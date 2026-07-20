@@ -1,11 +1,12 @@
 import { spawn } from "node:child_process";
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { pathExists } from "./files.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const templateRoot = path.join(packageRoot, "templates", "research-loop");
+const agenticRlTemplateRoot = path.join(packageRoot, "templates", "agentic-rl-research");
 const pluginSkillsRoot = path.join(packageRoot, "plugins", "nodekit", "skills");
 const projectedSkillNames = ["nodekit-launch", "nodekit-present", "nodekit-qa"];
 
@@ -17,6 +18,19 @@ export function slugify(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
 }
 
+function presetFrom(options = {}) {
+  const preset = options.preset ?? "research-loop";
+  if (!new Set(["research-loop", "agentic-rl-research"]).has(preset)) {
+    throw new Error(`unknown preset ${preset}; available: research-loop, agentic-rl-research`);
+  }
+  return preset;
+}
+
+function normalizedSponsors(options = {}) {
+  const defaults = presetFrom(options) === "agentic-rl-research" ? [] : ["pi-ai"];
+  return [...new Set([...defaults, ...(options.sponsors ?? [])].map(slugify).filter(Boolean))];
+}
+
 async function isEmpty(directory) {
   if (!(await pathExists(directory))) return true;
   return (await readdir(directory)).length === 0;
@@ -25,7 +39,7 @@ async function isEmpty(directory) {
 function substitutions(options) {
   const slug = slugify(options.name || path.basename(options.target));
   const nodekitSpecifier = String(options.nodekitSpecifier ?? "github:HomenShum/node-platform").replaceAll("\\", "/");
-  const sponsors = [...new Set(["pi-ai", ...(options.sponsors ?? [])].map(slugify).filter(Boolean))];
+  const sponsors = normalizedSponsors(options);
   return {
     "__APP_NAME__": slug,
     "__APP_TITLE__": titleCase(slug),
@@ -39,6 +53,29 @@ function substitutions(options) {
     "__SECRET_REF__": options.secretRef ?? "OPENROUTER_API_KEY",
     "__SPONSORS_YAML__": sponsors.map((sponsor) => `  - id: ${sponsor}\n    intendedUse: ${sponsor === "pi-ai" ? "Provider-neutral live hypothesis generation." : "Sponsor capability selected during launch research."}`).join("\n"),
   };
+}
+
+async function applyPresetTemplate(preset, target, values) {
+  await copyTemplate(templateRoot, target, values);
+  if (preset !== "agentic-rl-research") return;
+
+  // The reference research loop carries an intentionally live-capable Pi
+  // adapter. FounderQuest-RL is a clean-room, replay-only research lab, so
+  // delete those semantics before applying its own authored contract.
+  for (const relative of [
+    "agent/tools/measure-ngram.mjs",
+    "agent/skills/autoresearch-live",
+    "agent/subagents",
+    "fixtures/corpus",
+    "integrations/pi-ai",
+    "evals/deterministic-smoke.json",
+    "schemas/experiment-receipt.schema.json",
+    "scripts/live-smoke.mjs",
+    "scripts/browser-proof.mjs",
+  ]) {
+    await rm(path.join(target, relative), { force: true, recursive: true });
+  }
+  await copyTemplate(agenticRlTemplateRoot, target, values);
 }
 
 function replaceTokens(value, values) {
@@ -94,20 +131,18 @@ export async function createProject(options) {
   if (!(await isEmpty(target))) {
     throw new Error(`target is not empty: ${target}`);
   }
-  if (options.preset && options.preset !== "research-loop") {
-    throw new Error(`unknown preset ${options.preset}; available: research-loop`);
-  }
+  const preset = presetFrom(options);
   const startedAt = new Date().toISOString();
   const packageManager = options.packageManager ?? "npm";
   if (!new Set(["npm", "pnpm"]).has(packageManager)) {
     throw new Error(`unsupported package manager ${packageManager}; available: npm, pnpm`);
   }
   const launchStartedAt = options.launchStartedAt && Number.isFinite(Date.parse(options.launchStartedAt)) ? options.launchStartedAt : startedAt;
-  const values = substitutions({ ...options, target });
+  const values = substitutions({ ...options, preset, target });
   await mkdir(target, { recursive: true });
-  await copyTemplate(templateRoot, target, values);
+  await applyPresetTemplate(preset, target, values);
   await projectCodingAgentSkills(target, values);
-  const sponsors = [...new Set(["pi-ai", ...(options.sponsors ?? [])].map(slugify).filter(Boolean))];
+  const sponsors = normalizedSponsors({ ...options, preset });
   for (const sponsor of sponsors.filter((entry) => entry !== "pi-ai")) {
     const integrationRoot = path.join(target, "integrations", sponsor);
     await mkdir(integrationRoot, { recursive: true });
@@ -130,7 +165,7 @@ export async function createProject(options) {
     ],
     nodekitVersion: "0.2.0",
     packageManager,
-    preset: "research-loop",
+    preset,
     repairLoops: 0,
     schemaVersion: "nodekit.build-friction/v1",
   };
@@ -153,7 +188,7 @@ export async function createProject(options) {
   friction.events.push({ at: new Date().toISOString(), durationMs: Date.now() - Date.parse(startedAt), name: "scaffold_completed" });
   await writeFile(path.join(target, "proof", "build-friction.json"), `${JSON.stringify(friction, null, 2)}\n`);
   if (options.git !== false && !(await pathExists(path.join(target, ".git")))) await run("git", ["init"], target);
-  return { name: values.__APP_NAME__, packageManager, target };
+  return { name: values.__APP_NAME__, packageManager, preset, target };
 }
 
 export async function recordSetupEvent(target, name, detail = {}, durationMs) {

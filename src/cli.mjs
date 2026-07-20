@@ -48,7 +48,7 @@ function printHelp() {
   console.log(`NodeKit
 
 Usage:
-  nodekit create <directory> --name <slug> --brief <text> [--preset research-loop]
+  nodekit create <directory> --name <slug> --brief <text> [--preset research-loop|agentic-rl-research]
       [--provider openrouter] [--model openai/gpt-4o-mini] [--backend filesystem]
       [--nodekit-specifier <npm-or-file-spec>] [--sponsors <comma-list>]
       [--package-manager npm|pnpm]
@@ -263,7 +263,10 @@ async function runCreate(parsed) {
   const compiled = await compileAgentDefinition(result.target);
   await recordSetupEvent(result.target, "compile_completed", { configHash: compiled.definition.configHash }, Date.now() - compileStarted);
   if (parsed.options["local-proof"] === true || parsed.options["local-proof"] === "true") {
-    for (const script of ["demo.mjs", "eval.mjs", "proof.mjs"]) {
+    const localProofScripts = result.preset === "agentic-rl-research"
+      ? ["demo.mjs", "eval.mjs", "benchmark.mjs", "proof.mjs"]
+      : ["demo.mjs", "eval.mjs", "proof.mjs"];
+    for (const script of localProofScripts) {
       await new Promise((resolve, reject) => {
         const child = spawn(process.execPath, [path.join(result.target, "scripts", script)], {
           cwd: result.target,
