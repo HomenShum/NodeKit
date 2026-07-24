@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:behavior-index-and-friction-loop",
+  "kind": "test",
+  "artifactRef": "git:31fafad174431c28bb7dda7e1c37f6b1a2fa165d:evolution/artifacts/behavior-index-and-friction-loop.md",
+  "sha256": "90f729081af889ba7c540d07a7a0501739585fcca556664e258d66b67c07449b",
+  "sourceCommit": "31fafad174431c28bb7dda7e1c37f6b1a2fa165d",
+  "generatedAt": "2026-07-24T14:10:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "behavior-index 6/6, friction-loop 4/4, repo-tour 5/5, copy-audit 4/4 (19 total). Adversarial: six routes to repair self-approval each stay blocked; a declared behavior with no owner reports unmapped; partial scenario coverage never reads verified; annotations quoted inside string literals are not counted as claims. typecheck:public exits 0.",
+    "evidenceBoundary": "Proves the behavior index derives ownership and proof state rather than accepting hand-written status, and that a repair cannot approve itself. The index covers four declared behaviors only and an ownership annotation asserts ownership rather than proving it. No repair has been carried through a real Builder Gym comparison end to end. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:repair-cannot-self-approve"],
+  "result": "partial"
+}

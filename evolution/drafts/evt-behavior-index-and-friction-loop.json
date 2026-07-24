@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:behavior-index-and-friction-loop",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "31fafad174431c28bb7dda7e1c37f6b1a2fa165d",
+    "occurredAt": "2026-07-24T14:10:00-07:00"
+  },
+  "track": "harness",
+  "category": "workflow",
+  "challenge": "NodeKit could prove that an artifact passed and record why the architecture changed, but it could not answer which code owns a behavior, which tests prove it, and which part has no proof. Separately, the recursive improvement loop was named in the roadmap but nothing connected a recorded friction observation to the Builder Gym that could judge a repair for it.",
+  "observedFailure": "Receipts, the Evolution Ledger, the repository map and interaction flows each answered a different question, and none answered behavior ownership. Recorded friction had no path to becoming a judged candidate repair, so improvement depended on someone remembering an observation rather than on a mechanism.",
+  "resolution": "Added nodekit.behavior-index/v1, generated from behavior declarations in the existing repository manifest plus ownership and verification annotations in source and tests, with implementation and verification state derived rather than hand-maintained and drift surfaced in both directions. Added a friction loop that turns one recorded friction observation into one repair candidate the Builder Gym judges, with fail-closed adoption: a repair becomes adopted only by presenting an independent gym verdict that authorized promotion over an unchanged protected evaluator and held fixed inputs. No new schema family duplicates human-study-event, builder-gym, fresh-user-study or interaction-flow.",
+  "assumptionIds": [],
+  "invariantIds": ["inv:repair-cannot-self-approve"],
+  "evidenceIds": ["evd:behavior-index-and-friction-loop"],
+  "predecessorIds": ["evt:journey-harness-and-tour"],
+  "knownLimitations": [
+    "The behavior index reports the four declared behaviors only; it does not claim the repository has no other behavior, and an ownership annotation asserts ownership rather than proving it.",
+    "The friction loop produces and gates repair candidates but does not run the Builder Gym, and no repair has been carried through a real gym comparison end to end.",
+    "The cold-start baseline feeding the loop is an instrumented probe, not a fresh-human study.",
+    "Nothing here certifies any application; EASE_NOT_CERTIFIED stands."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "project-owner",
+    "reviewedAt": "2026-07-24T14:10:00-07:00"
+  }
+}
