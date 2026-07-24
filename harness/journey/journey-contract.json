@@ -13,8 +13,8 @@
     {
       "id": "repo-map.generated",
       "claim": "repo-map.json is derived from source by a generator and a drift check fails when it is stale.",
-      "passes": false,
-      "evidence": null
+      "passes": true,
+      "evidence": "src/lib/repo-map.mjs derives the map from the CLI dispatch, schemas, modules and package.json; repo-map.json committed; test/repo-tour.test.mjs test 4 fails when the committed map is stale (it caught real staleness during this build)."
     },
     {
       "id": "start-here.answers-baseline",
@@ -31,14 +31,14 @@
     {
       "id": "tour.executable",
       "claim": "nodekit tour runs the walkthrough and verifies each step actually works rather than narrating it.",
-      "passes": false,
-      "evidence": null
+      "passes": true,
+      "evidence": "nodekit tour verifies 4 steps against disk (node version, dependency resolution, five architecture parts, trace targets) and labels unverifiable steps [note] with passed:null. test 1."
     },
     {
       "id": "tour.fails-closed",
       "claim": "nodekit tour reports failure when a step genuinely breaks; it cannot report success for an unobserved step.",
-      "passes": false,
-      "evidence": null
+      "passes": true,
+      "evidence": "test/repo-tour.test.mjs test 2: against a corrupted repo missing the named parts, tour exits 1, passed:false, and the failing step names the recovery."
     },
     {
       "id": "vocabulary.mapped",
