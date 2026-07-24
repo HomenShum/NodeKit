@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 85,
-    "modules": 55,
-    "tests": 52
+    "modules": 56,
+    "tests": 53
   },
   "architecture": [
     {
@@ -230,6 +230,7 @@
     "evidence-snapshots.mjs",
     "evolution-ledger.mjs",
     "files.mjs",
+    "friction-loop.mjs",
     "frontend-render-contract.mjs",
     "frontend-specialist.mjs",
     "harness-gym.mjs",
@@ -285,6 +286,7 @@
     "ease-proof.test.mjs",
     "evolution-ledger.test.mjs",
     "factory.test.mjs",
+    "friction-loop.test.mjs",
     "frontend-render-contract.test.mjs",
     "frontend-specialist.test.mjs",
     "github-actions-runtime-pins.test.mjs",
