@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:repository-wide-behavior-ownership",
+  "kind": "test",
+  "artifactRef": "git:125c866913234da23c1d3778156c06ad5cab8660:evolution/artifacts/repository-wide-behavior-ownership.md",
+  "sha256": "100cf06cc424c8825ca340b2f28a14a9b90dc6d96505d11c2a6f30c95ebf6455",
+  "sourceCommit": "125c866913234da23c1d3778156c06ad5cab8660",
+  "generatedAt": "2026-07-24T18:20:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "behavior-index 8/8 (every ledger invariant resolves to a symbol; named-file-only is not counted as covered; verifier rot is reported and a scenario anchor is not a false positive; a quoted annotation is not a claim), repo-tour + friction-loop + copy-audit + repair-approval 20/20 unaffected, all 10 annotated modules load, typecheck:public exits 0.",
+    "measuredDelta": "Before annotating, with ledger coverage in place: 0 of 18 invariants owned by a named symbol, 13 named a file only, 5 owned by nothing. After: 18 of 18 resolve to a definition.",
+    "evidenceBoundary": "Proves the index reports ownership and its absence over the ledger's invariant population. An annotation ASSERTS that a symbol enforces an invariant; it does not prove it, and the index cannot detect a claim that is simply wrong. The 18 invariants are the ledger's population, not every behavior in the repository. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:ownership-resolves-to-symbol"],
+  "result": "partial"
+}

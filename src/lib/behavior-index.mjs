@@ -88,6 +88,7 @@ async function collect(root, dir, extensions, pattern, build) {
 // Read the ledger's invariants and report, for each, whether a source symbol claims to own it and
 // whether the files it names as verifiers still exist. A verifierRef may carry a `#scenario` anchor;
 // only the path part is a file.
+// @nodekit-behavior inv:ownership-resolves-to-symbol owner
 async function coverLedgerInvariants(root, ownership) {
   const dir = path.join(root, "evolution", "invariants");
   let files;

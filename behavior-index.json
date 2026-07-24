@@ -193,8 +193,8 @@
   "invariantCoverage": {
     "available": true,
     "counts": {
-      "total": 18,
-      "annotatedSymbol": 18,
+      "total": 19,
+      "annotatedSymbol": 19,
       "namedFileOnly": 0,
       "unowned": 0,
       "withMissingRefs": 0
@@ -409,6 +409,27 @@
         "verifierRefs": [
           "src/lib/opportunity-compiler.mjs",
           "test/opportunity-compiler.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:ownership-resolves-to-symbol",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/behavior-index.mjs",
+            "symbol": "coverLedgerInvariants",
+            "line": 91
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/behavior-index.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/behavior-index.mjs",
+          "test/behavior-index.test.mjs"
         ],
         "missingVerifierRefs": [],
         "gaps": []

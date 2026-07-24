@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:repository-wide-behavior-ownership",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "125c866913234da23c1d3778156c06ad5cab8660",
+    "occurredAt": "2026-07-24T18:20:00-07:00"
+  },
+  "track": "harness",
+  "category": "workflow",
+  "challenge": "The behavior index answered which code owns a behavior for four hand-declared behaviors. For the rest of the repository the question it existed to answer was still unanswerable.",
+  "observedFailure": "Measured with ledger coverage in place and before any annotation: of the eighteen human-reviewed invariants the Evolution Ledger already declares, zero were owned by a named symbol, thirteen named a source file only, and five were claimed by nothing at all. Naming a file sends a reader hunting through thousands of lines rather than landing on the definition that enforces the guarantee.",
+  "resolution": "The index now covers the ledger's invariants as the repository's declared behavior, rather than asking anyone to re-declare the same statements in a second place. It distinguishes annotated-symbol, named-file-only and unowned, so a file-level pointer is not counted as coverage, and it reports invariants whose verifier paths no longer exist. Owners were annotated across caseflow conformance, the package entrypoint, submission gating and preparation, the factory, the frontend tournament, the builder journey, the decide-to-build compiler, the friction loop, repair approval, and the generated application's browser certification. All eighteen now resolve to a definition.",
+  "assumptionIds": [],
+  "invariantIds": ["inv:ownership-resolves-to-symbol"],
+  "evidenceIds": ["evd:repository-wide-behavior-ownership"],
+  "predecessorIds": ["evt:behavior-index-and-friction-loop"],
+  "knownLimitations": [
+    "An ownership annotation asserts that a symbol enforces an invariant; it does not prove it, and the index cannot detect a claim that is simply wrong.",
+    "The eighteen invariants are the ledger's population, not every behavior in the repository; behavior that never earned an invariant remains uncovered.",
+    "Nothing here certifies any application; EASE_NOT_CERTIFIED stands."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "project-owner",
+    "reviewedAt": "2026-07-24T18:20:00-07:00"
+  }
+}
