@@ -168,3 +168,13 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:behavior-index-and-friction-loop` (partial)
 - Known limitations: The behavior index reports the four declared behaviors only; it does not claim the repository has no other behavior, and an ownership annotation asserts ownership rather than proving it.; The friction loop produces and gates repair candidates but does not run the Builder Gym, and no repair has been carried through a real gym comparison end to end.; The cold-start baseline feeding the loop is an instrumented probe, not a fresh-human study.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
 
+### The friction loop gated repair adoption on the Builder Gym's promotionAuthorized flag, but the gym always seals that flag false by design because it measures whether a candidate is better and never decides that the better candidate should ship.
+
+- Event: `evt:gym-proven-friction-loop`
+- Source: `2a84faefeb0485df81cda36577e4857d271f5662`
+- Resolution: Adoption now requires two independent things, following the shape the repository already uses for skill promotion: a gym verdict that passed with no regressed dimensions over an unchanged protected evaluator and held fixed inputs, and a separate promotion approval bound to that exact verdict by hash and naming a human approver. An approval bound to a different comparison is refused so one genuine success cannot be replayed onto later repairs. The loop is now driven against the real evaluateBuilderGym rather than against synthetic verdicts, and the gym laboratory was extracted to a shared test helper so two suites drive one setup.
+- Observed failure: Adoption was unreachable, so the recursive improvement loop could never close. Had the flag ever been true, the gate would have treated a measurement as a permission. The unit tests did not catch this because they supplied hand-built verdict objects with promotionAuthorized true, a shape the real gym never produces, so the gate had been proven against a fiction.
+- Invariants: `inv:measurement-is-not-permission` (partially-verified)
+- Evidence: `evd:gym-proven-friction-loop` (partial)
+- Known limitations: The comparison runs against a scaffolded laboratory application, not against this repository's own history; no production repair has been carried through the gym.; The promotion approval is validated for binding and authorship but is not cryptographically signed, unlike the skill promotion path.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+

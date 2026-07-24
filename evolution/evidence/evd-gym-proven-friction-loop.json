@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:gym-proven-friction-loop",
+  "kind": "test",
+  "artifactRef": "git:2a84faefeb0485df81cda36577e4857d271f5662:evolution/artifacts/gym-proven-friction-loop.md",
+  "sha256": "fdef9484b20d0d5de7a068380145829253097d3bed112b79c87d346180a2c55c",
+  "sourceCommit": "2a84faefeb0485df81cda36577e4857d271f5662",
+  "generatedAt": "2026-07-24T15:20:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "friction-loop-end-to-end 4/4 against the REAL evaluateBuilderGym (real passing verdict alone refused; adopts only with a bound approval; a materially worse candidate judged regressed and refused; an approval bound to another comparison cannot be replayed; unpinned lock identity refused). friction-loop 4/4 unit gate, builder-gym 13/13 unaffected, typecheck:public exits 0.",
+    "evidenceBoundary": "Proves adoption requires both a real passing gym verdict and a separate bound human approval, and that the earlier gate was unreachable. The comparison runs against a scaffolded laboratory application, not this repository's own history; no production repair has been carried through the gym. The promotion approval is validated for binding and authorship but is not cryptographically signed. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:measurement-is-not-permission"],
+  "result": "partial"
+}

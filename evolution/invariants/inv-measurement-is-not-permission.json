@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:measurement-is-not-permission",
+  "statement": "A Builder Gym comparison that passes is evidence that a candidate is better, never permission to ship it. A repair becomes adopted only when a passing verdict over an unchanged protected evaluator and held fixed inputs is accompanied by a separate promotion approval bound to that exact verdict by hash and naming a human approver. An approval bound to a different comparison cannot be replayed, and adoption still requires a reviewed Evolution Ledger entry afterwards.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["recursive improvement loop", "Builder Gym adoption", "promotion authority"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/lib/friction-loop.mjs", "test/friction-loop-end-to-end.test.mjs", "test/friction-loop.test.mjs"],
+  "introducedByEventId": "evt:gym-proven-friction-loop",
+  "status": "partially-verified"
+}
