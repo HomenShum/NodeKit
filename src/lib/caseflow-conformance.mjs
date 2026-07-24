@@ -2,6 +2,9 @@
  * Provider-neutral Caseflow conformance. An adapter may return values directly
  * or as promises; the suite observes behavior rather than storage mechanics.
  */
+// @nodekit-behavior inv:caseflow-idempotent-retries owner
+// @nodekit-behavior inv:caseflow-receipt-retry-containment owner
+// @nodekit-behavior inv:postgres-caseflow-conformance owner
 export async function runCaseflowConformance(createRuntime, {
   actorMode = "caller-supplied",
   requiredCapabilities = { optimisticConcurrency: true, transactions: true },

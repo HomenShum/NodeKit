@@ -1,3 +1,4 @@
+// @nodekit-behavior inv:stable-caseflow-package-entrypoint owner
 export {
   CASEFLOW_SCHEMA_VERSIONS,
   TERMINAL_RUN_STATUSES,

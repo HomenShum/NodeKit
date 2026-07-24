@@ -325,7 +325,27 @@ async function runBehaviorIndex(parsed) {
       for (const owner of b.owners) lines.push(`      owner: ${owner.file}#${owner.symbol ?? "?"}`);
       for (const gap of [...b.implementationGaps, ...b.verificationGaps]) lines.push(`      GAP: ${gap}`);
     }
-    if (c.orphanAnnotations) lines.push(`  ${c.orphanAnnotations} annotation(s) name a behavior nodekit.yaml does not declare.`);
+    if (c.orphanAnnotations) lines.push(`  ${c.orphanAnnotations} annotation(s) name a behavior nothing declares.`);
+
+    // Repository-wide ownership, read from the ledger's own human-reviewed invariants.
+    const coverage = value.invariantCoverage;
+    if (coverage?.available) {
+      const k = coverage.counts;
+      lines.push(
+        "",
+        `LEDGER INVARIANT OWNERSHIP: ${k.total} invariants — ${k.annotatedSymbol} owned by a named symbol, ${k.namedFileOnly} name a file only, ${k.unowned} unowned.`,
+      );
+      for (const invariant of coverage.invariants) {
+        if (invariant.ownership === "annotated-symbol") continue;
+        const detail = invariant.ownership === "named-file-only"
+          ? `names ${invariant.namedSourceFiles.join(", ")} but no symbol claims it`
+          : "NO source file or symbol claims it";
+        lines.push(`  [${invariant.ownership}] ${invariant.invariantId} — ${detail}`);
+      }
+      if (k.withMissingRefs) {
+        lines.push(`  ${k.withMissingRefs} invariant(s) point at a verifier file that no longer exists.`);
+      }
+    }
     return lines.join("\n");
   });
 }
@@ -344,6 +364,7 @@ async function runRepoMap(parsed) {
 // The tour VERIFIES each step instead of narrating it. A step that cannot be observed is reported
 // as an explanation, never as a pass, so a green tour cannot mean "we printed some prose".
 // @nodekit-behavior orientation.tour owner
+// @nodekit-behavior inv:tour-verifies-what-it-claims owner
 async function runTour(parsed) {
   const root = path.resolve(parsed.options["repo-root"] ?? ".");
   const map = await buildRepoMap(root);

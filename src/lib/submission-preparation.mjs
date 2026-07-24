@@ -78,6 +78,8 @@ export function resolveCandidateCommit(repoRoot, candidateRef = "HEAD") {
   return commit;
 }
 
+// @nodekit-behavior inv:exact-candidate-evidence support
+// @nodekit-behavior inv:submission-cli-explicit-options owner
 export async function prepareSubmissionManifest({
   repoRoot,
   candidateRef = "HEAD",

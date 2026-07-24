@@ -1934,6 +1934,7 @@ async function validateProtectedKnowledgeDefinitionEvidence(reference, bytes) {
   }
 }
 
+// @nodekit-behavior inv:source-bound-decisive-verdicts support
 export async function resolveSubmissionEvidenceClosure(repoRoot, gateId, value) {
   const direct = transitiveSubmissionEvidence(gateId, value);
   const declaredDirectBytes = direct.reduce((total, reference) => total + (Number.isInteger(reference?.bytes) ? reference.bytes : 0), 0);
@@ -2332,6 +2333,8 @@ export function evidenceContractPasses(gateId, value) {
   }
 }
 
+// @nodekit-behavior inv:exact-candidate-evidence owner
+// @nodekit-behavior inv:source-bound-decisive-verdicts owner
 export async function evaluateSubmissionManifest(repoRoot, manifestPath = "proof/submission-manifest.json", options = {}) {
   const root = path.resolve(repoRoot);
   const manifestBytes = await readContainedEvidence(root, manifestPath);

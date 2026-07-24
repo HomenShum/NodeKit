@@ -156,6 +156,7 @@ export function verifyStageHandoff({ builderCase, stage, caseflow }) {
 }
 
 // @nodekit-behavior journey.stage.advance owner
+// @nodekit-behavior inv:builder-journey-stage-handoff owner
 export async function advanceStage({ builderCase, actor, caseflow }) {
   const stage = builderCase.currentStage;
   const { ok, needs } = verifyStageHandoff({ builderCase, stage, caseflow });

@@ -71,7 +71,7 @@
         {
           "file": "src/lib/opportunity-compiler.mjs",
           "symbol": "materializeBuildPacket",
-          "line": 105
+          "line": 106
         }
       ],
       "requiredScenarios": [
@@ -113,7 +113,7 @@
         {
           "file": "src/cli.mjs",
           "symbol": "runTour",
-          "line": 346
+          "line": 366
         }
       ],
       "supporting": [
@@ -190,6 +190,406 @@
       "verificationGaps": []
     }
   ],
+  "invariantCoverage": {
+    "available": true,
+    "counts": {
+      "total": 18,
+      "annotatedSymbol": 18,
+      "namedFileOnly": 0,
+      "unowned": 0,
+      "withMissingRefs": 0
+    },
+    "invariants": [
+      {
+        "invariantId": "inv:build-packet-carries-opportunity",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/opportunity-compiler.mjs",
+            "symbol": "materializeBuildPacket",
+            "line": 107
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/opportunity-compiler.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/opportunity-compiler.mjs",
+          "test/opportunity-build-packet.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:builder-journey-stage-handoff",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/builder-journey.mjs",
+            "symbol": "advanceStage",
+            "line": 159
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/builder-journey.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/builder-journey.mjs",
+          "test/builder-journey.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:caseflow-idempotent-retries",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/caseflow-conformance.mjs",
+            "symbol": "runCaseflowConformance",
+            "line": 5
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/caseflow-conformance.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/caseflow-conformance.mjs",
+          "test/caseflow.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:caseflow-receipt-retry-containment",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/caseflow-conformance.mjs",
+            "symbol": "runCaseflowConformance",
+            "line": 6
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/caseflow-conformance.mjs",
+          "src/component/caseflow.test.ts"
+        ],
+        "verifierRefs": [
+          "src/lib/caseflow-conformance.mjs",
+          "test/caseflow.test.mjs",
+          "src/component/caseflow.test.ts"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:domain-blank-create",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/scaffold.mjs",
+            "symbol": "createProject",
+            "line": 250
+          }
+        ],
+        "namedSourceFiles": [],
+        "verifierRefs": [
+          "test/factory.test.mjs#primary-create-rejects-domain-presets"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:exact-candidate-evidence",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/submission-gate.mjs",
+            "symbol": "evaluateSubmissionManifest",
+            "line": 2336
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/submission-gate.mjs",
+          "src/lib/submission-preparation.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/submission-gate.mjs",
+          "src/lib/submission-preparation.mjs",
+          "test/submission-gate.test.mjs",
+          "test/submission-preparation.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:guided-intake-mobile-decisions",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "templates/base/scripts/browser-certify.mjs",
+            "symbol": "verifyExportedProof",
+            "line": 92
+          }
+        ],
+        "namedSourceFiles": [
+          "templates/base/scripts/browser-certify.mjs"
+        ],
+        "verifierRefs": [
+          "test/ease-proof.test.mjs",
+          "templates/base/scripts/browser-certify.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:major-frontend-direction-tournament",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/frontend-specialist.mjs",
+            "symbol": "evaluateFrontendTournament",
+            "line": 181
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/frontend-specialist.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/frontend-specialist.mjs",
+          "test/frontend-specialist.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:measurement-is-not-permission",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/friction-loop.mjs",
+            "symbol": "adoptRepair",
+            "line": 124
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/friction-loop.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/friction-loop.mjs",
+          "test/friction-loop-end-to-end.test.mjs",
+          "test/friction-loop.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:opportunity-carries-to-build",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/opportunity-compiler.mjs",
+            "symbol": "compileOpportunityToBuild",
+            "line": 41
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/opportunity-compiler.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/opportunity-compiler.mjs",
+          "test/opportunity-compiler.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:postgres-caseflow-conformance",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/caseflow-conformance.mjs",
+            "symbol": "runCaseflowConformance",
+            "line": 7
+          }
+        ],
+        "namedSourceFiles": [
+          "scripts/run-postgres-conformance.mjs"
+        ],
+        "verifierRefs": [
+          "scripts/run-postgres-conformance.mjs",
+          "test/postgres-adapter.test.mjs",
+          "proof/postgres-conformance.json"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:rendered-browser-evidence",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "templates/base/scripts/browser-certify.mjs",
+            "symbol": "verifyExportedProof",
+            "line": 91
+          }
+        ],
+        "namedSourceFiles": [
+          "templates/base/scripts/browser-certify.mjs"
+        ],
+        "verifierRefs": [
+          "templates/base/scripts/browser-certify.mjs",
+          "test/ease-proof.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:repair-approval-is-signed",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/repair-approval.mjs",
+            "symbol": "verifyRepairPromotionApproval",
+            "line": 86
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/repair-approval.mjs",
+          "src/lib/friction-loop.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/repair-approval.mjs",
+          "test/repair-approval.test.mjs",
+          "src/lib/friction-loop.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:repair-cannot-self-approve",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/friction-loop.mjs",
+            "symbol": "adoptRepair",
+            "line": 123
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/friction-loop.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/friction-loop.mjs",
+          "test/friction-loop.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:source-bound-decisive-verdicts",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/submission-gate.mjs",
+            "symbol": "evaluateSubmissionManifest",
+            "line": 2337
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/submission-gate.mjs",
+          "src/lib/submission-preparation.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/submission-gate.mjs",
+          "src/lib/submission-preparation.mjs",
+          "test/submission-gate.test.mjs",
+          "test/submission-preparation.test.mjs",
+          "test/submission-verdict-schemas.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:stable-caseflow-package-entrypoint",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/caseflow.mjs",
+            "symbol": "(module exports)",
+            "line": 1
+          }
+        ],
+        "namedSourceFiles": [
+          "src/caseflow.mjs"
+        ],
+        "verifierRefs": [
+          "package.json",
+          "src/caseflow.mjs",
+          "test/public-api.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:submission-cli-explicit-options",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/submission-preparation.mjs",
+            "symbol": "prepareSubmissionManifest",
+            "line": 82
+          }
+        ],
+        "namedSourceFiles": [],
+        "verifierRefs": [
+          "test/submission-cli.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:tour-verifies-what-it-claims",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/cli.mjs",
+            "symbol": "runTour",
+            "line": 367
+          }
+        ],
+        "namedSourceFiles": [
+          "src/cli.mjs",
+          "src/lib/repo-map.mjs"
+        ],
+        "verifierRefs": [
+          "src/cli.mjs",
+          "src/lib/repo-map.mjs",
+          "test/repo-tour.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      }
+    ]
+  },
   "orphanAnnotations": [],
   "boundary": "This index reports declared behaviors only. It does not claim the repository has no other behavior, and an ownership annotation asserts ownership rather than proving it."
 }
