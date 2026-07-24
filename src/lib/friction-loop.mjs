@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { verifyRepairPromotionApproval } from "./repair-approval.mjs";
 
 // The recursive-improvement loop, wired through machinery that already exists rather than beside
 // it. Observe -> classify -> propose -> branch -> test -> compare -> approve -> record.
@@ -111,14 +112,15 @@ export function proposeRepair(friction, { repairIntent, changeRoots }) {
  * either be unreachable or would quietly treat "measured as better" as "approved to ship".
  *
  *   1. A gym verdict that PASSED over an unchanged protected evaluator and held fixed inputs.
- *   2. A separate promotion approval, bound to that exact verdict by hash and naming a human,
- *      following the same shape as nodekit.skill-promotion-approval/v1.
+ *   2. A SIGNED promotion approval, bound to that exact verdict and repair, from a key trusted for
+ *      the repair-promotion purpose. Domain-separated so a signature made for another purpose
+ *      cannot be replayed here.
  *
  * @param {object} repair
  * @param {object} gymVerdict a nodekit.builder-gym-verdict/v1
- * @param {{ verdictRef: string, approval?: { gymVerdictHash: string, approvedBy: string } }} binding
+ * @param {{ verdictRef: string, approval?: object, trustedKeys?: Record<string, {publicKey: string, purposes: string[]}> }} binding
  */
-export function adoptRepair(repair, gymVerdict, { verdictRef, approval } = {}) {
+export function adoptRepair(repair, gymVerdict, { verdictRef, approval, trustedKeys } = {}) {
   const blocked = (reason) => ({ ...repair, status: "blocked", blockedReason: reason, promotionAuthorized: false, gymVerdictRef: null });
 
   if (!gymVerdict || gymVerdict.schemaVersion !== "nodekit.builder-gym-verdict/v1") {
@@ -135,11 +137,20 @@ export function adoptRepair(repair, gymVerdict, { verdictRef, approval } = {}) {
   }
   if (!verdictRef) return blocked("an authorized verdict must be referenced so the adoption is auditable");
 
-  // The gym proved improvement. A human still has to decide it should ship.
-  if (!approval) return blocked("a passing comparison is not permission to ship; a promotion approval is required");
-  if (!approval.approvedBy) return blocked("a promotion approval must name who approved it");
-  if (!approval.gymVerdictHash || approval.gymVerdictHash !== gymVerdict.verdictHash) {
-    return blocked("the promotion approval is not bound to this comparison's verdict hash, so it could be replayed from another result");
+  // The gym proved improvement. A human still has to decide it should ship, and that decision must
+  // be SIGNED. An unsigned approval is only an object, and anything able to construct an object
+  // could grant it — including the agent proposing the repair.
+  if (!approval) return blocked("a passing comparison is not permission to ship; a signed promotion approval is required");
+
+  let verified;
+  try {
+    verified = verifyRepairPromotionApproval(approval, {
+      gymVerdictHash: gymVerdict.verdictHash,
+      repairId: repair.repairId,
+      trustedKeys,
+    });
+  } catch (error) {
+    return blocked(`the promotion approval did not verify: ${error.message}`);
   }
 
   return {
@@ -147,7 +158,9 @@ export function adoptRepair(repair, gymVerdict, { verdictRef, approval } = {}) {
     status: "adopted",
     promotionAuthorized: true,
     gymVerdictRef: verdictRef,
-    approvedBy: approval.approvedBy,
+    approvedBy: verified.approvedBy,
+    approvalKeyId: verified.keyId,
+    approvalHash: verified.approvalHash,
     // The ledger still owns the decision record. Adoption produces the material a reviewed
     // evolution event needs; it does not write one, and it does not stand in for human review.
     evolutionEventRequired: true,

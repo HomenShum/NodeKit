@@ -2,12 +2,27 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { generateKeyPairSync } from "node:crypto";
 import { adoptRepair, collectFriction, proposeRepair } from "../src/lib/friction-loop.mjs";
+import { sealRepairPromotionApproval } from "../src/lib/repair-approval.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const BASELINE = "harness/journey/baseline-2026-07-24.json";
 
-const APPROVAL = { gymVerdictHash: "a".repeat(64), approvedBy: "project-owner" };
+// Real Ed25519 approvals, not plain objects. An unsigned approval is only a shape, and anything
+// able to construct a shape could grant it — including the agent proposing the repair.
+const pair = generateKeyPairSync("ed25519");
+const PRIVATE_KEY = pair.privateKey.export({ format: "pem", type: "pkcs8" }).toString();
+const TRUSTED = {
+  "owner-key": {
+    publicKey: pair.publicKey.export({ format: "pem", type: "spki" }).toString(),
+    purposes: ["repair-promotion-approval"],
+  },
+};
+const APPROVAL = sealRepairPromotionApproval(
+  { gymVerdictHash: "a".repeat(64), repairId: "repair-F1", approvedBy: "project-owner", issuedAt: "2026-07-24T15:00:00.000Z" },
+  { privateKey: PRIVATE_KEY, keyId: "owner-key" },
+);
 
 function verdict(overrides = {}) {
   return {
@@ -56,25 +71,25 @@ test("a repair must answer real friction, state an intent, and name the roots it
 test("a repair cannot approve itself: adoption is refused without an independent authorizing verdict", async () => {
   const { repair } = await proposal();
 
-  const noVerdict = adoptRepair(repair, null, { verdictRef: "r", approval: APPROVAL });
+  const noVerdict = adoptRepair(repair, null, { verdictRef: "r", approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(noVerdict.status, "blocked");
   assert.match(noVerdict.blockedReason, /cannot approve itself/);
 
-  const selfDeclared = adoptRepair(repair, { schemaVersion: "something.else/v1", promotionAuthorized: true }, { verdictRef: "r", approval: APPROVAL });
+  const selfDeclared = adoptRepair(repair, { schemaVersion: "something.else/v1", promotionAuthorized: true }, { verdictRef: "r", approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(selfDeclared.status, "blocked", "a non-gym object claiming authorization must not work");
 
-  const tamperedEvaluator = adoptRepair(repair, verdict({ protectedEvaluatorUnchanged: false }), { verdictRef: "r", approval: APPROVAL });
+  const tamperedEvaluator = adoptRepair(repair, verdict({ protectedEvaluatorUnchanged: false }), { verdictRef: "r", approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(tamperedEvaluator.status, "blocked");
   assert.match(tamperedEvaluator.blockedReason, /evaluator changed/);
 
-  const movedInputs = adoptRepair(repair, verdict({ fixedInputsHeld: false }), { verdictRef: "r", approval: APPROVAL });
+  const movedInputs = adoptRepair(repair, verdict({ fixedInputsHeld: false }), { verdictRef: "r", approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(movedInputs.status, "blocked");
   assert.match(movedInputs.blockedReason, /equal terms/);
 
-  const regressed = adoptRepair(repair, verdict({ outcome: "regressed", passed: false, regressedDimensions: ["task"] }), { verdictRef: "r", approval: APPROVAL });
+  const regressed = adoptRepair(repair, verdict({ outcome: "regressed", passed: false, regressedDimensions: ["task"] }), { verdictRef: "r", approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(regressed.status, "blocked");
 
-  const unreferenced = adoptRepair(repair, verdict(), { verdictRef: null, approval: APPROVAL });
+  const unreferenced = adoptRepair(repair, verdict(), { verdictRef: null, approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(unreferenced.status, "blocked", "an adoption nobody can audit is not an adoption");
 
   for (const outcome of [noVerdict, selfDeclared, tamperedEvaluator, movedInputs, regressed, unreferenced]) {
@@ -85,7 +100,7 @@ test("a repair cannot approve itself: adoption is refused without an independent
 
 test("an authorized verdict adopts the repair and still requires a reviewed ledger entry", async () => {
   const { repair } = await proposal();
-  const adopted = adoptRepair(repair, verdict(), { verdictRef: "harness/gym/verdict-1.json", approval: APPROVAL });
+  const adopted = adoptRepair(repair, verdict(), { verdictRef: "harness/gym/verdict-1.json", approval: APPROVAL, trustedKeys: TRUSTED });
   assert.equal(adopted.status, "adopted");
   assert.equal(adopted.promotionAuthorized, true);
   assert.equal(adopted.gymVerdictRef, "harness/gym/verdict-1.json");
