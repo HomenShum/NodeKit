@@ -50,6 +50,7 @@ function stripCode(markdown) {
  * @param {string} repoRoot
  * @param {{ files?: string[] }} [options]
  */
+// @nodekit-behavior language.copy-audit owner
 export async function auditCopy(repoRoot, options = {}) {
   const root = path.resolve(repoRoot);
   const files = options.files ?? AUDITED_FILES;

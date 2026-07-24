@@ -25,6 +25,7 @@ async function cli(args, cwd = REPO) {
 
 // Persona: a senior engineer who has never seen NodeKit, on a fresh machine, told only
 // "here is the repo". They open a terminal and try the obvious things.
+// @nodekit-verifies orientation.tour#verified-and-explained-steps-separated
 test("an uninformed senior engineer can orient with `nodekit tour` and the tour separates what it verified from what it merely explained", async () => {
   const { code, out } = await cli(["tour", "--json"]);
   assert.equal(code, 0, "tour must pass on a healthy repository");
@@ -50,6 +51,7 @@ test("an uninformed senior engineer can orient with `nodekit tour` and the tour 
 
 // Adversarial: the tour must not be able to report success for something it did not observe.
 // Corrupt the world so a named architecture part is genuinely absent, and require a FAIL.
+// @nodekit-verifies orientation.tour#fails-closed-on-missing-part
 test("the tour fails closed when a part it names does not exist, and does not report a pass it did not observe", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-tour-fail-"));
   await mkdir(path.join(root, "src", "lib"), { recursive: true });

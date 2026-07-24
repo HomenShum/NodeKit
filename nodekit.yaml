@@ -57,3 +57,31 @@ contractDeclarations:
     path: src/lib/evolution-ledger.mjs
     mode: canonical
 architectureExceptions: []
+
+# Behavior intent for the generated behavior index (nodekit.behavior-index/v1).
+# Small declarations only. Ownership and proof are read from annotations in src/ and test/,
+# so implementation and verification state are derived rather than hand-maintained.
+behaviors:
+  journey.stage.advance:
+    statement: A builder case advances a stage only when that stage's handoff artifact exists and a receipt binds it by content hash.
+    requiredScenarios:
+      - blocked-without-handoff
+      - advances-when-bound
+      - forged-binding-stays-blocked
+  decide.compile-to-build:
+    statement: An approved OpportunityContract compiles into the product design contract the build stage reads, carrying the protected decisions.
+    requiredScenarios:
+      - decisions-carried-and-protected
+      - prohibitions-survive
+      - packet-accepted-by-planner
+  orientation.tour:
+    statement: The codebase tour reports a pass only for a step it observed, and exits non-zero when a step it names is genuinely absent.
+    requiredScenarios:
+      - verified-and-explained-steps-separated
+      - fails-closed-on-missing-part
+  language.copy-audit:
+    statement: Newcomer-facing copy is blocked when it uses a NodeKit term the glossary does not define or does not point a reader to.
+    requiredScenarios:
+      - undefined-term-blocks
+      - unreachable-glossary-blocks
+      - identifiers-not-flagged

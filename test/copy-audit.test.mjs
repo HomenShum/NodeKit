@@ -26,6 +26,7 @@ test("the real repository's newcomer surfaces define their own jargon", async ()
 });
 
 // A green audit is worthless unless it can go red. Each case below MUST fail.
+// @nodekit-verifies language.copy-audit#undefined-term-blocks
 test("the audit fails when user-facing copy uses a NodeKit term the glossary never defines", async () => {
   const root = await corpus({
     "GLOSSARY.md": "# Glossary\n\nNothing is defined here yet.\n",
@@ -39,6 +40,7 @@ test("the audit fails when user-facing copy uses a NodeKit term the glossary nev
   await rm(root, { recursive: true, force: true });
 });
 
+// @nodekit-verifies language.copy-audit#unreachable-glossary-blocks
 test("the audit fails when copy defines its terms but never tells the reader where the definitions are", async () => {
   const glossary = `# Glossary\n\n${Object.keys(VOCABULARY).map((t) => `**${t}**\ndefined.\n`).join("\n")}`;
   const root = await corpus({
@@ -53,6 +55,7 @@ test("the audit fails when copy defines its terms but never tells the reader whe
 
 // False-positive guard: a term inside a command, path, or schema id is an identifier, not prose.
 // An audit that cries wolf on real identifiers gets switched off, and then it protects nothing.
+// @nodekit-verifies language.copy-audit#identifiers-not-flagged
 test("the audit does not flag NodeKit terms that appear inside code, paths, or link targets", async () => {
   const glossary = `# Glossary\n\n${Object.keys(VOCABULARY).map((t) => `**${t}**\ndefined.\n`).join("\n")}`;
   const root = await corpus({

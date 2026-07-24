@@ -66,6 +66,7 @@ function commandsFromDispatch(source) {
  * @param {string} repoRoot
  * @returns {Promise<object>}
  */
+// @nodekit-behavior orientation.tour support
 export async function buildRepoMap(repoRoot) {
   const root = path.resolve(repoRoot);
   const cli = await readFile(path.join(root, "src", "cli.mjs"), "utf8");

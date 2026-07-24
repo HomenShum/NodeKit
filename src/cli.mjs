@@ -9,6 +9,7 @@ import { pathExists } from "./lib/files.mjs";
 import { checkRepository, commandFor } from "./lib/repo-check.mjs";
 import { buildRepoMap } from "./lib/repo-map.mjs";
 import { auditCopy } from "./lib/copy-audit.mjs";
+import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -308,6 +309,27 @@ function undeclaredLifecycleMessage(name, manifest) {
   return lines.join("\n");
 }
 
+async function runBehaviorIndex(parsed) {
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  const index = await buildBehaviorIndex(root);
+  if (parsed.options.write) {
+    await writeFile(path.join(root, "behavior-index.json"), `${JSON.stringify(index, null, 2)}\n`, "utf8");
+  }
+  printStructured(index, parsed, (value) => {
+    const c = value.counts;
+    const lines = [
+      `BEHAVIOR INDEX: ${c.declared} declared — ${c.mapped} mapped, ${c.unmapped} unmapped; ${c.verified} verified, ${c.partial} partial, ${c.unverified} unverified.`,
+    ];
+    for (const b of value.behaviors) {
+      lines.push(`  [${b.implementationState}/${b.verificationState}] ${b.behaviorId}`);
+      for (const owner of b.owners) lines.push(`      owner: ${owner.file}#${owner.symbol ?? "?"}`);
+      for (const gap of [...b.implementationGaps, ...b.verificationGaps]) lines.push(`      GAP: ${gap}`);
+    }
+    if (c.orphanAnnotations) lines.push(`  ${c.orphanAnnotations} annotation(s) name a behavior nodekit.yaml does not declare.`);
+    return lines.join("\n");
+  });
+}
+
 async function runRepoMap(parsed) {
   const root = path.resolve(parsed.options["repo-root"] ?? ".");
   const map = await buildRepoMap(root);
@@ -321,6 +343,7 @@ async function runRepoMap(parsed) {
 
 // The tour VERIFIES each step instead of narrating it. A step that cannot be observed is reported
 // as an explanation, never as a pass, so a green tour cannot mean "we printed some prose".
+// @nodekit-behavior orientation.tour owner
 async function runTour(parsed) {
   const root = path.resolve(parsed.options["repo-root"] ?? ".");
   const map = await buildRepoMap(root);
@@ -1455,6 +1478,10 @@ async function main() {
   }
   if (first === "repo" && second === "map") {
     await runRepoMap(parsed);
+    return;
+  }
+  if (first === "behavior" && second === "index") {
+    await runBehaviorIndex(parsed);
     return;
   }
   if (first === "tour") {

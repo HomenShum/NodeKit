@@ -78,3 +78,20 @@ turned out to be ~80% built — see App Atlas and NodeAgent Kit in the graph-hop
   means npm consumers get the glossary). The other four print Windows-style paths and main's CI is
   green on ubuntu, so they are almost certainly Windows-local. **CI is the authoritative gate — do
   not claim they are pre-existing without CI confirming.**
+
+## Standing rule: every change ships before/after evidence
+
+The owner had to ask for this, which means the practice was missing. It is not optional now.
+
+A change is not reportable until there is an artifact showing its EFFECT, not its diff:
+- **UI/template change** — render before and after side by side, both themes, same markup. If the
+  change is supposed to be visually neutral, that identity IS the evidence; say so explicitly.
+- **CLI/behaviour change** — capture real output from BOTH versions. Get the "before" by running
+  the old commit (`git worktree add --detach <sha>`, or `git show <sha>:src/cli.mjs > tmp` and run
+  it, since relative imports resolve against the current tree). Never quote the old output from
+  memory or from notes — run it.
+- **Always** state what the evidence does NOT prove.
+
+Reason: NodeKit's own rule is that an evaluator generates evidence rather than accepting a claim,
+and the long-running-agent harness rule is that the agent cannot claim success it has not observed.
+Reporting a passing test as if it were an observed effect breaks both.

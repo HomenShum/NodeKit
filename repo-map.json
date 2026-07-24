@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 85,
-    "modules": 54,
-    "tests": 51
+    "modules": 55,
+    "tests": 52
   },
   "architecture": [
     {
@@ -45,6 +45,7 @@
     "topLevel": [
       "adopt",
       "atlas",
+      "behavior",
       "certify",
       "check",
       "compile",
@@ -79,6 +80,7 @@
       "attestation:sign",
       "attestation:verify",
       "audit:prod",
+      "behavior:index",
       "build:component",
       "candidate:check",
       "candidate:distribution",
@@ -213,6 +215,7 @@
     "atlas-rank.mjs",
     "atlas-retrieval.mjs",
     "atlas.mjs",
+    "behavior-index.mjs",
     "builder-gym.mjs",
     "builder-journey.mjs",
     "caseflow-conformance.mjs",
@@ -266,6 +269,7 @@
     "agent-ease-matrix.test.mjs",
     "atlas-retrieval.test.mjs",
     "atlas.test.mjs",
+    "behavior-index.test.mjs",
     "builder-gym.test.mjs",
     "builder-journey.test.mjs",
     "caseflow.test.mjs",

@@ -16,6 +16,7 @@ test("the salon OpportunityContract compiles into a product-design contract the 
   assert.deepEqual(findings, [], `compiled contract must validate: ${findings.join("; ")}`);
 });
 
+// @nodekit-verifies decide.compile-to-build#decisions-carried-and-protected
 test("the OpportunityContract's decisions are carried into the product contract and marked protected", async () => {
   const opportunity = await salonOpportunity();
   const { productDesignContract } = compileOpportunityToBuild(opportunity);
@@ -30,6 +31,7 @@ test("the OpportunityContract's decisions are carried into the product contract 
   assert.equal(productDesignContract.protectedDecisions.finalVerdict, "nodeproof");
 });
 
+// @nodekit-verifies decide.compile-to-build#prohibitions-survive
 test("prohibited authorities become anti-patterns the interface may not present", async () => {
   const opportunity = await salonOpportunity();
   const { productDesignContract } = compileOpportunityToBuild(opportunity);
