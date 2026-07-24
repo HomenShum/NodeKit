@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:journey-harness-and-tour",
+  "kind": "test",
+  "artifactRef": "git:bfda0655c5593cdaa6dee0be0a34b21c4071f532:evolution/artifacts/journey-harness-and-tour.md",
+  "sha256": "c160f4993eb3388f2a2a0fec26a606125fc3d89f14aee25522e5953250f2b0ed",
+  "sourceCommit": "bfda0655c5593cdaa6dee0be0a34b21c4071f532",
+  "generatedAt": "2026-07-24T12:40:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "repo-tour 5/5 and copy-audit 4/4 (9 total), including three adversarial cases: tour exits 1 against a repository missing the parts its map names; copy audit blocks on undefined jargon and on defined-but-unreachable jargon; identifiers inside code, paths and link targets are not false-flagged. typecheck:public exits 0.",
+    "evidenceBoundary": "Proves the tour cannot report an unobserved pass, that the repository map is derived and fails when stale, and that the copy audit can go red. The cold-start baseline is an instrumented probe, NOT a fresh-human study, and does not satisfy nodekit.fresh-user-study/v1. Recorded friction is not yet wired to the Builder Gym. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:tour-verifies-what-it-claims"],
+  "result": "partial"
+}

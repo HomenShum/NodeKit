@@ -148,3 +148,13 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:frontend-decisive-evidence` (partial)
 - Known limitations: The verifier command that drives a real browser over the six states and calls the assembler is not yet wired; receipts are assembled from observations, not from a live browser run.; Freezing a new tournament version so a benchmark cannot be replayed against a stale contract is a separate follow-on.; This makes the tournament's decisiveness honest; it does not by itself certify any real frontend, model, or consumer.
 
+### NodeKit could prove what an application did but could not explain itself to the person who had to work on it. The proof machinery was far ahead of the explanations, so a senior engineer starting from an empty machine could not orient without private coaching.
+
+- Event: `evt:journey-harness-and-tour`
+- Source: `bfda0655c5593cdaa6dee0be0a34b21c4071f532`
+- Resolution: The undeclared-lifecycle error now names what the repository declares and the next steps, and still exits 1. A derived repository map, an executable tour that verifies each step against disk and marks unobservable steps as explanations rather than passes, a glossary, a single orientation entry point, and a vocabulary-backed copy audit that blocks undefined jargon. A proposal to add a Human Journey Harness was checked against the repository first and found to be about eighty percent already built under other names, so nothing duplicating interaction-flow, human-study-event, builder-gym or fresh-user-study was added, and a guard test now fails if such a duplicate appears.
+- Observed failure: A cold-start probe recorded seven friction findings, three of them P0: the README ran its first command before the install step; eleven NodeKit-specific terms appeared in the first five lines with no definition anywhere and no glossary existed; and nodekit demo from the platform repository dead-ended with a message that stated a fact and named no recovery.
+- Invariants: `inv:tour-verifies-what-it-claims` (partially-verified)
+- Evidence: `evd:journey-harness-and-tour` (partial)
+- Known limitations: The cold-start baseline is an instrumented probe run by a coding agent, not a fresh-human study; five consented humans remain the real gate and nodekit.fresh-user-study/v1 is not satisfied by it.; The tour verifies four steps; two remain explanations and are labelled as such rather than made falsely checkable.; The copy audit covers three newcomer-facing surfaces; the 28 files under docs/ are not audited.; Recorded friction cannot yet become a candidate repair judged by the Builder Gym; the parts exist but are not wired into one path.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+

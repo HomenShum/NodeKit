@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:tour-verifies-what-it-claims",
+  "statement": "The codebase tour reports a pass only for a step it observed against the repository. A step it cannot observe is reported as an explanation with a null verdict and is excluded from the verified count, and a step whose target is genuinely absent makes the tour exit non-zero and name the recovery. The repository map is derived from source, so a stale map fails rather than teaching a false shape of the system.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["nodekit tour", "nodekit repo map", "newcomer orientation"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/cli.mjs", "src/lib/repo-map.mjs", "test/repo-tour.test.mjs"],
+  "introducedByEventId": "evt:journey-harness-and-tour",
+  "status": "partially-verified"
+}
