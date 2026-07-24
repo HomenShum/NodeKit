@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:repair-approval-is-signed",
+  "statement": "A repair promotion approval is an Ed25519 detached attestation over a domain-separated statement whose purpose is repair-promotion-approval. It verifies only when the signature is correct, the signing key is trusted AND authorized for that specific purpose, and the approval body is bound to both the comparison's verdict hash and the repair's identifier. A signature produced under any other domain or purpose does not verify, so a key trusted for a different approval authority cannot promote a repair.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["repair promotion approval", "recursive improvement loop adoption"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/lib/repair-approval.mjs", "test/repair-approval.test.mjs", "src/lib/friction-loop.mjs"],
+  "introducedByEventId": "evt:signed-repair-promotion",
+  "status": "partially-verified"
+}
