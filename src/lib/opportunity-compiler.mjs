@@ -37,6 +37,7 @@ function isReadOnly(authorityLimits) {
  * @param {object} opportunity  a validated nodekit.opportunity-contract/v1
  * @returns {{ productDesignContract: object, atlasQuery: object }}
  */
+// @nodekit-behavior decide.compile-to-build owner
 export function compileOpportunityToBuild(opportunity) {
   const readOnly = isReadOnly(opportunity.authorityLimits);
   const avoid = [...new Set([
@@ -101,6 +102,7 @@ export function compileOpportunityToBuild(opportunity) {
  * @param {{ repoRoot: string, opportunity: object, packetName?: string }} options
  * @returns {Promise<{ packetPath: string, atlasQueryPath: string, productDesignContract: object, atlasQuery: object }>}
  */
+// @nodekit-behavior decide.compile-to-build support
 export async function materializeBuildPacket({ repoRoot, opportunity, packetName = "opportunity" }) {
   if (!/^[a-z0-9-]{1,64}$/.test(packetName)) {
     throw new Error(`materializeBuildPacket packetName must be a short kebab slug, got: ${packetName}`);

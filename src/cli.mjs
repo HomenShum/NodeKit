@@ -7,6 +7,9 @@ import { renderDashboard } from "./lib/dashboard.mjs";
 import { compileAgentDefinition, inspectAgentDefinition } from "./lib/agent-definition.mjs";
 import { pathExists } from "./lib/files.mjs";
 import { checkRepository, commandFor } from "./lib/repo-check.mjs";
+import { buildRepoMap } from "./lib/repo-map.mjs";
+import { auditCopy } from "./lib/copy-audit.mjs";
+import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -283,6 +286,166 @@ function quoteArgument(value) {
   return `"${value.replaceAll('"', '\\"')}"`;
 }
 
+// Lifecycle commands are declared per application in nodekit.yaml, so the platform repository
+// itself declares only a subset. Stating that a command is undeclared is true but teaches nothing:
+// it was the highest-severity dead end in the cold-start baseline (harness/journey, F5). Name what
+// this repository does declare and the next step that gets the caller a repository that declares
+// the rest.
+function undeclaredLifecycleMessage(name, manifest) {
+  const declared = Object.keys(manifest?.commands ?? {}).sort();
+  const lines = [
+    `${name} is not declared in nodekit.yaml.`,
+    "",
+    `Lifecycle commands (dev, demo, check, proof) are declared per application. This repository declares: ${declared.length ? declared.join(", ") : "none"}.`,
+  ];
+  if (!declared.includes(name)) {
+    lines.push(
+      "",
+      "If you are exploring NodeKit itself, this repository is the platform, not a generated application.",
+      "  nodekit tour                      show what this repository is and verify your setup",
+      "  nodekit create <dir> --name <slug> --brief <text>   generate an application that declares dev, demo, check, and proof",
+    );
+  }
+  return lines.join("\n");
+}
+
+async function runBehaviorIndex(parsed) {
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  const index = await buildBehaviorIndex(root);
+  if (parsed.options.write) {
+    await writeFile(path.join(root, "behavior-index.json"), `${JSON.stringify(index, null, 2)}\n`, "utf8");
+  }
+  printStructured(index, parsed, (value) => {
+    const c = value.counts;
+    const lines = [
+      `BEHAVIOR INDEX: ${c.declared} declared — ${c.mapped} mapped, ${c.unmapped} unmapped; ${c.verified} verified, ${c.partial} partial, ${c.unverified} unverified.`,
+    ];
+    for (const b of value.behaviors) {
+      lines.push(`  [${b.implementationState}/${b.verificationState}] ${b.behaviorId}`);
+      for (const owner of b.owners) lines.push(`      owner: ${owner.file}#${owner.symbol ?? "?"}`);
+      for (const gap of [...b.implementationGaps, ...b.verificationGaps]) lines.push(`      GAP: ${gap}`);
+    }
+    if (c.orphanAnnotations) lines.push(`  ${c.orphanAnnotations} annotation(s) name a behavior nodekit.yaml does not declare.`);
+    return lines.join("\n");
+  });
+}
+
+async function runRepoMap(parsed) {
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  const map = await buildRepoMap(root);
+  if (parsed.options.write) {
+    await writeFile(path.join(root, "repo-map.json"), `${JSON.stringify(map, null, 2)}\n`, "utf8");
+  }
+  printStructured(map, parsed, (value) =>
+    `REPO MAP: ${value.architecture.length} architecture parts, ${value.counts.schemas} schemas, ${value.counts.modules} modules, ${value.counts.tests} test suites${parsed.options.write ? " (wrote repo-map.json)" : ""}`,
+  );
+}
+
+// The tour VERIFIES each step instead of narrating it. A step that cannot be observed is reported
+// as an explanation, never as a pass, so a green tour cannot mean "we printed some prose".
+// @nodekit-behavior orientation.tour owner
+async function runTour(parsed) {
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  const map = await buildRepoMap(root);
+  const steps = [];
+
+  const major = Number(process.versions.node.split(".")[0]);
+  steps.push({
+    id: "environment.node",
+    title: "Your Node.js is new enough",
+    checked: true,
+    passed: major >= 20,
+    detail: `Node ${process.versions.node} (needs 20 or newer).`,
+    fix: major >= 20 ? null : "Install Node 20 or newer, then run this again.",
+  });
+
+  let depsOk = true;
+  try { await import("yaml"); } catch { depsOk = false; }
+  steps.push({
+    id: "environment.dependencies",
+    title: "Dependencies are installed",
+    checked: true,
+    passed: depsOk,
+    detail: depsOk ? "Dependencies resolve." : "A required dependency did not resolve.",
+    fix: depsOk ? null : "Run `npm install` in this directory, then run this again.",
+  });
+
+  steps.push({
+    id: "orientation.what-this-is",
+    title: "What this repository is",
+    checked: false,
+    passed: null,
+    detail:
+      "This repository is the NodeKit PLATFORM, not an application. It generates applications and then proves what they did. That is why `nodekit demo` does not run here: lifecycle commands belong to a generated application.",
+    fix: null,
+  });
+
+  const partChecks = await Promise.all(
+    map.architecture.map(async (part) => ({ part, exists: await pathExists(path.join(root, part.rootGlob)) })),
+  );
+  const missingParts = partChecks.filter((p) => !p.exists).map((p) => p.part.id);
+  steps.push({
+    id: "architecture.five-parts",
+    title: "The five parts you must be able to name",
+    checked: true,
+    passed: missingParts.length === 0,
+    detail: partChecks.map(({ part }) => `${part.title} — ${part.owns}`).join("\n    "),
+    fix: missingParts.length === 0 ? null : `These parts are named in the map but missing on disk: ${missingParts.join(", ")}. The map is stale; run \`npm run repo:map\`.`,
+  });
+
+  const traceFiles = ["src/lib/caseflow.mjs", "src/lib/builder-journey.mjs", "schemas/nodekit.builder-case.v1.schema.json"];
+  const traceMissing = (await Promise.all(traceFiles.map(async (f) => ({ f, ok: await pathExists(path.join(root, f)) })))).filter((x) => !x.ok).map((x) => x.f);
+  steps.push({
+    id: "trace.one-action",
+    title: "Trace one action from start to receipt",
+    checked: true,
+    passed: traceMissing.length === 0,
+    detail:
+      "A builder case advances a stage only when that stage's handoff artifact exists AND a receipt binds it by content hash:\n    " +
+      traceFiles.join("\n    ") +
+      "\n    Read advanceStage in src/lib/builder-journey.mjs — it is the whole rule in one function.",
+    fix: traceMissing.length ? `Missing: ${traceMissing.join(", ")}` : null,
+  });
+
+  steps.push({
+    id: "change.make-and-prove",
+    title: "Make one small change and prove it",
+    checked: false,
+    passed: null,
+    detail:
+      "Change something, then run `npm test` and `npm run evolution:verify`. A change to src, schemas, templates/base, or harness is MATERIAL and needs a reviewed Evolution Ledger entry before it can land.",
+    fix: null,
+  });
+
+  const verified = steps.filter((s) => s.checked);
+  const failed = verified.filter((s) => !s.passed);
+  const output = {
+    schemaVersion: "nodekit.tour-result/v1",
+    steps,
+    verifiedCount: verified.length,
+    failedCount: failed.length,
+    passed: failed.length === 0,
+  };
+  if (parsed.options.json) {
+    console.log(JSON.stringify(output, null, 2));
+  } else {
+    console.log("NodeKit tour\n");
+    for (const s of steps) {
+      const mark = !s.checked ? "[note]" : s.passed ? "[ ok ]" : "[FAIL]";
+      console.log(`${mark} ${s.title}`);
+      console.log(`    ${s.detail}`);
+      if (s.fix) console.log(`    -> ${s.fix}`);
+      console.log("");
+    }
+    console.log(
+      output.passed
+        ? `TOUR PASS: ${verified.length} steps verified. Steps marked [note] are explanations, not verified claims.`
+        : `TOUR FAIL: ${failed.length} of ${verified.length} verified steps failed.`,
+    );
+  }
+  if (!output.passed) process.exitCode = 1;
+}
+
 async function runLifecycle(name, parsed) {
   const result = await checkOne(parsed.options);
   if (!result.passed) {
@@ -291,7 +454,7 @@ async function runLifecycle(name, parsed) {
     return;
   }
   const command = commandFor(result.manifest, name);
-  if (!command) throw new Error(`${name} is not declared in nodekit.yaml`);
+  if (!command) throw new Error(undeclaredLifecycleMessage(name, result.manifest));
   await runShell(command, result.repoRoot, parsed.commandArgs);
 }
 
@@ -1311,6 +1474,29 @@ async function main() {
   }
   if (first === "certify") {
     await runCertify(parsed);
+    return;
+  }
+  if (first === "repo" && second === "map") {
+    await runRepoMap(parsed);
+    return;
+  }
+  if (first === "behavior" && second === "index") {
+    await runBehaviorIndex(parsed);
+    return;
+  }
+  if (first === "tour") {
+    await runTour(parsed);
+    return;
+  }
+  if (first === "copy" && second === "audit") {
+    const root = path.resolve(parsed.options["repo-root"] ?? ".");
+    const result = await auditCopy(root);
+    printStructured(result, parsed, (value) =>
+      value.passed
+        ? `COPY AUDIT PASS: ${value.vocabularySize} terms defined and reachable across ${value.auditedFiles.length} surfaces.`
+        : `COPY AUDIT BLOCKED: ${value.findings.length} findings.\n${value.findings.map((f) => `  ${f.file}: ${f.detail}`).join("\n")}`,
+    );
+    if (!result.passed) process.exitCode = 1;
     return;
   }
   if (first === "repo" && second === "check") {

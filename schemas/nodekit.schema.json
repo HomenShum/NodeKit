@@ -21,58 +21,173 @@
     "architectureExceptions"
   ],
   "properties": {
-    "schemaVersion": { "const": "nodekit.repo/v1" },
-    "repository": { "type": "string", "pattern": "^[^/]+/[^/]+$" },
-    "registryMode": { "enum": ["ecosystem", "external"] },
-    "lifecycle": { "enum": ["production", "preview", "experimental", "reference", "archived"] },
-    "support": { "enum": ["active", "maintenance", "frozen"] },
-    "role": { "type": "string", "minLength": 1 },
-    "commandProfile": { "enum": ["application", "platform", "protocol", "untracked"] },
-    "canonicalFor": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
-    "consumes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "schemaVersion": {
+      "const": "nodekit.repo/v1"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "registryMode": {
+      "enum": [
+        "ecosystem",
+        "external"
+      ]
+    },
+    "lifecycle": {
+      "enum": [
+        "production",
+        "preview",
+        "experimental",
+        "reference",
+        "archived"
+      ]
+    },
+    "support": {
+      "enum": [
+        "active",
+        "maintenance",
+        "frozen"
+      ]
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commandProfile": {
+      "enum": [
+        "application",
+        "platform",
+        "protocol",
+        "untracked"
+      ]
+    },
+    "canonicalFor": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "consumes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
     "commands": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
         "oneOf": [
-          { "required": ["script"] },
-          { "required": ["run"] }
+          {
+            "required": [
+              "script"
+            ]
+          },
+          {
+            "required": [
+              "run"
+            ]
+          }
         ],
         "properties": {
-          "script": { "type": "string", "minLength": 1 },
-          "run": { "type": "string", "minLength": 1 },
-          "mode": { "enum": ["finite", "service"] }
+          "script": {
+            "type": "string",
+            "minLength": 1
+          },
+          "run": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mode": {
+            "enum": [
+              "finite",
+              "service"
+            ]
+          }
         },
-        "required": ["mode"],
+        "required": [
+          "mode"
+        ],
         "additionalProperties": false
       }
     },
     "noKey": {
       "type": "object",
-      "required": ["status", "command", "externalAccountsRequired", "disclosure"],
+      "required": [
+        "status",
+        "command",
+        "externalAccountsRequired",
+        "disclosure"
+      ],
       "properties": {
-        "status": { "enum": ["certified", "partial", "missing", "not-applicable"] },
-        "command": { "type": ["string", "null"] },
-        "externalAccountsRequired": { "type": "integer", "minimum": 0 },
-        "disclosure": { "type": "string", "minLength": 1 }
+        "status": {
+          "enum": [
+            "certified",
+            "partial",
+            "missing",
+            "not-applicable"
+          ]
+        },
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "externalAccountsRequired": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "disclosure": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     },
     "environment": {
       "type": "object",
-      "required": ["contractVersion", "status"],
+      "required": [
+        "contractVersion",
+        "status"
+      ],
       "properties": {
-        "contractVersion": { "const": "nodeplatform.env/v1" },
-        "status": { "enum": ["aligned", "legacy", "migration-planned", "not-applicable"] }
+        "contractVersion": {
+          "const": "nodeplatform.env/v1"
+        },
+        "status": {
+          "enum": [
+            "aligned",
+            "legacy",
+            "migration-planned",
+            "not-applicable"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "proof": {
       "type": "object",
-      "required": ["command", "receiptSchema"],
+      "required": [
+        "command",
+        "receiptSchema"
+      ],
       "properties": {
-        "command": { "type": ["string", "null"] },
-        "receiptSchema": { "type": ["string", "null"] }
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "receiptSchema": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       },
       "additionalProperties": false
     },
@@ -80,14 +195,39 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["concept", "signature", "path", "mode"],
+        "required": [
+          "concept",
+          "signature",
+          "path",
+          "mode"
+        ],
         "properties": {
-          "concept": { "type": "string" },
-          "signature": { "type": "string" },
-          "path": { "type": "string" },
-          "mode": { "enum": ["canonical", "adapter", "domain-specialization", "generated", "migration-copy", "migration-source", "template-copy"] },
-          "origin": { "type": "string" },
-          "reason": { "type": "string" }
+          "concept": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "canonical",
+              "adapter",
+              "domain-specialization",
+              "generated",
+              "migration-copy",
+              "migration-source",
+              "template-copy"
+            ]
+          },
+          "origin": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }
@@ -96,13 +236,56 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["rule", "path", "reason"],
+        "required": [
+          "rule",
+          "path",
+          "reason"
+        ],
         "properties": {
-          "rule": { "type": "string", "minLength": 1 },
-          "path": { "type": "string", "minLength": 1 },
-          "reason": { "type": "string", "minLength": 1 }
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "additionalProperties": false
+      }
+    },
+    "behaviors": {
+      "type": "object",
+      "description": "Behavior intent for the generated behavior index (nodekit.behavior-index/v1). Small declarations only: ownership and proof are read from @nodekit-behavior and @nodekit-verifies annotations in source and tests, so implementation and verification state are derived rather than hand-maintained.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "statement",
+          "requiredScenarios"
+        ],
+        "properties": {
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requiredScenarios": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9.-]*$"
       }
     }
   },

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:repair-cannot-self-approve",
+  "statement": "A repair candidate answering recorded friction becomes adopted only by presenting an independent Builder Gym verdict that authorized promotion for that repair, over a comparison in which the protected evaluator was unchanged and fixed inputs held. Absent any of those, the repair stays blocked and unauthorized, and adoption still requires a reviewed Evolution Ledger entry afterwards.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["recursive improvement loop", "friction to repair routing", "Builder Gym adoption"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/lib/friction-loop.mjs", "test/friction-loop.test.mjs"],
+  "introducedByEventId": "evt:behavior-index-and-friction-loop",
+  "status": "partially-verified"
+}

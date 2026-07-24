@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "nodekit.journey-contract/v1",
+  "contractId": "journey-harness-and-tour",
+  "intent": "A person starting from an empty machine can understand the mission, run the product, trace one action through the code, make one small change, and prove it, without private coaching.",
+  "rule": "Every check starts false. A check may only be set true by a recorded observation bound to a real artifact. Never hand-edit a check to true. The agent proposes; the agent does not approve.",
+  "checks": [
+    {
+      "id": "baseline.recorded",
+      "claim": "A cold-start walkthrough was executed and its friction recorded without repairing anything during the pass.",
+      "passes": true,
+      "evidence": "harness/journey/baseline-2026-07-24.json — 7 friction records (3 P0) from executed probes; notRepaired:true. Boundary: instrumented probe, NOT a fresh-human study."
+    },
+    {
+      "id": "repo-map.generated",
+      "claim": "repo-map.json is derived from source by a generator and a drift check fails when it is stale.",
+      "passes": true,
+      "evidence": "src/lib/repo-map.mjs derives the map from the CLI dispatch, schemas, modules and package.json; repo-map.json committed; test/repo-tour.test.mjs test 4 fails when the committed map is stale (it caught real staleness during this build)."
+    },
+    {
+      "id": "start-here.answers-baseline",
+      "claim": "START_HERE.md answers every blocking question the baseline actually recorded, not a speculative list.",
+      "passes": true,
+      "evidence": "START_HERE.md answers F1 (install before first command), F3 (single entry point + five parts), F7 (docs/ are reference not onboarding) and links the glossary for F2. README now points to it in line 3 and installs deps before the first CLI command."
+    },
+    {
+      "id": "glossary.covers-undefined-terms",
+      "claim": "GLOSSARY.md defines every term the baseline recorded as undefined on first contact.",
+      "passes": true,
+      "evidence": "GLOSSARY.md defines all 11 terms F2 recorded plus 6 more met next; test/copy-audit.test.mjs test 1 asserts undefinedTerms is empty against the real repo."
+    },
+    {
+      "id": "tour.executable",
+      "claim": "nodekit tour runs the walkthrough and verifies each step actually works rather than narrating it.",
+      "passes": true,
+      "evidence": "nodekit tour verifies 4 steps against disk (node version, dependency resolution, five architecture parts, trace targets) and labels unverifiable steps [note] with passed:null. test 1."
+    },
+    {
+      "id": "tour.fails-closed",
+      "claim": "nodekit tour reports failure when a step genuinely breaks; it cannot report success for an unobserved step.",
+      "passes": true,
+      "evidence": "test/repo-tour.test.mjs test 2: against a corrupted repo missing the named parts, tour exits 1, passed:false, and the failing step names the recovery."
+    },
+    {
+      "id": "vocabulary.mapped",
+      "claim": "A vocabulary map exists binding internal terms to user-facing terms.",
+      "passes": true,
+      "evidence": "src/lib/copy-audit.mjs VOCABULARY binds 17 internal terms to reader-facing wording."
+    },
+    {
+      "id": "copy-audit.fails-on-jargon",
+      "claim": "The copy audit fails on undefined jargon in user-facing copy, proven by a corpus that must fail.",
+      "passes": true,
+      "evidence": "test/copy-audit.test.mjs tests 2 and 3: undefined jargon blocks, and defined-but-unreachable jargon blocks. Test 4 proves identifiers in code/paths/links are not false-flagged."
+    },
+    {
+      "id": "loop.wired",
+      "claim": "A recorded friction record can become a candidate repair judged by the existing gym and recorded in the ledger, with no new parallel subsystem.",
+      "passes": true,
+      "evidence": "src/lib/friction-loop.mjs routes recorded friction into a Builder Gym-judged repair. Proven END TO END against the REAL gym in test/friction-loop-end-to-end.test.mjs 4/4: a real verdict from evaluateBuilderGym adopts only with a separate human approval bound to that verdict hash; a genuinely worse candidate is judged regressed by the real gym and refused; an approval bound to another comparison cannot be replayed; the gym refuses an unpinned lock identity. Unit gate: 6 self-approval routes blocked (friction-loop 4/4)."
+    },
+    {
+      "id": "no-duplicate-subsystem",
+      "claim": "No schema or module was added that duplicates interaction-flow, human-study-event, builder-gym, or fresh-user-study.",
+      "passes": true,
+      "evidence": "test/repo-tour.test.mjs guard asserts human-study-*, builder-gym*, fresh-user-* and interaction-flow each keep exactly one owner, and fails if a duplicating schema family appears. friction-loop and behavior-index add no schema family; they route into the existing owners."
+    },
+    {
+      "id": "suite.green",
+      "claim": "Full test suite, typecheck, and evolution verify pass on the branch.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "independently.evaluated",
+      "claim": "A reviewer that did not build this work reviewed the diff and returned a verdict.",
+      "passes": false,
+      "evidence": null
+    }
+  ]
+}

@@ -155,6 +155,7 @@ export function verifyStageHandoff({ builderCase, stage, caseflow }) {
   return { ok: needs.length === 0, needs };
 }
 
+// @nodekit-behavior journey.stage.advance owner
 export async function advanceStage({ builderCase, actor, caseflow }) {
   const stage = builderCase.currentStage;
   const { ok, needs } = verifyStageHandoff({ builderCase, stage, caseflow });

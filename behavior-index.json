@@ -1,0 +1,195 @@
+{
+  "schemaVersion": "nodekit.behavior-index/v1",
+  "generatedBy": "src/lib/behavior-index.mjs",
+  "regenerate": "npm run behavior:index",
+  "counts": {
+    "declared": 4,
+    "mapped": 4,
+    "unmapped": 0,
+    "verified": 4,
+    "partial": 0,
+    "unverified": 0,
+    "orphanAnnotations": 0
+  },
+  "behaviors": [
+    {
+      "behaviorId": "journey.stage.advance",
+      "statement": "A builder case advances a stage only when that stage's handoff artifact exists and a receipt binds it by content hash.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/lib/builder-journey.mjs",
+          "symbol": "advanceStage",
+          "line": 158
+        }
+      ],
+      "supporting": [],
+      "requiredScenarios": [
+        "blocked-without-handoff",
+        "advances-when-bound",
+        "forged-binding-stays-blocked"
+      ],
+      "provenScenarios": [
+        "blocked-without-handoff",
+        "advances-when-bound",
+        "forged-binding-stays-blocked"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "blocked-without-handoff",
+          "file": "test/builder-journey.test.mjs",
+          "line": 35
+        },
+        {
+          "scenario": "advances-when-bound",
+          "file": "test/builder-journey.test.mjs",
+          "line": 50
+        },
+        {
+          "scenario": "forged-binding-stays-blocked",
+          "file": "test/builder-journey.test.mjs",
+          "line": 77
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    },
+    {
+      "behaviorId": "decide.compile-to-build",
+      "statement": "An approved OpportunityContract compiles into the product design contract the build stage reads, carrying the protected decisions.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/lib/opportunity-compiler.mjs",
+          "symbol": "compileOpportunityToBuild",
+          "line": 40
+        }
+      ],
+      "supporting": [
+        {
+          "file": "src/lib/opportunity-compiler.mjs",
+          "symbol": "materializeBuildPacket",
+          "line": 105
+        }
+      ],
+      "requiredScenarios": [
+        "decisions-carried-and-protected",
+        "prohibitions-survive",
+        "packet-accepted-by-planner"
+      ],
+      "provenScenarios": [
+        "packet-accepted-by-planner",
+        "decisions-carried-and-protected",
+        "prohibitions-survive"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "packet-accepted-by-planner",
+          "file": "test/opportunity-build-packet.test.mjs",
+          "line": 18
+        },
+        {
+          "scenario": "decisions-carried-and-protected",
+          "file": "test/opportunity-compiler.test.mjs",
+          "line": 19
+        },
+        {
+          "scenario": "prohibitions-survive",
+          "file": "test/opportunity-compiler.test.mjs",
+          "line": 34
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    },
+    {
+      "behaviorId": "orientation.tour",
+      "statement": "The codebase tour reports a pass only for a step it observed, and exits non-zero when a step it names is genuinely absent.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/cli.mjs",
+          "symbol": "runTour",
+          "line": 346
+        }
+      ],
+      "supporting": [
+        {
+          "file": "src/lib/repo-map.mjs",
+          "symbol": "buildRepoMap",
+          "line": 69
+        }
+      ],
+      "requiredScenarios": [
+        "verified-and-explained-steps-separated",
+        "fails-closed-on-missing-part"
+      ],
+      "provenScenarios": [
+        "verified-and-explained-steps-separated",
+        "fails-closed-on-missing-part"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "verified-and-explained-steps-separated",
+          "file": "test/repo-tour.test.mjs",
+          "line": 28
+        },
+        {
+          "scenario": "fails-closed-on-missing-part",
+          "file": "test/repo-tour.test.mjs",
+          "line": 54
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    },
+    {
+      "behaviorId": "language.copy-audit",
+      "statement": "Newcomer-facing copy is blocked when it uses a NodeKit term the glossary does not define or does not point a reader to.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/lib/copy-audit.mjs",
+          "symbol": "auditCopy",
+          "line": 53
+        }
+      ],
+      "supporting": [],
+      "requiredScenarios": [
+        "undefined-term-blocks",
+        "unreachable-glossary-blocks",
+        "identifiers-not-flagged"
+      ],
+      "provenScenarios": [
+        "undefined-term-blocks",
+        "unreachable-glossary-blocks",
+        "identifiers-not-flagged"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "undefined-term-blocks",
+          "file": "test/copy-audit.test.mjs",
+          "line": 29
+        },
+        {
+          "scenario": "unreachable-glossary-blocks",
+          "file": "test/copy-audit.test.mjs",
+          "line": 43
+        },
+        {
+          "scenario": "identifiers-not-flagged",
+          "file": "test/copy-audit.test.mjs",
+          "line": 58
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    }
+  ],
+  "orphanAnnotations": [],
+  "boundary": "This index reports declared behaviors only. It does not claim the repository has no other behavior, and an ownership annotation asserts ownership rather than proving it."
+}
