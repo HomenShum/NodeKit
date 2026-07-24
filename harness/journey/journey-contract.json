@@ -67,14 +67,14 @@
     {
       "id": "suite.green",
       "claim": "Full test suite, typecheck, and evolution verify pass on the branch.",
-      "passes": false,
-      "evidence": null
+      "passes": true,
+      "evidence": "CI on PR #14: test PASS (49m12s, ubuntu) and verify PASS (materiality + evolution verify + projection drift). Flipped on CI output, not a local run: the local Windows run showed 4 failures printing Windows-style paths while ubuntu is green. Two smoke cells are the known clipboard flake; different cells fail on each run."
     },
     {
       "id": "independently.evaluated",
       "claim": "A reviewer that did not build this work reviewed the diff and returned a verdict.",
       "passes": false,
-      "evidence": null
+      "evidence": "DELIBERATELY FALSE. Every line of this work was written by the coding agent, so the agent is not an independent reviewer of it. This check flips only when someone who did not build it reviews the diff and returns a verdict. Leaving the contract at 11/12 is the honest state; closing it on the builders own say-so would be the exact failure this contract exists to prevent."
     }
   ]
 }
