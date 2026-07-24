@@ -2,12 +2,26 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { generateKeyPairSync } from "node:crypto";
 import { evaluateBuilderGym } from "../src/lib/builder-gym.mjs";
+import { sealRepairPromotionApproval } from "../src/lib/repair-approval.mjs";
 import { adoptRepair, collectFriction, proposeRepair } from "../src/lib/friction-loop.mjs";
 import { preparedBuilderGym } from "./helpers/builder-gym-lab.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const BASELINE = "harness/journey/baseline-2026-07-24.json";
+
+const pair = generateKeyPairSync("ed25519");
+const PRIVATE_KEY = pair.privateKey.export({ format: "pem", type: "pkcs8" }).toString();
+const TRUSTED = { "owner-key": { publicKey: pair.publicKey.export({ format: "pem", type: "spki" }).toString(), purposes: ["repair-promotion-approval"] } };
+
+// Sign a real approval bound to the REAL verdict hash the gym just produced.
+function approvalFor(verdict, repair, overrides = {}) {
+  return sealRepairPromotionApproval(
+    { gymVerdictHash: verdict.verdictHash, repairId: repair.repairId, approvedBy: "project-owner", issuedAt: "2026-07-24T15:00:00.000Z", ...overrides },
+    { privateKey: PRIVATE_KEY, keyId: "owner-key" },
+  );
+}
 
 // The unit tests for the loop use hand-built verdict objects, which proves the GATE but not the
 // PIPE. These drive the real Builder Gym: a protected lock, two sealed trajectories, and a verdict
@@ -43,13 +57,14 @@ test("a repair answering recorded friction is adopted only after the REAL Builde
   assert.equal(verdict.realWorldClaimAuthorized, false);
 
   const verdictRef = `harness/gym/${verdict.gymId}.json`;
-  const withoutApproval = adoptRepair(repair, verdict, { verdictRef });
+  const withoutApproval = adoptRepair(repair, verdict, { verdictRef, trustedKeys: TRUSTED });
   assert.equal(withoutApproval.status, "blocked", "a passing comparison is not permission to ship");
   assert.match(withoutApproval.blockedReason, /not permission to ship/);
 
   const adopted = adoptRepair(repair, verdict, {
     verdictRef,
-    approval: { gymVerdictHash: verdict.verdictHash, approvedBy: "project-owner" },
+    approval: approvalFor(verdict, repair),
+    trustedKeys: TRUSTED,
   });
   assert.equal(adopted.status, "adopted");
   assert.equal(adopted.promotionAuthorized, true);
@@ -66,16 +81,18 @@ test("an approval bound to a different comparison cannot be replayed onto this r
 
   const replayed = adoptRepair(repair, verdict, {
     verdictRef: "harness/gym/other.json",
-    approval: { gymVerdictHash: "f".repeat(64), approvedBy: "project-owner" },
+    approval: approvalFor({ verdictHash: "f".repeat(64) }, repair),
+    trustedKeys: TRUSTED,
   });
   assert.equal(replayed.status, "blocked");
   assert.match(replayed.blockedReason, /replayed/);
 
   const unsigned = adoptRepair(repair, verdict, {
     verdictRef: "harness/gym/other.json",
-    approval: { gymVerdictHash: verdict.verdictHash, approvedBy: "" },
+    approval: approvalFor(verdict, { repairId: "repair-someone-else" }),
+    trustedKeys: TRUSTED,
   });
-  assert.equal(unsigned.status, "blocked", "an approval nobody signed is not an approval");
+  assert.equal(unsigned.status, "blocked", "an approval bound to another repair is not an approval");
 });
 
 // The refusal path, driven by a genuinely worse candidate rather than a synthetic verdict object.
@@ -91,7 +108,7 @@ test("a candidate the REAL gym judges worse cannot be adopted, and the refusal n
   assert.ok(verdict.regressedDimensions.length > 0, "the gym must name what regressed");
 
   const repair = await repairFromRealFriction();
-  const blocked = adoptRepair(repair, verdict, { verdictRef: "harness/gym/regressed.json" });
+  const blocked = adoptRepair(repair, verdict, { verdictRef: "harness/gym/regressed.json", approval: approvalFor(verdict, repair), trustedKeys: TRUSTED });
   assert.equal(blocked.status, "blocked");
   assert.equal(blocked.promotionAuthorized, false);
   assert.equal(blocked.gymVerdictRef, null);

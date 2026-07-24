@@ -178,3 +178,13 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:gym-proven-friction-loop` (partial)
 - Known limitations: The comparison runs against a scaffolded laboratory application, not against this repository's own history; no production repair has been carried through the gym.; The promotion approval is validated for binding and authorship but is not cryptographically signed, unlike the skill promotion path.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
 
+### The friction loop refused to adopt a repair without both a passing Builder Gym comparison and a separate promotion approval, but the approval was checked for shape and binding only.
+
+- Event: `evt:signed-repair-promotion`
+- Source: `765c9ba3b126cab8ce616a809a40477fce709a7a`
+- Resolution: Repair promotion approvals are Ed25519 detached attestations over a domain-separated statement with their own purpose, mirroring the skill promotion pattern but deliberately not sharing its domain or purpose, because a key trusted to promote a skill must not thereby be able to promote a repair. Adoption now requires a verified signature from a key trusted and authorized for the repair-promotion purpose, bound to both the comparison verdict hash and the repair identifier.
+- Observed failure: Anything able to construct an object could grant the approval, including the agent proposing the repair. The separation of duties between proposing a change and permitting it to ship was structural but not enforceable.
+- Invariants: `inv:repair-approval-is-signed` (partially-verified)
+- Evidence: `evd:signed-repair-promotion` (partial)
+- Known limitations: Trusted keys are supplied by the caller; there is no key registry, rotation policy or revocation path in this change.; The approval carries an issuedAt but no expiry, so an approval does not go stale on its own.; No repair has been carried through this path against this repository's own history; the comparison still runs against a scaffolded laboratory application.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+

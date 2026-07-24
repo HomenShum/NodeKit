@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:signed-repair-promotion",
+  "kind": "test",
+  "artifactRef": "git:765c9ba3b126cab8ce616a809a40477fce709a7a:evolution/artifacts/signed-repair-promotion.md",
+  "sha256": "a12147285d8ef28b75208b84c5c623ff222e7e966dcf5be7b0f284058043820b",
+  "sourceCommit": "765c9ba3b126cab8ce616a809a40477fce709a7a",
+  "generatedAt": "2026-07-24T16:05:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "repair-approval 7/7 (cross-domain forgery with the same key over the same payload refused; field tampering breaks the binding; replay onto another comparison or repair refused; untrusted key refused; trusted-but-unauthorized-purpose key refused; approval hash independently recomputable), friction-loop 4/4 and friction-loop-end-to-end 4/4 re-run against real signatures, typecheck:public exits 0.",
+    "evidenceBoundary": "Proves the approval is unforgeable without the trusted private key and unreplayable across comparisons, repairs and purposes. Trusted keys are supplied by the caller: there is no key registry, rotation or revocation here, and the approval carries no expiry. No repair has been carried through this path against this repository's own history. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:repair-approval-is-signed"],
+  "result": "partial"
+}
