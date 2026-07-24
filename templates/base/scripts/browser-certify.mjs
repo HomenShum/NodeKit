@@ -88,6 +88,8 @@ async function recordArtifact(id, absolutePath) {
   evidenceArtifacts.push({ byteSize: (await stat(absolutePath)).size, id, path: path.relative(evidenceRoot, absolutePath).replaceAll("\\", "/"), sha256: sha256(bytes) });
 }
 
+// @nodekit-behavior inv:rendered-browser-evidence owner
+// @nodekit-behavior inv:guided-intake-mobile-decisions owner
 async function verifyExportedProof(absolutePath) {
   const bundle = JSON.parse(await readFile(absolutePath, "utf8"));
   if (bundle.schemaVersion !== "nodekit.portable-proof-bundle/v1") throw new Error("exported proof bundle schema is invalid");

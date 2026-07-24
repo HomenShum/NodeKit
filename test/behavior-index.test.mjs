@@ -144,6 +144,63 @@ test("an annotation quoted inside a string literal is not counted as a real clai
   await rm(root, { recursive: true, force: true });
 });
 
+// The whole point of extending the index: "which code owns X" must be answerable for the REPOSITORY,
+// not just for the handful of behaviours declared in the manifest. The Evolution Ledger already
+// carries the repository's human-reviewed invariants, so they are the honest population to cover.
+test("every ledger invariant resolves to an owning symbol, and the answer is a definition not a filename", async () => {
+  const index = await buildBehaviorIndex(REPO);
+  const coverage = index.invariantCoverage;
+  assert.equal(coverage.available, true, "the ledger invariants must be readable");
+  assert.ok(coverage.counts.total >= 18, "coverage should span the whole ledger");
+
+  // The state this work existed to remove: an invariant nobody owns.
+  assert.equal(coverage.counts.unowned, 0, "an invariant with no owner is an unanswerable 'who owns this'");
+  assert.equal(
+    coverage.counts.namedFileOnly,
+    0,
+    "naming a file is not ownership — it sends the reader hunting instead of landing on the definition",
+  );
+
+  for (const invariant of coverage.invariants) {
+    assert.ok(invariant.owners.length > 0, `${invariant.invariantId} has no owner`);
+    for (const owner of invariant.owners) {
+      assert.ok(owner.symbol, `${invariant.invariantId} owner in ${owner.file} did not resolve to a symbol`);
+    }
+    assert.deepEqual(invariant.gaps, [], `${invariant.invariantId} still reports gaps`);
+  }
+});
+
+// Rot in the ledger itself: an invariant may name a verifier file that has since been deleted or
+// renamed. That is a silent lie — the ledger keeps asserting a guarantee whose proof is gone.
+test("an invariant pointing at a verifier file that no longer exists is reported, not ignored", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-inv-rot-"));
+  await mkdir(path.join(root, "evolution", "invariants"), { recursive: true });
+  await mkdir(path.join(root, "src", "lib"), { recursive: true });
+  await writeFile(path.join(root, "nodekit.yaml"), "schemaVersion: nodekit.repo/v1\n");
+  await writeFile(
+    path.join(root, "evolution", "invariants", "inv-ghost.json"),
+    JSON.stringify({
+      schemaVersion: "nodekit.invariant-claim/v1",
+      id: "inv:ghost",
+      statement: "Something is guaranteed.",
+      verifierRefs: ["src/lib/present.mjs", "test/deleted-long-ago.test.mjs#a-scenario"],
+    }),
+  );
+  await writeFile(path.join(root, "src", "lib", "present.mjs"), "// @nodekit-behavior inv:ghost owner\nexport function present() {}");
+
+  const coverage = (await buildBehaviorIndex(root)).invariantCoverage;
+  const ghost = coverage.invariants[0];
+  assert.equal(ghost.ownership, "annotated-symbol", "ownership is fine; the ROT is the missing verifier");
+  assert.deepEqual(ghost.missingVerifierRefs, ["test/deleted-long-ago.test.mjs#a-scenario"]);
+  assert.equal(coverage.counts.withMissingRefs, 1);
+  assert.match(ghost.gaps[0], /points at code that is gone/);
+
+  // The `#scenario` anchor is not part of the path. Treating it as one would report every anchored
+  // ref as rot — a false positive that would train readers to ignore the signal.
+  assert.ok(!ghost.missingVerifierRefs.includes("src/lib/present.mjs"));
+  await rm(root, { recursive: true, force: true });
+});
+
 // The real repository must stay honest, and the committed index must not be stale.
 test("every behavior this repository declares is owned by a real symbol and the committed index is current", async () => {
   const index = await buildBehaviorIndex(REPO);

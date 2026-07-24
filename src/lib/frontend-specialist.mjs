@@ -178,6 +178,7 @@ function assertRenderedDirections(directionSet) {
   }
 }
 
+// @nodekit-behavior inv:major-frontend-direction-tournament owner
 export async function evaluateFrontendTournament(repoRoot, benchmarkFile) {
   const root = path.resolve(repoRoot);
   const benchmarkPath = resolveInside(root, benchmarkFile, "frontend benchmark");

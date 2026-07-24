@@ -61,6 +61,7 @@ function approvalBody({ gymVerdictHash, repairId, approvedBy, issuedAt }) {
  * @param {{ gymVerdictHash: string, repairId: string, approvedBy: string, issuedAt: string }} input
  * @param {{ privateKey: string, keyId: string, signedAt?: string }} signingOptions
  */
+// @nodekit-behavior inv:repair-approval-is-signed support
 export function sealRepairPromotionApproval(input, { privateKey, keyId, signedAt = new Date().toISOString() }) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$/.test(keyId ?? "")) throw new Error("repair approval keyId is invalid");
   const body = approvalBody(input);
@@ -82,6 +83,7 @@ export function sealRepairPromotionApproval(input, { privateKey, keyId, signedAt
  * @param {object} approval
  * @param {{ gymVerdictHash: string, repairId: string, trustedKeys: Record<string, { publicKey: string, purposes: string[] }> }} expectations
  */
+// @nodekit-behavior inv:repair-approval-is-signed owner
 export function verifyRepairPromotionApproval(approval, { gymVerdictHash, repairId, trustedKeys }) {
   if (!approval || approval.schemaVersion !== "nodekit.repair-promotion-approval/v1") {
     throw new Error("not a repair promotion approval");

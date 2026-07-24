@@ -188,3 +188,13 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:signed-repair-promotion` (partial)
 - Known limitations: Trusted keys are supplied by the caller; there is no key registry, rotation policy or revocation path in this change.; The approval carries an issuedAt but no expiry, so an approval does not go stale on its own.; No repair has been carried through this path against this repository's own history; the comparison still runs against a scaffolded laboratory application.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
 
+### The behavior index answered which code owns a behavior for four hand-declared behaviors. For the rest of the repository the question it existed to answer was still unanswerable.
+
+- Event: `evt:repository-wide-behavior-ownership`
+- Source: `125c866913234da23c1d3778156c06ad5cab8660`
+- Resolution: The index now covers the ledger's invariants as the repository's declared behavior, rather than asking anyone to re-declare the same statements in a second place. It distinguishes annotated-symbol, named-file-only and unowned, so a file-level pointer is not counted as coverage, and it reports invariants whose verifier paths no longer exist. Owners were annotated across caseflow conformance, the package entrypoint, submission gating and preparation, the factory, the frontend tournament, the builder journey, the decide-to-build compiler, the friction loop, repair approval, and the generated application's browser certification. All eighteen now resolve to a definition.
+- Observed failure: Measured with ledger coverage in place and before any annotation: of the eighteen human-reviewed invariants the Evolution Ledger already declares, zero were owned by a named symbol, thirteen named a source file only, and five were claimed by nothing at all. Naming a file sends a reader hunting through thousands of lines rather than landing on the definition that enforces the guarantee.
+- Invariants: `inv:ownership-resolves-to-symbol` (partially-verified)
+- Evidence: `evd:repository-wide-behavior-ownership` (partial)
+- Known limitations: An ownership annotation asserts that a symbol enforces an invariant; it does not prove it, and the index cannot detect a claim that is simply wrong.; The eighteen invariants are the ledger's population, not every behavior in the repository; behavior that never earned an invariant remains uncovered.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:ownership-resolves-to-symbol",
+  "statement": "Every invariant the Evolution Ledger declares resolves to an owning symbol in the behavior index, not merely to a filename. An invariant that no source claims is reported unowned, an invariant whose only claim is a file path is reported named-file-only, and neither state is counted as covered. An invariant naming a verifier path that does not exist is reported as rot, while a scenario anchor on an existing path is not.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["behavior index", "ledger invariant ownership coverage"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/lib/behavior-index.mjs", "test/behavior-index.test.mjs"],
+  "introducedByEventId": "evt:repository-wide-behavior-ownership",
+  "status": "partially-verified"
+}

@@ -247,6 +247,7 @@ async function scaffoldProject(options) {
   return { candidateCommit, name: values.__APP_NAME__, packageManager, target };
 }
 
+// @nodekit-behavior inv:domain-blank-create owner
 export async function createProject(options) {
   if (options.preset !== undefined) {
     throw new Error("nodekit create does not accept --preset; create the domain-blank figured-out base and let the coding agent specialize it from the user's real job");

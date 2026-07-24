@@ -120,6 +120,8 @@ export function proposeRepair(friction, { repairIntent, changeRoots }) {
  * @param {object} gymVerdict a nodekit.builder-gym-verdict/v1
  * @param {{ verdictRef: string, approval?: object, trustedKeys?: Record<string, {publicKey: string, purposes: string[]}> }} binding
  */
+// @nodekit-behavior inv:repair-cannot-self-approve owner
+// @nodekit-behavior inv:measurement-is-not-permission owner
 export function adoptRepair(repair, gymVerdict, { verdictRef, approval, trustedKeys } = {}) {
   const blocked = (reason) => ({ ...repair, status: "blocked", blockedReason: reason, promotionAuthorized: false, gymVerdictRef: null });
 
