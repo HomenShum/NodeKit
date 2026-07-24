@@ -190,7 +190,8 @@
     "knowledge:compare": "node scripts/run-knowledge-runtime-comparison.mjs",
     "check": "npm run test && npm run typecheck:public && npm run audit:prod && npm run registry:check && npm run ecosystem:check",
     "repo:map": "node src/cli.mjs repo map --write",
-    "tour": "node src/cli.mjs tour"
+    "tour": "node src/cli.mjs tour",
+    "copy:audit": "node src/cli.mjs copy audit"
   },
   "engines": {
     "node": ">=20"

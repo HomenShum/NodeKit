@@ -8,6 +8,7 @@ import { compileAgentDefinition, inspectAgentDefinition } from "./lib/agent-defi
 import { pathExists } from "./lib/files.mjs";
 import { checkRepository, commandFor } from "./lib/repo-check.mjs";
 import { buildRepoMap } from "./lib/repo-map.mjs";
+import { auditCopy } from "./lib/copy-audit.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -1458,6 +1459,17 @@ async function main() {
   }
   if (first === "tour") {
     await runTour(parsed);
+    return;
+  }
+  if (first === "copy" && second === "audit") {
+    const root = path.resolve(parsed.options["repo-root"] ?? ".");
+    const result = await auditCopy(root);
+    printStructured(result, parsed, (value) =>
+      value.passed
+        ? `COPY AUDIT PASS: ${value.vocabularySize} terms defined and reachable across ${value.auditedFiles.length} surfaces.`
+        : `COPY AUDIT BLOCKED: ${value.findings.length} findings.\n${value.findings.map((f) => `  ${f.file}: ${f.detail}`).join("\n")}`,
+    );
+    if (!result.passed) process.exitCode = 1;
     return;
   }
   if (first === "repo" && second === "check") {

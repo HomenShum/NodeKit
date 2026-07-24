@@ -1,5 +1,11 @@
 # NodeKit / Node Platform
 
+**New here? Read [START_HERE.md](START_HERE.md) first** — it orients you in about ten minutes. This
+page is the reference. Unfamiliar terms below are defined in [GLOSSARY.md](GLOSSARY.md).
+
+In one sentence: **NodeKit generates applications and then proves what they did.** This repository is
+the platform that does the generating, not an application you can run directly.
+
 NodeKit is the figured-out product foundation and conformance layer for proof-carrying agent applications. It turns an empty directory or existing repository into a domain-blank application with one guided lifecycle, a compiled definition, deterministic fixtures, browser proof, and receipts.
 
 > Blank in domain. Figured out in behavior. Convex-first, not Convex-locked.
@@ -29,7 +35,11 @@ Node Platform remains its ownership layer: it records which repository owns each
 
 Clone this repository, open it in Codex or Claude Code, and describe the pain point, user, outcome, sponsor tools, and deadline. Root `AGENTS.md` and `CLAUDE.md` route that brief into the bundled NodeKit launch skill.
 
-Or use the CLI directly:
+Or use the CLI directly. Install dependencies first — every command below needs them:
+
+```bash
+npm install
+```
 
 ```bash
 node src/cli.mjs create ../my-agent-app \

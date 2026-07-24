@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 85,
-    "modules": 53,
-    "tests": 50
+    "modules": 54,
+    "tests": 51
   },
   "architecture": [
     {
@@ -48,6 +48,7 @@
       "certify",
       "check",
       "compile",
+      "copy",
       "create",
       "dashboard",
       "demo",
@@ -87,6 +88,7 @@
       "conformance:postgres",
       "conformance:supabase-local",
       "consumer:prepare",
+      "copy:audit",
       "dashboard",
       "doctor",
       "ease:aggregate-developer",
@@ -217,6 +219,7 @@
     "caseflow.mjs",
     "consumer-package-preparation.mjs",
     "contracts.mjs",
+    "copy-audit.mjs",
     "dashboard.mjs",
     "developer-timing-aggregation.mjs",
     "distributable-candidate.mjs",
@@ -271,6 +274,7 @@
     "conformance.test.mjs",
     "consumer-package-preparation.test.mjs",
     "contracts.test.mjs",
+    "copy-audit.test.mjs",
     "developer-timing-aggregation.test.mjs",
     "distributable-candidate.test.mjs",
     "ease-evidence.test.mjs",
