@@ -146,6 +146,8 @@
     "ownership.yaml",
     "repositories.yaml",
     "architecture.yaml",
+    "GLOSSARY.md",
+    "START_HERE.md",
     "README.md",
     "LICENSE"
   ],

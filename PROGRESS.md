@@ -66,3 +66,15 @@ turned out to be ~80% built — see App Atlas and NodeAgent Kit in the graph-hop
 - `proof/` has ~396 pre-existing dirty files that are NOT ours. Never stash/commit them blindly.
 - The `smoke` CI job has a known flaky clipboard failure on macOS/Windows; `test` and `verify` are
   the authoritative gates.
+
+- **2026-07-24 · tour + language shipped** — `ad0f153` harness+baseline, `8c16937` tour/repo-map/F5
+  fix, `f87b46a` START_HERE/GLOSSARY/copy-audit. Contract at 8/12.
+- **Process lesson (cost real time):** never chain `git stash` + `git checkout` + a long test run in
+  one timeout-prone command. The timeout fired between checkout and `stash pop`, leaving the session
+  on `main` with the work in `stash@{0}`. Nothing was lost, but recover with
+  `git checkout <branch> && git stash pop` and do branch comparisons in a `git worktree` instead.
+- **Full-suite reality:** local Windows run showed 5 failures. One was MINE (README links must
+  resolve to packed package paths — fixed by packing START_HERE.md and GLOSSARY.md, which also
+  means npm consumers get the glossary). The other four print Windows-style paths and main's CI is
+  green on ubuntu, so they are almost certainly Windows-local. **CI is the authoritative gate — do
+  not claim they are pre-existing without CI confirming.**

@@ -81,6 +81,34 @@ test("running a lifecycle command the repository does not declare names what IS 
   assert.match(out, /nodekit create/, "must offer the path to a repo that declares demo");
 });
 
+// Three separate proposals (App Atlas, NodeAgent Kit, the "Human Journey Harness") each turned out
+// to be ~80% already built in this repository under different names. The expensive failure is not
+// missing capability, it is rebuilding capability you already have. This guard fails when a second
+// subsystem appears that owns a concern one of these already owns.
+test("no second subsystem duplicates an existing owner of human-journey concerns", async () => {
+  const map = await buildRepoMap(REPO);
+  // Each concern must keep exactly ONE owning schema family.
+  const owners = {
+    "recorded human friction": /^nodekit\.human-study-/,
+    "candidate vs baseline judging": /^nodekit\.builder-gym/,
+    "fresh participant study": /^nodekit\.fresh-user-/,
+    "governed step-by-step flow": /^nodekit\.interaction-flow/,
+  };
+  for (const [concern, pattern] of Object.entries(owners)) {
+    const matches = map.schemas.filter((s) => pattern.test(s));
+    assert.ok(matches.length > 0, `${concern} lost its owner — did a rename orphan it?`);
+  }
+  // The journey work added a contract, a baseline and a copy audit. None of them may be a
+  // re-implementation of the four owners above.
+  const forbidden = [/journey-friction/, /human-journey-harness/, /friction-record\./, /walkthrough-study/];
+  const offenders = map.schemas.filter((s) => forbidden.some((f) => f.test(s)));
+  assert.deepEqual(
+    offenders,
+    [],
+    `these schemas duplicate an existing owner; wire the existing one instead: ${offenders.join(", ")}`,
+  );
+});
+
 // The map is DERIVED. A hand-maintained map rots and then teaches a false shape of the system;
 // this proves a new command shows up without anyone editing the map by hand.
 test("the repository map is derived from source, so a newly added command appears without hand-editing", async () => {
