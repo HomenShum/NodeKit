@@ -56,7 +56,7 @@
       "id": "loop.wired",
       "claim": "A recorded friction record can become a candidate repair judged by the existing gym and recorded in the ledger, with no new parallel subsystem.",
       "passes": true,
-      "evidence": "src/lib/friction-loop.mjs routes recorded friction into a Builder Gym-judged repair. test/friction-loop.test.mjs 4/4: six routes to self-approval all stay blocked (no verdict, non-gym object, evaluator changed, fixed inputs moved, regressed outcome, unreferenced adoption); an authorized verdict adopts and still sets evolutionEventRequired."
+      "evidence": "src/lib/friction-loop.mjs routes recorded friction into a Builder Gym-judged repair. Proven END TO END against the REAL gym in test/friction-loop-end-to-end.test.mjs 4/4: a real verdict from evaluateBuilderGym adopts only with a separate human approval bound to that verdict hash; a genuinely worse candidate is judged regressed by the real gym and refused; an approval bound to another comparison cannot be replayed; the gym refuses an unpinned lock identity. Unit gate: 6 self-approval routes blocked (friction-loop 4/4)."
     },
     {
       "id": "no-duplicate-subsystem",

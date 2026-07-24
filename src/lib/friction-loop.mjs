@@ -103,13 +103,22 @@ export function proposeRepair(friction, { repairIntent, changeRoots }) {
 }
 
 /**
- * Adopt a repair. FAIL-CLOSED: this is the only path to adopted, and it refuses unless an
- * independent Builder Gym verdict authorized promotion for this exact repair.
+ * Adopt a repair. FAIL-CLOSED: this is the only path to adopted.
+ *
+ * TWO independent things are required, because the Builder Gym deliberately never promotes anything
+ * itself — it always seals `promotionAuthorized: false`. It measures whether a candidate is better;
+ * it does not decide that the better candidate should ship. Gating adoption on the gym alone would
+ * either be unreachable or would quietly treat "measured as better" as "approved to ship".
+ *
+ *   1. A gym verdict that PASSED over an unchanged protected evaluator and held fixed inputs.
+ *   2. A separate promotion approval, bound to that exact verdict by hash and naming a human,
+ *      following the same shape as nodekit.skill-promotion-approval/v1.
+ *
  * @param {object} repair
  * @param {object} gymVerdict a nodekit.builder-gym-verdict/v1
- * @param {{ verdictRef: string }} binding
+ * @param {{ verdictRef: string, approval?: { gymVerdictHash: string, approvedBy: string } }} binding
  */
-export function adoptRepair(repair, gymVerdict, { verdictRef }) {
+export function adoptRepair(repair, gymVerdict, { verdictRef, approval } = {}) {
   const blocked = (reason) => ({ ...repair, status: "blocked", blockedReason: reason, promotionAuthorized: false, gymVerdictRef: null });
 
   if (!gymVerdict || gymVerdict.schemaVersion !== "nodekit.builder-gym-verdict/v1") {
@@ -121,16 +130,24 @@ export function adoptRepair(repair, gymVerdict, { verdictRef }) {
   if (gymVerdict.fixedInputsHeld !== true) {
     return blocked("fixed inputs did not hold, so baseline and candidate were not compared on equal terms");
   }
-  if (gymVerdict.promotionAuthorized !== true || gymVerdict.passed !== true) {
+  if (gymVerdict.passed !== true || (gymVerdict.regressedDimensions?.length ?? 0) > 0) {
     return blocked(`the gym did not authorize promotion (outcome: ${gymVerdict.outcome ?? "unknown"})`);
   }
   if (!verdictRef) return blocked("an authorized verdict must be referenced so the adoption is auditable");
+
+  // The gym proved improvement. A human still has to decide it should ship.
+  if (!approval) return blocked("a passing comparison is not permission to ship; a promotion approval is required");
+  if (!approval.approvedBy) return blocked("a promotion approval must name who approved it");
+  if (!approval.gymVerdictHash || approval.gymVerdictHash !== gymVerdict.verdictHash) {
+    return blocked("the promotion approval is not bound to this comparison's verdict hash, so it could be replayed from another result");
+  }
 
   return {
     ...repair,
     status: "adopted",
     promotionAuthorized: true,
     gymVerdictRef: verdictRef,
+    approvedBy: approval.approvedBy,
     // The ledger still owns the decision record. Adoption produces the material a reviewed
     // evolution event needs; it does not write one, and it does not stand in for human review.
     evolutionEventRequired: true,

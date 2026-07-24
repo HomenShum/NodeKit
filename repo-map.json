@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 85,
     "modules": 56,
-    "tests": 53
+    "tests": 54
   },
   "architecture": [
     {
@@ -286,6 +286,7 @@
     "ease-proof.test.mjs",
     "evolution-ledger.test.mjs",
     "factory.test.mjs",
+    "friction-loop-end-to-end.test.mjs",
     "friction-loop.test.mjs",
     "frontend-render-contract.test.mjs",
     "frontend-specialist.test.mjs",
