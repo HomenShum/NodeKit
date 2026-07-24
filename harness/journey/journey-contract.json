@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "nodekit.journey-contract/v1",
+  "contractId": "journey-harness-and-tour",
+  "intent": "A person starting from an empty machine can understand the mission, run the product, trace one action through the code, make one small change, and prove it, without private coaching.",
+  "rule": "Every check starts false. A check may only be set true by a recorded observation bound to a real artifact. Never hand-edit a check to true. The agent proposes; the agent does not approve.",
+  "checks": [
+    {
+      "id": "baseline.recorded",
+      "claim": "A cold-start walkthrough was executed and its friction recorded without repairing anything during the pass.",
+      "passes": true,
+      "evidence": "harness/journey/baseline-2026-07-24.json — 7 friction records (3 P0) from executed probes; notRepaired:true. Boundary: instrumented probe, NOT a fresh-human study."
+    },
+    {
+      "id": "repo-map.generated",
+      "claim": "repo-map.json is derived from source by a generator and a drift check fails when it is stale.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "start-here.answers-baseline",
+      "claim": "START_HERE.md answers every blocking question the baseline actually recorded, not a speculative list.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "glossary.covers-undefined-terms",
+      "claim": "GLOSSARY.md defines every term the baseline recorded as undefined on first contact.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "tour.executable",
+      "claim": "nodekit tour runs the walkthrough and verifies each step actually works rather than narrating it.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "tour.fails-closed",
+      "claim": "nodekit tour reports failure when a step genuinely breaks; it cannot report success for an unobserved step.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "vocabulary.mapped",
+      "claim": "A vocabulary map exists binding internal terms to user-facing terms.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "copy-audit.fails-on-jargon",
+      "claim": "The copy audit fails on undefined jargon in user-facing copy, proven by a corpus that must fail.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "loop.wired",
+      "claim": "A recorded friction record can become a candidate repair judged by the existing gym and recorded in the ledger, with no new parallel subsystem.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "no-duplicate-subsystem",
+      "claim": "No schema or module was added that duplicates interaction-flow, human-study-event, builder-gym, or fresh-user-study.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "suite.green",
+      "claim": "Full test suite, typecheck, and evolution verify pass on the branch.",
+      "passes": false,
+      "evidence": null
+    },
+    {
+      "id": "independently.evaluated",
+      "claim": "A reviewer that did not build this work reviewed the diff and returned a verdict.",
+      "passes": false,
+      "evidence": null
+    }
+  ]
+}

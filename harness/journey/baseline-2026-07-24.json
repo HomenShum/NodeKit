@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "nodekit.journey-baseline/v1",
+  "baselineId": "cold-start-2026-07-24",
+  "repositoryCommit": "7a80b4a",
+  "method": "instrumented-probe",
+  "methodBoundary": "This is an automated cold-start probe run by the coding agent against the repository, NOT a fresh-human study. It measures what the repository objectively presents to a newcomer (first documented action, command validity, undefined terms, entry points). It does not measure comprehension, confusion, or time-on-task. A real fresh-human study requires nodekit.fresh-user-study/v1 with five participants and is NOT satisfied by this file.",
+  "rule": "Phase 0 records friction. Nothing was repaired during this pass.",
+  "friction": [
+    {
+      "id": "F1",
+      "severity": "P0",
+      "kind": "wrong-turn",
+      "observed": "README.md presents its first runnable command at line 35 (node src/cli.mjs create ...), but the dependency install step (npm install) does not appear until line 79. A newcomer reading top-down runs a command before installing dependencies.",
+      "consequence": "The first documented action fails on a fresh clone."
+    },
+    {
+      "id": "F2",
+      "severity": "P0",
+      "kind": "undefined-term",
+      "observed": "11 NodeKit-specific terms appear in the first 5 lines of README.md: figured-out, conformance layer, proof-carrying, domain-blank, guided lifecycle, compiled definition, deterministic fixtures, browser proof, receipts, Convex-first, Convex-locked. None is defined in any glossary; no GLOSSARY.md exists.",
+      "consequence": "A senior engineer cannot state what the product does after reading the opening paragraph."
+    },
+    {
+      "id": "F3",
+      "severity": "P1",
+      "kind": "missing-entry-point",
+      "observed": "README.md has no Quickstart, Getting Started, or Install heading. The first heading after the title is 'Current status'. There is no START_HERE.md and no repo-map.json.",
+      "consequence": "There is no single obvious first file to open."
+    },
+    {
+      "id": "F4",
+      "severity": "P1",
+      "kind": "misleading-affordance",
+      "observed": "npm run doctor maps to 'cli registry check' and prints 'PASS Node Platform registry' (exit 0). It validates the registry, not the newcomer's environment (Node version, installed dependencies, ability to run anything).",
+      "consequence": "The command named like a readiness check does not check readiness, so a green result is not evidence the environment works."
+    },
+    {
+      "id": "F5",
+      "severity": "P0",
+      "kind": "dead-end-error",
+      "observed": "Running 'node src/cli.mjs demo' from the platform repository exits 1 with 'nodekit: demo is not declared in nodekit.yaml'. The lifecycle commands (dev, demo, check, proof) are intended to run inside a GENERATED application, not the platform repository. The error does not say this or name a next step.",
+      "consequence": "The most obvious exploratory command fails with an error that does not teach recovery. This is the single highest-value repair."
+    },
+    {
+      "id": "F6",
+      "severity": "P2",
+      "kind": "discoverability",
+      "observed": "package.json exposes no start, demo, or tour script, so a newcomer inspecting scripts cannot discover the lifecycle commands that exist in the CLI.",
+      "consequence": "Working functionality is invisible at the place newcomers look first."
+    },
+    {
+      "id": "F7",
+      "severity": "P1",
+      "kind": "triage-burden",
+      "observed": "docs/ contains 28 files with no index, overview, or orientation document.",
+      "consequence": "A newcomer must guess which of 28 documents is the entry point."
+    }
+  ],
+  "confirmedWorking": [
+    "All 8 'npm run X' commands documented in README.md exist in package.json; none is stale.",
+    "npm run doctor exits 0.",
+    "AGENTS.md is already the short-map form (14 lines) that points to a skill rather than being a large manual."
+  ],
+  "notRepaired": true
+}
