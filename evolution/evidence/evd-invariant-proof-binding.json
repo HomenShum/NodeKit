@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:invariant-proof-binding",
+  "kind": "test",
+  "artifactRef": "git:dcf7546bc63b4dc05f4fc52828c763d074d35d19:evolution/artifacts/invariant-proof-binding.md",
+  "sha256": "8f826e0e12a83fd2982408ae0dc41baaa549a6ad3899c3a718b76358f0539e06",
+  "sourceCommit": "dcf7546bc63b4dc05f4fc52828c763d074d35d19",
+  "generatedAt": "2026-07-24T19:40:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "behavior-index 10/10 (a filename-only proof reports gestured-at and is not counted verified; every repository invariant is fully bound; verifier rot still reported order-independently), caseflow + factory + public-api + submission-cli + repo-tour + friction-loop + repair-approval 51/51, typecheck:public exits 0.",
+    "measuredDelta": "With verification coverage in place, before binding: 19 of 19 owned but 0 of 19 proven by a named assertion. After: 20 of 20 fully bound.",
+    "correctedDefect": "One binding was wrong on the first pass: caseflow-receipt-retry-containment was attached to a test about locale-independent ID ordering, which does not exercise retry containment. It would have reported proven while nothing checked it. Rebound to the idempotent-retry and exception-containment test.",
+    "evidenceBoundary": "Proves the index refuses to count a test filename as proof and reports the full chain only when a symbol owns an invariant and a named assertion claims it. A binding still ASSERTS that a test exercises an invariant; the index checks the claim exists and is well-formed, not that the assertion actually covers the guarantee. Coverage is per invariant, not per clause. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:invariant-proof-is-bound"],
+  "result": "partial"
+}

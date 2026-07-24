@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:invariant-proof-binding",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": { "commitSha": "dcf7546bc63b4dc05f4fc52828c763d074d35d19", "occurredAt": "2026-07-24T19:40:00-07:00" },
+  "track": "harness",
+  "category": "evaluation",
+  "challenge": "The behavior index made ownership answerable, but an annotation only asserts that a symbol enforces an invariant. Nothing bound the guarantee to the assertion that checks it.",
+  "observedFailure": "With verification coverage in place and before any binding, all nineteen ledger invariants were owned by a definition but none was proven by a named assertion: every proof was a test filename. A filename says proof lives somewhere in the file, and the file keeps passing long after the assertion that mattered was deleted or rewritten.",
+  "resolution": "Verification is reported with the same strictness as ownership. A test that names the invariant and its scenario is annotated-test; a verifierRef naming a test file that claims nothing is named-test-file-only and is not counted as verified; neither is unverified. An invariant is fully bound only when a symbol owns it and a named assertion proves it. All twenty are now fully bound.",
+  "assumptionIds": [],
+  "invariantIds": ["inv:invariant-proof-is-bound"],
+  "evidenceIds": ["evd:invariant-proof-binding"],
+  "predecessorIds": ["evt:repository-wide-behavior-ownership"],
+  "knownLimitations": [
+    "A binding asserts that a test exercises an invariant; the index checks the claim exists and is well-formed, not that the assertion actually covers the guarantee. One wrong binding was caught only by reading the test.",
+    "Coverage is per invariant, not per clause: an invariant naming several properties reports bound when one assertion claims it.",
+    "Nothing here certifies any application; EASE_NOT_CERTIFIED stands."
+  ],
+  "interpretation": { "status": "human-reviewed", "reviewedBy": "project-owner", "reviewedAt": "2026-07-24T19:40:00-07:00" }
+}
