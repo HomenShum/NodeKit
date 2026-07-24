@@ -55,14 +55,14 @@
     {
       "id": "loop.wired",
       "claim": "A recorded friction record can become a candidate repair judged by the existing gym and recorded in the ledger, with no new parallel subsystem.",
-      "passes": false,
-      "evidence": null
+      "passes": true,
+      "evidence": "src/lib/friction-loop.mjs routes recorded friction into a Builder Gym-judged repair. test/friction-loop.test.mjs 4/4: six routes to self-approval all stay blocked (no verdict, non-gym object, evaluator changed, fixed inputs moved, regressed outcome, unreferenced adoption); an authorized verdict adopts and still sets evolutionEventRequired."
     },
     {
       "id": "no-duplicate-subsystem",
       "claim": "No schema or module was added that duplicates interaction-flow, human-study-event, builder-gym, or fresh-user-study.",
-      "passes": false,
-      "evidence": null
+      "passes": true,
+      "evidence": "test/repo-tour.test.mjs guard asserts human-study-*, builder-gym*, fresh-user-* and interaction-flow each keep exactly one owner, and fails if a duplicating schema family appears. friction-loop and behavior-index add no schema family; they route into the existing owners."
     },
     {
       "id": "suite.green",
