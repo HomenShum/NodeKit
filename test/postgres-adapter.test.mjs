@@ -8,6 +8,7 @@ import {
 } from "@homenshum/nodekit/adapters/postgres";
 import { contentHash } from "@homenshum/nodekit/caseflow";
 
+// @nodekit-verifies inv:postgres-caseflow-conformance#adapter-conforms
 test("PostgreSQL adapter is available through the supported package entry point", () => {
   assert.equal(typeof createPostgresCaseflow, "function");
   assert.equal(typeof rehashLegacyPostgresProposalPatches, "function");

@@ -33,6 +33,7 @@ test("a fresh builder case starts in decide with decide active", async () => {
 });
 
 // @nodekit-verifies journey.stage.advance#blocked-without-handoff
+// @nodekit-verifies inv:builder-journey-stage-handoff#blocked-without-handoff
 test("advancing decide->build is BLOCKED before an OpportunityContract + receipt exist", async () => {
   const { builderCase, caseflow } = await freshCase();
   const verdict = await advanceStage({ builderCase, actor: ACTOR, caseflow });
@@ -75,6 +76,7 @@ test("the case advances once the handoff artifact + receipt exist", async () => 
 });
 
 // @nodekit-verifies journey.stage.advance#forged-binding-stays-blocked
+// @nodekit-verifies inv:builder-journey-stage-handoff#forged-binding-blocked
 test("a forged/mismatched handoff ref stays BLOCKED (contentHash binding, not mere presence)", async () => {
   const { builderCase, caseflow } = await freshCase();
   const salon = await loadSalon();

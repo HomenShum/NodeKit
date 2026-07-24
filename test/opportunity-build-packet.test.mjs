@@ -16,6 +16,7 @@ const SALON = JSON.parse(
 // Decide -> Build seam end to end: compile -> write packet -> the frontend planner accepts it and
 // carries the protected decisions and the read-only authority forward.
 // @nodekit-verifies decide.compile-to-build#packet-accepted-by-planner
+// @nodekit-verifies inv:build-packet-carries-opportunity#packet-accepted-by-planner
 test("the salon OpportunityContract materializes into a build packet the frontend planner accepts", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-build-packet-"));
   await mkdir(path.join(root, "harness"), { recursive: true });

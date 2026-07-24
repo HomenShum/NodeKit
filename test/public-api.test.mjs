@@ -39,6 +39,7 @@ import {
   verifySkillPromotionApproval,
 } from "@homenshum/nodekit/skill-evaluation";
 
+// @nodekit-verifies inv:stable-caseflow-package-entrypoint#entrypoint-surface-stable
 test("published Caseflow entry point exposes the supported portable contract", async () => {
   assert.equal(CASEFLOW_SCHEMA_VERSIONS.case, "nodekit.case/v1");
   assert.equal(PORTABLE_VALUE_LIMITS.maxArrayItems, 8192);

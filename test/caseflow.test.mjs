@@ -10,6 +10,7 @@ import {
 } from "../src/lib/receipt-bindings.mjs";
 import { negotiateRuntimeCapabilities, runtimeProfiles } from "../src/lib/runtime-capabilities.mjs";
 
+// @nodekit-verifies inv:caseflow-idempotent-retries#idempotent-retry
 test("memory runtime passes the provider-neutral adapter conformance suite", async () => {
   const result = await runCaseflowConformance(() => createMemoryCaseflow());
   assert.equal(result.passed, true);
@@ -296,6 +297,7 @@ test("memory caseflow makes exception recovery and next-action ownership explici
   assert.equal(resolved.run.nextActionOwner, "agent");
 });
 
+// @nodekit-verifies inv:caseflow-receipt-retry-containment#retry-contained
 test("case intake persists idempotently and multiple exceptions remain contained", () => {
   let tick = 0;
   const runtime = createMemoryCaseflow({ clock: () => `2026-07-21T00:02:${String(tick++).padStart(2, "0")}.000Z` });

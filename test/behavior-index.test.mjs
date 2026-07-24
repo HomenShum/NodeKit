@@ -147,6 +147,7 @@ test("an annotation quoted inside a string literal is not counted as a real clai
 // The whole point of extending the index: "which code owns X" must be answerable for the REPOSITORY,
 // not just for the handful of behaviours declared in the manifest. The Evolution Ledger already
 // carries the repository's human-reviewed invariants, so they are the honest population to cover.
+// @nodekit-verifies inv:ownership-resolves-to-symbol#every-invariant-owned
 test("every ledger invariant resolves to an owning symbol, and the answer is a definition not a filename", async () => {
   const index = await buildBehaviorIndex(REPO);
   const coverage = index.invariantCoverage;
@@ -170,8 +171,70 @@ test("every ledger invariant resolves to an owning symbol, and the answer is a d
   }
 });
 
+// Ownership answers "who enforces this". It does NOT answer "what checks that they do". A verifierRef
+// naming a test FILE says proof lives somewhere in there; the file can keep passing long after the
+// assertion that mattered was deleted. Verification gets the same strictness as ownership.
+// @nodekit-verifies inv:invariant-proof-is-bound#proof-bound-to-assertion
+test("an invariant whose proof is only a test filename is reported as gestured at, not as verified", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-proof-bind-"));
+  await mkdir(path.join(root, "evolution", "invariants"), { recursive: true });
+  await mkdir(path.join(root, "src", "lib"), { recursive: true });
+  await mkdir(path.join(root, "test"), { recursive: true });
+  await writeFile(path.join(root, "nodekit.yaml"), "schemaVersion: nodekit.repo/v1\n");
+  const invariant = (id, refs) => JSON.stringify({
+    schemaVersion: "nodekit.invariant-claim/v1", id, statement: "Something is guaranteed.", verifierRefs: refs,
+  });
+  await writeFile(path.join(root, "evolution", "invariants", "inv-gestured.json"),
+    invariant("inv:gestured", ["src/lib/thing.mjs", "test/thing.test.mjs"]));
+  await writeFile(path.join(root, "evolution", "invariants", "inv-bound.json"),
+    invariant("inv:bound", ["src/lib/thing.mjs", "test/thing.test.mjs"]));
+  await writeFile(path.join(root, "src", "lib", "thing.mjs"),
+    "// @nodekit-behavior inv:gestured owner\n// @nodekit-behavior inv:bound owner\nexport function thing() {}");
+  // Only ONE of the two invariants has a test that names it, though the same file is a verifierRef
+  // for both. That is exactly the difference between proof and a gesture at proof.
+  await writeFile(path.join(root, "test", "thing.test.mjs"),
+    "// @nodekit-verifies inv:bound#the-scenario\ntest('proves the bound one', () => {});");
+
+  const coverage = (await buildBehaviorIndex(root)).invariantCoverage;
+  const gestured = coverage.invariants.find((i) => i.invariantId === "inv:gestured");
+  const bound = coverage.invariants.find((i) => i.invariantId === "inv:bound");
+
+  // Both are OWNED. Only one is PROVEN. Ownership must not be mistaken for verification.
+  assert.equal(gestured.ownership, "annotated-symbol");
+  assert.equal(bound.ownership, "annotated-symbol");
+
+  assert.equal(gestured.verification, "named-test-file-only", "a filename is not an assertion");
+  assert.match(gestured.gaps.join(" "), /gestured at/);
+  assert.equal(bound.verification, "annotated-test");
+  assert.equal(bound.provenBy[0].scenario, "the-scenario");
+
+  assert.equal(coverage.counts.fullyBound, 1, "only the bound invariant completes the chain");
+  assert.equal(coverage.counts.namedTestFileOnly, 1);
+  await rm(root, { recursive: true, force: true });
+});
+
+// The repository's own chain must be complete: every invariant owned by a definition AND proven by
+// a named assertion. This is the claim the whole index exists to support.
+test("every ledger invariant in this repository is fully bound: a symbol owns it and an assertion proves it", async () => {
+  const coverage = (await buildBehaviorIndex(REPO)).invariantCoverage;
+  assert.equal(coverage.counts.namedTestFileOnly, 0, "a test filename is not proof of an invariant");
+  assert.equal(coverage.counts.unverified, 0);
+  assert.equal(
+    coverage.counts.fullyBound,
+    coverage.counts.total,
+    "every invariant must have both an owning symbol and a proving assertion",
+  );
+  for (const invariant of coverage.invariants) {
+    assert.ok(invariant.provenBy.length > 0, `${invariant.invariantId} has no proving assertion`);
+    for (const proof of invariant.provenBy) {
+      assert.ok(proof.scenario && proof.file.startsWith("test/"), `${invariant.invariantId} proof is not a real test scenario`);
+    }
+  }
+});
+
 // Rot in the ledger itself: an invariant may name a verifier file that has since been deleted or
 // renamed. That is a silent lie — the ledger keeps asserting a guarantee whose proof is gone.
+// @nodekit-verifies inv:ownership-resolves-to-symbol#verifier-rot-reported
 test("an invariant pointing at a verifier file that no longer exists is reported, not ignored", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-inv-rot-"));
   await mkdir(path.join(root, "evolution", "invariants"), { recursive: true });
@@ -193,7 +256,9 @@ test("an invariant pointing at a verifier file that no longer exists is reported
   assert.equal(ghost.ownership, "annotated-symbol", "ownership is fine; the ROT is the missing verifier");
   assert.deepEqual(ghost.missingVerifierRefs, ["test/deleted-long-ago.test.mjs#a-scenario"]);
   assert.equal(coverage.counts.withMissingRefs, 1);
-  assert.match(ghost.gaps[0], /points at code that is gone/);
+  // Order-independent: an invariant can carry several gaps at once (here it is also unproven), and
+  // asserting on gaps[0] would break every time a new gap kind is added.
+  assert.ok(ghost.gaps.some((gap) => /points at code that is gone/.test(gap)), "the rot must be named");
 
   // The `#scenario` anchor is not part of the path. Treating it as one would report every anchored
   // ref as rot — a false positive that would train readers to ignore the signal.

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:invariant-proof-is-bound",
+  "statement": "Verification of a ledger invariant is reported with the same strictness as ownership. An invariant proven by a test that names it is annotated-test; an invariant whose only proof is a verifierRef naming a test file is named-test-file-only and is NOT counted as verified; an invariant with neither is unverified. An invariant is fully bound only when a symbol owns it and a named assertion proves it.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["behavior index", "ledger invariant verification coverage"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/lib/behavior-index.mjs", "test/behavior-index.test.mjs"],
+  "introducedByEventId": "evt:invariant-proof-binding",
+  "status": "partially-verified"
+}

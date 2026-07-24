@@ -52,6 +52,7 @@ test("an uninformed senior engineer can orient with `nodekit tour` and the tour 
 // Adversarial: the tour must not be able to report success for something it did not observe.
 // Corrupt the world so a named architecture part is genuinely absent, and require a FAIL.
 // @nodekit-verifies orientation.tour#fails-closed-on-missing-part
+// @nodekit-verifies inv:tour-verifies-what-it-claims#fails-closed-on-missing-part
 test("the tour fails closed when a part it names does not exist, and does not report a pass it did not observe", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-tour-fail-"));
   await mkdir(path.join(root, "src", "lib"), { recursive: true });

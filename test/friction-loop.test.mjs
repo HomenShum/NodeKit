@@ -68,6 +68,7 @@ test("a repair must answer real friction, state an intent, and name the roots it
 
 // THE property. Every one of these must stay blocked, because each is a way an agent could
 // otherwise mark its own work as good.
+// @nodekit-verifies inv:repair-cannot-self-approve#self-approval-blocked
 test("a repair cannot approve itself: adoption is refused without an independent authorizing verdict", async () => {
   const { repair } = await proposal();
 

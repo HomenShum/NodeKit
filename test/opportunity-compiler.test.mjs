@@ -17,6 +17,7 @@ test("the salon OpportunityContract compiles into a product-design contract the 
 });
 
 // @nodekit-verifies decide.compile-to-build#decisions-carried-and-protected
+// @nodekit-verifies inv:opportunity-carries-to-build#decisions-protected
 test("the OpportunityContract's decisions are carried into the product contract and marked protected", async () => {
   const opportunity = await salonOpportunity();
   const { productDesignContract } = compileOpportunityToBuild(opportunity);

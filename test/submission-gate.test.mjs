@@ -139,6 +139,7 @@ function submissionManifest(candidateCommit, candidateSourceHash, gates, release
   return { ...manifest, evidenceRootSha256: submissionEvidenceRootSha256(gates) };
 }
 
+// @nodekit-verifies inv:exact-candidate-evidence#candidate-identity-bound
 test("decisive evidence contracts reject shallow counts and unproven live adoption", () => {
   const candidateCommit = "a".repeat(40);
   const verdicts = exactSubmissionVerdicts(candidateCommit);
@@ -230,6 +231,7 @@ test("decisive evidence contracts reject shallow counts and unproven live adopti
   assert.equal(evidenceContractPasses("proofloopEaseVerification", malformedProofLoop), false, "malformed ProofLoop evidence must fail closed without throwing");
 });
 
+// @nodekit-verifies inv:source-bound-decisive-verdicts#evidence-source-bound
 test("evidence paths are canonical and browser certification closes over every byte", async () => {
   for (const alias of ["./proof/x", "proof/./x", "proof//x", "proof/x/", "proof/../x", "C:/proof/x", "proof\\x"]) {
     assert.equal(portableEvidencePath(alias), false, alias);

@@ -24,6 +24,7 @@ async function createRepository() {
   return root;
 }
 
+// @nodekit-verifies inv:submission-cli-explicit-options#named-options-accepted
 test("submission preparation accepts explicit named options", async () => {
   const root = await createRepository();
   const output = "proof/named-options-manifest.json";
@@ -44,6 +45,7 @@ test("submission preparation accepts explicit named options", async () => {
   assert.equal(manifest.gates.length, 12);
 });
 
+// @nodekit-verifies inv:submission-cli-explicit-options#unknown-options-refused
 test("submission scripts fail clearly on unknown options", () => {
   for (const script of ["prepare-submission.mjs", "evaluate-submission.mjs"]) {
     const result = spawnSync(process.execPath, [path.join(repositoryRoot, "scripts", script), "--wat"], {

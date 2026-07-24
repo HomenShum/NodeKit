@@ -54,6 +54,7 @@ test("an approval for another comparison or another repair cannot be replayed", 
   assert.throws(() => verifyRepairPromotionApproval(approval, expect(keys, { repairId: "repair-other" })), /different repair/);
 });
 
+// @nodekit-verifies inv:repair-approval-is-signed#untrusted-key-refused
 test("an untrusted key, or a trusted key not authorized for this purpose, is refused", () => {
   const owner = keypair();
   const stranger = keypair();
@@ -71,6 +72,7 @@ test("an untrusted key, or a trusted key not authorized for this purpose, is ref
 // THE attack domain separation exists to stop. Without the domain prefix the signed bytes are just
 // a hash, so a signature produced for a different purpose would verify here and one approval
 // authority would silently become another.
+// @nodekit-verifies inv:repair-approval-is-signed#cross-domain-forgery-refused
 test("a signature made over the same payload for a DIFFERENT purpose does not verify here", () => {
   const keys = keypair();
   const approval = seal(keys);
