@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:copy-claims-gate-lies-not-taste",
+  "statement": "Generated user-facing copy fails the audit only for objectively wrong statements: fabricated entities absent from the approved source, capability claims nothing evidences, a finished status with no receipt, a mutation the agent lacks authority to perform, or a reported failure whose clauses offer no next action. Style findings are always advisory and can never change the verdict, because a supplied voice sample may legitimately require them. When no source is supplied, fabrication is reported as unchecked rather than passed.",
+  "scope": {
+    "applications": ["NodeKit Studio", "generated applications"],
+    "surfaces": ["generated user-facing copy", "frontend review evidence path"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/lib/copy-claims.mjs", "test/copy-claims.test.mjs"],
+  "introducedByEventId": "evt:copy-as-proof-surface",
+  "status": "partially-verified"
+}

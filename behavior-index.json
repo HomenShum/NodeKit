@@ -193,14 +193,14 @@
   "invariantCoverage": {
     "available": true,
     "counts": {
-      "total": 21,
-      "annotatedSymbol": 21,
+      "total": 22,
+      "annotatedSymbol": 22,
       "namedFileOnly": 0,
       "unowned": 0,
-      "annotatedTest": 21,
+      "annotatedTest": 22,
       "namedTestFileOnly": 0,
       "unverified": 0,
-      "fullyBound": 21,
+      "fullyBound": 22,
       "withMissingRefs": 0
     },
     "invariants": [
@@ -335,6 +335,43 @@
           "src/lib/caseflow-conformance.mjs",
           "test/caseflow.test.mjs",
           "src/component/caseflow.test.ts"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:copy-claims-gate-lies-not-taste",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/copy-claims.mjs",
+            "symbol": "auditCopyClaims",
+            "line": 93
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/copy-claims.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "fabrication-caught-against-source",
+            "file": "test/copy-claims.test.mjs",
+            "line": 9
+          },
+          {
+            "scenario": "style-never-blocks",
+            "file": "test/copy-claims.test.mjs",
+            "line": 85
+          }
+        ],
+        "namedTestFiles": [
+          "test/copy-claims.test.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/copy-claims.mjs",
+          "test/copy-claims.test.mjs"
         ],
         "missingVerifierRefs": [],
         "gaps": []
@@ -818,7 +855,7 @@
           {
             "file": "src/studio.mjs",
             "symbol": "studioCapability",
-            "line": 105
+            "line": 112
           }
         ],
         "namedSourceFiles": [

@@ -218,3 +218,13 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:invariant-proof-binding` (partial)
 - Known limitations: A binding asserts that a test exercises an invariant; the index checks the claim exists and is well-formed, not that the assertion actually covers the guarantee. One wrong binding was caught only by reading the test.; Coverage is per invariant, not per clause: an invariant naming several properties reports bound when one assertion claims it.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
 
+### A generated interface could pass every visual check while the text on the screen was false. The render contract proved that states rendered; nothing checked whether the sentences claimed a completion that never happened or an authority the agent did not hold.
+
+- Event: `evt:copy-as-proof-surface`
+- Source: `1302f5bf3d1ffe3848d7a43da1e789e5b49e3d79`
+- Resolution: Added a claims audit that fails only objectively wrong statements and treats style as advisory that can never change the verdict, because a supplied voice sample may legitimately require the patterns a linter would flag. Fabrication is a deterministic entity diff against approved source material, and when no source is supplied it reports unchecked rather than passing. The audit extends the existing frontend review evidence path and the Studio surface rather than opening a new receipt family.
+- Observed failure: The existing copy audit covered undefined jargon and authority terms only. Four ways for generated copy to be objectively wrong had no check at all: fabricated entities, unsupported capability claims, a finished status with no receipt behind it, and a failure message naming no next action.
+- Invariants: `inv:copy-claims-gate-lies-not-taste` (partially-verified)
+- Evidence: `evd:copy-as-proof-surface` (partial)
+- Known limitations: The audit checks whether claims are wrong; it cannot judge whether copy is good.; Fabrication detection covers URLs, dates, money and percentages, so an invented prose claim containing none of those is not caught.; Unsupported-claim detection is a pattern list and catches common forms rather than novel ones.; Detecting a missing recovery action required three attempts, each correct about the previous failure and wrong about the next; the class of error is a word's presence being read as its role.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+
