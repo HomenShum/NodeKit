@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:studio-boundary",
+  "kind": "test",
+  "artifactRef": "git:58dd5eeedb37e8af33f827ef24b5563d10249656:evolution/artifacts/studio-boundary.md",
+  "sha256": "0fe05a34693d85b07e05234c8d756bcce5985da9b51bd91512be243074a4c51d",
+  "sourceCommit": "58dd5eeedb37e8af33f827ef24b5563d10249656",
+  "generatedAt": "2026-07-25T13:45:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "studio-boundary 4/4: the surface imports as one entrypoint and every export resolves; the boundary re-exports rather than forks and owns exactly one function; the capability report names its gaps and cannot claim readiness while one is open; the declared gaps match the repository, with a git grep guard that fails if direct-edit capability appears without the loop declaration being updated. typecheck:public exits 0.",
+    "measuredFinding": "All five components the proposal named already existed: Atlas, the frontend tournament, review receipts and visual review inventory, the render contract, and frontend routing. The fifth instance of a proposal being substantially pre-built.",
+    "evidenceBoundary": "Proves the boundary is a declaration over existing code rather than a fork, and that its readiness report is derived rather than asserted. It adds no capability. The comparison benchmark has never run, the tournament has never run end to end against a real application, and the edit and reference-ingestion steps have no implementation. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:studio-boundary-declares-gaps"],
+  "result": "partial"
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:studio-boundary",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "58dd5eeedb37e8af33f827ef24b5563d10249656",
+    "occurredAt": "2026-07-25T13:45:00-07:00"
+  },
+  "track": "architecture",
+  "category": "workflow",
+  "challenge": "A proposal arrived to extract the user interface system as a standalone product named NodeKit Studio, listing five components it would contain.",
+  "observedFailure": "All five components already shipped in this repository under other names. This was the fifth time a proposal turned out to be substantially pre-built, because nothing declared where the interface surface begins and ends. The real risk was rebuilding existing capability as a second platform, and the standalone claim could not be tested because there was no boundary to test.",
+  "resolution": "Declared the boundary instead of building the product. A single module re-exports the existing implementations behind one package export subpath, following the pattern the Caseflow entrypoint already established. No file moved and nothing was forked; a test asserts the boundary owns exactly one function of its own so a future fork fails rather than silently becoming a second implementation. The loop is declared with an implemented flag per step, and the two steps that genuinely have no implementation, direct editing and reference ingestion, are declared false. Readiness is derived from those gaps rather than asserted. Extraction into a separate repository is deliberately deferred until the named consumers share this surface.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:studio-boundary-declares-gaps"
+  ],
+  "evidenceIds": [
+    "evd:studio-boundary"
+  ],
+  "predecessorIds": [
+    "evt:invariant-proof-binding"
+  ],
+  "knownLimitations": [
+    "This adds no capability; it is a declaration, and a declaration cannot make an unrun benchmark run.",
+    "The comparison benchmark of raw prompt versus contract versus contract with Atlas versus full Studio has never been executed, so no advantage is demonstrated.",
+    "The frontend tournament has never run end to end against a real generated application.",
+    "Direct editing and reference ingestion have no implementation at all.",
+    "Nothing here certifies any application; EASE_NOT_CERTIFIED stands."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "project-owner",
+    "reviewedAt": "2026-07-25T13:45:00-07:00"
+  }
+}
