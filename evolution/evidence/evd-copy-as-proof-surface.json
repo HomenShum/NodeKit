@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:copy-as-proof-surface",
+  "kind": "test",
+  "artifactRef": "git:1302f5bf3d1ffe3848d7a43da1e789e5b49e3d79:evolution/artifacts/copy-as-proof-surface.md",
+  "sha256": "93481f714b0c0c40201ac1eb4083858430d0921419ff5c205640fe3eeb4ff87c",
+  "sourceCommit": "1302f5bf3d1ffe3848d7a43da1e789e5b49e3d79",
+  "generatedAt": "2026-07-25T15:30:00-07:00",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "copy-claims 10/10 and studio-boundary 4/4. Covers each hard-fail class, the receipt and authority cases that legitimise the same sentence, a regression proving a noun inside a failure is not its own remedy, and a case proving style alone can never block. typecheck:public exits 0.",
+    "evidenceBoundary": "Proves the audit fails objectively wrong statements and never fails style. It cannot judge whether copy is good. Fabrication detection covers URLs, dates, money and percentages only, so an invented prose claim containing none of those is not caught, and unsupported-claim detection is a pattern list that catches common forms rather than novel ones. EASE_NOT_CERTIFIED stands."
+  },
+  "verifiesInvariantIds": ["inv:copy-claims-gate-lies-not-taste"],
+  "result": "partial"
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:copy-as-proof-surface",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "1302f5bf3d1ffe3848d7a43da1e789e5b49e3d79",
+    "occurredAt": "2026-07-25T15:30:00-07:00"
+  },
+  "track": "harness",
+  "category": "evaluation",
+  "challenge": "A generated interface could pass every visual check while the text on the screen was false. The render contract proved that states rendered; nothing checked whether the sentences claimed a completion that never happened or an authority the agent did not hold.",
+  "observedFailure": "The existing copy audit covered undefined jargon and authority terms only. Four ways for generated copy to be objectively wrong had no check at all: fabricated entities, unsupported capability claims, a finished status with no receipt behind it, and a failure message naming no next action.",
+  "resolution": "Added a claims audit that fails only objectively wrong statements and treats style as advisory that can never change the verdict, because a supplied voice sample may legitimately require the patterns a linter would flag. Fabrication is a deterministic entity diff against approved source material, and when no source is supplied it reports unchecked rather than passing. The audit extends the existing frontend review evidence path and the Studio surface rather than opening a new receipt family.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:copy-claims-gate-lies-not-taste"
+  ],
+  "evidenceIds": [
+    "evd:copy-as-proof-surface"
+  ],
+  "predecessorIds": [
+    "evt:studio-boundary"
+  ],
+  "knownLimitations": [
+    "The audit checks whether claims are wrong; it cannot judge whether copy is good.",
+    "Fabrication detection covers URLs, dates, money and percentages, so an invented prose claim containing none of those is not caught.",
+    "Unsupported-claim detection is a pattern list and catches common forms rather than novel ones.",
+    "Detecting a missing recovery action required three attempts, each correct about the previous failure and wrong about the next; the class of error is a word's presence being read as its role.",
+    "Nothing here certifies any application; EASE_NOT_CERTIFIED stands."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "project-owner",
+    "reviewedAt": "2026-07-25T15:30:00-07:00"
+  }
+}

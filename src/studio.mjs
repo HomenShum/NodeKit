@@ -75,6 +75,13 @@ export {
   stateManifestHashOf,
 } from "./lib/frontend-render-contract.mjs";
 
+// --- Generated copy as a proof surface ---------------------------------------------------------
+// A rendered interface can pass every visual check while its text lies: claiming a task completed
+// that never ran, or an authority the agent does not hold. Copy findings extend the existing
+// frontend review path rather than opening a new receipt family. Style is advisory by construction,
+// because a supplied voice sample may legitimately require the very patterns a linter would flag.
+export { auditCopyClaims } from "./lib/copy-claims.mjs";
+
 // --- The Decide -> Build seam ------------------------------------------------------------------
 // Studio's input is an approved OpportunityContract compiled into a product design contract, so a
 // Studio run cannot quietly re-scope the product it is dressing.
