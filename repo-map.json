@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 85,
     "modules": 57,
-    "tests": 55
+    "tests": 56
   },
   "architecture": [
     {
@@ -314,6 +314,7 @@
     "public-api.test.mjs",
     "repair-approval.test.mjs",
     "repo-tour.test.mjs",
+    "studio-boundary.test.mjs",
     "submission-attestation.test.mjs",
     "submission-cli.test.mjs",
     "submission-evidence-finalizer.test.mjs",

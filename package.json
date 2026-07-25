@@ -32,6 +32,7 @@
       "import": "./src/caseflow.mjs",
       "default": "./src/caseflow.mjs"
     },
+    "./studio": "./src/studio.mjs",
     "./submission-attestation": {
       "types": "./src/submission-attestation.d.mts",
       "import": "./src/submission-attestation.mjs",
