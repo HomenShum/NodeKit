@@ -44,12 +44,12 @@
         {
           "scenario": "advances-when-bound",
           "file": "test/builder-journey.test.mjs",
-          "line": 50
+          "line": 51
         },
         {
           "scenario": "forged-binding-stays-blocked",
           "file": "test/builder-journey.test.mjs",
-          "line": 77
+          "line": 78
         }
       ],
       "implementationGaps": [],
@@ -98,7 +98,7 @@
         {
           "scenario": "prohibitions-survive",
           "file": "test/opportunity-compiler.test.mjs",
-          "line": 34
+          "line": 35
         }
       ],
       "implementationGaps": [],
@@ -193,10 +193,14 @@
   "invariantCoverage": {
     "available": true,
     "counts": {
-      "total": 19,
-      "annotatedSymbol": 19,
+      "total": 20,
+      "annotatedSymbol": 20,
       "namedFileOnly": 0,
       "unowned": 0,
+      "annotatedTest": 20,
+      "namedTestFileOnly": 0,
+      "unverified": 0,
+      "fullyBound": 20,
       "withMissingRefs": 0
     },
     "invariants": [
@@ -213,6 +217,17 @@
         ],
         "namedSourceFiles": [
           "src/lib/opportunity-compiler.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "packet-accepted-by-planner",
+            "file": "test/opportunity-build-packet.test.mjs",
+            "line": 19
+          }
+        ],
+        "namedTestFiles": [
+          "test/opportunity-build-packet.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/opportunity-compiler.mjs",
@@ -235,6 +250,22 @@
         "namedSourceFiles": [
           "src/lib/builder-journey.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "blocked-without-handoff",
+            "file": "test/builder-journey.test.mjs",
+            "line": 36
+          },
+          {
+            "scenario": "forged-binding-blocked",
+            "file": "test/builder-journey.test.mjs",
+            "line": 79
+          }
+        ],
+        "namedTestFiles": [
+          "test/builder-journey.test.mjs"
+        ],
         "verifierRefs": [
           "src/lib/builder-journey.mjs",
           "test/builder-journey.test.mjs"
@@ -255,6 +286,17 @@
         ],
         "namedSourceFiles": [
           "src/lib/caseflow-conformance.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "idempotent-retry",
+            "file": "test/caseflow.test.mjs",
+            "line": 13
+          }
+        ],
+        "namedTestFiles": [
+          "test/caseflow.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/caseflow-conformance.mjs",
@@ -278,6 +320,17 @@
           "src/lib/caseflow-conformance.mjs",
           "src/component/caseflow.test.ts"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "retry-contained",
+            "file": "test/caseflow.test.mjs",
+            "line": 300
+          }
+        ],
+        "namedTestFiles": [
+          "test/caseflow.test.mjs"
+        ],
         "verifierRefs": [
           "src/lib/caseflow-conformance.mjs",
           "test/caseflow.test.mjs",
@@ -298,6 +351,17 @@
           }
         ],
         "namedSourceFiles": [],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "preset-rejected",
+            "file": "test/factory.test.mjs",
+            "line": 81
+          }
+        ],
+        "namedTestFiles": [
+          "test/factory.test.mjs"
+        ],
         "verifierRefs": [
           "test/factory.test.mjs#primary-create-rejects-domain-presets"
         ],
@@ -318,6 +382,18 @@
         "namedSourceFiles": [
           "src/lib/submission-gate.mjs",
           "src/lib/submission-preparation.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "candidate-identity-bound",
+            "file": "test/submission-gate.test.mjs",
+            "line": 142
+          }
+        ],
+        "namedTestFiles": [
+          "test/submission-gate.test.mjs",
+          "test/submission-preparation.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/submission-gate.mjs",
@@ -342,9 +418,52 @@
         "namedSourceFiles": [
           "templates/base/scripts/browser-certify.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "one-next-action-per-state",
+            "file": "test/ease-proof.test.mjs",
+            "line": 82
+          }
+        ],
+        "namedTestFiles": [
+          "test/ease-proof.test.mjs"
+        ],
         "verifierRefs": [
           "test/ease-proof.test.mjs",
           "templates/base/scripts/browser-certify.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:invariant-proof-is-bound",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/behavior-index.mjs",
+            "symbol": "coverLedgerInvariants",
+            "line": 92
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/behavior-index.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "proof-bound-to-assertion",
+            "file": "test/behavior-index.test.mjs",
+            "line": 177
+          }
+        ],
+        "namedTestFiles": [
+          "test/behavior-index.test.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/behavior-index.mjs",
+          "test/behavior-index.test.mjs"
         ],
         "missingVerifierRefs": [],
         "gaps": []
@@ -362,6 +481,17 @@
         ],
         "namedSourceFiles": [
           "src/lib/frontend-specialist.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "decisive-from-receipts",
+            "file": "test/frontend-specialist.test.mjs",
+            "line": 83
+          }
+        ],
+        "namedTestFiles": [
+          "test/frontend-specialist.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/frontend-specialist.mjs",
@@ -383,6 +513,18 @@
         ],
         "namedSourceFiles": [
           "src/lib/friction-loop.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "passing-comparison-is-not-permission",
+            "file": "test/friction-loop-end-to-end.test.mjs",
+            "line": 39
+          }
+        ],
+        "namedTestFiles": [
+          "test/friction-loop-end-to-end.test.mjs",
+          "test/friction-loop.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/friction-loop.mjs",
@@ -406,6 +548,17 @@
         "namedSourceFiles": [
           "src/lib/opportunity-compiler.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "decisions-protected",
+            "file": "test/opportunity-compiler.test.mjs",
+            "line": 20
+          }
+        ],
+        "namedTestFiles": [
+          "test/opportunity-compiler.test.mjs"
+        ],
         "verifierRefs": [
           "src/lib/opportunity-compiler.mjs",
           "test/opportunity-compiler.test.mjs"
@@ -427,6 +580,22 @@
         "namedSourceFiles": [
           "src/lib/behavior-index.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "every-invariant-owned",
+            "file": "test/behavior-index.test.mjs",
+            "line": 150
+          },
+          {
+            "scenario": "verifier-rot-reported",
+            "file": "test/behavior-index.test.mjs",
+            "line": 237
+          }
+        ],
+        "namedTestFiles": [
+          "test/behavior-index.test.mjs"
+        ],
         "verifierRefs": [
           "src/lib/behavior-index.mjs",
           "test/behavior-index.test.mjs"
@@ -447,6 +616,17 @@
         ],
         "namedSourceFiles": [
           "scripts/run-postgres-conformance.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "adapter-conforms",
+            "file": "test/postgres-adapter.test.mjs",
+            "line": 11
+          }
+        ],
+        "namedTestFiles": [
+          "test/postgres-adapter.test.mjs"
         ],
         "verifierRefs": [
           "scripts/run-postgres-conformance.mjs",
@@ -470,6 +650,17 @@
         "namedSourceFiles": [
           "templates/base/scripts/browser-certify.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "browser-evidence-bound",
+            "file": "test/ease-proof.test.mjs",
+            "line": 8
+          }
+        ],
+        "namedTestFiles": [
+          "test/ease-proof.test.mjs"
+        ],
         "verifierRefs": [
           "templates/base/scripts/browser-certify.mjs",
           "test/ease-proof.test.mjs"
@@ -491,6 +682,22 @@
         "namedSourceFiles": [
           "src/lib/repair-approval.mjs",
           "src/lib/friction-loop.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "untrusted-key-refused",
+            "file": "test/repair-approval.test.mjs",
+            "line": 57
+          },
+          {
+            "scenario": "cross-domain-forgery-refused",
+            "file": "test/repair-approval.test.mjs",
+            "line": 75
+          }
+        ],
+        "namedTestFiles": [
+          "test/repair-approval.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/repair-approval.mjs",
@@ -514,6 +721,17 @@
         "namedSourceFiles": [
           "src/lib/friction-loop.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "self-approval-blocked",
+            "file": "test/friction-loop.test.mjs",
+            "line": 71
+          }
+        ],
+        "namedTestFiles": [
+          "test/friction-loop.test.mjs"
+        ],
         "verifierRefs": [
           "src/lib/friction-loop.mjs",
           "test/friction-loop.test.mjs"
@@ -535,6 +753,19 @@
         "namedSourceFiles": [
           "src/lib/submission-gate.mjs",
           "src/lib/submission-preparation.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "evidence-source-bound",
+            "file": "test/submission-gate.test.mjs",
+            "line": 234
+          }
+        ],
+        "namedTestFiles": [
+          "test/submission-gate.test.mjs",
+          "test/submission-preparation.test.mjs",
+          "test/submission-verdict-schemas.test.mjs"
         ],
         "verifierRefs": [
           "src/lib/submission-gate.mjs",
@@ -560,6 +791,17 @@
         "namedSourceFiles": [
           "src/caseflow.mjs"
         ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "entrypoint-surface-stable",
+            "file": "test/public-api.test.mjs",
+            "line": 42
+          }
+        ],
+        "namedTestFiles": [
+          "test/public-api.test.mjs"
+        ],
         "verifierRefs": [
           "package.json",
           "src/caseflow.mjs",
@@ -580,6 +822,22 @@
           }
         ],
         "namedSourceFiles": [],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "named-options-accepted",
+            "file": "test/submission-cli.test.mjs",
+            "line": 27
+          },
+          {
+            "scenario": "unknown-options-refused",
+            "file": "test/submission-cli.test.mjs",
+            "line": 48
+          }
+        ],
+        "namedTestFiles": [
+          "test/submission-cli.test.mjs"
+        ],
         "verifierRefs": [
           "test/submission-cli.test.mjs"
         ],
@@ -600,6 +858,17 @@
         "namedSourceFiles": [
           "src/cli.mjs",
           "src/lib/repo-map.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "fails-closed-on-missing-part",
+            "file": "test/repo-tour.test.mjs",
+            "line": 55
+          }
+        ],
+        "namedTestFiles": [
+          "test/repo-tour.test.mjs"
         ],
         "verifierRefs": [
           "src/cli.mjs",

@@ -78,6 +78,7 @@ test("create emits a parseable, reproducible application from multiline input", 
   assert.equal(inspectAgentDefinition(second).secrets[0].name, "NODEKIT_OPTIONAL_MODEL_KEY");
 });
 
+// @nodekit-verifies inv:domain-blank-create#preset-rejected
 test("primary create rejects every domain preset without suggesting a narrow alternative", async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-no-presets-"));
   t.after(() => rm(root, { force: true, recursive: true }));

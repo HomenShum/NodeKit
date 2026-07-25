@@ -89,7 +89,8 @@ async function collect(root, dir, extensions, pattern, build) {
 // whether the files it names as verifiers still exist. A verifierRef may carry a `#scenario` anchor;
 // only the path part is a file.
 // @nodekit-behavior inv:ownership-resolves-to-symbol owner
-async function coverLedgerInvariants(root, ownership) {
+// @nodekit-behavior inv:invariant-proof-is-bound owner
+async function coverLedgerInvariants(root, ownership, verifications) {
   const dir = path.join(root, "evolution", "invariants");
   let files;
   try {
@@ -115,17 +116,38 @@ async function coverLedgerInvariants(root, ownership) {
       .filter((ref) => OWNERSHIP_ROOTS.some((ownedDir) => ref.startsWith(`${ownedDir}/`)))
       .map((ref) => ref.split("#")[0]);
 
+    // Verification gets the SAME strictness as ownership, for the same reason. A verifierRef naming
+    // a test FILE says "proof lives somewhere in here"; it does not say which assertion exercises
+    // the invariant, and a file can keep passing long after the assertion that mattered was deleted.
+    // An annotated test names the scenario, so the proof is bound rather than gestured at.
+    const provenBy = verifications.filter((v) => v.behaviorId === invariant.id);
+    const namedTestFiles = refs.filter((ref) => ref.startsWith("test/")).map((ref) => ref.split("#")[0]);
+    const verification = provenBy.length > 0
+      ? "annotated-test"
+      : namedTestFiles.length > 0
+        ? "named-test-file-only"
+        : "unverified";
+
     invariants.push({
       invariantId: invariant.id,
       status: invariant.status ?? null,
       ownership: owners.length > 0 ? "annotated-symbol" : namedSourceFiles.length > 0 ? "named-file-only" : "unowned",
       owners: owners.map((o) => ({ file: o.file, symbol: o.symbol, line: o.line })),
       namedSourceFiles,
+      verification,
+      provenBy: provenBy.map((v) => ({ scenario: v.scenario, file: v.file, line: v.line })),
+      namedTestFiles,
       verifierRefs: refs,
       missingVerifierRefs: missingRefs,
       gaps: [
         ...(owners.length === 0 && namedSourceFiles.length === 0
           ? ["No source file or symbol claims to own this invariant."]
+          : []),
+        ...(verification === "unverified"
+          ? ["No test claims to prove this invariant, and no test file is named as a verifier."]
+          : []),
+        ...(verification === "named-test-file-only"
+          ? [`Proof is gestured at (${namedTestFiles.join(", ")}) but no test names this invariant, so nothing binds the guarantee to an assertion.`]
           : []),
         ...missingRefs.map((ref) => `verifierRef "${ref}" does not exist; the invariant points at code that is gone.`),
       ],
@@ -137,6 +159,11 @@ async function coverLedgerInvariants(root, ownership) {
     annotatedSymbol: invariants.filter((i) => i.ownership === "annotated-symbol").length,
     namedFileOnly: invariants.filter((i) => i.ownership === "named-file-only").length,
     unowned: invariants.filter((i) => i.ownership === "unowned").length,
+    annotatedTest: invariants.filter((i) => i.verification === "annotated-test").length,
+    namedTestFileOnly: invariants.filter((i) => i.verification === "named-test-file-only").length,
+    unverified: invariants.filter((i) => i.verification === "unverified").length,
+    // The full chain: a guarantee whose owner is a definition AND whose proof is an assertion.
+    fullyBound: invariants.filter((i) => i.ownership === "annotated-symbol" && i.verification === "annotated-test").length,
     withMissingRefs: invariants.filter((i) => i.missingVerifierRefs.length > 0).length,
   };
   return { available: true, counts, invariants };
@@ -217,7 +244,7 @@ export async function buildBehaviorIndex(repoRoot) {
   //
   // Deliberately NOT copied into `behaviors`: the ledger owns invariant statements, and duplicating
   // them here would create a second place to keep honest. This reports coverage over them instead.
-  const invariantCoverage = await coverLedgerInvariants(root, ownership);
+  const invariantCoverage = await coverLedgerInvariants(root, ownership, verifications);
 
   // Annotated but never declared. This is drift in the other direction: code claiming to own a
   // behaviour nothing declares. A ledger invariant counts as declared — it is the repository's own

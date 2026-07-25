@@ -198,3 +198,13 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:repository-wide-behavior-ownership` (partial)
 - Known limitations: An ownership annotation asserts that a symbol enforces an invariant; it does not prove it, and the index cannot detect a claim that is simply wrong.; The eighteen invariants are the ledger's population, not every behavior in the repository; behavior that never earned an invariant remains uncovered.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
 
+### The behavior index made ownership answerable, but an annotation only asserts that a symbol enforces an invariant. Nothing bound the guarantee to the assertion that checks it.
+
+- Event: `evt:invariant-proof-binding`
+- Source: `dcf7546bc63b4dc05f4fc52828c763d074d35d19`
+- Resolution: Verification is reported with the same strictness as ownership. A test that names the invariant and its scenario is annotated-test; a verifierRef naming a test file that claims nothing is named-test-file-only and is not counted as verified; neither is unverified. An invariant is fully bound only when a symbol owns it and a named assertion proves it. All twenty are now fully bound.
+- Observed failure: With verification coverage in place and before any binding, all nineteen ledger invariants were owned by a definition but none was proven by a named assertion: every proof was a test filename. A filename says proof lives somewhere in the file, and the file keeps passing long after the assertion that mattered was deleted or rewritten.
+- Invariants: `inv:invariant-proof-is-bound` (partially-verified)
+- Evidence: `evd:invariant-proof-binding` (partial)
+- Known limitations: A binding asserts that a test exercises an invariant; the index checks the claim exists and is well-formed, not that the assertion actually covers the guarantee. One wrong binding was caught only by reading the test.; Coverage is per invariant, not per clause: an invariant naming several properties reports bound when one assertion claims it.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+

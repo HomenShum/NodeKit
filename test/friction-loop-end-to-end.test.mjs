@@ -36,6 +36,7 @@ async function repairFromRealFriction() {
   });
 }
 
+// @nodekit-verifies inv:measurement-is-not-permission#passing-comparison-is-not-permission
 test("a repair answering recorded friction is adopted only after the REAL Builder Gym authorizes it", async (t) => {
   const { baseline, candidate, lock, root } = await preparedBuilderGym(t);
 

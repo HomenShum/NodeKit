@@ -5,6 +5,7 @@ import test from "node:test";
 import { reportsWriteBlockage } from "../src/lib/agent-ease-report.mjs";
 import { requiredSubmissionGates } from "../src/lib/submission-gate.mjs";
 
+// @nodekit-verifies inv:rendered-browser-evidence#browser-evidence-bound
 test("EaseProof keeps browser contracts distinct from certification", async () => {
   const proof = await readFile(path.resolve("templates", "base", "scripts", "proof.mjs"), "utf8");
   const contract = await readFile(path.resolve("templates", "base", "scripts", "browser-proof.mjs"), "utf8");
@@ -78,6 +79,7 @@ test("generated UI scenarios are backed by caseflow conflict, exception, and rec
   assert.match(server, /there is no contained conflict to resolve/);
 });
 
+// @nodekit-verifies inv:guided-intake-mobile-decisions#one-next-action-per-state
 test("generated UI exposes one coherent next action for each lifecycle state", async () => {
   const html = await readFile(path.resolve("templates", "base", "apps", "web", "public", "index.html"), "utf8");
   const app = await readFile(path.resolve("templates", "base", "apps", "web", "public", "app.js"), "utf8");

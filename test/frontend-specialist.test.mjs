@@ -80,6 +80,7 @@ test("frontend planning protects product decisions and refuses reputation-only r
   await assert.rejects(() => compileFrontendPlan(root, path.relative(root, contractPath)), /requires evidenceRefs/);
 });
 
+// @nodekit-verifies inv:major-frontend-direction-tournament#decisive-from-receipts
 test("Frontend Gym requires three materially distinct rendered directions and blind independent selection", async () => {
   const { contractPath, root } = await fixture();
   const { plan, output: planOutput } = await compileFrontendPlan(root, path.relative(root, contractPath));
