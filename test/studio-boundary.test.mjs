@@ -28,6 +28,7 @@ test("the Studio surface is importable as one package entrypoint and every expor
 
 // The whole reason this boundary exists is that the same capability kept being re-proposed as new.
 // Studio must RE-EXPORT the shipped implementations, never fork them.
+// @nodekit-verifies inv:studio-boundary-declares-gaps#reexports-not-forks
 test("the boundary re-exports existing implementations instead of forking them", async () => {
   const source = await readFile(path.join(REPO, "src", "studio.mjs"), "utf8");
   // Every capability line must be an `export ... from`, i.e. a re-export of an existing module.
@@ -47,6 +48,7 @@ test("the boundary re-exports existing implementations instead of forking them",
 
 // THE honesty property. A boundary that advertises only what it can do is marketing. This one must
 // report what it cannot do, and must not be able to claim readiness while a step is missing.
+// @nodekit-verifies inv:studio-boundary-declares-gaps#readiness-derived-from-gaps
 test("the capability report names its own gaps and cannot claim standalone readiness while one is open", () => {
   const report = studioCapability();
   assert.equal(report.steps, STUDIO_LOOP.length);
@@ -72,17 +74,24 @@ test("the declared gaps match the repository: edit and reference ingestion genui
   assert.equal(editStep.surface, null, "an unimplemented step must not name a surface");
 
   // Grep the real source. If an edit capability appears, this fails and forces the declaration to move.
+  //
+  // This file is excluded from its own search, and that exclusion is load-bearing rather than
+  // convenient: the guard necessarily CONTAINS the pattern it looks for, so without it the guard
+  // matches itself and reports capability that does not exist. That is the same false-positive
+  // class as counting an annotation quoted inside a string literal — a tool reading a mention of a
+  // thing as the thing itself. Exclude the guard, never the subject.
   const { execFile } = await import("node:child_process");
   const { promisify } = await import("node:util");
   const run = promisify(execFile);
-  let found = "";
+  const SELF = "test/studio-boundary.test.mjs";
+  let found = [];
   try {
     const { stdout } = await run("git", ["grep", "-lE", "visualEdit|directEdit|applyEdit"], { cwd: REPO });
-    found = stdout.trim();
+    found = stdout.trim().split(/\r?\n/).filter(Boolean).map((f) => f.replaceAll("\\", "/")).filter((f) => f !== SELF);
   } catch {
-    found = ""; // git grep exits non-zero when there are no matches
+    found = []; // git grep exits non-zero when there are no matches
   }
-  assert.equal(found, "", `edit capability now exists (${found}); update STUDIO_LOOP rather than leaving the gap declared`);
+  assert.deepEqual(found, [], `edit capability now exists (${found.join(", ")}); update STUDIO_LOOP rather than leaving the gap declared`);
 
   // Every implemented step must name the surface that implements it, or the claim is unfalsifiable.
   for (const step of STUDIO_LOOP.filter((s) => s.implemented)) {

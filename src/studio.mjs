@@ -102,6 +102,7 @@ export const STUDIO_LOOP = Object.freeze([
  * Report the Studio surface and, honestly, what it cannot yet do.
  * A boundary that only advertises its capabilities is marketing; this reports the gaps too.
  */
+// @nodekit-behavior inv:studio-boundary-declares-gaps owner
 export function studioCapability() {
   const implemented = STUDIO_LOOP.filter((s) => s.implemented);
   const gaps = STUDIO_LOOP.filter((s) => !s.implemented);

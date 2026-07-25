@@ -193,14 +193,14 @@
   "invariantCoverage": {
     "available": true,
     "counts": {
-      "total": 20,
-      "annotatedSymbol": 20,
+      "total": 21,
+      "annotatedSymbol": 21,
       "namedFileOnly": 0,
       "unowned": 0,
-      "annotatedTest": 20,
+      "annotatedTest": 21,
       "namedTestFileOnly": 0,
       "unverified": 0,
-      "fullyBound": 20,
+      "fullyBound": 21,
       "withMissingRefs": 0
     },
     "invariants": [
@@ -806,6 +806,43 @@
           "package.json",
           "src/caseflow.mjs",
           "test/public-api.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:studio-boundary-declares-gaps",
+        "status": "partially-verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/studio.mjs",
+            "symbol": "studioCapability",
+            "line": 105
+          }
+        ],
+        "namedSourceFiles": [
+          "src/studio.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "reexports-not-forks",
+            "file": "test/studio-boundary.test.mjs",
+            "line": 31
+          },
+          {
+            "scenario": "readiness-derived-from-gaps",
+            "file": "test/studio-boundary.test.mjs",
+            "line": 51
+          }
+        ],
+        "namedTestFiles": [
+          "test/studio-boundary.test.mjs"
+        ],
+        "verifierRefs": [
+          "src/studio.mjs",
+          "test/studio-boundary.test.mjs"
         ],
         "missingVerifierRefs": [],
         "gaps": []

@@ -126,6 +126,16 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:source-bound-submission-gates-materiality` (partial)
 - Known limitations: The external timing, fresh-agent, human, consumer, preview, and independent ProofLoop verdicts remain open until collected for the exact candidate.; This review grants no package publication, production deployment, or Convex Component submission permission.; Historical proof cannot certify the final candidate and final evaluation must be rerun after the immutable candidate exists.
 
+### A proposal arrived to extract the user interface system as a standalone product named NodeKit Studio, listing five components it would contain.
+
+- Event: `evt:studio-boundary`
+- Source: `58dd5eeedb37e8af33f827ef24b5563d10249656`
+- Resolution: Declared the boundary instead of building the product. A single module re-exports the existing implementations behind one package export subpath, following the pattern the Caseflow entrypoint already established. No file moved and nothing was forked; a test asserts the boundary owns exactly one function of its own so a future fork fails rather than silently becoming a second implementation. The loop is declared with an implemented flag per step, and the two steps that genuinely have no implementation, direct editing and reference ingestion, are declared false. Readiness is derived from those gaps rather than asserted. Extraction into a separate repository is deliberately deferred until the named consumers share this surface.
+- Observed failure: All five components already shipped in this repository under other names. This was the fifth time a proposal turned out to be substantially pre-built, because nothing declared where the interface surface begins and ends. The real risk was rebuilding existing capability as a second platform, and the standalone claim could not be tested because there was no boundary to test.
+- Invariants: `inv:studio-boundary-declares-gaps` (partially-verified)
+- Evidence: `evd:studio-boundary` (partial)
+- Known limitations: This adds no capability; it is a declaration, and a declaration cannot make an unrun benchmark run.; The comparison benchmark of raw prompt versus contract versus contract with Atlas versus full Studio has never been executed, so no advantage is demonstrated.; The frontend tournament has never run end to end against a real generated application.; Direct editing and reference ingestion have no implementation at all.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
+
 ## Harness evolution
 
 ### Visually polished frontend output could still miss the intended creator-workspace topology.

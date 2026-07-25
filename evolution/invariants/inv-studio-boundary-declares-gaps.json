@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:studio-boundary-declares-gaps",
+  "statement": "The Studio boundary re-exports existing implementations and owns exactly one function of its own, so it cannot become a second implementation of capability that already ships. Its capability report derives standalone readiness from the declared loop, so it cannot report ready while any loop step is unimplemented, and every implemented step must name the surface that implements it.",
+  "scope": {
+    "applications": ["NodeKit platform repository"],
+    "surfaces": ["Studio package boundary", "UI research, direction, review and proof surface"]
+  },
+  "enforcement": "test",
+  "verifierRefs": ["src/studio.mjs", "test/studio-boundary.test.mjs"],
+  "introducedByEventId": "evt:studio-boundary",
+  "status": "partially-verified"
+}
