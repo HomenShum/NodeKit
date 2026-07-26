@@ -18,14 +18,14 @@
     "evd:personal-action-store"
   ],
   "knownLimitations": [
-    "interpretation.status is a const of \"human-reviewed\" with no value for an agent-authored record, so this field asserts a review that has not happened. The drafts/ directory is the only real not-canonical signal. Do not read the status field as approval.",
     "It defines its own node schema rather than nodekit.knowledge-graph/v1, which is the canonical knowledge-graph schema in this repository. That duplication is real and unresolved.",
     "It lives outside this repository and is not covered by repositories.yaml.",
-    "One lead (Wordware) has no verified inbound and is marked unverified."
+    "One lead (Wordware) has no verified inbound and is marked unverified.",
+    "Drafted by an agent and not canonical. Promotion derives human-reviewed by verifying a signed approval at record time, so no field can be edited to fake it. (This limitation originally described interpretation.status as a bare const that asserted an unheld review \u2014 a real defect at the time, fixed upstream in ce97ecf8 and f1a9ff58. Corrected here so the draft does not carry a claim that is no longer true.)"
   ],
   "interpretation": {
     "status": "human-reviewed",
-    "reviewedBy": "UNREVIEWED — drafted by claude-code 2026-07-25, awaiting project-owner review",
+    "reviewedBy": "UNREVIEWED \u2014 drafted by claude-code 2026-07-25, awaiting project-owner review",
     "reviewedAt": "2026-07-26T02:49:13.788Z"
   }
 }
