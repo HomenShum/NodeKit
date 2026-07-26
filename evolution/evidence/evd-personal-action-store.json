@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:personal-action-store",
+  "kind": "test",
+  "artifactRef": "git:5afb0d1dc415b1cd1adb33e4400c1f090e083870:evolution/artifacts/personal-action-store.md",
+  "sha256": "86ce1a757219ce4722ae9220491776ff7c51df182bed704fafd8d5efade1ab2b",
+  "sourceCommit": "5aa31b5cec73dbc415947dbdfa023adb7e480ee3",
+  "generatedAt": "2026-07-26T02:48:41.627Z",
+  "environment": {
+    "evidenceBoundary": "Read-only refused a write; md5 identical across a refresh. Ranking captured. Five arrival dates verified from LinkedIn, one unverified and marked as such.",
+    "platform": "win32 node 22.22.2"
+  },
+  "verifiesInvariantIds": [],
+  "result": "pass"
+}

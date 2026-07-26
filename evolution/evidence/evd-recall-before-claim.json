@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:recall-before-claim",
+  "kind": "test",
+  "artifactRef": "git:5afb0d1dc415b1cd1adb33e4400c1f090e083870:evolution/artifacts/recall-before-claim.md",
+  "sha256": "27fd5116914f0a947a744f15ecee495201df71b29e53b162e8e1ecc45176d48d",
+  "sourceCommit": "5aa31b5cec73dbc415947dbdfa023adb7e480ee3",
+  "generatedAt": "2026-07-26T02:48:41.627Z",
+  "environment": {
+    "evidenceBoundary": "Nine roots, 384 files, no depth limit. Before/after captured, the self-caught path defect included, control case included. Proves what was read; cannot prove a thing does not exist.",
+    "platform": "win32 node 22.22.2"
+  },
+  "verifiesInvariantIds": [],
+  "result": "pass"
+}
