@@ -170,7 +170,13 @@ async function recoverStaleGraphLock(repoRoot, graphPath, lockPath) {
     if (error?.code === "ENOENT") return true;
     throw error;
   }
-  if (metadata.isSymbolicLink() || !metadata.isFile() || metadata.nlink !== 1) throw new Error("knowledge graph mutation lock is not one regular file");
+  if (metadata.isSymbolicLink() || !metadata.isFile()) throw new Error("knowledge graph mutation lock is not one regular file");
+  // nlink > 1 means the lock is hardlinked, which is the attack this guards against. nlink === 0
+  // is not that: Windows reports it while a handle is still open on a file whose delete is pending,
+  // which is the ordinary state of a lock another writer is releasing right now. Throwing on it
+  // rejected the caller's write instead of retrying, and lost 1-2 of 12 concurrent receipts.
+  if (metadata.nlink > 1) throw new Error("knowledge graph mutation lock is hardlinked");
+  if (metadata.nlink === 0) return false;                       // held and being released; retry
   if (Date.now() - metadata.mtimeMs < GRAPH_LOCK_STALE_MS) return false;
   let lock = null;
   try {
@@ -203,7 +209,11 @@ async function withGraphMutationLock(repoRoot, graphPath, operation) {
     try {
       handle = await open(lockPath, "wx", 0o600);
     } catch (error) {
-      if (error?.code !== "EEXIST") throw error;
+      // "the lock is held" is not one errno. POSIX gives EEXIST. Windows gives EPERM or EACCES
+      // when the existing lock file is in a delete-pending state — the ordinary condition while
+      // another writer releases it. Only EEXIST was retried, so on Windows a contended write threw
+      // instead of waiting: measured losing 1-2 of 12 concurrent receipts, invisible on Linux CI.
+      if (!["EEXIST", "EPERM", "EACCES"].includes(error?.code)) throw error;
       if (await recoverStaleGraphLock(repoRoot, graphPath, lockPath)) continue;
       if (Date.now() >= deadline) throw new Error(`knowledge graph mutation lock timed out: ${resolved.relative}`);
       await new Promise((resolve) => setTimeout(resolve, GRAPH_LOCK_RETRY_MS));
