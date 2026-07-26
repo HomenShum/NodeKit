@@ -69,16 +69,26 @@ const HOME = process.env.USERPROFILE || process.env.HOME || "";
 const WORKSPACE = dirname(dirname(dirname(PLATFORM)));
 const PARITY = join(WORKSPACE, "parity-studio");
 const SLIDE = join(WORKSPACE, "nodeslide");
-// NodeRoom, and this tool's own directory. Added 2026-07-25 after
-// `recall.mjs "model routing broker cheaper"` returned NO MATCH across 1498
-// files in 19 roots. The answer existed in both places it had not been told to
-// look: node-platform/scripts holds run-agent-provider-broker.mjs, and NodeRoom
-// holds the model matrix and cost ledger that decide which route to use.
+// NodeRoom, and this tool's own directory. Added 2026-07-25 after multi-word
+// queries returned NO MATCH across 1498 files in 19 roots while the answer sat
+// in roots the tool had not been told to look at: node-platform/scripts holds
+// the broker and the ease harness, and NodeRoom holds the lane ledgers.
 //
-// The tool behaved correctly — it refused to call that a proof of absence and
-// said to widen with --root. But a probe that must be widened by hand every
-// time is a coverage claim resting on the caller remembering, and the whole
-// point of this file is that such claims are the defect.
+// Widening roots took the corpus from 1498 files to 4374.
+//
+// CORRECTION, same day. This comment first cited `"model routing broker
+// cheaper"` and named run-agent-provider-broker.mjs and cost-ledger.json as
+// where the answer sat. That does not reproduce: the broker file contains
+// "model" and "broker" but neither "routing" nor "cheaper", and no cost-ledger
+// or model-matrix exists at the path claimed. The example was asserted, not
+// run. Writing an unverified worked example into the tool built to stop
+// unverified claims is the defect wearing the fix's clothes, so it is replaced
+// with one that reproduces (see the search() docblock below).
+//
+// The tool behaved correctly throughout — it refused to call a miss a proof of
+// absence and said to widen with --root. But a probe that must be widened by
+// hand every time is a coverage claim resting on the caller remembering, and
+// the whole point of this file is that such claims are the defect.
 const NODEROOM = join(dirname(PLATFORM), "noderoom");
 
 const ROOTS = [
@@ -169,10 +179,21 @@ function collect(root) {
  * Matching is ALL-TERMS, not whole-phrase.
  *
  * The first version tested `body.includes(entireQuery)`, so a multi-word question
- * only matched a file containing that exact string. `recall.mjs "model routing
- * broker cheaper"` therefore returned NO MATCH across 1498 files while the answer
- * sat in run-agent-provider-broker.mjs and cost-ledger.json — and the coverage
- * report looked healthy, because every root really had been read.
+ * only matched a file containing that exact string. The coverage report looked
+ * healthy the whole time, because every root really had been read.
+ *
+ * Worked example, verified by running both versions:
+ *
+ *     recall.mjs "builder gym promotion"
+ *       before   NO MATCH in 1498 files across 19 roots      exit=3
+ *       after    FOUND 16 across 4374 files                  exit=0
+ *                evolution/artifacts/gym-proven-friction-loop.md, and 15 more
+ *
+ * Expect 17, not 16, when you run it: platform-scripts is a registered root, so
+ * this file is in its own corpus and this comment matches its own query. Cite a
+ * count here and you change it. That is not a bug, it is what indexing yourself
+ * means, and it is the reason the before/after above is stated as two runs of
+ * two different versions rather than as one absolute number.
  *
  * That is the worst version of this defect. A missing root announces itself;
  * a matcher that cannot match reports full coverage and finds nothing, which
