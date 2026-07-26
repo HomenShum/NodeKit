@@ -14,6 +14,7 @@ import {
   recordEvolutionRecord,
   verifyEvolutionLedger,
 } from "../src/lib/evolution-ledger.mjs";
+import { grantApproval, proposed } from "./helpers/evolution-approval-fixture.mjs";
 import { initializeKnowledgeGraph } from "../src/lib/knowledge-evolution.mjs";
 
 function git(root, args) {
@@ -36,14 +37,18 @@ async function fixture() {
     { schemaVersion: "nodekit.evolution-evidence/v1", id: "evd:test", kind: "test", artifactRef: "file:verifier.txt", sha256, sourceCommit: commit, generatedAt: new Date().toISOString(), command: "node --test", environment: { platform: process.platform }, verifiesInvariantIds: ["inv:test"], nodeProofReceiptId: "proof:test", result: "pass" },
     { schemaVersion: "nodekit.assumption/v1", id: "asm:test", statement: "Direct mutation was safe", scope: { applications: ["fixture"] }, status: "disproven", introducedByEventId: "evt:test", invalidatedByEventId: "evt:test", supportingEvidenceIds: [], contradictingEvidenceIds: ["evd:test"] },
     { schemaVersion: "nodekit.invariant-claim/v1", id: "inv:test", statement: "Agent writes remain proposals until approval", scope: { applications: ["fixture"] }, enforcement: "runtime-gate", verifierRefs: ["verifier.txt"], introducedByEventId: "evt:test", status: "verified" },
-    { schemaVersion: "nodekit.evolution-event/v1", id: "evt:test", projectId: "fixture", repository: "local/fixture", source: { commitSha: commit, occurredAt: new Date().toISOString() }, track: "architecture", category: "runtime", challenge: "Direct mutation corrupted canonical state", observedFailure: "A stale agent write replaced newer work", resolution: "Introduced proposal validation and approval", assumptionIds: ["asm:test"], invariantIds: ["inv:test"], evidenceIds: ["evd:test"], knownLimitations: [], interpretation: { status: "human-reviewed", reviewedBy: "reviewer", reviewedAt: new Date().toISOString() } },
+    { schemaVersion: "nodekit.evolution-event/v1", id: "evt:test", projectId: "fixture", repository: "local/fixture", source: { commitSha: commit, occurredAt: new Date().toISOString() }, track: "architecture", category: "runtime", challenge: "Direct mutation corrupted canonical state", observedFailure: "A stale agent write replaced newer work", resolution: "Introduced proposal validation and approval", assumptionIds: ["asm:test"], invariantIds: ["inv:test"], evidenceIds: ["evd:test"], knownLimitations: [], interpretation: { status: "agent-proposed" } },
     { schemaVersion: "nodekit.evolution-adoption/v1", id: "adp:test", invariantId: "inv:test", consumer: { repository: "local/fixture", application: "fixture" }, adoptedAtCommit: commit, evidenceIds: ["evd:test"], status: "verified" },
   ];
   await mkdir(path.join(root, "inputs"));
   for (const record of records) {
     const file = path.join(root, "inputs", `${record.id.replace(":", "-")}.json`);
     await writeFile(file, `${JSON.stringify(record, null, 2)}\n`);
-    await recordEvolutionRecord(root, path.relative(root, file));
+    // Events now need a verified approval to become canonical; the other record types do not.
+    const approval = record.schemaVersion === "nodekit.evolution-event/v1"
+      ? await grantApproval(root, record)
+      : null;
+    await recordEvolutionRecord(root, path.relative(root, file), approval);
   }
   return { commit, records, root };
 }
@@ -109,11 +114,11 @@ test("materiality gate blocks unrecorded system changes and accepts a reviewed e
     invariantIds: [],
     evidenceIds: ["evd:test"],
     knownLimitations: [],
-    interpretation: { status: "human-reviewed", reviewedBy: "reviewer", reviewedAt: new Date().toISOString() },
+    interpretation: { status: "agent-proposed" },
   };
   const input = path.join(root, "inputs", "material-event.json");
   await writeFile(input, `${JSON.stringify(event, null, 2)}\n`);
-  await recordEvolutionRecord(root, path.relative(root, input));
+  await recordEvolutionRecord(root, path.relative(root, input), await grantApproval(root, event));
   const passed = await checkEvolutionMateriality(root, before, after);
   assert.equal(passed.passed, true);
   assert.equal(passed.events[0].id, event.id);

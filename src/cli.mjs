@@ -103,6 +103,7 @@ import {
   recordEvolutionRecord,
   verifyEvolutionLedger,
 } from "./lib/evolution-ledger.mjs";
+import { initializeTrust } from "./lib/evolution-trust.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -1230,7 +1231,13 @@ async function runEvolutionDraft(parsed) {
     challenge: requireOption(parsed, "challenge"),
     observedFailure: parsed.options.failure,
     resolution: requireOption(parsed, "resolution"),
-    reviewedBy: requireOption(parsed, "reviewed-by"),
+    // A draft cannot name its own reviewer; that identity is derived from the verified approval
+    // credential at record time. These two are passed through ONLY so draftEvolutionEvent can
+    // refuse them explicitly — dropping them here would silently ignore an attempt to assert
+    // authority, and let the caller believe it worked.
+    reviewedBy: parsed.options["reviewed-by"],
+    status: parsed.options.status,
+    author: parsed.options.author,
     assumptionIds: optionList(parsed, "assumptions"),
     invariantIds: optionList(parsed, "invariants"),
     evidenceIds: optionList(parsed, "evidence"),
@@ -1240,8 +1247,29 @@ async function runEvolutionDraft(parsed) {
 }
 
 async function runEvolutionRecord(parsed) {
-  const output = await recordEvolutionRecord(repoRootFrom(parsed), requireOption(parsed, "file"));
-  printStructured(output, parsed, (value) => `${value.duplicate ? "UNCHANGED" : "RECORDED"} ${value.record.id}`);
+  const output = await recordEvolutionRecord(repoRootFrom(parsed), requireOption(parsed, "file"), parsed.options.approval);
+  printStructured(output, parsed, (value) => {
+    const promoted = value.promotion
+      // State the assurance actually reached. A reader must never have to assume which level applied.
+      ? ` promoted by ${value.promotion.interpretation.reviewedBy} at ${value.promotion.trustLevel} (${value.promotion.assurance})`
+      : "";
+    return `${value.duplicate ? "UNCHANGED" : "RECORDED"} ${value.record.id}${promoted}`;
+  });
+}
+
+async function runTrustInit(parsed) {
+  const output = await initializeTrust(repoRootFrom(parsed), {
+    reviewer: requireOption(parsed, "reviewer"),
+    dev: Boolean(parsed.flags?.dev ?? parsed.options.dev),
+    credentialId: parsed.options["credential-id"],
+    publicKey: parsed.options["public-key"],
+    trustLevel: parsed.options["trust-level"],
+    algorithm: parsed.options.algorithm,
+    requiredTrustLevel: parsed.options["required-trust-level"],
+  });
+  printStructured(output, parsed, (value) =>
+    `TRUST INITIALISED ${value.policy.version}; requires ${value.policy.requiredTrustLevel}` +
+    (value.devPrivateKeyPath ? `\n  development private key written OUTSIDE the repository: ${value.devPrivateKeyPath}\n  This is an H1 credential. It does NOT attest that a human acted.` : ""));
 }
 
 async function runEvolutionVerify(parsed) {
@@ -1698,6 +1726,10 @@ async function main() {
     await runEvolutionDraft(parsed);
     return;
   }
+  if (first === "trust" && second === "init") {
+    await runTrustInit(parsed);
+    return;
+  }
   if (first === "evolution" && second === "record") {
     await runEvolutionRecord(parsed);
     return;
@@ -1855,5 +1887,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(`nodekit: ${error.message}`);
-  process.exitCode = 1;
+  process.exitCode = error?.exitCode ?? 1;
 });
