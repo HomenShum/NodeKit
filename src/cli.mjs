@@ -10,6 +10,7 @@ import { checkRepository, commandFor } from "./lib/repo-check.mjs";
 import { buildRepoMap } from "./lib/repo-map.mjs";
 import { auditCopy } from "./lib/copy-audit.mjs";
 import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
+import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -307,6 +308,24 @@ function undeclaredLifecycleMessage(name, manifest) {
     );
   }
   return lines.join("\n");
+}
+
+// The journey contract forbade hand-editing a check to true, and then eleven of twelve were
+// hand-edited to true because nothing read the file. This command is what reads it.
+async function runJourneyVerify(parsed) {
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  const verdict = await verifyJourneyContract(root);
+  printStructured(verdict, parsed, (value) => {
+    const lines = [`JOURNEY CONTRACT: ${value.counts.derivedTrue}/${value.counts.total} derive true; ${value.counts.overclaimed} overclaimed.`];
+    for (const check of value.checks) {
+      const mark = !check.agrees ? "OVERCLAIM" : check.derived ? "ok" : "--";
+      lines.push(`  [${mark}] ${check.id}`);
+      if (check.evidence) lines.push(`        ${check.evidence}`);
+      else if (check.unattainable) lines.push(`        (never derivable by design)`);
+    }
+    return lines.join("\n");
+  });
+  if (!verdict.passed) process.exitCode = 1;
 }
 
 async function runBehaviorIndex(parsed) {
@@ -1503,6 +1522,10 @@ async function main() {
   }
   if (first === "behavior" && second === "index") {
     await runBehaviorIndex(parsed);
+    return;
+  }
+  if (first === "journey" && second === "verify") {
+    await runJourneyVerify(parsed);
     return;
   }
   if (first === "tour") {
