@@ -24,10 +24,10 @@
  *
  *   1. writes ONLY into evolution/drafts/. It resolves the output path and
  *      refuses if the result escapes that directory.
- *   2. stamps interpretation.status = "agent-proposed", never
- *      "human-reviewed". It rejects any attempt to pass that value. A
- *      promotion is a human moving the file into evolution/events/<track>/
- *      and changing that field themselves.
+ *   2. never asserts review. draftEvolutionEvent stamps "agent-proposed" itself
+ *      and refuses a caller-supplied reviewer. Promotion derives human-reviewed
+ *      by verifying a signed approval at record time — no field, anywhere, can
+ *      be edited to fake it.
  *   3. never overwrites and never deletes. An existing id is an error, not a
  *      merge. Superseding is explicit, via --supersedes.
  *
@@ -94,8 +94,8 @@ const a = parse(process.argv.slice(2));
 
 if (a.status && a.status !== "agent-proposed")
   die(`refused: this tool cannot write interpretation.status=${a.status!==undefined?a.status:""}. ` +
-      `canonicalRecords is human-reviewed-only. A human promotes by moving the ` +
-      `file into evolution/events/<track>/ and editing that field.`, 5);
+      `canonicalRecords is human-reviewed-only. human-reviewed is DERIVED from a ` +
+      `verified signed approval at record time — it is not a field anyone can set.`, 5);
 
 for (const need of ["id", "track", "challenge", "observed", "resolution"])
   if (!a[need]) die(`--${need} is required`);
@@ -129,12 +129,15 @@ if (existsSync(outPath)) die(`draft evt-${slug}.json already exists. delete is p
 // A tool that writes invalid records which look valid is worse than no tool.
 const { draftEvolutionEvent } = await import("../src/lib/evolution-ledger.mjs");
 
+// The schema defect this used to work around is FIXED upstream. draftEvolutionEvent
+// now stamps status "agent-proposed" itself and REFUSES a caller-supplied
+// reviewedBy — the reviewer identity is derived from a verified signed approval at
+// record time, never from a field. So the caveat that used to be appended here is
+// obsolete, and passing reviewedBy is now an error rather than an honest marker.
 const limitations = a.limitation.length ? a.limitation : [];
 limitations.push(
-  "Drafted by an agent and NOT human-reviewed. interpretation.status is a schema " +
-  "const of \"human-reviewed\" with no value for an agent-authored record, so that " +
-  "field asserts a review that has not happened. The drafts/ directory is the only " +
-  "real not-canonical signal — do not read the status field as approval.",
+  "Drafted by an agent. Not canonical: promotion derives human-reviewed from a " +
+  "verified signed approval, which this tool cannot produce.",
 );
 
 try {
@@ -150,7 +153,8 @@ try {
     evidenceIds: a.evidenceIds,
     predecessorIds: a.predecessorIds,
     knownLimitations: limitations,
-    reviewedBy: `UNREVIEWED — drafted by ${a.proposedBy || "claude-code"}, awaiting project-owner review`,
+    // author, not reviewer. Naming a reviewer is refused upstream by design.
+    authoredBy: a.proposedBy || "claude-code",
   });
   console.log(`\n  DRAFTED   ${event.id}`);
   console.log(`  file      ${relative(PLATFORM, output).replace(/\\/g, "/")}`);

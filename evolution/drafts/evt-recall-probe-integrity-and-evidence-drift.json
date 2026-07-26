@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:recall-probe-integrity-and-evidence-drift",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "98d75c427693ba4e52440acde42b3cdd69da0fa8",
+    "occurredAt": "2026-07-26T08:23:02.772Z"
+  },
+  "track": "harness",
+  "category": "evaluation",
+  "challenge": "An agent must be able to ask whether something already exists, and a repository must be able to tell whether a receipt still binds the bytes it claims. Both were answered by tooling that could return a clean-looking negative while being structurally unable to find the answer.",
+  "observedFailure": "recall.mjs reported full coverage across 23 roots while unable to match: it tested the entire query as one substring, so any multi-word question matched nothing, and its roots omitted NodeRoom, its own scripts directory, and the action store. Coverage looked complete while matching was impossible, which reads as proof of absence rather than a broken probe. propose-evolution.mjs built records by hand from one example file and produced three schema-invalid in 7, 9 and 8 ways while looking official. And nothing re-hashed an artifact against its receipt: verifyEvolutionLedger checks a record internally and never re-reads the file, so eight receipts point at bytes that no longer exist, all still reading pass.",
+  "resolution": "recall.mjs matches on all terms and reads 24 roots over about 4570 files. propose-evolution.mjs delegates to draftEvolutionEvent, which validates and refuses; invalid input exits 6 with the schema reason and writes nothing. Two verifiers added and wired to npm: bench:recall runs twelve golden cases drawn from real false-absent claims plus four runtime-generated controls and fails if absence is ever asserted; verify:evidence re-hashes every artifact against its receipt. Both caught their own defects first — the recall controls had been written into the corpus they measured, and the drift verifier reported three artifacts missing because it parsed only one of two URI schemes.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:recall-before-claim-v2",
+    "evd:propose-evolution-guards-v2"
+  ],
+  "knownLimitations": [
+    "Eight drifted receipts are reported, not repaired. Two from this session are superseded; six predate it.",
+    "recall.mjs matches substrings only. A decision recorded in different words is not found, and it says so.",
+    "bench:recall is not in npm run check: ~19s, and a slow gate gets removed rather than debugged.",
+    "Drafted by an agent. Not canonical: promotion derives human-reviewed from a verified signed approval, which this tool cannot produce."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}
