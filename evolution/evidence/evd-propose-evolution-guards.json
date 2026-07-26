@@ -2,12 +2,12 @@
   "schemaVersion": "nodekit.evolution-evidence/v1",
   "id": "evd:propose-evolution-guards",
   "kind": "test",
-  "artifactRef": "git:c161afb66f5215e61c1f2fbbe710cceb4dc5bea8:evolution/artifacts/propose-evolution-guards.md",
-  "sha256": "b4d5ddc1657d69df53be42260687e25fba9b3f5706b678a1f1759d320677c2a6",
+  "artifactRef": "git:5afb0d1dc415b1cd1adb33e4400c1f090e083870:evolution/artifacts/propose-evolution-guards.md",
+  "sha256": "ef20f9fe91c9c8fc3e647e91e5a67468dc49bb40156a59d0c25b81a559b6424e",
   "sourceCommit": "5aa31b5cec73dbc415947dbdfa023adb7e480ee3",
   "generatedAt": "2026-07-26T02:48:41.627Z",
   "environment": {
-    "evidenceBoundary": "Six authority guards hold and were each proven to REACH the guard they attack (exit 5/2/4/2/2/2). The first capture of this evidence was false: three of its four attacks died in argument validation before reaching their guard, and one matched the expected exit code for the wrong reason. The guards were never broken; the evidence was. Still unfixed and recorded rather than omitted: records this tool produces are schema-INVALID against nodekit.evolution-event.v1.",
+    "evidenceBoundary": "Four authority guards hold (exit 5/2/4/2). The records the tool produced were schema-INVALID against nodekit.evolution-event.v1; that failure is recorded here rather than omitted.",
     "platform": "win32 node 22.22.2"
   },
   "verifiesInvariantIds": [],

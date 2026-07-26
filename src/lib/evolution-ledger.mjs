@@ -4,6 +4,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathExists, readJson } from "./files.mjs";
 import { evidenceSnapshotToGraphNode, ingestEvidenceBytes, readEvidenceSnapshot } from "./evidence-snapshots.mjs";
+import { describeMutations, detectLedgerMutations } from "./evolution-immutability.mjs";
 import { proposeGraphPatch, readKnowledgeGraph } from "./knowledge-evolution.mjs";
 import { validateSchema } from "./schema-validation.mjs";
 
@@ -260,9 +261,33 @@ export async function verifyEvolutionLedger(repoRoot) {
     const adopters = ledger.adoptions.filter((adoption) => adoption.invariantId === invariant.id && adoption.status === "verified");
     if (invariant.scope.applications?.length > adopters.length && invariant.status === "verified") warnings.push(`${invariant.id} scope names more applications than verified adoptions`);
   }
+
+  // Immutability was declared in ledger.json and enforced only inside
+  // recordEvolutionEvent, which nothing writes evidence through. A committed
+  // record edited in place from result "partial" to "pass" passed this very
+  // function. Verify now compares every record against the revision that
+  // introduced it, so the authority rule is checked on the path people use.
+  // @nodekit-behavior inv:ledger-records-are-immutable owner
+  const loadedRecords = all
+    .filter((record) => ledger.filesById.has(record.id))
+    .map((record) => ({
+      file: path.relative(root, ledger.filesById.get(record.id)).split(path.sep).join("/"),
+      record,
+    }));
+  const mutationResult = await detectLedgerMutations(root, loadedRecords);
+  const mutationReport = describeMutations(mutationResult);
+  issues.push(...mutationReport.issues);
+  warnings.push(...mutationReport.warnings);
+
   return {
     schemaVersion: "nodekit.evolution-verdict/v1",
     counts: { events: ledger.events.length, assumptions: ledger.assumptions.length, invariants: ledger.invariants.length, evidence: ledger.evidence.length, adoptions: ledger.adoptions.length },
+    immutability: {
+      checked: mutationResult.checked,
+      gitAvailable: mutationResult.gitAvailable,
+      claimMutations: mutationResult.mutations.length,
+      bindingRepairs: mutationResult.bindingRepairs.length,
+    },
     issues: [...new Set(issues)],
     warnings: [...new Set(warnings)],
     passed: issues.length === 0,

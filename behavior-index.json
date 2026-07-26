@@ -9,7 +9,7 @@
     "verified": 4,
     "partial": 0,
     "unverified": 0,
-    "orphanAnnotations": 0
+    "orphanAnnotations": 10
   },
   "behaviors": [
     {
@@ -113,7 +113,7 @@
         {
           "file": "src/cli.mjs",
           "symbol": "runTour",
-          "line": 366
+          "line": 385
         }
       ],
       "supporting": [
@@ -926,7 +926,7 @@
           {
             "file": "src/cli.mjs",
             "symbol": "runTour",
-            "line": 367
+            "line": 386
           }
         ],
         "namedSourceFiles": [
@@ -954,6 +954,57 @@
       }
     ]
   },
-  "orphanAnnotations": [],
+  "orphanAnnotations": [
+    {
+      "behaviorId": "inv:ledger-records-are-immutable",
+      "file": "src/lib/evolution-ledger.mjs",
+      "line": 270
+    },
+    {
+      "behaviorId": "inv:ledger-records-are-immutable",
+      "file": "test/evolution-immutability.test.mjs",
+      "line": 41
+    },
+    {
+      "behaviorId": "inv:ledger-records-are-immutable",
+      "file": "test/evolution-immutability.test.mjs",
+      "line": 64
+    },
+    {
+      "behaviorId": "inv:ledger-records-are-immutable",
+      "file": "test/evolution-immutability.test.mjs",
+      "line": 76
+    },
+    {
+      "behaviorId": "inv:ledger-records-are-immutable",
+      "file": "test/evolution-immutability.test.mjs",
+      "line": 91
+    },
+    {
+      "behaviorId": "inv:ledger-records-are-immutable",
+      "file": "test/evolution-immutability.test.mjs",
+      "line": 104
+    },
+    {
+      "behaviorId": "inv:journey-contract-self-verifies",
+      "file": "test/journey-contract-verify.test.mjs",
+      "line": 14
+    },
+    {
+      "behaviorId": "inv:journey-contract-self-verifies",
+      "file": "test/journey-contract-verify.test.mjs",
+      "line": 36
+    },
+    {
+      "behaviorId": "inv:journey-contract-self-verifies",
+      "file": "test/journey-contract-verify.test.mjs",
+      "line": 48
+    },
+    {
+      "behaviorId": "inv:journey-contract-self-verifies",
+      "file": "test/journey-contract-verify.test.mjs",
+      "line": 80
+    }
+  ],
   "boundary": "This index reports declared behaviors only. It does not claim the repository has no other behavior, and an ownership annotation asserts ownership rather than proving it."
 }

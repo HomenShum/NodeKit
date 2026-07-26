@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:ledger-immutability-enforced-on-disk",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "c53235ca2cbe366a40d07822c0af901981ff8f92",
+    "occurredAt": "2026-07-26T03:51:12.097Z"
+  },
+  "track": "harness",
+  "category": "evaluation",
+  "materiality": [
+    "security-authority",
+    "proof-requirement"
+  ],
+  "challenge": "evolution/ledger.json declares mutation: append-or-supersede as ledger authority. Is that rule actually enforced?",
+  "observedFailure": "No. Enforcement lived only inside recordEvolutionEvent, which compares an incoming record against the one on disk and refuses to overwrite. Nothing writes evidence records through that function; they are produced by scripts and by hand and reach the file directly. Demonstrated by editing a committed evidence record in place from result 'partial' to 'pass' and replacing its evidenceBoundary with 'Everything passed. No limitations.' — evolution verify returned EVOLUTION PASS. Git saw the change instantly. Four records in this repository's own history were already mutated this way. Compounding it, the evidence schema had no supersession field and additionalProperties:false, so the sanctioned alternative to editing was inexpressible: the rule could not be followed even by someone trying.",
+  "resolution": "verifyEvolutionLedger now compares every canonical record AS READ FROM DISK against the revision that introduced it, so an uncommitted edit is caught too (comparing HEAD would have missed the motivating case). Pointer fields that cannot be correct at authoring time (artifactRef, sha256, sourceCommit, generatedAt) are classed as binding repairs and reported as warnings; any change to a claim field is a blocking issue. Outside a git repository the check reports that it could not look rather than passing. schemas/nodekit.evolution-evidence.v1.schema.json gains supersedesEvidenceId so supersession is expressible. The one claim mutation this found was my own, and it was repaired by superseding rather than by editing.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [],
+  "predecessorIds": [],
+  "knownLimitations": [
+    "Proposed by an agent and not yet human-reviewed. No claim here is canonical."
+  ],
+  "interpretation": {
+    "status": "agent-proposed",
+    "proposedBy": "claude-code",
+    "proposedAt": "2026-07-26T03:51:12.098Z",
+    "reviewedBy": null,
+    "reviewedAt": null
+  }
+}
