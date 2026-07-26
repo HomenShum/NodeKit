@@ -18,15 +18,15 @@
     "evd:recall-before-claim"
   ],
   "knownLimitations": [
-    "interpretation.status is a const of \"human-reviewed\" with no value for an agent-authored record, so this field asserts a review that has not happened. The drafts/ directory is the only real not-canonical signal. Do not read the status field as approval.",
     "Proves what was read, never that a thing does not exist. Absence remains unprovable by search.",
     "Substring matching only. A decision recorded in different words is not found.",
-    "The root list is fixed in source. A store not in that list is invisible — the original failure at a different scale.",
-    "ChatGPT threads are not a root; the reasoning half is covered only by local memory and skills."
+    "The root list is fixed in source. A store not in that list is invisible \u2014 the original failure at a different scale.",
+    "ChatGPT threads are not a root; the reasoning half is covered only by local memory and skills.",
+    "Drafted by an agent and not canonical. Promotion derives human-reviewed by verifying a signed approval at record time, so no field can be edited to fake it. (This limitation originally described interpretation.status as a bare const that asserted an unheld review \u2014 a real defect at the time, fixed upstream in ce97ecf8 and f1a9ff58. Corrected here so the draft does not carry a claim that is no longer true.)"
   ],
   "interpretation": {
     "status": "human-reviewed",
-    "reviewedBy": "UNREVIEWED — drafted by claude-code 2026-07-25, awaiting project-owner review",
+    "reviewedBy": "UNREVIEWED \u2014 drafted by claude-code 2026-07-25, awaiting project-owner review",
     "reviewedAt": "2026-07-26T02:49:13.596Z"
   }
 }

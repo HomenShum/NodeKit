@@ -320,7 +320,24 @@ test("agent campaign packs an isolated exact-source copy so prepare cannot mutat
   }
 });
 
-async function createTarball(_root, { marker = "candidate", version = "0.2.1" } = {}) {
+// `npm pack` costs ~2.4s even for this two-file package — almost all of it npm's own startup, not
+// the packing. Six call sites in this file asked for one, and five of them asked for the SAME one:
+// the result depends only on marker and version (`_root` is unused), so those five produced
+// byte-identical tarballs with identical digests, at 2.4s each.
+//
+// Memoised on (marker, version). The tarball is read-only input to the tests, so sharing it changes
+// nothing they assert — the digest they bind to is identical by construction, which is exactly why
+// repacking was redundant. Six packs become two.
+const tarballCache = new Map();
+
+async function createTarball(root, options = {}) {
+  const { marker = "candidate", version = "0.2.1" } = options;
+  const key = `${marker}@${version}`;
+  if (!tarballCache.has(key)) tarballCache.set(key, packTarball({ marker, version }));
+  return tarballCache.get(key);
+}
+
+async function packTarball({ marker, version }) {
   const packageTemp = await mkdtemp(path.join(os.tmpdir(), `nodekit-agent-package-${marker}-`));
   const packageRoot = path.join(packageTemp, "package");
   const outputRoot = path.join(packageTemp, "packed");
