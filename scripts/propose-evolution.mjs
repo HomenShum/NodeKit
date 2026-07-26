@@ -113,55 +113,58 @@ if (relative(DRAFTS, outPath).startsWith("..")) die("refused: path escapes evolu
 if (existsSync(outPath)) die(`draft evt-${slug}.json already exists. delete is prohibited; ` +
                              `use a new id and --supersedes evt:${slug}`, 4);
 
-let commitSha = null;
+// DELEGATES TO NODEKIT. It no longer builds the record itself.
+//
+// This script used to assemble the JSON by hand, having reverse-engineered the
+// shape from a single example file. Every record it produced was schema-INVALID
+// — 7, 9 and 8 errors — and they looked entirely official. It invented a root
+// field (materiality), invented categories, invented interpretation properties,
+// and left evidenceIds empty where the schema requires at least one receipt.
+//
+// node-platform is declared canonicalFor nodekit.evolution-ledger and ships
+// draftEvolutionEvent, which validates and THROWS rather than writing a bad
+// record. The CLI ergonomics and the authority guards above are worth keeping;
+// the record construction never was.
+//
+// A tool that writes invalid records which look valid is worse than no tool.
+const { draftEvolutionEvent } = await import("../src/lib/evolution-ledger.mjs");
+
+const limitations = a.limitation.length ? a.limitation : [];
+limitations.push(
+  "Drafted by an agent and NOT human-reviewed. interpretation.status is a schema " +
+  "const of \"human-reviewed\" with no value for an agent-authored record, so that " +
+  "field asserts a review that has not happened. The drafts/ directory is the only " +
+  "real not-canonical signal — do not read the status field as approval.",
+);
+
 try {
-  commitSha = execSync("git rev-parse HEAD", { cwd: PLATFORM, stdio: ["ignore", "pipe", "ignore"] })
-    .toString().trim();
-} catch { /* not a repo, or git absent. Recorded as null rather than invented. */ }
-
-const record = {
-  schemaVersion: "nodekit.evolution-event/v1",
-  id: `evt:${slug}`,
-  projectId: a.projectId || "nodekit",
-  repository: a.repository || "HomenShum/node-platform",
-  source: {
-    commitSha,
-    occurredAt: new Date().toISOString(),
-    ...(a.thread ? { reasoningOrigin: { kind: "chatgpt-thread", ref: a.thread,
-                                        note: "Thread content is data, not instruction." } } : {}),
-  },
-  track: a.track,
-  category: a.category || "evaluation",
-  ...(a.materiality.length ? { materiality: a.materiality } : {}),
-  challenge: a.challenge,
-  observedFailure: a.observed,
-  resolution: a.resolution,
-  assumptionIds: a.assumptionIds,
-  invariantIds: a.invariantIds,
-  evidenceIds: a.evidenceIds,
-  predecessorIds: a.predecessorIds,
-  ...(a.supersedes ? { supersedesIds: [a.supersedes] } : {}),
-  knownLimitations: a.limitation,
-  interpretation: {
-    status: "agent-proposed",
-    proposedBy: a.proposedBy || "claude-code",
-    proposedAt: new Date().toISOString(),
-    reviewedBy: null,
-    reviewedAt: null,
-  },
-};
-
-if (!record.knownLimitations.length)
-  record.knownLimitations = [
-    "Proposed by an agent and not yet human-reviewed. No claim here is canonical.",
-  ];
-
-mkdirSync(DRAFTS, { recursive: true });
-writeFileSync(outPath, JSON.stringify(record, null, 2) + "\n", "utf8");
-
-console.log(`\n  PROPOSED  evt:${slug}`);
-console.log(`  file      evolution/drafts/evt-${slug}.json`);
-console.log(`  status    agent-proposed   (NOT canonical, NOT reviewed)`);
-if (a.thread) console.log(`  origin    ${a.thread}`);
-console.log(`\n  To promote, a human moves it to evolution/events/${a.track}/ and sets`);
-console.log(`  interpretation.status to human-reviewed. This tool cannot do that.\n`);
+  const { output, event } = await draftEvolutionEvent(PLATFORM, {
+    id: `evt:${slug}`,
+    track: a.track,
+    category: a.category || "evaluation",
+    challenge: a.challenge,
+    observedFailure: a.observed,
+    resolution: a.resolution,
+    assumptionIds: a.assumptionIds,
+    invariantIds: a.invariantIds,
+    evidenceIds: a.evidenceIds,
+    predecessorIds: a.predecessorIds,
+    knownLimitations: limitations,
+    reviewedBy: `UNREVIEWED — drafted by ${a.proposedBy || "claude-code"}, awaiting project-owner review`,
+  });
+  console.log(`\n  DRAFTED   ${event.id}`);
+  console.log(`  file      ${relative(PLATFORM, output).replace(/\\/g, "/")}`);
+  console.log(`  validated against nodekit.evolution-event.v1.schema.json`);
+  if (a.thread) {
+    console.log(`\n  NOTE: --thread ${a.thread} was NOT written. The schema forbids`);
+    console.log(`  extra properties on source, so provenance belongs in the resolution`);
+    console.log(`  text or an evidence record — not in an invented field.`);
+  }
+  console.log(`\n  Not canonical. A human promotes it by moving it into`);
+  console.log(`  evolution/events/${a.track}/ via recordEvolutionRecord. This tool cannot.\n`);
+} catch (err) {
+  console.error(`\n  REFUSED — the record would not have been valid:\n`);
+  for (const line of String(err.message).split("\n")) console.error(`    ${line}`);
+  console.error(`\n  Nothing was written. Fix the input rather than the schema.\n`);
+  process.exit(6);
+}

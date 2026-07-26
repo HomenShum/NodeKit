@@ -119,6 +119,12 @@ const ROOTS = [
   // This tool's own neighbours. The broker, the ease harness and the graph
   // extractors were all invisible to a search run from inside this directory.
   { id: "platform-scripts", path: join(PLATFORM, "scripts"), half: "engineering" },
+  // The action store. Its absence was the sharpest version of this defect: the
+  // tool built to stop false claims of absence reported clean coverage across 23
+  // roots for records that were live the whole time — leads, obligations, the
+  // scored role board, the drafted replies. A search for a recruiter's name found
+  // nothing and said so with a full coverage table behind it.
+  { id: "action-store", path: join(HOME, "Downloads", "Interview items"), half: "engineering" },
   { id: "memory", path: join(HOME, ".claude", "projects"), half: "reasoning", only: "memory" },
   { id: "skills", path: join(HOME, ".claude", "skills"), half: "reasoning" },
   // The ChatGPT thread ledger was also absent. Decisions reached in a thread and
