@@ -1,6 +1,14 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import { parse as parseYaml } from "yaml";
+import { createRequire } from "node:module";
+
+// `yaml` costs 223ms to load and this module is on the import path of the CLI's startup, so every
+// `nodekit` invocation paid it whether or not it touched YAML. Deferred to first use. See
+// src/lib/files.mjs for the same treatment and the measurement behind it.
+const loadYamlModule = createRequire(import.meta.url);
+let yamlModule;
+const yaml = () => (yamlModule ??= loadYamlModule("yaml"));
+const parseYaml = (...args) => yaml().parse(...args);
 
 // The behaviour-ownership gap: receipts answer "did this artifact pass", the Evolution Ledger
 // answers "why did the architecture change", and the repository map answers "which packages exist".

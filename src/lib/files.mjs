@@ -1,6 +1,20 @@
 import { readFile, readdir, stat } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { parse } from "yaml";
+
+// `yaml` costs 223ms to load, and this file is imported by nearly every module in src/lib, so every
+// `nodekit` invocation paid it — including the ones that never read a YAML file. That was the single
+// largest component of a 708ms startup against a 137ms bare-node baseline, and it is multiplied by
+// the 32 places the test suite spawns the CLI.
+//
+// createRequire keeps every caller synchronous-or-async exactly as it was; only the cost moves, to
+// the first actual YAML read.
+const load = createRequire(import.meta.url);
+let parseYaml;
+const parse = (text, options) => {
+  parseYaml ??= load("yaml").parse;
+  return parseYaml(text, options);
+};
 
 const SOURCE_EXTENSIONS = new Set([
   ".cjs",
