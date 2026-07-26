@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -103,7 +104,8 @@ import {
   recordEvolutionRecord,
   verifyEvolutionLedger,
 } from "./lib/evolution-ledger.mjs";
-import { initializeTrust } from "./lib/evolution-trust.mjs";
+import { initializeTrust, readTrustPolicy } from "./lib/evolution-trust.mjs";
+import { approvalSubject, evidenceManifestHash, sealEvolutionApproval } from "./lib/evolution-approval.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -1257,6 +1259,51 @@ async function runEvolutionRecord(parsed) {
   });
 }
 
+/**
+ * Sign an approval for a draft. Without this the verification side is unsatisfiable and the ledger
+ * is bricked: a gate nobody can pass is not a gate, it is an outage.
+ *
+ * This command does NOT grant an assurance level. It produces a signature; the trust policy decides
+ * what that signature is worth. Signing with a software key the agent can read yields H1 no matter
+ * what this command is told, because the level is a property of where the key lives.
+ */
+async function runEvolutionApprove(parsed) {
+  const root = repoRootFrom(parsed);
+  const draft = JSON.parse(await readFile(path.resolve(root, requireOption(parsed, "draft")), "utf8"));
+  const policy = await readTrustPolicy(root);
+  if (!policy) throw new Error("no evolution/trust-policy.json. Run 'nodekit trust init' first.");
+
+  const credentialId = parsed.options["credential-id"] ?? Object.keys(policy.credentials)[0];
+  const credential = policy.credentials[credentialId];
+  if (!credential) throw new Error(`credential ${credentialId} is not in the trust policy`);
+
+  const keyPath = requireOption(parsed, "key");
+  const approval = sealEvolutionApproval({
+    repositoryId: parsed.options["repository-id"] ?? draft.repository ?? "unknown/repo",
+    projectId: draft.projectId,
+    eventId: draft.id,
+    subjectHash: approvalSubject(draft),
+    evidenceManifestHash: evidenceManifestHash(draft.evidenceIds),
+    commitSha: draft.source?.commitSha,
+    trustPolicyVersion: policy.version,
+    nonce: randomUUID(),
+    issuedAt: new Date().toISOString(),
+    // Short by default. An approval that lives for a week is a standing grant, not a decision.
+    expiresAt: new Date(Date.now() + Number(parsed.options["ttl-minutes"] ?? 30) * 60_000).toISOString(),
+  }, {
+    privateKey: await readFile(path.resolve(keyPath), "utf8"),
+    credentialId,
+    algorithm: credential.algorithm ?? "Ed25519",
+  });
+
+  const out = path.resolve(root, parsed.options.out ?? path.join("evolution", `approval-${draft.id}.json`));
+  await writeFile(out, `${JSON.stringify(approval, null, 2)}\n`);
+  printStructured({ approval, output: out, trustLevel: credential.trustLevel }, parsed, (value) =>
+    `APPROVED ${draft.id} -> ${path.relative(root, value.output)}\n` +
+    `  credential ${credentialId} at ${value.trustLevel}; single use; expires ${approval.expiresAt}\n` +
+    `  This command signed. It did not decide the assurance level — the trust policy did.`);
+}
+
 async function runTrustInit(parsed) {
   const output = await initializeTrust(repoRootFrom(parsed), {
     reviewer: requireOption(parsed, "reviewer"),
@@ -1724,6 +1771,10 @@ async function main() {
   }
   if (first === "evolution" && second === "draft") {
     await runEvolutionDraft(parsed);
+    return;
+  }
+  if (first === "evolution" && second === "approve") {
+    await runEvolutionApprove(parsed);
     return;
   }
   if (first === "trust" && second === "init") {
