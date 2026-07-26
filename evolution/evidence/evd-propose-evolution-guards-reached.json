@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:propose-evolution-guards-reached",
+  "supersedesEvidenceId": "evd:propose-evolution-guards",
+  "kind": "test",
+  "artifactRef": "git:c53235ca2cbe366a40d07822c0af901981ff8f92:evolution/artifacts/propose-evolution-guards.md",
+  "sha256": "b4d5ddc1657d69df53be42260687e25fba9b3f5706b678a1f1759d320677c2a6",
+  "sourceCommit": "c53235ca2cbe366a40d07822c0af901981ff8f92",
+  "generatedAt": "2026-07-26T03:48:10.616Z",
+  "command": "node scripts/probe-propose-guards.mjs",
+  "environment": {
+    "evidenceBoundary": "Supersedes evd:propose-evolution-guards, which recorded four guards as adversarially tested when three of its four attacks died in argument validation before reaching the guard they named, and one matched the expected exit code for an unrelated reason. The guards were never broken; that evidence was. Six guards now hold AND are each proven to reach the guard they attack (exit 5/2/4/2/2/2), asserted on message as well as exit code. The predecessor is left intact rather than edited, because the ledger authority is append-or-supersede. Still unfixed and recorded rather than omitted: records propose-evolution.mjs produces are schema-INVALID against nodekit.evolution-event.v1.",
+    "platform": "win32 node 22.22.2"
+  },
+  "verifiesInvariantIds": [],
+  "result": "partial"
+}

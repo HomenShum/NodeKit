@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:cli-authority-bypass-and-repair",
+  "kind": "test",
+  "artifactRef": "git:abf80a335d731ffc89759fe93d609e8450851049:evolution/artifacts/dogfood-cli-authority.md",
+  "sha256": "29792863bf778369174f28a70c56da40c652c50c39f6493266b648bc332e327c",
+  "sourceCommit": "abf80a335d731ffc89759fe93d609e8450851049",
+  "generatedAt": "2026-07-26T07:51:43.707Z",
+  "command": "node src/cli.mjs evolution draft ... && node src/cli.mjs evolution record ...",
+  "environment": {
+    "evidenceBoundary": "Reproduces the bypass and its repair by driving the real CLI. Before: two commands took an agent from nothing to canonical human-reviewed history, proven end to end in a throwaway repository. After: 11 adversarial cases refused or promoted correctly (assert a reviewer, assert a status, no approval, hand-stamped record, replayed nonce, draft edited after approval, expired approval, wrong event), plus 14 unit tests. Boundary: three commands of roughly seventy were driven. No claim is made about Atlas, frontend, harness, models, skills or routing. It does NOT establish that the 22 pre-existing canonical events were ever reviewed by a human; verify reports them as unattested precisely because that cannot be established retroactively.",
+    "platform": "win32 node 22.22.2"
+  },
+  "verifiesInvariantIds": [],
+  "result": "partial"
+}

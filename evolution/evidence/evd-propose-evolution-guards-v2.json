@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:propose-evolution-guards-v2",
+  "kind": "test",
+  "artifactRef": "git:f421f6b7647039883160c106cc92c313e2fbb4ff:evolution/artifacts/propose-evolution-guards.md",
+  "sha256": "b4d5ddc1657d69df53be42260687e25fba9b3f5706b678a1f1759d320677c2a6",
+  "sourceCommit": "f421f6b7647039883160c106cc92c313e2fbb4ff",
+  "generatedAt": "2026-07-26T07:54:51.623Z",
+  "environment": {
+    "supersedes": "evd:propose-evolution-guards",
+    "evidenceBoundary": "SUPERSEDES evd:propose-evolution-guards, which drifted. Re-bound to the current bytes. The substance is unchanged and was already partial: the four authority guards hold under attack, and the records the tool produced were schema-invalid. That second half is now fixed — propose-evolution.mjs delegates to draftEvolutionEvent and refuses invalid input with exit 6.",
+    "platform": "win32 node 22.22.2"
+  },
+  "verifiesInvariantIds": [],
+  "result": "partial"
+}

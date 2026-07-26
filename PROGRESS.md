@@ -37,15 +37,20 @@ turned out to be ~80% built — see App Atlas and NodeAgent Kit in the graph-hop
 
 ## Status
 
-| # | Step | State |
-|---|------|-------|
-| 0 | Cold-start baseline measured, friction recorded, nothing repaired | not started |
-| 1 | `repo-map.json` generated from source + drift-checked | not started |
-| 2 | `START_HERE.md` + `GLOSSARY.md` written from measured friction only | not started |
-| 3 | `nodekit tour` executable walkthrough | not started |
-| 4 | Vocabulary map + copy audit | not started |
-| 5 | friction → gym → ledger wired as one path | not started |
-| 6 | Tests + evolution attestation + PR | not started |
+**Do not hand-maintain this.** A hand-written status table went stale within hours: it read
+"not started" for seven steps that had already shipped, in the file whose own header says re-read
+this first. State is derived now — ask the gate:
+
+```bash
+npm run journey:verify
+```
+
+It recomputes every check from evidence on disk and reports any claim it cannot derive, exiting
+non-zero on an overclaim. As of 2026-07-25: **11 of 12 derive true, 0 overclaimed.** The twelfth,
+`independently.evaluated`, is permanently underivable by design — nothing this repository computes
+is independent review, and a checker able to grant it would launder the same self-approval one
+layer deeper.
+
 
 ## Session log
 

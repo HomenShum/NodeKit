@@ -195,7 +195,11 @@
     "repo:map": "node src/cli.mjs repo map --write",
     "tour": "node src/cli.mjs tour",
     "copy:audit": "node src/cli.mjs copy audit",
-    "behavior:index": "node src/cli.mjs behavior index --write"
+    "behavior:index": "node src/cli.mjs behavior index --write",
+    "journey:verify": "node src/cli.mjs journey verify",
+    "bench:recall": "node scripts/bench-recall.mjs",
+    "recall": "node scripts/recall.mjs",
+    "verify:evidence": "node scripts/verify-evidence-drift.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "ledger-authority-and-immutability-enforced",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "939b9c6d45cefdedef6d3bfe152fac8b6c95ddc3",
+    "occurredAt": "2026-07-26T07:52:21.408Z"
+  },
+  "track": "harness",
+  "category": "evaluation",
+  "challenge": "The ledger declares that the agent proposes and does not approve, and that records are append-or-supersede. Are either enforced on the path anyone uses?",
+  "observedFailure": "Neither. draft hardcoded interpretation.status human-reviewed and record gated on that same field, so two commands took an agent from nothing to canonical human-attested history with no human involved. Separately, immutability was checked only inside recordEvolutionEvent, which nothing writes evidence through, so a committed evidence record edited from result partial to pass returned EVOLUTION PASS while git saw the change instantly. A third defect in the same family: the graph mutation lock treated only EEXIST as held, so on Windows a contended write threw and lost 1-2 of 12 concurrent receipts, invisible on Linux CI.",
+  "resolution": "Status is derived only by verifying a single-use, domain-separated approval bound to the exact bytes, with trust levels H0-H3, no silent fallback, and the level reached recorded on the event. draft writes agent-proposed and refuses elevation with exit 5. verify compares every canonical record against the revision that introduced it, reading the bytes on disk rather than HEAD. The lock now treats EPERM and EACCES as held while keeping the hardlink guard. The 22 pre-existing events are reported as unattested rather than back-filled, because inventing an approval for a review nobody signed is fabrication.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:propose-evolution-guards-reached"
+  ],
+  "knownLimitations": [
+    "0 of 22 pre-existing canonical events carry a verified approval"
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

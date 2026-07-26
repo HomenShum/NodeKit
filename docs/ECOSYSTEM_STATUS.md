@@ -14,6 +14,9 @@
 | NodeMem | preview | standalone-package | PASS | certified | MISSING | 0 | 7/8 |
 | NodeProof | production | certification-harness | PASS | certified | DECLARED | 0 | 8/8 |
 | agentic-ui-qa | production | qa-protocol | PASS | certified | DECLARED | 0 | 8/8 |
+| NodeTasks | preview | evaluation-corpus | PASS | certified | DECLARED | 0 | 8/8 |
+| BetterPRHandoff | production | handoff-protocol | PASS | certified | DECLARED | 0 | 8/8 |
+| FeatureClipStudio | preview | presentation-evidence-tool | PASS | partial | DECLARED | 0 | 7/8 |
 
 ## Planned Extractions
 
@@ -22,5 +25,3 @@
 - `nodeagent.trace-workpaper` -> `@nodeagent/trace-protocol`; current source: `NodeRoom/src/nodeagent/traces/traceTypes.ts`
 
 A PASS here means the P0 repository contract is internally consistent. Commands are declared and statically resolvable; this table does not claim they were executed by the dashboard. It does not promote a preview repository to production or turn a planned package into a released package.
-
-`NodeBenchAI` is registered as an active production domain application. It remains `untracked` by ecosystem command execution until its planning-era `apiVersion/kind/spec` repository manifest is explicitly migrated to the canonical flat `nodekit.repo/v1` contract.

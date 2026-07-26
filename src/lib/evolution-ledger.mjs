@@ -4,6 +4,8 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathExists, readJson } from "./files.mjs";
 import { evidenceSnapshotToGraphNode, ingestEvidenceBytes, readEvidenceSnapshot } from "./evidence-snapshots.mjs";
+import { describeMutations, detectLedgerMutations } from "./evolution-immutability.mjs";
+import { verifyEvolutionApproval } from "./evolution-approval.mjs";
 import { proposeGraphPatch, readKnowledgeGraph } from "./knowledge-evolution.mjs";
 import { validateSchema } from "./schema-validation.mjs";
 
@@ -108,6 +110,18 @@ export async function initializeEvolutionLedger(repoRoot) {
 
 export async function draftEvolutionEvent(repoRoot, input) {
   const root = path.resolve(repoRoot);
+  // Refuse elevation loudly rather than ignoring it. A caller passing --status or --reviewed-by is
+  // trying to assert review, and silently dropping the flag would let them believe it worked.
+  if (input.status && input.status !== "agent-proposed") {
+    throw new EvolutionAuthorityError(
+      `refused: draft cannot write interpretation.status=${input.status}. A draft is a proposal. ` +
+      "human-reviewed is derived only by verifying a signed approval at record time.");
+  }
+  if (input.reviewedBy) {
+    throw new EvolutionAuthorityError(
+      "refused: draft cannot name a reviewer. The reviewer identity is derived from the verified " +
+      "approval credential, never supplied by the caller. An author identity may be supplied.");
+  }
   await initializeEvolutionLedger(root);
   const commitSha = input.commitSha ?? git(root, ["rev-parse", "HEAD"]);
   const event = {
@@ -125,7 +139,11 @@ export async function draftEvolutionEvent(repoRoot, input) {
     invariantIds: input.invariantIds ?? [],
     evidenceIds: input.evidenceIds ?? [],
     knownLimitations: input.knownLimitations ?? [],
-    interpretation: { status: "human-reviewed", reviewedBy: input.reviewedBy, reviewedAt: input.reviewedAt ?? now() },
+    // A draft is a PROPOSAL. This used to write "human-reviewed" unconditionally, so every draft
+    // NodeKit produced was born approved and `record` promoted it on the strength of a field the
+    // caller had just written. The status is now derivable only by verifying a signed approval,
+    // in recordEvolutionRecord. Nothing here can grant it.
+    interpretation: { status: "agent-proposed" },
   };
   const findings = await validateSchema("nodekit.evolution-event.v1.schema.json", event, "evolution event draft");
   if (findings.length > 0) throw new Error(`evolution event draft validation failed:\n${findings.join("\n")}`);
@@ -134,7 +152,53 @@ export async function draftEvolutionEvent(repoRoot, input) {
   return { event, output };
 }
 
-export async function recordEvolutionRecord(repoRoot, recordFile) {
+/** Raised when a caller tries to assert authority it does not hold. Distinct so the CLI can exit 5. */
+export class EvolutionAuthorityError extends Error {
+  constructor(message) { super(message); this.name = "EvolutionAuthorityError"; this.exitCode = 5; }
+}
+
+const TRUST_POLICY = path.join("evolution", "trust-policy.json");
+const CONSUMED = path.join("evolution", "approvals", "consumed.json");
+
+/**
+ * Derive the interpretation from a verified approval. Nothing here reads a status off the record.
+ * A missing policy or a missing approval is a refusal, never a downgrade to unattested — the whole
+ * defect being repaired was an absent check reading as a pass.
+ */
+async function deriveInterpretation(root, record, approvalFile) {
+  if (!approvalFile) {
+    throw new EvolutionAuthorityError(
+      "refused: promoting an event to canonical history requires a signed approval. " +
+      "Pass --approval <file>. The agent proposes; it does not approve.");
+  }
+  const policyPath = path.join(root, TRUST_POLICY);
+  if (!(await pathExists(policyPath))) {
+    throw new EvolutionAuthorityError(
+      `refused: no trust policy at ${TRUST_POLICY}. Run 'nodekit trust init' first. Without one ` +
+      "there is no credential to verify against, and an unverifiable approval is not an approval.");
+  }
+  const policy = await readJson(policyPath);
+  const approval = await readJson(resolveInside(root, approvalFile, "evolution approval"));
+
+  let consumed = [];
+  if (await pathExists(path.join(root, CONSUMED))) consumed = (await readJson(path.join(root, CONSUMED))).nonces ?? [];
+
+  const verified = verifyEvolutionApproval(approval, record, {
+    policy,
+    consumedNonces: new Set(consumed),
+    requiredTrustLevel: policy.requiredTrustLevel ?? "H2",
+  });
+
+  // Single use. Burn the nonce before the record is written, so a crash between the two cannot
+  // leave a spent approval reusable.
+  await mkdir(path.dirname(path.join(root, CONSUMED)), { recursive: true });
+  await writeFile(path.join(root, CONSUMED),
+    `${JSON.stringify({ schemaVersion: "nodekit.evolution-approval-nonces/v1", nonces: [...consumed, verified.nonce] }, null, 2)}\n`);
+
+  return verified;
+}
+
+export async function recordEvolutionRecord(repoRoot, recordFile, approvalFile = null) {
   const root = path.resolve(repoRoot);
   await initializeEvolutionLedger(root);
   const source = resolveInside(root, recordFile, "evolution record");
@@ -143,19 +207,50 @@ export async function recordEvolutionRecord(repoRoot, recordFile) {
   if (!definition) throw new Error(`unsupported evolution record schema: ${record.schemaVersion}`);
   const findings = await validateSchema(definition.schema, record, `evolution record ${record.id ?? source}`);
   if (findings.length > 0) throw new Error(`evolution record validation failed:\n${findings.join("\n")}`);
-  if (record.schemaVersion === EVOLUTION_EVENT_SCHEMA && record.interpretation?.status !== "human-reviewed") {
-    throw new Error("canonical evolution events require human-reviewed interpretation");
+  const isEvent = record.schemaVersion === EVOLUTION_EVENT_SCHEMA;
+
+  // A record arriving already stamped human-reviewed is refused outright. That stamp can only be
+  // the product of the bypass this replaces: the status is not an input.
+  if (isEvent && record.interpretation?.status === "human-reviewed") {
+    throw new EvolutionAuthorityError(
+      "refused: this record already claims human-reviewed. That status is not an input. Submit an " +
+      "agent-proposed draft together with a signed approval, and it will be derived.");
   }
-  const subtype = record.schemaVersion === EVOLUTION_EVENT_SCHEMA ? `${definition.directory}/${record.track}` : definition.directory;
+
+  const subtype = isEvent ? `${definition.directory}/${record.track}` : definition.directory;
   const output = path.join(root, "evolution", subtype, `${record.id.replaceAll(":", "-")}.json`);
+
+  // Idempotence and immutability are settled BEFORE any approval is consumed. Two reasons, both
+  // found by a test: approvals are single use, so deriving first burned a nonce on a re-record that
+  // was going to be a no-op; and the incoming event carries `agent-proposed` while the stored one
+  // carries the derived `human-reviewed`, so a whole-record comparison would call an identical
+  // re-record a mutation. Comparing the SUBJECT — everything except the derived interpretation —
+  // asks the real question: did the substance change?
   if (await pathExists(output)) {
     const existing = await readJson(output);
-    if (canonical(existing) !== canonical(record)) throw new Error(`evolution records are immutable; supersede instead of overwriting ${record.id}`);
-    return { duplicate: true, output, record };
+    const subjectOf = (value) => { const { interpretation, ...rest } = value; return canonical(rest); };
+    if (subjectOf(existing) !== subjectOf(record)) {
+      throw new Error(`evolution records are immutable; supersede instead of overwriting ${record.id}`);
+    }
+    return { duplicate: true, output, record: existing, promotion: null };
   }
+
+  // Promotion. The old gate read `record.interpretation.status` — the same field draft had just
+  // written — so anyone who could write a file could write canonical history. It is now DERIVED
+  // from a verified approval, and the record's own copy is replaced by the derived one.
+  let promotion = null;
+  if (isEvent) {
+    promotion = await deriveInterpretation(root, record, approvalFile);
+    record.interpretation = {
+      ...promotion.interpretation,
+      approvalHash: promotion.approvalHash,
+      trustLevel: promotion.trustLevel,
+    };
+  }
+
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(record, null, 2)}\n`);
-  return { duplicate: false, output, record };
+  return { duplicate: false, output, record, promotion };
 }
 
 function hasCycle(events) {
@@ -260,9 +355,54 @@ export async function verifyEvolutionLedger(repoRoot) {
     const adopters = ledger.adoptions.filter((adoption) => adoption.invariantId === invariant.id && adoption.status === "verified");
     if (invariant.scope.applications?.length > adopters.length && invariant.status === "verified") warnings.push(`${invariant.id} scope names more applications than verified adoptions`);
   }
+
+  // Immutability was declared in ledger.json and enforced only inside
+  // recordEvolutionEvent, which nothing writes evidence through. A committed
+  // record edited in place from result "partial" to "pass" passed this very
+  // function. Verify now compares every record against the revision that
+  // introduced it, so the authority rule is checked on the path people use.
+  // @nodekit-behavior inv:ledger-records-are-immutable owner
+  const loadedRecords = all
+    .filter((record) => ledger.filesById.has(record.id))
+    .map((record) => ({
+      file: path.relative(root, ledger.filesById.get(record.id)).split(path.sep).join("/"),
+      record,
+    }));
+  // Which canonical events actually carry a verified approval. Silence here would be the original
+  // defect all over again: 22 events say human-reviewed because a command wrote that string, and a
+  // reader must be able to tell those apart from ones a credential signed. Reported, never
+  // back-filled — inventing an approvalHash for a review that was never signed is fabrication.
+  const unattested = ledger.events.filter((event) =>
+    event.interpretation?.status === "human-reviewed" && !event.interpretation?.approvalHash);
+  if (unattested.length > 0) {
+    warnings.push(
+      `${unattested.length} canonical event(s) claim human-reviewed with no verified approval, ` +
+      "promoted before approval enforcement landed on 2026-07-26. Their status is a string a command " +
+      "wrote, not an attestation. They are reported rather than back-filled, because inventing an " +
+      `approval for a review that was never signed is fabrication: ${unattested.slice(0, 3).map((e) => e.id).join(", ")}` +
+      (unattested.length > 3 ? `, and ${unattested.length - 3} more` : ""));
+  }
+
+  const mutationResult = await detectLedgerMutations(root, loadedRecords);
+  const mutationReport = describeMutations(mutationResult);
+  issues.push(...mutationReport.issues);
+  warnings.push(...mutationReport.warnings);
+
   return {
     schemaVersion: "nodekit.evolution-verdict/v1",
     counts: { events: ledger.events.length, assumptions: ledger.assumptions.length, invariants: ledger.invariants.length, evidence: ledger.evidence.length, adoptions: ledger.adoptions.length },
+    immutability: {
+      checked: mutationResult.checked,
+      gitAvailable: mutationResult.gitAvailable,
+      claimMutations: mutationResult.mutations.length,
+      bindingRepairs: mutationResult.bindingRepairs.length,
+    },
+    authority: {
+      canonicalEvents: ledger.events.length,
+      attested: ledger.events.length - unattested.length,
+      unattested: unattested.length,
+      unattestedIds: unattested.map((event) => event.id),
+    },
     issues: [...new Set(issues)],
     warnings: [...new Set(warnings)],
     passed: issues.length === 0,

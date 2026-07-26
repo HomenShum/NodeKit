@@ -13,3 +13,8 @@ proof/ease/agents/
 # Windows reserved device name. A `2>NUL` redirect run under a POSIX shell on
 # Windows creates a real zero-byte file here instead of discarding output.
 /NUL
+
+# Downloaded proof fixtures. Five trees, ~22k files each. Untracked and
+# unignored, they were swept into a commit by `git add proof/` and killed the
+# push with an HTTP 500 pack failure.
+proof/ease/downloaded*/

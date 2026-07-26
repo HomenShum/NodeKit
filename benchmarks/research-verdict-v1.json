@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "nodekit.research-verdict-corpus/v1",
+  "id": "research-verdict-v1",
+  "note": "Scores the research phase's incumbent handling. NodeKit's research phase made an observed error on 2026-07-25: told a McKinsey associate case, it found that McKinsey already has Lilli and concluded NodeKit should therefore avoid a broad consulting product. The owner rejected that inference — an incumbent at that scale is category VALIDATION, and the correct output was to compose NodeRoom and NodeSlide. The correction has its own failure mode: if an incumbent is always validation, the research phase can never output do-not-build, and a rule that cannot say no carries no information. This corpus therefore contains cases in BOTH directions and is scored by error direction, not by accuracy alone.",
+  "verdicts": ["build-new", "compose-existing", "do-not-build"],
+  "families": [
+    { "id": "validating-incumbent", "note": "A large incumbent proves the category. The job is still unserved for this user, and existing Node products can compose it." },
+    { "id": "adjacent-incumbent", "note": "An incumbent exists but does not do this job. Its presence is close to irrelevant and must not be read either way." },
+    { "id": "foreclosing-incumbent", "note": "The incumbent genuinely forecloses entry, for a reason that is about the BUYER's situation, not the product's quality." },
+    { "id": "commodity-floor", "note": "The job is served free or near-free by mature tools with no switching cost. Nothing is left to win." }
+  ],
+  "knownDefect": {
+    "found": "2026-07-26, by putting five of these cases to the thread that produced the original error",
+    "problem": "NOT ONE of the ten cases states a MEASURED residual gap. Every case asserts the gap in prose ('cannot see weekly operating profit') and none supplies completion rates, elapsed time, rework counts, or observed workarounds. A procedure that requires measured evidence and fails closed on unknowns therefore returns do-not-build on almost the whole corpus, and is scored as making the exact error the corpus was built to detect. It is not making that error. The corpus is underspecified.",
+    "consequence": "The expected verdicts below encode the OWNER's stated position after the Lilli exchange. They are not evidence-derived. Until each case carries observed measurements, this corpus tests agreement with a judgement, and cannot adjudicate between a procedure that reads incumbents wrongly and one that correctly refuses to decide without evidence.",
+    "fix": "Add a measuredGap block per case — representative tasks, completion rate, elapsed time, rework, observed workarounds — or mark the case underspecified and exclude it from scoring. Not done. Doing it properly requires observing real users, which is the thread's own point: the strongest signal is repeated workaround behaviour, and it cannot be authored."
+  },
+  "scoringNote": "A constant predictor must score badly. 'always compose-existing' is reported as a baseline on every run; a procedure that does not beat it by a stated margin is not carrying information, only agreeing with the corpus skew. This mirrors the structured-baseline discipline already applied to the Atlas ranker.",
+  "cases": [
+    {
+      "id": "rv01",
+      "family": "validating-incumbent",
+      "user": "McKinsey engagement associate",
+      "job": "run a workstream end to end: research, synthesis, analysis, storyline, review",
+      "incumbents": ["Lilli (internal, firm-wide adoption reported)"],
+      "expected": "compose-existing",
+      "decidingInput": "buyerCanAdopt",
+      "why": "Lilli proves consultants will use a unified AI workspace, and it is the firm's own tool rather than a contract barring other software. The engagement-coordination layer across people, agents, workstreams and reviews is not what Lilli does. NodeRoom plus NodeSlide compose it. This is the case the research phase got wrong.",
+      "observedFailure": "2026-07-25: predicted avoid-broad-consulting-product, citing Lilli. Wrong direction."
+    },
+    {
+      "id": "rv02",
+      "family": "validating-incumbent",
+      "user": "investment banking analyst",
+      "job": "build and check comparable-company models against source filings",
+      "incumbents": ["an internal LLM suite already deployed firm-wide"],
+      "expected": "compose-existing",
+      "decidingInput": "jobIsUnservedBySpecificIncumbent",
+      "why": "Firm-wide LLM deployment validates that the bank will put models in the analyst's path. A general assistant does not do source-bound calculation checking, which is exactly what NodeProof does. Same shape as rv01 and included deliberately: a procedure that gets rv01 right by memorising Lilli, rather than by applying a rule, will not generalise here."
+    },
+    {
+      "id": "rv03",
+      "family": "adjacent-incumbent",
+      "user": "salon owner",
+      "job": "see weekly operating profit with each number traceable to a source document",
+      "incumbents": ["QuickBooks", "Square dashboards"],
+      "expected": "build-new",
+      "decidingInput": "jobIsUnservedBySpecificIncumbent",
+      "why": "Both incumbents are present and neither reconciles across bank, Square and payroll into one owner-readable brief with source links and flagged uncertain items. The incumbent presence is nearly irrelevant to the verdict, which is the point of the family: the procedure must not read it as either validation or disqualification."
+    },
+    {
+      "id": "rv04",
+      "family": "adjacent-incumbent",
+      "user": "clinical research coordinator",
+      "job": "check that a trial protocol amendment is reflected in every downstream document",
+      "incumbents": ["Microsoft Word", "SharePoint"],
+      "expected": "build-new",
+      "decidingInput": "jobIsUnservedBySpecificIncumbent",
+      "why": "The incumbents are where the documents live, not tools that do the job. A procedure that counts any installed software as an incumbent signal will misfire here."
+    },
+    {
+      "id": "rv05",
+      "family": "foreclosing-incumbent",
+      "user": "hospital scheduling coordinator",
+      "job": "build staff rosters against changing ward demand",
+      "incumbents": ["an Epic module the hospital is contractually locked into for four years"],
+      "expected": "do-not-build",
+      "decidingInput": "buyerCanAdopt",
+      "why": "The barrier is the buyer's contract, not the product. No quality of build changes the four-year lock, and clinical scheduling touching the system of record is not a surface a small team can enter around it. This is the case that detects over-correction: a rule holding that incumbents are always validation predicts build or compose here and is wrong.",
+      "detects": "incumbent-as-always-validation"
+    },
+    {
+      "id": "rv06",
+      "family": "foreclosing-incumbent",
+      "user": "EU public-sector procurement officer",
+      "job": "screen supplier bids for compliance",
+      "incumbents": ["an accredited national procurement platform, mandated by statute"],
+      "expected": "do-not-build",
+      "decidingInput": "buyerCanAdopt",
+      "why": "Adoption is barred by law rather than by preference. The user may want the product and still be unable to use it. Distinct from rv05 in mechanism (statute, not contract) so a procedure cannot pass by pattern-matching the word contract."
+    },
+    {
+      "id": "rv07",
+      "family": "commodity-floor",
+      "user": "solo developer",
+      "job": "put a landing page online",
+      "incumbents": ["v0", "Lovable", "Bolt"],
+      "expected": "do-not-build",
+      "decidingInput": "remainingValueAfterIncumbent",
+      "why": "Mature, free-tier, near-zero switching cost, and the job is finished in minutes. Category validation is real here and still does not matter, because nothing is left to win. This separates 'the category is proven' from 'there is room', which the corrected rule conflates.",
+      "detects": "incumbent-as-always-validation"
+    },
+    {
+      "id": "rv08",
+      "family": "commodity-floor",
+      "user": "small-business owner",
+      "job": "send an invoice and get paid",
+      "incumbents": ["Stripe Invoicing", "Square", "PayPal"],
+      "expected": "do-not-build",
+      "decidingInput": "remainingValueAfterIncumbent",
+      "why": "Bundled free with a payment rail the user already pays for. The incumbent is not merely good, it is attached to something they cannot remove."
+    },
+    {
+      "id": "rv09",
+      "family": "validating-incumbent",
+      "user": "engineering manager onboarding a new hire",
+      "job": "get a new engineer from empty machine to first reviewed change",
+      "incumbents": ["internal wiki", "Backstage"],
+      "expected": "compose-existing",
+      "decidingInput": "jobIsUnservedBySpecificIncumbent",
+      "why": "Backstage validates that orgs will run a developer portal, and neither incumbent proves a new hire can actually complete the path. NodeKit already ships START_HERE, GLOSSARY, repo-map and tour, so composing is right and building new is wrong. Included because the expected answer is compose rather than build, and a procedure that outputs build-new whenever the job is unserved will fail it."
+    },
+    {
+      "id": "rv10",
+      "family": "adjacent-incumbent",
+      "user": "indie game developer",
+      "job": "find why a physics bug reproduces only on one hardware configuration",
+      "incumbents": ["Unity profiler", "RenderDoc"],
+      "expected": "build-new",
+      "decidingInput": "remainingValueAfterIncumbent",
+      "why": "Strong incumbents at the observation step, none at the differential-diagnosis step across configurations. Guards against reading tool maturity in the neighbourhood as coverage of the job."
+    }
+  ]
+}

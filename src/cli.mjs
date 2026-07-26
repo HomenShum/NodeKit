@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +11,7 @@ import { checkRepository, commandFor } from "./lib/repo-check.mjs";
 import { buildRepoMap } from "./lib/repo-map.mjs";
 import { auditCopy } from "./lib/copy-audit.mjs";
 import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
+import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -102,6 +104,8 @@ import {
   recordEvolutionRecord,
   verifyEvolutionLedger,
 } from "./lib/evolution-ledger.mjs";
+import { initializeTrust, readTrustPolicy } from "./lib/evolution-trust.mjs";
+import { approvalSubject, evidenceManifestHash, sealEvolutionApproval } from "./lib/evolution-approval.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -307,6 +311,24 @@ function undeclaredLifecycleMessage(name, manifest) {
     );
   }
   return lines.join("\n");
+}
+
+// The journey contract forbade hand-editing a check to true, and then eleven of twelve were
+// hand-edited to true because nothing read the file. This command is what reads it.
+async function runJourneyVerify(parsed) {
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  const verdict = await verifyJourneyContract(root);
+  printStructured(verdict, parsed, (value) => {
+    const lines = [`JOURNEY CONTRACT: ${value.counts.derivedTrue}/${value.counts.total} derive true; ${value.counts.overclaimed} overclaimed.`];
+    for (const check of value.checks) {
+      const mark = !check.agrees ? "OVERCLAIM" : check.derived ? "ok" : "--";
+      lines.push(`  [${mark}] ${check.id}`);
+      if (check.evidence) lines.push(`        ${check.evidence}`);
+      else if (check.unattainable) lines.push(`        (never derivable by design)`);
+    }
+    return lines.join("\n");
+  });
+  if (!verdict.passed) process.exitCode = 1;
 }
 
 async function runBehaviorIndex(parsed) {
@@ -1211,7 +1233,13 @@ async function runEvolutionDraft(parsed) {
     challenge: requireOption(parsed, "challenge"),
     observedFailure: parsed.options.failure,
     resolution: requireOption(parsed, "resolution"),
-    reviewedBy: requireOption(parsed, "reviewed-by"),
+    // A draft cannot name its own reviewer; that identity is derived from the verified approval
+    // credential at record time. These two are passed through ONLY so draftEvolutionEvent can
+    // refuse them explicitly — dropping them here would silently ignore an attempt to assert
+    // authority, and let the caller believe it worked.
+    reviewedBy: parsed.options["reviewed-by"],
+    status: parsed.options.status,
+    author: parsed.options.author,
     assumptionIds: optionList(parsed, "assumptions"),
     invariantIds: optionList(parsed, "invariants"),
     evidenceIds: optionList(parsed, "evidence"),
@@ -1221,8 +1249,74 @@ async function runEvolutionDraft(parsed) {
 }
 
 async function runEvolutionRecord(parsed) {
-  const output = await recordEvolutionRecord(repoRootFrom(parsed), requireOption(parsed, "file"));
-  printStructured(output, parsed, (value) => `${value.duplicate ? "UNCHANGED" : "RECORDED"} ${value.record.id}`);
+  const output = await recordEvolutionRecord(repoRootFrom(parsed), requireOption(parsed, "file"), parsed.options.approval);
+  printStructured(output, parsed, (value) => {
+    const promoted = value.promotion
+      // State the assurance actually reached. A reader must never have to assume which level applied.
+      ? ` promoted by ${value.promotion.interpretation.reviewedBy} at ${value.promotion.trustLevel} (${value.promotion.assurance})`
+      : "";
+    return `${value.duplicate ? "UNCHANGED" : "RECORDED"} ${value.record.id}${promoted}`;
+  });
+}
+
+/**
+ * Sign an approval for a draft. Without this the verification side is unsatisfiable and the ledger
+ * is bricked: a gate nobody can pass is not a gate, it is an outage.
+ *
+ * This command does NOT grant an assurance level. It produces a signature; the trust policy decides
+ * what that signature is worth. Signing with a software key the agent can read yields H1 no matter
+ * what this command is told, because the level is a property of where the key lives.
+ */
+async function runEvolutionApprove(parsed) {
+  const root = repoRootFrom(parsed);
+  const draft = JSON.parse(await readFile(path.resolve(root, requireOption(parsed, "draft")), "utf8"));
+  const policy = await readTrustPolicy(root);
+  if (!policy) throw new Error("no evolution/trust-policy.json. Run 'nodekit trust init' first.");
+
+  const credentialId = parsed.options["credential-id"] ?? Object.keys(policy.credentials)[0];
+  const credential = policy.credentials[credentialId];
+  if (!credential) throw new Error(`credential ${credentialId} is not in the trust policy`);
+
+  const keyPath = requireOption(parsed, "key");
+  const approval = sealEvolutionApproval({
+    repositoryId: parsed.options["repository-id"] ?? draft.repository ?? "unknown/repo",
+    projectId: draft.projectId,
+    eventId: draft.id,
+    subjectHash: approvalSubject(draft),
+    evidenceManifestHash: evidenceManifestHash(draft.evidenceIds),
+    commitSha: draft.source?.commitSha,
+    trustPolicyVersion: policy.version,
+    nonce: randomUUID(),
+    issuedAt: new Date().toISOString(),
+    // Short by default. An approval that lives for a week is a standing grant, not a decision.
+    expiresAt: new Date(Date.now() + Number(parsed.options["ttl-minutes"] ?? 30) * 60_000).toISOString(),
+  }, {
+    privateKey: await readFile(path.resolve(keyPath), "utf8"),
+    credentialId,
+    algorithm: credential.algorithm ?? "Ed25519",
+  });
+
+  const out = path.resolve(root, parsed.options.out ?? path.join("evolution", `approval-${draft.id}.json`));
+  await writeFile(out, `${JSON.stringify(approval, null, 2)}\n`);
+  printStructured({ approval, output: out, trustLevel: credential.trustLevel }, parsed, (value) =>
+    `APPROVED ${draft.id} -> ${path.relative(root, value.output)}\n` +
+    `  credential ${credentialId} at ${value.trustLevel}; single use; expires ${approval.expiresAt}\n` +
+    `  This command signed. It did not decide the assurance level — the trust policy did.`);
+}
+
+async function runTrustInit(parsed) {
+  const output = await initializeTrust(repoRootFrom(parsed), {
+    reviewer: requireOption(parsed, "reviewer"),
+    dev: Boolean(parsed.flags?.dev ?? parsed.options.dev),
+    credentialId: parsed.options["credential-id"],
+    publicKey: parsed.options["public-key"],
+    trustLevel: parsed.options["trust-level"],
+    algorithm: parsed.options.algorithm,
+    requiredTrustLevel: parsed.options["required-trust-level"],
+  });
+  printStructured(output, parsed, (value) =>
+    `TRUST INITIALISED ${value.policy.version}; requires ${value.policy.requiredTrustLevel}` +
+    (value.devPrivateKeyPath ? `\n  development private key written OUTSIDE the repository: ${value.devPrivateKeyPath}\n  This is an H1 credential. It does NOT attest that a human acted.` : ""));
 }
 
 async function runEvolutionVerify(parsed) {
@@ -1505,6 +1599,10 @@ async function main() {
     await runBehaviorIndex(parsed);
     return;
   }
+  if (first === "journey" && second === "verify") {
+    await runJourneyVerify(parsed);
+    return;
+  }
   if (first === "tour") {
     await runTour(parsed);
     return;
@@ -1675,6 +1773,14 @@ async function main() {
     await runEvolutionDraft(parsed);
     return;
   }
+  if (first === "evolution" && second === "approve") {
+    await runEvolutionApprove(parsed);
+    return;
+  }
+  if (first === "trust" && second === "init") {
+    await runTrustInit(parsed);
+    return;
+  }
   if (first === "evolution" && second === "record") {
     await runEvolutionRecord(parsed);
     return;
@@ -1832,5 +1938,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(`nodekit: ${error.message}`);
-  process.exitCode = 1;
+  process.exitCode = error?.exitCode ?? 1;
 });

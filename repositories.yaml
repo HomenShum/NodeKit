@@ -29,6 +29,20 @@ repositories:
     role: domain-application
     commandProfile: application
 
+  # Added 2026-07-25. Until this entry existed the ecosystem dashboard measured
+  # thirteen repositories and could not see this one, so `nodekit repo check
+  # --repo-root parity-studio` failed with a TypeError rather than a verdict.
+  # The consequence was not cosmetic: three Notion P1 rows asserted that a PPTX
+  # importer, a deleteDeck mutation and export-my-data did not exist, while all
+  # three sat in this repository — pptxImport.ts alone is 2,330 lines. They were
+  # ranked as build tasks for months of work that was already done.
+  - name: parity-studio
+    github: HomenShum/parity-studio
+    lifecycle: preview
+    support: active
+    role: domain-application
+    commandProfile: application
+
   - name: NodeVideo
     github: HomenShum/NodeVideo
     lifecycle: preview

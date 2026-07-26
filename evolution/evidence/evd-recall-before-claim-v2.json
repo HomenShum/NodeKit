@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:recall-before-claim-v2",
+  "kind": "test",
+  "artifactRef": "git:f421f6b7647039883160c106cc92c313e2fbb4ff:evolution/artifacts/recall-before-claim.md",
+  "sha256": "a084b23dcb13ebdf19b78c800fcf9fde73eb503d28e70d0656cca64f9b6c1ac6",
+  "sourceCommit": "f421f6b7647039883160c106cc92c313e2fbb4ff",
+  "generatedAt": "2026-07-26T07:54:51.623Z",
+  "environment": {
+    "supersedes": "evd:recall-before-claim",
+    "evidenceBoundary": "SUPERSEDES evd:recall-before-claim, which drifted. That record was cut 2026-07-25 20:35 and the artifact was amended at 20:43 to add a section titled THIS CONTROL DESTROYED ITSELF — an honest correction recording that the control term had been written into the artifact and so became findable by the very search it was controlling. The original hash 27fd5116 no longer matched any file and the record still read result=pass. Result is downgraded to partial here: the before/after remains reproducible, but the control case is self-invalidating and the coverage figures quoted (9 roots, 384 files) are stale — the tool now reads 24 roots and about 4570 files. Nothing detected the drift for a day; scripts/verify-evidence-drift.mjs now does.",
+    "platform": "win32 node 22.22.2"
+  },
+  "verifiesInvariantIds": [],
+  "result": "partial"
+}
