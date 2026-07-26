@@ -136,6 +136,7 @@
     "scripts/verify-submission-attestation.mjs",
     "scripts/finalize-submission-evidence.mjs",
     "scripts/prepare-consumer-package.mjs",
+    "scripts/test-files.mjs",
     "scripts/capture-human-study.mjs",
     "scripts/capture-managed-evidence.mjs",
     "scripts/run-knowledge-runtime-comparison.mjs",
@@ -161,7 +162,7 @@
     "prepare": "npm run build:component",
     "audit:prod": "npm audit --omit=dev",
     "typecheck:public": "tsc -p tsconfig.public.json",
-    "test:repository": "node --test test/*.test.mjs",
+    "test:repository": "node scripts/test-files.mjs fast",
     "test": "npm run test:repository && npm run test:component",
     "presentation:nodekit-proof": "node scripts/generate-nodekit-proof-presentation.mjs",
     "acceptance:factory": "node src/factory-acceptance.mjs",
@@ -199,7 +200,9 @@
     "journey:verify": "node src/cli.mjs journey verify",
     "bench:recall": "node scripts/bench-recall.mjs",
     "recall": "node scripts/recall.mjs",
-    "verify:evidence": "node scripts/verify-evidence-drift.mjs"
+    "verify:evidence": "node scripts/verify-evidence-drift.mjs",
+    "test:slow": "node scripts/test-files.mjs slow",
+    "test:all": "node scripts/test-files.mjs all && npm run test:component"
   },
   "engines": {
     "node": ">=20"
