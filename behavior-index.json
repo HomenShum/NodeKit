@@ -9,7 +9,7 @@
     "verified": 4,
     "partial": 0,
     "unverified": 0,
-    "orphanAnnotations": 10
+    "orphanAnnotations": 18
   },
   "behaviors": [
     {
@@ -64,14 +64,14 @@
         {
           "file": "src/lib/opportunity-compiler.mjs",
           "symbol": "compileOpportunityToBuild",
-          "line": 40
+          "line": 48
         }
       ],
       "supporting": [
         {
           "file": "src/lib/opportunity-compiler.mjs",
           "symbol": "materializeBuildPacket",
-          "line": 106
+          "line": 114
         }
       ],
       "requiredScenarios": [
@@ -113,7 +113,7 @@
         {
           "file": "src/cli.mjs",
           "symbol": "runTour",
-          "line": 385
+          "line": 388
         }
       ],
       "supporting": [
@@ -212,7 +212,7 @@
           {
             "file": "src/lib/opportunity-compiler.mjs",
             "symbol": "materializeBuildPacket",
-            "line": 107
+            "line": 115
           }
         ],
         "namedSourceFiles": [
@@ -481,7 +481,7 @@
           {
             "file": "src/lib/behavior-index.mjs",
             "symbol": "coverLedgerInvariants",
-            "line": 92
+            "line": 100
           }
         ],
         "namedSourceFiles": [
@@ -513,7 +513,7 @@
           {
             "file": "src/lib/frontend-specialist.mjs",
             "symbol": "evaluateFrontendTournament",
-            "line": 181
+            "line": 189
           }
         ],
         "namedSourceFiles": [
@@ -579,7 +579,7 @@
           {
             "file": "src/lib/opportunity-compiler.mjs",
             "symbol": "compileOpportunityToBuild",
-            "line": 41
+            "line": 49
           }
         ],
         "namedSourceFiles": [
@@ -611,7 +611,7 @@
           {
             "file": "src/lib/behavior-index.mjs",
             "symbol": "coverLedgerInvariants",
-            "line": 91
+            "line": 99
           }
         ],
         "namedSourceFiles": [
@@ -926,7 +926,7 @@
           {
             "file": "src/cli.mjs",
             "symbol": "runTour",
-            "line": 386
+            "line": 389
           }
         ],
         "namedSourceFiles": [
@@ -956,9 +956,44 @@
   },
   "orphanAnnotations": [
     {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "src/lib/evolution-approval.mjs",
+      "line": 173
+    },
+    {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
-      "line": 270
+      "line": 364
+    },
+    {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "test/evolution-approval.test.mjs",
+      "line": 48
+    },
+    {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "test/evolution-approval.test.mjs",
+      "line": 58
+    },
+    {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "test/evolution-approval.test.mjs",
+      "line": 67
+    },
+    {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "test/evolution-approval.test.mjs",
+      "line": 86
+    },
+    {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "test/evolution-approval.test.mjs",
+      "line": 97
+    },
+    {
+      "behaviorId": "inv:canonical-promotion-requires-verified-approval",
+      "file": "test/evolution-approval.test.mjs",
+      "line": 113
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
@@ -1004,6 +1039,11 @@
       "behaviorId": "inv:journey-contract-self-verifies",
       "file": "test/journey-contract-verify.test.mjs",
       "line": 80
+    },
+    {
+      "behaviorId": "inv:research-verdict-beats-constant",
+      "file": "test/research-verdict-benchmark.test.mjs",
+      "line": 51
     }
   ],
   "boundary": "This index reports declared behaviors only. It does not claim the repository has no other behavior, and an ownership annotation asserts ownership rather than proving it."
