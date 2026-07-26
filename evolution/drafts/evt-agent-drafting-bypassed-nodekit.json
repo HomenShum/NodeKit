@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:agent-drafting-bypassed-nodekit",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "5aa31b5cec73dbc415947dbdfa023adb7e480ee3",
+    "occurredAt": "2026-07-26T02:49:13.739Z"
+  },
+  "track": "architecture",
+  "category": "schema",
+  "challenge": "An agent needed to write evolution records. NodeKit is declared canonicalFor nodekit.evolution-ledger and ships draftEvolutionEvent, which validates against the schema and refuses a malformed record.",
+  "observedFailure": "scripts/propose-evolution.mjs was written from scratch, reverse-engineering the record shape from one example file. All three records it produced were schema-INVALID — 7, 9 and 8 errors. It invented a root field (materiality), invented categories (governance, tooling), left evidenceIds empty where at least one is required, and invented interpretation properties. The authority guards it did add held under attack, so the failure was not carelessness about safety; it was never checking whether the capability already existed.",
+  "resolution": "Records are now drafted through NodeKit draftEvolutionEvent, which validates before writing and throws on any violation. Real evidence artifacts were produced and hashed so evidenceIds is satisfied by receipts rather than left empty. recall.mjs existed in this repository at the time and was not run against \"nodekit\" — the tool built to prevent this class of failure was not used on the class of failure it was built for.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:propose-evolution-guards"
+  ],
+  "knownLimitations": [
+    "interpretation.status is a const of \"human-reviewed\" with no value for an agent-authored record, so this field asserts a review that has not happened. The drafts/ directory is the only real not-canonical signal. Do not read the status field as approval.",
+    "propose-evolution.mjs is superseded by this record but not yet deleted; delete is prohibited and it still documents the guard tests.",
+    "The guards were verified; the output was not, until it was validated against the schema and failed."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "UNREVIEWED — drafted by claude-code 2026-07-25, awaiting project-owner review",
+    "reviewedAt": "2026-07-26T02:49:13.739Z"
+  }
+}

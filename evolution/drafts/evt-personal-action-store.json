@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:personal-action-store",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "5aa31b5cec73dbc415947dbdfa023adb7e480ee3",
+    "occurredAt": "2026-07-26T02:49:13.788Z"
+  },
+  "track": "product",
+  "category": "workflow",
+  "challenge": "The ledger records engineering decisions and holds no node type for the operator own obligations, which were spread across markdown, a roles registry, an inbox and several threads, so no store could answer what to do next.",
+  "observedFailure": "An apply-copilot state.db existed with a complete drafting pipeline and zero rows. The machinery was correct and nothing had ever passed through it. Warm inbound sat unanswered while build work continued, because build work was the only lane with a visible queue.",
+  "resolution": "Built a personal action store with nodes, edges and an append-only event log, ranked by cost of delay with cash speed as the tie-break. Its first ingestion was the unanswered inbound, so it cannot be used without confronting them. Staleness returns unknown rather than zero when the start date is unknown, and unknown sorts as urgent.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:personal-action-store"
+  ],
+  "knownLimitations": [
+    "interpretation.status is a const of \"human-reviewed\" with no value for an agent-authored record, so this field asserts a review that has not happened. The drafts/ directory is the only real not-canonical signal. Do not read the status field as approval.",
+    "It defines its own node schema rather than nodekit.knowledge-graph/v1, which is the canonical knowledge-graph schema in this repository. That duplication is real and unresolved.",
+    "It lives outside this repository and is not covered by repositories.yaml.",
+    "One lead (Wordware) has no verified inbound and is marked unverified."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "UNREVIEWED — drafted by claude-code 2026-07-25, awaiting project-owner review",
+    "reviewedAt": "2026-07-26T02:49:13.788Z"
+  }
+}

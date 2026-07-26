@@ -69,6 +69,17 @@ const HOME = process.env.USERPROFILE || process.env.HOME || "";
 const WORKSPACE = dirname(dirname(dirname(PLATFORM)));
 const PARITY = join(WORKSPACE, "parity-studio");
 const SLIDE = join(WORKSPACE, "nodeslide");
+// NodeRoom, and this tool's own directory. Added 2026-07-25 after
+// `recall.mjs "model routing broker cheaper"` returned NO MATCH across 1498
+// files in 19 roots. The answer existed in both places it had not been told to
+// look: node-platform/scripts holds run-agent-provider-broker.mjs, and NodeRoom
+// holds the model matrix and cost ledger that decide which route to use.
+//
+// The tool behaved correctly — it refused to call that a proof of absence and
+// said to widen with --root. But a probe that must be widened by hand every
+// time is a coverage claim resting on the caller remembering, and the whole
+// point of this file is that such claims are the defect.
+const NODEROOM = join(dirname(PLATFORM), "noderoom");
 
 const ROOTS = [
   { id: "repositories", path: join(PLATFORM, "repositories.yaml"), half: "engineering" },
@@ -90,6 +101,14 @@ const ROOTS = [
   { id: "slide-src", path: join(SLIDE, "src"), half: "engineering" },
   { id: "slide-convex", path: join(SLIDE, "convex"), half: "engineering" },
   { id: "slide-skills", path: join(SLIDE, "skills"), half: "engineering" },
+  { id: "noderoom-src", path: join(NODEROOM, "src"), half: "engineering" },
+  { id: "noderoom-convex", path: join(NODEROOM, "convex"), half: "engineering" },
+  // The lane ledgers: model-matrix.json and cost-ledger.json live here and are
+  // what decide which model route is used and what it costs.
+  { id: "noderoom-proofloop", path: join(NODEROOM, ".proofloop"), half: "engineering" },
+  // This tool's own neighbours. The broker, the ease harness and the graph
+  // extractors were all invisible to a search run from inside this directory.
+  { id: "platform-scripts", path: join(PLATFORM, "scripts"), half: "engineering" },
   { id: "memory", path: join(HOME, ".claude", "projects"), half: "reasoning", only: "memory" },
   { id: "skills", path: join(HOME, ".claude", "skills"), half: "reasoning" },
   // The ChatGPT thread ledger was also absent. Decisions reached in a thread and
@@ -146,9 +165,29 @@ function collect(root) {
   return { cov, files };
 }
 
+/**
+ * Matching is ALL-TERMS, not whole-phrase.
+ *
+ * The first version tested `body.includes(entireQuery)`, so a multi-word question
+ * only matched a file containing that exact string. `recall.mjs "model routing
+ * broker cheaper"` therefore returned NO MATCH across 1498 files while the answer
+ * sat in run-agent-provider-broker.mjs and cost-ledger.json — and the coverage
+ * report looked healthy, because every root really had been read.
+ *
+ * That is the worst version of this defect. A missing root announces itself;
+ * a matcher that cannot match reports full coverage and finds nothing, which
+ * reads as proof of absence rather than a broken probe.
+ *
+ * A file now matches when EVERY term appears somewhere in it. Whitespace,
+ * underscores and hyphens are also collapsed, so "cost-ledger" finds costLedger.
+ */
 function search(term) {
   const needle = term.toLowerCase();
   const loose = needle.replace(/[\s_-]+/g, "");
+  const terms = needle.split(/\s+/).filter(Boolean);
+  const looseTerms = terms.map((t) => t.replace(/[_-]+/g, ""));
+  const hasAll = (flat, flatter) =>
+    terms.every((t, i) => flat.includes(t) || flatter.includes(looseTerms[i]));
   const hits = [];
   const coverage = [];
 
@@ -164,16 +203,22 @@ function search(term) {
 
       const flat = body.toLowerCase();
       const flatter = flat.replace(/[\s_-]+/g, "");
-      if (!flat.includes(needle) && !flatter.includes(loose)) continue;
+      const phrase = flat.includes(needle) || flatter.includes(loose);
+      if (!phrase && !hasAll(flat, flatter)) continue;
 
+      // Prefer lines carrying the whole phrase; fall back to lines carrying the
+      // rarest term, so a hit on a common word does not decide what is shown.
+      const rarest = terms.slice().sort((a, b) =>
+        (flat.split(a).length) - (flat.split(b).length))[0] ?? needle;
       const lines = body.split(/\r?\n/);
       const where = [];
-      lines.forEach((ln, i) => {
+      for (const [i, ln] of lines.entries()) {
         const l = ln.toLowerCase();
-        if (l.includes(needle) || l.replace(/[\s_-]+/g, "").includes(loose)) {
+        const lf = l.replace(/[\s_-]+/g, "");
+        if (l.includes(needle) || lf.includes(loose) || l.includes(rarest)) {
           if (where.length < 3) where.push({ n: i + 1, text: ln.trim().slice(0, 150) });
         }
-      });
+      }
       hits.push({ root: root.id, half: root.half, file: f, where });
     }
   }

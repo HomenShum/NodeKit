@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:recall-before-claim",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "5aa31b5cec73dbc415947dbdfa023adb7e480ee3",
+    "occurredAt": "2026-07-26T02:49:13.595Z"
+  },
+  "track": "harness",
+  "category": "evaluation",
+  "challenge": "An agent must decide whether a thing already exists before building it. Existence was checked with ad hoc globs whose coverage was never stated, so a search that could not have found the target was indistinguishable from one that found nothing.",
+  "observedFailure": "Eight artefacts were reported as not existing in one session. All eight existed. The probe covered depth one; node-platform sits at depth two. It returned zero matches and exit code zero. Two of the eight were the nodeplatform.repo-contract ownership entry and evt:copy-as-proof-surface, the latter already promoted with evidence and a derived invariant.",
+  "resolution": "Added scripts/recall.mjs, which reads nine roots across both halves with no depth limit and has no code path that prints absent. It returns matches, or exactly what it read: every root, whether it existed, how many files were opened, which were unreadable. On its first execution it caught its own defect, reporting seven roots MISSING because import.meta.url percent-encoded a space, rather than reporting the target as not found.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:recall-before-claim"
+  ],
+  "knownLimitations": [
+    "interpretation.status is a const of \"human-reviewed\" with no value for an agent-authored record, so this field asserts a review that has not happened. The drafts/ directory is the only real not-canonical signal. Do not read the status field as approval.",
+    "Proves what was read, never that a thing does not exist. Absence remains unprovable by search.",
+    "Substring matching only. A decision recorded in different words is not found.",
+    "The root list is fixed in source. A store not in that list is invisible — the original failure at a different scale.",
+    "ChatGPT threads are not a root; the reasoning half is covered only by local memory and skills."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "UNREVIEWED — drafted by claude-code 2026-07-25, awaiting project-owner review",
+    "reviewedAt": "2026-07-26T02:49:13.596Z"
+  }
+}
