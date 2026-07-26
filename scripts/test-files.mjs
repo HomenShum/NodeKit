@@ -24,7 +24,15 @@
  */
 
 const SLOW = [
-  // 236s, dominated by one test evaluating a 15-trial protected matrix through a spawned evaluator.
+  // Measured 2026-07-26, after the fixture-encoding fix: 500s (8m20s), 6/6 tests pass.
+  //
+  // Before that fix the same lane could not finish at all — killed at a 20-minute ceiling with only
+  // 4 of its 6 tests reached and one failing. The cause was pngjs decoding 1-bit fixture PNGs
+  // through its per-pixel path: 275s of 366s profiled self time, 75.1%. See
+  // test/submission-fixtures.mjs browserPng.
+  //
+  // Still the slowest file by a wide margin, so it stays in this lane. It evaluates a 15-trial
+  // protected matrix through a spawned evaluator, several times.
   "test/agent-ease-matrix.test.mjs",
 ];
 

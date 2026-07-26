@@ -189,21 +189,46 @@ export function browserPng(width, height, marker) {
     const ihdr = Buffer.alloc(13);
     ihdr.writeUInt32BE(width, 0);
     ihdr.writeUInt32BE(height, 4);
-    ihdr[8] = 1;
-    ihdr[9] = 0;
-    const stride = Math.ceil(width / 8);
+    // bitDepth 8 / colorType 2 (truecolour), NOT bitDepth 1 / colorType 0.
+    //
+    // This was the whole cost of the slow test lane. pngjs decodes any image whose bitDepth is not
+    // 8 through its per-pixel `bitRetriever` path, and these fixtures were 1-bit. Profiled on the
+    // real 11,194-file fixture: 366.34s total with 275.26s of pngjs self time — 75.1%. Filesystem
+    // work was 8.1s, 2.2%, so the earlier "it is spread across ~11k file operations" reading was
+    // wrong. The validator has always accepted this encoding (submission-gate.mjs:1364 admits
+    // bitDepth 8 with colorType 2 or 6), and real production screenshots are already depth-8
+    // truecolour, so this makes the fixture resemble what the gate actually sees in the field.
+    //
+    // Level 1 rather than 9 on purpose: at level 9 encoding costs 1.8s per 180-image manifest
+    // against 0.32s at level 1, and every fixture cache miss pays it twice. Largest fixture is
+    // 30 KB against MAX_SCREENSHOT_PNG_BYTES of 25 MiB, so there is no size risk.
+    //
+    // Nothing is weakened, and that is measured rather than argued: across every encoding tested,
+    // 180/180 images kept distinct compressed bytes AND distinct decoded-pixel hashes, so the
+    // compressed-byte reuse check, the decoded-pixel reuse check and the pixelSha256 binding all
+    // still tell every image apart.
+    ihdr[8] = 8;
+    ihdr[9] = 2;
+    const stride = width * 3;
     const raw = Buffer.alloc((stride + 1) * height, 0xff);
     for (let row = 0; row < height; row += 1) raw[row * (stride + 1)] = 0;
     const markerDigest = createHash("sha256").update(marker).digest();
+    // The narrowest viewport is 390px, so stride is 1170 and all 32 marker bytes still land in
+    // scanline 0. The `index < stride` guard is kept rather than dropped as now-unreachable.
     for (let index = 0; index < markerDigest.length && index < stride; index += 1) raw[1 + index] = markerDigest[index];
     base = {
-      idat: pngChunk("IDAT", deflateSync(raw, { level: 9 })),
+      idat: pngChunk("IDAT", deflateSync(raw, { level: 1 })),
       iend: pngChunk("IEND"),
       prefix: Buffer.concat([
         Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
         pngChunk("IHDR", ihdr),
       ]),
     };
+    // Bounded, because the key includes a per-image marker so every image is a new entry and the
+    // value retains the compressed IDAT. Truecolour makes each retained value larger, which turns an
+    // unbounded Map from untidy into a memory risk under a long run. Oldest-first eviction mirrors
+    // what submission-gate.mjs:1403 already does.
+    if (pngFixtureCache.size >= 512) pngFixtureCache.delete(pngFixtureCache.keys().next().value);
     pngFixtureCache.set(cacheKey, base);
   }
   return Buffer.concat([
