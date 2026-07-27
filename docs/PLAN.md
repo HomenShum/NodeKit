@@ -117,6 +117,33 @@ Only items that the trials or the sweep proved matter: the three indicted gates 
 once a real case exists), copy-gate wiring, the 233s fast-lane test. Each lands as a small PR with
 its own before/after evidence.
 
+### Found 2026-07-27: the ecosystem dashboard measures an unnamed checkout (folds into P3)
+
+Reported by a peer session, verified here before acceptance. Three claims, all reproduced:
+`nodekit dashboard` resolves NodeSlide to `nodebench_ai4/NodeSlide`, on branch
+`codex/injectable-core` at `0669be4`, **130 commits behind its own origin/main**; that copy has
+`nodekit.yaml:42 receiptSchema: null` while the live product repo has
+`receiptSchema: nodeslide.conformance/v1` at the same line. The row's `MISSING` proof-schema verdict
+and `6/8` score are therefore correct about the bytes they read and wrong about NodeSlide.
+(One correction to the report: the live repo is currently on `feat/deck-data-rights` at `3d89185`,
+not `main a8ae541`. The receiptSchema difference holds.)
+
+Propagation matters more than the row: a downstream ranker reads ECOSYSTEM_STATUS.md as measured
+signal and promotes that `6/8` above every P1, so the top work-queue item derives from a
+130-commit-old branch.
+
+**The defect is not the stale clone — it is that the report cannot say what it measured.**
+`repositories.yaml` identifies a repository by `name` and `github` only. ECOSYSTEM_STATUS.md
+contains **zero** occurrences of commit, sha, ref or branch in the whole file. This is the project's
+own recurring bug class at ecosystem scale: a word's presence is not its role; an exit code's value
+is not its cause; a turn count is not an identity; **a repository name is not a version.** A
+dashboard printing eight columns of verdict without naming the bytes behind them is unfalsifiable
+by construction — the one property this project refuses everywhere else.
+
+Fix: every dashboard row records the resolved path, branch and commit it measured, and `repo check`
+fails when a resolved checkout is behind its own tracking ref. `src/` is a material path, so this
+needs an evolution event; deliberately NOT added to the already-blocked PR #22.
+
 ### P4 — Widen (second builder), only after P2
 The retrieval core (`searchContext()`, SQLite+FTS first), the UI Design Graph as a generated
 projection, NodeCase composition. Each requires: the loop closed twice, and a failing benchmark or
@@ -131,3 +158,5 @@ named demand justifying it — per the thread's own doctrine.
 | 3 | Legacy 22 events unattested vs re-approve | leave; the warning is the record |
 | 4 | If Arm B loses twice: accept reclassification | plan says yes |
 | 5 | H2 credential or stay H1-dev | stay H1; receipts say so |
+| 6 | Should the workspace resolve NodeSlide to `D:/VSCode Projects/nodeslide`, or is `nodebench_ai4/NodeSlide` a deliberate second worktree? | dashboard keeps measuring the stale clone |
+| 7 | parity-studio row reads `Commands FAIL · 0/8` — registered 2026-07-25, unexamined | stays failing |
