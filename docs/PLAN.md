@@ -1,184 +1,133 @@
-# NodeKit — the overall plan
+# NodeKit — the plan, product side up
 
-Written 2026-07-27 against `origin/main` at `e9201e79` (PR #21 merged) with PR #22 open.
-Synthesized from the NodeKit ChatGPT thread (read through its newest two exchanges, 2026-07-27),
-the related threads (Slide AI Collaboration, NK-yC-S26, NK-Mom's-Biz), the Evolution Ledger
-(22 events), and the gates as they derive today.
+Rewritten 2026-07-27, superseding the engineering-led version of the same date. That version
+ordered work by subsystem readiness. This one orders it by the only question that matters:
+**does NodeKit measurably reduce the founding pain, for a named user, on a real case?**
+Everything engineering serves that question or waits.
 
-**Status claims in this file rot.** Where a claim is checkable, the command that checks it is
-named. Trust the command over the prose, and the prose only as of the date above.
+**Status claims rot.** Checkable claims name their checking command; trust the command.
 
 ---
 
-## 1. Thesis
+## 1. The user, decided
 
-NodeKit is the vehicle that carries a builder from an idea to a live, improving product:
-**DECIDE → BUILD → EXPLAIN → LAUNCH → LEARN**, with proof cross-cutting every stage. The gates are
-stage-exit conditions, not the product. The founding pain is the reprompt loop — a coding agent
-making product decisions while coding — and the founding fix is the OpportunityContract: an
-approved boundary the agent builds against instead of improvising.
+The record held three users at once — the builder, the hypothetical external builder, the
+portfolio audience — and that ambiguity stalled prioritization. Decided now:
 
-Entry model (decided in-thread, replacing the original assumption): the user does not open
-NodeKit. **The user opens Codex or Claude Code, opens a repository, and asks the coding agent to
-use NodeKit.** NodeKit installs into the repository and guides and verifies from inside it.
-The technical stack comes after the adoption path — always.
+- **The customer** is a builder with a coding agent. Near-term that is one person: the owner,
+  building with Claude Code / Codex.
+- **The operator** is the coding agent itself. NodeKit's entry model has always said so: the user
+  opens their coding agent and asks it to use NodeKit. NodeKit's direct user interface is the
+  agent, not the human. This has a consequence the project under-used: **an agent can run the
+  user journey for real, not as simulation** — provided it is a FRESH agent with no author
+  context, holding only what a real user's agent would hold.
+- **The beneficiary** is the person the built product serves — concretely, a real salon owner
+  receiving a weekly brief. She never sees NodeKit and does not care about attestation. She cares
+  that the numbers are right and traceable.
+- **The acknowledged byproduct**: NodeKit is also proof-of-craft for the owner's FDE pipeline.
+  That purpose is real, currently the best-served of the three, and is a byproduct — not the
+  design target. Naming it stops it from silently steering scope.
 
-Two journeys are optimized at once: the **user's** journey through the product, and the
-**engineer's** journey through the repository. A person starting from an empty screen must be able
-to understand the mission, run it, trace one action, make one small change, and prove it, without
-private coaching.
+External builders (user #2 of the old ambiguity) are **not a target** until the loop has closed
+twice for user #1. NodeCase, the UI Design Graph, and the retrieval core remain parked behind
+that same gate.
 
-## 2. Doctrine that survived contact
+## 2. The product, as the user experiences it
 
-These rules were each violated at least once, caught, and are now enforced in code. They are the
-constitution; new work that conflicts with them is wrong until proven otherwise.
+The human writes one messy paragraph to their coding agent — the kind a real client sends:
 
-1. **The agent proposes; the agent does not approve.** Enforced end to end since #20/#21: drafts
-   are born `agent-proposed`; `human-reviewed` is derivable only from a signed, single-use,
-   domain-separated approval; trust levels H0–H3 with no silent fallback. Verified by
-   `test/evolution-approval.test.mjs` (14 cases) and the adversarial CLI probe (11 cases).
-2. **Evidence is generated, never accepted.** Verify recomputes; a claim without a named artifact
-   is an overclaim. `npm run journey:verify` exits non-zero on any hand-edited check.
-3. **Derived beats hand-maintained.** repo-map.json, behavior-index.json, EVOLUTION.md,
-   ECOSYSTEM_STATUS.md are all generated; their tests fail when they go stale. Every
-   hand-maintained status table this project ever had went stale within hours.
-4. **A value's presence is not its role.** The recurring bug class (~12 confirmed instances:
-   grep-as-claim, exit-code-for-the-wrong-reason, matching-turn-count-as-identity,
-   coverage-that-searched-nothing). Every gate that survived does so by checking meaning, not
-   presence. New checks must state what they do NOT establish.
-5. **Immutable history, append-or-supersede.** In-place edits to committed records are detected
-   against the introducing commit, from bytes on disk. Binding repairs are allowed and reported;
-   claim changes block.
-6. **Adoption path before tech stack.** From the research-phase correction: an incumbent is
-   neither a veto nor automatic validation; the G/A/N/R procedure decides, fails closed on
-   unknowns, and must be able to say do-not-build.
-7. **Graphs and indexes are generated projections, never new sources of truth.** (Newest thread
-   exchange, converging unprompted with rule 3.)
+> "My client runs a salon. She never knows if she's actually making money each week. Build her
+> something simple she can look at Monday morning."
 
-## 3. Where we actually are
+Without NodeKit, the agent improvises: it invents scope, makes product decisions mid-code, and
+returns something plausible whose claims nobody can check. That improvisation loop is the
+founding pain, and it is the owner's documented, felt pain — the reprompt loop.
 
-### Shipped and gated (main)
+With NodeKit, the agent is supposed to: surface an **OpportunityContract** (the decided boundary —
+user, problem, primary artifact, rejected alternatives) *before* building; build against it; and
+return work whose claims carry evidence. The human's "aha" is the moment the agent **asks for a
+decision instead of quietly making it** — and the moment a claim in the output can be traced to a
+source instead of taken on faith.
 
-| pillar | state | check |
-|---|---|---|
-| Builder journey J0/J1 | builder-case, opportunity-contract, build packet; salon fixture | `npm run journey:verify` (11/12; 12th underivable by design) |
-| Codebase tour | START_HERE, GLOSSARY, repo-map, `nodekit tour` | same |
-| Behavior Index | 22 invariants, 22 symbol-owned, bound to proving assertions | `npm run behavior:index` |
-| Evolution Ledger | 22 events; immutability + authority enforced | `nodekit evolution verify` |
-| Approval chain | trust init → approve → record, H0–H3 | `test/evolution-approval.test.mjs` |
-| Atlas | retrieval + honest benchmark; ranker on probation (fielded ranking not proven superior) | `nodekit graph benchmark` |
-| Suite performance | slow lane 20min-timeout → 8m20s green; CLI 708→269ms | PR #22 |
+That is the product. Not the 85 schemas — the changed behavior of the agent the user already has.
 
-### Known-broken or unproven, in priority order
+## 3. The founding claim, made falsifiable
 
-1. **PR #22 is red.** `verify` blocks on materiality for `.github/workflows/quality.yml` — one
-   file, needs one approved evolution event. **Owner action; an agent must not self-approve it.**
-   `test` failure is downstream of the same branch state; re-runs after the event records.
-2. **The ledger's 22 events are 0/22 attested** (promoted before enforcement; reported honestly
-   rather than back-filled). Standing debt, visible in every `evolution verify` run.
-3. **The frontend tournament cannot run.** Directions exist; **nothing renders them** and
-   `assembleFrontendRenderReceipt` has zero non-test callers. DECISIVE is reachable only from
-   receipts nobody produces. This is the single biggest gap between "engines" and "vehicle."
-4. **Three gates have holes found by the 2026-07-26 sweep, deliberately left for review:**
-   evidence *artifacts* aren't byte-verified on disk (records are); `journey-contract`'s
-   `suite.green` derives from the behavior index and cannot observe a test run;
-   `test/ease-proof.test.mjs` is 147 substring greps of 161 assertions.
-5. **The fast lane is not fast.** submission-gate has a 233s test; submission-preparation has four
-   over 80s; five fixture-dependent files sum to ~1,279s. Improved by the PNG fix but unresolved.
-6. **The research-verdict corpus is underspecified** — no case carries a measured gap, so it
-   scores agreement with a judgement, and correctly says so in its `knownDefect` block.
-7. **copy-claims has zero production callers.** The classes exist; the gate isn't wired to any
-   pipeline. (Todo #22 as written is stale — close it and open the wiring item instead.)
+**Hypothesis:** given an underspecified real brief, a coding agent operating through NodeKit makes
+measurably fewer unapproved product decisions, invents less scope, and asserts fewer unevidenced
+claims than the same class of agent without it — without an unacceptable cost in time.
 
-### Decided in-thread, not yet started
+Until this is measured, NodeKit fails its own G input (measured residual gap) and its own research
+procedure returns do-not-build-more. So this experiment precedes all new platform work.
 
-- **NodeCase** (consulting engagement workspace composing NodeRoom+NodeSlide+NodeProof…) — the
-  corrected Lilli answer. Parked: it is a composition play that presupposes the journey loop works.
-- **UI Design Graph** — generated projection over contract/Atlas/flows/behavior-index/receipts;
-  literature-backed (WebDesignIter +9.55pp Pass@2). Parked behind the tournament being runnable,
-  because its inputs include render receipts that don't exist yet.
-- **Retrieval core service** — one `searchContext()` service, several transports (CLI/HTTP/MCP/
-  subagent); SQLite+FTS first, vector only when the lexical benchmark fails, graph only for
-  relationship/temporal questions. The second-brain server and `recall.mjs` are working prototypes
-  of exactly this shape.
+### The closed-loop test (agent-operated, runnable now)
 
-## 4. The plan
+Two arms, same brief, fresh agents with no author context — the cwc fresh-context evaluator
+pattern applied at product level, and the Builder Gym's baseline-vs-candidate shape applied to
+NodeKit itself:
 
-The ordering principle: **close the loop before widening it.** NodeKit has never carried one real
-case through all five stages with proof at each seam. Until it has, every new subsystem is another
-engine bolted to a vehicle that hasn't driven.
+- **Arm A (control):** fresh agent, empty directory, the salon brief, no NodeKit.
+- **Arm B (candidate):** identical, plus the packed NodeKit tarball and the one sentence a real
+  user would add: "I heard NodeKit helps coding agents build products properly — use it."
+  This is literally the `agent-process-packed-cli-from-empty` bootstrap mode the ease matrix
+  already defines, run as a product experiment instead of a conformance test.
+- **Judge:** a third fresh agent scores both directories against a rubric neither arm saw:
+  (a) product decisions made without being surfaced for approval, (b) scope invented beyond the
+  brief, (c) claims in the output with no evidence path, (d) whether a decided boundary exists as
+  an artifact, (e) time/step cost. Verdict shape follows the gym: comparison, never promotion.
 
-### P0 — Unblock (owner, ~15 minutes)
+**What this closes and what it does not.** It closes the **operator loop** — can a user's agent
+actually drive NodeKit from a bare directory to a decided, evidenced first slice, and does NodeKit
+change the agent's behavior in the claimed direction? It does **not** close the **beneficiary
+loop** — whether a real salon owner acts on the brief. One trial per arm is an anecdote; the
+existing 15-trial no-cherry-pick campaign shape is the scale-up path if trial 1 is promising.
 
-1. Run the approval chain for the `quality.yml` materiality event (commands in PROGRESS.md):
-   `trust init` → `evolution approve` → `evolution record`. Merge PR #22 when green.
-2. Decide the standing question this creates: do the 22 legacy events stay `unattested` (honest,
-   noisy) or get re-approved under the new chain (a day of ceremony)? Recommendation: leave them;
-   the warning is the record.
+### Kill criteria (Reset template, applied to our own product)
 
-**Exit:** PR #22 merged, CI green on main, `npm test` fast for every future session.
+- If Arm B shows **no reduction** in unapproved decisions / invented scope / unevidenced claims —
+  or the agent cannot complete the NodeKit path without author coaching — the platform pitch
+  fails its first real test. Response: fix the specific frictions the trial recorded and rerun
+  once. A second failure kills "NodeKit as a product for others" and reclassifies the repo as
+  internal tooling + portfolio, which are its currently-proven uses.
+- If Arm B wins on discipline but costs >3x the steps, the finding is "right product, wrong
+  weight" — the fix is subtraction, not features.
 
-### P1 — Close the Build→Explain seam (the tournament, ~1–2 sessions)
+## 4. The loop, in order
 
-The missing physical piece is small and known: a renderer for the three directions and a wired
-receipt producer.
+### P0 — Unblock (owner, ~15 min)
+Approve + record the `quality.yml` materiality event (commands in PROGRESS.md); merge PR #22.
+Unchanged from the prior plan.
 
-1. Implement the direction renderer (static HTML render of each candidate against the salon
-   contract — no live model calls; the tournament evaluates artifacts, not generation).
-2. Wire `assembleFrontendRenderReceipt` into a `nodekit frontend render` command; receipts include
-   screenshot hashes that must exist on disk (closing the sweep's "hashes nothing checks" hole).
-3. Run the tournament end to end on the salon contract. Ship the first DECISIVE verdict produced
-   from real receipts. Record the evolution event via the approval chain.
+### P1 — Run the closed-loop experiment (agent-operated; no renderer dependency)
+The prior plan put the tournament renderer first. **Product-side, that was wrong**: the user's
+agent builds the app itself; the tournament is NodeKit-internal machinery. The renderer moves to
+engineering debt (P3). The experiment above is runnable today and measures G directly.
+**Exit:** a judged A/B verdict artifact with per-arm trajectories, and a friction list from Arm B
+in the ledger's friction taxonomy. First run launched 2026-07-27.
 
-**Exit:** `nodekit frontend plan → directions → render → benchmark → canary` runs on the salon
-case with zero hand-authored artifacts. Todo #21 closes.
+### P2 — Close the beneficiary loop (one real human)
+Take Arm B's slice (or its post-friction-fix rerun) to one real salon owner through the Mom's-Biz
+network. She receives the Monday brief; we record whether she acts on it and what she distrusts.
+**Exit:** one ObservationPack from a real human, one friction→gym→ledger repair cycle run on it,
+all five journey stage receipts on one real `builder-case`.
 
-### P2 — First full journey on the real vertical (salon, ~1 week of sessions)
+### P3 — Engineering in service of what P1/P2 exposed
+Only items that the trials or the sweep proved matter: the three indicted gates (artifact bytes,
+`suite.green`, ease-proof greps), the tournament renderer + receipt producer (needed by EXPLAIN
+once a real case exists), copy-gate wiring, the 233s fast-lane test. Each lands as a small PR with
+its own before/after evidence.
 
-DECIDE (contract exists) → BUILD (tournament output) → EXPLAIN (StoryPack from real receipts) →
-LAUNCH (local demo counts; LaunchManifest recorded) → LEARN (one ObservationPack; one friction →
-gym → ledger repair cycle on a real observation).
+### P4 — Widen (second builder), only after P2
+The retrieval core (`searchContext()`, SQLite+FTS first), the UI Design Graph as a generated
+projection, NodeCase composition. Each requires: the loop closed twice, and a failing benchmark or
+named demand justifying it — per the thread's own doctrine.
 
-**Exit:** one `builder-case` with all five stage receipts, walkable by `nodekit tour`, demoable to
-a stranger. This is also the YC/demo narrative artifact.
-
-### P3 — Harden the gates the sweep indicted (parallel with P2, small PRs)
-
-1. Artifact byte-verification in `evolution verify` (same pattern as record immutability).
-2. `suite.green` must consume a real test-run artifact (timestamped result file the CI writes),
-   or be renamed to what it actually checks.
-3. Replace ease-proof's substring greps with behavior-index-style symbol checks, file by file.
-4. Wire `auditCopyClaims` into one real pipeline point (PR template or `nodekit check`).
-5. Fast-lane heavy tests: profile the 233s submission-gate test the same way the PNG cost was
-   found — measured, not guessed.
-
-### P4 — Retrieval core + UI Design Graph (only after P1–P2)
-
-1. Extract `searchContext()` as one service with CLI/MCP transports, absorbing `recall.mjs` and
-   the second-brain server's lessons (localhost-default, token-gated, read-only, coverage always
-   reported). SQLite+FTS only; the vector/graph escalation each require a failing benchmark first.
-2. Generate the UI Design Graph as a projection (rule 7), feeding it render receipts from P1.
-3. Revisit NodeCase only when a second real vertical demands composition.
-
-## 5. Risks
-
-- **Self-approval regression.** Any new "convenience" path that writes review status is the old
-  bug. The tests exist; keep them in the fast lane.
-- **Gate theatre.** The sweep found three gates that pass without observing. Fixing them (P3) can
-  wait; *trusting* them cannot — until fixed, treat `suite.green` and ease-proof as advisory.
-- **Measurement contamination.** Two nights were partially lost to orphaned test processes and
-  piped exit codes. The discipline is written into the artifacts: kill-and-verify-zero before
-  timing, `$?` on its own line, absolute paths for cross-shell files.
-- **Scope gravity.** NodeCase, the design graph, and the retrieval service are all real — and all
-  downstream of a loop that has never closed. The wedge stays: one builder, one vertical (salon),
-  one journey, proven.
-
-## 6. Owner decision queue
+## 5. Owner decision queue
 
 | # | decision | default if silent |
 |---|---|---|
-| 1 | Approve+record the quality.yml event (P0) | PR #22 stays red |
-| 2 | Legacy 22 events: leave unattested vs re-approve | leave, keep the warning |
-| 3 | H2 credential (passkey/hardware) or stay H1-dev | stay H1; receipts say so |
-| 4 | 15-trial matrix: keep 180 imgs/manifest or shrink | keep; coverage is the point |
-| 5 | Close stale todo #22, open "wire copy gate" | done in this plan |
+| 1 | Approve+record the quality.yml event; merge #22 | PR stays red |
+| 2 | Name the real salon contact for P2 | P2 blocks after P1 |
+| 3 | Legacy 22 events unattested vs re-approve | leave; the warning is the record |
+| 4 | If Arm B loses twice: accept reclassification | plan says yes |
+| 5 | H2 credential or stay H1-dev | stay H1; receipts say so |
