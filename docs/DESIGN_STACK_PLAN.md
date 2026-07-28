@@ -148,6 +148,17 @@ verified by toggling the media query in a real browser, not by grepping CSS).
 - This is the piece that keeps the whole stack honest: without it, motion work is vibes with a
   token vocabulary.
 
+### 4.5 `trust-surfaces` — shipped 2026-07-28, from a cross-session convergence
+
+Two sessions independently found the same rule from opposite sides: motion-ladder's *"motion that
+makes a not-yet-accepted change feel accepted is a correctness bug"* and the
+`data-agent-web-consent` gap (consent posture silently vanished from the DOM — nothing failed).
+One class: **on any surface where trust is decided, the affordances carrying the decision must be
+inspectable and must not be styled to imply an outcome.** Two clauses — machine-readable state
+(existence asserted, not just value) and no outcome-implying styling (motion, success tokens, or
+copy) on undecided things. Previously enforced in two places by two instruments, which is exactly
+how one clause went missing without failing anything. Now one skill, one gate.
+
 ## 5. Combination recipes `[COUNCIL will add/amend]`
 
 **A — Consumer app screen (salon vertical):**
