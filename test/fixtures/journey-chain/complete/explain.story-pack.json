@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "nodekit.story-pack/v1",
+  "caseId": "fixture-chain-2026-07-28",
+  "stage": "explain",
+  "producedAt": "2026-07-28T18:20:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.build-evidence-pack/v1",
+      "caseId": "fixture-chain-2026-07-28",
+      "sha256": "11ee3aa325924138f5346996d75ecfeac61d33b2f01e334023a76c80e9a70603",
+      "path": "build.build-evidence-pack.json"
+    },
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "fixture-chain-2026-07-28",
+      "sha256": "cff0142e7c0e91f8d367fef640b36af0080dded43ad42de51345dd0d0e2c1c02",
+      "path": "decide.opportunity-contract.json"
+    }
+  ],
+  "content": {
+    "claims": [
+      {
+        "claim": "The reconcile CLI turns four differently shaped exports into one ledger.",
+        "boundTo": "content.built[0]",
+        "bindingEvidence": "reconcile-suite.log"
+      },
+      {
+        "claim": "The tool never writes to an accounting system of record.",
+        "boundTo": "content.decisions[1]",
+        "bindingEvidence": "write-surface-scan.txt"
+      }
+    ],
+    "unboundClaims": [
+      {
+        "claim": "The bookkeeper saves a morning every Monday.",
+        "why": "No BuildEvidencePack entry supports a timing claim; nothing timed a real reconciliation."
+      }
+    ]
+  },
+  "completeness": {
+    "claimed": [
+      "Every claim made to a human is either bound to a named BuildEvidencePack entry or listed as unbound."
+    ],
+    "notRun": [
+      "No human read this story pack, so its persuasiveness is unmeasured.",
+      "The timing claim was written down as unbound rather than tested."
+    ],
+    "refused": [
+      {
+        "item": "A headline figure for hours saved per week",
+        "reason": "There is no observation behind it; publishing one would be a number with no denominator."
+      }
+    ]
+  }
+}

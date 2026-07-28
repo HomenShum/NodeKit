@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "nodekit.opportunity-contract/v1",
+  "user": "A solo bookkeeper who reconciles four small retail clients every Monday morning.",
+  "problem": "Reconciliation takes the whole morning because every client exports a different CSV shape and the bookkeeper re-derives the column mapping by eye each week.",
+  "wedge": "One buyer, one pain: the Monday reconciliation for these four clients, nothing else in the practice.",
+  "primaryJob": "Turn four differently shaped weekly exports into one reconciled ledger the bookkeeper can sign off in under fifteen minutes.",
+  "inputs": ["client_csv_exports", "prior_week_ledger", "chart_of_accounts"],
+  "primaryArtifact": "A reconciled weekly ledger with every unmatched line itemised and attributed to a source file.",
+  "rejectedAlternatives": [
+    {
+      "alternative": "A general-purpose CSV mapping UI",
+      "reason": "Moves the column-guessing work rather than removing it, and widens the buyer from one bookkeeper to every spreadsheet user."
+    },
+    {
+      "alternative": "Direct bank API integrations",
+      "reason": "Requires credentials this wave has no authority to hold, and the clients' banks are not the shared bottleneck."
+    }
+  ],
+  "openUnknowns": [
+    "Whether the four export shapes are stable week to week or change with each vendor update.",
+    "Whether an unmatched line is more costly to miss than a wrongly matched one for this bookkeeper."
+  ],
+  "successCondition": "The bookkeeper completes a Monday reconciliation in under fifteen minutes without hand-editing a column mapping.",
+  "authorityLimits": {
+    "read": ["client_csv_exports", "prior_week_ledger", "chart_of_accounts"],
+    "propose": ["column mappings", "line-item matches"],
+    "approve": [],
+    "prohibited": [
+      "writing to any accounting system of record",
+      "holding bank credentials",
+      "marking a reconciliation as signed off on the bookkeeper's behalf"
+    ]
+  }
+}

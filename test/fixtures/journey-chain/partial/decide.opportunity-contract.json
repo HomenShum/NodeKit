@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "nodekit.opportunity-contract/v1",
+  "user": "A solo bookkeeper who reconciles four small retail clients every Monday morning.",
+  "problem": "Reconciliation takes the whole morning because every client exports a different CSV shape.",
+  "wedge": "One buyer, one pain: the Monday reconciliation for these four clients, nothing else in the practice.",
+  "primaryJob": "Turn four differently shaped weekly exports into one reconciled ledger.",
+  "inputs": ["client_csv_exports", "prior_week_ledger"],
+  "primaryArtifact": "A reconciled weekly ledger with every unmatched line itemised.",
+  "rejectedAlternatives": [
+    {
+      "alternative": "A general-purpose CSV mapping UI",
+      "reason": "Moves the column-guessing work rather than removing it."
+    }
+  ],
+  "openUnknowns": ["Whether the four export shapes are stable week to week."],
+  "successCondition": "The bookkeeper completes a Monday reconciliation in under fifteen minutes.",
+  "authorityLimits": {
+    "read": ["client_csv_exports", "prior_week_ledger"],
+    "propose": ["column mappings"],
+    "approve": [],
+    "prohibited": ["writing to any accounting system of record"]
+  }
+}
