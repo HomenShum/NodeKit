@@ -174,6 +174,68 @@ simultaneously over-matching and under-matching, and its noise conceals the miss
 Related discipline: the self-test must exercise the **real** probe, not a duplicated copy of it. A
 self-test against a re-implementation proves the copy works — this class again, one level up.
 
+### Defending the boundary that was never silent
+
+The `update_theme_v1` port was briefed on a stated blast radius: adding the op without the Convex
+validator member would produce "valid TypeScript that the server rejects at the wire." The agent
+tested that claim instead of accepting it, and it is **wrong** — deleting the validator member
+produces **8 `convex tsc` errors**, because downstream types derive from it via `Infer<>`. It would
+never have shipped silently.
+
+The genuinely silent boundaries were somewhere nobody was looking: `externalChangeSet`'s
+`new Set<PatchOperation['op']>([...])` and external-agent's `requireOneOf([...])` are **plain string
+lists**. A missing op typechecks perfectly and is rejected at the wire with a generic message. The
+header also named three owners; there are five.
+
+So the fear was real and pointed at the wrong place. **A documented blast radius is a claim, and it
+decays like any other** — the two boundaries it named were watched, and the two it did not name
+were the ones that could fail in silence. Both now derive from a
+`satisfies Record<PatchOperation['op'], true>` table rather than keeping hand-written copies.
+
+Verified by injection rather than argument: a hypothetical `set_deck_locale_v1` member produces
+**22 distinct compile errors**, each at a site that needs a decision. That is what makes the
+exhaustiveness guard a gate rather than a comment.
+
+### Receipts computed from the traversal that performed the work
+
+Named by the other session after a third instance in one day, and it is the sharpest formulation of
+the family:
+
+> **erasure receipts assert completeness from the traversal that performed the deletion, so
+> anything the traversal could not reach is invisible to the claim by construction**
+
+Three instances: an orphaned `_storage` blob, the unbounded `collectNodeSlideScopedRows`, and
+`DERIVED_SWEEP_LIMIT` reading only the first 512 `nodeslide_agent_runs` while the schema pass
+deleted *all* of them — stranding run 513's budget row behind an id no deck-anchored query can
+reach, under `remainingDeckRows: 0` and `retentionSafe: true`.
+
+This is the vacuous pass with a receipt attached. The check is not merely uninformative; it
+actively **asserts safety over surviving user data**, and it is structurally incapable of noticing,
+because the thing that measures completeness is the same thing whose incompleteness is in question.
+The general defence is an *independent* backstop — a count or query that does not share the
+traversal's reachability assumptions.
+
+### A tripwire is not a gate, and may still be worth keeping
+
+`assertNoStrandedBudgetRows` has **no reachable trigger** once both strand paths are closed at the
+source: its knockout comes back green. By the rule in this document that would make it a candidate
+for deletion — an assertion that cannot fail is not a gate.
+
+It was kept, with the argument written into the source, and the argument is right: every other
+derived table has `countJobDerivedRows` as an independent backstop, and the budget cluster
+structurally cannot, because its id dies with the job. Without the assertion, a future traversal
+change yields a green receipt over surviving spend data **with no failing test anywhere**.
+
+So the rule needs a distinction it did not have:
+
+    a GATE proves a property holds today — one that cannot fail proves nothing
+    a TRIPWIRE guards against a future change — it is SUPPOSED to be unreachable now
+
+Both must be probed. The difference is what a green knockout means: for a gate it is a defect, for
+a tripwire it is the expected state. **A tripwire must say in its own comment that it is one**,
+along with why no cheaper backstop exists — otherwise the next reader deletes it to keep the
+knockout table tidy, which is exactly the tidying this document exists to prevent.
+
 ## Resolved / Open
 
 - `trust-surface-audit.mjs` — **retired.** Replaced by `trust-surface-core.mjs` (probe + verdict),
