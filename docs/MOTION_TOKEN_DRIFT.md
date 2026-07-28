@@ -86,6 +86,33 @@ not replacements:
 
 The one changing value is called out rather than buried, so the diff carries its own disclosure.
 
+## What the gate found that this document missed
+
+`scripts/motion-token-drift-gate.mjs` was written to enforce the table above. Its first run
+returned **more conflicts than the hand analysis**, because I had only read the three `tokens.css`
+files while the gate reads all 67 CSS files across the three repositories:
+
+    --duration-normal   200ms  noderoom:docs/design/contract-spec-extracted.css (+2 design-system exports)
+                        220ms  noderoom:src/ui/mobile/mobile.tokens.css
+    --duration-slow     400ms  noderoom:docs/design/contract-spec-extracted.css (+2 design-system exports)
+                        380ms  noderoom:src/ui/mobile/mobile.tokens.css
+
+This is **not** the cross-repository drift the table describes. It is `within-one-repository`, and
+its shape is more specific than "two files disagree": the **design-system specification says
+200/400ms and the shipped mobile code says 220/380ms.** The implementation and the document that
+defines it have diverged, and the document is the one that reads as authoritative.
+
+Two things follow. The canonical mapping above listed noderoom's `--duration-normal` as 220ms and
+proposed moving it to 240ms — a 20ms change. Against the *spec's* 200ms it is a 40ms change, in the
+same direction, and whichever number is chosen one of the two sources is currently wrong about the
+product. That is an owner call, not a mechanical rename.
+
+And the method lesson, which is the point of building the gate at all: **the hand analysis read the
+files named `tokens.css` and concluded it had read the tokens.** A tool that enumerates rather than
+assumes found a class of conflict I had no reason to look for. The gate is deliberately not
+filtered to `src/` — a specification file making a false claim about the design system is a real
+finding, and hiding it behind a path filter would be the same mistake one level down.
+
 ## Gate this needs
 
 A cross-repo check that fails when a motion token name resolves to different values in different
