@@ -1,0 +1,872 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.story-pack.v1.schema.json",
+  "title": "NodeKit story pack",
+  "description": "EXPLAIN stage of the Builder Journey. Answers: what is the claim being made to a human, which BuildEvidencePack entry binds each claim, and which claims have no binding. Consumes BuildEvidencePack + OpportunityContract. Does NOT consume LaunchManifest — StoryPack and LaunchManifest are the one genuinely parallel pair.\n\nThe root envelope is frozen by docs/JOURNEY_INTERSTAGE_CONTRACT.md and is not this schema's to change.\n\nWHY THIS STAGE EXISTS. Trial 1 shipped a product that made every assertion truthfully and still misrepresented itself, because the claims were true ABOUT THE SOFTWARE and false ABOUT THE DATA. docs/PLAN.md §W2 names the distinction this schema makes structural:\n\n    BUILD provenance   — how the software was constructed\n    CONTENT provenance — what the displayed numbers actually depict\n\nTrial 1's receipts proved the first. Nothing in the artifact was obliged to prove the second. So every claim here carries TWO independent bindings, and satisfying one does not satisfy the other. `buildBinding` resolves into BuildEvidencePack. `contentBinding` resolves into `content.sources`, which is a different pool with a different authority test. A claim with a perfect buildBinding and a fixture-origin contentBinding is exactly the Trial 1 failure, and this schema forces it into `status: disclosed-demo` with adjacent disclosure copy rather than letting it render as fact.\n\nTHE UNBOUND CLAIM IS THE POINT. An unbound claim must be expressible but visibly marked, never silently omitted. There are two shapes of unbound and they live in structurally different places: a claim that IS shown to a human without a binding is `status: unbound` in `content.claims` and must carry disclosure; a claim the producer wanted to make and could not bind at all is a record in `content.withheldClaims`, which cannot carry a rendering. Dropping a claim quietly is therefore not a shape this document has.\n\nLANGUAGE IS PART OF THE CONTRACT. 'your Square export', 'actual revenue', 'based on your data' are claims and are validated as claims. Every claim carries a `phraseScan` — a GENERATED record of a lexicon run over the exact rendered statement, never an author's assurance that they checked. A non-empty scan forces a non-empty `dataImplications`, and a non-empty `dataImplications` forces the authority-or-disclosure choice. The chain from 'the copy says your' to 'the copy must be bound or disclosed' is closed inside the schema.\n\nWHAT THE SCHEMA CANNOT DO. It cannot resolve an id to an entry, cannot compute the union of `phraseScan.matches[].implies`, cannot compare a `coversPeriod` to wall-clock time, and cannot read the bytes a digest names. Each of those is marked below as a verifier obligation. The schema's job is to make the dishonest shape inexpressible; resolution remains the verifier's.",
+  "type": "object",
+  "required": ["schemaVersion", "caseId", "stage", "producedAt", "inputs", "content", "completeness"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "nodekit.story-pack/v1" },
+    "caseId": {
+      "$ref": "#/$defs/caseId",
+      "description": "Identical across all five journey artifacts for one journey."
+    },
+    "stage": { "const": "explain" },
+    "producedAt": { "$ref": "#/$defs/utcDateTime" },
+
+    "inputs": {
+      "$comment": "Binding, not a label. sha256 is over the canonical JSON (keys sorted at every level, no insignificant whitespace) of the upstream artifact. EXPLAIN consumes BuildEvidencePack and OpportunityContract, so both digests must be present exactly once. A pack that cannot digest what it consumed was handed a name, not an artifact.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/inputBinding" },
+      "allOf": [
+        {
+          "description": "The BuildEvidencePack every buildBinding resolves into.",
+          "contains": {
+            "type": "object",
+            "required": ["schemaVersion"],
+            "properties": { "schemaVersion": { "const": "nodekit.build-evidence-pack/v1" } }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "description": "The OpportunityContract whose successCondition and authorityLimits the narrative is answerable to.",
+          "contains": {
+            "type": "object",
+            "required": ["schemaVersion"],
+            "properties": { "schemaVersion": { "const": "nodekit.opportunity-contract/v1" } }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "description": "StoryPack and LaunchManifest do not consume each other. A story pack that has read a launch manifest has been produced out of order.",
+          "not": {
+            "contains": {
+              "type": "object",
+              "required": ["schemaVersion"],
+              "properties": { "schemaVersion": { "const": "nodekit.launch-manifest/v1" } }
+            }
+          }
+        }
+      ]
+    },
+
+    "completeness": { "$ref": "#/$defs/completeness" },
+
+    "content": {
+      "type": "object",
+      "required": [
+        "audience",
+        "surfaces",
+        "sources",
+        "disclosures",
+        "claims",
+        "withheldClaims",
+        "narrative",
+        "demoMode",
+        "promotionAuthorized"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "audience": { "$ref": "#/$defs/audience" },
+
+        "surfaces": {
+          "$comment": "Where a human actually reads the claims. surfaceId SHOULD reuse the BuildEvidencePack surface ids so the two packs describe one product rather than two.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/surface" }
+        },
+
+        "sources": {
+          "$comment": "The CONTENT provenance pool. Deliberately NOT the BuildEvidencePack evidence pool: evidence records how the software was constructed, a source records what the displayed numbers depict. Binding a claim into the wrong pool is the Trial 1 error, and keeping the pools in separate arrays with separate id prefixes is what makes that error visible instead of plausible. May be empty — a story that shows no data at all is legitimate, and is exactly the case where every claim must have rendersData:false.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 128,
+          "items": { "$ref": "#/$defs/sourceRecord" }
+        },
+
+        "disclosures": {
+          "$comment": "The disclosure copy pool. A disclosure is a rendered string with a placement, not a policy intention. sourceRefs on a claim can be checked mechanically; disclosure copy cannot, so its shape is constrained hard here.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/disclosure" }
+        },
+
+        "claims": {
+          "$comment": "Every statement made to a human, bound or not. Verifier obligation: claimId uniqueness (uniqueItems compares whole items and cannot express it), and resolution of every buildBinding/contentBinding/disclosure reference.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/storyClaim" }
+        },
+
+        "withheldClaims": {
+          "$comment": "Claims the producer wanted to make and could not bind, and therefore did not render. This array is why 'silently omitted' is not a shape this document has: the alternative to rendering an unbindable claim is recording it here, not deleting it. May be empty, but an empty array is a positive assertion that nothing was dropped.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/withheldClaim" }
+        },
+
+        "narrative": {
+          "$comment": "The ordered sequence a human actually reads. Verifier obligation: every claimRef resolves to content.claims, and every consequential claim appears in at least one beat — a claim bound but never told is not a story, and a beat with no claims is prose that escaped binding.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/beat" }
+        },
+
+        "demoMode": { "$ref": "#/$defs/demoMode" },
+
+        "promotionAuthorized": {
+          "const": false,
+          "$comment": "Pinned false. A producer may write false and never true; the true value is derived by verification from a signed approval, never accepted as input. The field exists rather than being omitted so that its absence cannot be read as authorization."
+        }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["approved"] },
+          { "required": ["reviewedBy"] },
+          { "required": ["verdict"] },
+          { "required": ["signOff"] },
+          { "required": ["reviewStatus"] },
+          { "required": ["attestation"] },
+          { "required": ["humanReviewed"] }
+        ]
+      },
+      "$comment": "The `not` is redundant under additionalProperties:false and is kept as a named tripwire: if this object is ever loosened, self-approval fields still fail closed rather than silently becoming expressible."
+    }
+  },
+
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "prose": { "type": "string", "minLength": 12, "maxLength": 2000 },
+    "caseId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+
+    "utcDateTime": {
+      "$comment": "UTC only. A local timestamp in a chain of artifacts produced on different machines is not orderable.",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$"
+    },
+
+    "repoPath": {
+      "$comment": "Repository-relative POSIX path. No absolute paths, no traversal, no backslashes: a path must resolve to the same bytes on any machine that has the repository.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9._][A-Za-z0-9._/-]*$",
+      "not": { "pattern": "(^|/)\\.\\.(/|$)" }
+    },
+
+    "storyClaimId": { "type": "string", "pattern": "^sc-[a-z0-9][a-z0-9-]{0,62}$" },
+    "bepClaimId": {
+      "$comment": "Matches nodekit.build-evidence-pack/v1 content.claims[].claimId exactly, so the reference is resolvable without translation.",
+      "type": "string",
+      "pattern": "^claim-[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "evidenceId": {
+      "$comment": "Matches nodekit.build-evidence-pack/v1 content.evidence[].evidenceId exactly.",
+      "type": "string",
+      "pattern": "^ev-[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "sourceId": { "type": "string", "pattern": "^src-[a-z0-9][a-z0-9-]{0,62}$" },
+    "disclosureId": { "type": "string", "pattern": "^disc-[a-z0-9][a-z0-9-]{0,62}$" },
+    "surfaceId": { "type": "string", "pattern": "^surface-[a-z0-9][a-z0-9-]{0,62}$" },
+
+    "inputBinding": {
+      "type": "object",
+      "required": ["schemaVersion", "caseId", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "caseId": { "$ref": "#/$defs/caseId" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "path": { "$ref": "#/$defs/repoPath" }
+      }
+    },
+
+    "completeness": {
+      "$comment": "Frozen by the inter-stage contract. notRun is never empty merely because filling it was inconvenient: an empty notRun is a positive claim that everything in scope was attempted.",
+      "type": "object",
+      "required": ["claimed", "notRun", "refused"],
+      "additionalProperties": false,
+      "properties": {
+        "claimed": { "type": "array", "minItems": 0, "maxItems": 200, "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmpty" } },
+        "notRun": { "type": "array", "minItems": 0, "maxItems": 200, "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmpty" } },
+        "refused": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "required": ["item", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "item": { "$ref": "#/$defs/nonEmpty" },
+              "reason": { "$ref": "#/$defs/prose" }
+            }
+          }
+        }
+      }
+    },
+
+    "artifactRef": {
+      "$comment": "An artifact that exists on disk. path + sha256 + byteLength, never a boolean. `exists: true` is not evidence that anything exists.",
+      "type": "object",
+      "required": ["path", "sha256", "byteLength"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/repoPath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "byteLength": { "type": "integer", "minimum": 0, "maximum": 1073741824 },
+        "mediaType": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+
+    "audience": {
+      "$comment": "Who is being told and what they will do about it. Recorded because the honesty bar is set by the decision, not by the sentence: the same words shown to a teammate and to a paying owner carry different consequence, and `stakes` is what a verifier weighs when deciding whether a disclosed-demo claim was acceptable.",
+      "type": "object",
+      "required": ["reader", "decision", "stakes"],
+      "additionalProperties": false,
+      "properties": {
+        "reader": { "$ref": "#/$defs/prose" },
+        "decision": {
+          "$comment": "The decision this story is asking the reader to make. If the story asks for no decision, say so explicitly here.",
+          "$ref": "#/$defs/prose"
+        },
+        "stakes": {
+          "type": "string",
+          "enum": ["internal-review", "demo-to-stakeholder", "prospective-user", "paying-user", "public"]
+        },
+        "priorBeliefs": {
+          "$comment": "What the reader is assumed to already believe. An unstated assumption is where a technically true sentence becomes misleading.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 24,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        }
+      }
+    },
+
+    "surface": {
+      "type": "object",
+      "required": ["surfaceId", "kind", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "surfaceId": { "$ref": "#/$defs/surfaceId" },
+        "kind": {
+          "type": "string",
+          "enum": ["web-page", "cli-output", "document", "deck-slide", "email", "api-response", "readme"]
+        },
+        "description": { "$ref": "#/$defs/prose" },
+        "route": {
+          "$comment": "Route, command, or slide number a reader can navigate to. Not a URL with a host — the surface may not be deployed yet, and LAUNCH owns liveness.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "artifact": { "$ref": "#/$defs/artifactRef" }
+      }
+    },
+
+    "sourceRecord": {
+      "$comment": "One origin of displayed data. `origin` is the whole content-provenance question in one enum, and only `authority-issued` means a real party outside this system handed over these bytes. A fixture that LOOKS like a Square export is `fixture`, not `authority-issued` — the adversarial case docs/PLAN.md §W2 names is fixture laundering through a real-looking source, and the defence is that authority is a property of who issued the bytes, never of what they resemble.",
+      "type": "object",
+      "required": ["sourceId", "origin", "describes", "artifact"],
+      "additionalProperties": false,
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/sourceId" },
+        "origin": {
+          "type": "string",
+          "enum": ["authority-issued", "fixture", "synthetic", "model_generated", "unknown"],
+          "$comment": "There is deliberately no value meaning 'realistic' or 'representative'. Data is either issued by a named authority or it is not."
+        },
+        "describes": {
+          "$comment": "What this data is ABOUT, in the reader's terms — 'one week of card sales for the pilot salon'. A reader who disagrees with this sentence has found a misrepresentation, which is the point of writing it.",
+          "$ref": "#/$defs/prose"
+        },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "authority": { "$ref": "#/$defs/authority" },
+        "coversPeriod": { "$ref": "#/$defs/period" },
+        "freshness": { "$ref": "#/$defs/freshness" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "origin": { "const": "authority-issued" } }, "required": ["origin"] },
+          "then": {
+            "required": ["authority"],
+            "$comment": "Authority-issued without a named issuer and a receipt is the claim 'this is real data' with nothing behind it."
+          },
+          "else": {
+            "not": { "required": ["authority"] },
+            "$comment": "Non-authority data cannot carry an issuer. Removing the field rather than allowing a null is what stops a fixture from acquiring an issuer name by degrees."
+          }
+        }
+      ]
+    },
+
+    "authority": {
+      "$comment": "The party outside this system that issued the bytes, and the record of receiving them. `receipt` is an artifact on disk, so 'the owner uploaded it' is checkable rather than remembered.",
+      "type": "object",
+      "required": ["issuer", "issuerKind", "artifactType", "receivedAt", "receipt"],
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "$comment": "The named party. 'Square', 'the salon owner', 'Chase'. Not 'the system' and not 'the build'.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "issuerKind": {
+          "type": "string",
+          "enum": ["end-user-upload", "connected-account", "third-party-api", "institution-export", "human-attestation"]
+        },
+        "artifactType": {
+          "$comment": "What the issuer called it — 'Square transactions CSV export', 'bank statement PDF'.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "receivedAt": { "$ref": "#/$defs/utcDateTime" },
+        "receipt": {
+          "$comment": "Bytes proving receipt: the upload record, the API response, the signed attestation. Verifier obligation: the digest resolves to a file that exists.",
+          "$ref": "#/$defs/artifactRef"
+        },
+        "consentRef": {
+          "$comment": "Where the issuer agreed this data could be used this way, when consent was separately recorded.",
+          "$ref": "#/$defs/repoPath"
+        }
+      }
+    },
+
+    "period": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "$ref": "#/$defs/utcDateTime" },
+        "end": { "$ref": "#/$defs/utcDateTime" }
+      }
+    },
+
+    "freshness": {
+      "$comment": "Required on any source backing a claim that implies CURRENT data. The schema cannot compare asOf to wall-clock time; declaring maxStalenessSeconds is what gives the verifier a threshold to compare against, and omitting it is how 'current' quietly becomes 'whenever this was last generated'.",
+      "type": "object",
+      "required": ["asOf", "maxStalenessSeconds"],
+      "additionalProperties": false,
+      "properties": {
+        "asOf": { "$ref": "#/$defs/utcDateTime" },
+        "maxStalenessSeconds": { "type": "integer", "minimum": 0, "maximum": 31536000 }
+      }
+    },
+
+    "disclosure": {
+      "$comment": "Rendered disclosure copy. docs/PLAN.md §W2 is explicit that the wording and the placement are both part of the contract: 'Sample data — not connected to your Square account', not 'Example', not 'Preview', and not a small demo chip beside an unrelated control.",
+      "type": "object",
+      "required": ["disclosureId", "kind", "text", "placement", "surfaceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "disclosureId": { "$ref": "#/$defs/disclosureId" },
+        "kind": {
+          "type": "string",
+          "enum": ["demo-data", "partial-coverage", "unverified-derivation", "unbound-claim", "authority-limit", "staleness"]
+        },
+        "text": {
+          "$comment": "The exact rendered string, character for character. Not a description of what the disclosure conveys — a paraphrase here means nobody checked the words the reader sees.",
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 500,
+          "not": {
+            "pattern": "^\\s*([Ee]xample|[Pp]review|[Dd]emo|[Ss]ample|[Tt]est|[Bb]eta)\\s*[.!]?\\s*$",
+            "$comment": "A bare hedging noun is not a disclosure. These are the exact words PLAN.md §W2 rules out as substitutes for saying what is not true."
+          }
+        },
+        "placement": {
+          "type": "string",
+          "enum": ["adjacent-to-claim", "surface-header", "footer", "separate-page"]
+        },
+        "surfaceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/surfaceId" }
+        },
+        "evidenceRef": {
+          "$comment": "The BuildEvidencePack `disclosure-copy` evidence entry showing this string is actually rendered by the built software, rather than promised by this document.",
+          "$ref": "#/$defs/evidenceId"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "demo-data" } }, "required": ["kind"] },
+          "then": {
+            "properties": {
+              "text": {
+                "pattern": "([Nn]ot connected|[Nn]ot real|[Nn]ot your|[Nn]ot from|[Dd]oes not|[Nn]o .{0,24}(connection|account|data))",
+                "$comment": "A demo-data disclosure must NEGATE something, not merely label. 'Sample data' alone tells a reader what it is called; 'not connected to your Square account' tells them what is false. Deliberately narrow and English-specific: the full lexicon is a verifier obligation, and this pattern only closes the laziest hole."
+              },
+              "placement": {
+                "enum": ["adjacent-to-claim", "surface-header"],
+                "$comment": "A footer or a separate page is the 'small demo chip beside an unrelated control' failure. A reader who reads the number must have read the disclosure."
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "phraseScan": {
+      "$comment": "A GENERATED record of a lexicon run over the exact statement, mirroring BuildEvidencePack's rule that evidence names a process that ran. There is deliberately no field meaning 'the author reviewed the wording'. An empty `matches` is a positive claim that the scanner found nothing, attributable to a named scanner at a named lexicon digest — so a missed phrase is a scanner bug with an owner, not an oversight with none.",
+      "type": "object",
+      "required": ["scanner", "scannerVersion", "lexiconDigest", "scannedAt", "matches"],
+      "additionalProperties": false,
+      "properties": {
+        "scanner": { "$ref": "#/$defs/nonEmpty" },
+        "scannerVersion": { "$ref": "#/$defs/nonEmpty" },
+        "lexiconDigest": {
+          "$comment": "Digest of the phrase list applied. Verifier obligation: the same lexicon digest across all claims in one pack, and a lexicon that actually contains the §W2 phrases.",
+          "$ref": "#/$defs/sha256"
+        },
+        "scannedAt": { "$ref": "#/$defs/utcDateTime" },
+        "matches": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "required": ["phrase", "implies"],
+            "additionalProperties": false,
+            "properties": {
+              "phrase": {
+                "$comment": "The matched substring as it appears in the statement, e.g. 'your Square export', 'actual revenue', 'based on your data'.",
+                "$ref": "#/$defs/nonEmpty"
+              },
+              "implies": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 4,
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/dataImplication" }
+              },
+              "offset": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+
+    "dataImplication": {
+      "$comment": "The four implications docs/PLAN.md §W2 names. Each one is a promise about the DATA, not the software: user-owned (these bytes are yours), connected (a live account is attached), current (this reflects now), factual (these numbers happened).",
+      "type": "string",
+      "enum": ["user-owned", "connected", "current", "factual"]
+    },
+
+    "buildBinding": {
+      "$comment": "BUILD provenance: does the software do what the sentence says? Resolves into BuildEvidencePack. Satisfying this does NOT satisfy contentBinding, and the entire reason this stage exists is that Trial 1 satisfied exactly this one.",
+      "type": "object",
+      "required": ["bepClaimIds", "evidenceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "bepClaimIds": {
+          "$comment": "The BuildEvidencePack claims this story claim restates. May be empty when the story claim is a rendering-level statement bound directly to evidence, but never absent — an empty array is a visible statement that no upstream claim covers this sentence.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/bepClaimId" }
+        },
+        "evidenceRefs": {
+          "$comment": "BuildEvidencePack evidence entries. Verifier obligation: each resolves, and where the story claim narrows an upstream claim, the evidence set is a subset of that claim's.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evidenceId" }
+        },
+        "restatement": {
+          "type": "string",
+          "enum": ["verbatim", "narrowed", "simplified", "aggregated"],
+          "$comment": "How the upstream wording changed on the way to the reader. `simplified` and `aggregated` are where a bounded engineering claim becomes an unbounded marketing one, so they are named rather than left to diffing."
+        },
+        "strengthDelta": {
+          "$comment": "Whether the story says MORE than the evidence supports. `stronger` is not forbidden by the schema — it is forced into the open so a reviewer can see it, because a claim that quietly outgrew its evidence is the failure that reads as fine.",
+          "type": "string",
+          "enum": ["weaker", "equal", "stronger"]
+        }
+      }
+    },
+
+    "contentBinding": {
+      "$comment": "CONTENT provenance: what do the displayed numbers actually depict? Resolves into content.sources, a different pool from BuildEvidencePack evidence. Required on any claim with rendersData:true.",
+      "type": "object",
+      "required": ["origin", "sourceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "$comment": "The weakest origin among the referenced sources. Verifier obligation: this equals the weakest `origin` in sourceRefs — one fixture in an otherwise authority-issued set makes the whole rendered figure a fixture-derived figure.",
+          "type": "string",
+          "enum": ["authority-issued", "fixture", "synthetic", "model_generated", "unknown"]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourceId" }
+        },
+        "derivation": { "$ref": "#/$defs/derivation" },
+        "derivedStatus": {
+          "$comment": "Only meaningful when `derivation` is present. `derived_unverified` is the honest status when the transformation cannot be rerun, and it forces disclosure below.",
+          "type": "string",
+          "enum": ["derived_reproduced", "derived_unverified"]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["derivation"] },
+          "then": {
+            "required": ["derivedStatus"],
+            "$comment": "A derived figure with no reproduction status is the fixture-laundering case: real source file present, number invented downstream, nothing obliged to say which."
+          }
+        },
+        {
+          "if": {
+            "properties": { "derivedStatus": { "const": "derived_reproduced" } },
+            "required": ["derivedStatus"]
+          },
+          "then": {
+            "properties": {
+              "derivation": {
+                "properties": { "reproduction": { "required": ["command", "exitCode", "outputDigest"] } }
+              }
+            },
+            "$comment": "Claiming reproduction requires the command, its exit code, and the digest of what it produced."
+          }
+        }
+      ]
+    },
+
+    "derivation": {
+      "$comment": "A rendered figure that is computed rather than read straight from a source. docs/PLAN.md §W2: a rendered 'repeat customer rate 63%' needs input sources, exact source digests, a named transformation and its version, and a reproduction record. Without those, a legitimate Square CSV plus a seeded random function renders an invented headline over a real-looking provenance trail.",
+      "type": "object",
+      "required": ["transformation", "transformationVersion", "inputSourceRefs", "reproduction"],
+      "additionalProperties": false,
+      "properties": {
+        "transformation": { "$ref": "#/$defs/nonEmpty" },
+        "transformationVersion": { "$ref": "#/$defs/nonEmpty" },
+        "inputSourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourceId" }
+        },
+        "inputDigests": {
+          "$comment": "Digests of the exact input bytes the transformation consumed, which may differ from the sources as filed if the pipeline normalised them.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sha256" }
+        },
+        "reproduction": {
+          "type": "object",
+          "required": ["rerunnable"],
+          "additionalProperties": false,
+          "properties": {
+            "rerunnable": { "type": "boolean" },
+            "command": { "type": "string", "minLength": 1, "maxLength": 1024 },
+            "exitCode": { "type": "integer", "minimum": 0, "maximum": 255 },
+            "outputDigest": { "$ref": "#/$defs/sha256" },
+            "unavailableReason": { "$ref": "#/$defs/prose" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "rerunnable": { "const": false } }, "required": ["rerunnable"] },
+              "then": {
+                "required": ["unavailableReason"],
+                "$comment": "A transformation that cannot be rerun must say why. 'Not rerunnable' with no reason is indistinguishable from 'nobody tried'."
+              }
+            }
+          ]
+        }
+      }
+    },
+
+    "storyClaim": {
+      "$comment": "One statement made to a human, carrying BOTH provenance axes and its own limit.\n\nThe rules at the bottom of this object are the schema's whole purpose:\n  1. rendersData:true requires a contentBinding — a number on screen has an origin.\n  2. A non-empty phraseScan.matches requires a non-empty dataImplications — the copy cannot claim more than the fields admit.\n  3. A non-empty dataImplications requires EITHER a bound claim over authority-issued sources OR status:disclosed-demo with disclosure. `unbound` is not available here, which is the teeth: you may not render 'your actual revenue' with no binding and no disclosure. The way to express that claim honestly is withheldClaims.\n  4. Any status other than `bound` requires disclosure, so an unbound claim is expressible and visibly marked but never quiet.",
+      "type": "object",
+      "required": [
+        "claimId",
+        "statement",
+        "surfaceRefs",
+        "consequential",
+        "rendersData",
+        "dataImplications",
+        "phraseScan",
+        "status",
+        "boundary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "claimId": { "$ref": "#/$defs/storyClaimId" },
+        "statement": {
+          "$comment": "The exact sentence the human reads, character for character as rendered. Not a summary of it. The phraseScan is run over THIS string, so a paraphrase here scans a sentence nobody will ever see.",
+          "$ref": "#/$defs/prose"
+        },
+        "surfaceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/surfaceId" }
+        },
+        "consequential": {
+          "$comment": "Whether a reader could act on this to their cost. docs/PLAN.md §W2 scopes the gate to consequential visible claims; marking a claim non-consequential is therefore itself a claim, and a reviewable one.",
+          "type": "boolean"
+        },
+        "rendersData": {
+          "$comment": "Whether this statement displays or characterises data. 'The brief opens in under a second' does not; 'your revenue was $8,420' does. False here with a figure in the statement is a lie the verifier can catch by reading the sentence.",
+          "type": "boolean"
+        },
+        "dataImplications": {
+          "$comment": "What this sentence implies about the DATA. Verifier obligation: this set is a superset of the union of phraseScan.matches[].implies — JSON Schema cannot compute a union, so the schema enforces only that a non-empty scan yields a non-empty set.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/dataImplication" }
+        },
+        "phraseScan": { "$ref": "#/$defs/phraseScan" },
+        "status": {
+          "type": "string",
+          "enum": ["bound", "disclosed-demo", "unbound"],
+          "$comment": "`bound` — build and content provenance both resolve. `disclosed-demo` — the software does this but the data does not depict what the sentence would otherwise imply, and the surface says so. `unbound` — no binding resolves; the claim is still shown, and still marked. There is deliberately no fourth value, and in particular none meaning 'binding pending'."
+        },
+        "buildBinding": { "$ref": "#/$defs/buildBinding" },
+        "contentBinding": { "$ref": "#/$defs/contentBinding" },
+        "disclosureRefs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/disclosureId" }
+        },
+        "unbound": { "$ref": "#/$defs/unboundRecord" },
+        "boundary": {
+          "$comment": "What this claim does NOT establish, in the reader's terms rather than the engineer's. Required, because a claim whose limits were never written down is a claim nobody bounded. Inherited from BuildEvidencePack's rule and deliberately restated per story claim: an upstream boundary written for a reviewer is not the boundary a salon owner needs.",
+          "$ref": "#/$defs/prose"
+        }
+      },
+
+      "allOf": [
+        {
+          "if": { "properties": { "rendersData": { "const": true } }, "required": ["rendersData"] },
+          "then": {
+            "required": ["contentBinding"],
+            "$comment": "RULE 1. A statement that displays data must say where the data came from. This is the field Trial 1 had no obligation to fill."
+          }
+        },
+        {
+          "if": {
+            "properties": { "phraseScan": { "properties": { "matches": { "minItems": 1 } }, "required": ["matches"] } },
+            "required": ["phraseScan"]
+          },
+          "then": {
+            "properties": { "dataImplications": { "minItems": 1 } },
+            "$comment": "RULE 2. If the scanner found regulated language, the claim cannot declare zero data implications. This closes the gap between what the copy says and what the structured fields admit — 'your Square export' in the statement with dataImplications:[] is now unrepresentable."
+          }
+        },
+        {
+          "if": { "properties": { "dataImplications": { "minItems": 1 } }, "required": ["dataImplications"] },
+          "then": {
+            "anyOf": [
+              {
+                "$comment": "Arm A — genuinely bound to data a named authority issued.",
+                "required": ["status", "buildBinding", "contentBinding"],
+                "properties": {
+                  "status": { "const": "bound" },
+                  "contentBinding": {
+                    "properties": { "origin": { "const": "authority-issued" } },
+                    "required": ["origin"]
+                  }
+                }
+              },
+              {
+                "$comment": "Arm B — the data does not support the implication, and the surface discloses it.",
+                "required": ["status", "disclosureRefs"],
+                "properties": {
+                  "status": { "const": "disclosed-demo" },
+                  "disclosureRefs": { "minItems": 1 }
+                }
+              }
+            ],
+            "$comment": "RULE 3, and the reason this schema exists. A claim implying user-owned, connected, current or factual data is bound to an authority-issued source or it is forced into disclosed demo. `status: unbound` is unavailable in this branch by construction — there is no honest way to render 'based on your data' with nothing behind it, and the honest alternative is content.withheldClaims."
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "bound" } }, "required": ["status"] },
+          "then": {
+            "required": ["buildBinding"],
+            "$comment": "RULE 4a. Bound means the software was shown to do this, which means BuildEvidencePack entries."
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "disclosed-demo" } }, "required": ["status"] },
+          "then": {
+            "required": ["disclosureRefs"],
+            "properties": { "disclosureRefs": { "minItems": 1 } },
+            "$comment": "RULE 4b. Demo status with no rendered disclosure is undisclosed demo."
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "unbound" } }, "required": ["status"] },
+          "then": {
+            "required": ["unbound", "disclosureRefs"],
+            "properties": { "disclosureRefs": { "minItems": 1 } },
+            "$comment": "RULE 4c. THE CASE THIS SCHEMA EXISTS FOR. An unbound claim is expressible — it is not deleted, not softened, and not quietly dropped — but it cannot be shown without a record of why it is unbound and a disclosure the reader actually sees."
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contentBinding": {
+                "properties": { "derivedStatus": { "const": "derived_unverified" } },
+                "required": ["derivedStatus"]
+              }
+            },
+            "required": ["contentBinding"]
+          },
+          "then": {
+            "required": ["disclosureRefs"],
+            "properties": { "disclosureRefs": { "minItems": 1 } },
+            "$comment": "RULE 5. A figure whose transformation could not be rerun is disclosed as such on the surface, per docs/PLAN.md §W2."
+          }
+        },
+        {
+          "if": {
+            "allOf": [
+              { "properties": { "consequential": { "const": true } }, "required": ["consequential"] },
+              { "properties": { "dataImplications": { "contains": { "const": "current" } } }, "required": ["dataImplications"] }
+            ]
+          },
+          "then": {
+            "properties": {
+              "contentBinding": { "required": ["origin", "sourceRefs"] }
+            },
+            "$comment": "RULE 6. A consequential claim about CURRENT data needs sources whose freshness was declared. Verifier obligation: every referenced source carries `freshness` and its asOf is within maxStalenessSeconds of producedAt — the schema cannot follow the reference or read the clock."
+          }
+        }
+      ]
+    },
+
+    "unboundRecord": {
+      "$comment": "Why a shown claim has no binding, and what would fix it. `whatWouldBindIt` is the field that makes an unbound claim a work item instead of a permanent disclaimer.",
+      "type": "object",
+      "required": ["reason", "whatWouldBindIt", "riskIfBelieved"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "no-evidence-generated",
+            "evidence-inconclusive",
+            "evidence-out-of-scope",
+            "upstream-claim-absent",
+            "measurement-not-possible-yet"
+          ]
+        },
+        "detail": { "$ref": "#/$defs/prose" },
+        "whatWouldBindIt": {
+          "$comment": "The specific artifact or measurement that would move this to bound. Vague answers here are visible as vague.",
+          "$ref": "#/$defs/prose"
+        },
+        "riskIfBelieved": {
+          "$comment": "What goes wrong for the reader if they act on this claim and it is false. This is the field a reviewer reads to decide whether the claim should be shown at all.",
+          "$ref": "#/$defs/prose"
+        }
+      }
+    },
+
+    "withheldClaim": {
+      "$comment": "A claim the producer wanted to make and did not render, because it could not be bound and could not be honestly disclosed. Recorded rather than deleted: 'expressible but visibly marked, never silently omitted' applies to the claims that did not survive as much as to the ones that did. Deliberately has NO surfaceRefs and NO status — a withheld claim that acquired a rendering would be a shown claim, and belongs in content.claims.",
+      "type": "object",
+      "required": ["claimId", "statement", "withheldBecause", "wouldHaveImplied"],
+      "additionalProperties": false,
+      "properties": {
+        "claimId": { "$ref": "#/$defs/storyClaimId" },
+        "statement": { "$ref": "#/$defs/prose" },
+        "withheldBecause": {
+          "type": "string",
+          "enum": [
+            "no-authority-issued-source",
+            "no-build-evidence",
+            "evidence-contradicts",
+            "outside-authority-limits",
+            "cannot-be-disclosed-honestly"
+          ]
+        },
+        "detail": { "$ref": "#/$defs/prose" },
+        "wouldHaveImplied": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/dataImplication" }
+        }
+      }
+    },
+
+    "beat": {
+      "$comment": "One step of the narrative a human reads in order. `claimRefs` may be empty for pure connective prose, but such a beat may not assert anything — verifier obligation, since the schema cannot read English.",
+      "type": "object",
+      "required": ["order", "heading", "claimRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "order": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "heading": { "$ref": "#/$defs/nonEmpty" },
+        "claimRefs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/storyClaimId" }
+        },
+        "surfaceRef": { "$ref": "#/$defs/surfaceId" }
+      }
+    },
+
+    "demoMode": {
+      "$comment": "Whether the rendered product as a whole is in disclosed demo. Required rather than optional so that its absence cannot be read as 'this is production data'. Verifier obligation: if ANY consequential claim has status disclosed-demo, engaged must be true and every surface carrying such a claim must appear in surfaceRefs — the schema cannot cross-reference arrays.",
+      "type": "object",
+      "required": ["engaged", "surfaceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "engaged": { "type": "boolean" },
+        "surfaceRefs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/surfaceId" }
+        },
+        "reason": { "$ref": "#/$defs/prose" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "engaged": { "const": true } }, "required": ["engaged"] },
+          "then": {
+            "required": ["reason"],
+            "properties": { "surfaceRefs": { "minItems": 1 } },
+            "$comment": "Demo mode engaged over zero surfaces is demo mode that renders nowhere."
+          }
+        }
+      ]
+    }
+  }
+}
