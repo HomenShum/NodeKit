@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "nodekit.launch-manifest/v1",
+  "caseId": "salon-weekly-brief",
+  "stage": "launch",
+  "producedAt": "2026-07-28T19:42:11Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.build-evidence-pack/v1",
+      "caseId": "salon-weekly-brief",
+      "sha256": "3f1c9a77e0b2d45861ac0f39d7e8b21c5a604fd93b8e7c1a2069d4f5b3c8e07a"
+    }
+  ],
+  "content": {
+    "release": {
+      "artifactName": "salon-weekly-brief-web",
+      "sourceRepository": "HomenShum/salon-weekly-brief",
+      "sourceCommit": "9d41c0b7e2f83a5164cb90de77aa2f31b0c6e845",
+      "sourceRef": "feat/weekly-brief-slice",
+      "artifactSha256": "c7b21e50a9d3f8461b0e7c2d95a4f8360d17be29c4a05f7318d6b92e0af35c14",
+      "buildCompletedAt": "2026-07-28T19:31:04Z"
+    },
+    "target": {
+      "provider": "vercel",
+      "environment": "production",
+      "accountIdentity": "team_cafecorner",
+      "projectIdentity": "salon-weekly-brief",
+      "deploymentId": "dpl_7Qk3ZmV2xN8sTbRw",
+      "url": "https://salon-weekly-brief.vercel.app/",
+      "deployedAt": "2026-07-28T19:33:52Z",
+      "publicReachability": "public"
+    },
+    "authority": {
+      "mode": "standing-grant",
+      "actor": {
+        "id": "agent:claude-code",
+        "type": "agent"
+      },
+      "grant": {
+        "schemaVersion": "nodekit.capability-manifest/v1",
+        "grantId": "grant_cafecorner_default",
+        "sha256": "58ea0c31d7b64f92a80c5e13bf27d6491a0e83c5f74b2d908e61ca37b5024fd8",
+        "signedAt": "2026-07-27T16:05:00Z"
+      },
+      "keyKind": "agent-readable",
+      "trustLevel": "H1",
+      "trustLevelBasis": "The capability manifest was signed with an ed25519 key readable by the agent process itself. That is a policy statement the owner set at setup time; it is not evidence a human was present for this deploy. Nothing in this launch raised the level and nothing silently assumed a higher one.",
+      "humanPresenceProven": false,
+      "withinGrant": "inside"
+    },
+    "spend": {
+      "currency": "USD",
+      "periodStart": "2026-07-01T00:00:00Z",
+      "periodEnd": "2026-08-01T00:00:00Z",
+      "grantCapMinorUnits": 10000,
+      "priorPeriodSpendMinorUnits": 1875,
+      "thisLaunchMinorUnits": 320,
+      "remainingAfterMinorUnits": 7805,
+      "meteringBasis": "provider-api",
+      "capExceeded": false,
+      "entries": [
+        {
+          "label": "Vercel build minutes, 8 min at the team rate",
+          "minorUnits": 320,
+          "meteringBasis": "provider-api",
+          "receiptRef": "proof/journey/salon-launch/vercel-usage-2026-07-28.json",
+          "receiptSha256": "e04a7fb1c9d258360be7a4159cf0d82b7361ea94c05d7bf218a3609ecb4d17f2"
+        }
+      ]
+    },
+    "liveness": {
+      "claim": "deployed-signal-not-observed",
+      "notObservedDisclosure": "The deployment succeeded and the origin answers 200, but neither probe found the week-total signal. The rendered-DOM probe shows why: the bundle throws on boot (3 page errors, TypeError reading 'weekStart' of undefined), so the app mounts nothing. The only signal that WAS found is the document title, which the empty shell also carries — it is recorded here precisely so it cannot be mistaken for proof. This launch is deployed and not live. No green claim is available and none is made.",
+      "promisedSignals": [
+        {
+          "signalId": "salon-week-total",
+          "kind": "testid",
+          "expected": "data-testid=\"salon-week-total\"",
+          "whyThisProvesTheApp": "The week-total node is rendered only after the brief query resolves and the week boundary is computed. It cannot exist unless data was fetched, the week was bounded, and the component mounted — the three things this slice was built to do.",
+          "presentInUnbuiltShell": false,
+          "probeIds": ["raw-shell-grep", "rendered-boot"]
+        },
+        {
+          "signalId": "document-title",
+          "kind": "text",
+          "expected": "Salon Weekly Brief",
+          "whyThisProvesTheApp": "It does not. The title is static in index.html and survives a total application failure. It is listed and marked shell-present so that finding it is on the record as worthless rather than quietly counted.",
+          "presentInUnbuiltShell": true,
+          "probeIds": ["title-grep"]
+        }
+      ],
+      "probes": [
+        {
+          "probeId": "raw-shell-grep",
+          "signalId": "salon-week-total",
+          "method": "raw-http",
+          "urlFetched": "https://salon-weekly-brief.vercel.app/",
+          "finalUrl": "https://salon-weekly-brief.vercel.app/",
+          "fetchedAt": "2026-07-28T19:35:20Z",
+          "httpStatus": 200,
+          "responseBytes": 1310,
+          "authenticatedSession": false,
+          "observation": "absent",
+          "failureDetail": "200 OK, 1310 bytes — the byte-identical Vite index shell. The testid is injected by the client bundle and can never appear in this response, working app or not. This probe was run to record the shell size, not to decide liveness; a raw-HTTP grep cannot answer the question at all.",
+          "shellBaselineComparison": {
+            "performed": true,
+            "baselineDescription": "Same origin built from a deliberately gutted entrypoint that renders null, deployed as a preview.",
+            "baselineResponseBytes": 1310,
+            "baselineContainedSignal": false
+          }
+        },
+        {
+          "probeId": "rendered-boot",
+          "signalId": "salon-week-total",
+          "method": "rendered-dom",
+          "urlFetched": "https://salon-weekly-brief.vercel.app/",
+          "finalUrl": "https://salon-weekly-brief.vercel.app/",
+          "fetchedAt": "2026-07-28T19:36:47Z",
+          "httpStatus": 200,
+          "responseBytes": 1310,
+          "authenticatedSession": false,
+          "observation": "absent",
+          "failureDetail": "Page loaded, bundle executed, root stayed empty. 3 uncaught page errors, first is TypeError: Cannot read properties of undefined (reading 'weekStart') in assets/index-4b7f2a1c.js. Waited to networkidle plus a 5s selector wait; the node never appeared. The application is catastrophically broken behind a 200.",
+          "renderer": {
+            "engine": "chromium",
+            "engineVersion": "127.0.6533.88",
+            "waitStrategy": "networkidle, then waitForSelector('[data-testid=\"salon-week-total\"]') with a 5000ms budget"
+          },
+          "consoleErrorCount": 4,
+          "pageErrorCount": 3,
+          "shellBaselineComparison": {
+            "performed": true,
+            "baselineDescription": "Same origin built from a deliberately gutted entrypoint that renders null, deployed as a preview.",
+            "baselineResponseBytes": 1310,
+            "baselineContainedSignal": false
+          },
+          "evidence": [
+            {
+              "kind": "dom-snapshot",
+              "path": "proof/journey/salon-launch/rendered-boot.dom.html",
+              "sha256": "b1907ca4e6d3528f0743bc1e59a8d206f3e47b0c821d9a5673ef04cb2d81a396"
+            },
+            {
+              "kind": "screenshot",
+              "path": "proof/journey/salon-launch/rendered-boot.png",
+              "sha256": "7a2fd08c4b16e953802ad7f4c091b6e35d8720af619c3b04ed52719a8f0c6b41"
+            },
+            {
+              "kind": "console-log",
+              "path": "proof/journey/salon-launch/rendered-boot.console.jsonl",
+              "sha256": "2c85be40197daf63c0b418e75a9f2306d14bc78e0f359a2b6741ecd0938af52b"
+            }
+          ]
+        },
+        {
+          "probeId": "title-grep",
+          "signalId": "document-title",
+          "method": "raw-http",
+          "urlFetched": "https://salon-weekly-brief.vercel.app/",
+          "finalUrl": "https://salon-weekly-brief.vercel.app/",
+          "fetchedAt": "2026-07-28T19:35:21Z",
+          "httpStatus": 200,
+          "responseBytes": 1310,
+          "authenticatedSession": false,
+          "observation": "observed",
+          "observedValue": "<title>Salon Weekly Brief</title>",
+          "shellBaselineComparison": {
+            "performed": true,
+            "baselineDescription": "Same origin built from a deliberately gutted entrypoint that renders null, deployed as a preview.",
+            "baselineResponseBytes": 1310,
+            "baselineContainedSignal": true
+          },
+          "evidence": [
+            {
+              "kind": "response-body",
+              "path": "proof/journey/salon-launch/origin-index.html",
+              "sha256": "4de81b0f7c25a936e1487d0ba36f5c19207ebd4a8f31c60d97b5ae2340f8c176"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "completeness": {
+    "claimed": [
+      "A production deployment of commit 9d41c0b to vercel/team_cafecorner exists and is identified by deployment id dpl_7Qk3ZmV2xN8sTbRw.",
+      "The deployment ran under the standing capability grant at H1, with no human presence claimed.",
+      "$3.20 was metered against the $100/month grant from the provider usage API, leaving $78.05.",
+      "Two promised signals were probed. The load-bearing one was not observed in a rendered DOM; the one that was observed is shell-present and proves nothing."
+    ],
+    "notRun": [
+      "No re-probe after a fix — the boot error was found at 19:36 and nothing has been redeployed since.",
+      "No mobile-viewport probe; only 1280x800 chromium was run.",
+      "No probe from an unauthenticated network egress outside the build machine, so 'public' in target.publicReachability is the provider's configuration, not an observation.",
+      "No lighthouse, accessibility, or performance measurement of any kind."
+    ],
+    "refused": [
+      {
+        "item": "Claim live-signal-observed-in-rendered-dom on the strength of the 200 response and the title match.",
+        "reason": "Both came from a 1310-byte shell that is byte-identical to the gutted baseline. A 200 and a static title are what a totally broken app also returns. The schema will not accept the green claim without a rendered-DOM observation of a shell-distinguishing signal, and there is no such observation to point at."
+      },
+      {
+        "item": "Record trustLevel H2 because the grant was signed and the owner set it up in person last week.",
+        "reason": "The signing key is readable by this agent process. H2 would assert cryptographic evidence of human presence for THIS launch, which does not exist. Setup-time intent is not run-time presence."
+      },
+      {
+        "item": "Write promotionAuthorized true after the deploy succeeded.",
+        "reason": "Authorization is derived by verification from an attestation and is never authored by the producing stage. false is written explicitly so its absence cannot be read as an omission."
+      }
+    ]
+  },
+  "promotionAuthorized": false
+}
