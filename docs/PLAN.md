@@ -132,9 +132,47 @@ never sees a password; the session is the permission.
   ignored) each marked approved or defaulted-with-disclosure. The journey contract derives the
   check; BUILD fails closed until it passes. This repoints the approvals that today gate only
   money and deploys.
-- **Fabricated-data disclosure gate.** If fixtures/sample data exist in the build, the served UI
-  must carry a user-visible disclosure marker, or the render contract hard-fails. Wire
-  copy-claims' existing fabrication class (currently zero production callers) into the same seam.
+- **Rendered Claim Provenance Gate** (replaces the fixture-marker gate I first proposed; that
+  proposal was refuted 2026-07-27 and the refutation is better).
+
+  My version was: *if fixtures exist in the build, the served UI must carry a disclosure marker.*
+  It fails three ways. It is not necessary — generated synthetic data has no fixture file. It is
+  not sufficient — unrelated test fixtures overfire it. And the overfiring is the fatal part:
+  *"once it produces enough false positives, someone will add exceptions until the gate becomes
+  decorative."*
+
+  The distinction I had missed, and it is the whole finding:
+
+      BUILD provenance   — how the software was constructed
+      CONTENT provenance — what the displayed numbers actually depict
+
+  Trial 1's receipts proved the first. The product lied about the second. Every assertion was
+  true and the artifact still misrepresented itself to its user.
+
+  The gate: **no consequential visible claim may imply user-owned, connected, current or factual
+  data unless that exact claim is bound to an authority-issued source record.** Unbound or
+  synthetic claims force the rendered surface into visibly disclosed demo mode.
+
+  Language consistency is part of the contract, not decoration. These phrases require a real
+  upload or connector binding — *"your Square export"*, *"from your account"*, *"actual revenue"*,
+  *"current sales"*, *"based on your data"*. If origin is `fixture`, `synthetic`,
+  `model_generated` or `unknown`, they are forbidden, and the page must say something
+  unambiguous: **"Sample data — not connected to your Square account."** Not "Example". Not
+  "Preview". Not a small demo chip beside an unrelated control. The misleading sentence is itself
+  a claim and is validated as one.
+
+  Derived metrics need more than a real source file. A rendered "repeat customer rate 63%"
+  requires input sources, exact source digests, a named transformation and its version, and a
+  recomputed output. If the transformation cannot be rerun the honest status is
+  `derived_unverified`, and the surface discloses that.
+
+  **The adversarial case to build first**, which beats my original gate outright: fixture
+  laundering through a real-looking source — ship a legitimate Square CSV fixture, render a
+  "Sample data" marker in the footer, then generate the headline metrics at runtime from a seeded
+  random function. Fixture present, marker present, numbers invented, gate green.
+
+  copy-claims' existing fabrication class (still zero production callers) wires into this seam
+  rather than into the fixture-detection seam.
 
 ### W3 — Reference pipeline (Pillar A)
 - Mobbin OAuth in setup (owner action); CDP capture → `atlas add` flow for non-API sources.
@@ -177,3 +215,6 @@ no appeal, per the plan that predates the result.
 | 6 | NodeSlide checkout resolution; parity-studio 0/8 row | open |
 | 7 | Legacy 22 events stay unattested | default: leave; warning is the record |
 | 8 | Mobbin OAuth (interactive session, owner) | open — blocks W3's API path |
+| 9 | parity-studio `role: domain-application` — accurate when parity was NodeSlide's home, false once Phase 4 resurfaces it. Proposer correctly says the edit should FOLLOW the Phase 4 merge, not precede it. | defer until Phase 4 lands |
+| 10 | The registry has no way to express **"hosts code it does not own."** Between Phase 4 and Phase 3, parity's declared role and its contents will legitimately disagree — 1,139 NodeSlide items still stranded there. This is a vocabulary gap, not a parity problem, and it recurs. | open — worth a `hostsForeignCode` field |
+| 11 | `measurementRevision: <full immutable SHA>` per registry entry, never `main`/`latest`/null, with `canonicalRemote` + `shippingManifestPath`; measurement resolves the remote, fetches that exact revision, detached-checks-out, and requires `manifest.repositoryCommit == measurementRevision`, failing `REGISTRY_REVISION_MISMATCH`. **A dirty working tree must never satisfy the check.** This is the fix for both measurement bugs found today — the dashboard scoring a 130-commit-stale checkout, and the port audit scoring a dirty tree. | open — recommend accept |
