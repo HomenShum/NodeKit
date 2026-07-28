@@ -1,13 +1,13 @@
 {
   "schemaVersion": "nodekit.launch-manifest/v1",
-  "caseId": "salon-weekly-brief",
+  "caseId": "salon-weekly-profit-2026-07",
   "stage": "launch",
   "producedAt": "2026-07-28T19:42:11Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.build-evidence-pack/v1",
-      "caseId": "salon-weekly-brief",
-      "sha256": "3f1c9a77e0b2d45861ac0f39d7e8b21c5a604fd93b8e7c1a2069d4f5b3c8e07a"
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "702ee0093c8426ca56e808d4dede150b2025bccda44cc4efae7560fe956104c2"
     }
   ],
   "content": {

@@ -1,18 +1,18 @@
 {
   "schemaVersion": "nodekit.observation-pack/v1",
-  "caseId": "salon-weekly-brief",
+  "caseId": "salon-weekly-profit-2026-07",
   "stage": "learn",
   "producedAt": "2026-07-28T21:40:00Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.launch-manifest/v1",
-      "caseId": "salon-weekly-brief",
-      "sha256": "3f1c0b9a7d2e45681aa4c73f9b05e2d8146c7a30f9be51cd2847a6b30f5e91cc"
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "eef47976ee61ca482a54e4ed5070161b077b36bb12e36ce1ce20bf388f9255c0"
     },
     {
       "schemaVersion": "nodekit.story-pack/v1",
-      "caseId": "salon-weekly-brief",
-      "sha256": "b74e2a5cd018f36920ab4c5178de3f0e6c92b1470da85f3c19e0bb7248a6d5f1"
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "407352a94c2bf776e8709be191994e7fcccc67f263d007a9bca872acb43dfdaf"
     }
   ],
   "content": {
