@@ -17,8 +17,9 @@ Three.js and GSAP, which is what a live answer to my own question looks like fro
 - Slide-AI: *"'Genjutsu' is useful internally, but too ambiguous to own architecture."* — and
   proposes the public name **Motion Deception Corpus**.
 
-Three priors, one verdict. The owner's fifth name is a *profile*, not a product. Shipped as
-`motion-proof/profiles/genjutsu.yaml`.
+Three priors, one verdict. The owner's fifth name is a *profile*, not a product. The intended home is
+`motion-proof/profiles/genjutsu.yaml`; that profile file is **not present in this repository as of
+2026-07-28**, so this document does not claim it shipped.
 
 **2. `design-dna` is Studio Fabric's record format, finally named.** NodeKit says so outright;
 Mom's Biz says the structure was already there as ReferenceObservation → DesignRule →

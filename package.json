@@ -199,6 +199,7 @@
     "tour": "node src/cli.mjs tour",
     "copy:audit": "node src/cli.mjs copy audit",
     "behavior:index": "node src/cli.mjs behavior index --write",
+    "motion:compare": "node src/cli.mjs motion compare",
     "journey:verify": "node src/cli.mjs journey verify",
     "bench:recall": "node scripts/bench-recall.mjs",
     "recall": "node scripts/recall.mjs",

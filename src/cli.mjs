@@ -11,6 +11,7 @@ import { checkRepository, commandFor } from "./lib/repo-check.mjs";
 import { buildRepoMap } from "./lib/repo-map.mjs";
 import { auditCopy } from "./lib/copy-audit.mjs";
 import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
+import { compareMotionPortability } from "./lib/motion-portability.mjs";
 import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
@@ -152,6 +153,7 @@ Usage:
   nodekit doctor [--repo-root <path>] [--json]
   nodekit dev|demo|check|proof [--repo-root <path>] [-- <args>]
   nodekit repo check [--repo-root <path>] [--json]
+  nodekit motion compare <repoA> <repoB> [repoC ...] [--output <receipt.json>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
@@ -370,6 +372,53 @@ async function runBehaviorIndex(parsed) {
     }
     return lines.join("\n");
   });
+}
+
+async function runMotionCompare(parsed) {
+  if (parsed.options.help) {
+    console.log(`Usage:
+  nodekit motion compare <repoA> <repoB> [repoC ...] [--output <receipt.json>] [--json]
+
+Compares concrete CSS motion-token declarations across repositories.
+Returns PASS (0), FAIL (1), or NOT_RUN (3). It never applies a migration.`);
+    return;
+  }
+  const repositories = parsed.positional.slice(2);
+  if (repositories.length < 2) {
+    throw Object.assign(
+      new Error(
+        "motion compare needs at least two repository paths; an absent comparison is NOT_RUN, never PASS",
+      ),
+      { exitCode: 3 },
+    );
+  }
+  const receipt = await compareMotionPortability(repositories);
+  if (parsed.options.output) {
+    const output = path.resolve(String(parsed.options.output));
+    await mkdir(path.dirname(output), { recursive: true });
+    await writeFile(output, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
+  }
+  printStructured(receipt, parsed, (value) => {
+    const c = value.coverage;
+    const lines = [
+      `MOTION PORTABILITY ${value.verdict}: ${c.readableRepositories}/${c.repositoriesRequested} repositories, ${c.repositories.reduce((sum, repository) => sum + repository.cssFilesRead, 0)} CSS files, ${c.declarationsObserved} declarations, ${c.distinctTokenNames} token names.`,
+    ];
+    for (const conflict of value.conflicts) {
+      lines.push(`  [${conflict.scope}] ${conflict.token}`);
+      for (const observed of conflict.values) {
+        lines.push(`      ${observed.value}: ${observed.sites.join(", ")}`);
+      }
+    }
+    const migration = value.migration.summary;
+    lines.push(
+      "",
+      `MIGRATION: ${migration.behaviorPreservingAliases} behavior-preserving aliases ready; ${migration.reviewRequiredValueChanges} value changes require review; ${migration.ownerDecisions} owner decisions blocked; ${migration.unmappedTokens} unmapped.`,
+      "PROOF BOUNDARY: static declarations observed; runtime, DOM/trace, video, and audience evidence not run.",
+    );
+    if (parsed.options.output) lines.push(`RECEIPT: ${path.resolve(String(parsed.options.output))}`);
+    return lines.join("\n");
+  });
+  if (!receipt.passed) process.exitCode = receipt.exitCode;
 }
 
 async function runRepoMap(parsed) {
@@ -1597,6 +1646,10 @@ async function main() {
   }
   if (first === "behavior" && second === "index") {
     await runBehaviorIndex(parsed);
+    return;
+  }
+  if (first === "motion" && second === "compare") {
+    await runMotionCompare(parsed);
     return;
   }
   if (first === "journey" && second === "verify") {

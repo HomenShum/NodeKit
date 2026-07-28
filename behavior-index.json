@@ -3,10 +3,10 @@
   "generatedBy": "src/lib/behavior-index.mjs",
   "regenerate": "npm run behavior:index",
   "counts": {
-    "declared": 4,
-    "mapped": 4,
+    "declared": 5,
+    "mapped": 5,
     "unmapped": 0,
-    "verified": 4,
+    "verified": 5,
     "partial": 0,
     "unverified": 0,
     "orphanAnnotations": 18
@@ -113,7 +113,7 @@
         {
           "file": "src/cli.mjs",
           "symbol": "runTour",
-          "line": 388
+          "line": 437
         }
       ],
       "supporting": [
@@ -184,6 +184,56 @@
           "scenario": "identifiers-not-flagged",
           "file": "test/copy-audit.test.mjs",
           "line": 58
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    },
+    {
+      "behaviorId": "studio.motion-portability",
+      "statement": "A copied motion recipe is blocked when one static token name resolves to different behavior, and migration aliases preserve observed values unless a disclosed owner decision changes them.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/lib/motion-portability.mjs",
+          "symbol": "compareMotionPortability",
+          "line": 285
+        }
+      ],
+      "supporting": [],
+      "requiredScenarios": [
+        "detects-silent-cross-repo-drift",
+        "normalizes-equivalent-values",
+        "incomplete-coverage-is-not-run",
+        "aliases-preserve-behavior"
+      ],
+      "provenScenarios": [
+        "detects-silent-cross-repo-drift",
+        "normalizes-equivalent-values",
+        "incomplete-coverage-is-not-run",
+        "aliases-preserve-behavior"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "detects-silent-cross-repo-drift",
+          "file": "test/motion-portability.test.mjs",
+          "line": 46
+        },
+        {
+          "scenario": "normalizes-equivalent-values",
+          "file": "test/motion-portability.test.mjs",
+          "line": 124
+        },
+        {
+          "scenario": "incomplete-coverage-is-not-run",
+          "file": "test/motion-portability.test.mjs",
+          "line": 150
+        },
+        {
+          "scenario": "aliases-preserve-behavior",
+          "file": "test/motion-portability.test.mjs",
+          "line": 168
         }
       ],
       "implementationGaps": [],
@@ -855,7 +905,7 @@
           {
             "file": "src/studio.mjs",
             "symbol": "studioCapability",
-            "line": 112
+            "line": 126
           }
         ],
         "namedSourceFiles": [
@@ -926,7 +976,7 @@
           {
             "file": "src/cli.mjs",
             "symbol": "runTour",
-            "line": 389
+            "line": 438
           }
         ],
         "namedSourceFiles": [

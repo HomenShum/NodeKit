@@ -92,3 +92,8 @@ It exists so scope is decided *before* implementation instead of drifting during
 **fail-closed**
 When evidence is missing or does not match, the answer is "blocked", never "probably fine". Most
 NodeKit gates are built this way.
+
+**behavior portability**
+A copied interaction keeps the behavior it was authored to have, even when the destination
+repository uses different libraries or legacy token names. NodeKit compares resolved semantics,
+not just whether a familiar name exists.

@@ -93,6 +93,25 @@ npm run ecosystem:check
 npm run dashboard
 ```
 
+### Compare copied behavior
+
+Design tokens can preserve appearance while silently changing interaction timing. NodeKit's first
+behavior-portability check compares static CSS motion declarations across repositories, binds the
+exact source set, and emits reviewable migration aliases:
+
+```bash
+node src/cli.mjs motion compare \
+  /path/to/source-repository \
+  /path/to/destination-repository \
+  --output proof/motion-portability.json
+```
+
+The command returns `PASS`, `FAIL`, or `NOT_RUN`; missing coverage is never green. Its receipt is
+decisive for static name/value conflicts only and explicitly leaves runtime, DOM/trace, video, and
+audience evidence unrun. See
+[`docs/BEHAVIOR_PORTABILITY_SHOWCASE.md`](https://github.com/HomenShum/node-platform/blob/main/docs/BEHAVIOR_PORTABILITY_SHOWCASE.md) for the measured
+NodeSlide/NodeRoom example.
+
 By default, `nodekit create` vendors the exact compile/check runtime that generated
 the project under `vendor/nodekit` and records `file:vendor/nodekit` in
 `package.json`. This keeps a fresh clone installable and prevents a later

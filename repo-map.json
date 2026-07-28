@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 85,
-    "modules": 63,
-    "tests": 62
+    "schemas": 86,
+    "modules": 64,
+    "tests": 63
   },
   "architecture": [
     {
@@ -64,6 +64,7 @@
       "inspect",
       "journey",
       "models",
+      "motion",
       "proof",
       "registry",
       "repo",
@@ -108,6 +109,7 @@
       "evolution:verify",
       "journey:verify",
       "knowledge:compare",
+      "motion:compare",
       "prepare",
       "presentation:nodekit-proof",
       "proof:package-install",
@@ -181,6 +183,7 @@
     "nodekit.model-capability-card.v1.schema.json",
     "nodekit.model-intelligence-harness-verdict.v1.schema.json",
     "nodekit.model-observation.v1.schema.json",
+    "nodekit.motion-portability-receipt.v1.schema.json",
     "nodekit.nodetrace-trajectory.v1.schema.json",
     "nodekit.opportunity-contract.v1.schema.json",
     "nodekit.package-install-proof.v1.schema.json",
@@ -256,6 +259,7 @@
     "knowledge-runtime.mjs",
     "managed-evidence-capture.mjs",
     "model-intelligence.mjs",
+    "motion-portability.mjs",
     "npm-cli-invocation.mjs",
     "npm-package-archive.mjs",
     "official-pricing-proof.mjs",
@@ -320,6 +324,7 @@
     "local-candidate-gate.test.mjs",
     "managed-evidence-capture.test.mjs",
     "model-intelligence.test.mjs",
+    "motion-portability.test.mjs",
     "nodekit-proof-campaign-publication.test.mjs",
     "nodekit-proof-campaign-video.test.mjs",
     "npm-cli-invocation.test.mjs",

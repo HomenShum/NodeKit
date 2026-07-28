@@ -1,121 +1,165 @@
-# Motion token drift — measured, 2026-07-28
+# Motion token portability — measured, 2026-07-28
 
-The council ranked `motion-token-harmonizer` first because it is the only proposed stage that is
-already a *measured* defect rather than a capability gap. Here is the measurement. It is worse than
-"three dialects."
+Status: **productized as `nodekit motion compare`**. The command emits
+`nodekit.motion-portability-receipt/v1`, binds the exact CSS source set, fails closed on incomplete
+coverage, and never claims runtime evidence from a static scan.
 
-## Inventory
+## The public defect
 
-| token | nodeslide | parity-studio | noderoom |
-|---|---|---|---|
+| token | NodeSlide | parity-studio | NodeRoom |
+|---|---:|---:|---:|
 | `--duration-fastest` | 80ms | 80ms | — |
 | `--duration-faster` | 120ms | 120ms | — |
 | `--duration-fast` | **180ms** | **180ms** | **120ms** |
 | `--duration-base` | 240ms | 240ms | — |
-| `--duration-normal` | — | — | 220ms |
-| `--duration-slow` | — | — | 380ms |
-| `--motion-fast` | — | — | .12s |
-| `--ease-out` | `cubic-bezier(0.2, 0.8, 0.25, 1)` | same | — |
-| `--ease-out-expo` | — | — | `cubic-bezier(.16,1,.3,1)` *and* `cubic-bezier(0.16, 1, 0.3, 1)` |
-| `--ease-spring` | — | — | `cubic-bezier(0.32, 0.72, 0, 1)` |
+| `--duration-normal` | — | — | 200ms **and** 220ms |
+| `--duration-slow` | — | — | 380ms **and** 400ms |
+| `--motion-fast` | — | — | 120ms |
+| `--motion-base` | — | — | 180ms |
+| `--motion-slow` | — | — | 340ms |
 
-`prefers-reduced-motion` is honored in all three (4 / 6 / 12 files), so the accessibility floor is
-intact. The drift is in vocabulary, not in compliance.
+`--duration-fast` is a false friend:
 
-## The three defects, in severity order
-
-**1. `--duration-fast` is a false friend — same name, different meaning.**
-
-    nodeslide / parity   --duration-fast: 180ms
-    noderoom             --duration-fast: 120ms
-
-And the collision closes the loop: noderoom's `--duration-fast` (120ms) is *exactly* nodeslide's
-`--duration-faster` (120ms). So the same name means two things, and the same value has two names.
-
-This is the worst available shape, because it fails silently in the one operation the design stack
-is built to encourage: **copying a reviewed recipe between repos.** A recipe that reads correctly,
-compiles, and passes review runs 33% faster or 50% slower than authored, and nothing reports it.
-It is the token-level instance of the class this week keeps producing — *a name's presence is not
-its meaning*.
-
-**2. Two scales that do not map onto each other.** nodeslide/parity run a four-rung
-fastest/faster/fast/base scale; noderoom runs a three-rung fast/normal/slow scale. There is no
-value in common except the 120ms collision above. A canonical mapping must therefore be authored,
-not derived — no mechanical rename can reconcile 4 rungs with 3.
-
-**3. Two curves both called "ease out", and one curve spelled two ways.**
-`--ease-out: cubic-bezier(0.2, 0.8, 0.25, 1)` and `--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)`
-are materially different curves. Separately, `--ease-out-expo` is declared twice within noderoom
-with different formatting of the same values — harmless today, but it means a textual diff of
-token files reports a change where there is none, which is how a real change later gets waved
-through.
-
-## Proposed canonical scale
-
-Semantics first, names second — the council's floor is "map each token to canonical *semantics*",
-not "pick a winner."
-
-| canonical | ms | meaning | absorbs |
-|---|---|---|---|
-| `--motion-instant` | 80 | state flip, no perceived travel | `--duration-fastest` |
-| `--motion-quick` | 120 | micro-feedback, hover, focus | `--duration-faster`, noderoom `--duration-fast`, `--motion-fast` |
-| `--motion-base` | 180 | standard enter/exit | nodeslide/parity `--duration-fast` |
-| `--motion-considered` | 240 | modal, panel, route | `--duration-base` |
-| `--motion-deliberate` | 380 | large surface, deliberate reveal | `--duration-slow` |
-
-noderoom's 220ms `--duration-normal` maps to `--motion-considered` (240) — a 20ms change, the only
-value that moves. Every other mapping is behavior-preserving.
-
-Curves keep both, because both are real and used:
-`--motion-ease-standard: cubic-bezier(0.2, 0.8, 0.25, 1)` ·
-`--motion-ease-expressive: cubic-bezier(0.16, 1, 0.3, 1)` ·
-`--motion-ease-spring: cubic-bezier(0.32, 0.72, 0, 1)`
-
-## Migration rule (behavior-preserving)
-
-Per the council floor — *"preserve existing behavior until migration"* — each repo gets aliases,
-not replacements:
-
-```css
-/* noderoom */
---duration-fast: var(--motion-quick);      /* 120ms — unchanged */
---motion-fast:   var(--motion-quick);      /* was .12s — unchanged */
---duration-slow: var(--motion-deliberate); /* 380ms — unchanged */
---duration-normal: var(--motion-considered); /* 220ms -> 240ms, THE ONLY BEHAVIOR CHANGE */
+```text
+NodeSlide / parity-studio   --duration-fast: 180ms
+NodeRoom                    --duration-fast: 120ms
 ```
 
-The one changing value is called out rather than buried, so the diff carries its own disclosure.
+The collision closes the loop: NodeRoom's `--duration-fast` is exactly NodeSlide's
+`--duration-faster`. The same name means two things, and the same value has two names.
 
-## What the gate found that this document missed
+A reviewed recipe copied by spelling still compiles, but it runs 33% faster in one direction or
+50% slower in the other. Presence is not meaning.
 
-`scripts/motion-token-drift-gate.mjs` was written to enforce the table above. Its first run
-returned **more conflicts than the hand analysis**, because I had only read the three `tokens.css`
-files while the gate reads all 67 CSS files across the three repositories:
+This is currently a **portability hazard**, not evidence of an active NodeSlide component
+regression. On the measured checkouts, NodeSlide defines the duration scale but has no CSS
+`var(--duration-*)` consumers; NodeRoom has live consumers. The showcase deliberately demonstrates
+the copy boundary rather than pretending an existing NodeSlide control is broken.
 
-    --duration-normal   200ms  noderoom:docs/design/contract-spec-extracted.css (+2 design-system exports)
-                        220ms  noderoom:src/ui/mobile/mobile.tokens.css
-    --duration-slow     400ms  noderoom:docs/design/contract-spec-extracted.css (+2 design-system exports)
-                        380ms  noderoom:src/ui/mobile/mobile.tokens.css
+## What the shipped receipt observed
 
-This is **not** the cross-repository drift the table describes. It is `within-one-repository`, and
-its shape is more specific than "two files disagree": the **design-system specification says
-200/400ms and the shipped mobile code says 220/380ms.** The implementation and the document that
-defines it have diverged, and the document is the one that reads as authoritative.
+The 2026-07-28 three-repository run reported:
 
-Two things follow. The canonical mapping above listed noderoom's `--duration-normal` as 220ms and
-proposed moving it to 240ms — a 20ms change. Against the *spec's* 200ms it is a 40ms change, in the
-same direction, and whichever number is chosen one of the two sources is currently wrong about the
-product. That is an owner call, not a mechanical rename.
+```text
+MOTION PORTABILITY FAIL
+3/3 repositories
+56 CSS files
+40 concrete motion declarations
+13 distinct motion-token names
+3 conflicts
+```
 
-And the method lesson, which is the point of building the gate at all: **the hand analysis read the
-files named `tokens.css` and concluded it had read the tokens.** A tool that enumerates rather than
-assumes found a class of conflict I had no reason to look for. The gate is deliberately not
-filtered to `src/` — a specification file making a false claim about the design system is a real
-finding, and hiding it behind a path filter would be the same mistake one level down.
+The conflicts are:
 
-## Gate this needs
+1. Cross-repository `--duration-fast`: 180ms versus 120ms.
+2. Inside NodeRoom, `--duration-normal`: the design exports say 200ms while shipped mobile CSS says
+   220ms.
+3. Inside NodeRoom, `--duration-slow`: the design exports say 400ms while shipped mobile CSS says
+   380ms.
 
-A cross-repo check that fails when a motion token name resolves to different values in different
-repositories. Without it this report describes a state, and the state re-drifts. Same argument as
-every other gate this week: **`git branch -r --contains HEAD` beat a documented habit, and so will
-this.**
+Normalization removes spelling noise before comparison: `.12s` equals `120ms`, and
+`cubic-bezier(.16,1,.3,1)` equals `cubic-bezier(0.16, 1, 0.3, 1)`. A `var(...)` alias is counted in
+the denominator but is not treated as an independent value claim.
+
+## Canonical semantics
+
+Names follow behavior, not relative adjectives:
+
+| canonical token | value | meaning |
+|---|---:|---|
+| `--motion-instant` | 80ms | state flip with no perceived travel |
+| `--motion-quick` | 120ms | micro-feedback such as hover or focus |
+| `--motion-base` | 180ms | standard enter or exit |
+| `--motion-considered` | 240ms | modal, panel, or route transition |
+| `--motion-deliberate` | 380ms | large surface or deliberate reveal |
+
+The two real curves remain distinct:
+
+```css
+--motion-ease-standard: cubic-bezier(0.2, 0.8, 0.25, 1);
+--motion-ease-expressive: cubic-bezier(0.16, 1, 0.3, 1);
+--motion-ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+```
+
+Generated NodeKit applications already inherit this vocabulary from
+`templates/base/apps/web/public/styles.css`.
+
+## Migration truth
+
+The first hand analysis said “exactly one value moves.” The complete CSS scan disproved that claim,
+so the command does not repeat it.
+
+The current receipt emits:
+
+- 14 behavior-preserving aliases ready for review;
+- one explicit value-change proposal, NodeRoom `--motion-slow` 340ms →
+  `--motion-deliberate` 380ms;
+- two blocked owner decisions for NodeRoom's 200/220ms and 380/400ms specification/runtime
+  disagreements;
+- one unmapped curve, `--ease-smooth`, which remains distinct instead of being silently collapsed.
+
+The important contextual mapping is behavior-preserving:
+
+```css
+/* NodeSlide: "fast" meant standard enter/exit. */
+--duration-fast: var(--motion-base);  /* 180ms stays 180ms */
+
+/* NodeRoom: "fast" meant micro-feedback. */
+--duration-fast: var(--motion-quick); /* 120ms stays 120ms */
+```
+
+A value-changing proposal is never emitted inside the ready alias block. It stays review-only until
+an owner chooses the authoritative behavior.
+
+## Proof boundary
+
+This first receipt is authoritative only for **static CSS name/value conflicts** and whether a
+generated alias preserves that observed value. It explicitly records:
+
+```text
+runtimeObserved: false
+domOrTraceObserved: false
+videoReviewed: false
+audienceValidated: false
+```
+
+It therefore cannot say that an animation executed, that its computed duration matched the token,
+that reduced motion reached the same final state, or that an audience found it useful.
+
+There is also a known source-kind gap: NodeSlide's tracked
+`src/domains/nodeslide/theme/app-tokens.json` declares a 120/180/340ms scale that disagrees with its
+runtime CSS and appears unconsumed. The receipt says `comparison: css-motion-tokens`; it does not
+smuggle that JSON record into a denominator it did not scan. DTCG/design-record ingestion is the
+next contract-coverage increment.
+
+The evidence order remains separate:
+
+```text
+static contract comparison  → token portability only
+runtime instrumentation     → timing, order, state, performance
+DOM + trace                  → structure and user flow
+video review                 → advisory perception
+audience study               → usefulness
+```
+
+No later layer may override a trust-surface violation, missing reduced motion, performance failure,
+or failed knockout, and the receipts are never blended into one score.
+
+## Reproduce
+
+```bash
+node src/cli.mjs motion compare \
+  /path/to/nodeslide \
+  /path/to/noderoom \
+  /path/to/parity-studio \
+  --output proof/motion-portability.json
+```
+
+The legacy entrypoint remains a wrapper over the same implementation:
+
+```bash
+node scripts/motion-token-drift-gate.mjs \
+  /path/to/nodeslide \
+  /path/to/noderoom \
+  /path/to/parity-studio
+```
