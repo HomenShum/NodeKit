@@ -174,7 +174,26 @@ try {
   }
   const installedManifest = await installedPackageFileManifest(path.dirname(installedPackageJson));
   if (JSON.stringify(installedManifest) !== JSON.stringify(inspectedArchive.fileManifest)) {
-    throw new Error("installed candidate file manifest differs from the inspected tarball payload");
+    // Name the delta. An integrity error that only says "differs" forces the next reader to
+    // rebuild the comparison by hand to learn anything; the check already holds both sides, so
+    // withholding them makes the sensor weaker than the evidence it collected.
+    const byPath = (list) => new Map(list.map((entry) => [entry.path, entry]));
+    const installed = byPath(installedManifest);
+    const archived = byPath(inspectedArchive.fileManifest);
+    const onlyInstalled = [...installed.keys()].filter((p) => !archived.has(p));
+    const onlyArchived = [...archived.keys()].filter((p) => !installed.has(p));
+    const changed = [...installed.keys()].filter((p) => {
+      const other = archived.get(p);
+      return other && (other.sha256 !== installed.get(p).sha256 || other.size !== installed.get(p).size);
+    });
+    const sample = (label, list) => (list.length ? `${label}: ${list.slice(0, 5).join(", ")}${list.length > 5 ? ` (+${list.length - 5} more)` : ""}` : null);
+    const detail = [
+      `installed=${installedManifest.length} archived=${inspectedArchive.fileManifest.length}`,
+      sample("only in install", onlyInstalled),
+      sample("only in archive", onlyArchived),
+      sample("content differs", changed),
+    ].filter(Boolean).join("; ");
+    throw new Error(`installed candidate file manifest differs from the inspected tarball payload — ${detail}`);
   }
   const postInstallSnapshotBytes = await readFile(snapshottedCandidateTarball);
   if (!postInstallSnapshotBytes.equals(candidateTarballBytes)

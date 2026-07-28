@@ -64,14 +64,14 @@
         {
           "file": "src/lib/opportunity-compiler.mjs",
           "symbol": "compileOpportunityToBuild",
-          "line": 48
+          "line": 53
         }
       ],
       "supporting": [
         {
           "file": "src/lib/opportunity-compiler.mjs",
           "symbol": "materializeBuildPacket",
-          "line": 114
+          "line": 127
         }
       ],
       "requiredScenarios": [
@@ -212,7 +212,7 @@
           {
             "file": "src/lib/opportunity-compiler.mjs",
             "symbol": "materializeBuildPacket",
-            "line": 115
+            "line": 128
           }
         ],
         "namedSourceFiles": [
@@ -513,7 +513,7 @@
           {
             "file": "src/lib/frontend-specialist.mjs",
             "symbol": "evaluateFrontendTournament",
-            "line": 189
+            "line": 224
           }
         ],
         "namedSourceFiles": [
@@ -524,7 +524,7 @@
           {
             "scenario": "decisive-from-receipts",
             "file": "test/frontend-specialist.test.mjs",
-            "line": 83
+            "line": 86
           }
         ],
         "namedTestFiles": [
@@ -579,7 +579,7 @@
           {
             "file": "src/lib/opportunity-compiler.mjs",
             "symbol": "compileOpportunityToBuild",
-            "line": 49
+            "line": 54
           }
         ],
         "namedSourceFiles": [
