@@ -119,6 +119,34 @@ Probed in three states before shipping, since the fix arrived unproven and unpro
 subject of this file: module absent → throws about the module; module and binary present → returns;
 missing-binary branch predicate → `true` on a missing path, `false` on the real one.
 
+### A test that measures the platform's rollback instead of the code's ordering
+
+From the deck-erasure envelope, 2026-07-28. The envelope's whole claim is *ordering*: it checks
+both ceilings **before the first write**, so an oversized deck is refused rather than partially
+processed. The obvious test is "call it with an oversized deck, then assert nothing was deleted."
+
+That test is vacuous, and the reason is subtle enough that it was nearly written:
+
+> convex-test rolls a `t.run` back when its handler throws, so asserting "nothing was deleted" from
+> outside the transaction measures **the rollback**, not the ordering — it would pass against an
+> implementation that deleted everything and only then noticed.
+
+Same green, same assertion, and it proves the platform works rather than the code. The fix is to
+swallow the error **inside** the transaction so the post-state is observed before rollback can
+launder it.
+
+This also corrected the premise I had written into the task: I described the envelope as preventing
+a "half-deleted deck." Convex mutations are transactional, so half-deletion was never the literal
+failure mode. What the envelope actually buys is a *named* refusal, a *measured* cliff a test can
+sit on, and a bounded read set — a refused erasure now reads one row past the envelope instead of
+the whole workspace. Checking before the first write remains the right structure precisely because
+it makes the property hold **independent of** the platform's rollback, rather than relying on it.
+
+The generalisation, which is not specific to Convex:
+
+    if your test would pass against an implementation that does the right thing for the wrong
+    reason, it is measuring the environment, not the code
+
 ### A gate with no PASS fixture is half-built
 
 The sharpest rule of the day, and it explains why "probe both directions" is not symmetric advice:
