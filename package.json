@@ -127,7 +127,8 @@
     "nodekit-evidence-finalize": "scripts/finalize-submission-evidence.mjs",
     "nodekit-consumer-prepare": "scripts/prepare-consumer-package.mjs",
     "nodekit-evidence-capture": "scripts/capture-managed-evidence.mjs",
-    "nodekit-human-study": "scripts/capture-human-study.mjs"
+    "nodekit-human-study": "scripts/capture-human-study.mjs",
+    "nodekit-unpushed-work-gate": "scripts/unpushed-work-gate.mjs"
   },
   "files": [
     "dist",
@@ -138,6 +139,7 @@
     "scripts/prepare-consumer-package.mjs",
     "scripts/test-files.mjs",
     "scripts/capture-human-study.mjs",
+    "scripts/unpushed-work-gate.mjs",
     "scripts/capture-managed-evidence.mjs",
     "scripts/run-knowledge-runtime-comparison.mjs",
     "adapters",
