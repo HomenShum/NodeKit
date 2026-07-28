@@ -73,8 +73,55 @@ a reader who expected 200,000 lines learns immediately that the scope was wrong.
   produces a recording of nothing that looks like a recording of something.
 - **Probe both directions before shipping any gate.**
 
-## Open
+## Two extensions, found by probing (2026-07-28, same day)
 
-`trust-surface-audit.mjs` has not been probed in the passing direction. Until it is, it is a
-candidate instance of this class rather than a defence against it, and it should not be wired as a
-gate.
+### A reporter is not a gate, and nothing in its output says so
+
+`trust-surface-audit.mjs` was almost packaged as a gate. Probing it found something worse than an
+unproven pass direction: **it had no verdict at all.** It printed `surfaces=2, affordances=0,
+consentAttrs=0` and stopped. No PASS, no FAIL, no NOT_RUN. It had been read as a gate for an entire
+session because *the numbers looked like a result.*
+
+    an instrument that only reports is safe until someone treats its output as a verdict,
+    and nothing in the output stops them
+
+This is adjacent to the vacuous pass rather than an instance of it — it cannot conclude vacuously
+because it never concludes. But the consequence is identical: a green-looking artifact standing in
+for a judgement nobody made. **A tool that computes facts must either state a verdict or state that
+it has none.**
+
+### A gate with no PASS fixture is half-built
+
+The sharpest rule of the day, and it explains why "probe both directions" is not symmetric advice:
+
+    the failing direction cannot detect over-matching
+
+Building the PASS fixture immediately exposed two real bugs that were invisible from the FAIL side:
+
+1. **The gate ignored the very attribute it demanded.** Surface enumeration matched on *prose*
+   (`/propos|conflict|failed|error|review/`). NodeRoom's boot FAILED state — which carries
+   `data-boot-state="failed"` — has copy reading "Could not open the room," containing no trust
+   word, so the gate returned **0 surfaces** on a surface that literally declares failed state.
+   Meanwhile it flagged two marketing landings for the phrase "Review every change." **Failing in
+   both directions at once, on one heuristic**, and loudly enough that the miss was hidden by the
+   noise. Fixed: a surface qualifies by *declaring a state* (definitional) or by trust language
+   co-located with a real decision affordance.
+2. **Nested double-counting.** After fix 1, a `<main>` wrapping a proposal card qualified as a
+   second surface and threw a clause-1 failure against a wrapper never meant to declare state. The
+   compliant fixture went red — which is how it was caught. Only the innermost qualifying element
+   is kept now.
+
+Neither was reachable from the failing direction. A gate that only fails loudly can be
+simultaneously over-matching and under-matching, and its noise conceals the miss.
+
+Related discipline: the self-test must exercise the **real** probe, not a duplicated copy of it. A
+self-test against a re-implementation proves the copy works — this class again, one level up.
+
+## Resolved / Open
+
+- `trust-surface-audit.mjs` — **retired.** Replaced by `trust-surface-core.mjs` (probe + verdict),
+  `trust-surface-selftest.mjs` (three fixtures: PASS, FAIL, NOT_RUN — all green, verified
+  independently), and `trust-surface-live.mjs`. Live results: NodeRoom boot FAILED state **PASS**,
+  two landings **NOT_RUN**, fixture built to break it **FAIL**.
+- The self-test is not optional dressing. It is the only thing standing between that file and the
+  class it exists to defend against, so the two ship together or not at all.
