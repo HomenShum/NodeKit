@@ -1,0 +1,21 @@
+$ node tools/decision-sweep.mjs --scope test/fixtures/builder-journey/build-evidence/src
+Method: every exported constant, every literal threshold, every default parameter and every
+early return in the slice was listed, then each was asked "could this have been otherwise, and
+did the OpportunityContract say which?". Anything answering "yes / no" is an emergent decision.
+
+candidates found: 6
+  src/ingest.mjs:6    SUPPORTED_INPUTS            -> contract-stated (/inputs), not emergent
+  src/ingest.mjs:10   RECEIPT_MATCH_THRESHOLD     -> EMERGENT  dec-receipt-ocr-threshold
+  src/ingest.mjs:25   classify() proposal-only    -> EMERGENT  dec-category-proposal-only
+  src/weekly-brief.mjs:12 BRIEF_LABEL             -> contract contradiction, reconciled at /primaryArtifact
+  src/weekly-brief.mjs:15 WEEK_BOUNDARY           -> EMERGENT  dec-week-boundary
+  src/cli.mjs:9       renderBrief field order     -> presentation, no user-visible consequence
+
+separately swept: client-side storage, because retention is invisible in the source constants
+  90-day parsed-total retention                   -> EMERGENT  dec-parsed-total-retention
+
+emergent total: 4
+exit code: 0
+
+Known blind spots: the sweep reads source text only. A decision expressed purely in copy, in a
+CSS breakpoint, or in the order the owner is asked questions would not appear here.

@@ -1,0 +1,12 @@
+$ grep -rnE "fetch\(|https?://|XMLHttpRequest|net\.|node:https?|plaid|WebSocket" test/fixtures/builder-journey/build-evidence/src/
+exit code: 1
+
+$ grep -rc "" test/fixtures/builder-journey/build-evidence/src/*.mjs
+test/fixtures/builder-journey/build-evidence/src/cli.mjs:19
+test/fixtures/builder-journey/build-evidence/src/ingest.mjs:24
+test/fixtures/builder-journey/build-evidence/src/weekly-brief.mjs:27
+
+Scan boundary: this is a static text scan of three source files at one commit. It shows no
+outbound network call is written in this slice. It does not prove the running process makes no
+network call, because it does not inspect transitive dependencies and it did not run the program
+under a network monitor.
