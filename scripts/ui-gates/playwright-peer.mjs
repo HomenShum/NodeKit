@@ -14,10 +14,12 @@
  * no findings, so PASS" is the exact shape this repository spent a day cataloguing.
  */
 
+import { existsSync } from "node:fs";
+
 export async function requireChromium(toolName) {
+  let chromium;
   try {
-    const { chromium } = await import("playwright");
-    return chromium;
+    ({ chromium } = await import("playwright"));
   } catch (error) {
     if (error?.code !== "ERR_MODULE_NOT_FOUND") throw error;
     throw new Error(
@@ -32,4 +34,32 @@ export async function requireChromium(toolName) {
       ].join("\n"),
     );
   }
+
+  // The module resolving is not the capability existing.
+  //
+  // `npm install playwright` WITHOUT `npx playwright install chromium` is the common half-install:
+  // the import succeeds, this function returns happily, and the run dies much later at
+  // `chromium.launch()` with "Executable doesn't exist at ...". Still non-zero, so not a vacuous
+  // pass — but it fails in the wrong place with the wrong message, and the guard would have
+  // measured the PACKAGE rather than the BROWSER.
+  //
+  // This is the guard-shaped member of the class in docs/VACUOUS_PASS.md: a precondition check
+  // that verifies a PROXY for the precondition. Module presence standing in for browser
+  // availability is the same substitution as prose standing in for a declared trust state.
+  //
+  // `executablePath()` is synchronous and launches nothing, so proving the real thing is cheap.
+  const executable = chromium.executablePath?.();
+  if (executable && !existsSync(executable)) {
+    throw new Error(
+      [
+        `${toolName}: Playwright is installed but its Chromium binary is not.`,
+        "",
+        "      npx playwright install chromium",
+        "",
+        `  Expected at: ${executable}`,
+        "  Not-run is never a pass, so this exits non-zero rather than skipping.",
+      ].join("\n"),
+    );
+  }
+  return chromium;
 }

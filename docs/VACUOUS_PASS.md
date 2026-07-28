@@ -90,6 +90,35 @@ because it never concludes. But the consequence is identical: a green-looking ar
 for a judgement nobody made. **A tool that computes facts must either state a verdict or state that
 it has none.**
 
+### The guard-shaped member: a precondition check that verifies a *proxy* for the precondition
+
+`requireChromium` — the guard written *specifically* to keep these gates from failing vacuously —
+had the defect itself, and it was caught by the other session applying this document's own test to
+it.
+
+It caught `ERR_MODULE_NOT_FOUND`: the *module* being absent. It did not catch the far more common
+half-install, `npm install playwright` **without** `npx playwright install chromium`. In that state
+the import succeeds, the guard returns happily, and the run dies much later at `chromium.launch()`
+with "Executable doesn't exist at …".
+
+That is not a vacuous pass by itself — it still exits non-zero. But it fails in the wrong place
+with the wrong message, and **the guard measured the package rather than the browser**. Apply this
+document's own tell and it falls immediately: *what would this check have reported if the browser
+did not exist?* The same thing it reports when it does.
+
+    module presence stood in for browser availability
+    the way prose stood in for a declared trust state
+
+Both look like they are checking the real thing. Every other instance in this document is an
+instrument measuring an empty subject; this one is a **precondition check whose subject is a
+stand-in for the precondition**. Distinct enough to name separately, because the fix is different:
+not "measure something" but "measure the thing itself" — here, `chromium.executablePath()` plus an
+`existsSync`, which is synchronous and launches nothing, so proving the real capability is cheap.
+
+Probed in three states before shipping, since the fix arrived unproven and unproven is the whole
+subject of this file: module absent → throws about the module; module and binary present → returns;
+missing-binary branch predicate → `true` on a missing path, `false` on the real one.
+
 ### A gate with no PASS fixture is half-built
 
 The sharpest rule of the day, and it explains why "probe both directions" is not symmetric advice:
