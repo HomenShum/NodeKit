@@ -3,65 +3,200 @@
   "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.product-design-contract.v1.schema.json",
   "title": "NodeKit protected product design contract",
   "type": "object",
-  "required": ["schemaVersion", "contractId", "product", "journey", "designIntent", "interfaceHypothesis", "requiredDesktopSurfaces", "requiredMobileSurfaces", "avoid", "requiredStates", "protectedDecisions"],
+  "required": [
+    "schemaVersion",
+    "contractId",
+    "product",
+    "journey",
+    "designIntent",
+    "interfaceHypothesis",
+    "requiredDesktopSurfaces",
+    "requiredMobileSurfaces",
+    "avoid",
+    "requiredStates",
+    "protectedDecisions",
+    "domStateAssertions"
+  ],
   "properties": {
-    "schemaVersion": { "const": "nodekit.product-design-contract/v1" },
-    "contractId": { "$ref": "#/$defs/nonEmpty" },
+    "schemaVersion": {
+      "const": "nodekit.product-design-contract/v1"
+    },
+    "contractId": {
+      "$ref": "#/$defs/nonEmpty"
+    },
     "product": {
       "type": "object",
-      "required": ["targetUser", "primaryJob", "primaryArtifact"],
+      "required": [
+        "targetUser",
+        "primaryJob",
+        "primaryArtifact"
+      ],
       "properties": {
-        "targetUser": { "$ref": "#/$defs/nonEmpty" },
-        "primaryJob": { "$ref": "#/$defs/nonEmpty" },
-        "primaryArtifact": { "$ref": "#/$defs/nonEmpty" }
+        "targetUser": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "primaryJob": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "primaryArtifact": {
+          "$ref": "#/$defs/nonEmpty"
+        }
       },
       "additionalProperties": false
     },
-    "journey": { "$ref": "#/$defs/nonEmptyStrings" },
+    "journey": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
     "designIntent": {
       "type": "object",
-      "required": ["emotionalTarget", "dominantSurface", "dominantAction", "density"],
+      "required": [
+        "emotionalTarget",
+        "dominantSurface",
+        "dominantAction",
+        "density"
+      ],
       "properties": {
-        "emotionalTarget": { "$ref": "#/$defs/nonEmptyStrings" },
-        "dominantSurface": { "$ref": "#/$defs/nonEmpty" },
-        "dominantAction": { "$ref": "#/$defs/nonEmpty" },
-        "density": { "enum": ["low", "medium", "high"] }
+        "emotionalTarget": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "dominantSurface": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "dominantAction": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "density": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "interfaceHypothesis": {
       "type": "object",
-      "required": ["artifactDominance", "agentPlacement", "reviewBoundary", "mobileTopology"],
+      "required": [
+        "artifactDominance",
+        "agentPlacement",
+        "reviewBoundary",
+        "mobileTopology"
+      ],
       "properties": {
-        "artifactDominance": { "$ref": "#/$defs/nonEmpty" },
-        "agentPlacement": { "$ref": "#/$defs/nonEmpty" },
-        "reviewBoundary": { "$ref": "#/$defs/nonEmpty" },
-        "mobileTopology": { "$ref": "#/$defs/nonEmpty" }
+        "artifactDominance": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "agentPlacement": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "reviewBoundary": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "mobileTopology": {
+          "$ref": "#/$defs/nonEmpty"
+        }
       },
       "additionalProperties": false
     },
-    "requiredDesktopSurfaces": { "$ref": "#/$defs/nonEmptyStrings" },
-    "requiredMobileSurfaces": { "$ref": "#/$defs/nonEmptyStrings" },
-    "avoid": { "$ref": "#/$defs/nonEmptyStrings" },
-    "requiredStates": { "$ref": "#/$defs/nonEmptyStrings" },
+    "requiredDesktopSurfaces": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
+    "requiredMobileSurfaces": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
+    "avoid": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
+    "requiredStates": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
     "protectedDecisions": {
       "type": "object",
-      "required": ["primaryUser", "primaryJob", "canonicalWorkflow", "dataAuthority", "permissionBoundaries", "completionCriteria", "finalVerdict"],
+      "required": [
+        "primaryUser",
+        "primaryJob",
+        "canonicalWorkflow",
+        "dataAuthority",
+        "permissionBoundaries",
+        "completionCriteria",
+        "finalVerdict"
+      ],
       "properties": {
-        "primaryUser": { "const": "nodekit" },
-        "primaryJob": { "const": "nodekit" },
-        "canonicalWorkflow": { "const": "nodekit" },
-        "dataAuthority": { "const": "nodekit" },
-        "permissionBoundaries": { "const": "nodekit" },
-        "completionCriteria": { "const": "nodeproof" },
-        "finalVerdict": { "const": "nodeproof" }
+        "primaryUser": {
+          "const": "nodekit"
+        },
+        "primaryJob": {
+          "const": "nodekit"
+        },
+        "canonicalWorkflow": {
+          "const": "nodekit"
+        },
+        "dataAuthority": {
+          "const": "nodekit"
+        },
+        "permissionBoundaries": {
+          "const": "nodekit"
+        },
+        "completionCriteria": {
+          "const": "nodeproof"
+        },
+        "finalVerdict": {
+          "const": "nodeproof"
+        }
       },
       "additionalProperties": false
+    },
+    "domStateAssertions": {
+      "type": "array",
+      "description": "Trust-surfaces clause 1: how each trust-decision state announces itself in the rendered DOM, so an agent can read which state the surface is in. Required for proposal, conflict and failed_safe.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state",
+          "selector",
+          "attribute",
+          "value"
+        ],
+        "properties": {
+          "state": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The product stage this assertion proves."
+          },
+          "selector": {
+            "type": "string",
+            "minLength": 1,
+            "description": "CSS selector for the element carrying the state."
+          },
+          "attribute": {
+            "type": "string",
+            "minLength": 1,
+            "description": "DOM attribute published on that element, conventionally data-nodekit-trust-state."
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact attribute value asserted when the surface is in this state."
+          }
+        }
+      }
     }
   },
   "$defs": {
-    "nonEmpty": { "type": "string", "minLength": 1 },
-    "nonEmptyStrings": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true }
+    "nonEmpty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nonEmpty"
+      },
+      "uniqueItems": true
+    }
   },
   "additionalProperties": false
 }

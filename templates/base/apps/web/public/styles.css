@@ -14,6 +14,21 @@
   --shadow-brand:3px 3px 0 var(--ink); --shadow-float:5px 5px 0 var(--ink);
   /* type scale + radius */
   --weight-black:850; --weight-bold:750; --weight-semibold:700; --radius-round:50%;
+  /* spacing scale — 4px base. Every surface in this family runs one; a generated app
+     without it is off-system from its first commit. */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px;
+  --space-6:32px; --space-7:48px; --space-8:64px;
+  /* motion scale — canonical names from docs/MOTION_TOKEN_DRIFT.md, planted here so a
+     generated app inherits the vocabulary rather than inventing a fourth dialect.
+     A bespoke duration or cubic-bezier in generated code is drift, not craft. */
+  --motion-instant:80ms;      /* state flip, no perceived travel */
+  --motion-quick:120ms;       /* micro-feedback: hover, focus */
+  --motion-base:180ms;        /* standard enter/exit */
+  --motion-considered:240ms;  /* modal, panel, route */
+  --motion-deliberate:380ms;  /* large surface, deliberate reveal */
+  --motion-ease-standard:cubic-bezier(0.2,0.8,0.25,1);
+  --motion-ease-expressive:cubic-bezier(0.16,1,0.3,1);
+  --motion-ease-spring:cubic-bezier(0.32,0.72,0,1);
   font-family:Inter,ui-sans-serif,system-ui,sans-serif;
 }
 * { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); } button { font:inherit; } button:focus-visible,a:focus-visible,[tabindex]:focus-visible,summary:focus-visible { outline:3px solid var(--violet); outline-offset:3px; }
@@ -31,4 +46,9 @@ aside{border-left:1px solid var(--ink);padding:1.5rem;background:var(--aside-fil
 @media(max-width:640px){header{height:58px}.orientation{grid-template-columns:1fr;padding:1rem 0 .75rem}.orientation .button{justify-self:start}h1{font-size:2.55rem}.lede{margin-top:.65rem;font-size:.92rem;line-height:1.4}.progress{grid-template-columns:repeat(2,1fr)}.step{min-height:48px;padding:.5rem;font-size:.7rem}.state-banner{flex-direction:row;margin-top:.6rem;padding:.65rem;gap:.65rem}.state-kind{min-width:0}.workspace{grid-template-columns:1fr;margin-top:.6rem}.workspace nav{grid-row:2;border-right:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:1rem}.workspace nav .eyebrow,.workspace nav>strong,.case-meta{grid-column:1/-1}.workspace nav>a{text-align:center;padding:.45rem}.artifact{grid-row:1;padding:1rem}.primary-input>div{flex-direction:column}.artifact-body{min-height:220px;padding:1.3rem}aside{grid-row:3;padding:1.1rem}footer{flex-direction:column}body[data-action-state="propose"] main,body[data-action-state="pending"] main,body[data-action-state="conflict"] main,body[data-action-state="recovery"] main{padding-bottom:8rem}body[data-action-state="propose"] aside .actions,body[data-action-state="pending"] aside .actions,body[data-action-state="conflict"] aside .actions,body[data-action-state="recovery"] aside .actions{display:none}.mobile-action{position:fixed;z-index:30;left:.75rem;right:.75rem;bottom:.75rem;padding:.75rem;border:1px solid var(--ink);background:var(--panel);box-shadow:var(--shadow-float);align-items:center;justify-content:space-between;gap:.75rem}.mobile-action:not([hidden]){display:flex}.mobile-action>div:first-child{display:flex;min-width:0;flex-direction:column;gap:.2rem}.mobile-action span{color:var(--muted);font:.62rem ui-monospace,monospace;letter-spacing:.08em}.mobile-action strong{font-size:.84rem;line-height:1.2}.mobile-action>div:last-child{display:flex;gap:.5rem}.mobile-action .button{min-height:42px;padding:.55rem .7rem;font-size:.78rem}}
 @media(max-height:500px) and (min-width:641px){header{height:44px}.orientation{padding:.5rem 0 .4rem;gap:.5rem}.orientation h1{max-width:none;font-size:1.9rem;line-height:.9;letter-spacing:-.05em}.orientation h1 br{display:none}.orientation h1 em{margin-left:.35rem}.orientation .eyebrow,.orientation .lede{display:none}.progress{grid-template-columns:repeat(4,1fr);margin-top:.15rem}.step{min-height:38px;padding:.35rem;font-size:.66rem}.state-banner{margin-top:.3rem;padding:.4rem .6rem;align-items:center}.state-banner p{display:none}.workspace{margin-top:.3rem}.artifact{padding:.5rem 1rem}.primary-input{margin-bottom:.5rem;padding:.5rem}.primary-input label{margin-bottom:.3rem}}
 @media(prefers-color-scheme:dark){:root{color-scheme:dark;--ink:#f3f1e9;--muted:#aaa99f;--paper:#111310;--panel:#191b17;--line:#383b34;--lime:#b8e85b;--violet:#a99cff;--soft:#29263a;--error-fill:#341c18;--error-text:#ffb7aa;--aside-fill:#201e2b;--artifact-fill:#131511;--proposal-fill:rgba(0,0,0,.18);--shadow-brand:3px 3px 0 #777d70}header{background:rgba(17,19,16,.92)}.brand{color:var(--ink)}.primary,.approve{color:#111313}.secondary{color:var(--ink)}.workspace nav>a.active{background:#f3f1e9;color:#171817}.completion{color:#111313}.state-banner[data-kind="waiting"],.state-banner[data-kind="partial"]{color:#211806}.state-banner[data-kind="waiting"] p,.state-banner[data-kind="partial"] p{color:#5e4a18}.state-banner[data-kind="error"],.state-banner[data-kind="failure"],.state-banner[data-kind="conflict"]{color:#3e100c}.state-banner[data-kind="error"] p,.state-banner[data-kind="failure"] p,.state-banner[data-kind="conflict"] p{color:#6c3a34}.state-banner[data-kind="complete"],.state-banner[data-kind="receipt_inspection"],.state-banner[data-kind="export_share"]{color:#111313}.state-banner[data-kind="complete"] p,.state-banner[data-kind="receipt_inspection"] p,.state-banner[data-kind="export_share"] p{color:#31431b}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+/* Reduced motion collapses to the FINAL state — never to a different design. `animation` is
+   covered as well as `transition`: the template ships zero @keyframes today, and this guard is
+   what keeps that true for anything a generated app adds. Also survives the protected-browser
+   lane, which screenshots with animations:"disabled" — if the gate freezes it, it was never
+   evidence. */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:1ms!important;animation-duration:1ms!important;animation-iteration-count:1!important}}

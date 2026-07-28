@@ -7,6 +7,8 @@ import test from "node:test";
 import { stringify as stringifyYaml } from "yaml";
 import {
   FRONTEND_REQUIRED_STATES,
+  FRONTEND_TRUST_STATE_ATTRIBUTE,
+  FRONTEND_TRUST_STATES,
   FRONTEND_REQUIRED_VIEWS,
   compileFrontendPlan,
   createFrontendDirections,
@@ -61,6 +63,7 @@ async function fixture() {
     requiredMobileSurfaces: ["today", "review", "business", "sources", "sticky_action"],
     avoid: ["generic_kpi_dashboard", "accounting_schema_as_interface", "decorative_chat", "all_workflow_states_expanded", "hidden_data_freshness"],
     requiredStates: [...FRONTEND_REQUIRED_STATES],
+    domStateAssertions: FRONTEND_TRUST_STATES.map((state) => ({ state, selector: "[data-nodekit-trust-surface]", attribute: FRONTEND_TRUST_STATE_ATTRIBUTE, value: state })),
     protectedDecisions: { primaryUser: "nodekit", primaryJob: "nodekit", canonicalWorkflow: "nodekit", dataAuthority: "nodekit", permissionBoundaries: "nodekit", completionCriteria: "nodeproof", finalVerdict: "nodeproof" },
   };
   const contractPath = path.join(root, "harness", "frontend", "product-packets", "verified-business.yaml");

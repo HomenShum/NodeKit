@@ -37,6 +37,27 @@ export const FRONTEND_EVALUATION_DIMENSIONS = Object.freeze([
   "visualQuality",
 ]);
 
+/**
+ * The subset of required states where a human or an agent DECIDES whether to trust something.
+ *
+ * These carry an obligation the others do not: the state must be assertable from the rendered
+ * page, not merely present in the plan. A state that exists in the contract and announces nothing
+ * in the DOM is invisible to the agent that has to act on it — and the failure is silent, because
+ * the page still renders and nothing fails.
+ *
+ * This is clause 1 of the trust-surfaces contract. Clause 2 — that these surfaces must not be
+ * styled to imply an outcome (no motion, no success tokens, no settled position on an undecided
+ * thing) — is enforced at render time, not here.
+ *
+ * Naming note: this list uses `failed_safe`, while Caseflow's run status is `failed_safely`.
+ * They are genuinely different things (a product stage vs a run outcome) and the near-identical
+ * spelling is a readability hazard worth knowing about before someone "fixes" one to match.
+ */
+export const FRONTEND_TRUST_STATES = Object.freeze(["proposal", "conflict", "failed_safe"]);
+
+/** The DOM attribute a trust state must publish so its posture is machine-readable. */
+export const FRONTEND_TRUST_STATE_ATTRIBUTE = "data-nodekit-trust-state";
+
 export const FRONTEND_REQUIRED_STATES = Object.freeze([
   "first_arrival",
   "loading",
@@ -116,6 +137,20 @@ export async function compileFrontendPlan(repoRoot, contractFile, routeFile = "h
   if (missingStates.length) throw new Error(`product design contract is missing required states: ${missingStates.join(", ")}`);
   const missingGuardrails = FRONTEND_REQUIRED_GUARDRAILS.filter((guardrail) => !contract.avoid.includes(guardrail));
   if (missingGuardrails.length) throw new Error(`product design contract is missing anti-pattern guardrails: ${missingGuardrails.join(", ")}`);
+  // Trust-surfaces clause 1: a trust state must be assertable from the page, not only present in
+  // the plan. Listing `proposal` in requiredStates proves the state was designed; it does not
+  // prove an agent can read which state the surface is in. Fail closed on the difference.
+  const undeclaredTrustStates = FRONTEND_TRUST_STATES.filter(
+    (state) => !(contract.domStateAssertions ?? []).some((assertion) => assertion?.state === state && assertion?.attribute),
+  );
+  if (undeclaredTrustStates.length) {
+    throw new Error(
+      `trust states must declare themselves in the DOM: ${undeclaredTrustStates.join(", ")}. ` +
+        `Add a domStateAssertions entry per state naming the selector and the attribute ` +
+        `(conventionally ${FRONTEND_TRUST_STATE_ATTRIBUTE}). A state present in the plan but ` +
+        `silent in the page cannot be inspected by the agent that must act on it.`,
+    );
+  }
   if (route.selection.preferredRoute && route.selection.evidenceRefs.length === 0) {
     throw new Error("a preferred frontend route requires evidenceRefs; model reputation is not routing evidence");
   }
