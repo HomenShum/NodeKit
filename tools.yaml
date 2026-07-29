@@ -1,0 +1,437 @@
+# NodeKit tool operating model — machine-readable registry.
+# Source: owner ChatGPT thread "NodeKit tool inventory and use plan" (thread-2026-07-29).
+# Placement enum is CLOSED: CORE | CONNECTOR | ADAPTER | APP | REFERENCE | BENCHMARK | DOMAIN.
+# journeyStages enum: decide | reference | build | prove | launch | learn.
+# `packages` lists the npm package names an APP entry would appear under in a package.json —
+# the dependency-free-core gate (scripts/tool-placement-gate.mjs) scans for them.
+# `unresolved: true` + `journeyStages: []` means the stage could not be honestly derived
+# from the thread; a guessed stage is worse than a declared unknown.
+schemaVersion: nodekit.tools/v1
+source: thread-2026-07-29
+
+tools:
+  # ---- external: design references and connectors ----
+  - id: mobbin-mcp
+    placement: [CONNECTOR, REFERENCE]
+    journeyStages: [decide, reference]
+    source: thread-2026-07-29
+  - id: figma-and-figma-mcp
+    placement: [CONNECTOR, REFERENCE]
+    journeyStages: [reference, build]
+    source: thread-2026-07-29
+  - id: figma-code-connect
+    placement: [CONNECTOR]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: lovable
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: manus
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: vercel-eve
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: linear
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: figma-slides
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: gamma
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: impeccable-style
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    constraint: skill input
+    source: thread-2026-07-29
+  - id: frontend-slides
+    placement: [REFERENCE, ADAPTER]
+    journeyStages: [reference]
+    constraint: adapter optional
+    source: thread-2026-07-29
+  - id: patoles-agent-flow
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: gittrend
+    placement: [REFERENCE, BENCHMARK]
+    journeyStages: [decide, reference, learn]
+    source: thread-2026-07-29
+  - id: openalice
+    placement: [REFERENCE, BENCHMARK]
+    journeyStages: [reference, learn]
+    source: thread-2026-07-29
+  - id: mckinsey-lilli
+    placement: [REFERENCE]
+    journeyStages: [decide, reference]
+    source: thread-2026-07-29
+  - id: tana-granola
+    placement: [REFERENCE]
+    journeyStages: [decide, reference]
+    source: thread-2026-07-29
+
+  # ---- external: UI component layers ----
+  - id: shadcn-ui
+    placement: [APP]
+    journeyStages: [build]
+    packages: [shadcn, shadcn-ui]
+    source: thread-2026-07-29
+  - id: radix-ui
+    placement: [APP]
+    journeyStages: [build]
+    packages: [radix-ui, "@radix-ui/react-primitive", "@radix-ui/themes"]
+    source: thread-2026-07-29
+  - id: shadcn-mcp
+    placement: [CONNECTOR]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: ai-elements
+    placement: [APP]
+    journeyStages: [build]
+    packages: [ai-elements]
+    source: thread-2026-07-29
+  - id: assistant-ui
+    placement: [APP, REFERENCE]
+    journeyStages: [reference, build]
+    packages: ["@assistant-ui/react"]
+    source: thread-2026-07-29
+  - id: openui
+    placement: [ADAPTER, REFERENCE]
+    journeyStages: [reference, build]
+    source: thread-2026-07-29
+  - id: uiverse
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    constraint: APP only after review
+    source: thread-2026-07-29
+  - id: kokonut-ui
+    placement: [REFERENCE]
+    journeyStages: [reference]
+    constraint: APP only after review
+    source: thread-2026-07-29
+  - id: bklit-ui
+    placement: [APP, REFERENCE]
+    journeyStages: [reference, build]
+    packages: [bklit-ui]
+    source: thread-2026-07-29
+  - id: react-bits
+    placement: [APP]
+    journeyStages: [build]
+    constraint: after explicit selection
+    packages: [react-bits]
+    source: thread-2026-07-29
+  - id: storybook
+    placement: [ADAPTER]
+    journeyStages: [build]
+    constraint: development adapter only
+    source: thread-2026-07-29
+  - id: a2ui
+    placement: [REFERENCE, ADAPTER]
+    journeyStages: [reference]
+    constraint: adapter possible, not adopted
+    source: thread-2026-07-29
+  - id: tambo
+    placement: [REFERENCE, ADAPTER]
+    journeyStages: [reference]
+    constraint: adapter possible, not adopted
+    source: thread-2026-07-29
+  - id: mcp-apps
+    placement: [CONNECTOR]
+    journeyStages: [build]
+    constraint: UI connector
+    source: thread-2026-07-29
+  - id: tailwind-css
+    placement: [APP]
+    journeyStages: [build]
+    packages: [tailwindcss]
+    source: thread-2026-07-29
+  - id: convex-prosemirror-sync
+    placement: [APP, ADAPTER]
+    journeyStages: [build]
+    constraint: backend adapter
+    packages: ["@convex-dev/prosemirror-sync"]
+    source: thread-2026-07-29
+
+  # ---- external: motion and 3D (rung-gated per motion-ladder) ----
+  - id: motion-framer-motion
+    placement: [APP]
+    journeyStages: [build]
+    constraint: rung-gated (motion-ladder)
+    packages: [motion, framer-motion]
+    source: thread-2026-07-29
+  - id: animejs
+    placement: [APP]
+    journeyStages: [build]
+    constraint: rung-gated (motion-ladder)
+    packages: [animejs]
+    source: thread-2026-07-29
+  - id: gsap
+    placement: [APP]
+    journeyStages: [build]
+    constraint: rung-gated (motion-ladder)
+    packages: [gsap]
+    source: thread-2026-07-29
+  - id: lenis
+    placement: [APP]
+    journeyStages: [build]
+    constraint: rung-gated (motion-ladder)
+    packages: [lenis, "@studio-freight/lenis"]
+    source: thread-2026-07-29
+  - id: threejs
+    placement: [APP]
+    journeyStages: [build]
+    constraint: rung-gated (motion-ladder)
+    packages: [three]
+    source: thread-2026-07-29
+  - id: vanta
+    placement: [APP]
+    journeyStages: [build]
+    constraint: rung-gated (motion-ladder); APP only after explicit approval
+    packages: [vanta]
+    source: thread-2026-07-29
+
+  # ---- external: delivery stage ----
+  - id: remotion
+    placement: [APP]
+    journeyStages: [launch]
+    constraint: delivery APP
+    packages: [remotion, "@remotion/cli"]
+    source: thread-2026-07-29
+  - id: vimax
+    placement: [DOMAIN]
+    journeyStages: [launch]
+    constraint: delivery stage only, never core
+    source: thread-2026-07-29
+  - id: video-shotcraft
+    placement: [DOMAIN]
+    journeyStages: [launch]
+    constraint: delivery stage only, never core
+    source: thread-2026-07-29
+
+  # ---- external: coding harnesses, agent frameworks, benchmarks ----
+  - id: claude-code
+    placement: [ADAPTER]
+    journeyStages: [build]
+    constraint: external coding harness, never core
+    source: thread-2026-07-29
+  - id: codex
+    placement: [ADAPTER]
+    journeyStages: [build]
+    constraint: external coding harness, never core
+    source: thread-2026-07-29
+  - id: pi-agent-core
+    placement: [ADAPTER]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: nooa
+    placement: [ADAPTER, BENCHMARK]
+    journeyStages: [learn]
+    constraint: experimental
+    source: thread-2026-07-29
+  - id: meta-hyperagents
+    placement: [BENCHMARK]
+    journeyStages: [learn]
+    constraint: research benchmark
+    source: thread-2026-07-29
+  - id: langchain-deepagent
+    placement: [ADAPTER, REFERENCE]
+    journeyStages: [reference]
+    constraint: architecture reference
+    source: thread-2026-07-29
+  - id: openhands
+    placement: [BENCHMARK, ADAPTER]
+    journeyStages: [learn]
+    constraint: external harness adapter
+    source: thread-2026-07-29
+  - id: swe-agent
+    placement: [BENCHMARK]
+    journeyStages: [learn]
+    source: thread-2026-07-29
+  - id: goose
+    placement: [BENCHMARK, ADAPTER]
+    journeyStages: [learn]
+    constraint: external adapter
+    source: thread-2026-07-29
+  - id: openai-agents-sdk
+    placement: [APP, ADAPTER]
+    journeyStages: [build]
+    constraint: internal-agent adapter alternative
+    packages: ["@openai/agents"]
+    source: thread-2026-07-29
+  - id: openrouter
+    placement: [ADAPTER]
+    journeyStages: [build]
+    constraint: optional model-routing adapter
+    source: thread-2026-07-29
+  - id: context7-mcp
+    placement: [CONNECTOR]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: chrome-devtools-mcp-cdp
+    placement: [CONNECTOR, ADAPTER]
+    journeyStages: [prove, launch]
+    constraint: proof adapter
+    source: thread-2026-07-29
+  - id: vercel-agent-browser
+    placement: [ADAPTER]
+    journeyStages: [prove]
+    constraint: optional browser adapter
+    source: thread-2026-07-29
+  - id: public-web-search
+    placement: [CONNECTOR]
+    journeyStages: [decide, reference]
+    source: thread-2026-07-29
+
+  # ---- NodeKit-owned systems (thread §1: all CORE or APP) ----
+  - id: nodekit-mcp
+    placement: [CORE]
+    journeyStages: [decide, reference, build, prove, launch, learn]
+    source: thread-2026-07-29
+  - id: builder-journey
+    placement: [CORE]
+    journeyStages: [decide, reference, build, prove, launch, learn]
+    source: thread-2026-07-29
+  - id: caseflow
+    placement: [CORE]
+    journeyStages: [decide]
+    source: thread-2026-07-29
+  - id: opportunity-contract
+    placement: [CORE]
+    journeyStages: [decide]
+    source: thread-2026-07-29
+  - id: build-packet
+    placement: [CORE]
+    journeyStages: [decide, build]
+    source: thread-2026-07-29
+  - id: atlas
+    placement: [CORE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: app-atlas
+    placement: [CORE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: studio
+    placement: [CORE]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: behavior-index
+    placement: [CORE]
+    journeyStages: [build, prove]
+    source: thread-2026-07-29
+  - id: evolution-ledger
+    placement: [CORE]
+    journeyStages: [learn]
+    source: thread-2026-07-29
+  - id: nodeproof
+    placement: [APP]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: nodetaste
+    placement: [CORE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: changelens
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: nodetrace
+    placement: [APP]
+    journeyStages: [prove, learn]
+    source: thread-2026-07-29
+  - id: nodemem
+    placement: [APP]
+    journeyStages: [learn]
+    source: thread-2026-07-29
+  - id: nodegraph
+    placement: [APP]
+    journeyStages: []
+    unresolved: true
+    source: thread-2026-07-29
+  - id: graph-hop
+    placement: [APP]
+    journeyStages: [decide, reference]
+    source: thread-2026-07-29
+  - id: builder-gym
+    placement: [CORE]
+    journeyStages: [learn]
+    source: thread-2026-07-29
+  - id: nodeagent
+    placement: [APP]
+    journeyStages: [build, prove]
+    source: thread-2026-07-29
+  - id: noderl
+    placement: [APP]
+    journeyStages: []
+    unresolved: true
+    source: thread-2026-07-29
+  - id: proofloop
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: local-proof-runner
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: reference-gate
+    placement: [CORE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: delivery-matrix
+    placement: [CORE]
+    journeyStages: [launch]
+    source: thread-2026-07-29
+
+  # ---- NodeKit-owned skills and gates (thread §5) ----
+  - id: agentic-ui-qa
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: frontend-design-skill
+    placement: [CORE]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: dataviz-skill
+    placement: [CORE]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: design-dna-skill
+    placement: [CORE]
+    journeyStages: [reference]
+    source: thread-2026-07-29
+  - id: trust-surfaces-skill
+    placement: [CORE]
+    journeyStages: [build, prove]
+    source: thread-2026-07-29
+  - id: motion-ladder-skill
+    placement: [CORE]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: motion-proof-skill
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: before-after-proof-skill
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: easier-to-read-submissions-skill
+    placement: [CORE]
+    journeyStages: [launch]
+    source: thread-2026-07-29
+  - id: copy-audit
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29
+  - id: frontend-tournament
+    placement: [CORE]
+    journeyStages: [prove]
+    source: thread-2026-07-29

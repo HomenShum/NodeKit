@@ -375,6 +375,7 @@
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
     "test-files.test.mjs",
+    "tool-placement-gate.test.mjs",
     "understand-anything.test.mjs"
   ]
 }
