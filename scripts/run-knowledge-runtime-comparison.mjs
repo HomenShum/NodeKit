@@ -187,7 +187,43 @@ try {
       return other && (other.sha256 !== installed.get(p).sha256 || other.size !== installed.get(p).size);
     });
     const sample = (label, list) => (list.length ? `${label}: ${list.slice(0, 5).join(", ")}${list.length > 5 ? ` (+${list.length - 5} more)` : ""}` : null);
+    // Name the overwhelmingly likely CAUSE, not just the symptom.
+    //
+    // `npm pack` runs `prepare` -> `build:component` -> `tsc`, so packing is not a pure read. If
+    // the working tree is dirty, two packs taken moments apart can legitimately differ, and this
+    // check fails through no fault of the packaged code.
+    //
+    // Measured 2026-07-28: this check failed on a tree with one modified file and passed 11/11 on
+    // a clean detached checkout of the identical commit. Before that was established, the bare
+    // "content differs: src/cli.mjs" message sent three agents and an external model hunting a
+    // defect in a file that was never the problem. A diagnostic that names a symptom as though it
+    // were a cause is not neutral — it actively spends other people's time.
+    let dirtyNote = null;
+    try {
+      const { execFileSync } = await import("node:child_process");
+      const { fileURLToPath } = await import("node:url");
+      // This file lives in <repo>/scripts/, so the repository root is one level up. Derived from
+      // the module's own location rather than process.cwd(), which is the caller's choice.
+      const scriptRoot = path.dirname(fileURLToPath(import.meta.url));
+      const porcelain = execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], {
+        cwd: path.resolve(scriptRoot, ".."),
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+      if (porcelain) {
+        const files = porcelain.split("\n").map((line) => line.slice(3).trim());
+        dirtyNote =
+          `WORKING TREE IS DIRTY (${files.length} tracked file(s) modified: ` +
+          `${files.slice(0, 5).join(", ")}${files.length > 5 ? ` (+${files.length - 5} more)` : ""}). ` +
+          `Packing runs the prepare script, so a dirty tree can produce this difference on its own. ` +
+          `Re-run against a clean checkout before treating the named files below as the defect.`;
+      }
+    } catch {
+      // git unavailable or not a repository — fall through with the raw comparison, which is still
+      // the honest evidence. Never let the diagnostic's own failure suppress the finding.
+    }
     const detail = [
+      dirtyNote,
       `installed=${installedManifest.length} archived=${inspectedArchive.fileManifest.length}`,
       sample("only in install", onlyInstalled),
       sample("only in archive", onlyArchived),
