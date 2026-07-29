@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "nodekit.reference-observation/v1",
+  "collectionId": "absence-vs-zero",
+  "problemStatement": "A financial surface must show something before any account is connected. The number zero and the absence of data are different claims, and a surface that renders them identically tells the user something false.",
+  "whyThisProblem": "Trial 1's build rendered a fabricated figure labelled 'your Square export'. The salon product's first screen has the same hazard in its mildest form: before a connector exists, every metric is unbound, and $0 is the most believable wrong answer available.",
+  "licenceMode": "live-inspection-attributed",
+  "licenceNote": "Records our observations of publicly listed reference screens. No source pixels are stored, cached, indexed or embedded. Each record cites its canonical Mobbin URL so the source can be re-inspected rather than reproduced.",
+  "capturedAt": "2026-07-28",
+  "capturedVia": "mobbin-mcp/search_screens",
+  "observations": [
+    {
+      "id": "obs-midday-empty",
+      "app": "Midday",
+      "platform": "web",
+      "mobbinUrl": "https://mobbin.com/screens/70b6f2ff-b18a-4e63-9d11-cfcdab442e18",
+      "surface": "analytics dashboard, no bank account connected",
+      "stance": "counterexample",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "relationship",
+          "subject": "primary chart panel",
+          "property": "renders-when-unbound",
+          "value": "refuses",
+          "locatorDescription": "large upper panel; chart area is a greyed skeleton, overlaid with centred text"
+        },
+        {
+          "id": "f2",
+          "kind": "count",
+          "subject": "primary chart panel",
+          "property": "words of explanation for the absence",
+          "value": 8,
+          "locatorDescription": "'No data available' plus 'Connect your bank account to unlock this metric.'"
+        },
+        {
+          "id": "f3",
+          "kind": "relationship",
+          "subject": "secondary metric tiles",
+          "property": "renders-when-unbound",
+          "value": "renders a numeral",
+          "locatorDescription": "lower row; 'Average Monthly Burn Rate $0' and 'Average Monthly Expenses $0', typeset identically to a measured value"
+        },
+        {
+          "id": "f4",
+          "kind": "count",
+          "subject": "secondary metric tiles",
+          "property": "words distinguishing zero from absent",
+          "value": 0,
+          "locatorDescription": "no marker, tooltip, or caption adjacent to either $0"
+        }
+      ],
+      "observedTension": "One screen answers the same question two ways. The upper panel treats unbound as unrenderable and says why; the lower tiles render $0 in the typography of a measurement. A reader who scrolls past the explanation sees two confident zeros.",
+      "boundary": "Static screen capture. Whether the $0 tiles change after connecting, or carry a state not visible here, was not observed."
+    },
+    {
+      "id": "obs-quicken-empty",
+      "app": "Quicken",
+      "platform": "web",
+      "mobbinUrl": "https://mobbin.com/screens/b8661d09-4bc5-42de-a026-f3d227fd10c9",
+      "surface": "holdings view, no account connected",
+      "stance": "positive",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "count",
+          "subject": "screen body",
+          "property": "numerals displayed",
+          "value": 0,
+          "locatorDescription": "centred illustration, one sentence, one button; no figure anywhere in the content area"
+        },
+        {
+          "id": "f2",
+          "kind": "relationship",
+          "subject": "absence statement",
+          "property": "names the object rather than the system",
+          "value": "'No holdings to display.'",
+          "locatorDescription": "single sentence directly above the primary action"
+        },
+        {
+          "id": "f3",
+          "kind": "count",
+          "subject": "primary action",
+          "property": "competing actions on screen",
+          "value": 0,
+          "locatorDescription": "'CONNECT ACCOUNT' is the only interactive control in the content area"
+        }
+      ],
+      "boundary": "Does not tell the user what they will see after connecting, so the value of the action is unstated."
+    },
+    {
+      "id": "obs-wise-empty",
+      "app": "Wise",
+      "platform": "web",
+      "mobbinUrl": "https://mobbin.com/screens/629ffc1a-2986-43bf-ae93-1c4744451351",
+      "surface": "connected bank accounts, none connected",
+      "stance": "positive",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "count",
+          "subject": "screen body",
+          "property": "numerals displayed",
+          "value": 0,
+          "locatorDescription": "illustration, one sentence, one button"
+        },
+        {
+          "id": "f2",
+          "kind": "relationship",
+          "subject": "absence statement",
+          "property": "grammatical subject",
+          "value": "the user",
+          "locatorDescription": "'You don't have any bank accounts connected' — states the user's situation, not the system's failure to load"
+        },
+        {
+          "id": "f3",
+          "kind": "relationship",
+          "subject": "page title",
+          "property": "persists while empty",
+          "value": "'Connected bank accounts' remains as the heading",
+          "locatorDescription": "top of content area, unchanged by the empty state"
+        }
+      ],
+      "boundary": "This is a management surface, not a metric surface, so it never had a number to withhold. Weaker evidence for the metric case than Quicken."
+    },
+    {
+      "id": "obs-midday-bound",
+      "app": "Midday",
+      "platform": "web",
+      "mobbinUrl": "https://mobbin.com/screens/564f6067-f18b-4990-b3a4-0c82e52c98e7",
+      "surface": "revenue overview, account connected",
+      "stance": "positive",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "relationship",
+          "subject": "headline revenue figure",
+          "property": "carries a definition of the metric",
+          "value": "tooltip states 'Revenue represents your total income from all sources'",
+          "locatorDescription": "info affordance adjacent to '$11,135.04'"
+        },
+        {
+          "id": "f2",
+          "kind": "relationship",
+          "subject": "headline revenue figure",
+          "property": "discloses a known overstatement risk",
+          "value": "'If the revenue appears too high, internal transfers may have been marked as income'",
+          "locatorDescription": "same tooltip, second paragraph"
+        },
+        {
+          "id": "f3",
+          "kind": "relationship",
+          "subject": "headline revenue figure",
+          "property": "names the user's remedy",
+          "value": "'You can fix this by excluding the transactions from the calculations'",
+          "locatorDescription": "same tooltip, third paragraph"
+        },
+        {
+          "id": "f4",
+          "kind": "measurement",
+          "subject": "comparison baseline",
+          "property": "shown adjacent to the headline",
+          "value": "vs $7,669 last period",
+          "unit": "USD",
+          "locatorDescription": "directly beneath the headline figure, smaller type"
+        }
+      ],
+      "observedTension": "This is a bound figure that still discloses how it can mislead. The disclosure is about the metric's DEFINITION, not its data source — a distinct axis from whether the data is real.",
+      "boundary": "Whether the tooltip appears on hover only was not determined from the capture; a disclosure reachable only by hover is weaker than one always visible."
+    }
+  ],
+  "notRun": [
+    "iOS platform not searched; all four records are web.",
+    "No flow captured — the transition from unbound to bound was not observed, only its endpoints.",
+    "No salon or beauty-vertical product observed; these are finance tools serving an adjacent job.",
+    "No audience-task evidence (tier M3). All records are tier M2, live shipped-product observation."
+  ]
+}

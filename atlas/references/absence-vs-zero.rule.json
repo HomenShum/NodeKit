@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "nodekit.design-rule/v1",
+  "ruleId": "rule-absence-is-not-zero",
+  "derivedFrom": {
+    "collectionId": "absence-vs-zero",
+    "observationIds": ["obs-midday-empty", "obs-quicken-empty", "obs-wise-empty", "obs-midday-bound"],
+    "factIds": [
+      "obs-midday-empty/f3", "obs-midday-empty/f4",
+      "obs-quicken-empty/f1", "obs-quicken-empty/f2",
+      "obs-wise-empty/f1",
+      "obs-midday-bound/f2"
+    ]
+  },
+  "statement": "A metric with no bound data source must not render a numeral. State the absence, name the object that is missing, and offer the binding action.",
+  "mechanismHypothesis": "A numeral in metric typography is read as a measurement regardless of adjacent copy, because the reader's eye reaches the figure before the caption. $0 is uniquely dangerous among numerals: it is a plausible true value for a new or quiet business, so the reader has no internal contradiction to prompt a second look. Refusing to render removes the misreading rather than annotating it.",
+  "confidence": "medium",
+  "confidenceBasis": "Three shipped products, two of which refuse cleanly and one of which does both on a single screen. The disagreement is what makes this citable rather than a house style — but no audience-task evidence (M3) was collected, so the mechanism is hypothesised from the artefacts, not measured on users.",
+  "appliesWhen": [
+    "the surface presents a figure a user would act on",
+    "the data source is unbound, unconnected, or synthetic",
+    "zero is a plausible real value for this metric"
+  ],
+  "doesNotApplyWhen": [
+    "the metric is a genuine measured zero from a bound source — that must render, and suppressing it would be its own lie",
+    "the surface is a management or settings list with no metric to withhold (see obs-wise-empty's own boundary)",
+    "the figure is explicitly framed as an example inside disclosed demo mode"
+  ],
+  "counterexampleNote": "obs-midday-empty is retained deliberately as the anti-reference. A shipped, audience-proven product does the wrong thing three tiles below doing the right thing, which is stronger evidence that the failure is easy than any invented fixture would be.",
+  "boundToGate": {
+    "gate": "nodekit.story-pack/v1 content provenance",
+    "relationship": "This rule is the visual form of the schema constraint already shipped: a claim with rendersData true requires a contentBinding, and an unbound claim cannot be rendered as bound. The schema makes the dishonest record unrepresentable; this rule says what the honest surface looks like.",
+    "schemaPath": "schemas/nodekit.story-pack.v1.schema.json"
+  },
+  "problemTags": ["unbound-metric", "first-run-orientation", "absence-vs-zero", "connector-prompt"],
+  "intentTags": ["prevent-misreading", "prompt-binding-action"],
+  "firstSeenAt": "2026-07-28",
+  "lastVerifiedAt": "2026-07-28",
+  "reVerifyAfterDays": 90,
+  "reVerifyReason": "Sources stay remote and uncached by licence, so the records can drift from the live products without any local signal. Re-inspection is the only way this collection stays true.",
+  "evidenceTier": "M2",
+  "tierLadder": "M3 audience-task evidence > M2 live shipped-product observation > M1 official demonstration or documentation > M0 recipe or showcase. This rule may not be promoted to audience-proven on M2 alone."
+}
