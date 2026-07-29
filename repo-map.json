@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 90,
+    "schemas": 93,
     "modules": 65,
-    "tests": 68
+    "tests": 69
   },
   "architecture": [
     {
@@ -146,6 +146,7 @@
     "nodekit.canary-receipt.v1.schema.json",
     "nodekit.convex-consumers-verdict.v1.schema.json",
     "nodekit.design-decision.v1.schema.json",
+    "nodekit.design-rule.v1.schema.json",
     "nodekit.developer-timing-verdict.v1.schema.json",
     "nodekit.engineering-check-receipt.v1.schema.json",
     "nodekit.engineering-health-verdict.v1.schema.json",
@@ -203,10 +204,12 @@
     "nodekit.protected-knowledge-comparison-result.v1.schema.json",
     "nodekit.protected-screenshot-proof.v1.schema.json",
     "nodekit.publication-approval.v1.schema.json",
+    "nodekit.reference-observation.v1.schema.json",
     "nodekit.research-collection.v1.schema.json",
     "nodekit.routing-policy.v1.schema.json",
     "nodekit.runtime-capabilities.v1.schema.json",
     "nodekit.schema.json",
+    "nodekit.score-receipt.v1.schema.json",
     "nodekit.skill-benchmark-input.v1.schema.json",
     "nodekit.skill-benchmark-verdict.v1.schema.json",
     "nodekit.skill-candidate.v1.schema.json",
@@ -345,6 +348,7 @@
     "presentation-pipeline.test.mjs",
     "protected-evaluator-image-binding.test.mjs",
     "public-api.test.mjs",
+    "reference-corpus-gate.test.mjs",
     "repair-approval.test.mjs",
     "repo-tour.test.mjs",
     "research-verdict-benchmark.test.mjs",
