@@ -3,10 +3,10 @@
   "generatedBy": "src/lib/behavior-index.mjs",
   "regenerate": "npm run behavior:index",
   "counts": {
-    "declared": 5,
-    "mapped": 5,
+    "declared": 6,
+    "mapped": 6,
     "unmapped": 0,
-    "verified": 5,
+    "verified": 6,
     "partial": 0,
     "unverified": 0,
     "orphanAnnotations": 18
@@ -50,6 +50,49 @@
           "scenario": "forged-binding-stays-blocked",
           "file": "test/builder-journey.test.mjs",
           "line": 78
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    },
+    {
+      "behaviorId": "journey.build.produce-evidence",
+      "statement": "A BuildEvidencePack is produced only from generated evidence — digested bytes and recorded exit codes — with every contract decision explicitly dispositioned, so a silent honour or a fabricated evidence path refuses the pack instead of shipping inside it.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/lib/build-evidence-producer.mjs",
+          "symbol": "produceBuildEvidencePack",
+          "line": 173
+        }
+      ],
+      "supporting": [],
+      "requiredScenarios": [
+        "every-pointer-dispositioned-no-silent-honour",
+        "fabricated-evidence-refuses-the-pack",
+        "produced-pack-walks-the-chain"
+      ],
+      "provenScenarios": [
+        "every-pointer-dispositioned-no-silent-honour",
+        "fabricated-evidence-refuses-the-pack",
+        "produced-pack-walks-the-chain"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "every-pointer-dispositioned-no-silent-honour",
+          "file": "test/build-evidence-producer.test.mjs",
+          "line": 66
+        },
+        {
+          "scenario": "fabricated-evidence-refuses-the-pack",
+          "file": "test/build-evidence-producer.test.mjs",
+          "line": 197
+        },
+        {
+          "scenario": "produced-pack-walks-the-chain",
+          "file": "test/build-evidence-producer.test.mjs",
+          "line": 266
         }
       ],
       "implementationGaps": [],
@@ -113,7 +156,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 443
+          "line": 498
         }
       ],
       "supporting": [
@@ -969,7 +1012,7 @@
           {
             "file": "src/studio.mjs",
             "symbol": "studioCapability",
-            "line": 112
+            "line": 126
           }
         ],
         "namedSourceFiles": [
@@ -1040,7 +1083,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 444
+            "line": 499
           }
         ],
         "namedSourceFiles": [

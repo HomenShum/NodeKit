@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: mew-migration
+    runtime: docker
+    healthCheckPath: /api/health
+    autoDeploy: false

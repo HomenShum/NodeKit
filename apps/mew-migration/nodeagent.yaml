@@ -1,0 +1,38 @@
+schemaVersion: nodeagent.application/v1
+application:
+  id: mew-migration
+  name: Mew Migration
+  purpose: "Migrate the mew Ideaflow notebook (export copy) into a Convex-backed store with per-note provenance and an import manifest that closes: in = out + refusals."
+authoring:
+  directory: ./agent
+runtime:
+  engine: nodekit-caseflow
+  profile: replay
+provider:
+  adapter: deterministic-fixture
+  model:
+    provider: local
+    id: nodekit-guided-demo-v1
+  secretRef: NODEKIT_OPTIONAL_MODEL_KEY
+backend:
+  adapter: memory
+contracts:
+  event: nodeagent.event/v1
+  trace: nodeagent.trace/v1
+orchestration:
+  lifecycle: case-run-stage-artifact-proposal-approval-receipt
+  oneAuthoritativeBackend: true
+packs:
+  - ./packs/primary/pack.yaml
+policies:
+  tools: deny-by-default
+  proposalBeforeMutation: true
+  preserveCanonicalStateOnFailure: true
+  requireBaseVersion: true
+  requireReceipt: true
+evaluations:
+  required:
+    - figured-out-journey
+    - stale-proposal-conflict
+secrets:
+  - envRef: NODEKIT_OPTIONAL_MODEL_KEY

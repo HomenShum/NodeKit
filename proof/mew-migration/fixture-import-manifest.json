@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "mew.import-manifest/v2",
+  "importedAt": "2026-07-29T10:04:38.692Z",
+  "expectedShape": "mew export-database.ts output (personal-dev-mew commit 3013c596, schema sha256 d79b2bd01699089c09f61a28493a72a4c66ca488a73eba8a7f112cfa79d3f41e): {data, users, graphNodes, graphRelations, relationTypes, relationLists}",
+  "counts": {
+    "graphNodes": {
+      "in": 3,
+      "imported": 3,
+      "refused": 0,
+      "closes": true
+    },
+    "graphRelations": {
+      "in": 2,
+      "imported": 2,
+      "refused": 0,
+      "closes": true
+    },
+    "relationTypes": {
+      "in": 2,
+      "imported": 2,
+      "refused": 0,
+      "closes": true
+    },
+    "relationLists": {
+      "in": 1,
+      "imported": 1,
+      "refused": 0,
+      "closes": true
+    },
+    "danglingRelations": 1
+  },
+  "closes": true,
+  "refusals": [],
+  "droppedTables": [
+    {
+      "table": "data",
+      "rowsDropped": 0,
+      "reason": "legacy blob table (dataTable); not part of the graph"
+    },
+    {
+      "table": "users",
+      "rowsDropped": 1,
+      "reason": "identity domain (mew_user); authorId strings are carried on every row, accounts are not migrated"
+    }
+  ],
+  "fieldDrops": [
+    {
+      "table": "graphNodes",
+      "field": "pk",
+      "reason": "storage-layer surrogate uuid; Mew identity is (id, authorId) and sourceId carries id"
+    },
+    {
+      "table": "graphNodes",
+      "field": "contentTsvector",
+      "reason": "derived full-text index, recomputable from content"
+    },
+    {
+      "table": "graphRelations",
+      "field": "pk",
+      "reason": "storage-layer surrogate uuid"
+    },
+    {
+      "table": "relationTypes",
+      "field": "pk",
+      "reason": "storage-layer surrogate uuid"
+    }
+  ],
+  "nodes": [
+    {
+      "sourceId": "fixture:node-alpha",
+      "sourceDigest": "b10571ac9cb32fc3e2ae276922548d753348b7330929ef4bff0cfd86d27db04e"
+    },
+    {
+      "sourceId": "fixture:node-beta",
+      "sourceDigest": "25d1147859b97f3f57433e82fb9ecf0678b82c2acdf3783dcfb2d9528eab4d0f"
+    },
+    {
+      "sourceId": "fixture:node-gamma",
+      "sourceDigest": "567541af331380822f7bb898e40fbe5a3532104b5c4d19ee6784f1e918767879"
+    }
+  ],
+  "source": {
+    "path": "fixtures/ideaflow-export.fixture.json",
+    "sha256": "141236ae9c0473807cb3b80fde4e291adf891d871bcbff302885c4380206d4e5",
+    "byteLength": 3748,
+    "fixtureLabeled": true
+  }
+}

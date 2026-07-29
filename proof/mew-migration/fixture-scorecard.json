@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "mew.scorecard/v1",
+  "producedAt": "2026-07-29T10:04:53.229Z",
+  "blended": false,
+  "deterministic": {
+    "verdict": "PASS",
+    "checksRun": 14,
+    "checksFailed": 0,
+    "dataOrigin": "fixture: labeled importer unit fixtures only — no user data exists; these checks prove the machinery, not the notebook",
+    "manifestSourceSha256": "141236ae9c0473807cb3b80fde4e291adf891d871bcbff302885c4380206d4e5",
+    "checks": [
+      {
+        "id": "graphNodes-closes",
+        "detail": "in 3 === imported 3 + refused 0",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-graphNodes",
+        "detail": "store holds 3, manifest claims 3",
+        "pass": true
+      },
+      {
+        "id": "graphRelations-closes",
+        "detail": "in 2 === imported 2 + refused 0",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-graphRelations",
+        "detail": "store holds 2, manifest claims 2",
+        "pass": true
+      },
+      {
+        "id": "relationTypes-closes",
+        "detail": "in 2 === imported 2 + refused 0",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-relationTypes",
+        "detail": "store holds 2, manifest claims 2",
+        "pass": true
+      },
+      {
+        "id": "relationLists-closes",
+        "detail": "in 1 === imported 1 + refused 0",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-relationLists",
+        "detail": "store holds 1, manifest claims 1",
+        "pass": true
+      },
+      {
+        "id": "every-row-carries-provenance",
+        "detail": "sourceId + 64-hex sourceDigest + importedAt on every row of every table",
+        "pass": true
+      },
+      {
+        "id": "manifest-digests-match-store",
+        "detail": "every manifest node digest appears on exactly one store node",
+        "pass": true
+      },
+      {
+        "id": "every-refusal-has-reason",
+        "detail": "0 refusal(s), each with a non-empty table + reason",
+        "pass": true
+      },
+      {
+        "id": "dangling-relations-declared",
+        "detail": "manifest declares 1 dangling; store carries 1",
+        "pass": true
+      },
+      {
+        "id": "dropped-tables-disclosed",
+        "detail": "droppedTables covers data + users with counts and reasons (data:0, users:1)",
+        "pass": true
+      },
+      {
+        "id": "field-drops-disclosed",
+        "detail": "fieldDrops names pk and contentTsvector with reasons",
+        "pass": true
+      }
+    ]
+  },
+  "semantic": {
+    "verdict": "NOT_RUN",
+    "reason": "3 owner-authored cases now exist (harness/mew-migration/notion-cases.json, harvested from Notion page 21b9539b-8f9a-8026-a57b-d8f4042c7c78 after the ground-truth correction superseded wave-0A's ruling). All 3 are NOT_RUN: they exercise agent CRUD orchestration (research/create, find/organize/move, find/link) absent from this retrieval-only slice, and require a populated graph — the owner's export (owner input #1) does not exist yet. Nothing was invented or paraphrased into testability.",
+    "casesHarvested": 3,
+    "casesEvaluated": 0,
+    "casesFile": "harness/mew-migration/notion-cases.json"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "nodekit.launch-manifest/v1",
+  "caseId": "mew-migration",
+  "stage": "launch",
+  "producedAt": "2026-07-29T10:07:55.225Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.build-evidence-pack/v1",
+      "caseId": "mew-migration",
+      "sha256": "daee8a8b4d28e99ecb4ec426b4b45b47178f4c1e9a7c6f49c0bd631a8852891c"
+    }
+  ],
+  "content": {
+    "release": {
+      "artifactName": "mew-migration source archive (git archive HEAD -- apps/mew-migration); built, tested, never shipped to any cloud target",
+      "sourceRepository": "HomenShum/node-platform",
+      "sourceCommit": "57d41c10c64eb9dab0a4c0d782ad4ed718357d5e",
+      "sourceRef": "feat/mew-waves1-4",
+      "artifactSha256": "5c2908f8f7f0efd006a4a5819b304ec26cbb7d7f2aaa5cad31d1b2bd34df2d43",
+      "buildCompletedAt": "2026-07-29T10:07:49.000Z"
+    },
+    "target": {
+      "provider": "convex",
+      "environment": "production",
+      "accountIdentity": "none-no-convex-account-on-this-machine",
+      "projectIdentity": "none-project-never-created",
+      "deploymentId": "none-deployment-never-created",
+      "url": "https://dashboard.convex.dev",
+      "deployedAt": "2026-07-29T10:07:49.573Z",
+      "publicReachability": "unknown"
+    },
+    "authority": {
+      "mode": "none",
+      "actor": {
+        "id": "claude-fable-5/mew-waves1-4",
+        "type": "agent"
+      },
+      "keyKind": "none",
+      "trustLevel": "H0",
+      "trustLevelBasis": "No capability grant artifact exists in this repository, no human approved this specific launch, and the deploy command ran under ambient session authority only; it failed before any resource was created.",
+      "humanPresenceProven": false,
+      "withinGrant": "unknown",
+      "outsideGrantDisclosure": "There is no standing grant to be inside of. Whether the owner would authorize a Convex cloud deployment is owner input #2, unanswered; the attempt created nothing and spent nothing."
+    },
+    "spend": {
+      "currency": "USD",
+      "periodStart": "2026-07-01T00:00:00.000Z",
+      "periodEnd": "2026-08-01T00:00:00.000Z",
+      "grantCapMinorUnits": 10000,
+      "priorPeriodSpendMinorUnits": 0,
+      "thisLaunchMinorUnits": 0,
+      "remainingAfterMinorUnits": 10000,
+      "meteringBasis": "free-tier-no-charge",
+      "capExceeded": false,
+      "entries": [
+        {
+          "label": "convex anonymous local dev backend (schema validation only) — no account exists, nothing is billable, nothing was billed",
+          "minorUnits": 0,
+          "meteringBasis": "free-tier-no-charge",
+          "receiptRef": "proof/mew-migration/convex-deploy-receipt.json",
+          "receiptSha256": "adbcc049b225e376ab0aab9e330e5eff149689903e96aa486312b575268f734e"
+        }
+      ]
+    },
+    "liveness": {
+      "claim": "deploy-failed",
+      "notObservedDisclosure": "The cloud deploy was attempted and failed: `npx --no-install convex deploy -y  (cwd apps/mew-migration, CI=1)` exited 1 requiring `npx convex login` (no Convex account, no deploy key — owner input #2 absent). No deployment exists, so no signal was observed anywhere, and the anonymous LOCAL backend that convex dev provisioned is a localhost schema-validation aid, not a launch.",
+      "promisedSignals": [
+        {
+          "signalId": "mew-agent-surface-attr",
+          "kind": "attribute",
+          "expected": "data-nodekit-artifact=\"mew-migration-agent-surface\"",
+          "whyThisProvesTheApp": "Only the app's own served page emits this attribute on its body, with data-store-notes carrying the mounted store's count; a hosting shell, provider error page, or unhydrated SPA skeleton contains neither.",
+          "presentInUnbuiltShell": false,
+          "probeIds": [
+            "probe-cloud-dom"
+          ]
+        }
+      ],
+      "probes": [
+        {
+          "probeId": "probe-cloud-dom",
+          "signalId": "mew-agent-surface-attr",
+          "method": "raw-http",
+          "urlFetched": "https://dashboard.convex.dev",
+          "authenticatedSession": false,
+          "observation": "not-attempted",
+          "notAttemptedReason": "No deployment URL exists to fetch — the deploy failed before a project was created, so the only recordable URL is the provider console the CLI pointed at. A future green claim additionally requires a rendered-DOM probe (Playwright is a devDependency here but its browser binaries are not provisioned in this environment; use scripts/ui-gates/playwright-peer.mjs when re-running after owner input #2)."
+        }
+      ]
+    }
+  },
+  "completeness": {
+    "claimed": [
+      "The cloud deploy path was exercised for real, not assumed: npx convex deploy -y exited 1 with the login requirement, recorded with sanitized output in proof/mew-migration/convex-deploy-receipt.json.",
+      "The hand-written convex/schema.ts was accepted by a real Convex backend (anonymous local dev): tables notes/links/tags with five by_sourceId/by_sourceDigest/by_name indexes created.",
+      "The release is identified by commit and by digest of the exact source archive that would have shipped.",
+      "The spend ledger closes at zero against the USD 100.00 monthly cap: no Convex account exists to be billed."
+    ],
+    "notRun": [
+      "No rendered-DOM probe ran anywhere: there is no deployment to render.",
+      "No raw-http probe of a deployment ran: there is no deployment URL.",
+      "The local anonymous backend was not probed as a launch surface; localhost is not a launch and its coordinates in .env.local are deliberately untracked."
+    ],
+    "refused": [
+      {
+        "item": "Recording the anonymous local dev deployment as the launch target",
+        "reason": "A backend on 127.0.0.1 with no account behind it is reachable by exactly one machine. Calling it a launch would satisfy the schema while meaning nothing; the target recorded is the cloud deployment that was aimed at and never created."
+      },
+      {
+        "item": "Writing any liveness claim other than deploy-failed",
+        "reason": "deployed-signal-not-observed would imply something was deployed; not-attempted would erase the real attempt and its receipt. The command ran and failed, so deploy-failed is the only claim that matches the receipt."
+      }
+    ]
+  }
+}

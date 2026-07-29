@@ -1,0 +1,82 @@
+command: node --test apps/mew-migration/test/importer.test.mjs
+exit code: 0
+duration ms: 268
+--- stdout ---
+TAP version 13
+# Subtest: scenario: owner imports a well-formed export — every table closes, provenance on every row
+ok 1 - scenario: owner imports a well-formed export — every table closes, provenance on every row
+  ---
+  duration_ms: 8.4864
+  type: 'test'
+  ...
+# Subtest: scenario: whole-table drops (users, data) are counted and disclosed, never silent
+ok 2 - scenario: whole-table drops (users, data) are counted and disclosed, never silent
+  ---
+  duration_ms: 2.2554
+  type: 'test'
+  ...
+# Subtest: scenario: export contains a duplicate node id — second occurrence refused loudly, table still closes
+ok 3 - scenario: export contains a duplicate node id — second occurrence refused loudly, table still closes
+  ---
+  duration_ms: 1.8086
+  type: 'test'
+  ...
+# Subtest: scenario: schema drift from another branch (contentText from latest-main) — record refused, drift named
+ok 4 - scenario: schema drift from another branch (contentText from latest-main) — record refused, drift named
+  ---
+  duration_ms: 1.1122
+  type: 'test'
+  ...
+# Subtest: scenario: malformed records (no id, bad timestamp, bad relationLists.type) — each refused with its own reason
+ok 5 - scenario: malformed records (no id, bad timestamp, bad relationLists.type) — each refused with its own reason
+  ---
+  duration_ms: 1.2648
+  type: 'test'
+  ...
+# Subtest: scenario: empty export — zero everything, closes, nothing fabricated
+ok 6 - scenario: empty export — zero everything, closes, nothing fabricated
+  ---
+  duration_ms: 0.9679
+  type: 'test'
+  ...
+# Subtest: scenario: unrecognized top-level shape — the whole import refuses rather than guessing
+ok 7 - scenario: unrecognized top-level shape — the whole import refuses rather than guessing
+  ---
+  duration_ms: 0.4958
+  type: 'test'
+  ...
+# Subtest: scenario: determinism — the same export digests identically across runs
+ok 8 - scenario: determinism — the same export digests identically across runs
+  ---
+  duration_ms: 2.6735
+  type: 'test'
+  ...
+# Subtest: scenario: erasure — enumerating one node returns every touching row across every table
+ok 9 - scenario: erasure — enumerating one node returns every touching row across every table
+  ---
+  duration_ms: 1.2766
+  type: 'test'
+  ...
+# Subtest: scenario: agent surface over an EMPTY store — every answer renders unbound, with the reason
+ok 10 - scenario: agent surface over an EMPTY store — every answer renders unbound, with the reason
+  ---
+  duration_ms: 0.6229
+  type: 'test'
+  ...
+# Subtest: scenario: agent surface over fixture rows — answers carry node id + digest bindings; unmatched questions stay unbound
+ok 11 - scenario: agent surface over fixture rows — answers carry node id + digest bindings; unmatched questions stay unbound
+  ---
+  duration_ms: 1.531
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 170.0163
+
+--- stderr ---

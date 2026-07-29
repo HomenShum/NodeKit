@@ -1,0 +1,43 @@
+{
+  "/primaryArtifact": {
+    "how": "The artifact exists as committed code bound to the real Mew model: the Convex schema for nodes/relations/relationTypes/relationLists with provenance columns and by_sourceId erasure indexes, the importer whose manifest closes per table with counted drops, the filesystem store mirror with enumerateForErasure walking every table including endpoint-touching relations, the agent surface that renders unbound without a binding, and the fixture-run import manifest produced by executing the importer.",
+    "sourceFiles": [
+      "apps/mew-migration/convex/schema.ts",
+      "apps/mew-migration/src/importer.mjs",
+      "apps/mew-migration/src/store.mjs",
+      "apps/mew-migration/src/serve.mjs",
+      "proof/mew-migration/fixture-import-manifest.json"
+    ]
+  },
+  "/inputs/0": {
+    "how": "The importer accepts exactly the shape Mew's own exporter writes — {data, users, graphNodes, graphRelations, relationTypes, relationLists} — with field sets taken from personal-dev-mew src/db/schema.ts, and is unit-tested only against the labeled fixture file whose every id is prefixed 'fixture:'; the manifest records fixtureLabeled true, read from the file's own label, and binds the expected shape to the recon-digested schema and exporter.",
+    "sourceFiles": [
+      "apps/mew-migration/fixtures/ideaflow-export.fixture.json",
+      "apps/mew-migration/test/importer.test.mjs",
+      "proof/mew-migration/fixture-import-manifest.json",
+      "proof/mew-migration/local-recon.json"
+    ]
+  },
+  "/rejectedAlternatives/3": {
+    "how": "Schema drift refuses loudly: a record carrying latest-main's contentText/relationCount (or any field outside the bound personal-dev-mew field sets) is refused with the drift named in the reason, and the scenario suite asserts exactly that refusal while the table still closes.",
+    "sourceFiles": [
+      "apps/mew-migration/src/importer.mjs",
+      "apps/mew-migration/test/importer.test.mjs"
+    ]
+  },
+  "/rejectedAlternatives/4": {
+    "how": "Dedup is implemented by id within one export, mirroring the source's unique(id, author_id): the first occurrence is kept and every duplicate is a loud manifest refusal, never a merge. The scenario suite covers the duplicate-id refusal and the table still closing.",
+    "sourceFiles": [
+      "apps/mew-migration/src/importer.mjs",
+      "apps/mew-migration/test/importer.test.mjs"
+    ]
+  },
+  "/rejectedAlternatives/5": {
+    "how": "Drops are explicit and counted: droppedTables records data and users with row counts and reasons, fieldDrops records pk and contentTsvector with reasons, dangling relation endpoints are flagged on the row and counted in the manifest, and the scenario suite asserts all of it; the fixture-run manifest shows users(1) dropped and danglingRelations 1 with zero silent drops.",
+    "sourceFiles": [
+      "apps/mew-migration/src/importer.mjs",
+      "apps/mew-migration/test/importer.test.mjs",
+      "proof/mew-migration/fixture-import-manifest.json"
+    ]
+  }
+}

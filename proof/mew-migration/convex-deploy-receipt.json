@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "mew.convex-deploy-receipt/v1",
+  "recordedAt": "2026-07-29T10:07:49.573Z",
+  "premiseTested": "Convex CLOUD deploy credentials exist on this machine (owner input #2)",
+  "finding": "ABSENT. No Convex account, no CONVEX_DEPLOY_KEY, no cloud deployment. The cloud deploy path fails at login; convex 1.42.3 instead provisions an ANONYMOUS LOCAL deployment, which is not a launch.",
+  "attempts": [
+    {
+      "command": "npx --no-install convex dev --once  (cwd apps/mew-migration, CI=1)",
+      "exitCode": 0,
+      "outcome": "local-anonymous-deployment",
+      "detail": "Provisioned a local backend at http://127.0.0.1:3210 with 'No Convex account'. Pushed the reworked convex/schema.ts (real Mew graph model) successfully: tables nodes/relations/relationTypes/relationLists accepted, ten indexes created (nodes.by_sourceId/by_sourceDigest/by_authorId, relations.by_sourceId/by_fromId/by_toId, relationTypes.by_sourceId, relationLists.by_sourceId/by_nodeId/by_relationId). This validates the schema; it deploys nothing anywhere reachable.",
+      "sanitizedOutputSha256": "fde55123c3d89dcb96f3592063c3463c9bae3aaedeecb0e5daab7fbb7ee4eb64"
+    },
+    {
+      "command": "npx --no-install convex deploy -y  (cwd apps/mew-migration, CI=1)",
+      "exitCode": 1,
+      "outcome": "kill-receipt-for-cloud-deploy",
+      "sanitizedOutput": "You are currently developing anonymously with a locally running project.\nTo deploy your Convex app to the cloud, log in by running `npx convex login`.\nSee https://docs.convex.dev/production for more information on how Convex cloud works and instructions on how to set up hosting.",
+      "sanitizedOutputSha256": "34eed7e6f5a8b2bbb83cb6c90d2cd20061a8eb8508344c13d0cb5ed987372d50"
+    }
+  ],
+  "secretsHandling": "No credential was entered, read, or written. .env.local (local-deployment coordinates written by the CLI) is untracked per the app .gitignore and its values appear in no artifact.",
+  "unblock": "Owner input #2: `npx convex login` in an interactive session (or CONVEX_DEPLOY_KEY in the environment), then `npx convex deploy` and the rendered-DOM probe re-run."
+}

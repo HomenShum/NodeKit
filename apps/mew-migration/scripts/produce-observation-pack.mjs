@@ -1,0 +1,260 @@
+import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { canonicalSha256 } from "../../../src/lib/journey-chain-gate.mjs";
+import { validateSchema } from "../../../src/lib/schema-validation.mjs";
+
+// LEARN-stage producer for the mew migration. The defining fact of this window: the deploy failed
+// and zero humans used anything, so SIX of the eight dimensions are unobserved and say so as
+// first-class reports. The two observed dimensions (reachability, cost) are backed by the deploy
+// receipt — a source a reader can go re-read — and the reachability findings are the two things
+// that actually happened: the cloud deploy was blocked at login, and the hand-written schema was
+// accepted by a real (anonymous local) backend.
+//
+//   node scripts/produce-observation-pack.mjs [--chain-dir <dir>] [--out <path>]
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "..", "..", "..");
+const args = process.argv.slice(2);
+function opt(name, fallback) {
+  const i = args.indexOf(name);
+  return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
+}
+const chainDir = path.resolve(opt("--chain-dir", path.join(repoRoot, "proof", "mew-migration", "chain")));
+const outPath = path.resolve(opt("--out", path.join(chainDir, "mew-migration.observation-pack.json")));
+const CASE_ID = "mew-migration";
+
+const launch = JSON.parse(await readFile(path.join(chainDir, "mew-migration.launch-manifest.json"), "utf8"));
+const story = JSON.parse(await readFile(path.join(chainDir, "mew-migration.story-pack.json"), "utf8"));
+const contract = JSON.parse(await readFile(path.join(chainDir, "opportunity-contract.json"), "utf8"));
+const receipt = JSON.parse(await readFile(path.join(repoRoot, "proof", "mew-migration", "convex-deploy-receipt.json"), "utf8"));
+const serveProbe = JSON.parse(await readFile(path.join(repoRoot, "proof", "mew-migration", "serve-probe.json"), "utf8"));
+
+if (launch.content.liveness.claim !== "deploy-failed") {
+  throw new Error("REFUSED: this producer writes the observation pack for the deploy-failed window it actually lived through; a different liveness claim needs a different (re-run) observation pass");
+}
+
+const ms = (value) => new Date(value).toISOString().replace(/\.(\d{3})\d*Z$/, ".$1Z");
+const producedAt = ms(new Date().toISOString());
+const window = { from: ms(serveProbe.probedAt), to: producedAt };
+const attemptAt = ms(receipt.recordedAt);
+
+const unobserved = (state, reason, wouldRequire, extra = {}) => ({ state, reason, wouldRequire, ...extra });
+
+const pack = {
+  schemaVersion: "nodekit.observation-pack/v1",
+  caseId: CASE_ID,
+  stage: "learn",
+  producedAt,
+  inputs: [
+    { schemaVersion: "nodekit.launch-manifest/v1", caseId: CASE_ID, sha256: canonicalSha256(launch) },
+    { schemaVersion: "nodekit.story-pack/v1", caseId: CASE_ID, sha256: canonicalSha256(story) },
+  ],
+  content: {
+    observationWindow: window,
+    sources: [
+      {
+        sourceId: "src-deploy-receipt",
+        kind: "deployment-log",
+        locator: "proof/mew-migration/convex-deploy-receipt.json",
+        availability: "reporting",
+        note: "Sanitized record of both convex CLI attempts: local anonymous dev (exit 0, schema accepted) and cloud deploy (exit 1, login required).",
+      },
+      {
+        sourceId: "src-serve-probe",
+        kind: "synthetic-probe",
+        locator: "proof/mew-migration/serve-probe.json",
+        availability: "reporting",
+        coverageWindow: { from: ms(serveProbe.probedAt), to: ms(serveProbe.probedAt) },
+        note: "Raw-http probe of the LOCAL surface in both store states. Pre-launch proof activity; deliberately not used to claim anything about a launched app.",
+      },
+      {
+        sourceId: "src-convex-billing",
+        kind: "billing-ledger",
+        locator: "Convex billing dashboard — no account exists on this machine, so there is nothing to read",
+        availability: "not-configured",
+      },
+    ],
+    instruments: [
+      {
+        instrumentId: "ins-deploy-exit",
+        sourceId: "src-deploy-receipt",
+        dimension: "reachability",
+        measures: "count of reachable cloud deployments, and the exit code of each provisioning attempt",
+        method: "run `npx convex dev --once` and `npx convex deploy -y` non-interactively (CI=1) and record exit codes and sanitized output; re-runnable by any holder of this repository",
+        status: "ran",
+      },
+      {
+        instrumentId: "ins-spend-ledger",
+        sourceId: "src-deploy-receipt",
+        dimension: "cost",
+        measures: "USD minor units billed against the standing grant cap (10000) during the window",
+        method: "read the deploy receipt: no Convex account exists and no billable resource was created; the ledger therefore closes at zero without a provider invoice to read",
+        status: "ran",
+      },
+    ],
+    coverage: {
+      observed: {
+        reachability: {
+          sourceIds: ["src-deploy-receipt"],
+          instrumentIds: ["ins-deploy-exit"],
+          window: { from: attemptAt, to: attemptAt },
+          measured: "0 reachable cloud deployments; 2 provisioning attempts (exit 0 local-anonymous, exit 1 cloud requiring login)",
+          sampleCount: 2,
+          outcome: "findings",
+          findings: ["obs-deploy-blocked", "obs-local-schema-accepted"],
+          conclusion: "The launched thing does not exist to be reached; the blocker is one owner login, not the schema or the app.",
+        },
+        cost: {
+          sourceIds: ["src-deploy-receipt"],
+          instrumentIds: ["ins-spend-ledger"],
+          window,
+          measured: "0 USD minor units billed of a 10000 minor-unit monthly cap; no account exists to bill",
+          sampleCount: 2,
+          outcome: "no-instances",
+          findings: [],
+          conclusion: "Zero spend is a structural fact of the failed deploy, not a report from a billing API — none is configured.",
+        },
+      },
+      unobserved: {
+        usage: unobserved(
+          "not-instrumented",
+          "No deployment exists and no human has used even the local surface. Zero real traffic is absence of observation, not evidence of anything.",
+          "A reachable deployment (owner input #2) plus access logs or analytics attached to it.",
+          { blocksClaims: [] },
+        ),
+        errors: unobserved(
+          "not-instrumented",
+          "No error tracker, log drain, or console-capture instrumentation exists for any running instance; the unit-test suite is BUILD evidence, not runtime observation.",
+          "An error tracker or structured log capture on a deployed instance.",
+          { blocksClaims: [] },
+        ),
+        performance: unobserved(
+          "not-instrumented",
+          "Nothing measured latency anywhere; the serve probe recorded bytes and status codes only.",
+          "Timed probes or telemetry against a deployed instance under real load.",
+          { blocksClaims: [] },
+        ),
+        taskOutcome: unobserved(
+          "not-instrumented",
+          "The primary job (migrate the real database; answer over it with bindings) cannot be attempted: zero database records exist in this pipeline, and the 3 harvested owner-authored cases (harness/mew-migration/notion-cases.json) exercise CRUD orchestration this retrieval-only slice does not implement.",
+          "Owner input #1 (one run of Mew's own exporter) wired into the importer, plus either the CRUD agent toolset the harvested cases exercise or owner-authored retrieval cases for the semantic column.",
+          { blocksClaims: ["sc-withheld-semantic-recall", "sc-withheld-notebook-migrated", "sc-withheld-inventory-intact"] },
+        ),
+        friction: unobserved(
+          "not-instrumented",
+          "No friction instrumentation was attached to this run; the receipts record outcomes, not struggle. (Known but uninstrumented example: the convex CLI required the dependency declared in the app package.json before it would run.)",
+          "A human-study event capture or structured run-transcript friction extraction on the next traversal.",
+          { blocksClaims: [] },
+        ),
+        feedback: unobserved(
+          "not-instrumented",
+          "No human has read the report, used the surface, or responded; the countersignature list has been answered by nobody.",
+          "The owner reading docs/MEW_MIGRATION_RUN_REPORT.md and answering the countersignature list.",
+          { blocksClaims: [] },
+        ),
+      },
+    },
+    observations: [
+      {
+        id: "obs-deploy-blocked",
+        severity: "P1",
+        kind: "launch.deploy-blocked",
+        observed: "`npx convex deploy -y` exited 1: anonymous local development only, cloud deploy requires `npx convex login`. No Convex account or deploy key exists on this machine.",
+        consequence: "No deployment exists; usage, performance, taskOutcome and feedback are unobservable until owner input #2 is provided.",
+        dimension: "reachability",
+        sourceId: "src-deploy-receipt",
+        instrumentId: "ins-deploy-exit",
+        inferred: false,
+        occurredAt: attemptAt,
+        count: 1,
+        evidenceRefs: ["proof/mew-migration/convex-deploy-receipt.json"],
+      },
+      {
+        id: "obs-local-schema-accepted",
+        severity: "P3",
+        kind: "launch.local-schema-accepted",
+        observed: "`npx convex dev --once` provisioned an anonymous local backend and accepted the hand-written convex/schema.ts: tables notes/links/tags with five indexes (by_sourceId x3, by_sourceDigest, by_name) created.",
+        consequence: "The schema half of the deploy path is already proven against a real Convex backend; the owner login is the only missing step between here and a cloud deployment.",
+        dimension: "reachability",
+        sourceId: "src-deploy-receipt",
+        instrumentId: "ins-deploy-exit",
+        inferred: false,
+        occurredAt: attemptAt,
+        count: 1,
+        evidenceRefs: ["proof/mew-migration/convex-deploy-receipt.json"],
+      },
+      {
+        id: "obs-zero-spend",
+        severity: "P3",
+        kind: "cost.zero-spend-structural",
+        observed: "0 minor units were billed during the window: no account exists, and the only backend created was local and anonymous.",
+        consequence: null,
+        dimension: "cost",
+        sourceId: "src-deploy-receipt",
+        instrumentId: "ins-spend-ledger",
+        inferred: true,
+        inferenceBasis: "Derived from the deploy receipt (no account, no cloud resource) rather than read from a billing API, because no billing source is configured; recorded as inferred for exactly that reason.",
+        occurredAt: attemptAt,
+        evidenceRefs: ["proof/mew-migration/convex-deploy-receipt.json"],
+      },
+    ],
+    decideFeedback: {
+      successCondition: {
+        status: "not-observable",
+        basis: "The contract's success condition is defined over a real export copy and owner-authored cases. Neither exists (wave-0A NOT_RUN, wave-0B KILL), and the dimensions the condition depends on — taskOutcome and usage — were never observable in this window. The fixture-run properties hold (importer manifest closes, scorecard deterministic column 8/8) but the condition itself is about the notebook, and there is no notebook here.",
+        evidenceObservationIds: [],
+        unobservedDimensions: ["taskOutcome", "usage"],
+      },
+      unknownsResolved: [
+        {
+          unknown: contract.openUnknowns[3],
+          answer: "Absent. The cloud deploy exits 1 requiring login; no account or key exists. Bonus finding: convex 1.42.3 falls back to an anonymous LOCAL backend, which accepted the hand-written schema (five indexes) — so after `npx convex login`, the remaining path is deploy plus the rendered-DOM probe.",
+          resolvedByObservationIds: ["obs-deploy-blocked", "obs-local-schema-accepted"],
+        },
+      ],
+      unknownsStillOpen: [contract.openUnknowns[0], contract.openUnknowns[1], contract.openUnknowns[2], contract.openUnknowns[4]],
+      newUnknowns: [
+        "Whether the owner authorizes a cloud deployment at all: authority is H0 with no grant artifact to be inside of, so 'can deploy' and 'may deploy' are both open.",
+        "Whether the anonymous local Convex backend is acceptable for developing against the real export, or whether all real data must wait for the authenticated project (a privacy call only the owner can make).",
+      ],
+      instrumentationDebt: [
+        { dimension: "taskOutcome", wouldRequire: "Owner inputs #1 and #3 wired into the importer run and the semantic scorecard column.", priority: "P1" },
+        { dimension: "feedback", wouldRequire: "The owner reading the run report and answering the countersignature list.", priority: "P1" },
+        { dimension: "usage", wouldRequire: "A reachable deployment with access logs or analytics.", priority: "P2" },
+        { dimension: "errors", wouldRequire: "An error tracker or structured log capture on a deployed instance.", priority: "P2" },
+        { dimension: "friction", wouldRequire: "Structured friction capture on the next traversal (human-study events or run-transcript extraction).", priority: "P3" },
+      ],
+    },
+    promotionAuthorized: false,
+    evolutionEventRequired: true,
+  },
+  completeness: {
+    claimed: [
+      "All eight dimensions are partitioned exactly once: two observed with sources, instruments, windows and sample counts; six unobserved as first-class reports with reasons and wouldRequire.",
+      "Both observed reports are backed by a re-readable source (the sanitized deploy receipt) and the one derived number (zero spend) is marked inferred with its basis.",
+      "The success condition is answered not-observable, naming the unobserved dimensions that made it so, with zero supporting observations smuggled in.",
+    ],
+    notRun: [
+      "No dimension of the launched application was observed, because no launched application exists.",
+      "The serve-probe source is declared but backs no observed dimension: probing one's own local process is proof-stage verification, not post-launch observation, and counting it would dress PROVE up as LEARN.",
+    ],
+    refused: [
+      {
+        item: "Reporting 'no errors observed' or 'no usage problems' for any unobserved dimension",
+        reason: "Zero samples supports no statement. Those dimensions are unobserved — a fact about instrumentation, not about the application — and the schema's partition exists precisely so this cannot be blurred.",
+      },
+    ],
+  },
+};
+
+const errors = await validateSchema("nodekit.observation-pack.v1.schema.json", pack, "observation-pack");
+if (errors.length > 0) {
+  console.error("REFUSED: produced observation pack does not validate; nothing written:");
+  for (const error of errors) console.error(`  - ${error}`);
+  process.exit(1);
+}
+await writeFile(outPath, `${JSON.stringify(pack, null, 2)}\n`, "utf8");
+console.log(`OBSERVATION PACK written: ${outPath}`);
+console.log(`  observed 2/8 dimensions (reachability, cost), unobserved 6/8 as first-class reports`);
+console.log(`  successCondition not-observable; 1 unknown resolved, 4 carried, 2 new`);
