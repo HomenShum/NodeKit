@@ -14,9 +14,9 @@ Before proposing any write, the tool verifies all of the following:
 - the `.tgz` is a regular file and passes NodeKit's non-extracting npm archive verifier;
 - package name, package version, tarball SHA-256, and SHA-512 SRI are all exact;
 - the source worktree package name and version match the archive;
-- a fresh `npm pack --ignore-scripts` runs only inside a disposable byte-for-byte copy of the candidate's clean, tracked distribution source, with no Git metadata or link back to the source checkout, and produces the same canonical file-manifest hash, package name, version, file count, and unpacked byte count as the supplied archive;
-- package lifecycle behavior cannot write into the authoritative NodeKit checkout because npm never receives that checkout as its working directory;
-- the NodeKit commit, source hash, clean status, and tracked distributable file set remain exact after independent packing;
+- the supplied archive's complete canonical file manifest exactly matches the bounded, clean, tracked distribution bytes selected by `package.json#files`, including package name, version, file count, and unpacked byte count;
+- package lifecycle behavior cannot run during source verification because the verifier reads and hashes tracked files directly instead of invoking `npm pack`;
+- the NodeKit commit, source hash, clean status, and tracked distributable file set remain exact after the comparison;
 - the consumer is a clean Git worktree;
 - the consumer `package.json` is tracked and Git-clean against `HEAD` (so normal cross-platform Git line-ending filters remain supported);
 - vendor, manifest, and package paths are contained, distinct, and do not traverse symlinks.
@@ -68,7 +68,7 @@ node scripts/prepare-consumer-package.mjs `
 
 The JSON result describes the exact planned writes. Dry-run does not create a vendor directory, change `package.json`, or write the provenance manifest.
 
-The independently generated `.tgz` does not need the same compressed bytes. Gzip metadata and tar ordering can differ without changing a package. NodeKit therefore compares the complete canonical unpacked file manifest and its aggregate identity, while the supplied archive remains bound separately by its exact SHA-256 and SRI. The authoritative checkout is verified against the requested commit and source hash before and after the disposable source copy is created. The copy is independently hashed before npm runs and deleted after packing, whether packing passes or fails.
+NodeKit compares the supplied archive's complete canonical unpacked file manifest with the exact clean, tracked distribution bytes. It does not run a second `npm pack`: npm executes `prepare` during packing even when `--ignore-scripts` is present, so treating that command as a read-only verifier is unsafe and fails whenever the lifecycle helper is outside the copied distribution. The authoritative checkout is verified against the requested commit and source hash before and after the bounded file comparison. The supplied archive remains bound separately by its exact SHA-256 and SRI.
 
 ## Apply exact bytes
 

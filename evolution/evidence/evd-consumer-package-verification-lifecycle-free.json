@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:consumer-package-verification-lifecycle-free",
+  "kind": "test",
+  "artifactRef": "git:77069c870e6fb94475c6d9253ae9c6e1f85ec2bd:evolution/artifacts/consumer-package-verification-lifecycle-free.md",
+  "sha256": "4c393e6e266597839746c5b4f0d346dbfd05a9aef10ab763ac2a92c215b284bb",
+  "sourceCommit": "77069c870e6fb94475c6d9253ae9c6e1f85ec2bd",
+  "generatedAt": "2026-07-29T05:24:16.8363055Z",
+  "command": "node --test test/consumer-package-preparation.test.mjs",
+  "environment": {
+    "platform": "Windows, Node 22.22.2",
+    "scenario": "real package prepare helper omitted from reduced distribution; lifecycle must not execute",
+    "result": "8/8 consumer preparation scenarios passed; complete fast repository gate passed 529/529 plus 8/8 component tests"
+  },
+  "verifiesInvariantIds": [
+    "inv:consumer-package-verification-lifecycle-free"
+  ],
+  "result": "pass"
+}

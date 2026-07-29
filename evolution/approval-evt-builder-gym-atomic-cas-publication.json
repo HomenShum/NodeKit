@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "nodekit.evolution-approval/v1",
+  "purpose": "evolution-canonical-promotion",
+  "repositoryId": "HomenShum/node-platform",
+  "projectId": "nodekit",
+  "eventId": "evt:builder-gym-atomic-cas-publication",
+  "subjectHash": "1a1848a4c33393f00fce1a880cff672d52e6cf7ccd8e3d8826d952adb76cf82f",
+  "evidenceManifestHash": "f172fe7d63dd29aa8eb0f32bd51df3b08cd7f2f2652f5051e20b28d29c4f3e70",
+  "commitSha": "77069c870e6fb94475c6d9253ae9c6e1f85ec2bd",
+  "reviewerCredentialId": "dev-software-key",
+  "trustPolicyVersion": "trust-policy-2026-07-29-1",
+  "nonce": "bc018c3a-9035-4ac7-a062-bbaeaca79e7e",
+  "issuedAt": "2026-07-29T05:29:45.845Z",
+  "expiresAt": "2026-07-29T05:59:45.845Z",
+  "approvalId": "evolution-approval:sha256:5638fcd980c052404bfcacd688a5deecb139931622e91c78ca96087e243ac042",
+  "approvalHash": "5638fcd980c052404bfcacd688a5deecb139931622e91c78ca96087e243ac042",
+  "attestation": {
+    "algorithm": "Ed25519",
+    "credentialId": "dev-software-key",
+    "payloadSha256": "5638fcd980c052404bfcacd688a5deecb139931622e91c78ca96087e243ac042",
+    "purpose": "evolution-canonical-promotion",
+    "schemaVersion": "nodekit.evolution-detached-attestation/v1",
+    "signatureEncoding": "base64url",
+    "signedAt": "2026-07-29T05:29:45.846Z",
+    "signature": "n4RixFShdaO8JxRFaBZxeZ5bmTNvmZ92DPLfZJUcp59mBFk8z7_bNN2lxmX-oelhVGn12FSgQyhTLamV2XD3DQ"
+  }
+}

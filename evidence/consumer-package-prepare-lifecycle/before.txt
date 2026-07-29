@@ -1,0 +1,36 @@
+NodeKit consumer-package preparation — before
+Captured: 2026-07-28 PDT
+
+Scenario
+--------
+A clean consumer prepares the exact NodeKit 0.2.1 archive on Windows. The
+candidate package declares:
+
+  prepare: node scripts/clean-component-dist.mjs
+
+That helper is intentionally outside the package's tracked distribution copy.
+
+Reproduction
+------------
+  node --test --test-name-pattern="source verification does not execute" \
+    test/consumer-package-preparation.test.mjs
+
+Observed result
+---------------
+  exit code: 1
+  error code: SOURCE_PACK_FAILURE
+  npm lifecycle: @homenshum/nodekit@0.2.1 prepare
+  underlying error: MODULE_NOT_FOUND for scripts/clean-component-dist.mjs
+
+Root cause
+----------
+The verifier called npm pack in a reduced source copy and described
+--ignore-scripts as lifecycle-free. npm pack still executed prepare. The
+reduced copy therefore could not verify a valid archive, even though the
+supplied archive and exact tracked distribution bytes matched.
+
+Safety result
+-------------
+The failure happened before consumer writes. No vendored archive, dependency
+change, provenance manifest, deployment, or authenticated-adoption claim was
+created.

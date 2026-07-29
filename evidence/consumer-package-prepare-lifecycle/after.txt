@@ -1,0 +1,39 @@
+NodeKit consumer-package preparation — after
+Captured: 2026-07-28 PDT
+
+Behavior
+--------
+Source verification no longer invokes npm pack or any package lifecycle. It
+builds a bounded canonical manifest directly from the clean, tracked
+package.json#files distribution and compares that identity with the supplied
+archive's independently parsed manifest.
+
+Focused regression
+------------------
+  node --test --test-name-pattern="source verification does not execute" \
+    test/consumer-package-preparation.test.mjs
+
+  exit code: 0
+  tests: 1 passed
+
+Scenario suite
+--------------
+  node --test test/consumer-package-preparation.test.mjs
+
+  exit code: 0
+  tests: 8 passed
+
+Adjacent archive/public-surface suite
+-------------------------------------
+  node --test test/npm-package-archive.test.mjs \
+    test/npm-cli-invocation.test.mjs test/public-api.test.mjs
+
+  exit code: 0
+  tests: 17 passed
+
+Closed failure mode
+-------------------
+The exact scenario that previously stopped at MODULE_NOT_FOUND now produces a
+read-only preparation plan with sourceArchiveManifestExact=true and no output
+files. Mutating lifecycle scripts are not executed in the authoritative
+checkout or in a disposable copy.

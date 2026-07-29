@@ -1,6 +1,8 @@
 {
   "schemaVersion": "nodekit.evolution-approval-nonces/v1",
   "nonces": [
-    "cc94e0d6-a203-4d53-9525-d43064bf584e"
+    "cc94e0d6-a203-4d53-9525-d43064bf584e",
+    "00d282f6-82b7-464e-ae53-b33aa9ce0a82",
+    "bc018c3a-9035-4ac7-a062-bbaeaca79e7e"
   ]
 }

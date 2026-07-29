@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:builder-gym-atomic-cas-publication",
+  "kind": "test",
+  "artifactRef": "git:77069c870e6fb94475c6d9253ae9c6e1f85ec2bd:evolution/artifacts/builder-gym-atomic-cas-publication.md",
+  "sha256": "a1d572f1acb03d1c769b578fb8e511b9f0179e33887569c5624429c474219519",
+  "sourceCommit": "77069c870e6fb94475c6d9253ae9c6e1f85ec2bd",
+  "generatedAt": "2026-07-29T05:24:16.8363055Z",
+  "command": "node --test --test-name-pattern=\"content-addressed trajectory writes survive\" test/builder-gym.test.mjs",
+  "environment": {
+    "platform": "Windows, Node 22.22.2",
+    "scenario": "prepared collision, 32-writer burst, then five sustained eight-writer rounds",
+    "result": "scenario passed and complete fast repository gate passed 529/529 plus 8/8 component tests"
+  },
+  "verifiesInvariantIds": [
+    "inv:builder-gym-cas-publishes-complete-bytes"
+  ],
+  "result": "pass"
+}
