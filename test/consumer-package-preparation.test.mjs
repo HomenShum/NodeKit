@@ -26,6 +26,12 @@ const NODEKIT_PACKAGE_JSON = Object.freeze({
     prepare: "node -e \"require('node:fs').writeFileSync('PREPARE_SCRIPT_RAN', 'unsafe')\"",
   },
 });
+const NODEKIT_PACKAGE_JSON_WITH_EXTERNAL_PREPARE = Object.freeze({
+  ...NODEKIT_PACKAGE_JSON,
+  scripts: {
+    prepare: "node scripts/clean-component-dist.mjs",
+  },
+});
 
 function digest(algorithm, value, encoding = "hex") {
   return createHash(algorithm).update(value).digest(encoding);
@@ -57,9 +63,12 @@ function tarEntry(name, body) {
   return Buffer.concat([header, data, Buffer.alloc((BLOCK - (data.length % BLOCK)) % BLOCK)]);
 }
 
-function packageArchive(indexSource = "export const nodekit = true;\n") {
+function packageArchive(
+  indexSource = "export const nodekit = true;\n",
+  packageJson = NODEKIT_PACKAGE_JSON,
+) {
   return gzipSync(Buffer.concat([
-    tarEntry("package/package.json", `${JSON.stringify(NODEKIT_PACKAGE_JSON, null, 2)}\n`),
+    tarEntry("package/package.json", `${JSON.stringify(packageJson, null, 2)}\n`),
     tarEntry("package/src/index.mjs", indexSource),
     Buffer.alloc(BLOCK * 2),
   ]), { level: 9 });
@@ -89,15 +98,16 @@ async function gitRepository(root, files) {
 async function fixture({
   archiveIndexSource = "export const nodekit = true;\n",
   consumerDependencies = { [NAME]: "file:vendor/old-nodekit.tgz" },
+  nodekitPackageJson = NODEKIT_PACKAGE_JSON,
 } = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-consumer-preparation-"));
   const nodekitRoot = path.join(root, "nodekit");
   const consumerRoot = path.join(root, "consumer");
   const archivePath = path.join(root, "nodekit.tgz");
-  const archiveBytes = packageArchive(archiveIndexSource);
+  const archiveBytes = packageArchive(archiveIndexSource, nodekitPackageJson);
   await writeFile(archivePath, archiveBytes);
   const candidateCommit = await gitRepository(nodekitRoot, {
-    "package.json": `${JSON.stringify(NODEKIT_PACKAGE_JSON, null, 2)}\n`,
+    "package.json": `${JSON.stringify(nodekitPackageJson, null, 2)}\n`,
     "src/index.mjs": "export const nodekit = true;\n",
   });
   const consumerCommit = await gitRepository(consumerRoot, {
@@ -124,7 +134,7 @@ async function absent(file) {
   await assert.rejects(access(file), { code: "ENOENT" });
 }
 
-test("isolated packing keeps a mutating prepare lifecycle away from authoritative source while dry-run and apply remain exact", async () => {
+test("tracked source verification never runs a mutating prepare lifecycle while dry-run and apply remain exact", async () => {
   const current = await fixture();
   try {
     const packagePath = path.join(current.consumerRoot, "package.json");
@@ -165,6 +175,25 @@ test("isolated packing keeps a mutating prepare lifecycle away from authoritativ
     assert.equal(git(current.nodekitRoot, ["status", "--porcelain=v1", "--untracked-files=all"]), sourceStatusBefore);
     assert.equal(await computeNodeKitSourceHash(current.nodekitRoot), sourceHashBefore);
     assert.equal(git(current.nodekitRoot, ["rev-parse", "HEAD"]), current.options.candidateCommit);
+  } finally {
+    await rm(current.root, { force: true, recursive: true });
+  }
+});
+
+test("source verification does not execute a prepare lifecycle whose helper is outside the distribution", async () => {
+  const current = await fixture({
+    nodekitPackageJson: NODEKIT_PACKAGE_JSON_WITH_EXTERNAL_PREPARE,
+  });
+  try {
+    const result = await prepareExactConsumerPackage({
+      ...current.options,
+      updateDependency: true,
+    });
+    assert.equal(result.applied, false);
+    assert.equal(result.manifest.checks.sourceArchiveManifestExact, true);
+    assert.equal(result.manifest.nodekit.sourcePack.fileCount, 2);
+    await absent(path.join(current.consumerRoot, "vendor", "nodekit.tgz"));
+    await absent(path.join(current.consumerRoot, "nodekit.consumer-package.json"));
   } finally {
     await rm(current.root, { force: true, recursive: true });
   }

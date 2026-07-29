@@ -1,0 +1,25 @@
+Builder Gym content-addressed publication race — after
+Captured: 2026-07-28 PDT
+
+Behavior
+--------
+Each writer now writes and fsyncs a private same-directory temporary inode,
+closes it, and atomically publishes the complete bytes with a create-if-absent
+hard link. A losing writer can observe EEXIST only after the winner's complete
+file is visible. Temporary files are removed on every path.
+
+Scenario gate
+-------------
+  node --test --test-name-pattern="content-addressed trajectory writes survive" \
+    test/builder-gym.test.mjs
+
+  exit code: 0
+  tests: 1 passed
+
+Coverage
+--------
+- rejects an attacker/prepared final address containing different bytes;
+- 32 simultaneous idempotent writers in a burst;
+- five sustained rounds of eight simultaneous writers;
+- every writer returns the same address;
+- final bytes exactly match the canonical trajectory JSON.

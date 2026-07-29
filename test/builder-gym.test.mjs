@@ -547,19 +547,20 @@ test("concurrent Builder Gym fixtures do not confuse distinct Windows file ident
   assert.equal(new Set(fixtures.map((fixture) => fixture.root)).size, fixtures.length);
 });
 
-test("content-addressed trajectory writes are exclusive, byte-idempotent, and reject prepared addresses", async (t) => {
+test("content-addressed trajectory writes survive burst and sustained contention while rejecting prepared addresses", async (t) => {
   const { baseline, root } = await preparedBuilderGym(t);
   const output = path.join(root, "harness", "trajectories", "builder", "sha256", `${baseline.trajectoryHash}.json`);
   await writeFile(output, "prepared collision\n");
   await assert.rejects(() => recordNodeTraceTrajectory(root, baseline), /already exists with different bytes/);
 
-  await rm(output, { force: true });
-  const [first, second] = await Promise.all([
-    recordNodeTraceTrajectory(root, baseline),
-    recordNodeTraceTrajectory(root, baseline),
-  ]);
-  assert.equal(first.output, second.output);
-  assert.equal(await readFile(output, "utf8"), `${JSON.stringify(baseline, null, 2)}\n`);
+  for (const concurrency of [32, 8, 8, 8, 8, 8]) {
+    await rm(output, { force: true });
+    const writes = await Promise.all(
+      Array.from({ length: concurrency }, () => recordNodeTraceTrajectory(root, baseline)),
+    );
+    assert.equal(new Set(writes.map((entry) => entry.output)).size, 1);
+    assert.equal(await readFile(output, "utf8"), `${JSON.stringify(baseline, null, 2)}\n`);
+  }
 });
 
 test("content-addressed trajectory writes reject a symlink or junction at the final address", async (t) => {

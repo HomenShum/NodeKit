@@ -1,0 +1,28 @@
+Builder Gym content-addressed publication race — before
+Captured: 2026-07-28 PDT
+
+Scenario
+--------
+The complete fast repository suite exercised two concurrent writers for the
+same NodeTrace trajectory address while the machine was under parallel test
+load.
+
+Observed result
+---------------
+  test: content-addressed trajectory writes are exclusive, byte-idempotent,
+        and reject prepared addresses
+  outcome: failed
+  error: NodeTrace trajectory immutable address already exists with different bytes
+
+Root cause
+----------
+The winner opened the final path with wx and then wrote its bytes. The losing
+writer received EEXIST as soon as that path was opened, before the winner had
+finished writing, and immediately read a partial file. EEXIST was therefore
+mistaken for a completely published immutable object.
+
+Impact
+------
+Valid concurrent idempotent writes could be reported as an immutable-address
+conflict. Under agent loops that false conflict can incorrectly stop a run or
+teach a caller that equal content differs.

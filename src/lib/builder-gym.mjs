@@ -1,5 +1,15 @@
-import { createHash } from "node:crypto";
-import { lstat, mkdir, readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { createHash, randomBytes } from "node:crypto";
+import {
+  link,
+  lstat,
+  mkdir,
+  open,
+  readFile,
+  readdir,
+  realpath,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { pathExists, readJson, readYaml } from "./files.mjs";
 import { validateSchema } from "./schema-validation.mjs";
@@ -128,22 +138,44 @@ async function writeJsonIfMissing(target, value, created) {
 async function writeContentAddressedJson(target, value, label) {
   const bytes = Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
   await mkdir(path.dirname(target), { recursive: true });
+  const temporary = path.join(
+    path.dirname(target),
+    `.${path.basename(target)}.${process.pid}.${randomBytes(8).toString("hex")}.tmp`,
+  );
+  const handle = await open(temporary, "wx", 0o600);
   try {
-    await writeFile(target, bytes, { flag: "wx" });
-    return { created: true };
-  } catch (error) {
-    if (error?.code !== "EEXIST") throw error;
-  }
+    try {
+      await handle.writeFile(bytes);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
 
-  const metadata = await lstat(target);
-  if (metadata.isSymbolicLink() || !metadata.isFile()) {
-    throw new Error(`${label} address was pre-created as a symlink, junction, or non-regular file`);
+    let created = false;
+    try {
+      // The final content-addressed name appears only after every byte is closed
+      // and durable in a same-directory temporary inode. Publishing via a hard
+      // link is create-if-absent and atomic, so an EEXIST observer can never read
+      // the winning writer's partial file.
+      await link(temporary, target);
+      created = true;
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+    }
+    if (created) return { created: true };
+
+    const metadata = await lstat(target);
+    if (metadata.isSymbolicLink() || !metadata.isFile()) {
+      throw new Error(`${label} address was pre-created as a symlink, junction, or non-regular file`);
+    }
+    const existing = await readFile(target);
+    if (!existing.equals(bytes)) {
+      throw new Error(`${label} immutable address already exists with different bytes`);
+    }
+    return { created: false };
+  } finally {
+    await rm(temporary, { force: true });
   }
-  const existing = await readFile(target);
-  if (!existing.equals(bytes)) {
-    throw new Error(`${label} immutable address already exists with different bytes`);
-  }
-  return { created: false };
 }
 
 function evaluatorManifest() {

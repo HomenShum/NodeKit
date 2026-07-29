@@ -1,11 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import {
-  chmod,
-  copyFile,
   lstat,
   mkdir,
-  mkdtemp,
   open,
   readFile,
   readdir,
@@ -13,7 +10,6 @@ import {
   rename,
   rm,
 } from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import {
   assertCleanDistributablePaths,
@@ -21,10 +17,9 @@ import {
   parseGitStatusPorcelainZ,
 } from "./distributable-candidate.mjs";
 import {
+  NPM_PACKAGE_FILE_MANIFEST_SCHEMA_VERSION,
   inspectNpmPackageArchiveBytes,
-  inspectNpmPackageArchiveFile,
 } from "./npm-package-archive.mjs";
-import { resolveNpmCliInvocation } from "./npm-cli-invocation.mjs";
 import { computeNodeKitSourceHash } from "./source-hash.mjs";
 
 export const CONSUMER_PACKAGE_PROVENANCE_SCHEMA_VERSION = "nodekit.consumer-package-provenance/v1";
@@ -39,6 +34,9 @@ const DEPENDENCY_SECTIONS = Object.freeze([
   "optionalDependencies",
   "peerDependencies",
 ]);
+const MAX_DISTRIBUTION_FILE_BYTES = 128 * 1024 * 1024;
+const MAX_DISTRIBUTION_FILES = 100_000;
+const MAX_DISTRIBUTION_UNPACKED_BYTES = 256 * 1024 * 1024;
 const WINDOWS_RESERVED_SEGMENT = /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?$/iu;
 
 export class ConsumerPackagePreparationError extends Error {
@@ -200,88 +198,84 @@ async function assertDistributableFilesTracked(root, pathspecs) {
   return true;
 }
 
-function parseNpmPackOutput(stdout) {
-  let parsed;
-  try {
-    parsed = JSON.parse(String(stdout).replace(/^\uFEFF/u, "").trim());
-  } catch (error) {
-    fail("SOURCE_PACK_FAILURE", "npm pack did not emit valid JSON", { cause: error });
+async function inspectTrackedNodeKitDistribution(
+  root,
+  packageJson,
+  { candidateCommit, sourceHash },
+) {
+  if (readHeadCommit(root, "NodeKit before tracked distribution inspection") !== candidateCommit) {
+    fail("SOURCE_ISOLATION_MISMATCH", "NodeKit HEAD changed before its tracked distribution was inspected");
   }
-  if (!Array.isArray(parsed) || parsed.length !== 1 || typeof parsed[0]?.filename !== "string") {
-    fail("SOURCE_PACK_FAILURE", "npm pack must emit exactly one archive record");
+  const sourceFiles = await distributableFiles(root, distributablePathspecs(packageJson));
+  if (sourceFiles.length === 0 || sourceFiles.length > MAX_DISTRIBUTION_FILES) {
+    fail(
+      "SOURCE_DISTRIBUTION_LIMIT",
+      `tracked distribution must contain between 1 and ${MAX_DISTRIBUTION_FILES} files`,
+    );
   }
-  if (path.basename(parsed[0].filename) !== parsed[0].filename || !parsed[0].filename.endsWith(".tgz")) {
-    fail("SOURCE_PACK_FAILURE", "npm pack emitted an unsafe archive filename");
-  }
-  return parsed[0];
-}
 
-async function independentlyPackNodeKitSource(root, { candidateCommit, sourceHash }) {
-  const isolationRoot = await mkdtemp(path.join(os.tmpdir(), "nodekit-consumer-source-pack-"));
-  const isolatedSourceRoot = path.join(isolationRoot, "source");
-  const destination = path.join(isolationRoot, "packed");
-  try {
-    if (readHeadCommit(root, "NodeKit before isolated source copy") !== candidateCommit) {
-      fail("SOURCE_ISOLATION_MISMATCH", "NodeKit HEAD changed before the isolated source copy was created");
-    }
-    const sourcePackageJson = parsePackageJson(await readFile(path.join(root, "package.json")), "NodeKit package.json");
-    const sourceFiles = await distributableFiles(root, distributablePathspecs(sourcePackageJson));
-    for (const relativePath of sourceFiles) {
-      const source = path.join(root, ...relativePath.split("/"));
-      const target = path.join(isolatedSourceRoot, ...relativePath.split("/"));
-      const metadata = await lstat(source);
-      if (!metadata.isFile() || metadata.isSymbolicLink()) {
-        fail("SOURCE_ISOLATION_FAILURE", `isolated source input is not a regular file: ${relativePath}`);
-      }
-      await mkdir(path.dirname(target), { recursive: true });
-      await copyFile(source, target);
-      await chmod(target, metadata.mode & 0o777);
-    }
-    const isolatedSourceHash = await computeNodeKitSourceHash(isolatedSourceRoot);
-    if (isolatedSourceHash !== sourceHash) {
+  const portablePaths = new Map();
+  const fileManifest = [];
+  let unpackedSize = 0;
+  for (const relativePath of sourceFiles) {
+    const portableKey = portablePathKey(relativePath);
+    const collision = portablePaths.get(portableKey);
+    if (collision !== undefined && collision !== relativePath) {
       fail(
-        "SOURCE_ISOLATION_MISMATCH",
-        `isolated source does not match candidate ${candidateCommit}/${sourceHash}; received source hash ${isolatedSourceHash}`,
+        "SOURCE_PATH_COLLISION",
+        `tracked distribution path ${relativePath} collides with ${collision} on a case-insensitive filesystem`,
       );
     }
-    if (readHeadCommit(root, "NodeKit after isolated source copy") !== candidateCommit
-      || await computeNodeKitSourceHash(root) !== sourceHash) {
-      fail("SOURCE_CHANGED_DURING_COPY", "NodeKit commit or source bytes changed while the isolated source copy was created");
+    portablePaths.set(portableKey, relativePath);
+
+    const source = path.join(root, ...relativePath.split("/"));
+    const metadata = await lstat(source);
+    if (!metadata.isFile() || metadata.isSymbolicLink()) {
+      fail("SOURCE_ISOLATION_FAILURE", `tracked distribution input is not a regular file: ${relativePath}`);
     }
-    // npm receives only disposable, validated distribution bytes. No Git
-    // metadata or filesystem link points back to the authoritative checkout.
-    await mkdir(destination, { recursive: false });
-    const invocation = resolveNpmCliInvocation([
-      "pack",
-      "--json",
-      "--ignore-scripts",
-      "--pack-destination",
-      destination,
-    ]);
-    const result = spawnSync(invocation.command, invocation.args, {
-      cwd: isolatedSourceRoot,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        CI: "1",
-        NO_COLOR: "1",
-        npm_config_audit: "false",
-        npm_config_fund: "false",
-        npm_config_ignore_scripts: "true",
-      },
-      maxBuffer: 32 * 1024 * 1024,
-      shell: invocation.shell,
-      timeout: 120_000,
+    if (metadata.size > MAX_DISTRIBUTION_FILE_BYTES) {
+      fail(
+        "SOURCE_DISTRIBUTION_LIMIT",
+        `tracked distribution file ${relativePath} exceeds ${MAX_DISTRIBUTION_FILE_BYTES} bytes`,
+      );
+    }
+    unpackedSize += metadata.size;
+    if (!Number.isSafeInteger(unpackedSize) || unpackedSize > MAX_DISTRIBUTION_UNPACKED_BYTES) {
+      fail(
+        "SOURCE_DISTRIBUTION_LIMIT",
+        `tracked distribution exceeds ${MAX_DISTRIBUTION_UNPACKED_BYTES} unpacked bytes`,
+      );
+    }
+    const bytes = await readFile(source);
+    if (bytes.length !== metadata.size) {
+      fail("SOURCE_CHANGED_DURING_READ", `tracked distribution file changed while being read: ${relativePath}`);
+    }
+    fileManifest.push({
+      path: relativePath,
+      sha256: sha256(bytes),
+      size: bytes.length,
     });
-    if (result.error || result.status !== 0) {
-      const detail = String(result.stderr || result.stdout || result.error?.message || "").trim();
-      fail("SOURCE_PACK_FAILURE", `independent npm pack failed${detail ? `: ${detail.slice(-2_000)}` : ""}`, { cause: result.error });
-    }
-    const record = parseNpmPackOutput(result.stdout);
-    return await inspectNpmPackageArchiveFile(path.join(destination, record.filename));
-  } finally {
-    await rm(isolationRoot, { force: true, recursive: true });
   }
+
+  if (readHeadCommit(root, "NodeKit after tracked distribution inspection") !== candidateCommit
+    || await computeNodeKitSourceHash(root) !== sourceHash) {
+    fail(
+      "SOURCE_CHANGED_DURING_READ",
+      "NodeKit commit or source bytes changed while its tracked distribution was inspected",
+    );
+  }
+  const canonicalManifest = JSON.stringify({
+    files: fileManifest,
+    schemaVersion: NPM_PACKAGE_FILE_MANIFEST_SCHEMA_VERSION,
+  });
+  return {
+    canonicalManifestSha256: sha256(Buffer.from(canonicalManifest, "utf8")),
+    fileCount: fileManifest.length,
+    fileManifest,
+    name: packageJson.name,
+    unpackedSize,
+    version: packageJson.version,
+  };
 }
 
 async function assertSafeOutputPath(root, relativePath, label) {
@@ -499,7 +493,7 @@ export async function prepareExactConsumerPackage(options) {
   if (nodekitPackageJson.name !== archive.name || nodekitPackageJson.version !== archive.version) {
     fail("SOURCE_PACKAGE_MISMATCH", "NodeKit source package name/version does not match the archive");
   }
-  const sourceArchive = await independentlyPackNodeKitSource(nodekitRoot, {
+  const sourceArchive = await inspectTrackedNodeKitDistribution(nodekitRoot, nodekitPackageJson, {
     candidateCommit,
     sourceHash,
   });
@@ -512,13 +506,16 @@ export async function prepareExactConsumerPackage(options) {
   };
   if (!Object.values(sourceArchiveChecks).every(Boolean)) {
     const failed = Object.entries(sourceArchiveChecks).filter(([, passed]) => !passed).map(([name]) => name);
-    fail("SOURCE_ARCHIVE_MISMATCH", `supplied archive does not match an independent script-disabled pack of the exact NodeKit source: ${failed.join(", ")}`);
+    fail(
+      "SOURCE_ARCHIVE_MISMATCH",
+      `supplied archive does not match the exact clean tracked NodeKit distribution: ${failed.join(", ")}`,
+    );
   }
-  if (readHeadCommit(nodekitRoot, "NodeKit after independent pack") !== candidateCommit
+  if (readHeadCommit(nodekitRoot, "NodeKit after tracked distribution comparison") !== candidateCommit
     || await computeNodeKitSourceHash(nodekitRoot) !== sourceHash) {
-    fail("SOURCE_CHANGED_DURING_PACK", "NodeKit commit or source bytes changed during independent packing");
+    fail("SOURCE_CHANGED_DURING_PACK", "NodeKit commit or source bytes changed during tracked distribution comparison");
   }
-  assertCleanRepository(nodekitRoot, "NodeKit after independent pack", nodekitPathspecs);
+  assertCleanRepository(nodekitRoot, "NodeKit after tracked distribution comparison", nodekitPathspecs);
   await assertDistributableFilesTracked(nodekitRoot, nodekitPathspecs);
 
   const [vendorAbsolute, manifestAbsolute, packageJsonAbsolute] = await Promise.all([
