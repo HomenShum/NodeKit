@@ -111,9 +111,9 @@
       "verificationState": "verified",
       "owners": [
         {
-          "file": "src/cli.mjs",
+          "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 437
+          "line": 443
         }
       ],
       "supporting": [
@@ -510,7 +510,7 @@
           {
             "scenario": "one-next-action-per-state",
             "file": "test/ease-proof.test.mjs",
-            "line": 82
+            "line": 83
           }
         ],
         "namedTestFiles": [
@@ -905,7 +905,7 @@
           {
             "file": "src/studio.mjs",
             "symbol": "studioCapability",
-            "line": 126
+            "line": 112
           }
         ],
         "namedSourceFiles": [
@@ -974,9 +974,9 @@
         "ownership": "annotated-symbol",
         "owners": [
           {
-            "file": "src/cli.mjs",
+            "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 438
+            "line": 444
           }
         ],
         "namedSourceFiles": [

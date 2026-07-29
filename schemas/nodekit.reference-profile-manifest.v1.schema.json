@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nodekit.reference-profile-manifest/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "profile", "rules"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.reference-profile-manifest/v1" },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,99}$"
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ruleId", "ruleDigest"],
+        "properties": {
+          "ruleId": { "type": "string", "pattern": "^rule_[0-9a-f]{24}$" },
+          "ruleDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}

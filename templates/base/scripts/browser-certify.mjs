@@ -342,7 +342,7 @@ try {
             journeyAssertions.exportDownloadedAndVerified = true;
             milestone("export_downloaded_and_reopened");
             await page.locator("#copy-share").click();
-            await page.locator("#copy-status").waitFor({ state: "visible" });
+            await page.waitForFunction(() => document.querySelector("#copy-status")?.textContent?.trim().length > 0);
             journeyAssertions.shareSummaryProduced = (await page.locator("#copy-status").innerText()).trim().length > 0;
           }
         } else if (!(await page.locator("#receipt-actions").isHidden())) {

@@ -23,6 +23,10 @@
     "The measured repositories fail with three conflicts; no migration is applied automatically."
   ],
   "interpretation": {
-    "status": "agent-proposed"
+    "status": "human-reviewed",
+    "reviewedBy": "HomenShum",
+    "reviewedAt": "2026-07-29T00:27:43.857Z",
+    "approvalHash": "1c2cb9902d408b131e788ed6bdda7aba7cc37d1ffbb774ec7a310c5e8eae35f2",
+    "trustLevel": "H1"
   }
 }

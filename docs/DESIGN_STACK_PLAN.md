@@ -50,7 +50,8 @@ grounds, and is design-dna just Studio Fabric's record format finally named?
 **Skills/plugins already shipped:** `agentic-ui-qa` (persona QA vs the Agentic UI Bar),
 `frontend-design` (aesthetic direction), `dataviz` (chart system + palette validator),
 `before-after-proof`, `easier-to-read-submissions` (demo recording + DOM checks + **Gemini video
-judge**), `drawio-skill`, Shadcn MCP, Mobbin remote-MCP (OAuth pending, owner).
+judge**), `drawio-skill`, Shadcn MCP, and the Mobbin remote MCP. Mobbin OAuth was completed and an
+authenticated non-pixel canary passed on 2026-07-29.
 
 **Buried assets the mining resurfaced:**
 - `feature-walkthrough-gif` SKILL — 13 capture lessons, 5-stage pipeline ending in video judgment

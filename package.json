@@ -53,6 +53,11 @@
       "import": "./src/managed-evidence-capture.mjs",
       "default": "./src/managed-evidence-capture.mjs"
     },
+    "./reference-loop": {
+      "types": "./src/reference-loop.d.mts",
+      "import": "./src/reference-loop.mjs",
+      "default": "./src/reference-loop.mjs"
+    },
     "./builder-gym": {
       "types": "./src/builder-gym.d.mts",
       "import": "./src/builder-gym.mjs",
@@ -193,6 +198,8 @@
     "dashboard": "node src/cli.mjs dashboard --registry-root . --workspace .. --write",
     "evolution:verify": "node src/cli.mjs evolution verify --repo-root .",
     "evolution:docs": "node src/cli.mjs evolution build-docs --repo-root .",
+    "reference:schemas": "node scripts/generate-reference-schema-validators.mjs",
+    "reference:schemas:check": "node scripts/generate-reference-schema-validators.mjs --check",
     "knowledge:compare": "node scripts/run-knowledge-runtime-comparison.mjs",
     "check": "npm run test && npm run typecheck:public && npm run audit:prod && npm run registry:check && npm run ecosystem:check",
     "repo:map": "node src/cli.mjs repo map --write",

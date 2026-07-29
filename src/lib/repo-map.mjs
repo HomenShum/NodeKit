@@ -54,7 +54,7 @@ async function listDir(root, rel, filter = () => true) {
 // entry behind. Both dispatch spellings are covered: `first === "x"` and inclusion lists.
 function commandsFromDispatch(source) {
   const found = new Set();
-  for (const m of source.matchAll(/first === "([a-z][a-z-]*)"/g)) found.add(m[1]);
+  for (const m of source.matchAll(/(?:first|command) === "([a-z][a-z-]*)"/g)) found.add(m[1]);
   for (const m of source.matchAll(/\[((?:\s*"[a-z][a-z-]*"\s*,?)+)\]\.includes\(first\)/g)) {
     for (const q of m[1].matchAll(/"([a-z][a-z-]*)"/g)) found.add(q[1]);
   }
@@ -69,7 +69,11 @@ function commandsFromDispatch(source) {
 // @nodekit-behavior orientation.tour support
 export async function buildRepoMap(repoRoot) {
   const root = path.resolve(repoRoot);
-  const cli = await readFile(path.join(root, "src", "cli.mjs"), "utf8");
+  const cliEntry = await readFile(path.join(root, "src", "cli.mjs"), "utf8");
+  const cliImplementation = cliEntry.includes("./cli-main.mjs")
+    ? await readFile(path.join(root, "src", "cli-main.mjs"), "utf8")
+    : "";
+  const cli = `${cliEntry}\n${cliImplementation}`;
   const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 
   const schemas = await listDir(root, "schemas", (n) => n.endsWith(".schema.json"));

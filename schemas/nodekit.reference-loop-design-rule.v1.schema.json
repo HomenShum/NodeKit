@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nodekit.reference-loop-design-rule/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "ruleId",
+    "sourceObservationRefs",
+    "statement",
+    "problemTags",
+    "intentTags",
+    "layoutTags",
+    "interactionTags",
+    "mechanismHypothesis",
+    "appliesWhen",
+    "doesNotApplyWhen",
+    "confidence",
+    "requiredEvidence",
+    "contentDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.reference-loop-design-rule/v1" },
+    "ruleId": { "type": "string", "pattern": "^rule_[0-9a-f]{24}$" },
+    "sourceObservationRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["observationId", "observationDigest", "factIds"],
+        "properties": {
+          "observationId": { "type": "string", "pattern": "^observation_[0-9a-f]{24}$" },
+          "observationDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "factIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      }
+    },
+    "statement": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "problemTags": { "$ref": "#/$defs/tags" },
+    "intentTags": { "$ref": "#/$defs/tags" },
+    "layoutTags": { "$ref": "#/$defs/tags" },
+    "interactionTags": { "$ref": "#/$defs/tags" },
+    "mechanismHypothesis": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "appliesWhen": { "$ref": "#/$defs/conditions" },
+    "doesNotApplyWhen": { "$ref": "#/$defs/conditions" },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation", "audienceFit", "causal"],
+      "properties": {
+        "observation": { "enum": ["low", "medium", "high"] },
+        "audienceFit": { "enum": ["low", "medium", "high"] },
+        "causal": { "enum": ["none", "low", "medium", "high"] }
+      }
+    },
+    "requiredEvidence": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 1000 }
+    },
+    "contentDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+    },
+    "conditions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": { "type": "string", "minLength": 1, "maxLength": 1000 }
+    }
+  }
+}
