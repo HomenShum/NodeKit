@@ -2,22 +2,22 @@
   "schemaVersion": "nodekit.launch-manifest/v1",
   "caseId": "mew-migration",
   "stage": "launch",
-  "producedAt": "2026-07-29T09:52:07.628Z",
+  "producedAt": "2026-07-29T10:07:55.225Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.build-evidence-pack/v1",
       "caseId": "mew-migration",
-      "sha256": "a58a682462898171d0850065779ee66a5a9162ff167d76721ec0b7efadc35ec5"
+      "sha256": "daee8a8b4d28e99ecb4ec426b4b45b47178f4c1e9a7c6f49c0bd631a8852891c"
     }
   ],
   "content": {
     "release": {
       "artifactName": "mew-migration source archive (git archive HEAD -- apps/mew-migration); built, tested, never shipped to any cloud target",
       "sourceRepository": "HomenShum/node-platform",
-      "sourceCommit": "f5e220ee188e01b482be03d87237cba551207394",
+      "sourceCommit": "57d41c10c64eb9dab0a4c0d782ad4ed718357d5e",
       "sourceRef": "feat/mew-waves1-4",
-      "artifactSha256": "56a0f4c26f7b9d4622199fcb310e401b8df837bda16e96194920d1bbd9293fcf",
-      "buildCompletedAt": "2026-07-29T09:52:07.000Z"
+      "artifactSha256": "5c2908f8f7f0efd006a4a5819b304ec26cbb7d7f2aaa5cad31d1b2bd34df2d43",
+      "buildCompletedAt": "2026-07-29T10:07:49.000Z"
     },
     "target": {
       "provider": "convex",
@@ -26,7 +26,7 @@
       "projectIdentity": "none-project-never-created",
       "deploymentId": "none-deployment-never-created",
       "url": "https://dashboard.convex.dev",
-      "deployedAt": "2026-07-29T09:50:35.397Z",
+      "deployedAt": "2026-07-29T10:07:49.573Z",
       "publicReachability": "unknown"
     },
     "authority": {
@@ -58,7 +58,7 @@
           "minorUnits": 0,
           "meteringBasis": "free-tier-no-charge",
           "receiptRef": "proof/mew-migration/convex-deploy-receipt.json",
-          "receiptSha256": "c086fde2046f826167e0c57e7daa1299c7fd3ba1bffb1f4d0b0b79580aabe047"
+          "receiptSha256": "adbcc049b225e376ab0aab9e330e5eff149689903e96aa486312b575268f734e"
         }
       ]
     },

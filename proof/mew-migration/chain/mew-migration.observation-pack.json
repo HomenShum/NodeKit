@@ -2,23 +2,23 @@
   "schemaVersion": "nodekit.observation-pack/v1",
   "caseId": "mew-migration",
   "stage": "learn",
-  "producedAt": "2026-07-29T09:54:13.966Z",
+  "producedAt": "2026-07-29T10:08:19.003Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.launch-manifest/v1",
       "caseId": "mew-migration",
-      "sha256": "077cb3a86ab33e53a3784bd502700d9f776c0546ce8b2eabc4ee2cfb17de619f"
+      "sha256": "d8f39de275132d6aea56cee330db765e42b9f2270757afbb77a3cb865f2266d7"
     },
     {
       "schemaVersion": "nodekit.story-pack/v1",
       "caseId": "mew-migration",
-      "sha256": "f624c700cdf83ae36a32973ea8d01f5fda697a15aaf75c5ed251ed209d1b81a0"
+      "sha256": "e88d8cc2d6a3af02fe8398a23b250c6dd779c879481dc33133ae7ee07d4d39ba"
     }
   ],
   "content": {
     "observationWindow": {
-      "from": "2026-07-29T09:44:52.772Z",
-      "to": "2026-07-29T09:54:13.966Z"
+      "from": "2026-07-29T10:06:24.095Z",
+      "to": "2026-07-29T10:08:19.003Z"
     },
     "sources": [
       {
@@ -34,8 +34,8 @@
         "locator": "proof/mew-migration/serve-probe.json",
         "availability": "reporting",
         "coverageWindow": {
-          "from": "2026-07-29T09:44:52.772Z",
-          "to": "2026-07-29T09:44:52.772Z"
+          "from": "2026-07-29T10:06:24.095Z",
+          "to": "2026-07-29T10:06:24.095Z"
         },
         "note": "Raw-http probe of the LOCAL surface in both store states. Pre-launch proof activity; deliberately not used to claim anything about a launched app."
       },
@@ -74,8 +74,8 @@
             "ins-deploy-exit"
           ],
           "window": {
-            "from": "2026-07-29T09:50:35.397Z",
-            "to": "2026-07-29T09:50:35.397Z"
+            "from": "2026-07-29T10:07:49.573Z",
+            "to": "2026-07-29T10:07:49.573Z"
           },
           "measured": "0 reachable cloud deployments; 2 provisioning attempts (exit 0 local-anonymous, exit 1 cloud requiring login)",
           "sampleCount": 2,
@@ -94,8 +94,8 @@
             "ins-spend-ledger"
           ],
           "window": {
-            "from": "2026-07-29T09:44:52.772Z",
-            "to": "2026-07-29T09:54:13.966Z"
+            "from": "2026-07-29T10:06:24.095Z",
+            "to": "2026-07-29T10:08:19.003Z"
           },
           "measured": "0 USD minor units billed of a 10000 minor-unit monthly cap; no account exists to bill",
           "sampleCount": 2,
@@ -125,8 +125,8 @@
         },
         "taskOutcome": {
           "state": "not-instrumented",
-          "reason": "The primary job (migrate the real notebook; answer over it with bindings) cannot be attempted: zero notes and zero owner-authored cases exist (wave-0 receipts).",
-          "wouldRequire": "Owner inputs #1 and #3 — the real export and the semantic acceptance cases — wired into the importer run and the scorecard's semantic column.",
+          "reason": "The primary job (migrate the real database; answer over it with bindings) cannot be attempted: zero database records exist in this pipeline, and the 3 harvested owner-authored cases (harness/mew-migration/notion-cases.json) exercise CRUD orchestration this retrieval-only slice does not implement.",
+          "wouldRequire": "Owner input #1 (one run of Mew's own exporter) wired into the importer, plus either the CRUD agent toolset the harvested cases exercise or owner-authored retrieval cases for the semantic column.",
           "blocksClaims": [
             "sc-withheld-semantic-recall",
             "sc-withheld-notebook-migrated",
@@ -158,7 +158,7 @@
         "sourceId": "src-deploy-receipt",
         "instrumentId": "ins-deploy-exit",
         "inferred": false,
-        "occurredAt": "2026-07-29T09:50:35.397Z",
+        "occurredAt": "2026-07-29T10:07:49.573Z",
         "count": 1,
         "evidenceRefs": [
           "proof/mew-migration/convex-deploy-receipt.json"
@@ -174,7 +174,7 @@
         "sourceId": "src-deploy-receipt",
         "instrumentId": "ins-deploy-exit",
         "inferred": false,
-        "occurredAt": "2026-07-29T09:50:35.397Z",
+        "occurredAt": "2026-07-29T10:07:49.573Z",
         "count": 1,
         "evidenceRefs": [
           "proof/mew-migration/convex-deploy-receipt.json"
@@ -191,7 +191,7 @@
         "instrumentId": "ins-spend-ledger",
         "inferred": true,
         "inferenceBasis": "Derived from the deploy receipt (no account, no cloud resource) rather than read from a billing API, because no billing source is configured; recorded as inferred for exactly that reason.",
-        "occurredAt": "2026-07-29T09:50:35.397Z",
+        "occurredAt": "2026-07-29T10:07:49.573Z",
         "evidenceRefs": [
           "proof/mew-migration/convex-deploy-receipt.json"
         ]
@@ -218,10 +218,10 @@
         }
       ],
       "unknownsStillOpen": [
-        "Notebook inventory: N notes, M links, K tags — awaiting owner input #1; not estimated.",
-        "The exact shape of a real Ideaflow export file; the importer's expected shape is derived from Ideaflow's public data model (notes, hashtags, links, timestamps) and is falsifiable the moment a real export exists.",
-        "Semantic acceptance criteria: zero owner-authored test cases exist (wave-0A NOT_RUN receipt); awaiting owner input #3.",
-        "Ideaflow hashtag-plus semantics beyond the public hashtag model — preserved raw, uninterpreted."
+        "Notebook inventory: N graph nodes, M relations, relation-type and relation-list counts — awaiting owner input #1 (one exporter run); not estimated.",
+        "Which branch's schema the owner's real export will carry: personal-dev-mew (bound), latest-main (adds contentText/relationCount/attributes/canonical_path_cache), or prod-push (adds attributes + MCP settings). Drift refuses loudly until the owner decides.",
+        "Whether the harvested MewAgent acceptance cases should gate this migration slice (retrieval-only) or only the future CRUD-agent slice — an owner call recorded in the cases file per case.",
+        "Hashtag semantics: hashtags live in node content and relations, not a table; whether the migration should materialize a derived hashtag index is deferred, not invented."
       ],
       "newUnknowns": [
         "Whether the owner authorizes a cloud deployment at all: authority is H0 with no grant artifact to be inside of, so 'can deploy' and 'may deploy' are both open.",

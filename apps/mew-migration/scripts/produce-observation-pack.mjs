@@ -137,8 +137,8 @@ const pack = {
         ),
         taskOutcome: unobserved(
           "not-instrumented",
-          "The primary job (migrate the real notebook; answer over it with bindings) cannot be attempted: zero notes and zero owner-authored cases exist (wave-0 receipts).",
-          "Owner inputs #1 and #3 — the real export and the semantic acceptance cases — wired into the importer run and the scorecard's semantic column.",
+          "The primary job (migrate the real database; answer over it with bindings) cannot be attempted: zero database records exist in this pipeline, and the 3 harvested owner-authored cases (harness/mew-migration/notion-cases.json) exercise CRUD orchestration this retrieval-only slice does not implement.",
+          "Owner input #1 (one run of Mew's own exporter) wired into the importer, plus either the CRUD agent toolset the harvested cases exercise or owner-authored retrieval cases for the semantic column.",
           { blocksClaims: ["sc-withheld-semantic-recall", "sc-withheld-notebook-migrated", "sc-withheld-inventory-intact"] },
         ),
         friction: unobserved(
