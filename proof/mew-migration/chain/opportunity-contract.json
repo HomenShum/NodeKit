@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "nodekit.opportunity-contract/v1",
+  "user": "The owner of the 'mew' Ideaflow notebook (one person, one notebook), who wants the notes out of Ideaflow and into a store they control. Decision recorded defaulted-with-disclosure: the owner has not countersigned this description.",
+  "problem": "The notebook lives in Ideaflow behind a signed-in session that does not exist on this machine (wave-0B kill receipt, PR #27). Zero notes, zero links, zero tags have been inventoried; the notebook's contents are unreadable from here. Any migration must therefore be built and proven on structure alone, with every data-dependent claim withheld or marked NOT_RUN.",
+  "wedge": "One notebook, one export file, one importer: an Ideaflow-export-shaped JSON goes in, a Convex-schema store with per-note provenance (sourceId, sourceDigest, importedAt) comes out, and an import manifest proves count-in equals count-imported plus refusals. Decision defaulted-with-disclosure: scope confirmed by no one.",
+  "primaryJob": "Migrate every note, link and tag from an EXPORT COPY of the Ideaflow notebook into the Convex-backed store without silent drops, and serve the migrated notes through an agent surface whose every answer carries a source binding (note id + digest) or renders as unbound.",
+  "inputs": [
+    "An Ideaflow export copy as JSON: notes with body text, hashtags, inter-note links, created/updated timestamps, completion state — the fields Ideaflow's public data model documents. ABSENT at contract time; the importer is built and unit-tested against clearly labeled fixture data (fixture: ids) only.",
+    "Owner input #1 (awaiting): the measured notebook inventory — N notes, M links, K tags. Recorded as unknown; never estimated.",
+    "Owner input #3 (awaiting): semantic acceptance cases authored by the owner. Zero exist (wave-0A receipt, PR #26); the semantic scorecard column stays NOT_RUN until they do.",
+    "Convex project credentials for the deploy target (owner input #2). Presence is tested, not assumed, at LAUNCH."
+  ],
+  "primaryArtifact": "A Convex-schema migration app (apps/mew-migration): schema for notes/links/tags with provenance columns and erasure enumerability, an importer that digests every source note and emits an import manifest (in = out + refusals), and a local agent surface that answers only with source bindings.",
+  "rejectedAlternatives": [
+    {
+      "alternative": "Scrape the live Ideaflow DOM or API with a signed-in browser session",
+      "reason": "No signed-in session exists; the wave-0B probe hit its kill condition (PR #27 receipt). The plan's own rule: the migration works on an EXPORT copy and nothing touches live Ideaflow."
+    },
+    {
+      "alternative": "Synthesize a plausible 'sample of the owner's notebook' to exercise the pipeline end to end",
+      "reason": "Forbidden fabrication. A sample of a notebook nobody has read is invented user data — the trial-1 failure. Labeled importer unit fixtures are legitimate test data; a fake notebook is not."
+    },
+    {
+      "alternative": "Estimate the notebook inventory (note/link/tag counts) from typical Ideaflow usage",
+      "reason": "The RECON exit is a measured inventory. An estimated denominator would let every downstream count claim ride on a guess; inventory stays unknown, awaiting owner input #1."
+    },
+    {
+      "alternative": "Map Ideaflow's hashtag-plus syntax to a bespoke rich-tag table in the first migration",
+      "reason": "Structural decision, defaulted-with-disclosure: hashtag-plus semantics beyond the public data model are unverified from here. First migration preserves the raw token in the tag row (rawToken column) and drops no information; interpretation is deferred, not invented."
+    },
+    {
+      "alternative": "Deduplicate notes by normalized body text",
+      "reason": "Structural decision, defaulted-with-disclosure: dedup is by sourceId first (Ideaflow ids are authoritative), then by exact content digest for id-less notes. Fuzzy text dedup can silently merge distinct notes, which is a silent drop wearing a cleanup label."
+    },
+    {
+      "alternative": "Drop Ideaflow backlinks and recompute them from forward links after import",
+      "reason": "Structural decision, defaulted-with-disclosure: backlinks that arrive in the export are stored as link rows with direction preserved; recomputation would erase any asymmetry the export carries. Nothing in the export is dropped — fields outside the mapping are refused loudly in the manifest, never discarded quietly."
+    }
+  ],
+  "openUnknowns": [
+    "Notebook inventory: N notes, M links, K tags — awaiting owner input #1; not estimated.",
+    "The exact shape of a real Ideaflow export file; the importer's expected shape is derived from Ideaflow's public data model (notes, hashtags, links, timestamps) and is falsifiable the moment a real export exists.",
+    "Semantic acceptance criteria: zero owner-authored test cases exist (wave-0A NOT_RUN receipt); awaiting owner input #3.",
+    "Whether Convex deploy credentials exist for this machine; tested at LAUNCH, with a kill receipt if absent.",
+    "Ideaflow hashtag-plus semantics beyond the public hashtag model — preserved raw, uninterpreted."
+  ],
+  "successCondition": "On a real export copy: the import manifest closes exactly (notes in = notes imported + refusals, each refusal carrying a reason), every imported row carries sourceId + sourceDigest + importedAt, deterministic checks over the manifest pass, and the agent surface returns no answer without a source binding. Until that export exists, the same properties are demonstrated on labeled fixtures only and every data-dependent verdict stays NOT_RUN.",
+  "authorityLimits": {
+    "read": [
+      "The Ideaflow EXPORT copy, once the owner provides it",
+      "This repository and its committed receipts",
+      "Ideaflow's public documentation of its data model"
+    ],
+    "propose": [
+      "Schema mapping, dedup policy, and drop policy — all recorded defaulted-with-disclosure pending owner countersignature",
+      "The import manifest format and scorecard checks"
+    ],
+    "approve": [],
+    "prohibited": [
+      "Writing anything back to Ideaflow",
+      "Fabricating notes, links, tags, inventory counts, or acceptance cases",
+      "Marking any decision approved or human-reviewed",
+      "Blending deterministic and semantic scorecard columns into one number",
+      "Recording secrets or credentials in any artifact or receipt"
+    ]
+  }
+}
