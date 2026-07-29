@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:motion-portability-static-receipt",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+    "occurredAt": "2026-07-28T20:18:07.702Z"
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "Copying reviewed motion recipes between NodeSlide, NodeRoom, and parity-studio could preserve token names while changing timing behavior, and the existing drift script had no package API, schema-bound receipt, source-set identity, or fail-closed NOT_RUN state.",
+  "observedFailure": "The same --duration-fast name resolves to 180ms in NodeSlide and parity-studio but 120ms in NodeRoom; NodeRoom also carries internal 200/220ms and 380/400ms duration conflicts. A proposed one-value migration hid these additional owner decisions.",
+  "resolution": "Added one dependency-free motion portability comparator shared by the Studio API, nodekit motion compare CLI, and legacy wrapper. It normalizes spelling noise, binds exact CSS source sets, separates preserving aliases from review-only changes, emits a strict receipt, and keeps runtime, DOM/trace, video, and audience evidence explicitly NOT_RUN.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:motion-portability-static-receipt"
+  ],
+  "knownLimitations": [
+    "The supporting evidence proves the static comparison contract and its fail-closed behavior; it does not certify a runtime migration.",
+    "The comparator scans CSS custom-property declarations only; DTCG JSON, token consumption, runtime timing, DOM traces, video, and audience response remain outside this receipt.",
+    "The measured repositories fail with three conflicts; no migration is applied automatically."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

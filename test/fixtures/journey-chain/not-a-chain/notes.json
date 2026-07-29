@@ -1,0 +1,4 @@
+{
+  "note": "This directory holds JSON that is not a journey stage artifact. It exists so the gate can be probed in its NOT_RUN direction: files were read, none declared a chain schemaVersion, so nothing was measured. NOT_RUN is unknown, not clean, and must never render green.",
+  "schemaVersion": "nodekit.not-a-journey-artifact/v0"
+}

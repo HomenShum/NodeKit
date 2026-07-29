@@ -1,0 +1,569 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.build-evidence-pack.v1.schema.json",
+  "title": "NodeKit build evidence pack",
+  "description": "BUILD-stage handoff of the Builder Journey. Answers: which OpportunityContract decisions were honoured, which were defaulted-with-disclosure, and which were contradicted; what was built; and what GENERATED evidence supports each claim. Consumed by StoryPack and LaunchManifest. The root envelope is frozen by docs/JOURNEY_INTERSTAGE_CONTRACT.md and is not this schema's to change.",
+  "type": "object",
+  "required": ["schemaVersion", "caseId", "stage", "producedAt", "inputs", "content", "completeness"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "nodekit.build-evidence-pack/v1" },
+    "caseId": { "$ref": "#/$defs/caseId" },
+    "stage": { "const": "build" },
+    "producedAt": { "$ref": "#/$defs/utcDateTime" },
+    "inputs": {
+      "$comment": "Every upstream artifact consumed. sha256 is over canonical JSON of the upstream document (keys sorted at every level, no insignificant whitespace). A stage that cannot produce the digest of what it consumed has been handed a name, not an artifact.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/inputBinding" },
+      "contains": {
+        "type": "object",
+        "required": ["schemaVersion"],
+        "properties": { "schemaVersion": { "const": "nodekit.opportunity-contract/v1" } }
+      },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "content": { "$ref": "#/$defs/content" },
+    "completeness": { "$ref": "#/$defs/completeness" }
+  },
+  "not": {
+    "$comment": "Redundant with additionalProperties:false, kept for a legible failure message. Self-approval is forbidden at authoring time; these are derived by verification from an attestation, never accepted as input.",
+    "anyOf": [
+      { "required": ["approved"] },
+      { "required": ["reviewedBy"] },
+      { "required": ["verdict"] },
+      { "required": ["signOff"] },
+      { "required": ["reviewStatus"] },
+      { "required": ["attestation"] }
+    ]
+  },
+
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "prose": { "type": "string", "minLength": 12, "maxLength": 2000 },
+    "caseId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "utcDateTime": {
+      "$comment": "UTC only, matching nodeagent.event.v1. Offsets are rejected so two artifacts in one journey cannot disagree about ordering by timezone.",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$"
+    },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "repoPath": {
+      "$comment": "Repository-relative POSIX path. No absolute paths, no traversal, no backslashes: an evidence path must resolve to the same bytes on any machine that has the repository.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9._][A-Za-z0-9._/-]*$",
+      "not": { "pattern": "(^|/)\\.\\.(/|$)" }
+    },
+    "jsonPointer": {
+      "$comment": "RFC 6901 pointer into the bound OpportunityContract, e.g. /wedge or /rejectedAlternatives/2 or /authorityLimits/prohibited/0.",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 256,
+      "pattern": "^/[^ ]*$"
+    },
+    "evidenceId": { "type": "string", "pattern": "^ev-[a-z0-9][a-z0-9-]{0,62}$" },
+    "evidenceRefs": {
+      "$comment": "Every reference must resolve to an entry in content.evidence. Resolution is the verifier's job; the schema only makes the reference mandatory and non-empty. A disposition without evidence is an assertion, and assertions are the failure mode this pack exists to prevent.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/evidenceId" }
+    },
+
+    "inputBinding": {
+      "type": "object",
+      "required": ["schemaVersion", "caseId", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "caseId": { "$ref": "#/$defs/caseId" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "path": { "$ref": "#/$defs/repoPath" }
+      }
+    },
+
+    "completeness": {
+      "$comment": "Frozen by the inter-stage contract. notRun is never empty merely because filling it was inconvenient: an empty notRun is a positive claim that everything in scope was attempted.",
+      "type": "object",
+      "required": ["claimed", "notRun", "refused"],
+      "additionalProperties": false,
+      "properties": {
+        "claimed": {
+          "type": "array", "minItems": 0, "maxItems": 200, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        },
+        "notRun": {
+          "type": "array", "minItems": 0, "maxItems": 200, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        },
+        "refused": {
+          "type": "array", "minItems": 0, "maxItems": 200,
+          "items": {
+            "type": "object",
+            "required": ["item", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "item": { "$ref": "#/$defs/nonEmpty" },
+              "reason": { "$ref": "#/$defs/prose" }
+            }
+          }
+        }
+      }
+    },
+
+    "artifactRef": {
+      "$comment": "An artifact that exists on disk. path + sha256 + byteLength, never a boolean. `exists: true` is not evidence that anything exists.",
+      "type": "object",
+      "required": ["path", "sha256", "byteLength"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/repoPath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "byteLength": { "type": "integer", "minimum": 0, "maximum": 1073741824 },
+        "mediaType": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+
+    "evidence": {
+      "$comment": "The generation record for one artifact. There is deliberately no `kind: assertion` and no `passed`/`ok`/`verified` boolean: the only way to enter this array is to name a process that ran and the bytes it left behind.",
+      "type": "object",
+      "required": ["evidenceId", "kind", "artifact", "generatedBy", "observation", "boundary"],
+      "additionalProperties": false,
+      "properties": {
+        "evidenceId": { "$ref": "#/$defs/evidenceId" },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "test-run",
+            "command-output",
+            "measurement",
+            "source-file",
+            "generated-artifact",
+            "dom-capture",
+            "screenshot",
+            "http-response",
+            "log",
+            "diff",
+            "disclosure-copy"
+          ]
+        },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "generatedBy": { "$ref": "#/$defs/generation" },
+        "observation": {
+          "$comment": "What the bytes show, stated so a reader who opens the artifact can agree or disagree. Not a verdict.",
+          "$ref": "#/$defs/prose"
+        },
+        "boundary": {
+          "$comment": "What this artifact does NOT establish. The anti-vacuous-pass field: evidence with no stated limit is evidence whose limit was never considered.",
+          "$ref": "#/$defs/prose"
+        },
+        "measurement": {
+          "type": "object",
+          "required": ["name", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "$ref": "#/$defs/nonEmpty" },
+            "value": { "type": ["number", "string", "boolean"] },
+            "unit": { "type": "string", "minLength": 1, "maxLength": 32 }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "measurement" } }, "required": ["kind"] },
+          "then": { "required": ["measurement"] }
+        },
+        {
+          "if": { "properties": { "kind": { "enum": ["test-run", "command-output"] } }, "required": ["kind"] },
+          "then": {
+            "$comment": "A test run without the command and its exit code is a claim that a test ran.",
+            "properties": { "generatedBy": { "required": ["command", "exitCode"] } }
+          }
+        }
+      ]
+    },
+
+    "generation": {
+      "$comment": "How the artifact came to exist. `method` has no value meaning 'stated by the author', which is the point.",
+      "type": "object",
+      "required": ["method", "tool", "actor", "producedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["command", "http-fetch", "file-read", "browser-capture", "instrumented-run", "manual-capture"]
+        },
+        "tool": {
+          "$comment": "The executable or module that produced the bytes, e.g. 'node --test' or 'src/lib/foo.mjs'.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "actor": {
+          "$comment": "Who ran it. Recorded so a later reader can weigh self-produced evidence differently from independently produced evidence. It is metadata, never an approval.",
+          "type": "string",
+          "enum": ["builder-agent", "platform-tool", "external-tool", "human"]
+        },
+        "producedAt": { "$ref": "#/$defs/utcDateTime" },
+        "command": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "exitCode": { "type": "integer", "minimum": -256, "maximum": 255 },
+        "cwd": { "$ref": "#/$defs/repoPath" },
+        "durationMs": { "type": "integer", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "method": { "const": "command" } }, "required": ["method"] },
+          "then": { "required": ["command", "exitCode"] }
+        }
+      ]
+    },
+
+    "disposition": {
+      "$comment": "EXACTLY three values, and every one of them is an admission. There is no 'not-applicable', no 'unknown', no null, and no way to omit the field: a decision that was neither honoured, disclosed, nor contradicted cannot be expressed. This is the whole point of the reconciliation — trial 1 shipped ten silent product decisions, and silence was expressible.",
+      "type": "string",
+      "enum": ["honoured", "defaulted-with-disclosure", "contradicted"]
+    },
+
+    "decisionEntry": {
+      "type": "object",
+      "required": ["pointer", "disposition", "evidenceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "pointer": { "$ref": "#/$defs/jsonPointer" },
+        "disposition": { "$ref": "#/$defs/disposition" },
+        "evidenceRefs": { "$ref": "#/$defs/evidenceRefs" },
+        "how": { "$ref": "#/$defs/prose" },
+        "defaultApplied": { "$ref": "#/$defs/prose" },
+        "disclosure": { "$ref": "#/$defs/prose" },
+        "disclosedIn": { "$ref": "#/$defs/evidenceId" },
+        "whyNotEscalated": { "$ref": "#/$defs/prose" },
+        "contractSaid": { "$ref": "#/$defs/prose" },
+        "builtInstead": { "$ref": "#/$defs/prose" },
+        "justification": { "$ref": "#/$defs/prose" },
+        "reportedIn": { "$ref": "#/$defs/evidenceId" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "disposition": { "const": "honoured" } }, "required": ["disposition"] },
+          "then": {
+            "required": ["how"],
+            "properties": {
+              "defaultApplied": false, "disclosure": false, "disclosedIn": false, "whyNotEscalated": false,
+              "contractSaid": false, "builtInstead": false, "justification": false, "reportedIn": false
+            }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "defaulted-with-disclosure" } }, "required": ["disposition"] },
+          "then": {
+            "$comment": "A default is only 'with disclosure' if the disclosure text exists AND an artifact contains it. whyNotEscalated forces the producer to say why it decided instead of asking — the exact move that went unrecorded ten times in trial 1.",
+            "required": ["defaultApplied", "disclosure", "disclosedIn", "whyNotEscalated"],
+            "properties": {
+              "how": false,
+              "contractSaid": false, "builtInstead": false, "justification": false, "reportedIn": false
+            }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "contradicted" } }, "required": ["disposition"] },
+          "then": {
+            "$comment": "A contradiction may be reported; it may never be self-approved. reportedIn must resolve to an artifact a human reads. There is deliberately no `approvedBy` here.",
+            "required": ["contractSaid", "builtInstead", "justification", "reportedIn"],
+            "properties": {
+              "how": false,
+              "defaultApplied": false, "disclosure": false, "disclosedIn": false, "whyNotEscalated": false
+            }
+          }
+        }
+      ]
+    },
+
+    "collectionDecisionEntry": {
+      "$comment": "For contract fields that are arrays. declaredElementCount is a claim about the bound upstream artifact that the verifier checks against the sha256'd OpportunityContract — reconciling 2 of 4 inputs now requires stating a count that is falsifiable, rather than silently covering the field with one word.",
+      "type": "object",
+      "required": ["pointer", "declaredElementCount", "elements"],
+      "additionalProperties": false,
+      "properties": {
+        "pointer": { "$ref": "#/$defs/jsonPointer" },
+        "declaredElementCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "elements": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/decisionEntry" }
+        }
+      }
+    },
+
+    "emergentDecision": {
+      "$comment": "A decision invented during BUILD that the OpportunityContract never mentions. This is where trial 1 actually failed: the ten silent decisions had no contract counterpart, so a contract-shaped reconciliation alone would have reported clean.",
+      "type": "object",
+      "required": ["decisionId", "question", "chosen", "alternativesConsidered", "basis", "authorityBucket", "disclosure", "disclosedIn", "evidenceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "decisionId": { "type": "string", "pattern": "^dec-[a-z0-9][a-z0-9-]{0,62}$" },
+        "question": {
+          "$comment": "The open question as it stood before the choice. Written as a question, so a reader can tell it was a fork and not a foregone conclusion.",
+          "$ref": "#/$defs/prose"
+        },
+        "chosen": { "$ref": "#/$defs/prose" },
+        "alternativesConsidered": {
+          "$comment": "At least one. A decision with no alternative was not a decision; it was a description.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["alternative", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "alternative": { "$ref": "#/$defs/nonEmpty" },
+              "reason": { "$ref": "#/$defs/prose" }
+            }
+          }
+        },
+        "basis": {
+          "type": "string",
+          "enum": ["contract-implied", "user-stated", "agent-default"]
+        },
+        "authorityBucket": {
+          "$comment": "Which OpportunityContract.authorityLimits bucket this decision fell into. A value of 'approve' or 'prohibited' is the loud case: the build acted where it held no standing authority.",
+          "type": "string",
+          "enum": ["read", "propose", "approve", "prohibited", "outside-declared-limits"]
+        },
+        "disclosure": { "$ref": "#/$defs/prose" },
+        "disclosedIn": {
+          "$comment": "The artifact where a human is actually told. A disclosure that exists only in this pack was disclosed to nobody.",
+          "$ref": "#/$defs/evidenceId"
+        },
+        "evidenceRefs": { "$ref": "#/$defs/evidenceRefs" },
+        "reversal": {
+          "type": "object",
+          "required": ["reversible", "cost"],
+          "additionalProperties": false,
+          "properties": {
+            "reversible": { "type": "boolean" },
+            "cost": { "$ref": "#/$defs/prose" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "authorityBucket": { "enum": ["approve", "prohibited", "outside-declared-limits"] } }, "required": ["authorityBucket"] },
+          "then": {
+            "$comment": "Acting beyond `propose` requires stating the cost of undoing it. The producer still may not mark it approved.",
+            "required": ["reversal"]
+          }
+        }
+      ]
+    },
+
+    "emergentSweep": {
+      "$comment": "Absence of finding requires a search receipt. An empty `emergent` array is the claim that BUILD invented nothing, and that claim is only checkable if the producer states how and where it looked. Same logic as an empty notRun.",
+      "type": "object",
+      "required": ["method", "scannedPaths", "evidenceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "method": { "$ref": "#/$defs/prose" },
+        "scannedPaths": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/repoPath" }
+        },
+        "evidenceRefs": { "$ref": "#/$defs/evidenceRefs" },
+        "knownBlindSpots": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        }
+      }
+    },
+
+    "decisions": {
+      "$comment": "Two arms, because silence has two shapes: failing to reconcile a decision the contract made (contract), and failing to surface a decision the build made (emergent).",
+      "type": "object",
+      "required": ["contract", "emergent", "emergentSweep"],
+      "additionalProperties": false,
+      "properties": {
+        "contract": { "$ref": "#/$defs/contractReconciliation" },
+        "emergent": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/emergentDecision" }
+        },
+        "emergentSweep": { "$ref": "#/$defs/emergentSweep" }
+      }
+    },
+
+    "contractReconciliation": {
+      "$comment": "Closed enumeration of every decision-bearing field of nodekit.opportunity-contract/v1. `required` plus `additionalProperties:false` is the strongest lever JSON Schema offers: omitting `wedge` is a validation error rather than a quiet gap, and inventing a field the contract never had is also an error. Thirteen reconciliations are mandatory.",
+      "type": "object",
+      "required": [
+        "user", "problem", "wedge", "primaryJob", "inputs", "primaryArtifact",
+        "rejectedAlternatives", "openUnknowns", "successCondition", "authorityLimits"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "user": { "$ref": "#/$defs/decisionEntry" },
+        "problem": { "$ref": "#/$defs/decisionEntry" },
+        "wedge": { "$ref": "#/$defs/decisionEntry" },
+        "primaryJob": { "$ref": "#/$defs/decisionEntry" },
+        "primaryArtifact": { "$ref": "#/$defs/decisionEntry" },
+        "successCondition": {
+          "$comment": "The most gameable entry in the pack. A verifier should additionally require that at least one of its evidenceRefs names an evidence entry of kind `measurement` or `test-run`, which the schema cannot express because it cannot resolve ids.",
+          "$ref": "#/$defs/decisionEntry"
+        },
+        "inputs": { "$ref": "#/$defs/collectionDecisionEntry" },
+        "rejectedAlternatives": {
+          "$comment": "`contradicted` here means the build implemented something the contract explicitly rejected.",
+          "$ref": "#/$defs/collectionDecisionEntry"
+        },
+        "openUnknowns": { "$ref": "#/$defs/collectionDecisionEntry" },
+        "authorityLimits": {
+          "type": "object",
+          "required": ["read", "propose", "approve", "prohibited"],
+          "additionalProperties": false,
+          "properties": {
+            "read": { "$ref": "#/$defs/collectionDecisionEntry" },
+            "propose": { "$ref": "#/$defs/collectionDecisionEntry" },
+            "approve": { "$ref": "#/$defs/collectionDecisionEntry" },
+            "prohibited": { "$ref": "#/$defs/collectionDecisionEntry" }
+          }
+        }
+      }
+    },
+
+    "surface": {
+      "$comment": "Something that now exists and can be pointed at. Existence is shown by source files with digests, never by a `built: true`.",
+      "type": "object",
+      "required": ["surfaceId", "kind", "identifier", "sourceFiles", "evidenceRefs"],
+      "additionalProperties": false,
+      "properties": {
+        "surfaceId": { "type": "string", "pattern": "^surface-[a-z0-9][a-z0-9-]{0,62}$" },
+        "kind": {
+          "type": "string",
+          "enum": ["http-route", "cli-command", "module", "schema", "job", "integration", "static-asset", "data-store"]
+        },
+        "identifier": {
+          "$comment": "How a user or agent reaches it: a route path, a command line, an exported symbol.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "sourceFiles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/artifactRef" }
+        },
+        "evidenceRefs": { "$ref": "#/$defs/evidenceRefs" },
+        "servesPointer": {
+          "$comment": "Optional pointer into the OpportunityContract this surface serves, so StoryPack can walk contract to surface without re-deriving the mapping.",
+          "$ref": "#/$defs/jsonPointer"
+        }
+      }
+    },
+
+    "built": {
+      "type": "object",
+      "required": ["surfaces"],
+      "additionalProperties": false,
+      "properties": {
+        "surfaces": {
+          "$comment": "May legitimately be empty when BUILD refused everything — in which case completeness.refused carries the reasons. An empty surfaces array with an empty refused array is a pack that claims to have built nothing for no reason.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/surface" }
+        },
+        "invocation": {
+          "$comment": "How LaunchManifest starts the thing. Present so the next stage does not have to guess an entrypoint.",
+          "type": "object",
+          "required": ["command"],
+          "additionalProperties": false,
+          "properties": {
+            "command": { "type": "string", "minLength": 1, "maxLength": 1024 },
+            "cwd": { "$ref": "#/$defs/repoPath" },
+            "requiredEnv": {
+              "$comment": "Variable NAMES only. Values are secrets and never belong in a committed artifact.",
+              "type": "array", "minItems": 0, "maxItems": 50, "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,63}$" }
+            }
+          }
+        }
+      }
+    },
+
+    "claim": {
+      "$comment": "A statement StoryPack may repeat to a human. Each one carries its own evidence and its own stated limit, so an unbindable claim is visible here rather than discovered downstream.",
+      "type": "object",
+      "required": ["claimId", "statement", "scope", "evidenceRefs", "boundary"],
+      "additionalProperties": false,
+      "properties": {
+        "claimId": { "type": "string", "pattern": "^claim-[a-z0-9][a-z0-9-]{0,62}$" },
+        "statement": { "$ref": "#/$defs/prose" },
+        "scope": {
+          "type": "string",
+          "enum": ["capability", "correctness", "performance", "safety", "cost", "coverage"]
+        },
+        "evidenceRefs": { "$ref": "#/$defs/evidenceRefs" },
+        "boundary": {
+          "$comment": "What the cited evidence does not establish. Required, because a claim whose limits were never written down is a claim nobody bounded.",
+          "$ref": "#/$defs/prose"
+        },
+        "surfaceRefs": {
+          "type": "array", "minItems": 0, "maxItems": 32, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^surface-[a-z0-9][a-z0-9-]{0,62}$" }
+        }
+      }
+    },
+
+    "content": {
+      "type": "object",
+      "required": ["summary", "built", "decisions", "claims", "evidence", "promotionAuthorized"],
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "$comment": "One paragraph a human reads first. It is an index into the rest, not a substitute for it.",
+          "$ref": "#/$defs/prose"
+        },
+        "built": { "$ref": "#/$defs/built" },
+        "decisions": { "$ref": "#/$defs/decisions" },
+        "claims": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/claim" }
+        },
+        "evidence": {
+          "$comment": "The generated-artifact pool every other section refers into. evidenceId uniqueness is not expressible in JSON Schema (uniqueItems compares whole items) and is a verifier obligation.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "promotionAuthorized": {
+          "$comment": "Pinned false. A producer may write false and never true; the true value is derived by verification from an attestation. The field exists rather than being omitted so that its absence cannot be read as authorization.",
+          "const": false
+        }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["approved"] },
+          { "required": ["reviewedBy"] },
+          { "required": ["verdict"] },
+          { "required": ["signOff"] },
+          { "required": ["reviewStatus"] },
+          { "required": ["attestation"] },
+          { "required": ["humanReviewed"] }
+        ]
+      }
+    }
+  }
+}

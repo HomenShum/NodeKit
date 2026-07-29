@@ -294,6 +294,22 @@ concepts:
       - id: nodeslide-patch-operation
         regex: '^\s*export\s+type\s+PatchOperation\b'
 
+  # Distinct from nodeslide.deck-patch on purpose. deck-patch covers LOCAL patch operations
+  # against a deck; this covers RECONCILIATION against an external system of record — a three-way
+  # baseline where every remote write is planned, reviewed, executed, then read back and verified,
+  # and conflicts stop before any mutation. Folding it into deck-patch would put local edits and
+  # remote reconciliation behind one contract version, so a change to either would force the other.
+  nodeslide.presentation-sync:
+    owner: NodeSlide
+    package: "@nodeslide/contracts"
+    targetPackage: "@nodeslide/contracts"
+    status: canonical-unpackaged
+    contractVersion: nodeslide.presentation-sync/v1
+    consumers: []
+    signatures:
+      - id: nodeslide-presentation-sync-contract
+        regex: '^\s*export\s+interface\s+PresentationSyncCapabilities\b'
+
   nodevideo.worker-receipt:
     owner: NodeVideo
     package: null

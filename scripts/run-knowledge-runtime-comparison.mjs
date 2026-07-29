@@ -174,7 +174,67 @@ try {
   }
   const installedManifest = await installedPackageFileManifest(path.dirname(installedPackageJson));
   if (JSON.stringify(installedManifest) !== JSON.stringify(inspectedArchive.fileManifest)) {
-    throw new Error("installed candidate file manifest differs from the inspected tarball payload");
+    // Name the delta. An integrity error that only says "differs" forces the next reader to
+    // rebuild the comparison by hand to learn anything; the check already holds both sides, so
+    // withholding them makes the sensor weaker than the evidence it collected.
+    const byPath = (list) => new Map(list.map((entry) => [entry.path, entry]));
+    const installed = byPath(installedManifest);
+    const archived = byPath(inspectedArchive.fileManifest);
+    const onlyInstalled = [...installed.keys()].filter((p) => !archived.has(p));
+    const onlyArchived = [...archived.keys()].filter((p) => !installed.has(p));
+    const changed = [...installed.keys()].filter((p) => {
+      const other = archived.get(p);
+      return other && (other.sha256 !== installed.get(p).sha256 || other.size !== installed.get(p).size);
+    });
+    const sample = (label, list) => (list.length ? `${label}: ${list.slice(0, 5).join(", ")}${list.length > 5 ? ` (+${list.length - 5} more)` : ""}` : null);
+    // Name the CAUSE, not the symptom — and note that the first attempt at this comment named the
+    // WRONG cause with confidence, which is worse than naming none.
+    //
+    // The real mechanism, root-caused 2026-07-28 by byte-level comparison: npm's `bin-links`
+    // rewrites the FIRST shebang of a DECLARED BIN from CRLF to LF at install time
+    // (`fix-bin.js`, predicate `/^#![^\n]+\r\n/`). `--ignore-scripts` does NOT disable bin linking.
+    // So a bin whose working copy carries a CRLF shebang is packed with `\r\n` and installed with
+    // `\n` — a one-byte difference, at offset 19, in exactly one file out of 463.
+    //
+    // Why it hid: `.gitattributes` is `* text=auto eol=lf`, so the INDEX blob is pure LF while the
+    // physical working file was CRLF. `git status` reports the file clean, because normalization
+    // makes its logical content equal. Only `git ls-files --eol` shows `i/lf w/mixed`.
+    //
+    // The earlier hypothesis — "the working tree is dirty, and packing runs `prepare`, so two packs
+    // can differ" — was wrong twice over. The payload is pinned (one byte array is read, inspected,
+    // written, byte-compared and hash-verified before install; there is no second archive source),
+    // and the unrelated dirty file was irrelevant. "Clean checkout passes" was a proxy for "a fresh
+    // checkout materialised LF", not evidence about dirtiness at all. A confounded correlation,
+    // stated as a mechanism, sent three agents and an external model hunting the wrong thing.
+    const CRLF_SHEBANG = /^#![^\n]+\r\n/;
+    let binNote = null;
+    try {
+      const declaredBins = Object.values(inspectedArchive.packageJson?.bin ?? {})
+        .map((value) => `package/${String(value).replace(/^\.?\//, "")}`);
+      const offenders = (inspectedArchive.entries ?? [])
+        .filter((entry) => declaredBins.includes(entry.path) && CRLF_SHEBANG.test(entry.contents?.toString("utf8") ?? ""))
+        .map((entry) => entry.path);
+      if (offenders.length) {
+        binNote =
+          `DECLARED BIN WITH A CRLF SHEBANG (${offenders.join(", ")}). npm's bin-links rewrites the ` +
+          `first shebang of a declared bin from CRLF to LF on install, so the archived and installed ` +
+          `bytes differ by exactly one byte and this check fails through no fault of the package. ` +
+          `Fix the SOURCE file's line endings — do not relax the comparison. Note git may report the ` +
+          `file clean: check \`git ls-files --eol\` for \`w/mixed\`.`;
+      }
+    } catch {
+      // The archive shape may not expose entries in every version. Fall through with the raw
+      // comparison, which is still the honest evidence. Never let a diagnostic's own failure
+      // suppress the finding it was added to explain.
+    }
+    const detail = [
+      binNote,
+      `installed=${installedManifest.length} archived=${inspectedArchive.fileManifest.length}`,
+      sample("only in install", onlyInstalled),
+      sample("only in archive", onlyArchived),
+      sample("content differs", changed),
+    ].filter(Boolean).join("; ");
+    throw new Error(`installed candidate file manifest differs from the inspected tarball payload — ${detail}`);
   }
   const postInstallSnapshotBytes = await readFile(snapshottedCandidateTarball);
   if (!postInstallSnapshotBytes.equals(candidateTarballBytes)

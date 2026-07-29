@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "nodekit.score-receipt/v1",
+  "receiptId": "score-fixture-malformed",
+  "ruleId": "rule-fixture",
+  "subject": {
+    "id": "fixture-subject",
+    "name": "Fixture subject that was never looked at",
+    "kind": "generated-application-surface",
+    "surface": "fixture",
+    "evidenceBasis": "recorded-observation",
+    "evidenceRef": "nothing",
+    "observedAt": "2026-07-28"
+  },
+  "derivedFrom": {
+    "collectionId": "fixture-malformed",
+    "observationIds": ["obs-fixture-bad"],
+    "factIds": ["obs-fixture-bad/f2", "obs-fixture-bad/f9"]
+  },
+  "ruleApplicability": {
+    "applies": true,
+    "appliesWhenSatisfied": ["fixture"],
+    "doesNotApplyWhenChecked": [
+      { "clause": "always — this rule governs no real surface", "fires": false, "note": "Fixture asserts otherwise, which is itself part of what makes this record wrong." }
+    ]
+  },
+  "scale": {
+    "min": 0,
+    "max": 4,
+    "anchors": {
+      "0": "fixture anchor zero",
+      "4": "fixture anchor four"
+    }
+  },
+  "criteria": [
+    {
+      "id": "c1-fabricated-citation",
+      "question": "DEFECT 3 — does a criterion cite a fact id that exists?",
+      "score": 0,
+      "citations": [
+        {
+          "observationId": "obs-fixture-bad",
+          "factIds": ["f9"],
+          "relation": "meets",
+          "withinRuleDerivation": false,
+          "note": "obs-fixture-bad has facts f1 and f2 only. f9 was invented. This is the reference-corpus form of a fabricated digest: it looks like evidence and binds to none."
+        }
+      ],
+      "finding": "Fixture."
+    },
+    {
+      "id": "c2-mislabelled-derivation",
+      "question": "DEFECT 4 and 5 — is withinRuleDerivation believed rather than recomputed, and is the score inside the receipt's own scale?",
+      "score": 7,
+      "citations": [
+        {
+          "observationId": "obs-fixture-bad",
+          "factIds": ["f2"],
+          "relation": "meets",
+          "withinRuleDerivation": true,
+          "note": "rule-fixture stands on obs-fixture-bad/f1 alone, so this claim is false. And 7 is outside the 0..4 scale this same record declared."
+        }
+      ],
+      "finding": "Fixture."
+    }
+  ],
+  "score": 0,
+  "scoreBasis": "Fixture. No basis.",
+  "notScored": ["Everything. This receipt scores nothing real."],
+  "boundary": "Fixture. Cite this record for nothing.",
+  "scoredBy": "hand-written fixture",
+  "scoredAt": "2026-07-28"
+}

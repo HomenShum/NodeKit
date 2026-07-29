@@ -7,12 +7,16 @@
  *
  * evolution/artifacts/propose-evolution-guards.md recorded four guards as
  * adversarially tested. Three of the four commands never reached the guard they
- * named. propose-evolution.mjs validates required arguments BEFORE it checks
- * kebab-case, materiality, or an existing draft, so:
+ * named. The old propose-evolution.mjs validated required arguments BEFORE it
+ * checked kebab-case, materiality, or an existing draft, so:
  *
  *   propose-evolution.mjs --materiality made-up
  *     recorded as: "unknown materiality made-up"        exit=2
  *     actual:      "--id is required"                    exit=2
+ *
+ * Materiality was also a silent no-op: the event schema has no such field, so
+ * even an allowed value disappeared from the written record. The repaired CLI
+ * rejects unknown flags instead of letting callers believe ignored input was stored.
  *
  * The exit code matched. The cause did not. An exit code's value is not its
  * reason, and a probe that reads only the number cannot tell a fired guard from
@@ -40,6 +44,7 @@ const VALID = {
   "--challenge": "probe",
   "--observed": "probe",
   "--resolution": "probe",
+  "--evidence": "evd:cli-authority-bypass-and-repair",
 };
 
 function run(overrides, extra = []) {
@@ -77,11 +82,11 @@ const CASES = [
     wantMessage: /already exists.*delete is prohibited/s,
   },
   {
-    name: "G4  invented materiality",
+    name: "G4  unknown flag",
     overrides: {},
     extra: ["--materiality", "made-up"],
     wantCode: 2,
-    wantMessage: /unknown materiality made-up/,
+    wantMessage: /unknown flag --materiality/,
   },
   {
     name: "G5  invented track",

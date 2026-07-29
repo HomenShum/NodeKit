@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.score-receipt.v1.schema.json",
+  "title": "NodeKit score receipt binding a score to named reference facts",
+  "description": "The third layer of the reference corpus: ReferenceObservation records the facts, DesignRule states what they license, ScoreReceipt spends that licence on one real subject. Every criterion must cite at least one observationId plus specific factIds, so a score of 2 rather than 4 is answerable with 'because of this fact, on this screen' rather than with taste. humanReview lets a person disagree with a citation on the record instead of quietly rescoring: the instrument's number stays in score, the person's number goes in humanReview.revisedScore, and both survive.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "ruleId",
+    "subject",
+    "derivedFrom",
+    "ruleApplicability",
+    "scale",
+    "criteria",
+    "score",
+    "scoreBasis",
+    "notScored",
+    "boundary",
+    "scoredBy",
+    "scoredAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.score-receipt/v1" },
+    "receiptId": { "$ref": "#/$defs/id" },
+    "ruleId": {
+      "description": "The DesignRule being applied. The corpus gate resolves it against the rules in the corpus; a receipt citing a rule that is not there is scoring against nothing.",
+      "$ref": "#/$defs/id"
+    },
+    "subject": { "$ref": "#/$defs/subject" },
+    "derivedFrom": {
+      "description": "The union of every fact any criterion cites. Kept in the same shape as DesignRule.derivedFrom so the existing corpus gate resolves a receipt's citations with no special case.",
+      "$ref": "#/$defs/derivedFrom"
+    },
+    "ruleApplicability": { "$ref": "#/$defs/ruleApplicability" },
+    "scale": { "$ref": "#/$defs/scale" },
+    "criteria": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/criterion" } },
+    "score": { "type": "integer", "minimum": 0 },
+    "scoreBasis": {
+      "description": "How the criterion scores compose into the single number, stated so a reader can re-derive it.",
+      "$ref": "#/$defs/text"
+    },
+    "humanReview": { "$ref": "#/$defs/humanReview" },
+    "notScored": {
+      "description": "What this receipt did not examine. Required and non-empty, on the same principle as the gate's denominator line: a score silent about its gaps reads as total.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/text" },
+      "uniqueItems": true
+    },
+    "boundary": { "$ref": "#/$defs/text" },
+    "scoredBy": {
+      "description": "The instrument or agent that produced the criterion scores. Not a grade and not an approval — an identity, so the number has an author.",
+      "$ref": "#/$defs/text"
+    },
+    "scoredAt": { "$ref": "#/$defs/date" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "text": { "type": "string", "minLength": 1 },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "factId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "qualifiedFactId": { "type": "string", "pattern": "^[a-z][a-z0-9-]*/[a-z0-9][a-z0-9-]*$" },
+    "subject": {
+      "type": "object",
+      "required": ["id", "name", "kind", "surface", "evidenceBasis", "evidenceRef", "observedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/text" },
+        "kind": { "enum": ["generated-application-surface", "platform-surface", "reference-application-surface"] },
+        "surface": { "$ref": "#/$defs/text" },
+        "evidenceBasis": {
+          "description": "live-inspection: the scorer opened the surface. recorded-observation: the scorer worked from a dated first-party record of it, which is weaker and must say so.",
+          "enum": ["live-inspection", "recorded-observation"]
+        },
+        "evidenceRef": { "$ref": "#/$defs/text" },
+        "observedAt": { "$ref": "#/$defs/date" }
+      },
+      "additionalProperties": false
+    },
+    "derivedFrom": {
+      "type": "object",
+      "required": ["collectionId", "observationIds", "factIds"],
+      "properties": {
+        "collectionId": { "$ref": "#/$defs/id" },
+        "observationIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "factIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/qualifiedFactId" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "ruleApplicability": {
+      "description": "The applicability check, written out before the score rather than assumed. A receipt that cites a rule the subject is outside is a fabricated citation with a real fact id in it.",
+      "type": "object",
+      "required": ["applies", "appliesWhenSatisfied", "doesNotApplyWhenChecked"],
+      "properties": {
+        "applies": { "const": true },
+        "appliesWhenSatisfied": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "uniqueItems": true },
+        "doesNotApplyWhenChecked": {
+          "description": "Every doesNotApplyWhen clause of the cited rule, each answered. If any fires, the rule does not govern this subject and the receipt must not exist.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["clause", "fires", "note"],
+            "properties": {
+              "clause": { "$ref": "#/$defs/text" },
+              "fires": { "const": false },
+              "note": { "$ref": "#/$defs/text" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "rejectedSubjects": {
+          "description": "Subjects considered and put down because a doesNotApplyWhen clause fired. Recorded so the next reader does not re-litigate the choice.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "excludedByClause", "note"],
+            "properties": {
+              "name": { "$ref": "#/$defs/text" },
+              "excludedByClause": { "$ref": "#/$defs/text" },
+              "note": { "$ref": "#/$defs/text" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scale": {
+      "type": "object",
+      "required": ["min", "max", "anchors"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 1 },
+        "anchors": {
+          "description": "Every point on the scale described concretely, and where possible tied to an observed surface. An unanchored scale is a preference with integers on it.",
+          "type": "object",
+          "minProperties": 2,
+          "patternProperties": { "^[0-9]+$": { "$ref": "#/$defs/text" } },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "criterion": {
+      "type": "object",
+      "required": ["id", "question", "score", "citations", "finding"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "question": { "$ref": "#/$defs/text" },
+        "score": { "type": "integer", "minimum": 0 },
+        "citations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/citation" } },
+        "finding": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "citation": {
+      "description": "One observation, and the specific facts within it that carry this criterion's score. factIds are bare ids; the corpus gate qualifies them with observationId and resolves each one.",
+      "type": "object",
+      "required": ["observationId", "factIds", "relation", "withinRuleDerivation", "note"],
+      "properties": {
+        "observationId": { "$ref": "#/$defs/id" },
+        "factIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/factId" }, "uniqueItems": true },
+        "relation": {
+          "description": "How the subject stands against the cited facts.",
+          "enum": ["meets", "exceeds", "falls-short-of", "matches-counterexample"]
+        },
+        "withinRuleDerivation": {
+          "description": "Whether every fact in this citation appears in the cited rule's derivedFrom.factIds. False is allowed and sometimes right, but it marks a criterion reaching past the rule's own evidence — which is exactly the thing a human reviewer should be able to find and dispute. The corpus gate recomputes this flag; it is a cross-reference, not a self-assessment.",
+          "type": "boolean"
+        },
+        "note": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "humanReview": {
+      "description": "A person disagreeing with the machine, on the record. decision override requires a revisedScore; affirm and abstain must not carry one.",
+      "type": "object",
+      "required": ["decision", "reason", "reviewer", "reviewedAt"],
+      "properties": {
+        "decision": { "enum": ["affirm", "override", "abstain"] },
+        "revisedScore": { "type": "integer", "minimum": 0 },
+        "reason": { "$ref": "#/$defs/text" },
+        "disputedCriterionIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "reviewer": { "$ref": "#/$defs/text" },
+        "reviewedAt": { "$ref": "#/$defs/date" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "decision": { "const": "override" } }, "required": ["decision"] },
+          "then": { "required": ["revisedScore", "disputedCriterionIds"] }
+        },
+        {
+          "if": { "properties": { "decision": { "enum": ["affirm", "abstain"] } }, "required": ["decision"] },
+          "then": { "not": { "required": ["revisedScore"] } }
+        }
+      ]
+    }
+  }
+}

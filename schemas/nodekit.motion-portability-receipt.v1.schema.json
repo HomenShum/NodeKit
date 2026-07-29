@@ -1,0 +1,664 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.motion-portability-receipt.v1.schema.json",
+  "title": "NodeKit motion portability receipt",
+  "description": "A deterministic, source-set-bound comparison of static CSS motion-token declarations. This receipt deliberately does not claim runtime, trace, video, or audience evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "comparison",
+    "verdict",
+    "passed",
+    "exitCode",
+    "coverage",
+    "conflicts",
+    "valueAliases",
+    "migration",
+    "proof",
+    "boundary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "nodekit.motion-portability-receipt/v1"
+    },
+    "comparison": {
+      "const": "css-motion-tokens"
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_RUN"
+      ]
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "enum": [
+        0,
+        1,
+        3
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparisonPossible",
+        "coverageComplete",
+        "declarationsObserved",
+        "distinctTokenNames",
+        "readableRepositories",
+        "repositories",
+        "repositoriesRequested",
+        "unreadableFiles",
+        "unreadableRepositories"
+      ],
+      "properties": {
+        "comparisonPossible": {
+          "type": "boolean"
+        },
+        "coverageComplete": {
+          "type": "boolean"
+        },
+        "declarationsObserved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "distinctTokenNames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "readableRepositories": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repositories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "aliasDeclarationsIgnoredAsIndependentClaims",
+              "cssFilesRead",
+              "declarationsObserved",
+              "repositoryId",
+              "sourceSetSha256"
+            ],
+            "properties": {
+              "aliasDeclarationsIgnoredAsIndependentClaims": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cssFilesRead": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "declarationsObserved": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "repositoryId": {
+                "$ref": "#/$defs/nonEmpty"
+              },
+              "sourceSetSha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        },
+        "repositoriesRequested": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unreadableFiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "repositoryId",
+              "path",
+              "reason"
+            ],
+            "properties": {
+              "repositoryId": {
+                "$ref": "#/$defs/nonEmpty"
+              },
+              "path": {
+                "$ref": "#/$defs/nonEmpty"
+              },
+              "reason": {
+                "$ref": "#/$defs/nonEmpty"
+              }
+            }
+          }
+        },
+        "unreadableRepositories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "repositoryId",
+              "reason"
+            ],
+            "properties": {
+              "repositoryId": {
+                "$ref": "#/$defs/nonEmpty"
+              },
+              "reason": {
+                "$ref": "#/$defs/nonEmpty"
+              }
+            }
+          }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scope",
+          "token",
+          "values"
+        ],
+        "properties": {
+          "scope": {
+            "enum": [
+              "cross-repository",
+              "within-repository"
+            ]
+          },
+          "token": {
+            "$ref": "#/$defs/token"
+          },
+          "values": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "repositoryIds",
+                "sites",
+                "value"
+              ],
+              "properties": {
+                "repositoryIds": {
+                  "$ref": "#/$defs/nonEmptyStrings"
+                },
+                "sites": {
+                  "$ref": "#/$defs/nonEmptyStrings"
+                },
+                "value": {
+                  "$ref": "#/$defs/nonEmpty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "valueAliases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tokens",
+          "value"
+        ],
+        "properties": {
+          "tokens": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/token"
+            }
+          },
+          "value": {
+            "$ref": "#/$defs/nonEmpty"
+          }
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "repositories",
+        "readyAliases",
+        "reviewRequired",
+        "ownerDecisions",
+        "unmapped",
+        "alreadyCanonical",
+        "summary"
+      ],
+      "properties": {
+        "contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "durations",
+            "easings",
+            "schemaVersion"
+          ],
+          "properties": {
+            "durations": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/semantic"
+              }
+            },
+            "easings": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/semantic"
+              }
+            },
+            "schemaVersion": {
+              "const": "nodekit.motion-semantics/v1"
+            }
+          }
+        },
+        "repositories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "aliasCss",
+              "readyAliasCount",
+              "repositoryId"
+            ],
+            "properties": {
+              "aliasCss": {
+                "type": "string"
+              },
+              "readyAliasCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "repositoryId": {
+                "$ref": "#/$defs/nonEmpty"
+              }
+            }
+          }
+        },
+        "readyAliases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/readyAlias"
+          }
+        },
+        "reviewRequired": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reviewRequired"
+          }
+        },
+        "ownerDecisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ownerDecision"
+          }
+        },
+        "unmapped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/unmapped"
+          }
+        },
+        "alreadyCanonical": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/alreadyCanonical"
+          }
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "alreadyCanonical",
+            "behaviorPreservingAliases",
+            "ownerDecisions",
+            "reviewRequiredValueChanges",
+            "unmappedTokens"
+          ],
+          "properties": {
+            "alreadyCanonical": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "behaviorPreservingAliases": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ownerDecisions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reviewRequiredValueChanges": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unmappedTokens": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "staticDeclarationsObserved",
+        "runtimeObserved",
+        "domOrTraceObserved",
+        "videoReviewed",
+        "audienceValidated",
+        "decisiveFor",
+        "notDecisiveFor"
+      ],
+      "properties": {
+        "staticDeclarationsObserved": {
+          "type": "boolean"
+        },
+        "runtimeObserved": {
+          "const": false
+        },
+        "domOrTraceObserved": {
+          "const": false
+        },
+        "videoReviewed": {
+          "const": false
+        },
+        "audienceValidated": {
+          "const": false
+        },
+        "decisiveFor": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "notDecisiveFor": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        }
+      }
+    },
+    "boundary": {
+      "$ref": "#/$defs/nonEmpty"
+    }
+  },
+  "$defs": {
+    "nonEmpty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "token": {
+      "type": "string",
+      "pattern": "^--[a-z0-9-]+$"
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nonEmpty"
+      }
+    },
+    "semantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "meaning",
+        "normalizedValue",
+        "token",
+        "value"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "duration",
+            "easing"
+          ]
+        },
+        "meaning": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "normalizedValue": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "token": {
+          "$ref": "#/$defs/token"
+        },
+        "value": {
+          "$ref": "#/$defs/nonEmpty"
+        }
+      }
+    },
+    "readyAlias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalToken",
+        "meaning",
+        "observedValue",
+        "repositoryId",
+        "sites",
+        "token"
+      ],
+      "properties": {
+        "canonicalToken": {
+          "$ref": "#/$defs/token"
+        },
+        "meaning": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "observedValue": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "repositoryId": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "sites": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "token": {
+          "$ref": "#/$defs/token"
+        }
+      }
+    },
+    "reviewRequired": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalToken",
+        "deltaMs",
+        "from",
+        "meaning",
+        "repositoryId",
+        "sites",
+        "to",
+        "token"
+      ],
+      "properties": {
+        "canonicalToken": {
+          "$ref": "#/$defs/token"
+        },
+        "deltaMs": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "from": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "meaning": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "repositoryId": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "sites": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "to": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "token": {
+          "$ref": "#/$defs/token"
+        }
+      }
+    },
+    "ownerDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repositoryId",
+        "token",
+        "values",
+        "sites",
+        "reason"
+      ],
+      "properties": {
+        "repositoryId": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "token": {
+          "$ref": "#/$defs/token"
+        },
+        "values": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "sites": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "reason": {
+          "$ref": "#/$defs/nonEmpty"
+        }
+      }
+    },
+    "unmapped": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedValue",
+        "repositoryId",
+        "sites",
+        "token"
+      ],
+      "properties": {
+        "observedValue": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "repositoryId": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "sites": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "token": {
+          "$ref": "#/$defs/token"
+        }
+      }
+    },
+    "alreadyCanonical": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalToken",
+        "observedValue",
+        "repositoryId",
+        "sites"
+      ],
+      "properties": {
+        "canonicalToken": {
+          "$ref": "#/$defs/token"
+        },
+        "observedValue": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "repositoryId": {
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "sites": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "PASS"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "passed": {
+            "const": true
+          },
+          "exitCode": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "FAIL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "passed": {
+            "const": false
+          },
+          "exitCode": {
+            "const": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "NOT_RUN"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "passed": {
+            "const": false
+          },
+          "exitCode": {
+            "const": 3
+          }
+        }
+      }
+    }
+  ]
+}

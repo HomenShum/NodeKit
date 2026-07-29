@@ -1,0 +1,37 @@
+$ node --test test/fixtures/builder-journey/build-evidence/
+TAP version 13
+# Subtest: estimated operating profit subtracts payroll and bank debits from square gross
+ok 1 - estimated operating profit subtracts payroll and bank debits from square gross
+  ---
+  duration_ms: 3.114
+  ...
+# Subtest: every bank row without a receiptId lands in the verification queue
+ok 2 - every bank row without a receiptId lands in the verification queue
+  ---
+  duration_ms: 1.702
+  ...
+# Subtest: classify never returns a committed category
+ok 3 - classify never returns a committed category
+  ---
+  duration_ms: 0.938
+  ...
+# Subtest: the brief labels itself Estimated, not Verified
+ok 4 - the brief labels itself Estimated, not Verified
+  ---
+  duration_ms: 0.611
+  ...
+# Subtest: receipts below the 0.82 threshold are excluded from coverage
+ok 5 - receipts below the 0.82 threshold are excluded from coverage
+  ---
+  duration_ms: 0.844
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 61.203
+exit code: 0

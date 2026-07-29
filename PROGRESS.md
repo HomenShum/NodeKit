@@ -52,6 +52,81 @@ is independent review, and a checker able to grant it would launder the same sel
 layer deeper.
 
 
+## 2026-07-26 — ONE COMMAND IS WAITING FOR THE OWNER
+
+PR #20 (`feat/close-the-loop`, 18 commits) is pushed and cannot be merged by an agent. CI `verify`
+blocks on:
+
+    EVOLUTION MATERIALITY BLOCKED: 10 material files, 0 recorded events
+
+That is correct. The branch changes `src/` and `schemas/`, the ledger requires a human-reviewed event
+for material change, and this branch is what made such an event impossible to forge. An agent that
+could satisfy this gate would be the bypass the branch removes, one layer out. `gh pr merge --admin`
+would pass it and is not an option.
+
+The draft is written and waiting at
+`evolution/drafts/ledger-authority-and-immutability-enforced.json`, status `agent-proposed`:
+
+```bash
+nodekit trust init --reviewer homen --dev
+nodekit evolution approve \
+  --draft evolution/drafts/ledger-authority-and-immutability-enforced.json \
+  --key ../.nodekit-dev-approval-dev-software-key.pem
+nodekit evolution record \
+  --file evolution/drafts/ledger-authority-and-immutability-enforced.json \
+  --approval evolution/approval-ledger-authority-and-immutability-enforced.json
+npm run evolution:docs && git add evolution/ && git commit && git push
+```
+
+`--dev` yields **H1** — an exportable software key, credential-attested only. It unblocks the merge;
+it does NOT attest that a human was present, and `evolution verify` will keep saying
+`authority.attested: 0 of 22` until a real H2 credential signs. That report is the point.
+
+## Suite performance, measured rather than guessed
+
+`node --test` runs ~31 files concurrently on a 32-core box, so wall-clock is set by the slowest file.
+
+| finding | number |
+|---|---|
+| `agent-ease verdict binds all 15 trials` | **236s in one test** |
+| every other test in that file | under 3s |
+| the other 61 files | 390 tests, 539s CPU spread wide |
+| `evaluate-agent-ease.mjs`, alone, timed end to end | **454s** on the real fixture |
+| its fixture | 11,192 files — 5,415 PNGs, 5,567 JSONs |
+| `nodekit --help` before / after | 708ms / **269ms** (bare node is 141ms) |
+
+454 seconds for one invocation, walking ~11k files at roughly 40ms each. The test calls it several
+times. That single file is the suite.
+
+Four hypotheses for the cost were measured and **all four were wrong**: `npm pack` (2.4s x 6, real
+but small), archive inspection (42ms), PNG validation (the probe called it with the wrong signature,
+so its numbers meant nothing), and lock contention. The honest state is that the 454s is **located
+but not explained** — it is spread across ~11k file operations rather than concentrated in one call.
+`--cpu-prof` is the right next step; two attempts failed on the path trap below. **Do not guess a
+fifth time.**
+
+The open design question, which is the owner's: does a test asserting that *a verdict binds 15
+trials to one packed candidate* need a complete 361-screenshot closure per trial? The binding is
+what is under test; the screenshot volume is incidental to it. Shrinking the fixture would make this
+fast, and would also weaken the completeness the protected evaluator exists to check. That trade is
+a decision, not a refactor.
+
+Two methodology traps that cost real time here:
+
+- **Orphaned runs poison every measurement.** Timed-out `npm test` invocations left
+  `evaluate-agent-ease` processes alive at 215s CPU each, saturating all 32 cores. Three separate
+  suite runs stalled at exactly 14 tests because of it, and it read as a hang in the suite. Kill
+  every `evaluate-agent-ease` / `--test` process and confirm zero before timing anything.
+- **The Bash tool caps at 10 minutes and `&` does not survive it.** Detaching with `&` gets the
+  child killed when the call returns. Use `run_in_background: true` for anything over ~8 minutes.
+- **`$?` after a pipeline is the LAST command's status.** `timeout 25 node ... | head -5` reported
+  `exit=0` and no output, which read as "it finished instantly". It had been killed at 25s. That
+  produced a confident, wrong conclusion that the evaluator was fast. Capture the status before
+  piping, or use `PIPESTATUS`.
+- **`/tmp` is not the same path to bash and to node.** Bash writes to its own `/tmp`; node resolves
+  `/tmp/x` to `D:\tmp\x`. Two `--cpu-prof-dir=/tmp/prof` runs wrote their profile somewhere neither
+  tool then looked. Use absolute Windows paths when handing a path from bash to node.
+
 ## Session log
 
 <!-- Append one entry per meaningful checkpoint. Newest last. Keep entries short and factual. -->

@@ -65,9 +65,18 @@ const DERIVATIONS = {
   },
 
   "tour.executable": async (root) => {
-    const cli = await readFile(path.join(root, "src/cli.mjs"), "utf8").catch(() => "");
-    const has = cli.includes("async function runTour") && cli.includes('first === "tour"');
-    return { passes: has, evidence: has ? "src/cli.mjs dispatches tour to runTour, which checks state against disk" : null };
+    const entry = await readFile(path.join(root, "src/cli.mjs"), "utf8").catch(() => "");
+    const implementation = entry.includes("./cli-main.mjs")
+      ? await readFile(path.join(root, "src/cli-main.mjs"), "utf8").catch(() => "")
+      : entry;
+    const has = implementation.includes("async function runTour")
+      && implementation.includes('first === "tour"');
+    return {
+      passes: has,
+      evidence: has
+        ? "src/cli.mjs reaches the CLI implementation that dispatches tour to runTour, which checks state against disk"
+        : null,
+    };
   },
 
   "tour.fails-closed": async (root) => {

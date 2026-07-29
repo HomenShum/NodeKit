@@ -1,0 +1,324 @@
+{
+  "schemaVersion": "nodekit.observation-pack/v1",
+  "caseId": "salon-weekly-profit-2026-07",
+  "stage": "learn",
+  "producedAt": "2026-07-28T21:40:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.launch-manifest/v1",
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "eef47976ee61ca482a54e4ed5070161b077b36bb12e36ce1ce20bf388f9255c0"
+    },
+    {
+      "schemaVersion": "nodekit.story-pack/v1",
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "407352a94c2bf776e8709be191994e7fcccc67f263d007a9bca872acb43dfdaf"
+    }
+  ],
+  "content": {
+    "observationWindow": {
+      "from": "2026-07-21T00:00:00Z",
+      "to": "2026-07-28T00:00:00Z"
+    },
+    "sources": [
+      {
+        "sourceId": "src-edge-access-log",
+        "kind": "http-access-log",
+        "locator": "vercel:salon-weekly-brief/logs/edge",
+        "availability": "reporting",
+        "retention": "7 days on the hobby plan; anything older than the window is already gone",
+        "coverageWindow": { "from": "2026-07-21T00:00:00Z", "to": "2026-07-28T00:00:00Z" }
+      },
+      {
+        "sourceId": "src-uptime-probe",
+        "kind": "synthetic-probe",
+        "locator": "proof/launch/salon-weekly-brief/uptime-probe.jsonl",
+        "availability": "reporting",
+        "retention": "committed to the repository, so it outlives the provider's retention"
+      },
+      {
+        "sourceId": "src-owner-debrief",
+        "kind": "human-report",
+        "locator": "proof/launch/salon-weekly-brief/owner-debrief-2026-07-27.md",
+        "availability": "reporting",
+        "note": "One owner, one session, recorded with consent. n=1 and every finding below inherits that."
+      },
+      {
+        "sourceId": "src-billing-ledger",
+        "kind": "billing-ledger",
+        "locator": "vercel:salon-weekly-brief/usage",
+        "availability": "reporting"
+      },
+      {
+        "sourceId": "src-error-tracker",
+        "kind": "error-tracker",
+        "locator": "sentry:project-not-created",
+        "availability": "not-configured",
+        "note": "Named here because the LaunchManifest promised it. It was never provisioned; it reports nothing, and nothing may be concluded from its silence."
+      }
+    ],
+    "instruments": [
+      {
+        "instrumentId": "ins-uptime-probe",
+        "sourceId": "src-uptime-probe",
+        "dimension": "reachability",
+        "measures": "count of probe runs returning HTTP 200 with the data-testid=\"weekly-brief-root\" node present in the raw HTML, sampled every 30 minutes",
+        "method": "scripts/uptime-probe.mjs fetches the production URL and greps the response body for the testid; a 200 with a missing testid counts as unreachable, not reachable",
+        "status": "ran"
+      },
+      {
+        "instrumentId": "ins-session-count",
+        "sourceId": "src-edge-access-log",
+        "dimension": "usage",
+        "measures": "count of distinct sessions (unique IP + user-agent pairs) issuing at least one POST /api/brief during the window",
+        "method": "aggregation over the edge access log for the window; sessions are not deduplicated across networks, so this over-counts a user who switches networks",
+        "status": "ran"
+      },
+      {
+        "instrumentId": "ins-latency-p95",
+        "sourceId": "src-edge-access-log",
+        "dimension": "performance",
+        "measures": "p95 wall-clock milliseconds from POST /api/brief to first byte of the brief response",
+        "method": "percentile over the access log's own duration field for the window",
+        "status": "ran"
+      },
+      {
+        "instrumentId": "ins-brief-completion",
+        "sourceId": "src-owner-debrief",
+        "dimension": "taskOutcome",
+        "measures": "count of debrief sessions in which the owner reached a rendered weekly profit figure, and the count of verification items still unresolved at the end of the session",
+        "method": "structured debrief against the OpportunityContract successCondition, scored by the observer during the session rather than reconstructed afterwards",
+        "status": "ran"
+      },
+      {
+        "instrumentId": "ins-owner-friction",
+        "sourceId": "src-owner-debrief",
+        "dimension": "friction",
+        "measures": "count of wrong turns and help requests during the debrief session, and which of the four declared input file types the owner actually supplied",
+        "method": "observer notes taken live during the same debrief session; not a separate study",
+        "status": "ran"
+      },
+      {
+        "instrumentId": "ins-grant-spend",
+        "sourceId": "src-billing-ledger",
+        "dimension": "cost",
+        "measures": "USD spend during the window against the 25.00 USD standing grant declared in the LaunchManifest, and the count of invocations that pushed cumulative spend past that grant",
+        "method": "provider usage export summed over the window and compared against the grant ceiling",
+        "status": "ran"
+      },
+      {
+        "instrumentId": "ins-runtime-error-capture",
+        "sourceId": "src-error-tracker",
+        "dimension": "errors",
+        "measures": "count of unhandled runtime exceptions and 5xx responses, by route",
+        "method": "would require an SDK-instrumented runtime reporting into the error tracker",
+        "status": "not-implemented",
+        "failureReason": "Described in the LaunchManifest and never built. It has never executed, so it has produced neither errors nor an absence of errors."
+      }
+    ],
+    "coverage": {
+      "observed": {
+        "reachability": {
+          "sourceIds": ["src-uptime-probe"],
+          "instrumentIds": ["ins-uptime-probe"],
+          "window": { "from": "2026-07-21T00:00:00Z", "to": "2026-07-28T00:00:00Z" },
+          "measured": "336 probe runs at 30-minute intervals; 336 returned HTTP 200 with the weekly-brief-root testid present in the raw HTML; 0 returned a 200 shell without it",
+          "sampleCount": 336,
+          "outcome": "no-instances",
+          "findings": [],
+          "conclusion": "The deployment stayed reachable across the whole window at 30-minute resolution. An outage shorter than 30 minutes would not have been seen."
+        },
+        "usage": {
+          "sourceIds": ["src-edge-access-log"],
+          "instrumentIds": ["ins-session-count"],
+          "window": { "from": "2026-07-21T00:00:00Z", "to": "2026-07-28T00:00:00Z" },
+          "measured": "2 distinct sessions issued POST /api/brief; both originated from the owner's own network during the scheduled debrief",
+          "sampleCount": 2,
+          "outcome": "findings",
+          "findings": ["OBS-1"],
+          "conclusion": "There was no unattended use at all. Every dimension below that depends on real traffic is therefore describing a guided session, not a week of operation."
+        },
+        "performance": {
+          "sourceIds": ["src-edge-access-log"],
+          "instrumentIds": ["ins-latency-p95"],
+          "window": { "from": "2026-07-21T00:00:00Z", "to": "2026-07-28T00:00:00Z" },
+          "measured": "p95 time-to-first-byte for POST /api/brief was 41200 ms across 9 requests; the slowest 3 all carried receipt_images",
+          "sampleCount": 9,
+          "outcome": "findings",
+          "findings": ["OBS-2"],
+          "conclusion": "p95 over 9 requests is a wide interval; treat 41 seconds as an order of magnitude, not a number."
+        },
+        "taskOutcome": {
+          "sourceIds": ["src-owner-debrief"],
+          "instrumentIds": ["ins-brief-completion"],
+          "window": { "from": "2026-07-27T17:00:00Z", "to": "2026-07-27T18:10:00Z" },
+          "measured": "1 of 1 debrief sessions reached a rendered weekly operating profit figure; 6 verification items remained unresolved when the session ended",
+          "sampleCount": 1,
+          "outcome": "findings",
+          "findings": ["OBS-3"],
+          "conclusion": "Half the success condition was reached. The resolve-every-verification-item half was not."
+        },
+        "friction": {
+          "sourceIds": ["src-owner-debrief"],
+          "instrumentIds": ["ins-owner-friction"],
+          "window": { "from": "2026-07-27T17:00:00Z", "to": "2026-07-27T18:10:00Z" },
+          "measured": "3 wrong turns and 2 help requests in one 70-minute session; the owner supplied 3 of the 4 declared input types and never produced payroll_summary",
+          "sampleCount": 1,
+          "outcome": "findings",
+          "findings": ["OBS-4"],
+          "conclusion": "n=1. These are leads for the next study, not rates."
+        },
+        "cost": {
+          "sourceIds": ["src-billing-ledger"],
+          "instrumentIds": ["ins-grant-spend"],
+          "window": { "from": "2026-07-21T00:00:00Z", "to": "2026-07-28T00:00:00Z" },
+          "measured": "0.62 USD of the 25.00 USD standing grant consumed across 41 function invocations; 0 invocations pushed cumulative spend past the grant",
+          "sampleCount": 41,
+          "outcome": "no-instances",
+          "findings": [],
+          "conclusion": "No grant overrun occurred. With 2 real sessions this says almost nothing about cost at load."
+        }
+      },
+      "unobserved": {
+        "errors": {
+          "state": "not-instrumented",
+          "reason": "The error tracker named in the LaunchManifest was never provisioned, and the platform's runtime error stream is not retained beyond the request that produced it. Nothing watched this dimension for any part of the window. This is NOT a report that there were no errors — no instrument existed that could have distinguished zero errors from a hundred.",
+          "wouldRequire": "An error-tracker DSN wired into the runtime with a retention window at least as long as the observation window, plus a 5xx counter derived from the edge access log as an independent second source.",
+          "sourceIds": ["src-error-tracker"],
+          "instrumentIds": ["ins-runtime-error-capture"],
+          "blocksClaims": [
+            "StoryPack claim C3: 'the brief generates end to end without runtime failures' — this pack can neither support nor contradict it.",
+            "StoryPack claim C5: 'unmatched receipts degrade gracefully rather than erroring' — the degradation path was never exercised under observation."
+          ]
+        },
+        "feedback": {
+          "state": "refused",
+          "reason": "Observing what the salon's own customers think would require contacting them. The OpportunityContract's authorityLimits prohibit any contact outside the owner, and no consent path exists for the owner's customer list.",
+          "wouldRequire": "An owner-mediated feedback channel the owner controls and consents to share, which is a different wedge from a read-only weekly profit check.",
+          "blocksClaims": []
+        }
+      }
+    },
+    "observations": [
+      {
+        "id": "OBS-1",
+        "severity": "P1",
+        "kind": "no-unattended-use",
+        "observed": "Both sessions in the window came from the owner's own network during the scheduled 70-minute debrief. No session occurred outside a session the observer arranged.",
+        "consequence": "Every behavioural statement in this pack describes a guided session. The launch produced no evidence about unattended weekly use, which is the actual job.",
+        "dimension": "usage",
+        "sourceId": "src-edge-access-log",
+        "instrumentId": "ins-session-count",
+        "inferred": false,
+        "occurredAt": "2026-07-27T17:00:00Z",
+        "count": 2,
+        "evidenceRefs": ["proof/launch/salon-weekly-brief/edge-access-log-window.json"]
+      },
+      {
+        "id": "OBS-2",
+        "severity": "P1",
+        "kind": "slow-path",
+        "observed": "p95 time-to-first-byte for POST /api/brief was 41.2 seconds. The three slowest requests all carried receipt_images; requests without them completed under 3 seconds.",
+        "consequence": "The owner waited past the point of walking away twice during the debrief, and asked whether the page had frozen.",
+        "dimension": "performance",
+        "sourceId": "src-edge-access-log",
+        "instrumentId": "ins-latency-p95",
+        "inferred": false,
+        "count": 9,
+        "evidenceRefs": ["proof/launch/salon-weekly-brief/edge-access-log-window.json"]
+      },
+      {
+        "id": "OBS-3",
+        "severity": "P0",
+        "kind": "incomplete-outcome",
+        "observed": "The owner reached a rendered weekly operating profit figure, then ended the session with 6 verification items still unresolved. Four of the six were unmatched card expenses with no receipt.",
+        "consequence": "The success condition requires resolving every verification item blocking the estimate. It was not met, so the figure the owner saw was an estimate she could not verify.",
+        "dimension": "taskOutcome",
+        "sourceId": "src-owner-debrief",
+        "instrumentId": "ins-brief-completion",
+        "inferred": false,
+        "occurredAt": "2026-07-27T18:10:00Z",
+        "count": 6,
+        "evidenceRefs": ["proof/launch/salon-weekly-brief/owner-debrief-2026-07-27.md"]
+      },
+      {
+        "id": "OBS-4",
+        "severity": "P0",
+        "kind": "undefined-input-format",
+        "observed": "The owner supplied bank_csv, square_export and receipt_images, and never supplied payroll_summary. Asked why, she said she did not know what file that was; her payroll provider emails a PDF she has never downloaded.",
+        "consequence": "One of the four declared inputs is one the user cannot produce, so the profit figure omits labour cost entirely — the single largest line in a salon's operating cost.",
+        "dimension": "friction",
+        "sourceId": "src-owner-debrief",
+        "instrumentId": "ins-owner-friction",
+        "inferred": false,
+        "occurredAt": "2026-07-27T17:24:00Z",
+        "evidenceRefs": ["proof/launch/salon-weekly-brief/owner-debrief-2026-07-27.md"]
+      }
+    ],
+    "decideFeedback": {
+      "successCondition": {
+        "status": "partially-met",
+        "basis": "The owner read an estimated weekly operating profit (OBS-3, first half met). She did not resolve every verification item blocking that estimate — 6 remained — and the estimate excluded labour cost because payroll_summary was never supplied (OBS-4). n=1 session, so this is a verdict about one owner, not about owners.",
+        "evidenceObservationIds": ["OBS-3", "OBS-4"],
+        "unobservedDimensions": []
+      },
+      "unknownsResolved": [
+        {
+          "unknown": "Whether owners will upload all four file types every week or only a subset.",
+          "answer": "The one owner observed supplied three of four and could not produce payroll_summary at all, because her payroll provider delivers a PDF she has never downloaded. The blocker is availability of the file, not willingness to upload it.",
+          "resolvedByObservationIds": ["OBS-4"]
+        }
+      ],
+      "unknownsStillOpen": [
+        "How many transactions typically lack a matching receipt and therefore block verification.",
+        "Whether square_export payout timing aligns with the bank_csv week boundary."
+      ],
+      "newUnknowns": [
+        "Whether an operating profit figure that silently excludes labour cost is worse than no figure at all.",
+        "Whether a 41-second wait on receipt-bearing uploads is tolerable weekly or abandons the session on the second use.",
+        "Whether the six unresolved verification items are a one-owner backlog or the steady-state weekly volume."
+      ],
+      "instrumentationDebt": [
+        {
+          "dimension": "errors",
+          "wouldRequire": "An error-tracker DSN wired into the runtime with retention at least as long as the observation window, plus a 5xx counter derived from the edge access log as an independent second source.",
+          "priority": "P0",
+          "note": "Two StoryPack claims already promise reliability that nothing in this launch could have measured. The gap is under a promise, which makes it more urgent than the size of the work suggests."
+        },
+        {
+          "dimension": "usage",
+          "wouldRequire": "At least one unattended week with a session origin that is not the observer's own arrangement.",
+          "priority": "P1",
+          "note": "Not a missing instrument — the instrument worked. What is missing is a world for it to measure."
+        }
+      ]
+    },
+    "promotionAuthorized": false,
+    "evolutionEventRequired": true
+  },
+  "completeness": {
+    "claimed": [
+      "Reachability measured by synthetic probe at 30-minute resolution across the full window.",
+      "Usage, performance and cost measured from the provider's own edge access log and usage export for the full window.",
+      "Task outcome and friction measured from one recorded owner debrief session (n=1).",
+      "Two dimensions accounted for as unobserved with a stated reason and the instrument that would be required."
+    ],
+    "notRun": [
+      "The inputs digests are placeholders. LaunchManifest and StoryPack do not exist on this tree, so nothing was hashed and the binding is unverified — this fixture demonstrates the shape of a bound pack, not a bound pack.",
+      "No unattended-use window was observed; the observation window contains only sessions the observer arranged.",
+      "No second participant was run, so every friction and taskOutcome finding is n=1 and no rate may be computed from it.",
+      "Outages shorter than the 30-minute probe interval were not observable and were not attempted.",
+      "Cost was measured under 2 sessions; no load or sustained-use cost observation was attempted."
+    ],
+    "refused": [
+      {
+        "item": "Observation of the salon's own customers' feedback.",
+        "reason": "Contacting the owner's customers is outside the authorityLimits of the OpportunityContract, and no consent path exists. Recorded as coverage.unobserved.feedback with state refused rather than left out."
+      },
+      {
+        "item": "Any statement about runtime error rate, in either direction.",
+        "reason": "No error instrument ever executed. Reporting 'no errors observed' from an uninstrumented dimension is the exact confusion this schema forbids, so the dimension is carried as coverage.unobserved.errors instead."
+      }
+    ]
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "schemaVersion": "nodekit.story-pack/v1",
+  "caseId": "salon-weekly-profit-2026-07",
+  "stage": "explain",
+  "producedAt": "2026-07-28T19:40:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "bfa4d3c52f0dc983f9460fb8fa4bbe4fdc515d47c658e30355a1d39f6a2855b3",
+      "path": "test/fixtures/builder-journey/salon.opportunity-contract.json"
+    },
+    {
+      "schemaVersion": "nodekit.build-evidence-pack/v1",
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "702ee0093c8426ca56e808d4dede150b2025bccda44cc4efae7560fe956104c2",
+      "path": "test/fixtures/builder-journey/salon.build-evidence-pack.json"
+    }
+  ],
+  "content": {
+    "audience": {
+      "reader": "The owner of the pilot salon, reading the weekly brief for the first time in a walkthrough session.",
+      "decision": "Whether to upload next week's files and use this brief instead of the spreadsheet she keeps by hand.",
+      "stakes": "demo-to-stakeholder",
+      "priorBeliefs": [
+        "That a tool showing a dollar figure has read her real bank and Square accounts.",
+        "That a number without a qualifier beside it has been verified rather than estimated.",
+        "That 'Estimated' is a hedge about arithmetic rather than a statement about missing receipts."
+      ]
+    },
+
+    "surfaces": [
+      {
+        "surfaceId": "surface-weekly-brief",
+        "kind": "document",
+        "description": "The rendered Weekly Salon Brief: the headline profit figure, the verification checklist, and the disclosure block.",
+        "route": "weekly-brief"
+      },
+      {
+        "surfaceId": "surface-cli",
+        "kind": "cli-output",
+        "description": "Terminal output of the brief command, which prints the same figures and the same disclosure lines.",
+        "route": "node src/cli.mjs brief --week 2026-07-06"
+      }
+    ],
+
+    "sources": [
+      {
+        "sourceId": "src-synthetic-week-sales",
+        "origin": "fixture",
+        "describes": "One synthetic week of card-sale rows standing in for a Square transactions export. No salon issued these bytes and no account was connected to produce them.",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/story/salon-week-synthetic-sales.csv",
+          "sha256": "58813d1ede05087112ab6d6f8228176a92cec1280b741a25b58fa852aec2ca87",
+          "byteLength": 431,
+          "mediaType": "text/csv"
+        },
+        "coversPeriod": {
+          "start": "2026-07-06T00:00:00Z",
+          "end": "2026-07-12T23:59:59Z"
+        },
+        "freshness": {
+          "asOf": "2026-07-28T19:30:00Z",
+          "maxStalenessSeconds": 2592000
+        }
+      }
+    ],
+
+    "disclosures": [
+      {
+        "disclosureId": "disc-sample-data",
+        "kind": "demo-data",
+        "text": "Sample data — this brief is not connected to your Square account, and every figure below describes a synthetic test week.",
+        "placement": "adjacent-to-claim",
+        "surfaceRefs": ["surface-weekly-brief", "surface-cli"],
+        "evidenceRef": "ev-disclosures"
+      },
+      {
+        "disclosureId": "disc-estimate-unverified",
+        "kind": "unverified-derivation",
+        "text": "This profit figure was not recomputed for this walkthrough; it was carried forward from an earlier run and cannot be reproduced from the files shown.",
+        "placement": "adjacent-to-claim",
+        "surfaceRefs": ["surface-weekly-brief"]
+      },
+      {
+        "disclosureId": "disc-unbound-readability",
+        "kind": "unbound-claim",
+        "text": "No salon owner has read this brief yet. Any statement about how quickly or easily it reads is a design intention, not a measurement.",
+        "placement": "adjacent-to-claim",
+        "surfaceRefs": ["surface-weekly-brief"]
+      }
+    ],
+
+    "claims": [
+      {
+        "claimId": "sc-weekly-profit-figure",
+        "statement": "Your estimated operating profit for the week of 6 July is $2,318, computed only from your uploaded files.",
+        "surfaceRefs": ["surface-weekly-brief", "surface-cli"],
+        "consequential": true,
+        "rendersData": true,
+        "dataImplications": ["user-owned", "factual"],
+        "phraseScan": {
+          "scanner": "src/lib/copy-claims.mjs",
+          "scannerVersion": "0.0.0-fixture",
+          "lexiconDigest": "ad09127ec793b723652f36ec8461fd666bd2a4803391e1d5ec47ad9dd32b06a3",
+          "scannedAt": "2026-07-28T19:38:00Z",
+          "matches": [
+            { "phrase": "Your estimated", "implies": ["user-owned"] },
+            { "phrase": "your uploaded", "implies": ["user-owned"] }
+          ]
+        },
+        "status": "disclosed-demo",
+        "buildBinding": {
+          "bepClaimIds": ["claim-weekly-profit-estimate"],
+          "evidenceRefs": ["ev-brief-suite", "ev-src-weekly-brief"],
+          "restatement": "simplified",
+          "strengthDelta": "stronger"
+        },
+        "contentBinding": {
+          "origin": "fixture",
+          "sourceRefs": ["src-synthetic-week-sales"],
+          "derivation": {
+            "transformation": "weekly-operating-profit",
+            "transformationVersion": "1.2.0",
+            "inputSourceRefs": ["src-synthetic-week-sales"],
+            "inputDigests": ["58813d1ede05087112ab6d6f8228176a92cec1280b741a25b58fa852aec2ca87"],
+            "reproduction": {
+              "rerunnable": false,
+              "unavailableReason": "The payroll and receipt inputs the transformation also consumes were never filed as sources, so the figure cannot be recomputed from what this pack declares."
+            }
+          },
+          "derivedStatus": "derived_unverified"
+        },
+        "disclosureRefs": ["disc-sample-data", "disc-estimate-unverified"],
+        "boundary": "The upstream evidence shows the software can compute a profit figure from four declared inputs. It does not show that this particular figure is correct, and the word 'your' is false: these are synthetic rows, not the owner's files."
+      },
+
+      {
+        "claimId": "sc-receipt-coverage",
+        "statement": "Seventy-one percent of this week's expense rows were matched to a receipt, which is why the brief says Estimated rather than Verified.",
+        "surfaceRefs": ["surface-weekly-brief"],
+        "consequential": true,
+        "rendersData": true,
+        "dataImplications": ["current"],
+        "phraseScan": {
+          "scanner": "src/lib/copy-claims.mjs",
+          "scannerVersion": "0.0.0-fixture",
+          "lexiconDigest": "ad09127ec793b723652f36ec8461fd666bd2a4803391e1d5ec47ad9dd32b06a3",
+          "scannedAt": "2026-07-28T19:38:00Z",
+          "matches": [
+            { "phrase": "this week's", "implies": ["current"] }
+          ]
+        },
+        "status": "disclosed-demo",
+        "buildBinding": {
+          "bepClaimIds": ["claim-receipt-coverage-partial"],
+          "evidenceRefs": ["ev-receipt-coverage", "ev-contradiction-notice"],
+          "restatement": "simplified",
+          "strengthDelta": "equal"
+        },
+        "contentBinding": {
+          "origin": "fixture",
+          "sourceRefs": ["src-synthetic-week-sales"],
+          "derivation": {
+            "transformation": "receipt-match-coverage",
+            "transformationVersion": "1.0.0",
+            "inputSourceRefs": ["src-synthetic-week-sales"],
+            "inputDigests": ["58813d1ede05087112ab6d6f8228176a92cec1280b741a25b58fa852aec2ca87"],
+            "reproduction": {
+              "rerunnable": true,
+              "command": "node test/fixtures/builder-journey/build-evidence/src/cli.mjs coverage --week 2026-07-06",
+              "exitCode": 0,
+              "outputDigest": "0864e558ee471c801173913910137f6319eaf039942955a572f3c2ac657dda20"
+            }
+          },
+          "derivedStatus": "derived_reproduced"
+        },
+        "disclosureRefs": ["disc-sample-data"],
+        "boundary": "The ratio is matched-over-submitted and excludes the six expense rows for which no receipt was ever uploaded, so true verification coverage is lower than 0.71. 'This week' names a synthetic week, not the week the reader is living in."
+      },
+
+      {
+        "claimId": "sc-no-outbound-network",
+        "statement": "No source file in this slice contains an outbound network call, an accounting-ledger client, or a money-movement call.",
+        "surfaceRefs": ["surface-weekly-brief"],
+        "consequential": true,
+        "rendersData": false,
+        "dataImplications": [],
+        "phraseScan": {
+          "scanner": "src/lib/copy-claims.mjs",
+          "scannerVersion": "0.0.0-fixture",
+          "lexiconDigest": "ad09127ec793b723652f36ec8461fd666bd2a4803391e1d5ec47ad9dd32b06a3",
+          "scannedAt": "2026-07-28T19:38:00Z",
+          "matches": []
+        },
+        "status": "bound",
+        "buildBinding": {
+          "bepClaimIds": ["claim-no-outbound-network"],
+          "evidenceRefs": ["ev-network-scan"],
+          "restatement": "verbatim",
+          "strengthDelta": "equal"
+        },
+        "boundary": "A static text scan of three files at one commit. It does not inspect transitive dependencies and the program was never run under a network monitor, so it constrains what was written, not what executes."
+      },
+
+      {
+        "claimId": "sc-readable-without-accounting",
+        "statement": "The brief is meant to be read in a few minutes by an owner with no accounting background.",
+        "surfaceRefs": ["surface-weekly-brief"],
+        "consequential": true,
+        "rendersData": false,
+        "dataImplications": [],
+        "phraseScan": {
+          "scanner": "src/lib/copy-claims.mjs",
+          "scannerVersion": "0.0.0-fixture",
+          "lexiconDigest": "ad09127ec793b723652f36ec8461fd666bd2a4803391e1d5ec47ad9dd32b06a3",
+          "scannedAt": "2026-07-28T19:38:00Z",
+          "matches": []
+        },
+        "status": "unbound",
+        "unbound": {
+          "reason": "no-evidence-generated",
+          "detail": "The BuildEvidencePack contains no comprehension measurement of any kind. Its completeness section records that no owner used the CLI, no session was recorded, and no comprehension of the disclosures was measured.",
+          "whatWouldBindIt": "One recorded session in which an owner who has never seen the tool reads the brief unaided and correctly states both the profit figure and the items blocking verification.",
+          "riskIfBelieved": "A buyer picks this over a bookkeeper expecting no learning curve, then abandons it mid-week when the Estimated-versus-Verified vocabulary turns out to need explaining, and trusts the next honest tool less."
+        },
+        "disclosureRefs": ["disc-unbound-readability"],
+        "boundary": "This is a design intention with nothing behind it. No one outside the build has read this brief, so the claim is unfalsified rather than supported."
+      }
+    ],
+
+    "withheldClaims": [
+      {
+        "claimId": "sc-revenue-growth-vs-last-week",
+        "statement": "Your revenue grew 12 percent against last week, so the extra chair is already paying for itself.",
+        "withheldBecause": "no-authority-issued-source",
+        "detail": "There is one synthetic week on file and no prior week at all, so the comparison has no second operand. Rendering it as disclosed demo was rejected: a growth number invented for a walkthrough is the exact fixture-laundering case docs/PLAN.md W2 names, and a disclosure beside it would not stop the reader remembering the twelve percent.",
+        "wouldHaveImplied": ["user-owned", "factual", "current"]
+      }
+    ],
+
+    "narrative": [
+      {
+        "order": 1,
+        "heading": "What this brief is, and what its numbers are",
+        "claimRefs": ["sc-weekly-profit-figure"],
+        "surfaceRef": "surface-weekly-brief"
+      },
+      {
+        "order": 2,
+        "heading": "Why it says Estimated",
+        "claimRefs": ["sc-receipt-coverage"],
+        "surfaceRef": "surface-weekly-brief"
+      },
+      {
+        "order": 3,
+        "heading": "What it will never do to your money",
+        "claimRefs": ["sc-no-outbound-network"],
+        "surfaceRef": "surface-weekly-brief"
+      },
+      {
+        "order": 4,
+        "heading": "What we have not tested yet",
+        "claimRefs": ["sc-readable-without-accounting"],
+        "surfaceRef": "surface-weekly-brief"
+      }
+    ],
+
+    "demoMode": {
+      "engaged": true,
+      "surfaceRefs": ["surface-weekly-brief", "surface-cli"],
+      "reason": "Every figure on both surfaces derives from one synthetic week. No salon has uploaded a file and no account is connected, so both surfaces render in disclosed demo rather than presenting the figures as the reader's own."
+    },
+
+    "promotionAuthorized": false
+  },
+
+  "completeness": {
+    "claimed": [
+      "Four claims made to a human, each carrying a build binding, a content binding where data is rendered, and its own stated boundary.",
+      "Every claim implying user-owned, current or factual data is forced into disclosed demo, because no source in this pack is authority-issued.",
+      "One claim is recorded as unbound with a reason, a binding condition and a stated risk, and is disclosed on the surface rather than dropped.",
+      "One claim the build wanted to make is recorded as withheld rather than deleted, with what it would have implied."
+    ],
+    "notRun": [
+      "No claim in this pack is bound to an authority-issued source, so the bound-plus-authority-issued path is unexercised by this fixture and only the disclosure path is demonstrated.",
+      "The phraseScan records are illustrative: no scanner was executed over these statements, and scannerVersion is marked 0.0.0-fixture to say so. A real pack must carry a scan that actually ran.",
+      "The weekly profit transformation was not rerun, which is why it is recorded as derived_unverified rather than reproduced.",
+      "No owner has read either surface, so no claim about comprehension, speed or ease has any measurement behind it.",
+      "The rendered surfaces are not deployed; nothing here establishes that these strings appear in a live page. LAUNCH owns that."
+    ],
+    "refused": [
+      {
+        "item": "Rendering the week-over-week revenue growth claim in disclosed demo mode.",
+        "reason": "A fabricated growth figure with a disclosure beside it still leaves the reader remembering the figure. The claim is recorded in withheldClaims instead, where it cannot acquire a surface."
+      },
+      {
+        "item": "Describing the synthetic sales file as a Square export.",
+        "reason": "It resembles one, and resemblance is exactly what the authority-issued origin refuses to accept. Calling it an export would be fixture laundering through a real-looking source."
+      }
+    ]
+  }
+}

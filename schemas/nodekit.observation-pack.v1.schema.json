@@ -1,0 +1,567 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.observation-pack.v1.schema.json",
+  "title": "NodeKit observation pack",
+  "description": "LEARN stage of the Builder Journey. Answers: what actually happened after launch, FROM WHICH SOURCE, and what did NOT get observed. Consumes LaunchManifest + StoryPack; closes the loop back to DECIDE.\n\nThe defining problem of this stage is that absence of observation is the NORMAL case and must never read as a negative finding. 'no errors observed' and 'error observation was never instrumented' are different claims, so they live in structurally different places: the first is a `coverage.observed` report with outcome `no-instances` and a non-zero sampleCount; the second is a `coverage.unobserved` report that CANNOT carry a sampleCount, an outcome or a conclusion at all. There is no shape in which the two can be confused.\n\nCoverage is a partition, not a list. Every dimension in the closed enum appears exactly once, in exactly one of `observed` / `unobserved` — enforced by the allOf at the bottom of this file. A stage cannot narrow its own scope by omitting a dimension, which is the vacuous pass this schema exists to prevent (docs/VACUOUS_PASS.md).\n\nDoes NOT define a friction record. `content.observations[]` is deliberately field-identical to the friction records `src/lib/friction-loop.mjs#collectFriction` already reads (id, severity, kind, observed, consequence), so classification into the existing loop is an identity map, not a translation. Judging is owned by nodekit.builder-gym-verdict/v1, recorded human friction by nodekit.human-study-event/v1, and the decision record by nodekit.evolution-event/v1. This pack feeds all three and replaces none.",
+  "type": "object",
+  "required": ["schemaVersion", "caseId", "stage", "producedAt", "inputs", "content", "completeness"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "nodekit.observation-pack/v1" },
+    "caseId": {
+      "$ref": "#/$defs/id",
+      "description": "Identical across all five journey artifacts for one journey."
+    },
+    "stage": { "const": "learn" },
+    "producedAt": { "$ref": "#/$defs/instant" },
+    "inputs": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 24,
+      "description": "Binding, not a label. sha256 is over the canonical JSON (sorted keys, no insignificant whitespace) of the upstream artifact. LEARN consumes LaunchManifest and StoryPack, so both digests must be present; a pack that cannot digest what it consumed was handed a name, not an artifact.",
+      "items": { "$ref": "#/$defs/inputBinding" },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": ["schemaVersion"],
+            "properties": { "schemaVersion": { "const": "nodekit.launch-manifest/v1" } }
+          },
+          "description": "The LaunchManifest this pack observed the consequences of."
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": ["schemaVersion"],
+            "properties": { "schemaVersion": { "const": "nodekit.story-pack/v1" } }
+          },
+          "description": "The StoryPack whose claims this pack checks against reality."
+        }
+      ]
+    },
+    "content": { "$ref": "#/$defs/content" },
+    "completeness": {
+      "type": "object",
+      "required": ["claimed", "notRun", "refused"],
+      "additionalProperties": false,
+      "description": "An empty notRun is itself a claim: that everything in scope was attempted. A refusal with a reason is a success; a silent omission is the failure this apparatus exists to catch.",
+      "properties": {
+        "claimed": { "$ref": "#/$defs/nonEmptyStrings" },
+        "notRun": { "$ref": "#/$defs/stringList" },
+        "refused": {
+          "type": "array",
+          "maxItems": 48,
+          "items": {
+            "type": "object",
+            "required": ["item", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "item": { "$ref": "#/$defs/nonEmpty" },
+              "reason": { "$ref": "#/$defs/nonEmpty" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 48,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmpty" }
+    },
+    "stringList": {
+      "type": "array",
+      "maxItems": 48,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmpty" }
+    },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,95}$" },
+    "idList": {
+      "type": "array",
+      "maxItems": 48,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "nonEmptyIdList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 48,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "instant": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$",
+      "description": "ISO-8601 UTC, Z-terminated. A local-offset timestamp makes two observation windows incomparable."
+    },
+
+    "inputBinding": {
+      "type": "object",
+      "required": ["schemaVersion", "caseId", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "caseId": { "$ref": "#/$defs/id" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+
+    "window": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "description": "A closed interval. Every measurement states its own window, because a finding without a window is not comparable to the next run's finding.",
+      "properties": {
+        "from": { "$ref": "#/$defs/instant" },
+        "to": { "$ref": "#/$defs/instant" }
+      }
+    },
+
+    "dimension": {
+      "enum": [
+        "reachability",
+        "usage",
+        "errors",
+        "performance",
+        "taskOutcome",
+        "friction",
+        "cost",
+        "feedback"
+      ],
+      "description": "CLOSED on purpose. An open dimension set lets a pack narrow its own scope by simply never mentioning a dimension, which is exactly the omission this stage must make impossible. Adding a dimension is a schema version bump, not a producer's private choice.\n\nreachability: is the launched thing actually reachable. usage: did anyone use it. errors: runtime failures. performance: latency and responsiveness. taskOutcome: did users complete the primary job from the OpportunityContract. friction: where users struggled. cost: spend against the standing grant declared in the LaunchManifest. feedback: direct human statements about it."
+    },
+
+    "source": {
+      "type": "object",
+      "required": ["sourceId", "kind", "locator", "availability"],
+      "additionalProperties": false,
+      "description": "WHERE an observation could come from. A source that exists is not a source that reports; `availability` keeps those apart.",
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/id" },
+        "kind": {
+          "enum": [
+            "http-access-log",
+            "error-tracker",
+            "browser-telemetry",
+            "synthetic-probe",
+            "analytics",
+            "support-inbox",
+            "human-report",
+            "billing-ledger",
+            "deployment-log",
+            "manual-inspection"
+          ]
+        },
+        "locator": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "Where the source physically is: a URL, a repository-relative path, a provider dashboard identifier. A source nobody can go and re-read is an assertion."
+        },
+        "availability": {
+          "enum": ["reporting", "configured-not-reporting", "not-configured", "access-denied", "retired"],
+          "description": "not-configured and configured-not-reporting are the two states that most often masquerade as a clean result. Neither may ever back an `observed` report."
+        },
+        "retention": { "$ref": "#/$defs/nonEmpty" },
+        "coverageWindow": { "$ref": "#/$defs/window" },
+        "note": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
+
+    "instrument": {
+      "type": "object",
+      "required": ["instrumentId", "sourceId", "dimension", "measures", "method", "status"],
+      "additionalProperties": false,
+      "description": "HOW a source was read. `measures` and `method` are required because docs/VACUOUS_PASS.md's rule is that an instrument must state what it measured, not only what it concluded. An instrument that cannot name its quantity and its unit did not measure anything.",
+      "properties": {
+        "instrumentId": { "$ref": "#/$defs/id" },
+        "sourceId": {
+          "$ref": "#/$defs/id",
+          "description": "Must match a content.sources[].sourceId. Referential integrity is a verifier's job, not JSON Schema's."
+        },
+        "dimension": { "$ref": "#/$defs/dimension" },
+        "measures": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "The quantity, WITH its unit. 'count of HTTP 5xx responses per hour', not 'errors'."
+        },
+        "method": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "How the quantity was obtained, precisely enough for a second party to obtain it again."
+        },
+        "status": {
+          "enum": ["ran", "not-run", "failed", "not-implemented"],
+          "description": "not-implemented means the instrument is described here but does not exist. Describing an instrument is not running one; only `ran` may back an `observed` report."
+        },
+        "failureReason": { "$ref": "#/$defs/nonEmpty" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "failed" } }, "required": ["status"] },
+          "then": { "required": ["failureReason"], "properties": { "failureReason": { "$ref": "#/$defs/nonEmpty" } } }
+        }
+      ]
+    },
+
+    "observedReport": {
+      "type": "object",
+      "required": ["sourceIds", "instrumentIds", "window", "measured", "sampleCount", "outcome", "findings"],
+      "additionalProperties": false,
+      "description": "A dimension that was actually watched. Requires the source and the instrument that watched it, so a reader can tell what the number is a number OF.",
+      "properties": {
+        "sourceIds": { "$ref": "#/$defs/nonEmptyIdList" },
+        "instrumentIds": { "$ref": "#/$defs/nonEmptyIdList" },
+        "window": { "$ref": "#/$defs/window" },
+        "measured": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "What was measured and what came back, in units. Stated separately from `conclusion` so a conclusion can be checked against its own evidence."
+        },
+        "sampleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many units of observation the instrument actually saw (requests, sessions, probe runs, reports). This is the number that separates 'we watched and there were none' from 'we watched nothing'."
+        },
+        "outcome": {
+          "enum": ["findings", "no-instances", "inconclusive"],
+          "description": "no-instances is the ONLY way to say 'none observed', and it is a positive claim requiring sampleCount >= 1. Zero samples is `inconclusive` — the instrument ran but the world did not supply anything to measure, which supports no statement about the dimension at all."
+        },
+        "findings": {
+          "$ref": "#/$defs/idList",
+          "description": "References into content.observations[].id. Non-empty only when outcome is `findings`."
+        },
+        "conclusion": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "Optional, and never a substitute for `measured`."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "findings" } }, "required": ["outcome"] },
+          "then": { "properties": { "findings": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "outcome": { "const": "no-instances" } }, "required": ["outcome"] },
+          "then": {
+            "properties": {
+              "findings": { "maxItems": 0 },
+              "sampleCount": { "minimum": 1 }
+            }
+          },
+          "description": "'No errors observed' from zero samples is the flagship vacuous pass. A no-instances claim must be backed by at least one thing actually looked at."
+        },
+        {
+          "if": { "properties": { "outcome": { "const": "inconclusive" } }, "required": ["outcome"] },
+          "then": { "properties": { "findings": { "maxItems": 0 } } }
+        }
+      ]
+    },
+
+    "unobservedReport": {
+      "type": "object",
+      "required": ["state", "reason", "wouldRequire"],
+      "additionalProperties": false,
+      "description": "A dimension that was NOT watched. This is a first-class report with its own required fields, not an omission and not a result. It structurally cannot carry sampleCount, outcome, findings or conclusion, so it can never be misread as a negative finding.",
+      "properties": {
+        "state": {
+          "enum": ["not-instrumented", "instrumented-not-run", "source-unavailable", "outside-window", "refused"],
+          "description": "not-instrumented: nothing exists that could have seen this. instrumented-not-run: an instrument exists and was not executed. source-unavailable: the instrument ran but its source could not be read. outside-window: the dimension is only observable outside this pack's window. refused: deliberately not observed, on authority or privacy grounds."
+        },
+        "reason": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "Why it was not observed. A reason is what turns a gap into a finding about the instrumentation."
+        },
+        "wouldRequire": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "The specific instrument or access that WOULD observe this dimension. This is the field that closes the loop: an unobserved dimension is an input to the next DECIDE, not a dead end."
+        },
+        "sourceIds": {
+          "$ref": "#/$defs/idList",
+          "description": "The sources that were expected to serve this dimension, when any existed."
+        },
+        "instrumentIds": {
+          "$ref": "#/$defs/idList",
+          "description": "Instruments declared for this dimension that did not produce a reading."
+        },
+        "blocksClaims": {
+          "$ref": "#/$defs/stringList",
+          "description": "Claims from the bound StoryPack that cannot be substantiated because of this gap. An unobserved dimension with no blocked claims is a gap nobody was relying on; one with blocked claims is a hole under a promise already made to a human."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "source-unavailable" } }, "required": ["state"] },
+          "then": { "required": ["sourceIds"], "properties": { "sourceIds": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "state": { "const": "instrumented-not-run" } }, "required": ["state"] },
+          "then": { "required": ["instrumentIds"], "properties": { "instrumentIds": { "minItems": 1 } } }
+        }
+      ]
+    },
+
+    "observation": {
+      "type": "object",
+      "required": ["id", "severity", "kind", "observed", "consequence", "dimension", "sourceId", "instrumentId", "inferred"],
+      "additionalProperties": false,
+      "description": "One recorded post-launch fact.\n\nThe first five fields are field-identical to the friction records `src/lib/friction-loop.mjs#collectFriction` already normalises out of harness/journey/*.json (id, severity, kind, observed, consequence). Classifying this pack into the existing loop is therefore `{ friction: pack.content.observations }` — an identity map. This schema deliberately does NOT introduce a competing friction record type; nodekit.human-study-* owns recorded human friction and test/repo-tour.test.mjs enforces that ownership.\n\nThe remaining fields are the provenance the friction record never carried: which source, which instrument, and whether the fact was measured or inferred.",
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "severity": {
+          "enum": ["P0", "P1", "P2", "P3"],
+          "description": "Same ladder as src/lib/friction-loop.mjs SEVERITY_ORDER, so ordering survives the handoff."
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]{0,63}$",
+          "description": "Free slug rather than an enum, because an enum would make an unclassifiable observation inexpressible and push it into silence. `unclassified` is the honest value when the class is not yet known — it is also what friction-loop defaults to."
+        },
+        "observed": {
+          "$ref": "#/$defs/nonEmpty",
+          "description": "What was seen, stated as fact rather than as judgement."
+        },
+        "consequence": {
+          "oneOf": [{ "$ref": "#/$defs/nonEmpty" }, { "type": "null" }],
+          "description": "Explicit null when the consequence is not yet known. Required-but-nullable rather than optional, so 'we did not work out the consequence' is written down instead of left out."
+        },
+        "dimension": { "$ref": "#/$defs/dimension" },
+        "sourceId": { "$ref": "#/$defs/id" },
+        "instrumentId": { "$ref": "#/$defs/id" },
+        "inferred": {
+          "type": "boolean",
+          "description": "false when the instrument read this directly; true when a human or agent derived it from something the instrument read. An inferred observation that reads as measured is how a story becomes evidence."
+        },
+        "inferenceBasis": { "$ref": "#/$defs/nonEmpty" },
+        "occurredAt": { "$ref": "#/$defs/instant" },
+        "count": { "type": "integer", "minimum": 1 },
+        "evidenceRefs": {
+          "$ref": "#/$defs/stringList",
+          "description": "Repository-relative paths or receipt identifiers a reader can open."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "inferred": { "const": true } }, "required": ["inferred"] },
+          "then": { "required": ["inferenceBasis"], "properties": { "inferenceBasis": { "$ref": "#/$defs/nonEmpty" } } },
+          "description": "An inference must name what it was inferred FROM, or it is an opinion wearing an observation's schema."
+        }
+      ]
+    },
+
+    "coverage": {
+      "type": "object",
+      "required": ["observed", "unobserved"],
+      "additionalProperties": false,
+      "description": "The partition. Both keys are required even when one is empty, because `unobserved: {}` is a claim a reader can challenge while a missing key is not. Every dimension appears exactly once across the two maps — see the allOf below.",
+      "properties": {
+        "observed": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/dimension" },
+          "additionalProperties": { "$ref": "#/$defs/observedReport" }
+        },
+        "unobserved": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/dimension" },
+          "additionalProperties": { "$ref": "#/$defs/unobservedReport" }
+        }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/partitionOn/reachability" },
+        { "$ref": "#/$defs/partitionOn/usage" },
+        { "$ref": "#/$defs/partitionOn/errors" },
+        { "$ref": "#/$defs/partitionOn/performance" },
+        { "$ref": "#/$defs/partitionOn/taskOutcome" },
+        { "$ref": "#/$defs/partitionOn/friction" },
+        { "$ref": "#/$defs/partitionOn/cost" },
+        { "$ref": "#/$defs/partitionOn/feedback" }
+      ]
+    },
+
+    "partitionOn": {
+      "$comment": "One entry per dimension. Each asserts exactly-once membership: present in observed and absent from unobserved, or the reverse. This is what makes a silently dropped dimension a schema violation rather than a quiet narrowing of scope.",
+      "reachability": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["reachability"] }, "unobserved": { "not": { "required": ["reachability"] } } } },
+          { "properties": { "unobserved": { "required": ["reachability"] }, "observed": { "not": { "required": ["reachability"] } } } }
+        ]
+      },
+      "usage": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["usage"] }, "unobserved": { "not": { "required": ["usage"] } } } },
+          { "properties": { "unobserved": { "required": ["usage"] }, "observed": { "not": { "required": ["usage"] } } } }
+        ]
+      },
+      "errors": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["errors"] }, "unobserved": { "not": { "required": ["errors"] } } } },
+          { "properties": { "unobserved": { "required": ["errors"] }, "observed": { "not": { "required": ["errors"] } } } }
+        ]
+      },
+      "performance": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["performance"] }, "unobserved": { "not": { "required": ["performance"] } } } },
+          { "properties": { "unobserved": { "required": ["performance"] }, "observed": { "not": { "required": ["performance"] } } } }
+        ]
+      },
+      "taskOutcome": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["taskOutcome"] }, "unobserved": { "not": { "required": ["taskOutcome"] } } } },
+          { "properties": { "unobserved": { "required": ["taskOutcome"] }, "observed": { "not": { "required": ["taskOutcome"] } } } }
+        ]
+      },
+      "friction": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["friction"] }, "unobserved": { "not": { "required": ["friction"] } } } },
+          { "properties": { "unobserved": { "required": ["friction"] }, "observed": { "not": { "required": ["friction"] } } } }
+        ]
+      },
+      "cost": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["cost"] }, "unobserved": { "not": { "required": ["cost"] } } } },
+          { "properties": { "unobserved": { "required": ["cost"] }, "observed": { "not": { "required": ["cost"] } } } }
+        ]
+      },
+      "feedback": {
+        "anyOf": [
+          { "properties": { "observed": { "required": ["feedback"] }, "unobserved": { "not": { "required": ["feedback"] } } } },
+          { "properties": { "unobserved": { "required": ["feedback"] }, "observed": { "not": { "required": ["feedback"] } } } }
+        ]
+      }
+    },
+
+    "decideFeedback": {
+      "type": "object",
+      "required": ["successCondition", "unknownsResolved", "unknownsStillOpen", "newUnknowns"],
+      "additionalProperties": false,
+      "description": "What LEARN sends back to DECIDE. The loop is only closed if the next OpportunityContract can be written from this object without re-reading the whole pack.",
+      "properties": {
+        "successCondition": {
+          "type": "object",
+          "required": ["status", "basis"],
+          "additionalProperties": false,
+          "description": "Against the successCondition carried by the OpportunityContract at the head of this chain.",
+          "properties": {
+            "status": {
+              "enum": ["met", "not-met", "partially-met", "not-observable"],
+              "description": "not-observable is a first-class outcome, not a failure to report. It is the correct answer whenever the dimensions the success condition depends on were never instrumented."
+            },
+            "basis": { "$ref": "#/$defs/nonEmpty" },
+            "evidenceObservationIds": {
+              "$ref": "#/$defs/idList",
+              "description": "References into content.observations[].id."
+            },
+            "unobservedDimensions": {
+              "type": "array",
+              "maxItems": 8,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/dimension" }
+            }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "status": { "enum": ["met", "not-met", "partially-met"] } }, "required": ["status"] },
+              "then": {
+                "required": ["evidenceObservationIds"],
+                "properties": { "evidenceObservationIds": { "minItems": 1 } }
+              },
+              "description": "A verdict on the success condition must point at observations. Declaring success with nothing to point at is the vacuous pass at its most expensive."
+            },
+            {
+              "if": { "properties": { "status": { "const": "not-observable" } }, "required": ["status"] },
+              "then": {
+                "required": ["unobservedDimensions"],
+                "properties": {
+                  "unobservedDimensions": { "minItems": 1 },
+                  "evidenceObservationIds": { "maxItems": 0 }
+                }
+              },
+              "description": "'Not observable' must name WHICH unobserved dimensions made it so, and may not smuggle in supporting observations."
+            }
+          ]
+        },
+        "unknownsResolved": {
+          "type": "array",
+          "maxItems": 24,
+          "description": "openUnknowns from the OpportunityContract that this pack answered.",
+          "items": {
+            "type": "object",
+            "required": ["unknown", "answer", "resolvedByObservationIds"],
+            "additionalProperties": false,
+            "properties": {
+              "unknown": { "$ref": "#/$defs/nonEmpty" },
+              "answer": { "$ref": "#/$defs/nonEmpty" },
+              "resolvedByObservationIds": { "$ref": "#/$defs/nonEmptyIdList" }
+            }
+          }
+        },
+        "unknownsStillOpen": {
+          "$ref": "#/$defs/stringList",
+          "description": "openUnknowns the launch did not answer. Carried forward verbatim so the next DECIDE inherits them rather than re-deriving them."
+        },
+        "newUnknowns": {
+          "$ref": "#/$defs/stringList",
+          "description": "Questions the launch created that nobody had before."
+        },
+        "instrumentationDebt": {
+          "type": "array",
+          "maxItems": 24,
+          "description": "The unobserved set restated as work. Each entry is a candidate scope item for the next journey, derived from an unobserved dimension's wouldRequire.",
+          "items": {
+            "type": "object",
+            "required": ["dimension", "wouldRequire", "priority"],
+            "additionalProperties": false,
+            "properties": {
+              "dimension": { "$ref": "#/$defs/dimension" },
+              "wouldRequire": { "$ref": "#/$defs/nonEmpty" },
+              "priority": { "enum": ["P0", "P1", "P2", "P3"] },
+              "note": { "$ref": "#/$defs/nonEmpty" }
+            }
+          }
+        }
+      }
+    },
+
+    "content": {
+      "type": "object",
+      "required": ["observationWindow", "sources", "instruments", "coverage", "observations", "decideFeedback", "promotionAuthorized"],
+      "additionalProperties": false,
+      "properties": {
+        "observationWindow": {
+          "$ref": "#/$defs/window",
+          "description": "The interval during which observation was even possible. Everything in coverage.observed must sit inside it; a finding dated outside the window came from somewhere this pack did not declare."
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 48,
+          "items": { "$ref": "#/$defs/source" },
+          "description": "May be empty — a launch with no observation sources at all is a legitimate and important thing to record, provided coverage.unobserved then accounts for all eight dimensions."
+        },
+        "instruments": {
+          "type": "array",
+          "maxItems": 48,
+          "items": { "$ref": "#/$defs/instrument" }
+        },
+        "coverage": { "$ref": "#/$defs/coverage" },
+        "observations": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/observation" }
+        },
+        "decideFeedback": { "$ref": "#/$defs/decideFeedback" },
+        "promotionAuthorized": {
+          "const": false,
+          "description": "A producer may write false. It may never write true. Promotion is derived from a signed approval by src/lib/repair-approval.mjs, never accepted as input."
+        },
+        "evolutionEventRequired": {
+          "type": "boolean",
+          "description": "Whether this pack's contents warrant a nodekit.evolution-event/v1 draft. This pack does NOT write one — the Evolution Ledger owns the decision record and its interpretation.status may only reach human-reviewed through a verified signed approval."
+        }
+      },
+      "propertyNames": {
+        "not": { "enum": ["reviewedBy", "reviewedAt", "approved", "approvedBy", "approvalHash", "verdict", "interpretation", "trustLevel"] }
+      },
+      "$comment": "The propertyNames guard is redundant under additionalProperties:false and is kept as a named tripwire: if this object is ever loosened, self-approval fields still fail closed rather than silently becoming expressible. Written as propertyNames rather than `not`/`required` so it survives Ajv strict mode (strictRequired rejects a required property that is not declared in `properties`), and because it binds every property name rather than an enumerated list of shapes."
+    }
+  }
+}

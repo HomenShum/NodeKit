@@ -9,7 +9,12 @@ const loadYamlModule = createRequire(import.meta.url);
 let yamlModule;
 const yaml = () => (yamlModule ??= loadYamlModule("yaml"));
 const stringifyYaml = (...args) => yaml().stringify(...args);
-import { FRONTEND_REQUIRED_GUARDRAILS, FRONTEND_REQUIRED_STATES } from "./frontend-specialist.mjs";
+import {
+  FRONTEND_REQUIRED_GUARDRAILS,
+  FRONTEND_REQUIRED_STATES,
+  FRONTEND_TRUST_STATE_ATTRIBUTE,
+  FRONTEND_TRUST_STATES,
+} from "./frontend-specialist.mjs";
 
 // Decide -> Build compiler. An approved OpportunityContract is the boundary the Build stage must
 // respect. This turns it into the two things Build actually consumes: a product-design contract for
@@ -80,6 +85,14 @@ export function compileOpportunityToBuild(opportunity) {
     requiredMobileSurfaces: [...STANDARD_MOBILE_SURFACES],
     avoid,
     requiredStates: [...FRONTEND_REQUIRED_STATES],
+    // Trust-surfaces clause 1. Derived from FRONTEND_TRUST_STATES rather than hand-listed, so a
+    // new trust state acquires its DOM obligation automatically instead of silently skipping one.
+    domStateAssertions: FRONTEND_TRUST_STATES.map((state) => ({
+      state,
+      selector: "[data-nodekit-trust-surface]",
+      attribute: FRONTEND_TRUST_STATE_ATTRIBUTE,
+      value: state,
+    })),
     // The OpportunityContract's decisions are protected: the agent cannot re-decide them while coding.
     protectedDecisions: {
       primaryUser: "nodekit",

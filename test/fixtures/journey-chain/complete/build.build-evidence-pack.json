@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "nodekit.build-evidence-pack/v1",
+  "caseId": "fixture-chain-2026-07-28",
+  "stage": "build",
+  "producedAt": "2026-07-28T18:10:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "fixture-chain-2026-07-28",
+      "sha256": "cff0142e7c0e91f8d367fef640b36af0080dded43ad42de51345dd0d0e2c1c02",
+      "path": "decide.opportunity-contract.json"
+    }
+  ],
+  "content": {
+    "decisions": [
+      {
+        "decision": "Derive column mappings per client from the prior week's accepted ledger.",
+        "disposition": "honoured",
+        "opportunityContractField": "primaryJob",
+        "evidence": "reconcile-suite.log"
+      },
+      {
+        "decision": "Refuse to write to any accounting system of record.",
+        "disposition": "honoured",
+        "opportunityContractField": "authorityLimits.prohibited",
+        "evidence": "write-surface-scan.txt"
+      },
+      {
+        "decision": "Treat a wrongly matched line as costlier than an unmatched one.",
+        "disposition": "defaulted-with-disclosure",
+        "opportunityContractField": "openUnknowns",
+        "evidence": "matching-threshold-disclosure.md"
+      }
+    ],
+    "built": [
+      {
+        "surface": "reconcile CLI",
+        "claim": "Produces a reconciled ledger from four export shapes.",
+        "evidence": "reconcile-suite.log",
+        "generated": true
+      }
+    ]
+  },
+  "completeness": {
+    "claimed": [
+      "Three OpportunityContract decision points reconciled with a disposition and a named evidence file.",
+      "The reconcile CLI runs end to end against the four fixture export shapes."
+    ],
+    "notRun": [
+      "Stability of the four export shapes across vendor updates was never exercised; only one week's shapes exist.",
+      "No measurement of whether the bookkeeper actually finishes in fifteen minutes, because no bookkeeper was observed."
+    ],
+    "refused": [
+      {
+        "item": "Direct bank API integration",
+        "reason": "Requires credentials outside this wave's authority; refused rather than stubbed so the gap stays visible."
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "measuredAt": "2026-07-28T18:41:07Z",
+  "tool": "test/fixtures/builder-journey/build-evidence/src/weekly-brief.mjs",
+  "week": "2026-07-20/2026-07-26",
+  "threshold": 0.82,
+  "receiptsSubmitted": 24,
+  "receiptsMatchedAtOrAboveThreshold": 17,
+  "receiptsBelowThreshold": 2,
+  "receiptsUnreadable": 5,
+  "coverage": 0.7083333333333334,
+  "expenseRowsWithoutAnyReceipt": 6,
+  "note": "Coverage is matched/submitted. It says nothing about expense rows for which no receipt was ever uploaded; those are counted separately and appear in the verification queue."
+}

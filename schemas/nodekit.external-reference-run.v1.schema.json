@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nodekit.external-reference-run/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "provider",
+    "operation",
+    "policyId",
+    "status",
+    "subjectDigest",
+    "contentDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.external-reference-run/v1" },
+    "runId": { "type": "string", "pattern": "^external_run_[0-9a-f]{24}$" },
+    "provider": { "const": "mobbin" },
+    "operation": { "const": "authenticated-live-inspection" },
+    "policyId": { "const": "nodekit.mobbin-remote-mcp/v1" },
+    "status": { "enum": ["pass", "fail", "not-run"] },
+    "checkedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "sourceUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://([a-z0-9-]+\\.)?mobbin\\.com/"
+    },
+    "remoteObjectId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "runNonce": { "type": "string", "pattern": "^[A-Za-z0-9_-]{16,128}$" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "version"],
+      "properties": {
+        "tool": { "const": "mobbin/search_flows" },
+        "version": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "observationId": { "type": "string", "pattern": "^observation_[0-9a-f]{24}$" },
+    "observationDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "factsDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "prohibitedMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storedPixels",
+        "cachedSourcePayload",
+        "embeddingStored",
+        "ragIndexed",
+        "trainingUsed"
+      ],
+      "properties": {
+        "storedPixels": { "const": false },
+        "cachedSourcePayload": { "const": false },
+        "embeddingStored": { "const": false },
+        "ragIndexed": { "const": false },
+        "trainingUsed": { "const": false }
+      }
+    },
+    "reasonCode": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "purpose",
+        "keyId",
+        "subjectDigest",
+        "signedAt",
+        "algorithm",
+        "signatureEncoding",
+        "signature"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "nodekit.reference-service-attestation/v1" },
+        "purpose": { "const": "mobbin-external-reference-run" },
+        "keyId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,200}$" },
+        "subjectDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "signedAt": { "type": "string", "format": "date-time" },
+        "algorithm": { "const": "Ed25519" },
+        "signatureEncoding": { "const": "base64url" },
+        "signature": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" }
+      }
+    },
+    "subjectDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "contentDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "pass" } }, "required": ["status"] },
+      "then": {
+        "required": [
+          "checkedAt",
+          "expiresAt",
+          "sourceUrl",
+          "remoteObjectId",
+          "runNonce",
+          "producer",
+          "observationId",
+          "observationDigest",
+          "factsDigest",
+          "prohibitedMaterial",
+          "attestation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "enum": ["fail", "not-run"] } },
+        "required": ["status"]
+      },
+      "then": { "required": ["reasonCode"] }
+    }
+  ]
+}

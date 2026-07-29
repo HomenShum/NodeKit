@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "nodekit.launch-manifest/v1",
+  "caseId": "fixture-chain-2026-07-28",
+  "stage": "launch",
+  "producedAt": "2026-07-28T18:25:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.build-evidence-pack/v1",
+      "caseId": "fixture-chain-2026-07-28",
+      "sha256": "11ee3aa325924138f5346996d75ecfeac61d33b2f01e334023a76c80e9a70603",
+      "path": "build.build-evidence-pack.json"
+    }
+  ],
+  "content": {
+    "deployment": {
+      "target": "local preview only",
+      "url": "http://127.0.0.1:4173/reconcile",
+      "liveDomSignal": "[data-testid=\"reconcile-ledger-root\"]",
+      "liveDomSignalObserved": true,
+      "observedIn": "preview-dom-capture.html"
+    },
+    "authority": {
+      "standingGrant": "local-preview-only",
+      "grantedBy": "repository default, no credential grant requested",
+      "costAgainstGrant": { "currency": "USD", "amount": 0 },
+      "approvalsRequestedFrom": [],
+      "reviewedByPolicy": "derived-from-attestation-never-authored"
+    },
+    "promotionAuthorized": false
+  },
+  "completeness": {
+    "claimed": [
+      "A preview served the reconcile surface and the DOM signal was observed in the captured markup."
+    ],
+    "notRun": [
+      "No public deployment was performed; this wave holds no deployment credentials.",
+      "No cost was drawn against any standing grant because no hosted resource was created."
+    ],
+    "refused": [
+      {
+        "item": "Publishing the preview to a public URL",
+        "reason": "Out of scope for this wave and outside the OpportunityContract's authorityLimits.approve, which is empty."
+      }
+    ]
+  }
+}

@@ -53,6 +53,11 @@
       "import": "./src/managed-evidence-capture.mjs",
       "default": "./src/managed-evidence-capture.mjs"
     },
+    "./reference-loop": {
+      "types": "./src/reference-loop.d.mts",
+      "import": "./src/reference-loop.mjs",
+      "default": "./src/reference-loop.mjs"
+    },
     "./builder-gym": {
       "types": "./src/builder-gym.d.mts",
       "import": "./src/builder-gym.mjs",
@@ -127,7 +132,8 @@
     "nodekit-evidence-finalize": "scripts/finalize-submission-evidence.mjs",
     "nodekit-consumer-prepare": "scripts/prepare-consumer-package.mjs",
     "nodekit-evidence-capture": "scripts/capture-managed-evidence.mjs",
-    "nodekit-human-study": "scripts/capture-human-study.mjs"
+    "nodekit-human-study": "scripts/capture-human-study.mjs",
+    "nodekit-unpushed-work-gate": "scripts/unpushed-work-gate.mjs"
   },
   "files": [
     "dist",
@@ -136,7 +142,9 @@
     "scripts/verify-submission-attestation.mjs",
     "scripts/finalize-submission-evidence.mjs",
     "scripts/prepare-consumer-package.mjs",
+    "scripts/test-files.mjs",
     "scripts/capture-human-study.mjs",
+    "scripts/unpushed-work-gate.mjs",
     "scripts/capture-managed-evidence.mjs",
     "scripts/run-knowledge-runtime-comparison.mjs",
     "adapters",
@@ -161,7 +169,7 @@
     "prepare": "npm run build:component",
     "audit:prod": "npm audit --omit=dev",
     "typecheck:public": "tsc -p tsconfig.public.json",
-    "test:repository": "node --test test/*.test.mjs",
+    "test:repository": "node scripts/test-files.mjs fast",
     "test": "npm run test:repository && npm run test:component",
     "presentation:nodekit-proof": "node scripts/generate-nodekit-proof-presentation.mjs",
     "acceptance:factory": "node src/factory-acceptance.mjs",
@@ -190,16 +198,21 @@
     "dashboard": "node src/cli.mjs dashboard --registry-root . --workspace .. --write",
     "evolution:verify": "node src/cli.mjs evolution verify --repo-root .",
     "evolution:docs": "node src/cli.mjs evolution build-docs --repo-root .",
+    "reference:schemas": "node scripts/generate-reference-schema-validators.mjs",
+    "reference:schemas:check": "node scripts/generate-reference-schema-validators.mjs --check",
     "knowledge:compare": "node scripts/run-knowledge-runtime-comparison.mjs",
     "check": "npm run test && npm run typecheck:public && npm run audit:prod && npm run registry:check && npm run ecosystem:check",
     "repo:map": "node src/cli.mjs repo map --write",
     "tour": "node src/cli.mjs tour",
     "copy:audit": "node src/cli.mjs copy audit",
     "behavior:index": "node src/cli.mjs behavior index --write",
+    "motion:compare": "node src/cli.mjs motion compare",
     "journey:verify": "node src/cli.mjs journey verify",
     "bench:recall": "node scripts/bench-recall.mjs",
     "recall": "node scripts/recall.mjs",
-    "verify:evidence": "node scripts/verify-evidence-drift.mjs"
+    "verify:evidence": "node scripts/verify-evidence-drift.mjs",
+    "test:slow": "node scripts/test-files.mjs slow",
+    "test:all": "node scripts/test-files.mjs all && npm run test:component"
   },
   "engines": {
     "node": ">=20"

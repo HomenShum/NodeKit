@@ -93,6 +93,25 @@ npm run ecosystem:check
 npm run dashboard
 ```
 
+### Compare copied behavior
+
+Design tokens can preserve appearance while silently changing interaction timing. NodeKit's first
+behavior-portability check compares static CSS motion declarations across repositories, binds the
+exact source set, and emits reviewable migration aliases:
+
+```bash
+node src/cli.mjs motion compare \
+  /path/to/source-repository \
+  /path/to/destination-repository \
+  --output proof/motion-portability.json
+```
+
+The command returns `PASS`, `FAIL`, or `NOT_RUN`; missing coverage is never green. Its receipt is
+decisive for static name/value conflicts only and explicitly leaves runtime, DOM/trace, video, and
+audience evidence unrun. See
+[`docs/BEHAVIOR_PORTABILITY_SHOWCASE.md`](https://github.com/HomenShum/node-platform/blob/main/docs/BEHAVIOR_PORTABILITY_SHOWCASE.md) for the measured
+NodeSlide/NodeRoom example.
+
 By default, `nodekit create` vendors the exact compile/check runtime that generated
 the project under `vendor/nodekit` and records `file:vendor/nodekit` in
 `package.json`. This keeps a fresh clone installable and prevents a later
@@ -197,6 +216,11 @@ nodekit harness builder status --repo-root <directory> --json
 import { NODETRACE_VERDICT_DIMENSIONS, builderGymStatus } from "@homenshum/nodekit/builder-gym";
 import { prepareExactConsumerPackage } from "@homenshum/nodekit/consumer-package-preparation";
 import { startManagedEvidenceCampaign } from "@homenshum/nodekit/managed-evidence-capture";
+import {
+  recordReferenceObservation,
+  scoreReferenceCandidate,
+  verifyReferenceScoreReceipt,
+} from "@homenshum/nodekit/reference-loop";
 import { finalizeSubmissionEvidence } from "@homenshum/nodekit/submission-evidence-finalizer";
 ```
 
@@ -206,6 +230,9 @@ but never creates or deletes those resources. Evidence finalization only signs a
 evidence with a purpose-scoped external key. None of these commands deploys, publishes, submits,
 or certifies adoption. Follow the [managed capture runbook](https://github.com/HomenShum/node-platform/blob/main/docs/MANAGED_EVIDENCE_CAPTURE.md)
 for the external operator steps.
+
+The provider-neutral reference contract and its fail-closed Mobbin boundary are documented in
+[`docs/REFERENCE_LOOP.md`](https://github.com/HomenShum/node-platform/blob/main/docs/REFERENCE_LOOP.md).
 
 ## PostgreSQL adapter
 

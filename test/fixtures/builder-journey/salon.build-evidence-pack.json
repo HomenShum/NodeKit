@@ -1,0 +1,654 @@
+{
+  "schemaVersion": "nodekit.build-evidence-pack/v1",
+  "caseId": "salon-weekly-profit-2026-07",
+  "stage": "build",
+  "producedAt": "2026-07-28T18:52:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "salon-weekly-profit-2026-07",
+      "sha256": "bfa4d3c52f0dc983f9460fb8fa4bbe4fdc515d47c658e30355a1d39f6a2855b3",
+      "path": "test/fixtures/builder-journey/salon.opportunity-contract.json"
+    }
+  ],
+  "content": {
+    "summary": "Built a read-only weekly salon brief slice: CSV/export ingestion, an estimated operating-profit calculation with a verification queue, and a single CLI entrypoint. Thirteen OpportunityContract decisions were reconciled — ten honoured, four defaulted with disclosure, one contradicted. The contradiction is the artifact's name: the contract asked for a Verified brief and this build ships an Estimated one, because measured receipt coverage is 0.71.",
+    "built": {
+      "surfaces": [
+        {
+          "surfaceId": "surface-weekly-brief",
+          "kind": "module",
+          "identifier": "buildWeeklyBrief(payload) -> { label, estimatedOperatingProfit, verificationQueue, receiptCoverage, sourceLinks }",
+          "sourceFiles": [
+            {
+              "path": "test/fixtures/builder-journey/build-evidence/src/weekly-brief.mjs",
+              "sha256": "362355716a97f6e767994ec06fb4f0015e35cfe019a9457a408f5d32eb7109bc",
+              "byteLength": 1397,
+              "mediaType": "text/javascript"
+            }
+          ],
+          "evidenceRefs": ["ev-src-weekly-brief", "ev-brief-suite"],
+          "servesPointer": "/primaryArtifact"
+        },
+        {
+          "surfaceId": "surface-ingest",
+          "kind": "module",
+          "identifier": "parseBankCsv(text) and classify(row)",
+          "sourceFiles": [
+            {
+              "path": "test/fixtures/builder-journey/build-evidence/src/ingest.mjs",
+              "sha256": "e6dedba38c134b338dd5874b307b6a3d2aad8a1c9d5f5661408831fa9bc343d7",
+              "byteLength": 1100,
+              "mediaType": "text/javascript"
+            }
+          ],
+          "evidenceRefs": ["ev-src-ingest", "ev-brief-suite"],
+          "servesPointer": "/inputs"
+        },
+        {
+          "surfaceId": "surface-cli",
+          "kind": "cli-command",
+          "identifier": "salon-brief week",
+          "sourceFiles": [
+            {
+              "path": "test/fixtures/builder-journey/build-evidence/src/cli.mjs",
+              "sha256": "3b5d30421340a9c2e888cfcc04e54df357740643cb410aec8f9b6a48eb186d97",
+              "byteLength": 555,
+              "mediaType": "text/javascript"
+            }
+          ],
+          "evidenceRefs": ["ev-src-cli", "ev-brief-suite"],
+          "servesPointer": "/primaryJob"
+        }
+      ],
+      "invocation": {
+        "command": "node test/fixtures/builder-journey/build-evidence/src/cli.mjs week",
+        "cwd": ".",
+        "requiredEnv": []
+      }
+    },
+    "decisions": {
+      "contract": {
+        "user": {
+          "pointer": "/user",
+          "disposition": "honoured",
+          "how": "The slice models exactly one salon: there is no location dimension in the brief payload and no location switcher in the CLI. The shipped copy addresses a single owner throughout.",
+          "evidenceRefs": ["ev-src-weekly-brief", "ev-disclosures"]
+        },
+        "problem": {
+          "pointer": "/problem",
+          "disposition": "honoured",
+          "how": "The brief reports estimated operating profit alongside the sales figure it was derived from, so a week with higher sales and lower profit is visible as two numbers moving in opposite directions rather than one.",
+          "evidenceRefs": ["ev-src-weekly-brief", "ev-brief-suite"]
+        },
+        "wedge": {
+          "pointer": "/wedge",
+          "disposition": "honoured",
+          "how": "Read-only and upload-driven: the slice contains no outbound network call and no writer. A static scan of all three source files for fetch, http, socket and Plaid identifiers returned no matches.",
+          "evidenceRefs": ["ev-network-scan", "ev-src-ingest"]
+        },
+        "primaryJob": {
+          "pointer": "/primaryJob",
+          "disposition": "defaulted-with-disclosure",
+          "defaultApplied": "The job has two halves — understand the estimate, and resolve the items blocking verification. Only the first half plus an enumeration of the second shipped: the verification queue lists and source-links every blocking item but offers no action to resolve one.",
+          "disclosure": "Your brief lists every item blocking verification and links to its source row. It does not yet let you resolve an item from inside the brief — you resolve it in your own records and re-upload.",
+          "disclosedIn": "ev-disclosures",
+          "whyNotEscalated": "Resolution requires a write path, and the wedge prohibits accounting write-back. Asking the owner would have offered a choice between two things the contract already forbids, so the reduction was disclosed rather than escalated.",
+          "evidenceRefs": ["ev-src-weekly-brief", "ev-disclosures"]
+        },
+        "primaryArtifact": {
+          "pointer": "/primaryArtifact",
+          "disposition": "contradicted",
+          "contractSaid": "A source-linked Verified Weekly Salon Brief.",
+          "builtInstead": "A source-linked brief labelled Estimated Weekly Salon Brief. Source-linking was delivered in full; the word Verified was not.",
+          "justification": "Verification requires every expense row to carry a matched receipt. Measured coverage for the pilot week was 0.71 against a 0.82 match threshold, with six expense rows carrying no receipt at all. Labelling that Verified would assert a property the artifact cannot show, so the label was changed rather than the threshold.",
+          "reportedIn": "ev-contradiction-notice",
+          "evidenceRefs": ["ev-receipt-coverage", "ev-contradiction-notice"]
+        },
+        "successCondition": {
+          "pointer": "/successCondition",
+          "disposition": "defaulted-with-disclosure",
+          "defaultApplied": "The first clause — read an estimated weekly operating profit from uploaded files only — is met and measured. The second clause, resolve every verification item, was reduced to enumerate and source-link every verification item.",
+          "disclosure": "Your brief lists every item blocking verification and links to its source row. It does not yet let you resolve an item from inside the brief.",
+          "disclosedIn": "ev-disclosures",
+          "whyNotEscalated": "Same reason as the primary job: resolution needs a write path the wedge excludes. The success condition is therefore partially met by construction, and saying so is more useful to the owner than a question with no admissible answer.",
+          "evidenceRefs": ["ev-brief-suite", "ev-receipt-coverage", "ev-disclosures"]
+        },
+        "inputs": {
+          "pointer": "/inputs",
+          "declaredElementCount": 4,
+          "elements": [
+            {
+              "pointer": "/inputs/0",
+              "disposition": "honoured",
+              "how": "bank_csv is parsed by parseBankCsv into per-row records; debits feed the spend total and rows without a receiptId feed the verification queue.",
+              "evidenceRefs": ["ev-src-ingest", "ev-brief-suite"]
+            },
+            {
+              "pointer": "/inputs/1",
+              "disposition": "honoured",
+              "how": "square_export gross rows are summed into the sales figure that the profit estimate subtracts from.",
+              "evidenceRefs": ["ev-src-weekly-brief", "ev-brief-suite"]
+            },
+            {
+              "pointer": "/inputs/2",
+              "disposition": "honoured",
+              "how": "payroll_summary is consumed as a single weekly total and subtracted from the estimate.",
+              "evidenceRefs": ["ev-src-weekly-brief", "ev-brief-suite"]
+            },
+            {
+              "pointer": "/inputs/3",
+              "disposition": "defaulted-with-disclosure",
+              "defaultApplied": "receipt_images are consumed only as confidence-scored match candidates. Five of twenty-four were unreadable and are counted as unmatched rather than retried, re-photographed or manually keyed.",
+              "disclosure": "A photographed receipt is matched to a bank row only when our read of it scores 0.82 or higher. Below that we leave the row in the verification queue rather than guessing.",
+              "disclosedIn": "ev-disclosures",
+              "whyNotEscalated": "The fallback is visible to the owner in the queue and costs nothing but attention; escalating twenty-four times per week would be worse than disclosing the rule once.",
+              "evidenceRefs": ["ev-receipt-coverage", "ev-src-ingest"]
+            }
+          ]
+        },
+        "rejectedAlternatives": {
+          "pointer": "/rejectedAlternatives",
+          "declaredElementCount": 4,
+          "elements": [
+            {
+              "pointer": "/rejectedAlternatives/0",
+              "disposition": "honoured",
+              "how": "No QuickBooks or Xero write-back exists. The scan of all three source files found no ledger client, no HTTP client, and no writer of any kind.",
+              "evidenceRefs": ["ev-network-scan"]
+            },
+            {
+              "pointer": "/rejectedAlternatives/1",
+              "disposition": "honoured",
+              "how": "No Plaid or live bank connection exists; the same scan searched for plaid, fetch and socket identifiers and matched nothing.",
+              "evidenceRefs": ["ev-network-scan"]
+            },
+            {
+              "pointer": "/rejectedAlternatives/2",
+              "disposition": "honoured",
+              "how": "No tax computation exists. The brief emits five fields — label, estimated profit, verification queue, receipt coverage and source links — and none is a tax figure.",
+              "evidenceRefs": ["ev-src-weekly-brief"]
+            },
+            {
+              "pointer": "/rejectedAlternatives/3",
+              "disposition": "honoured",
+              "how": "No multi-location roll-up exists. The brief payload carries no location key and the CLI takes no location argument.",
+              "evidenceRefs": ["ev-src-weekly-brief", "ev-src-cli"]
+            }
+          ]
+        },
+        "openUnknowns": {
+          "pointer": "/openUnknowns",
+          "declaredElementCount": 3,
+          "elements": [
+            {
+              "pointer": "/openUnknowns/0",
+              "disposition": "honoured",
+              "how": "Left open rather than assumed. Every input to buildWeeklyBrief defaults to empty, so a partial upload renders a brief instead of failing, and the absent inputs show up as gaps in the queue.",
+              "evidenceRefs": ["ev-src-weekly-brief", "ev-brief-suite"]
+            },
+            {
+              "pointer": "/openUnknowns/1",
+              "disposition": "honoured",
+              "how": "Closed by measurement for one pilot week: twenty-four receipts submitted, seventeen matched at or above threshold, two below, five unreadable, and six expense rows carrying no receipt at all.",
+              "evidenceRefs": ["ev-receipt-coverage"]
+            },
+            {
+              "pointer": "/openUnknowns/2",
+              "disposition": "defaulted-with-disclosure",
+              "defaultApplied": "Square payouts that settle on a Monday for the prior Sunday are attributed to the week they were earned, not the week they landed. The alignment question was answered by choosing earned-week attribution rather than by measuring the owner's actual payout timing.",
+              "disclosure": "We treated the week as Monday 00:00 through Sunday 23:59 in your salon's local time. Square payouts that settle on a Monday for the prior Sunday are counted in the week they were earned, not the week they landed. If your bank statement disagrees by a day, this is why.",
+              "disclosedIn": "ev-disclosures",
+              "whyNotEscalated": "Answering it properly needs several weeks of the owner's own payout history, which this one-week slice does not have. The choice was made explicit at the top of the brief so a mismatch is self-explaining.",
+              "evidenceRefs": ["ev-disclosures", "ev-src-weekly-brief"]
+            }
+          ]
+        },
+        "authorityLimits": {
+          "read": {
+            "pointer": "/authorityLimits/read",
+            "declaredElementCount": 4,
+            "elements": [
+              {
+                "pointer": "/authorityLimits/read/0",
+                "disposition": "honoured",
+                "how": "bank_csv transactions are read and never written back; parseBankCsv returns new records and mutates nothing.",
+                "evidenceRefs": ["ev-src-ingest"]
+              },
+              {
+                "pointer": "/authorityLimits/read/1",
+                "disposition": "honoured",
+                "how": "square_export sales rows are read into the gross total; payout rows are read for week attribution only.",
+                "evidenceRefs": ["ev-src-weekly-brief"]
+              },
+              {
+                "pointer": "/authorityLimits/read/2",
+                "disposition": "honoured",
+                "how": "payroll_summary is read as a scalar weekly total and used in the subtraction only.",
+                "evidenceRefs": ["ev-src-weekly-brief"]
+              },
+              {
+                "pointer": "/authorityLimits/read/3",
+                "disposition": "honoured",
+                "how": "receipt_images are read as confidence-scored candidates and are never stored or re-transmitted.",
+                "evidenceRefs": ["ev-src-ingest", "ev-network-scan"]
+              }
+            ]
+          },
+          "propose": {
+            "pointer": "/authorityLimits/propose",
+            "declaredElementCount": 2,
+            "elements": [
+              {
+                "pointer": "/authorityLimits/propose/0",
+                "disposition": "honoured",
+                "how": "Every bank row without a receiptId enters the verification queue carrying a classify() proposal marked requiresOwnerConfirmation, which is a flag rather than a change.",
+                "evidenceRefs": ["ev-src-ingest", "ev-brief-suite"]
+              },
+              {
+                "pointer": "/authorityLimits/propose/1",
+                "disposition": "defaulted-with-disclosure",
+                "defaultApplied": "The unmatched expense is listed and source-linked, but no request for the missing receipt is sent to anyone. The granted authority to request was exercised as an authority to display.",
+                "disclosure": "Your brief lists every item blocking verification and links to its source row. It does not yet let you resolve an item from inside the brief — you resolve it in your own records and re-upload.",
+                "disclosedIn": "ev-disclosures",
+                "whyNotEscalated": "Sending a request needs an outbound channel, and this slice deliberately has no network surface. Narrowing granted authority is safe to disclose; widening it would not have been.",
+                "evidenceRefs": ["ev-src-weekly-brief", "ev-network-scan"]
+              }
+            ]
+          },
+          "approve": {
+            "pointer": "/authorityLimits/approve",
+            "declaredElementCount": 0,
+            "elements": []
+          },
+          "prohibited": {
+            "pointer": "/authorityLimits/prohibited",
+            "declaredElementCount": 5,
+            "elements": [
+              {
+                "pointer": "/authorityLimits/prohibited/0",
+                "disposition": "honoured",
+                "how": "No live banking connection: the scan for fetch, http, socket and plaid identifiers across all three source files returned exit code 1 with no matches.",
+                "evidenceRefs": ["ev-network-scan"]
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/1",
+                "disposition": "honoured",
+                "how": "No accounting ledger is written: the slice has no ledger client and no persistence writer of any kind in source.",
+                "evidenceRefs": ["ev-network-scan", "ev-src-ingest"]
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/2",
+                "disposition": "honoured",
+                "how": "No tax advice is produced; the brief emits no tax field and the shipped copy contains no tax guidance.",
+                "evidenceRefs": ["ev-src-weekly-brief", "ev-disclosures"]
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/3",
+                "disposition": "honoured",
+                "how": "No money movement is possible: there is no payment client, no transfer call and no outbound network surface at all.",
+                "evidenceRefs": ["ev-network-scan"]
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/4",
+                "disposition": "honoured",
+                "how": "classify() returns status proposed with requiresOwnerConfirmation true and never a committed category; a test asserts that no code path returns a committed one.",
+                "evidenceRefs": ["ev-src-ingest", "ev-brief-suite", "ev-disclosures"]
+              }
+            ]
+          }
+        }
+      },
+      "emergent": [
+        {
+          "decisionId": "dec-week-boundary",
+          "question": "Which calendar boundary defines the week, given that Square payouts can settle on the far side of it from the sale that produced them?",
+          "chosen": "Monday 00:00 through Sunday 23:59 in the salon's local timezone, with payouts attributed to the week the sale was earned.",
+          "alternativesConsidered": [
+            {
+              "alternative": "Sunday-to-Saturday, matching the bank statement's own week grouping.",
+              "reason": "Rejected: it matches the bank but splits the salon's own busiest trading day away from the week the owner thinks in."
+            },
+            {
+              "alternative": "Attribute payouts to the settlement date, matching the bank exactly.",
+              "reason": "Rejected: profit would then move on days with no trading, which is the opposite of the visibility the owner asked for."
+            }
+          ],
+          "basis": "agent-default",
+          "authorityBucket": "propose",
+          "disclosure": "We treated the week as Monday 00:00 through Sunday 23:59 in your salon's local time, counting payouts in the week they were earned.",
+          "disclosedIn": "ev-disclosures",
+          "evidenceRefs": ["ev-src-weekly-brief", "ev-emergent-sweep"]
+        },
+        {
+          "decisionId": "dec-receipt-ocr-threshold",
+          "question": "Below what read-confidence should a photographed receipt be treated as unmatched rather than auto-matched to a bank row?",
+          "chosen": "0.82. Below it the row stays in the verification queue rather than being silently matched.",
+          "alternativesConsidered": [
+            {
+              "alternative": "Match at any confidence and show the score next to the match.",
+              "reason": "Rejected: it raises measured coverage without raising real coverage, which is exactly the number the Verified label would have leaned on."
+            },
+            {
+              "alternative": "Ask the owner to confirm every match below 0.95.",
+              "reason": "Rejected: at twenty-four receipts a week that is a confirmation queue longer than the verification queue it replaces."
+            }
+          ],
+          "basis": "agent-default",
+          "authorityBucket": "propose",
+          "disclosure": "A photographed receipt is matched only when our read of it scores 0.82 or higher; below that the row stays in your verification queue rather than being guessed.",
+          "disclosedIn": "ev-disclosures",
+          "evidenceRefs": ["ev-src-ingest", "ev-receipt-coverage"]
+        },
+        {
+          "decisionId": "dec-category-proposal-only",
+          "question": "Should an uncategorized bank row be given an inferred category, or left uncategorized with a proposal attached?",
+          "chosen": "Left uncategorized. classify() returns a proposal marked requiresOwnerConfirmation and no code path commits a category.",
+          "alternativesConsidered": [
+            {
+              "alternative": "Infer the category and let the owner correct it afterwards.",
+              "reason": "Rejected: the contract prohibits categorizing spending without owner confirmation, and a correctable inference is still a categorization."
+            }
+          ],
+          "basis": "contract-implied",
+          "authorityBucket": "propose",
+          "disclosure": "Uncategorized rows are shown as proposals with a suggested category. Nothing is committed until you confirm it.",
+          "disclosedIn": "ev-disclosures",
+          "evidenceRefs": ["ev-src-ingest", "ev-brief-suite"]
+        },
+        {
+          "decisionId": "dec-parsed-total-retention",
+          "question": "May anything be kept between weeks, so a week-over-week line can be drawn without re-uploading history?",
+          "chosen": "Parsed weekly totals — not the uploaded files — are kept in browser local storage for 90 days.",
+          "alternativesConsidered": [
+            {
+              "alternative": "Keep nothing; require re-upload of prior weeks to draw a trend.",
+              "reason": "Rejected on effort, not on principle: it makes the trend cost four uploads a week instead of zero."
+            },
+            {
+              "alternative": "Keep the uploaded files themselves.",
+              "reason": "Rejected: retaining bank and payroll files is a materially larger exposure than retaining four numbers."
+            }
+          ],
+          "basis": "agent-default",
+          "authorityBucket": "outside-declared-limits",
+          "disclosure": "To show a week-over-week line we keep the parsed totals — not your uploaded files — in local storage for 90 days. Clearing the browser's site data deletes them immediately.",
+          "disclosedIn": "ev-disclosures",
+          "evidenceRefs": ["ev-disclosures", "ev-emergent-sweep"],
+          "reversal": {
+            "reversible": true,
+            "cost": "Clearing site data removes every retained total immediately and costs the owner the week-over-week line until three weeks of new uploads accumulate. No server-side copy exists to delete."
+          }
+        }
+      ],
+      "emergentSweep": {
+        "method": "Every exported constant, literal threshold, default parameter and early return in the slice was listed, then each was asked whether it could have been otherwise and whether the OpportunityContract said which. Anything answering yes-then-no is an emergent decision. Client-side retention was swept separately because it is invisible in source constants.",
+        "scannedPaths": [
+          "test/fixtures/builder-journey/build-evidence/src/ingest.mjs",
+          "test/fixtures/builder-journey/build-evidence/src/weekly-brief.mjs",
+          "test/fixtures/builder-journey/build-evidence/src/cli.mjs"
+        ],
+        "evidenceRefs": ["ev-emergent-sweep"],
+        "knownBlindSpots": [
+          "The sweep reads source text only; a decision expressed purely in copy would not appear.",
+          "A decision expressed as a CSS breakpoint or layout order would not appear.",
+          "The order in which the owner is asked questions is not represented in source and was not swept."
+        ]
+      }
+    },
+    "claims": [
+      {
+        "claimId": "claim-weekly-profit-estimate",
+        "statement": "The owner can read an estimated weekly operating profit computed only from uploaded files, with every contributing figure traceable to a source row.",
+        "scope": "capability",
+        "evidenceRefs": ["ev-brief-suite", "ev-src-weekly-brief"],
+        "boundary": "Shown by five unit tests over synthetic rows and by the source itself. No real salon's files have been through it, and no owner has read the output.",
+        "surfaceRefs": ["surface-weekly-brief", "surface-cli"]
+      },
+      {
+        "claimId": "claim-receipt-coverage-partial",
+        "statement": "Receipt match coverage for the pilot week was 0.71, which is why the brief is labelled Estimated rather than Verified.",
+        "scope": "coverage",
+        "evidenceRefs": ["ev-receipt-coverage", "ev-contradiction-notice"],
+        "boundary": "One week, twenty-four receipts, one synthetic corpus. The ratio is matched-over-submitted and excludes the six expense rows for which no receipt was ever uploaded, so true verification coverage is lower than 0.71.",
+        "surfaceRefs": ["surface-weekly-brief"]
+      },
+      {
+        "claimId": "claim-no-outbound-network",
+        "statement": "No source file in this slice contains an outbound network call, an accounting-ledger client, or a money-movement call.",
+        "scope": "safety",
+        "evidenceRefs": ["ev-network-scan"],
+        "boundary": "A static text scan of three files at one commit. It does not inspect transitive dependencies and the program was never run under a network monitor, so it constrains what was written, not what executes.",
+        "surfaceRefs": ["surface-ingest", "surface-weekly-brief", "surface-cli"]
+      },
+      {
+        "claimId": "claim-no-silent-categorization",
+        "statement": "No spending is categorized without owner confirmation: every classification leaves the module as a proposal flagged requiresOwnerConfirmation.",
+        "scope": "safety",
+        "evidenceRefs": ["ev-src-ingest", "ev-brief-suite", "ev-disclosures"],
+        "boundary": "Asserted by one test over the single classify() path. If a future caller reads the proposal and commits it elsewhere, this test would still pass.",
+        "surfaceRefs": ["surface-ingest"]
+      }
+    ],
+    "evidence": [
+      {
+        "evidenceId": "ev-brief-suite",
+        "kind": "test-run",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/evidence/weekly-brief-suite.log",
+          "sha256": "b8184bfe1e6377ad55d2d92c1e3859849c9cd7a1823d5819d2994672784b98ba",
+          "byteLength": 1041,
+          "mediaType": "text/plain"
+        },
+        "generatedBy": {
+          "method": "command",
+          "tool": "node --test",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-28T18:41:03Z",
+          "command": "node --test test/fixtures/builder-journey/build-evidence/",
+          "exitCode": 0,
+          "cwd": ".",
+          "durationMs": 61
+        },
+        "observation": "Five tests pass, zero fail: the profit subtraction, the verification-queue rule, the proposal-only classifier, the Estimated label, and the 0.82 coverage threshold.",
+        "boundary": "Unit-level over synthetic rows. It exercises no file parsing of a real export, no OCR, and no user interface."
+      },
+      {
+        "evidenceId": "ev-receipt-coverage",
+        "kind": "measurement",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/evidence/receipt-match-coverage.json",
+          "sha256": "0864e558ee471c801173913910137f6319eaf039942955a572f3c2ac657dda20",
+          "byteLength": 563,
+          "mediaType": "application/json"
+        },
+        "generatedBy": {
+          "method": "instrumented-run",
+          "tool": "test/fixtures/builder-journey/build-evidence/src/weekly-brief.mjs",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-28T18:41:07Z"
+        },
+        "observation": "Twenty-four receipts submitted, seventeen matched at or above the 0.82 threshold, two below it, five unreadable, and six expense rows with no receipt at all. Coverage 0.7083.",
+        "boundary": "One synthetic pilot week. Coverage is matched-over-submitted and says nothing about the six expense rows for which no receipt exists.",
+        "measurement": {
+          "name": "receiptMatchCoverage",
+          "value": 0.7083333333333334,
+          "unit": "ratio"
+        }
+      },
+      {
+        "evidenceId": "ev-network-scan",
+        "kind": "command-output",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/evidence/network-surface-scan.txt",
+          "sha256": "b134e7523b54b98f5f8751975ee7fee22d6d48ec96cc5fc266a4fc5024eb257c",
+          "byteLength": 715,
+          "mediaType": "text/plain"
+        },
+        "generatedBy": {
+          "method": "command",
+          "tool": "grep",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-28T18:42:19Z",
+          "command": "grep -rnE \"fetch\\(|https?://|XMLHttpRequest|net\\.|node:https?|plaid|WebSocket\" test/fixtures/builder-journey/build-evidence/src/",
+          "exitCode": 1,
+          "cwd": "."
+        },
+        "observation": "Exit code 1 with no matching lines across seventy lines of source: no outbound network call, no Plaid identifier and no socket is written anywhere in the slice.",
+        "boundary": "A static text scan at one commit. It does not inspect transitive dependencies and did not run the program under a network monitor."
+      },
+      {
+        "evidenceId": "ev-emergent-sweep",
+        "kind": "command-output",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/evidence/emergent-decision-sweep.txt",
+          "sha256": "1e4f836388d9bfd2321cfd15f2d9851f3f94632bafdb211897967e120656815c",
+          "byteLength": 1346,
+          "mediaType": "text/plain"
+        },
+        "generatedBy": {
+          "method": "command",
+          "tool": "tools/decision-sweep.mjs",
+          "actor": "builder-agent",
+          "producedAt": "2026-07-28T18:47:55Z",
+          "command": "node tools/decision-sweep.mjs --scope test/fixtures/builder-journey/build-evidence/src",
+          "exitCode": 0,
+          "cwd": "."
+        },
+        "observation": "Six candidate forks found in source plus one swept separately for client-side retention; four classified as emergent decisions, one as contract-stated, one as a contract contradiction reconciled at /primaryArtifact, and one as presentation with no user-visible consequence.",
+        "boundary": "Source text only. Decisions living in copy, in CSS breakpoints, or in the order the owner is asked questions are outside what this sweep can see, and are listed as its blind spots."
+      },
+      {
+        "evidenceId": "ev-disclosures",
+        "kind": "disclosure-copy",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/evidence/disclosures.md",
+          "sha256": "7139fed3165a376019776774a6bf557fb3144bebc1f686cf7505ee03424e1fdf",
+          "byteLength": 1648,
+          "mediaType": "text/markdown"
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "test/fixtures/builder-journey/build-evidence/evidence/disclosures.md",
+          "actor": "builder-agent",
+          "producedAt": "2026-07-28T18:49:30Z"
+        },
+        "observation": "The copy shown above the profit number carries five disclosures: the Monday-to-Sunday week boundary and payout attribution, the 0.82 receipt threshold, the no-categorization rule, the list-not-resolve limit of the verification queue, and the 90-day retention of parsed totals.",
+        "boundary": "These are the bytes that ship, not proof that any owner read or understood them. No comprehension was measured."
+      },
+      {
+        "evidenceId": "ev-contradiction-notice",
+        "kind": "disclosure-copy",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/evidence/contradiction-notice.md",
+          "sha256": "26a44dbc176995f708b946a606a4e25110e55c3936849c1e7de3057837d2766c",
+          "byteLength": 1047,
+          "mediaType": "text/markdown"
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "test/fixtures/builder-journey/build-evidence/evidence/contradiction-notice.md",
+          "actor": "builder-agent",
+          "producedAt": "2026-07-28T18:50:02Z"
+        },
+        "observation": "States plainly that the contract named a Verified brief and the build ships an Estimated one, gives the 0.71 coverage that forced it, and records explicitly that the notice authorizes nothing.",
+        "boundary": "A record of a contradiction and its reason. It is not acceptance of the contradiction by the contract's owner, and nothing downstream may read it as such."
+      },
+      {
+        "evidenceId": "ev-src-weekly-brief",
+        "kind": "source-file",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/src/weekly-brief.mjs",
+          "sha256": "362355716a97f6e767994ec06fb4f0015e35cfe019a9457a408f5d32eb7109bc",
+          "byteLength": 1397,
+          "mediaType": "text/javascript"
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "node:fs/promises readFile",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-28T18:51:10Z"
+        },
+        "observation": "Twenty-seven lines: the Estimated label constant, the Monday week boundary constant, and buildWeeklyBrief returning label, estimated profit, verification queue, receipt coverage and source links.",
+        "boundary": "The source at one commit. It shows what is written, not what a running deployment serves."
+      },
+      {
+        "evidenceId": "ev-src-ingest",
+        "kind": "source-file",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/src/ingest.mjs",
+          "sha256": "e6dedba38c134b338dd5874b307b6a3d2aad8a1c9d5f5661408831fa9bc343d7",
+          "byteLength": 1100,
+          "mediaType": "text/javascript"
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "node:fs/promises readFile",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-28T18:51:11Z"
+        },
+        "observation": "Twenty-four lines: the four supported input kinds, the 0.82 receipt threshold, a pure CSV parser, and a classify() that returns a proposal flagged requiresOwnerConfirmation.",
+        "boundary": "The source at one commit. It shows no writer and no network client exists here, not that none exists anywhere in a future application."
+      },
+      {
+        "evidenceId": "ev-src-cli",
+        "kind": "source-file",
+        "artifact": {
+          "path": "test/fixtures/builder-journey/build-evidence/src/cli.mjs",
+          "sha256": "3b5d30421340a9c2e888cfcc04e54df357740643cb410aec8f9b6a48eb186d97",
+          "byteLength": 555,
+          "mediaType": "text/javascript"
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "node:fs/promises readFile",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-28T18:51:12Z"
+        },
+        "observation": "Nineteen lines rendering four labelled lines to stdout: the brief label, estimated operating profit, receipt coverage as a percentage, and the count of items blocking verification.",
+        "boundary": "The source at one commit. No terminal session was recorded, so this is not evidence the command has ever been run by a person."
+      }
+    ],
+    "promotionAuthorized": false
+  },
+  "completeness": {
+    "claimed": [
+      "All thirteen OpportunityContract decision points reconciled with a disposition and at least one evidence reference.",
+      "Four emergent decisions surfaced, each with alternatives, a basis, an authority bucket and a disclosure artifact.",
+      "Estimated weekly operating profit computed from the four declared inputs and covered by five passing unit tests.",
+      "Receipt match coverage measured for one pilot week and recorded as a number, not a label.",
+      "Static scan showing no outbound network surface, no ledger writer and no money-movement call in the slice."
+    ],
+    "notRun": [
+      "No real salon files were ingested; every row in every test is synthetic.",
+      "No OCR engine was run — receipt confidence scores are fixture values, not readings.",
+      "No owner used the CLI; no session was recorded and no comprehension of the disclosures was measured.",
+      "The 90-day retention was never exercised past a single week, so no expiry has been observed.",
+      "Dependencies were not scanned for network surface; only the three first-party source files were.",
+      "Square payout timing against the bank week boundary was chosen, not measured, so /openUnknowns/2 remains open.",
+      "No multi-week trend was rendered, so the decision to retain totals bought a capability that is still unproven."
+    ],
+    "refused": [
+      {
+        "item": "Labelling the brief Verified to satisfy the contract's wording.",
+        "reason": "Measured receipt coverage of 0.71 cannot support the word. The label was changed and the contradiction reported rather than the number being reframed."
+      },
+      {
+        "item": "Tax estimation or filing guidance in the brief.",
+        "reason": "Prohibited by /authorityLimits/prohibited/2 and separately a rejected alternative at /rejectedAlternatives/2."
+      },
+      {
+        "item": "Any live banking connection or accounting write-back.",
+        "reason": "Prohibited by /authorityLimits/prohibited/0 and /1, and excluded by the wedge itself."
+      },
+      {
+        "item": "Auto-matching receipts below the 0.82 confidence threshold to raise reported coverage.",
+        "reason": "It would raise the measured number without raising real coverage, which is the specific gaming move the Verified label would have rested on."
+      },
+      {
+        "item": "Writing an approval, review or sign-off field into this pack.",
+        "reason": "Forbidden at authoring time by the inter-stage contract. promotionAuthorized is written false; only verification against an attestation may derive anything stronger."
+      }
+    ]
+  }
+}

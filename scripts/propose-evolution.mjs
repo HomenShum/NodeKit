@@ -47,26 +47,49 @@
  *   node scripts/propose-evolution.mjs \
  *     --id recall-before-claim --track harness --category evaluation \
  *     --challenge "..." --observed "..." --resolution "..." \
+ *     --evidence evd:cli-authority-bypass-and-repair \
+ *     --supersedes evt:older-decision \
  *     --thread https://chatgpt.com/c/xxxx \
  *     --limitation "..." --limitation "..."
+ *
+ * Repeat --evidence, --assumption, --invariant, --predecessor, --supersedes,
+ * and --limitation to bind more than one record.
  *
  * Exit: 0 written, 2 bad usage, 4 id already exists, 5 authority violation.
  */
 
-import { writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
 
 const PLATFORM = dirname(dirname(fileURLToPath(import.meta.url)));
 const DRAFTS = join(PLATFORM, "evolution", "drafts");
+const EVIDENCE = join(PLATFORM, "evolution", "evidence");
 
 const TRACKS = ["harness", "architecture", "product"];
-const MATERIALITY = [
-  "primary-user-workflow", "public-contract", "architectural-ownership",
-  "security-authority", "proof-requirement", "model-routing",
-  "harness-behavior", "benchmark-conclusion", "downstream-guarantee",
-];
+const CATEGORIES = ["workflow", "schema", "runtime", "agent", "ui", "evaluation", "security", "release"];
+const MAX_ARGUMENT_TOKENS = 256;
+const MAX_REPEATABLE_VALUES = 64;
+const MAX_VALUE_LENGTH = 16_384;
+const MAX_EVIDENCE_RECORD_BYTES = 1024 * 1024;
+
+const FLAGS = Object.freeze({
+  id: { target: "id" },
+  track: { target: "track" },
+  category: { target: "category" },
+  challenge: { target: "challenge" },
+  observed: { target: "observed" },
+  resolution: { target: "resolution" },
+  thread: { target: "thread" },
+  status: { target: "status" },
+  "reviewed-by": { target: "reviewedBy" },
+  limitation: { target: "limitation", repeatable: true },
+  assumption: { target: "assumptionIds", repeatable: true },
+  invariant: { target: "invariantIds", repeatable: true },
+  evidence: { target: "evidenceIds", repeatable: true },
+  predecessor: { target: "predecessorIds", repeatable: true },
+  supersedes: { target: "supersedesIds", repeatable: true },
+});
 
 function die(msg, code = 2) {
   console.error(`  ERROR  ${msg}`);
@@ -74,18 +97,59 @@ function die(msg, code = 2) {
 }
 
 function parse(argv) {
+  if (argv.length > MAX_ARGUMENT_TOKENS) {
+    die(`too many arguments; at most ${MAX_ARGUMENT_TOKENS} tokens are accepted`);
+  }
   const out = { limitation: [], assumptionIds: [], invariantIds: [],
-                evidenceIds: [], predecessorIds: [], materiality: [] };
+                evidenceIds: [], predecessorIds: [], supersedesIds: [] };
+  const seenScalars = new Set();
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (!a.startsWith("--")) die(`unexpected argument ${a!==undefined?a:""}`);
     const key = a.slice(2);
+    const spec = FLAGS[key];
+    if (!spec) die(`unknown flag --${key}`);
     const val = argv[++i];
     if (val === undefined || val.startsWith("--")) die(`--${key} needs a value`);
-    if (Array.isArray(out[key])) out[key].push(val);
-    else out[key] = val;
+    if (val.length > MAX_VALUE_LENGTH) {
+      die(`--${key} exceeds the ${MAX_VALUE_LENGTH}-character input limit`);
+    }
+    if (spec.repeatable) {
+      const values = out[spec.target];
+      if (values.length >= MAX_REPEATABLE_VALUES) {
+        die(`--${key} exceeds the ${MAX_REPEATABLE_VALUES}-value limit`);
+      }
+      if (values.includes(val)) die(`duplicate --${key} value ${val}`);
+      values.push(val);
+    } else {
+      if (seenScalars.has(spec.target)) die(`--${key} may be supplied only once`);
+      seenScalars.add(spec.target);
+      out[spec.target] = val;
+    }
   }
   return out;
+}
+
+function validateEvidenceReference(id) {
+  if (!/^evd:[a-z0-9][a-z0-9._-]*$/.test(id)) {
+    die(`--evidence must be a canonical evd: identifier; received ${id}`);
+  }
+  const recordPath = join(EVIDENCE, `${id.replaceAll(":", "-")}.json`);
+  if (!existsSync(recordPath)) {
+    die(`--evidence ${id} does not exist in evolution/evidence/`);
+  }
+  if (statSync(recordPath).size > MAX_EVIDENCE_RECORD_BYTES) {
+    die(`--evidence ${id} exceeds the ${MAX_EVIDENCE_RECORD_BYTES}-byte record limit`);
+  }
+  let record;
+  try {
+    record = JSON.parse(readFileSync(recordPath, "utf8"));
+  } catch (error) {
+    die(`--evidence ${id} is unreadable JSON: ${error.message}`);
+  }
+  if (record.schemaVersion !== "nodekit.evolution-evidence/v1" || record.id !== id) {
+    die(`--evidence ${id} does not resolve to a matching nodekit.evolution-evidence/v1 record`);
+  }
 }
 
 const a = parse(process.argv.slice(2));
@@ -96,13 +160,19 @@ if (a.status && a.status !== "agent-proposed")
   die(`refused: this tool cannot write interpretation.status=${a.status!==undefined?a.status:""}. ` +
       `canonicalRecords is human-reviewed-only. human-reviewed is DERIVED from a ` +
       `verified signed approval at record time — it is not a field anyone can set.`, 5);
+if (a.reviewedBy)
+  die(`refused: this tool cannot name reviewedBy=${a.reviewedBy}. The reviewer identity is ` +
+      `derived from a verified signed approval at record time.`, 5);
 
 for (const need of ["id", "track", "challenge", "observed", "resolution"])
   if (!a[need]) die(`--${need} is required`);
+if (a.evidenceIds.length === 0)
+  die("--evidence is required; bind at least one canonical evolution evidence record");
 
 if (!TRACKS.includes(a.track)) die(`--track must be one of ${TRACKS.join(", ")}`);
-for (const m of a.materiality)
-  if (!MATERIALITY.includes(m)) die(`unknown materiality ${m}; ledger allows: ${MATERIALITY.join(", ")}`);
+if (a.category && !CATEGORIES.includes(a.category))
+  die(`--category must be one of ${CATEGORIES.join(", ")}`);
+for (const id of a.evidenceIds) validateEvidenceReference(id);
 
 const slug = a.id.replace(/^evt:/, "");
 if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) die("--id must be kebab-case");
@@ -152,9 +222,9 @@ try {
     invariantIds: a.invariantIds,
     evidenceIds: a.evidenceIds,
     predecessorIds: a.predecessorIds,
+    supersedesIds: a.supersedesIds,
     knownLimitations: limitations,
-    // author, not reviewer. Naming a reviewer is refused upstream by design.
-    authoredBy: a.proposedBy || "claude-code",
+    status: a.status,
   });
   console.log(`\n  DRAFTED   ${event.id}`);
   console.log(`  file      ${relative(PLATFORM, output).replace(/\\/g, "/")}`);
@@ -167,6 +237,10 @@ try {
   console.log(`\n  Not canonical. A human promotes it by moving it into`);
   console.log(`  evolution/events/${a.track}/ via recordEvolutionRecord. This tool cannot.\n`);
 } catch (err) {
+  if (err?.code === "EEXIST") {
+    die(`draft evt-${slug}.json already exists. delete is prohibited; ` +
+        `use a new id and --supersedes evt:${slug}`, 4);
+  }
   console.error(`\n  REFUSED — the record would not have been valid:\n`);
   for (const line of String(err.message).split("\n")) console.error(`    ${line}`);
   console.error(`\n  Nothing was written. Fix the input rather than the schema.\n`);

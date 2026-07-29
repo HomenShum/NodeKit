@@ -18,3 +18,6 @@ proof/ease/agents/
 # unignored, they were swept into a commit by `git add proof/` and killed the
 # push with an HTTP 500 pack failure.
 proof/ease/downloaded*/
+
+# local tool state
+.serena/

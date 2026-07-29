@@ -136,6 +136,15 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:studio-boundary` (partial)
 - Known limitations: This adds no capability; it is a declaration, and a declaration cannot make an unrun benchmark run.; The comparison benchmark of raw prompt versus contract versus contract with Atlas versus full Studio has never been executed, so no advantage is demonstrated.; The frontend tournament has never run end to end against a real generated application.; Direct editing and reference ingestion have no implementation at all.; Nothing here certifies any application; EASE_NOT_CERTIFIED stands.
 
+### Copying reviewed motion recipes between NodeSlide, NodeRoom, and parity-studio could preserve token names while changing timing behavior, and the existing drift script had no package API, schema-bound receipt, source-set identity, or fail-closed NOT_RUN state.
+
+- Event: `evt:motion-portability-static-receipt`
+- Source: `7a59bfb39d2d63f3330647a459e7cc029b9ed0c1`
+- Resolution: Added one dependency-free motion portability comparator shared by the Studio API, nodekit motion compare CLI, and legacy wrapper. It normalizes spelling noise, binds exact CSS source sets, separates preserving aliases from review-only changes, emits a strict receipt, and keeps runtime, DOM/trace, video, and audience evidence explicitly NOT_RUN.
+- Observed failure: The same --duration-fast name resolves to 180ms in NodeSlide and parity-studio but 120ms in NodeRoom; NodeRoom also carries internal 200/220ms and 380/400ms duration conflicts. A proposed one-value migration hid these additional owner decisions.
+- Evidence: `evd:motion-portability-static-receipt` (partial)
+- Known limitations: The supporting evidence proves the static comparison contract and its fail-closed behavior; it does not certify a runtime migration.; The comparator scans CSS custom-property declarations only; DTCG JSON, token consumption, runtime timing, DOM traces, video, and audience response remain outside this receipt.; The measured repositories fail with three conflicts; no migration is applied automatically.
+
 ## Harness evolution
 
 ### Visually polished frontend output could still miss the intended creator-workspace topology.

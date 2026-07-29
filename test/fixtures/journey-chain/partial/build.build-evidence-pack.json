@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "nodekit.build-evidence-pack/v1",
+  "caseId": "fixture-partial-2026-07-28",
+  "stage": "build",
+  "producedAt": "2026-07-28T18:10:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "fixture-partial-2026-07-28",
+      "sha256": "02b8f331b64bd261e61c79cd21d993ef5d434c0ac90fbcf9979aebb51f0683ad",
+      "path": "decide.opportunity-contract.json"
+    }
+  ],
+  "content": {
+    "decisions": [
+      {
+        "decision": "Derive column mappings per client from the prior week's accepted ledger.",
+        "disposition": "honoured",
+        "evidence": "reconcile-suite.log"
+      }
+    ],
+    "built": [
+      {
+        "surface": "reconcile CLI",
+        "claim": "Produces a reconciled ledger from four export shapes.",
+        "evidence": "reconcile-suite.log",
+        "generated": true
+      }
+    ]
+  },
+  "completeness": {
+    "claimed": ["The reconcile CLI runs end to end against the four fixture export shapes."],
+    "notRun": ["Nothing downstream of BUILD exists yet for this case; EXPLAIN, LAUNCH and LEARN were never produced."],
+    "refused": []
+  }
+}

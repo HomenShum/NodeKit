@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "nodekit.observation-pack/v1",
+  "caseId": "fixture-chain-2026-07-28",
+  "stage": "learn",
+  "producedAt": "2026-07-28T18:40:00Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.launch-manifest/v1",
+      "caseId": "fixture-chain-2026-07-28",
+      "sha256": "1e0fa9dff85abcc1c3fd07d25f52b5fe73c51dbad612357be073c9d371e37e96",
+      "path": "launch.launch-manifest.json"
+    },
+    {
+      "schemaVersion": "nodekit.story-pack/v1",
+      "caseId": "fixture-chain-2026-07-28",
+      "sha256": "8a491f4c9cb30ad319e84f6c6c1fe68aeb10ffadab023cbb9e5e3ad546555728",
+      "path": "explain.story-pack.json"
+    }
+  ],
+  "content": {
+    "observations": [
+      {
+        "observed": "The preview surface rendered the reconcile ledger root on first load.",
+        "source": "preview-dom-capture.html",
+        "sourceKind": "captured-dom",
+        "bearsOnClaim": "The reconcile CLI turns four differently shaped exports into one ledger."
+      },
+      {
+        "observed": "Two of the four fixture exports produced unmatched lines that the ledger itemised rather than silently dropping.",
+        "source": "reconcile-suite.log",
+        "sourceKind": "generated-log",
+        "bearsOnClaim": "A wrongly matched line is costlier than an unmatched one."
+      }
+    ],
+    "claimsWithNoObservation": [
+      {
+        "claim": "The bookkeeper saves a morning every Monday.",
+        "why": "No user was observed. The StoryPack already carried this as unbound; nothing in LEARN changed that."
+      }
+    ]
+  },
+  "completeness": {
+    "claimed": [
+      "Every observation names its source and the claim it bears on.",
+      "Claims with no observation behind them are listed rather than dropped."
+    ],
+    "notRun": [
+      "No audience observation of any kind; this wave has no users.",
+      "No post-launch telemetry, because nothing was launched beyond a local preview."
+    ],
+    "refused": [
+      {
+        "item": "Reporting a success-condition verdict for the fifteen-minute target",
+        "reason": "The success condition is about a real bookkeeper's Monday. Nothing here observed one, so any verdict would be a conclusion with an empty subject."
+      }
+    ]
+  }
+}

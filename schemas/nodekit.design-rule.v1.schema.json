@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.design-rule.v1.schema.json",
+  "title": "NodeKit design rule derived from reference observations",
+  "description": "A rule a build may be scored against, and the citations it stands on. derivedFrom.factIds is the rule's whole evidentiary base: scripts/reference-corpus-gate.mjs resolves every entry, and a ScoreReceipt that reaches outside this list is reaching past the rule's evidence. doesNotApplyWhen is required because a rule with no stated limits is a house style wearing a citation.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "ruleId",
+    "derivedFrom",
+    "statement",
+    "mechanismHypothesis",
+    "confidence",
+    "confidenceBasis",
+    "appliesWhen",
+    "doesNotApplyWhen",
+    "problemTags",
+    "intentTags",
+    "firstSeenAt",
+    "lastVerifiedAt",
+    "reVerifyAfterDays",
+    "reVerifyReason",
+    "evidenceTier",
+    "tierLadder"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.design-rule/v1" },
+    "ruleId": { "$ref": "#/$defs/id" },
+    "derivedFrom": { "$ref": "#/$defs/derivedFrom" },
+    "statement": { "$ref": "#/$defs/text" },
+    "mechanismHypothesis": {
+      "description": "Why the rule is believed to work. Named a hypothesis, not a finding, unless the evidence tier is M3.",
+      "$ref": "#/$defs/text"
+    },
+    "confidence": { "enum": ["low", "medium", "high"] },
+    "confidenceBasis": { "$ref": "#/$defs/text" },
+    "appliesWhen": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "uniqueItems": true },
+    "doesNotApplyWhen": {
+      "description": "The conditions under which citing this rule is a misuse. Required and non-empty.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/text" },
+      "uniqueItems": true
+    },
+    "counterexampleNote": { "$ref": "#/$defs/text" },
+    "boundToGate": {
+      "type": "object",
+      "required": ["gate", "relationship"],
+      "properties": {
+        "gate": { "$ref": "#/$defs/text" },
+        "relationship": { "$ref": "#/$defs/text" },
+        "schemaPath": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "problemTags": {
+      "description": "Retrieval tags naming the problem the rule solves. Appearance adjectives are refused by the corpus gate: a corpus you cannot query by problem is a scrapbook.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/tag" },
+      "uniqueItems": true
+    },
+    "intentTags": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/tag" }, "uniqueItems": true },
+    "firstSeenAt": { "$ref": "#/$defs/date" },
+    "lastVerifiedAt": { "$ref": "#/$defs/date" },
+    "reVerifyAfterDays": {
+      "description": "Sources stay remote and uncached by licence, so a record can drift from the live product with no local signal. This is the only expiry the corpus has.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "reVerifyReason": { "$ref": "#/$defs/text" },
+    "evidenceTier": {
+      "description": "M3 audience-task evidence > M2 live shipped-product observation > M1 official demonstration or documentation > M0 recipe or showcase.",
+      "enum": ["M0", "M1", "M2", "M3"]
+    },
+    "tierLadder": { "$ref": "#/$defs/text" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "text": { "type": "string", "minLength": 1 },
+    "tag": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "qualifiedFactId": {
+      "description": "observationId/factId. The corpus gate resolves every one of these against the recorded facts; a citation that resolves to nothing looks like evidence and binds to none.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*/[a-z0-9][a-z0-9-]*$"
+    },
+    "derivedFrom": {
+      "type": "object",
+      "required": ["collectionId", "observationIds", "factIds"],
+      "properties": {
+        "collectionId": { "$ref": "#/$defs/id" },
+        "observationIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "factIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/qualifiedFactId" }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    }
+  }
+}

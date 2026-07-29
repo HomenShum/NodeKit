@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "nodekit.reference-observation/v1",
+  "collectionId": "fixture-malformed",
+  "problemStatement": "Deliberately broken corpus. Exists so scripts/reference-corpus-gate.mjs can be seen failing, because a gate only ever observed passing is not known to work.",
+  "whyThisProblem": "Two of the defects here are the ones the corpus was built to refuse: a prose appearance judgement standing where an atomic fact belongs, and a score citing a fact id that does not exist. Nothing in this directory is a real observation of anything.",
+  "licenceMode": "live-inspection-attributed",
+  "licenceNote": "Fixture. The URL below points at nothing and no surface was inspected.",
+  "capturedAt": "2026-07-28",
+  "capturedVia": "hand-written fixture, not a capture",
+  "observations": [
+    {
+      "id": "obs-fixture-bad",
+      "app": "Fixture",
+      "platform": "web",
+      "mobbinUrl": "https://example.invalid/fixture-not-a-real-screen",
+      "surface": "fixture surface",
+      "stance": "counterexample",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "relationship",
+          "subject": "hero panel",
+          "property": "overall impression",
+          "value": "a sleek, modern hero that feels premium",
+          "locatorDescription": "DEFECT 1: prose appearance judgement where an atomic subject/property/value belongs. Unretrievable — no future reader can query the corpus for this."
+        },
+        {
+          "id": "f2",
+          "kind": "impression",
+          "subject": "metric tile",
+          "property": "renders-when-unbound",
+          "value": "renders a numeral",
+          "locatorDescription": "DEFECT 2: kind 'impression' is not one of the enumerated fact kinds, so the schema should refuse this record."
+        }
+      ],
+      "boundary": "Fixture. Establishes nothing about any product."
+    }
+  ],
+  "notRun": [
+    "Everything. No surface was inspected to produce this file."
+  ]
+}

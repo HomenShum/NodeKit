@@ -52,7 +52,11 @@ test("quality runs both public boundaries and the exact-candidate gate", async (
   const testCommands = steps(workflow, "test").map((step) => step.run).filter(Boolean);
   assert.ok(testCommands.includes("npm run typecheck:public"));
   assert.ok(testCommands.includes("npm run typecheck:component"));
-  assert.ok(testCommands.includes("npm test"));
+  // `b4ebced9` deliberately moved CI from `npm test` (fast lane only) to `npm run test:all`,
+  // which runs the slow lane too. This assertion kept naming the old command and had been red
+  // ever since — a stale test describing a CI that was intentionally changed. Assert the
+  // stronger command, so a silent narrowing back to the fast lane fails here.
+  assert.ok(testCommands.includes("npm run test:all"));
   const candidate = workflow.jobs["exact-candidate"];
   assert.equal(candidate.needs, "test");
   assert.match(candidate.if, /refs\/heads\/main/);

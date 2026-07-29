@@ -1,0 +1,552 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.launch-manifest.v1.schema.json",
+  "title": "NodeKit launch manifest",
+  "description": "LAUNCH stage artifact of the Builder Journey. Answers: what was deployed, where, under whose authority, at what cost against the standing grant, and what DOM signal proves it is live. Consumes a BuildEvidencePack (bound by sha256 in `inputs`, not named). The root envelope is frozen by docs/JOURNEY_INTERSTAGE_CONTRACT.md; only `content` is this schema's own design. The load-bearing part is `content.liveness`: a deploy claim is green ONLY when a rendered-DOM probe observed a promised signal that a shell baseline did NOT contain. Pushed is not shipped, and fetched is not rendered.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "caseId", "stage", "producedAt", "inputs", "content", "completeness"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.launch-manifest/v1" },
+    "caseId": {
+      "description": "Identical across all five stage artifacts for one journey.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "stage": { "const": "launch" },
+    "producedAt": { "$ref": "#/$defs/timestamp" },
+    "inputs": {
+      "description": "Every upstream artifact consumed, bound by sha256 over its canonical JSON (sorted keys, no insignificant whitespace). LAUNCH consumes BuildEvidencePack, so at least one binding must name it; a manifest that cannot digest its build pack was handed a name, not a pack. LAUNCH does NOT consume StoryPack — they are the one genuinely parallel pair.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/inputBinding" },
+      "contains": {
+        "type": "object",
+        "required": ["schemaVersion"],
+        "properties": { "schemaVersion": { "const": "nodekit.build-evidence-pack/v1" } }
+      },
+      "minContains": 1
+    },
+    "content": { "$ref": "#/$defs/content" },
+    "completeness": { "$ref": "#/$defs/completeness" },
+
+    "promotionAuthorized": {
+      "description": "A producer may write false. It may never write true — authorization is derived by verification from an attestation, never authored here.",
+      "const": false
+    },
+
+    "reviewedBy": false,
+    "approved": false,
+    "approvedBy": false,
+    "verdict": false,
+    "humanReviewed": false,
+    "signedOff": false,
+    "attestation": false
+  },
+
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$" },
+    "identity": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,255}$" },
+    "httpsUrl": { "type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 2048 },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?Z$"
+    },
+    "evidencePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._/-]+$"
+    },
+    "minorUnits": {
+      "description": "Money as an integer count of the currency's minor unit (USD cents). Never a float — a launch ledger that rounds is a launch ledger that drifts.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000000
+    },
+
+    "inputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "caseId", "sha256"],
+      "properties": {
+        "schemaVersion": { "type": "string", "pattern": "^nodekit\\.[a-z0-9-]+/v[0-9]+$" },
+        "caseId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+
+    "completeness": {
+      "description": "What this stage did NOT do, stated alongside what it did. An empty notRun is itself a claim that everything in scope was attempted.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claimed", "notRun", "refused"],
+      "properties": {
+        "claimed": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        },
+        "notRun": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        },
+        "refused": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["item", "reason"],
+            "properties": {
+              "item": { "$ref": "#/$defs/nonEmpty" },
+              "reason": { "$ref": "#/$defs/nonEmpty" }
+            }
+          }
+        }
+      }
+    },
+
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release", "target", "authority", "spend", "liveness"],
+      "properties": {
+        "release": { "$ref": "#/$defs/release" },
+        "target": { "$ref": "#/$defs/target" },
+        "authority": { "$ref": "#/$defs/authority" },
+        "spend": { "$ref": "#/$defs/spend" },
+        "liveness": { "$ref": "#/$defs/liveness" }
+      }
+    },
+
+    "release": {
+      "description": "WHAT was deployed. A branch name is not a version and a repository name is not an artifact — the shipped bytes are identified by digest and the source by commit.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactName", "sourceRepository", "sourceCommit", "artifactSha256", "buildCompletedAt"],
+      "properties": {
+        "artifactName": { "$ref": "#/$defs/nonEmpty" },
+        "sourceRepository": { "$ref": "#/$defs/identity" },
+        "sourceCommit": { "$ref": "#/$defs/commit" },
+        "sourceRef": {
+          "description": "Human-facing branch or tag. Recorded for readability only; it is never the identity.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "artifactSha256": {
+          "description": "Digest of the bytes actually shipped, not of the source tree.",
+          "$ref": "#/$defs/sha256"
+        },
+        "buildCompletedAt": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+
+    "target": {
+      "description": "WHERE it went. `deploymentId` is the provider's own immutable handle for this deployment — a URL can silently point at an older build or redirect elsewhere, an id cannot.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "environment",
+        "accountIdentity",
+        "projectIdentity",
+        "deploymentId",
+        "url",
+        "deployedAt",
+        "publicReachability"
+      ],
+      "properties": {
+        "provider": { "$ref": "#/$defs/slug" },
+        "environment": { "enum": ["preview", "staging", "production"] },
+        "accountIdentity": {
+          "description": "The account, org, or team under which the deployment landed.",
+          "$ref": "#/$defs/identity"
+        },
+        "projectIdentity": { "$ref": "#/$defs/identity" },
+        "deploymentId": { "$ref": "#/$defs/identity" },
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "deployedAt": { "$ref": "#/$defs/timestamp" },
+        "publicReachability": {
+          "description": "A signal observed by a signed-in agent behind a password wall is not evidence the public can reach the app. Stated here so a liveness probe can be read against it.",
+          "enum": ["public", "password-protected", "private-requires-auth", "unknown"]
+        }
+      }
+    },
+
+    "authority": {
+      "description": "UNDER WHOSE authority. The honest boundary is structural: a grant signed with an agent-readable key is H1 — a policy statement, not cryptographic proof of human presence — and this schema will not let H0/H1 be dressed up as human presence. No silent fallback.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "actor", "keyKind", "trustLevel", "trustLevelBasis", "humanPresenceProven", "withinGrant"],
+      "properties": {
+        "mode": {
+          "description": "standing-grant: covered by a signed capability manifest. per-action-approval: a human approved this specific launch. none: no authority was established.",
+          "enum": ["standing-grant", "per-action-approval", "none"]
+        },
+        "actor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type"],
+          "properties": {
+            "id": { "$ref": "#/$defs/identity" },
+            "type": { "enum": ["agent", "human"] }
+          }
+        },
+        "grant": {
+          "description": "The standing capability manifest this launch operated under, bound by digest. Required when mode is standing-grant.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schemaVersion", "grantId", "sha256", "signedAt"],
+          "properties": {
+            "schemaVersion": { "type": "string", "pattern": "^nodekit\\.[a-z0-9-]+/v[0-9]+$" },
+            "grantId": { "$ref": "#/$defs/identity" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "signedAt": { "$ref": "#/$defs/timestamp" }
+          }
+        },
+        "keyKind": {
+          "description": "What kind of key signed the authority. agent-readable means the agent could have signed it itself.",
+          "enum": ["agent-readable", "hardware-backed", "external-attested", "none"]
+        },
+        "trustLevel": { "enum": ["H0", "H1", "H2", "H3"] },
+        "trustLevelBasis": {
+          "description": "Prose: what concretely established this level. 'because the config said so' is a defect, not a basis.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "humanPresenceProven": {
+          "description": "Whether a human was cryptographically shown to be present for THIS launch. Constrained to false at H0/H1 — the whole point of the ladder.",
+          "type": "boolean"
+        },
+        "withinGrant": { "enum": ["inside", "outside", "unknown"] },
+        "outsideGrantDisclosure": { "$ref": "#/$defs/nonEmpty" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "standing-grant" } }, "required": ["mode"] },
+          "then": { "required": ["grant"] }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "none" } }, "required": ["mode"] },
+          "then": { "properties": { "trustLevel": { "const": "H0" } } }
+        },
+        {
+          "if": { "properties": { "keyKind": { "enum": ["agent-readable", "none"] } }, "required": ["keyKind"] },
+          "then": { "properties": { "trustLevel": { "enum": ["H0", "H1"] } } }
+        },
+        {
+          "if": { "properties": { "trustLevel": { "enum": ["H0", "H1"] } }, "required": ["trustLevel"] },
+          "then": { "properties": { "humanPresenceProven": { "const": false } } }
+        },
+        {
+          "if": { "properties": { "withinGrant": { "enum": ["outside", "unknown"] } }, "required": ["withinGrant"] },
+          "then": { "required": ["outsideGrantDisclosure"] }
+        }
+      ]
+    },
+
+    "spend": {
+      "description": "AT WHAT COST against the standing grant. `remainingAfterMinorUnits` is written so a verifier can check the arithmetic closes (cap - prior - thisLaunch); a producer that cannot make it close is disclosing an overrun, not hiding one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "periodStart",
+        "periodEnd",
+        "grantCapMinorUnits",
+        "priorPeriodSpendMinorUnits",
+        "thisLaunchMinorUnits",
+        "remainingAfterMinorUnits",
+        "meteringBasis",
+        "capExceeded",
+        "entries"
+      ],
+      "properties": {
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "periodStart": { "$ref": "#/$defs/timestamp" },
+        "periodEnd": { "$ref": "#/$defs/timestamp" },
+        "grantCapMinorUnits": {
+          "description": "The standing cap for the period. Default grant is $100/month = 10000.",
+          "$ref": "#/$defs/minorUnits"
+        },
+        "priorPeriodSpendMinorUnits": { "$ref": "#/$defs/minorUnits" },
+        "thisLaunchMinorUnits": { "$ref": "#/$defs/minorUnits" },
+        "remainingAfterMinorUnits": {
+          "description": "May be negative. A negative value is an overrun and requires capExceeded true.",
+          "type": "integer",
+          "minimum": -100000000,
+          "maximum": 100000000
+        },
+        "meteringBasis": {
+          "description": "Where the number came from. An estimate must never be indistinguishable from a billed amount.",
+          "enum": ["provider-invoice", "provider-api", "estimated", "free-tier-no-charge"]
+        },
+        "estimateMethod": { "$ref": "#/$defs/nonEmpty" },
+        "capExceeded": { "type": "boolean" },
+        "capExceededDisclosure": { "$ref": "#/$defs/nonEmpty" },
+        "entries": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "minorUnits", "meteringBasis"],
+            "properties": {
+              "label": { "$ref": "#/$defs/nonEmpty" },
+              "minorUnits": { "$ref": "#/$defs/minorUnits" },
+              "meteringBasis": { "enum": ["provider-invoice", "provider-api", "estimated", "free-tier-no-charge"] },
+              "receiptRef": { "$ref": "#/$defs/evidencePath" },
+              "receiptSha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "meteringBasis": { "const": "estimated" } }, "required": ["meteringBasis"] },
+          "then": { "required": ["estimateMethod"] }
+        },
+        {
+          "if": { "properties": { "meteringBasis": { "const": "free-tier-no-charge" } }, "required": ["meteringBasis"] },
+          "then": { "properties": { "thisLaunchMinorUnits": { "const": 0 } } }
+        },
+        {
+          "if": { "properties": { "capExceeded": { "const": true } }, "required": ["capExceeded"] },
+          "then": { "required": ["capExceededDisclosure"] }
+        }
+      ]
+    },
+
+    "liveness": {
+      "description": "WHAT DOM SIGNAL PROVES IT IS LIVE. This block exists because a Vite SPA returns a byte-identical shell whether the app works or is catastrophically broken, so a raw-HTML grep proves only that a server answered. Two things are therefore kept apart and never collapsed: fetching a URL (`method: raw-http`) and observing a signal in a rendered DOM (`method: rendered-dom`). The green claim is reachable only through the second, and only when a shell baseline showed the signal is not in the empty shell.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim", "promisedSignals", "probes"],
+      "properties": {
+        "claim": {
+          "description": "live-signal-observed-in-rendered-dom is structurally gated below — it cannot be written without a probe that earns it.",
+          "enum": [
+            "live-signal-observed-in-rendered-dom",
+            "deployed-signal-not-observed",
+            "deploy-failed",
+            "not-attempted"
+          ]
+        },
+        "notObservedDisclosure": {
+          "description": "Required for every non-green claim. 'It is probably fine' is a disclosure and will be read as one.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "promisedSignals": {
+          "description": "The signals promised BEFORE fetching. Each must name at least one probe, so a signal that was promised and never looked for is unrepresentable.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/promisedSignal" }
+        },
+        "probes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/probe" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "claim": { "const": "live-signal-observed-in-rendered-dom" } },
+            "required": ["claim"]
+          },
+          "then": {
+            "properties": {
+              "probes": {
+                "contains": {
+                  "type": "object",
+                  "required": ["method", "observation", "shellBaselineComparison"],
+                  "properties": {
+                    "method": { "const": "rendered-dom" },
+                    "observation": { "const": "observed" },
+                    "shellBaselineComparison": {
+                      "type": "object",
+                      "required": ["performed", "baselineContainedSignal"],
+                      "properties": {
+                        "performed": { "const": true },
+                        "baselineContainedSignal": { "const": false }
+                      }
+                    }
+                  }
+                },
+                "minContains": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "claim": { "enum": ["deployed-signal-not-observed", "deploy-failed", "not-attempted"] }
+            },
+            "required": ["claim"]
+          },
+          "then": { "required": ["notObservedDisclosure"] }
+        }
+      ]
+    },
+
+    "promisedSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signalId", "kind", "expected", "whyThisProvesTheApp", "presentInUnbuiltShell", "probeIds"],
+      "properties": {
+        "signalId": { "$ref": "#/$defs/slug" },
+        "kind": { "enum": ["testid", "text", "selector", "attribute", "aria-role", "json-key", "response-header"] },
+        "expected": {
+          "description": "The exact string, selector, or key expected. Not a description of it.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "whyThisProvesTheApp": {
+          "description": "Why this signal's presence means the application works, rather than that a server responded. A signal whose justification survives being applied to an empty shell is not a signal.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "presentInUnbuiltShell": {
+          "description": "Would this signal also appear in the app's own empty or error shell? True means it is worthless as proof and says so on the record.",
+          "type": "boolean"
+        },
+        "probeIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/slug" }
+        }
+      }
+    },
+
+    "probe": {
+      "description": "One observation attempt. `method` is the distinction the whole artifact turns on: raw-http received bytes, rendered-dom ran the page in an engine and inspected the resulting DOM.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probeId", "signalId", "method", "urlFetched", "observation", "authenticatedSession"],
+      "properties": {
+        "probeId": { "$ref": "#/$defs/slug" },
+        "signalId": { "$ref": "#/$defs/slug" },
+        "method": {
+          "description": "raw-http received bytes and grepped them. rendered-dom ran the page in a browser engine and inspected the resulting DOM. A raw-http probe may record a baseline byte comparison, but it can never satisfy the rendered-DOM gate on the green claim — that is the whole point of keeping the two apart.",
+          "enum": ["raw-http", "rendered-dom"]
+        },
+        "urlFetched": { "$ref": "#/$defs/httpsUrl" },
+        "finalUrl": {
+          "description": "The URL after redirects. Kept separate from urlFetched because a redirect to a marketing page is the classic false green.",
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "fetchedAt": { "$ref": "#/$defs/timestamp" },
+        "httpStatus": { "type": "integer", "minimum": 100, "maximum": 599 },
+        "responseBytes": { "type": "integer", "minimum": 0, "maximum": 1073741824 },
+        "authenticatedSession": {
+          "description": "Whether the probe used a signed-in session. True means the observation says nothing about public reachability.",
+          "type": "boolean"
+        },
+        "observation": {
+          "description": "observed: the signal was found. absent: the probe completed and the signal was not there. probe-failed: the probe itself did not complete. not-attempted: nobody looked.",
+          "enum": ["observed", "absent", "probe-failed", "not-attempted"]
+        },
+        "observedValue": {
+          "description": "What was actually found — the matched text or node, not the boolean true.",
+          "$ref": "#/$defs/nonEmpty"
+        },
+        "failureDetail": { "$ref": "#/$defs/nonEmpty" },
+        "notAttemptedReason": { "$ref": "#/$defs/nonEmpty" },
+        "renderer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["engine", "engineVersion", "waitStrategy"],
+          "properties": {
+            "engine": { "enum": ["chromium", "firefox", "webkit"] },
+            "engineVersion": { "$ref": "#/$defs/nonEmpty" },
+            "waitStrategy": { "$ref": "#/$defs/nonEmpty" }
+          }
+        },
+        "consoleErrorCount": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "pageErrorCount": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "shellBaselineComparison": {
+          "description": "The defense against the identical-shell trap: fetch a known-empty or known-broken build of the same app and check whether the signal appears there too. Without this, an observation only proves the string exists somewhere in the response.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["performed"],
+          "properties": {
+            "performed": { "type": "boolean" },
+            "baselineDescription": { "$ref": "#/$defs/nonEmpty" },
+            "baselineResponseBytes": { "type": "integer", "minimum": 0, "maximum": 1073741824 },
+            "baselineContainedSignal": { "type": "boolean" },
+            "notPerformedReason": { "$ref": "#/$defs/nonEmpty" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "performed": { "const": true } }, "required": ["performed"] },
+              "then": { "required": ["baselineDescription", "baselineContainedSignal"] }
+            },
+            {
+              "if": { "properties": { "performed": { "const": false } }, "required": ["performed"] },
+              "then": { "required": ["notPerformedReason"] }
+            }
+          ]
+        },
+        "evidence": {
+          "description": "Generated artifacts, never assertions. Required for any observed result.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "path", "sha256"],
+            "properties": {
+              "kind": { "enum": ["dom-snapshot", "screenshot", "har", "response-body", "console-log"] },
+              "path": { "$ref": "#/$defs/evidencePath" },
+              "sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "method": { "const": "rendered-dom" } }, "required": ["method"] },
+          "then": { "required": ["renderer", "consoleErrorCount", "pageErrorCount"] }
+        },
+        {
+          "if": { "properties": { "method": { "const": "raw-http" } }, "required": ["method"] },
+          "then": { "properties": { "renderer": false } }
+        },
+        {
+          "if": { "properties": { "observation": { "const": "observed" } }, "required": ["observation"] },
+          "then": {
+            "required": ["observedValue", "finalUrl", "fetchedAt", "httpStatus", "responseBytes", "shellBaselineComparison", "evidence"],
+            "properties": { "evidence": { "minItems": 1 } }
+          }
+        },
+        {
+          "if": { "properties": { "observation": { "const": "absent" } }, "required": ["observation"] },
+          "then": { "required": ["failureDetail", "finalUrl", "fetchedAt", "httpStatus", "responseBytes"] }
+        },
+        {
+          "if": { "properties": { "observation": { "const": "probe-failed" } }, "required": ["observation"] },
+          "then": { "required": ["failureDetail", "fetchedAt"] }
+        },
+        {
+          "if": { "properties": { "observation": { "const": "not-attempted" } }, "required": ["observation"] },
+          "then": { "required": ["notAttemptedReason"] }
+        }
+      ]
+    }
+  }
+}

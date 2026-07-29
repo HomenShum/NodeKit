@@ -85,3 +85,10 @@ behaviors:
       - undefined-term-blocks
       - unreachable-glossary-blocks
       - identifiers-not-flagged
+  studio.motion-portability:
+    statement: A copied motion recipe is blocked when one static token name resolves to different behavior, and migration aliases preserve observed values unless a disclosed owner decision changes them.
+    requiredScenarios:
+      - detects-silent-cross-repo-drift
+      - normalizes-equivalent-values
+      - incomplete-coverage-is-not-run
+      - aliases-preserve-behavior

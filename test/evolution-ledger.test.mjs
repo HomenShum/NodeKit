@@ -8,6 +8,7 @@ import test from "node:test";
 import {
   buildEvolutionDocs,
   checkEvolutionMateriality,
+  draftEvolutionEvent,
   initializeEvolutionLedger,
   proposeEvolutionKnowledgePatch,
   queryEvolutionLedger,
@@ -122,4 +123,33 @@ test("materiality gate blocks unrecorded system changes and accepts a reviewed e
   const passed = await checkEvolutionMateriality(root, before, after);
   assert.equal(passed.passed, true);
   assert.equal(passed.events[0].id, event.id);
+});
+
+test("concurrent agent proposals with one id never become last-writer-wins", async () => {
+  const { root } = await fixture();
+  const input = {
+    id: "evt:concurrent-maintainer-proposal",
+    track: "harness",
+    category: "evaluation",
+    challenge: "Two maintainers propose the same event during a release burst",
+    observedFailure: "A check-then-write lane can overwrite the first proposal",
+    resolution: "Create draft files exclusively so exactly one proposal wins",
+    evidenceIds: ["evd:test"],
+  };
+
+  const results = await Promise.allSettled([
+    draftEvolutionEvent(root, input),
+    draftEvolutionEvent(root, input),
+  ]);
+  assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+  const rejected = results.find((result) => result.status === "rejected");
+  assert.equal(rejected?.reason?.code, "EEXIST");
+
+  const stored = JSON.parse(await readFile(
+    path.join(root, "evolution", "drafts", "evt-concurrent-maintainer-proposal.json"),
+    "utf8",
+  ));
+  assert.equal(stored.id, input.id);
+  assert.deepEqual(stored.evidenceIds, ["evd:test"]);
+  assert.deepEqual(stored.interpretation, { status: "agent-proposed" });
 });

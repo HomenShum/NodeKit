@@ -1,0 +1,17 @@
+{
+  "lexiconVersion": "1.0.0",
+  "note": "Phrases that make a sentence a claim about DATA rather than about software, per docs/PLAN.md W2. A match forces a non-empty dataImplications on the story claim, which in turn forces the authority-or-disclosure choice.",
+  "phrases": [
+    { "phrase": "your Square export", "implies": ["user-owned", "factual"] },
+    { "phrase": "your uploaded", "implies": ["user-owned"] },
+    { "phrase": "from your account", "implies": ["user-owned", "connected"] },
+    { "phrase": "connected to your", "implies": ["connected"] },
+    { "phrase": "actual revenue", "implies": ["factual"] },
+    { "phrase": "current sales", "implies": ["current", "factual"] },
+    { "phrase": "based on your data", "implies": ["user-owned", "factual"] },
+    { "phrase": "this week's", "implies": ["current"] },
+    { "phrase": "your estimated", "implies": ["user-owned"] },
+    { "phrase": "live", "implies": ["connected", "current"] },
+    { "phrase": "real-time", "implies": ["connected", "current"] }
+  ]
+}

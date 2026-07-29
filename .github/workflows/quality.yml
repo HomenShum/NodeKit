@@ -20,7 +20,9 @@ jobs:
       - run: npm ci
       - run: npm run typecheck:public
       - run: npm run typecheck:component
-      - run: npm test
+      # test:all, not test. `npm test` is the fast lane a developer runs on every change;
+      # CI must still gate the slow acceptance lane, or splitting the suite quietly drops it.
+      - run: npm run test:all
       - run: npm run audit:prod
       - run: npm run registry:check
       - name: Pack and install NodeKit

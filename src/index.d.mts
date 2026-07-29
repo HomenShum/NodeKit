@@ -6,3 +6,4 @@ export * from "./skill-evaluation.mjs";
 export * from "./evidence-snapshots.mjs";
 export * from "./research-collector.mjs";
 export * from "./managed-evidence-capture.mjs";
+export * from "./reference-loop.mjs";
