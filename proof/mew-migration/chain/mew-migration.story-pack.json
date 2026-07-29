@@ -2,18 +2,18 @@
   "schemaVersion": "nodekit.story-pack/v1",
   "caseId": "mew-migration",
   "stage": "explain",
-  "producedAt": "2026-07-29T09:47:38.913Z",
+  "producedAt": "2026-07-29T10:07:14.344Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.build-evidence-pack/v1",
       "caseId": "mew-migration",
-      "sha256": "a58a682462898171d0850065779ee66a5a9162ff167d76721ec0b7efadc35ec5",
+      "sha256": "daee8a8b4d28e99ecb4ec426b4b45b47178f4c1e9a7c6f49c0bd631a8852891c",
       "path": "proof/mew-migration/chain/mew-migration.build-evidence-pack.json"
     },
     {
       "schemaVersion": "nodekit.opportunity-contract/v1",
       "caseId": "mew-migration",
-      "sha256": "0bbd89508e214e307d4a3a82e55e989c759f3e721c4a70dcc5a3ae1415affc48",
+      "sha256": "fdaf5b0789cb2e31ed2a3976b6f94cefd1f77650205ae45c83742d5d28346765",
       "path": "proof/mew-migration/chain/opportunity-contract.json"
     }
   ],
@@ -23,7 +23,7 @@
       "decision": "Whether to provide the real Ideaflow export (owner input #1) and author the semantic acceptance cases (owner input #3), or to change the migration's structural decisions first.",
       "stakes": "internal-review",
       "priorBeliefs": [
-        "The owner knows waves 0A and 0B stopped on kill conditions and that zero notes and zero cases exist anywhere in this pipeline."
+        "The owner knows the ground truth was corrected mid-run: Mew is the local codebase, the 0B receipt is superseded, 3 acceptance cases are harvested but unevaluated, and zero database records exist anywhere in this pipeline."
       ]
     },
     "surfaces": [
@@ -65,7 +65,7 @@
     "claims": [
       {
         "claimId": "sc-manifest-closes",
-        "statement": "The importer refuses loudly and its manifest closes: every note in an export is either imported or refused with a reason.",
+        "statement": "The importer refuses loudly and its manifest closes per table: every exported record is imported, refused with a reason, or in a counted, disclosed drop.",
         "surfaceRefs": [
           "surface-run-report"
         ],
@@ -76,7 +76,7 @@
           "scanner": "apps/mew-migration/scripts/produce-story-pack.mjs#scan",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "bba70e4ee2f6b3a5d20713b75df3f0d129da0239378098fd73987cc9e937bc70",
-          "scannedAt": "2026-07-29T09:47:38.913Z",
+          "scannedAt": "2026-07-29T10:07:14.344Z",
           "matches": []
         },
         "status": "bound",
@@ -90,7 +90,7 @@
           "restatement": "simplified",
           "strengthDelta": "equal"
         },
-        "boundary": "Demonstrated on labeled fixture data only. It says nothing about how many notes the owner's notebook holds or whether a real export would import cleanly — no real export has ever been read."
+        "boundary": "Demonstrated on labeled fixture data only. It says nothing about how many records the owner's database holds or whether a real export would import cleanly — no real export has ever been read."
       },
       {
         "claimId": "sc-provenance-erasure",
@@ -105,7 +105,7 @@
           "scanner": "apps/mew-migration/scripts/produce-story-pack.mjs#scan",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "bba70e4ee2f6b3a5d20713b75df3f0d129da0239378098fd73987cc9e937bc70",
-          "scannedAt": "2026-07-29T09:47:38.913Z",
+          "scannedAt": "2026-07-29T10:07:14.344Z",
           "matches": []
         },
         "status": "bound",
@@ -136,7 +136,7 @@
           "scanner": "apps/mew-migration/scripts/produce-story-pack.mjs#scan",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "bba70e4ee2f6b3a5d20713b75df3f0d129da0239378098fd73987cc9e937bc70",
-          "scannedAt": "2026-07-29T09:47:38.913Z",
+          "scannedAt": "2026-07-29T10:07:14.344Z",
           "matches": []
         },
         "status": "bound",
@@ -153,7 +153,7 @@
       },
       {
         "claimId": "sc-empty-disclosed",
-        "statement": "The surface discloses that no notebook data has been imported; the store it answers from holds zero notes.",
+        "statement": "The surface discloses that no notebook data has been imported; the store it answers from holds zero graph nodes.",
         "surfaceRefs": [
           "surface-agent-web",
           "surface-run-report"
@@ -165,7 +165,7 @@
           "scanner": "apps/mew-migration/scripts/produce-story-pack.mjs#scan",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "bba70e4ee2f6b3a5d20713b75df3f0d129da0239378098fd73987cc9e937bc70",
-          "scannedAt": "2026-07-29T09:47:38.913Z",
+          "scannedAt": "2026-07-29T10:07:14.344Z",
           "matches": []
         },
         "status": "bound",
@@ -178,11 +178,11 @@
           "restatement": "simplified",
           "strengthDelta": "equal"
         },
-        "boundary": "A statement about this software's own empty store, not about the notebook. The notebook's contents and size remain unknown (awaiting owner input #1)."
+        "boundary": "A statement about this software's own empty store, not about the notebook. The database's contents and size remain unknown (awaiting owner input #1: one run of Mew's own exporter)."
       },
       {
         "claimId": "sc-export-shape",
-        "statement": "The importer accepts the exact JSON shape that an Ideaflow export contains.",
+        "statement": "The importer accepts the exact JSON shape that Mew's own database exporter writes.",
         "surfaceRefs": [
           "surface-run-report"
         ],
@@ -193,7 +193,7 @@
           "scanner": "apps/mew-migration/scripts/produce-story-pack.mjs#scan",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "bba70e4ee2f6b3a5d20713b75df3f0d129da0239378098fd73987cc9e937bc70",
-          "scannedAt": "2026-07-29T09:47:38.913Z",
+          "scannedAt": "2026-07-29T10:07:14.344Z",
           "matches": []
         },
         "status": "unbound",
@@ -202,11 +202,11 @@
         ],
         "unbound": {
           "reason": "measurement-not-possible-yet",
-          "detail": "No Ideaflow session and no export file exist on this machine (wave-0B kill receipt, PR #27); the accepted shape is derived from Ideaflow's public data model and has never met a real export.",
-          "whatWouldBindIt": "One real export file from the owner's signed-in Ideaflow session, imported with the manifest closing and zero shape refusals.",
-          "riskIfBelieved": "If the real export shape differs, the first real import refuses most or all notes; the reader would have expected a working migration and gets a manifest full of refusals instead."
+          "detail": "The accepted shape is bound to the exporter and schema read from the owner's local personal-dev-mew checkout (digests in proof/mew-migration/local-recon.json), but no real export file has ever been produced or read, and schema drift across the owner's three branches is real and unresolved.",
+          "whatWouldBindIt": "One real export file from `yarn tsx scripts/export-database.ts` in personal-dev-mew, imported with every table closing and zero drift refusals.",
+          "riskIfBelieved": "If the owner's database was created from a different branch's schema, the first real import refuses the drifted records loudly; the reader would have expected a clean migration and gets a manifest full of drift refusals instead."
         },
-        "boundary": "An expectation, not a measurement. The importer's strictness means a shape mismatch fails loudly rather than importing garbage, but loud failure is still failure."
+        "boundary": "A code-derived expectation, not a measurement against real bytes. The importer's strictness means a mismatch fails loudly rather than importing garbage, but loud failure is still failure."
       }
     ],
     "withheldClaims": [
@@ -214,7 +214,7 @@
         "claimId": "sc-withheld-notebook-migrated",
         "statement": "The notebook has been migrated out of Ideaflow into a store the owner controls.",
         "withheldBecause": "no-authority-issued-source",
-        "detail": "Zero notes have ever been read from Ideaflow (wave-0B kill receipt). There is no export, no inventory, and therefore no migration of anything real to claim.",
+        "detail": "Zero records have ever been read from the owner's database (remote Postgres; credentials deliberately unused — local-recon receipt). There is no export, no inventory, and therefore no migration of anything real to claim.",
         "wouldHaveImplied": [
           "user-owned",
           "factual"
@@ -222,9 +222,9 @@
       },
       {
         "claimId": "sc-withheld-inventory-intact",
-        "statement": "All of the notebook's notes, links and tags survived the migration intact.",
+        "statement": "All of the notebook's nodes, relations, relation types and list entries survived the migration intact.",
         "withheldBecause": "no-authority-issued-source",
-        "detail": "The inventory (N notes, M links, K tags) is unknown and deliberately unestimated, awaiting owner input #1. A count claim with no denominator is the vacuous pass.",
+        "detail": "The inventory (N nodes, M relations) is unknown and deliberately unestimated, awaiting owner input #1. A count claim with no denominator is the vacuous pass.",
         "wouldHaveImplied": [
           "user-owned",
           "factual"
@@ -234,7 +234,7 @@
         "claimId": "sc-withheld-semantic-recall",
         "statement": "Asking the surface about a topic surfaces the note the owner wrote about it.",
         "withheldBecause": "no-authority-issued-source",
-        "detail": "Zero owner notes exist to surface and zero owner-authored acceptance cases exist to check against (wave-0A receipt). The semantic scorecard column is NOT_RUN awaiting owner input #3.",
+        "detail": "Zero owner nodes exist to surface, and the 3 harvested owner-authored cases (harness/mew-migration/notion-cases.json) exercise CRUD orchestration this retrieval-only slice does not implement. The semantic scorecard column is NOT_RUN with both reasons recorded per case.",
         "wouldHaveImplied": [
           "user-owned",
           "factual"

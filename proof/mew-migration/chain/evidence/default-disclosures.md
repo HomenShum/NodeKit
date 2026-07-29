@@ -1,6 +1,6 @@
 # Defaulted contract decisions — disclosure
 
-Contract: proof/mew-migration/chain/opportunity-contract.json (canonical sha256 0bbd89508e214e307d4a3a82e55e989c759f3e721c4a70dcc5a3ae1415affc48)
+Contract: proof/mew-migration/chain/opportunity-contract.json (canonical sha256 fdaf5b0789cb2e31ed2a3976b6f94cefd1f77650205ae45c83742d5d28346765)
 Case: mew-migration
 
 The BUILD stage attached no evidence for the decisions below. Each is recorded as
@@ -26,6 +26,7 @@ the repository's existing state to speak for this decision and attests nothing a
 - /authorityLimits/read/0: No build action attested to /authorityLimits/read/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/0 as unverified until evidence is attached.
 - /authorityLimits/read/1: No build action attested to /authorityLimits/read/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/1 as unverified until evidence is attached.
 - /authorityLimits/read/2: No build action attested to /authorityLimits/read/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/2 as unverified until evidence is attached.
+- /authorityLimits/read/3: No build action attested to /authorityLimits/read/3. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/3 as unverified until evidence is attached.
 - /authorityLimits/propose/0: No build action attested to /authorityLimits/propose/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/propose/0 as unverified until evidence is attached.
 - /authorityLimits/propose/1: No build action attested to /authorityLimits/propose/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/propose/1 as unverified until evidence is attached.
 - /authorityLimits/prohibited/0: No build action attested to /authorityLimits/prohibited/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/0 as unverified until evidence is attached.
@@ -33,3 +34,4 @@ the repository's existing state to speak for this decision and attests nothing a
 - /authorityLimits/prohibited/2: No build action attested to /authorityLimits/prohibited/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/2 as unverified until evidence is attached.
 - /authorityLimits/prohibited/3: No build action attested to /authorityLimits/prohibited/3. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/3 as unverified until evidence is attached.
 - /authorityLimits/prohibited/4: No build action attested to /authorityLimits/prohibited/4. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/4 as unverified until evidence is attached.
+- /authorityLimits/prohibited/5: No build action attested to /authorityLimits/prohibited/5. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/5 as unverified until evidence is attached.

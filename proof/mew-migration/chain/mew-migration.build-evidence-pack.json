@@ -2,17 +2,17 @@
   "schemaVersion": "nodekit.build-evidence-pack/v1",
   "caseId": "mew-migration",
   "stage": "build",
-  "producedAt": "2026-07-29T09:43:38.987Z",
+  "producedAt": "2026-07-29T10:06:45.710Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.opportunity-contract/v1",
       "caseId": "mew-migration",
-      "sha256": "0bbd89508e214e307d4a3a82e55e989c759f3e721c4a70dcc5a3ae1415affc48",
+      "sha256": "fdaf5b0789cb2e31ed2a3976b6f94cefd1f77650205ae45c83742d5d28346765",
       "path": "proof/mew-migration/chain/opportunity-contract.json"
     }
   ],
   "content": {
-    "summary": "Mechanical BUILD-stage evidence for case mew-migration: 5 contract decision(s) honoured with digested source evidence, 26 defaulted with a written disclosure, 0 contradicted, and 0 emergent decisions surfaced by a receipted sweep of 376 tracked files. Every evidence entry is a real file with a digest and a generation record; nothing in this pack is asserted.",
+    "summary": "Mechanical BUILD-stage evidence for case mew-migration: 5 contract decision(s) honoured with digested source evidence, 28 defaulted with a written disclosure, 0 contradicted, and 0 emergent decisions surfaced by a receipted sweep of 376 tracked files. Every evidence entry is a real file with a digest and a generation record; nothing in this pack is asserted.",
     "built": {
       "surfaces": []
     },
@@ -76,7 +76,7 @@
             "ev-src-serve-mjs",
             "ev-src-fixture-import-manifest-json"
           ],
-          "how": "The artifact exists as committed code: the Convex schema with provenance columns and by_sourceId erasure indexes, the importer whose manifest closes (in = imported + refused), the filesystem store mirror with enumerateForErasure, the agent surface that renders unbound without a binding, and the fixture-run import manifest produced by executing the importer."
+          "how": "The artifact exists as committed code bound to the real Mew model: the Convex schema for nodes/relations/relationTypes/relationLists with provenance columns and by_sourceId erasure indexes, the importer whose manifest closes per table with counted drops, the filesystem store mirror with enumerateForErasure walking every table including endpoint-touching relations, the agent surface that renders unbound without a binding, and the fixture-run import manifest produced by executing the importer."
         },
         "successCondition": {
           "pointer": "/successCondition",
@@ -100,9 +100,10 @@
               "evidenceRefs": [
                 "ev-src-ideaflow-export-fixture-json",
                 "ev-src-importer-test-mjs",
-                "ev-src-fixture-import-manifest-json"
+                "ev-src-fixture-import-manifest-json",
+                "ev-src-local-recon-json"
               ],
-              "how": "The importer accepts exactly the Ideaflow-export-shaped JSON this input describes and is unit-tested only against the labeled fixture file whose every id is prefixed 'fixture:'; the manifest records fixtureLabeled true, read from the file's own label."
+              "how": "The importer accepts exactly the shape Mew's own exporter writes — {data, users, graphNodes, graphRelations, relationTypes, relationLists} — with field sets taken from personal-dev-mew src/db/schema.ts, and is unit-tested only against the labeled fixture file whose every id is prefixed 'fixture:'; the manifest records fixtureLabeled true, read from the file's own label, and binds the expected shape to the recon-digested schema and exporter."
             },
             {
               "pointer": "/inputs/1",
@@ -187,10 +188,9 @@
               "disposition": "honoured",
               "evidenceRefs": [
                 "ev-src-importer-mjs",
-                "ev-src-schema-ts",
                 "ev-src-importer-test-mjs"
               ],
-              "how": "Hashtag-plus tokens are preserved raw on the tag row (rawToken keeps the '+' suffix; name strips it) with no interpretation, in both the Convex schema and the importer, and the scenario suite asserts the '#provenance+' token survives verbatim."
+              "how": "Schema drift refuses loudly: a record carrying latest-main's contentText/relationCount (or any field outside the bound personal-dev-mew field sets) is refused with the drift named in the reason, and the scenario suite asserts exactly that refusal while the table still closes."
             },
             {
               "pointer": "/rejectedAlternatives/4",
@@ -199,7 +199,7 @@
                 "ev-src-importer-mjs",
                 "ev-src-importer-test-mjs"
               ],
-              "how": "Dedup is implemented by sourceId first and exact content digest for id-less notes; a duplicate is a loud manifest refusal, never a merge. The scenario suite covers the duplicate-sourceId refusal and the manifest still closing."
+              "how": "Dedup is implemented by id within one export, mirroring the source's unique(id, author_id): the first occurrence is kept and every duplicate is a loud manifest refusal, never a merge. The scenario suite covers the duplicate-id refusal and the table still closing."
             },
             {
               "pointer": "/rejectedAlternatives/5",
@@ -209,7 +209,7 @@
                 "ev-src-importer-test-mjs",
                 "ev-src-fixture-import-manifest-json"
               ],
-              "how": "Link direction is stored exactly as exported (forward/backlink), dangling targets are recorded on the row and counted in the manifest, and a note carrying any field outside the mapping refuses that note rather than discarding the field; the fixture-run manifest shows danglingLinks 1 with zero silent drops."
+              "how": "Drops are explicit and counted: droppedTables records data and users with row counts and reasons, fieldDrops records pk and contentTsvector with reasons, dangling relation endpoints are flagged on the row and counted in the manifest, and the scenario suite asserts all of it; the fixture-run manifest shows users(1) dropped and danglingRelations 1 with zero silent drops."
             }
           ]
         },
@@ -282,7 +282,7 @@
         "authorityLimits": {
           "read": {
             "pointer": "/authorityLimits/read",
-            "declaredElementCount": 3,
+            "declaredElementCount": 4,
             "elements": [
               {
                 "pointer": "/authorityLimits/read/0",
@@ -317,6 +317,18 @@
                 ],
                 "defaultApplied": "The build attached no evidence for /authorityLimits/read/2; the repository's existing state was left as found and nothing about this decision is attested.",
                 "disclosure": "No build action attested to /authorityLimits/read/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/2 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/read/3",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/read/3; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/read/3. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/3 as unverified until evidence is attached.",
                 "disclosedIn": "ev-default-disclosures",
                 "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
               }
@@ -359,7 +371,7 @@
           },
           "prohibited": {
             "pointer": "/authorityLimits/prohibited",
-            "declaredElementCount": 5,
+            "declaredElementCount": 6,
             "elements": [
               {
                 "pointer": "/authorityLimits/prohibited/0",
@@ -420,6 +432,18 @@
                 "disclosure": "No build action attested to /authorityLimits/prohibited/4. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/4 as unverified until evidence is attached.",
                 "disclosedIn": "ev-default-disclosures",
                 "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/5",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/prohibited/5; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/prohibited/5. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/5 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
               }
             ]
           }
@@ -450,17 +474,17 @@
         "kind": "source-file",
         "artifact": {
           "path": "proof/mew-migration/chain/opportunity-contract.json",
-          "sha256": "ebb088a5cf1b034508150f0bf1532628b56d8e2410c9d14700ac055023c3364d",
-          "byteLength": 6524,
+          "sha256": "abf87b2c263a5afb3782329d725e9baaae0f13ee0ed2a3fdd7d1f2dc9fc9ff1a",
+          "byteLength": 8481,
           "mediaType": "application/json"
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "The OpportunityContract this pack reconciles against, read as 6524 bytes; its canonical-JSON digest is recorded in inputs[0].",
+        "observation": "The OpportunityContract this pack reconciles against, read as 8481 bytes; its canonical-JSON digest is recorded in inputs[0].",
         "boundary": "Shows what the contract says, not that any of it was built. Reconciliation dispositions carry that burden separately."
       },
       {
@@ -476,10 +500,10 @@
           "method": "command",
           "tool": "git",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z",
+          "producedAt": "2026-07-29T10:06:45.710Z",
           "command": "git -c core.quotepath=false ls-files -- src schemas scripts test",
           "exitCode": 0,
-          "durationMs": 44
+          "durationMs": 41
         },
         "observation": "The sweep inventoried 376 tracked files under src, schemas, scripts, test and the producer surfaced zero emergent decisions from that inventory.",
         "boundary": "A file inventory, not a reading. It cannot detect a decision expressed in code semantics, copy, or a default value; those blind spots are declared in decisions.emergentSweep."
@@ -489,16 +513,16 @@
         "kind": "source-file",
         "artifact": {
           "path": "apps/mew-migration/convex/schema.ts",
-          "sha256": "3de97f7cae590830b1f00a6d9a8e7b4146af9a9d8bd92b321b5a667f3e730845",
-          "byteLength": 2882
+          "sha256": "96f7c7f8c05f7054f522ae4546a8fab51053bb4f91b3593f31d1a728e6d7f33d",
+          "byteLength": 4700
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 2882 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 4700 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -506,16 +530,16 @@
         "kind": "source-file",
         "artifact": {
           "path": "apps/mew-migration/src/importer.mjs",
-          "sha256": "ad210e50d7f5a5b589f9e608714e126a1b0c215d60b67edb0316d7d48cf02dac",
-          "byteLength": 7918
+          "sha256": "a30d2e8d482afd32b9655537b7cd6af63cfbe13aefaeda5632ce5c8c8e3c2078",
+          "byteLength": 11092
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 7918 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 11092 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -523,16 +547,16 @@
         "kind": "source-file",
         "artifact": {
           "path": "apps/mew-migration/src/store.mjs",
-          "sha256": "e655944635c54b52618cad780564204ba9b8b05d0ebbf0a805a81ce8f1d4c37b",
-          "byteLength": 1660
+          "sha256": "d8d2b6cbd3fd59b061cac5873db5f2e3bf12df931190dc533ee04a5ddb3bc098",
+          "byteLength": 2080
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 1660 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 2080 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -540,16 +564,16 @@
         "kind": "source-file",
         "artifact": {
           "path": "apps/mew-migration/src/serve.mjs",
-          "sha256": "416a5a74b3cdbb41bd04995269b43b84ceda876065b58d939adcb65a4cd60537",
-          "byteLength": 4924
+          "sha256": "7e5996a654cc030d83fdc45dc55dcd6a25ba44e17fd28981e12b3681be2d1430",
+          "byteLength": 4967
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 4924 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 4967 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -557,16 +581,16 @@
         "kind": "source-file",
         "artifact": {
           "path": "proof/mew-migration/fixture-import-manifest.json",
-          "sha256": "af42d21ce457fd8f512689facef2b64ea520db355c782a00bf194fe284d9957f",
-          "byteLength": 1090
+          "sha256": "76b1daa840324474ac2b9d28c9a788b7d7b0883eaf60143264b00c3cb7c9a56d",
+          "byteLength": 2379
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 1090 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 2379 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -574,16 +598,16 @@
         "kind": "source-file",
         "artifact": {
           "path": "apps/mew-migration/fixtures/ideaflow-export.fixture.json",
-          "sha256": "6eb1fa5a9a020bb438ba01cc72a22fd5a17f3cc9c8ba0a5f2ce55085cb361674",
-          "byteLength": 1183
+          "sha256": "141236ae9c0473807cb3b80fde4e291adf891d871bcbff302885c4380206d4e5",
+          "byteLength": 3748
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 1183 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 3748 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -591,16 +615,33 @@
         "kind": "source-file",
         "artifact": {
           "path": "apps/mew-migration/test/importer.test.mjs",
-          "sha256": "a4cb7da8ba15dff15a379f082e0ccc714226378d99c3f7e668771ab5ec617b5d",
-          "byteLength": 6537
+          "sha256": "39978a053872f1a235b029eb794f6a45a25b80028a820115f6a9e1c784fa6e9d",
+          "byteLength": 8110
         },
         "generatedBy": {
           "method": "file-read",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 6537 bytes on disk at production time.",
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 8110 bytes on disk at production time.",
+        "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
+      },
+      {
+        "evidenceId": "ev-src-local-recon-json",
+        "kind": "source-file",
+        "artifact": {
+          "path": "proof/mew-migration/local-recon.json",
+          "sha256": "805c5c671a902b327f14f5cd75923b6c39247cb5ad10f2e479240e4b807a18ea",
+          "byteLength": 4581
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "src/lib/build-evidence-producer.mjs",
+          "actor": "platform-tool",
+          "producedAt": "2026-07-29T10:06:45.710Z"
+        },
+        "observation": "Source file named by the caller as evidence that a contract decision was honoured; digested from the 4581 bytes on disk at production time.",
         "boundary": "Existence and content of one file. Whether it actually honours the decision it is cited for is the caller's claim, recorded under that pointer's how."
       },
       {
@@ -608,18 +649,18 @@
         "kind": "test-run",
         "artifact": {
           "path": "proof/mew-migration/chain/evidence/test-run.log",
-          "sha256": "94b874edecf678250ed7233d7c750571748743af5c84bb2ef8a9595c0123ed81",
-          "byteLength": 2748,
+          "sha256": "2ec4d84b7faf9e610ee507f783c8c9bf5d4642df0fc8792633400d190739dd37",
+          "byteLength": 3048,
           "mediaType": "text/plain"
         },
         "generatedBy": {
           "method": "command",
           "tool": "shell",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z",
+          "producedAt": "2026-07-29T10:06:45.710Z",
           "command": "node --test apps/mew-migration/test/importer.test.mjs",
           "exitCode": 0,
-          "durationMs": 284
+          "durationMs": 268
         },
         "observation": "The configured test command exited 0; its full stdout and stderr are the artifact bytes, recorded whether it passed or failed.",
         "boundary": "One invocation on one machine at one time. It does not establish coverage of the contract's success condition, only what this command reported."
@@ -629,17 +670,17 @@
         "kind": "disclosure-copy",
         "artifact": {
           "path": "proof/mew-migration/chain/evidence/default-disclosures.md",
-          "sha256": "5a69a034bb5dc709a32dbe48f50a9cd728831071befb9e92ae444b4973db10c4",
-          "byteLength": 7467,
+          "sha256": "bfb3d3e050ea2c71525b7c77860320526cb74e87624bbe1baf973a49d1fa7ce5",
+          "byteLength": 8049,
           "mediaType": "text/markdown"
         },
         "generatedBy": {
           "method": "instrumented-run",
           "tool": "src/lib/build-evidence-producer.mjs",
           "actor": "platform-tool",
-          "producedAt": "2026-07-29T09:43:38.987Z"
+          "producedAt": "2026-07-29T10:06:45.710Z"
         },
-        "observation": "The human-readable disclosure listing all 26 contract decisions this pack defaults rather than honours, one line per pointer.",
+        "observation": "The human-readable disclosure listing all 28 contract decisions this pack defaults rather than honours, one line per pointer.",
         "boundary": "A disclosure written, not a disclosure read. No human has seen it; completeness.notRun says so."
       }
     ],
@@ -647,7 +688,7 @@
   },
   "completeness": {
     "claimed": [
-      "All 31 decision-bearing contract pointers carry an explicit disposition; none is silently honoured and none is omitted.",
+      "All 33 decision-bearing contract pointers carry an explicit disposition; none is silently honoured and none is omitted.",
       "The inputs[0] binding digest was recomputed from the canonical JSON of the contract actually read, via the same canonicalSha256 the chain gate uses.",
       "The emergent-decision sweep ran as a real command (exit 0) and its receipt lists all 376 files inventoried.",
       "The configured test command was executed and its exit code (0) recorded exactly as it happened."

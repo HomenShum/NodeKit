@@ -1,6 +1,6 @@
 {
   "schemaVersion": "mew.convex-deploy-receipt/v1",
-  "recordedAt": "2026-07-29T09:50:35.397Z",
+  "recordedAt": "2026-07-29T10:07:49.573Z",
   "premiseTested": "Convex CLOUD deploy credentials exist on this machine (owner input #2)",
   "finding": "ABSENT. No Convex account, no CONVEX_DEPLOY_KEY, no cloud deployment. The cloud deploy path fails at login; convex 1.42.3 instead provisions an ANONYMOUS LOCAL deployment, which is not a launch.",
   "attempts": [
@@ -8,8 +8,8 @@
       "command": "npx --no-install convex dev --once  (cwd apps/mew-migration, CI=1)",
       "exitCode": 0,
       "outcome": "local-anonymous-deployment",
-      "detail": "Provisioned a local backend at http://127.0.0.1:3210 with 'No Convex account'. Pushed the hand-written convex/schema.ts successfully: tables notes/links/tags accepted, indexes created (notes.by_sourceId, notes.by_sourceDigest, links.by_sourceId, tags.by_sourceId, tags.by_name). This validates the schema; it deploys nothing anywhere reachable.",
-      "sanitizedOutputSha256": "1d9b1a277a79c84f4814d65187f549cd70cfa5113f3a09f410bfa8c89797e9d0"
+      "detail": "Provisioned a local backend at http://127.0.0.1:3210 with 'No Convex account'. Pushed the reworked convex/schema.ts (real Mew graph model) successfully: tables nodes/relations/relationTypes/relationLists accepted, ten indexes created (nodes.by_sourceId/by_sourceDigest/by_authorId, relations.by_sourceId/by_fromId/by_toId, relationTypes.by_sourceId, relationLists.by_sourceId/by_nodeId/by_relationId). This validates the schema; it deploys nothing anywhere reachable.",
+      "sanitizedOutputSha256": "fde55123c3d89dcb96f3592063c3463c9bae3aaedeecb0e5daab7fbb7ee4eb64"
     },
     {
       "command": "npx --no-install convex deploy -y  (cwd apps/mew-migration, CI=1)",
