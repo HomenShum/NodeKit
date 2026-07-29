@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 98,
     "modules": 66,
-    "tests": 72
+    "tests": 73
   },
   "architecture": [
     {
@@ -373,6 +373,7 @@
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
     "test-files.test.mjs",
+    "tool-placement-gate.test.mjs",
     "understand-anything.test.mjs"
   ]
 }

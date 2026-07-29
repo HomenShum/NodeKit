@@ -1,0 +1,27 @@
+# Fixture: every mechanical rule violated once, so the gate's FAIL direction is proven per rule.
+schemaVersion: nodekit.tools/v1
+source: thread-2026-07-29
+tools:
+  - id: unknown-placement-tool
+    placement: [PLUGIN]
+    journeyStages: [build]
+    source: thread-2026-07-29
+  - id: gsap
+    placement: [APP]
+    journeyStages: [build]
+    constraint: use freely
+    packages: [gsap]
+    source: thread-2026-07-29
+  - id: stageless-tool
+    placement: [REFERENCE]
+    journeyStages: []
+    source: thread-2026-07-29
+  - id: benchmark-claiming-build
+    placement: [BENCHMARK, DOMAIN]
+    journeyStages: [build, learn]
+    source: thread-2026-07-29
+  - id: unresolved-but-guessing
+    placement: [APP]
+    journeyStages: [build]
+    unresolved: true
+    source: thread-2026-07-29
