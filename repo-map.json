@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 98,
     "modules": 66,
-    "tests": 71
+    "tests": 72
   },
   "architecture": [
     {
@@ -355,6 +355,7 @@
     "package-install-proof-runner.test.mjs",
     "postgres-adapter.test.mjs",
     "presentation-pipeline.test.mjs",
+    "propose-evolution-cli.test.mjs",
     "protected-evaluator-image-binding.test.mjs",
     "public-api.test.mjs",
     "reference-corpus-gate.test.mjs",

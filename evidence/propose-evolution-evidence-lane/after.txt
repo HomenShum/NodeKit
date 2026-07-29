@@ -1,0 +1,21 @@
+Observable: the documented evolution proposal lane binds canonical evidence and preserves supersession without granting review authority.
+Captured: 2026-07-28 America/Los_Angeles
+
+Command:
+node scripts/propose-evolution.mjs --id after-propose-evidence-lane --track harness --category evaluation --challenge "Material change needs a legal proposal lane" --observed "The documented CLI previously had no evidence argument" --resolution "Bind one canonical evidence record through an explicit flag" --evidence evd:cli-authority-bypass-and-repair --supersedes evt:agent-drafting-bypassed-nodekit
+
+Result:
+EXIT=0
+DRAFTED evt:after-propose-evidence-lane
+validated against nodekit.evolution-event.v1.schema.json
+
+Written draft signals:
+- evidenceIds = ["evd:cli-authority-bypass-and-repair"]
+- supersedesIds = ["evt:agent-drafting-bypassed-nodekit"]
+- interpretation.status = "agent-proposed"
+- interpretation.reviewedBy is absent
+
+Cleanup:
+- The proof draft was removed after inspection.
+- Canonical evolution history was not mutated.
+- No approval credential was produced or consumed.

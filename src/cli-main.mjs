@@ -204,7 +204,7 @@ Usage:
   nodekit reference verify --score <score-receipt.json> --candidate-receipt <render-receipt.json> [--repo-root <path>] [--json]
   nodekit reference status --provider mobbin [--repo-root <path>] [--json]
   nodekit evolution init [--repo-root <path>] [--json]
-  nodekit evolution draft --id <id> --track <track> --category <category> --challenge <text> --resolution <text> --reviewed-by <id>
+  nodekit evolution draft --id <id> --track <track> --category <category> --challenge <text> --resolution <text> --evidence <comma-list> [--predecessors <comma-list>] [--supersedes <comma-list>]
   nodekit evolution record --file <file> [--repo-root <path>] [--json]
   nodekit evolution verify [--repo-root <path>] [--json]
   nodekit evolution query [--track <track>] [--since <iso>] [--invariant <id>] [--repo-root <path>] [--json]
@@ -1298,6 +1298,8 @@ async function runEvolutionDraft(parsed) {
     assumptionIds: optionList(parsed, "assumptions"),
     invariantIds: optionList(parsed, "invariants"),
     evidenceIds: optionList(parsed, "evidence"),
+    predecessorIds: optionList(parsed, "predecessors"),
+    supersedesIds: optionList(parsed, "supersedes"),
     knownLimitations: optionList(parsed, "limitations"),
   });
   printStructured(output, parsed, (value) => `DRAFTED ${value.event.id}; record remains separate from canonical history`);

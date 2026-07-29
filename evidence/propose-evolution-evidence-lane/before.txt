@@ -1,0 +1,17 @@
+Observable: a documented evolution proposal cannot bind the evidence required by the event schema.
+Captured: 2026-07-28 America/Los_Angeles
+
+Command:
+node scripts/propose-evolution.mjs --id before-propose-evidence-lane --track harness --category evaluation --challenge "Material change needs a legal proposal lane" --observed "The documented CLI has no evidence argument" --resolution "Bind one evidence record"
+
+Result:
+EXIT=6
+REFUSED - the record would not have been valid:
+  evolution event draft validation failed:
+  evolution event draft/evidenceIds must NOT have fewer than 1 items
+Nothing was written.
+
+Unchanged:
+- No draft was created.
+- Authority remained agent-proposed only.
+- The schema still rejected evidence-free events.

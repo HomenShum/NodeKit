@@ -138,6 +138,8 @@ export async function draftEvolutionEvent(repoRoot, input) {
     assumptionIds: input.assumptionIds ?? [],
     invariantIds: input.invariantIds ?? [],
     evidenceIds: input.evidenceIds ?? [],
+    ...(input.predecessorIds?.length ? { predecessorIds: input.predecessorIds } : {}),
+    ...(input.supersedesIds?.length ? { supersedesIds: input.supersedesIds } : {}),
     knownLimitations: input.knownLimitations ?? [],
     // A draft is a PROPOSAL. This used to write "human-reviewed" unconditionally, so every draft
     // NodeKit produced was born approved and `record` promoted it on the strength of a field the
@@ -148,7 +150,9 @@ export async function draftEvolutionEvent(repoRoot, input) {
   const findings = await validateSchema("nodekit.evolution-event.v1.schema.json", event, "evolution event draft");
   if (findings.length > 0) throw new Error(`evolution event draft validation failed:\n${findings.join("\n")}`);
   const output = path.join(root, "evolution", "drafts", `${event.id.replaceAll(":", "-")}.json`);
-  await writeFile(output, `${JSON.stringify(event, null, 2)}\n`);
+  // The CLI's exists check is only an ergonomic fast path. Exclusive creation is the authority
+  // boundary: two agents proposing the same id concurrently must never race into last-writer-wins.
+  await writeFile(output, `${JSON.stringify(event, null, 2)}\n`, { flag: "wx" });
   return { event, output };
 }
 
