@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:motion-portability-static-receipt",
+  "kind": "test",
+  "artifactRef": "git:7a59bfb39d2d63f3330647a459e7cc029b9ed0c1:docs/BEHAVIOR_PORTABILITY_SHOWCASE.md",
+  "sha256": "32db6935b6f537806b0fb5f892df7c88196040348ff78d495a1d9ce11d4d044e",
+  "sourceCommit": "7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+  "generatedAt": "2026-07-28T17:24:00-07:00",
+  "command": "node --test test/motion-portability.test.mjs",
+  "environment": {
+    "reviewSurface": "node-platform",
+    "suites": "motion-portability 8/8 on Windows: normalized equivalent values, detected false-friend drift, bound the comparison denominator, failed closed as NOT_RUN for missing coverage, preserved exact migration aliases, rejected empty comparisons, emitted a schema-bound CLI receipt, and exposed side-effect-free help.",
+    "evidenceBoundary": "Static CSS custom-property comparison only. Runtime token consumption, DOM traces, video, audience response, and automatic migration remain NOT_RUN; the evidence does not certify a generated application."
+  },
+  "verifiesInvariantIds": [],
+  "result": "partial"
+}

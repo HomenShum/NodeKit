@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "nodekit.evolution-trust-policy/v1",
+  "version": "trust-policy-2026-07-29-1",
+  "requiredTrustLevel": "H1",
+  "credentials": {
+    "dev-software-key": {
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAkxL2WkD0pw3xzBvTb94pHcC3Yl3T9bAs6sUFyB3Hz3M=\n-----END PUBLIC KEY-----\n",
+      "algorithm": "Ed25519",
+      "reviewer": "HomenShum",
+      "purposes": [
+        "evolution-canonical-promotion"
+      ],
+      "trustLevel": "H1",
+      "note": "Exportable software key. Credential-attested only; it does NOT prove a human acted."
+    }
+  },
+  "boundary": "This file holds public material only. It proves which credential is trusted; it cannot prove the credential is out of the agent's reach. That property comes from where the private key lives, which no file in this repository can attest to."
+}

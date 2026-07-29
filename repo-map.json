@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 90,
-    "modules": 65,
-    "tests": 68
+    "schemas": 98,
+    "modules": 66,
+    "tests": 71
   },
   "architecture": [
     {
@@ -66,6 +66,7 @@
       "models",
       "motion",
       "proof",
+      "reference",
       "registry",
       "repo",
       "routing",
@@ -114,6 +115,8 @@
       "presentation:nodekit-proof",
       "proof:package-install",
       "recall",
+      "reference:schemas",
+      "reference:schemas:check",
       "registry:check",
       "repo:map",
       "submission:evaluate",
@@ -146,6 +149,7 @@
     "nodekit.canary-receipt.v1.schema.json",
     "nodekit.convex-consumers-verdict.v1.schema.json",
     "nodekit.design-decision.v1.schema.json",
+    "nodekit.design-rule.v1.schema.json",
     "nodekit.developer-timing-verdict.v1.schema.json",
     "nodekit.engineering-check-receipt.v1.schema.json",
     "nodekit.engineering-health-verdict.v1.schema.json",
@@ -157,6 +161,7 @@
     "nodekit.experience-asset.v1.schema.json",
     "nodekit.experience-build.v1.schema.json",
     "nodekit.experience-recipe.v1.schema.json",
+    "nodekit.external-reference-run.v1.schema.json",
     "nodekit.fresh-agent-verdict.v2.schema.json",
     "nodekit.fresh-user-study.v1.schema.json",
     "nodekit.fresh-user-verdict.v1.schema.json",
@@ -203,10 +208,16 @@
     "nodekit.protected-knowledge-comparison-result.v1.schema.json",
     "nodekit.protected-screenshot-proof.v1.schema.json",
     "nodekit.publication-approval.v1.schema.json",
+    "nodekit.reference-loop-design-rule.v1.schema.json",
+    "nodekit.reference-loop-observation.v1.schema.json",
+    "nodekit.reference-observation.v1.schema.json",
+    "nodekit.reference-profile-manifest.v1.schema.json",
+    "nodekit.reference-score-receipt.v1.schema.json",
     "nodekit.research-collection.v1.schema.json",
     "nodekit.routing-policy.v1.schema.json",
     "nodekit.runtime-capabilities.v1.schema.json",
     "nodekit.schema.json",
+    "nodekit.score-receipt.v1.schema.json",
     "nodekit.skill-benchmark-input.v1.schema.json",
     "nodekit.skill-benchmark-verdict.v1.schema.json",
     "nodekit.skill-candidate.v1.schema.json",
@@ -273,6 +284,7 @@
     "presentation-pipeline.mjs",
     "protected-browser-evidence.mjs",
     "receipt-bindings.mjs",
+    "reference-loop.mjs",
     "registry.mjs",
     "repair-approval.mjs",
     "repo-check.mjs",
@@ -345,6 +357,8 @@
     "presentation-pipeline.test.mjs",
     "protected-evaluator-image-binding.test.mjs",
     "public-api.test.mjs",
+    "reference-corpus-gate.test.mjs",
+    "reference-loop.test.mjs",
     "repair-approval.test.mjs",
     "repo-tour.test.mjs",
     "research-verdict-benchmark.test.mjs",
@@ -357,6 +371,7 @@
     "submission-preparation.test.mjs",
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
+    "test-files.test.mjs",
     "understand-anything.test.mjs"
   ]
 }

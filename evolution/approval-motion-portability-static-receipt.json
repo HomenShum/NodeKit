@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "nodekit.evolution-approval/v1",
+  "purpose": "evolution-canonical-promotion",
+  "repositoryId": "HomenShum/node-platform",
+  "projectId": "nodekit",
+  "eventId": "evt:motion-portability-static-receipt",
+  "subjectHash": "fe3052b2ccf64b6437cd77391b3f9123ee49c0759dde7abbbd4a054789520fe5",
+  "evidenceManifestHash": "8b457227e28b2e7d074e15a2f3820a046316187e6d8be636c0d580603b036eaa",
+  "commitSha": "7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+  "reviewerCredentialId": "dev-software-key",
+  "trustPolicyVersion": "trust-policy-2026-07-29-1",
+  "nonce": "cc94e0d6-a203-4d53-9525-d43064bf584e",
+  "issuedAt": "2026-07-29T00:27:43.857Z",
+  "expiresAt": "2026-07-29T00:57:43.859Z",
+  "approvalId": "evolution-approval:sha256:1c2cb9902d408b131e788ed6bdda7aba7cc37d1ffbb774ec7a310c5e8eae35f2",
+  "approvalHash": "1c2cb9902d408b131e788ed6bdda7aba7cc37d1ffbb774ec7a310c5e8eae35f2",
+  "attestation": {
+    "algorithm": "Ed25519",
+    "credentialId": "dev-software-key",
+    "payloadSha256": "1c2cb9902d408b131e788ed6bdda7aba7cc37d1ffbb774ec7a310c5e8eae35f2",
+    "purpose": "evolution-canonical-promotion",
+    "schemaVersion": "nodekit.evolution-detached-attestation/v1",
+    "signatureEncoding": "base64url",
+    "signedAt": "2026-07-29T00:27:43.860Z",
+    "signature": "MgkQlzLftvk88HhMKPSFJzYjqrx-UaVvNcxW28EAdG1oTUjKJMAoiF4hzMq-XNp2LU0AWTz1n4zdiWCWgBdTAQ"
+  }
+}

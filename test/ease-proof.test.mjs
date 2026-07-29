@@ -44,6 +44,7 @@ test("EaseProof keeps browser contracts distinct from certification", async () =
   assert.match(browser, /exportDownloadedAndVerified/);
   assert.match(browser, /verifyExportedProof/);
   assert.match(browser, /portable-proof-bundle/);
+  assert.match(browser, /document\.querySelector\("#copy-status"\)\?\.textContent\?\.trim\(\)\.length > 0/);
   assert.match(browser, /receiptHash !== contentHash\(receiptBody\)/);
   assert.match(browser, /export_downloaded_and_reopened/);
   assert.match(browser, /outcomeConfirmed/);

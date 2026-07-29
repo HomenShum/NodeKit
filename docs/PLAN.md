@@ -59,10 +59,10 @@ references the audience has already validated?*
   maturity floors, vetted recipes, reference-only benchmark entries. Its corpus is thin. Gap is
   ingestion, not architecture.
 - **Mobbin and the external catalog are the audience-proven half.** Mobbin's MCP connector is
-  already configured and needs one OAuth authorization by the owner in an interactive session
-  (it cannot be done headlessly — standing blocker, decision queue #8). Until then, and for
-  sources without an API: the signed-in Chrome path — browse the source, capture the pattern as
-  an Atlas observation (screenshot + metadata + license + source URL) via `nodekit atlas add`.
+  configured and OAuth was completed on 2026-07-29. The authenticated canary is recorded as four
+  attributed atomic facts through the provider-neutral reference loop. Mobbin pixels, screenshots,
+  OCR, DOM, source payloads, caches, embeddings, RAG, and training use are prohibited. Sources
+  without an API use the signed-in Chrome path to record the same non-pixel fact contract.
 - **The REFERENCE gate:** directions must cite the reference assets they remix. A screen with
   zero provenance fails the direction gate unless explicitly flagged novel-by-intent — visible,
   never silent. Render receipts gain a `referenceProvenance` field (asset id or source URL,
@@ -111,7 +111,7 @@ never sees a password; the session is the permission.
   promised DOM signal — the owner's live-DOM verification rule, promoted from memory to
   stage-exit condition. "Pushed" is not "shipped"; the gate makes the difference unforgeable.
 - Prefer a CLI with a provisioned token where one exists (faster, steadier); the signed-in
-  browser is the universal fallback and the only path for sources with no API (Mobbin capture,
+  browser is the universal fallback and the only path for sources with no API (Mobbin inspection,
   account dashboards, one-off integrations).
 
 ## 5. Gap-close workstreams
@@ -175,7 +175,10 @@ never sees a password; the session is the permission.
   rather than into the fixture-detection seam.
 
 ### W3 — Reference pipeline (Pillar A)
-- Mobbin OAuth in setup (owner action); CDP capture → `atlas add` flow for non-API sources.
+- [x] Mobbin OAuth and authenticated live canary; provider-neutral
+  `observe → rule → score → verify` loop with a fail-closed source-policy gate.
+- [ ] Obtain a purpose-bound S2/S3 detached receipt from the Mobbin adapter. OAuth proves the live
+  session, but an unsigned MCP payload cannot independently authorize a durable release PASS.
 - Seed corpus: 50 vetted assets for the small-business vertical (salon case first).
 - Direction gate + `referenceProvenance` in render receipts.
 - **Folds in the tournament unblock** (renderer + receipt producer wiring) — the direction gate
@@ -214,7 +217,7 @@ no appeal, per the plan that predates the result.
 | 5 | Real salon contact for the beneficiary loop | open — blocks post-trial-2 |
 | 6 | NodeSlide checkout resolution; parity-studio 0/8 row | open |
 | 7 | Legacy 22 events stay unattested | default: leave; warning is the record |
-| 8 | Mobbin OAuth (interactive session, owner) | open — blocks W3's API path |
+| 8 | Mobbin OAuth (interactive session, owner) | resolved 2026-07-29; authenticated live canary PASS |
 | 9 | parity-studio `role: domain-application` — accurate when parity was NodeSlide's home, false once Phase 4 resurfaces it. Proposer correctly says the edit should FOLLOW the Phase 4 merge, not precede it. | defer until Phase 4 lands |
 | 10 | The registry has no way to express **"hosts code it does not own."** Between Phase 4 and Phase 3, parity's declared role and its contents will legitimately disagree — 1,139 NodeSlide items still stranded there. This is a vocabulary gap, not a parity problem, and it recurs. | open — worth a `hostsForeignCode` field |
 | 11 | `measurementRevision: <full immutable SHA>` per registry entry, never `main`/`latest`/null, with `canonicalRemote` + `shippingManifestPath`; measurement resolves the remote, fetches that exact revision, detached-checks-out, and requires `manifest.repositoryCommit == measurementRevision`, failing `REGISTRY_REVISION_MISMATCH`. **A dirty working tree must never satisfy the check**, and **the measurement must assert `HEAD` actually resolves to the pinned SHA** rather than trusting a branch name it was handed. This is the fix for three measurement bugs found today, which share one root — *the thing measured was never bound to the thing named*: the dashboard scoring a 130-commit-stale checkout; the port audit scoring a dirty tree; and `parity-studio` reporting `unpushed: 0` for a `main` the checkout was not on while the real branch existed on no remote at all (`parity-studio/docs/PORT_TRIAGE.md` §13). The third is the one to design against — it did not look like a failure, it looked like reassurance. | open — recommend accept |
