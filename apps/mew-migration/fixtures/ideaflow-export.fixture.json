@@ -1,0 +1,30 @@
+{
+  "_label": "fixture: hand-written importer unit-test data. NOT a sample of the owner's notebook — no note here was ever in Ideaflow. Every id is prefixed 'fixture:' so it cannot be mistaken for user data.",
+  "format": "ideaflow-export-shaped/v1",
+  "notes": [
+    {
+      "id": "fixture:note-alpha",
+      "text": "Fixture note alpha about migration provenance. Links to beta.",
+      "hashtags": ["#fixture", "#provenance+"],
+      "links": [{ "targetId": "fixture:note-beta", "direction": "forward" }],
+      "createdAt": "2026-07-01T10:00:00.000Z",
+      "updatedAt": "2026-07-02T10:00:00.000Z",
+      "completed": false
+    },
+    {
+      "id": "fixture:note-beta",
+      "text": "Fixture note beta with a backlink to alpha and a dangling forward link.",
+      "hashtags": ["#fixture"],
+      "links": [
+        { "targetId": "fixture:note-alpha", "direction": "backlink" },
+        { "targetId": "fixture:note-never-exported", "direction": "forward" }
+      ],
+      "createdAt": "2026-07-01T11:00:00.000Z"
+    },
+    {
+      "id": "fixture:note-gamma",
+      "text": "Fixture note gamma: completed task-like note, no links, no tags.",
+      "completed": true
+    }
+  ]
+}

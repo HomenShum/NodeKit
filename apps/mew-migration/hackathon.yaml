@@ -1,0 +1,18 @@
+schemaVersion: nodekit.brief/v1
+application: mew-migration
+problem: "Migrate the mew Ideaflow notebook (export copy) into a Convex-backed store with per-note provenance and an import manifest that closes: in = out + refusals."
+outcome:
+  - Carry one user intention through a guided case to a reviewable artifact.
+  - Keep agent work provisional until an explicit approval applies it.
+  - Preserve the last canonical version when work conflicts or fails.
+  - Emit a content-addressed completion receipt.
+sponsors:
+
+constraints:
+  domainBlank: true
+  noKeyDemo: true
+  productionWrites: false
+approvals:
+  paidResourceActivation: human
+  productionDeployment: human
+  publicSubmission: human

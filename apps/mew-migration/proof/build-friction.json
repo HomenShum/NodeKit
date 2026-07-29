@@ -1,0 +1,43 @@
+{
+  "application": "mew-migration",
+  "events": [
+    {
+      "at": "2026-07-29T09:34:29.592Z",
+      "name": "launch_started"
+    },
+    {
+      "at": "2026-07-29T09:34:29.592Z",
+      "name": "scaffold_started"
+    },
+    {
+      "at": "2026-07-29T09:34:31.372Z",
+      "name": "files_generated"
+    },
+    {
+      "at": "2026-07-29T09:34:31.372Z",
+      "detail": {
+        "mode": "generated-vertical-slice"
+      },
+      "durationMs": 1780,
+      "name": "implementation_completed"
+    },
+    {
+      "at": "2026-07-29T09:34:31.374Z",
+      "durationMs": 1782,
+      "name": "scaffold_completed"
+    },
+    {
+      "at": "2026-07-29T09:34:36.664Z",
+      "detail": {
+        "configHash": "b981d55205356613e22c54bda777ec12b58fc015c0153b6325b39ab85c58ae98"
+      },
+      "durationMs": 5288,
+      "name": "compile_completed"
+    }
+  ],
+  "nodekitVersion": "0.2.1",
+  "packageManager": "npm",
+  "foundation": "domain-blank-base",
+  "repairLoops": 0,
+  "schemaVersion": "nodekit.build-friction/v1"
+}
