@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "nodekit.design-rule/v1",
+  "ruleId": "rule-fixture",
+  "derivedFrom": {
+    "collectionId": "fixture-malformed",
+    "observationIds": ["obs-fixture-bad"],
+    "factIds": ["obs-fixture-bad/f1"]
+  },
+  "statement": "Fixture rule. Stands on exactly one fact, so a receipt citing any other fact is provably reaching past this rule's evidence.",
+  "mechanismHypothesis": "None. This rule exists to give the malformed receipt something to resolve against, so the withinRuleDerivation recomputation has a denominator.",
+  "confidence": "low",
+  "confidenceBasis": "It is a fixture. It has no evidence and claims none.",
+  "appliesWhen": ["never — fixture only"],
+  "doesNotApplyWhen": ["always — this rule governs no real surface"],
+  "problemTags": ["fixture"],
+  "intentTags": ["fixture"],
+  "firstSeenAt": "2026-07-28",
+  "lastVerifiedAt": "2026-07-28",
+  "reVerifyAfterDays": 3650,
+  "reVerifyReason": "Fixture. Nothing remote to drift from.",
+  "evidenceTier": "M0",
+  "tierLadder": "M3 audience-task evidence > M2 live shipped-product observation > M1 official demonstration or documentation > M0 recipe or showcase."
+}

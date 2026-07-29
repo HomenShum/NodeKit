@@ -187,43 +187,48 @@ try {
       return other && (other.sha256 !== installed.get(p).sha256 || other.size !== installed.get(p).size);
     });
     const sample = (label, list) => (list.length ? `${label}: ${list.slice(0, 5).join(", ")}${list.length > 5 ? ` (+${list.length - 5} more)` : ""}` : null);
-    // Name the overwhelmingly likely CAUSE, not just the symptom.
+    // Name the CAUSE, not the symptom — and note that the first attempt at this comment named the
+    // WRONG cause with confidence, which is worse than naming none.
     //
-    // `npm pack` runs `prepare` -> `build:component` -> `tsc`, so packing is not a pure read. If
-    // the working tree is dirty, two packs taken moments apart can legitimately differ, and this
-    // check fails through no fault of the packaged code.
+    // The real mechanism, root-caused 2026-07-28 by byte-level comparison: npm's `bin-links`
+    // rewrites the FIRST shebang of a DECLARED BIN from CRLF to LF at install time
+    // (`fix-bin.js`, predicate `/^#![^\n]+\r\n/`). `--ignore-scripts` does NOT disable bin linking.
+    // So a bin whose working copy carries a CRLF shebang is packed with `\r\n` and installed with
+    // `\n` — a one-byte difference, at offset 19, in exactly one file out of 463.
     //
-    // Measured 2026-07-28: this check failed on a tree with one modified file and passed 11/11 on
-    // a clean detached checkout of the identical commit. Before that was established, the bare
-    // "content differs: src/cli.mjs" message sent three agents and an external model hunting a
-    // defect in a file that was never the problem. A diagnostic that names a symptom as though it
-    // were a cause is not neutral — it actively spends other people's time.
-    let dirtyNote = null;
+    // Why it hid: `.gitattributes` is `* text=auto eol=lf`, so the INDEX blob is pure LF while the
+    // physical working file was CRLF. `git status` reports the file clean, because normalization
+    // makes its logical content equal. Only `git ls-files --eol` shows `i/lf w/mixed`.
+    //
+    // The earlier hypothesis — "the working tree is dirty, and packing runs `prepare`, so two packs
+    // can differ" — was wrong twice over. The payload is pinned (one byte array is read, inspected,
+    // written, byte-compared and hash-verified before install; there is no second archive source),
+    // and the unrelated dirty file was irrelevant. "Clean checkout passes" was a proxy for "a fresh
+    // checkout materialised LF", not evidence about dirtiness at all. A confounded correlation,
+    // stated as a mechanism, sent three agents and an external model hunting the wrong thing.
+    const CRLF_SHEBANG = /^#![^\n]+\r\n/;
+    let binNote = null;
     try {
-      const { execFileSync } = await import("node:child_process");
-      const { fileURLToPath } = await import("node:url");
-      // This file lives in <repo>/scripts/, so the repository root is one level up. Derived from
-      // the module's own location rather than process.cwd(), which is the caller's choice.
-      const scriptRoot = path.dirname(fileURLToPath(import.meta.url));
-      const porcelain = execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], {
-        cwd: path.resolve(scriptRoot, ".."),
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-      if (porcelain) {
-        const files = porcelain.split("\n").map((line) => line.slice(3).trim());
-        dirtyNote =
-          `WORKING TREE IS DIRTY (${files.length} tracked file(s) modified: ` +
-          `${files.slice(0, 5).join(", ")}${files.length > 5 ? ` (+${files.length - 5} more)` : ""}). ` +
-          `Packing runs the prepare script, so a dirty tree can produce this difference on its own. ` +
-          `Re-run against a clean checkout before treating the named files below as the defect.`;
+      const declaredBins = Object.values(inspectedArchive.packageJson?.bin ?? {})
+        .map((value) => `package/${String(value).replace(/^\.?\//, "")}`);
+      const offenders = (inspectedArchive.entries ?? [])
+        .filter((entry) => declaredBins.includes(entry.path) && CRLF_SHEBANG.test(entry.contents?.toString("utf8") ?? ""))
+        .map((entry) => entry.path);
+      if (offenders.length) {
+        binNote =
+          `DECLARED BIN WITH A CRLF SHEBANG (${offenders.join(", ")}). npm's bin-links rewrites the ` +
+          `first shebang of a declared bin from CRLF to LF on install, so the archived and installed ` +
+          `bytes differ by exactly one byte and this check fails through no fault of the package. ` +
+          `Fix the SOURCE file's line endings — do not relax the comparison. Note git may report the ` +
+          `file clean: check \`git ls-files --eol\` for \`w/mixed\`.`;
       }
     } catch {
-      // git unavailable or not a repository — fall through with the raw comparison, which is still
-      // the honest evidence. Never let the diagnostic's own failure suppress the finding.
+      // The archive shape may not expose entries in every version. Fall through with the raw
+      // comparison, which is still the honest evidence. Never let a diagnostic's own failure
+      // suppress the finding it was added to explain.
     }
     const detail = [
-      dirtyNote,
+      binNote,
       `installed=${installedManifest.length} archived=${inspectedArchive.fileManifest.length}`,
       sample("only in install", onlyInstalled),
       sample("only in archive", onlyArchived),

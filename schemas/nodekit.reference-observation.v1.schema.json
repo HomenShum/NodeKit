@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.reference-observation.v1.schema.json",
+  "title": "NodeKit reference observation collection",
+  "description": "A collection of atomic observations of shipped surfaces, gathered to answer one named problem. The record stores facts, never pixels: under licenceMode live-inspection-attributed each observation cites the canonical source URL so the surface can be re-inspected rather than reproduced. notRun is required because a collection that does not state what it did not look at cannot be read for coverage.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "collectionId",
+    "problemStatement",
+    "whyThisProblem",
+    "licenceMode",
+    "licenceNote",
+    "capturedAt",
+    "capturedVia",
+    "observations",
+    "notRun"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.reference-observation/v1" },
+    "collectionId": { "$ref": "#/$defs/id" },
+    "problemStatement": { "$ref": "#/$defs/text" },
+    "whyThisProblem": { "$ref": "#/$defs/text" },
+    "licenceMode": {
+      "description": "Enumerated rather than free text: the licence terms under which sources may be recorded are a policy decision, so a new mode is a deliberate schema edit and a licence review, not a typed string.",
+      "enum": ["live-inspection-attributed"]
+    },
+    "licenceNote": { "$ref": "#/$defs/text" },
+    "capturedAt": { "$ref": "#/$defs/date" },
+    "capturedVia": { "$ref": "#/$defs/text" },
+    "observations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/observation" } },
+    "notRun": {
+      "description": "What this capture did not cover. Required: a collection silent about its gaps reads as exhaustive.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/text" },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "factId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "text": { "type": "string", "minLength": 1 },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "observation": {
+      "type": "object",
+      "required": ["id", "app", "platform", "mobbinUrl", "surface", "stance", "facts", "boundary"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "app": { "$ref": "#/$defs/text" },
+        "platform": { "enum": ["web", "ios", "android", "desktop"] },
+        "mobbinUrl": {
+          "description": "Canonical URL of the observed screen. Required by the licence: the attribution is what makes recording facts instead of pixels legitimate.",
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "surface": { "$ref": "#/$defs/text" },
+        "stance": {
+          "description": "positive: the surface is being cited as doing the thing. counterexample: it is retained deliberately as the anti-reference.",
+          "enum": ["positive", "counterexample"]
+        },
+        "facts": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/fact" } },
+        "observedTension": { "$ref": "#/$defs/text" },
+        "boundary": {
+          "description": "What this observation does not establish. Required: an observation without stated limits gets cited past its evidence.",
+          "$ref": "#/$defs/text"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fact": {
+      "description": "One atomic, retrievable claim. subject/property/value, not a sentence about how the screen feels — an adjective is unretrievable and is refused by scripts/reference-corpus-gate.mjs, which is the instrument for that check because a record may not assert its own compliance.",
+      "type": "object",
+      "required": ["id", "kind", "subject", "property", "value", "locatorDescription"],
+      "properties": {
+        "id": { "$ref": "#/$defs/factId" },
+        "kind": {
+          "description": "count, measurement and relationship are the shipped static kinds. timing, easing and choreography are the motion kinds specified in docs/DESIGN_STACK_PLAN.md section 3; no record uses them yet.",
+          "enum": ["count", "measurement", "relationship", "timing", "easing", "choreography"]
+        },
+        "subject": { "$ref": "#/$defs/text" },
+        "property": { "$ref": "#/$defs/text" },
+        "value": { "type": ["string", "number"] },
+        "unit": { "$ref": "#/$defs/text" },
+        "locatorDescription": {
+          "description": "Where on the surface the fact was read, in enough detail that a re-inspection lands on the same element.",
+          "$ref": "#/$defs/text"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "count" } }, "required": ["kind"] },
+          "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,174 @@
+// The reference corpus gate had no test, which is the specific way a gate rots: it is run once by
+// the person who wrote it, passes, and is never again observed doing the thing it exists to do.
+// A gate only ever seen passing is not known to work — it is known to exit 0, which an empty
+// function also does.
+//
+// So the load-bearing tests here are the FAILING ones. `test/fixtures/reference-corpus/malformed`
+// carries five deliberate defects, one per check, and each test below names the defect and requires
+// the gate to have caught that specific one. If a future edit weakens a check, the corresponding
+// test stops finding its line and fails — rather than the corpus quietly passing with less measured.
+//
+// The passing direction is still checked, along with the gate's denominators, because a PASS over
+// zero records is the failure docs/VACUOUS_PASS.md is named for.
+
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { validateSchema } from "../src/lib/schema-validation.mjs";
+
+const platformRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const gate = path.join(platformRoot, "scripts/reference-corpus-gate.mjs");
+const shippedCorpus = "atlas/references";
+const malformedCorpus = "test/fixtures/reference-corpus/malformed";
+
+function runGate(corpusDir) {
+  const result = spawnSync(process.execPath, [gate, corpusDir], { cwd: platformRoot, encoding: "utf8" });
+  return { status: result.status, out: `${result.stdout ?? ""}${result.stderr ?? ""}` };
+}
+
+function loadJson(relative) {
+  return JSON.parse(readFileSync(path.join(platformRoot, relative), "utf8"));
+}
+
+const clone = (value) => JSON.parse(JSON.stringify(value));
+
+test("the shipped corpus passes, and says how much it measured while passing", () => {
+  const { status, out } = runGate(shippedCorpus);
+  assert.equal(status, 0, `gate failed on the shipped corpus:\n${out}`);
+  assert.match(out, /^PASS/m);
+
+  // The denominators are the audit. A PASS line with zeroes behind it measured nothing.
+  const [, recordCount, validatedCount] = out.match(/(\d+) record\(s\) read from \S+; (\d+) validated/) ?? [];
+  const [, factCount, citationCount, scoreCount] =
+    out.match(/(\d+) fact\(s\) recorded; (\d+) citation\(s\) checked; (\d+) criterion score\(s\) checked/) ?? [];
+  assert.ok(Number(recordCount) >= 3, "expected the three corpus layers to be read");
+  assert.equal(recordCount, validatedCount, "every record read must have been validated against a declared schema");
+  assert.ok(Number(factCount) > 0 && Number(citationCount) > 0 && Number(scoreCount) > 0, out);
+});
+
+test("an empty corpus directory exits 3 — not-run is never a pass", () => {
+  const empty = mkdtempSync(path.join(tmpdir(), "empty-corpus-"));
+  const { status, out } = runGate(empty);
+  assert.equal(status, 3, out);
+  assert.match(out, /NOT_RUN/);
+});
+
+// One test per deliberate defect. Each asserts the gate caught THAT defect, so a weakened check
+// cannot hide behind another check's violation still being reported.
+const defects = [
+  {
+    name: "check 1 — a prose appearance judgement standing where an atomic fact belongs",
+    pattern: /appearance adjective "sleek"/,
+  },
+  {
+    name: "check 4 — a fact kind the schema does not enumerate",
+    pattern: /schema nodekit\.reference-observation\/v1 .*facts\/1\/kind must be equal to one of the allowed values/,
+  },
+  {
+    name: "check 5 — a criterion citing a fact id that does not exist in its observation",
+    pattern: /criterion c1-fabricated-citation cites obs-fixture-bad\/f9, which resolves to no recorded fact/,
+  },
+  {
+    name: "check 5 — a criterion scoring outside the scale the same record declared",
+    pattern: /criterion c2-mislabelled-derivation scores 7, outside its own declared scale 0\.\.4/,
+  },
+  {
+    name: "check 5 — withinRuleDerivation asserted rather than earned",
+    pattern: /claims withinRuleDerivation true, but recomputing against rule-fixture gives false/,
+  },
+];
+
+test("the malformed corpus fails, and fails for every reason it was built to fail for", () => {
+  const { status, out } = runGate(malformedCorpus);
+  assert.equal(status, 1, `the malformed corpus must not pass:\n${out}`);
+  assert.match(out, /^FAIL/m);
+  for (const defect of defects) {
+    assert.match(out, defect.pattern, `gate did not catch ${defect.name}:\n${out}`);
+  }
+});
+
+test("the malformed fixtures stay out of the shipped corpus", () => {
+  const { out } = runGate(shippedCorpus);
+  assert.doesNotMatch(out, /fixture/i, "a fixture leaked into atlas/references");
+});
+
+// The gate resolves citations across whatever files share a directory. These assertions bind the
+// shipped receipt to the shipped observations directly, so the chain is checked even if the gate
+// were pointed somewhere else.
+test("every fact the shipped receipt cites exists by id in the observations record", () => {
+  const observations = loadJson("atlas/references/absence-vs-zero.observations.json");
+  const receipt = loadJson("atlas/references/absence-vs-zero.trial1-arm-a.score-receipt.json");
+  const known = new Set(
+    observations.observations.flatMap((observation) => observation.facts.map((fact) => `${observation.id}/${fact.id}`)),
+  );
+  const citedByCriteria = receipt.criteria.flatMap((criterion) =>
+    criterion.citations.flatMap((citation) => citation.factIds.map((id) => `${citation.observationId}/${id}`)),
+  );
+  assert.ok(citedByCriteria.length > 0, "a receipt whose criteria cite nothing is a score with no reference behind it");
+  for (const cited of citedByCriteria) assert.ok(known.has(cited), `receipt cites ${cited}, which no observation records`);
+  assert.deepEqual(
+    [...new Set(citedByCriteria)].sort(),
+    [...receipt.derivedFrom.factIds].sort(),
+    "derivedFrom must be exactly what the criteria spend — no padding, no omissions",
+  );
+});
+
+test("the shipped receipt scores a subject the cited rule actually governs", () => {
+  const rule = loadJson("atlas/references/absence-vs-zero.rule.json");
+  const receipt = loadJson("atlas/references/absence-vs-zero.trial1-arm-a.score-receipt.json");
+  assert.equal(receipt.ruleId, rule.ruleId);
+
+  // Every one of the rule's exclusion clauses must be answered, verbatim, and none may fire.
+  const answered = receipt.ruleApplicability.doesNotApplyWhenChecked.map((entry) => entry.clause);
+  assert.deepEqual(answered.sort(), [...rule.doesNotApplyWhen].sort(), "an unanswered exclusion clause is an unchecked applicability claim");
+  for (const entry of receipt.ruleApplicability.doesNotApplyWhenChecked) assert.equal(entry.fires, false);
+});
+
+test("a citation reaching past the rule's own evidence is marked, not hidden", () => {
+  const rule = loadJson("atlas/references/absence-vs-zero.rule.json");
+  const receipt = loadJson("atlas/references/absence-vs-zero.trial1-arm-a.score-receipt.json");
+  const ruleFacts = new Set(rule.derivedFrom.factIds);
+  const outside = [];
+  for (const criterion of receipt.criteria) {
+    for (const citation of criterion.citations) {
+      const within = citation.factIds.every((id) => ruleFacts.has(`${citation.observationId}/${id}`));
+      assert.equal(citation.withinRuleDerivation, within, `${criterion.id} mislabels its citation of ${citation.observationId}`);
+      if (!within) outside.push(criterion.id);
+    }
+  }
+  // The human override exists to dispute exactly this. If nothing is marked outside, the override
+  // is disputing something the record does not show, and the disagreement is unauditable.
+  for (const disputed of receipt.humanReview.disputedCriterionIds) {
+    assert.ok(outside.includes(disputed), `humanReview disputes ${disputed}, but that criterion cites nothing outside the rule's derivation`);
+  }
+});
+
+test("the schema refuses an override that does not say what it revised the score to", async () => {
+  const receipt = loadJson("atlas/references/absence-vs-zero.trial1-arm-a.score-receipt.json");
+  assert.deepEqual(await validateSchema("nodekit.score-receipt.v1.schema.json", receipt, "receipt"), []);
+
+  const silent = clone(receipt);
+  delete silent.humanReview.revisedScore;
+  assert.ok(
+    (await validateSchema("nodekit.score-receipt.v1.schema.json", silent, "receipt")).length > 0,
+    "an override with no revised score is a disagreement with no content",
+  );
+
+  const affirmedButRescored = clone(receipt);
+  affirmedButRescored.humanReview.decision = "affirm";
+  assert.ok(
+    (await validateSchema("nodekit.score-receipt.v1.schema.json", affirmedButRescored, "receipt")).length > 0,
+    "affirming the score while also revising it must not be expressible",
+  );
+
+  const uncited = clone(receipt);
+  uncited.criteria[0].citations = [];
+  assert.ok(
+    (await validateSchema("nodekit.score-receipt.v1.schema.json", uncited, "receipt")).length > 0,
+    "a criterion with no citations is a score with no reference behind it",
+  );
+});
