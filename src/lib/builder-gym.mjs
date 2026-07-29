@@ -135,6 +135,7 @@ async function writeJsonIfMissing(target, value, created) {
   created.push(target);
 }
 
+// @nodekit-behavior inv:builder-gym-cas-publishes-complete-bytes owner
 async function writeContentAddressedJson(target, value, label) {
   const bytes = Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
   await mkdir(path.dirname(target), { recursive: true });

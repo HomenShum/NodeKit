@@ -198,6 +198,7 @@ async function assertDistributableFilesTracked(root, pathspecs) {
   return true;
 }
 
+// @nodekit-behavior inv:consumer-package-verification-lifecycle-free owner
 async function inspectTrackedNodeKitDistribution(
   root,
   packageJson,
