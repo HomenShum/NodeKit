@@ -145,6 +145,26 @@ Canonical JSON records remain authoritative. This projection explains why materi
 - Evidence: `evd:motion-portability-static-receipt` (partial)
 - Known limitations: The supporting evidence proves the static comparison contract and its fail-closed behavior; it does not certify a runtime migration.; The comparator scans CSS custom-property declarations only; DTCG JSON, token consumption, runtime timing, DOM traces, video, and audience response remain outside this receipt.; The measured repositories fail with three conflicts; no migration is applied automatically.
 
+### Consumer preparation could not verify the exact package on Windows because its supposed script-disabled pack still executed prepare.
+
+- Event: `evt:consumer-package-verification-lifecycle-free`
+- Source: `77069c870e6fb94475c6d9253ae9c6e1f85ec2bd`
+- Resolution: Compare the supplied archive manifest directly with bounded clean tracked distribution bytes and never execute npm or lifecycle scripts during verification.
+- Observed failure: npm pack ran prepare in the reduced distribution copy and failed with MODULE_NOT_FOUND before comparing a valid archive.
+- Invariants: `inv:consumer-package-verification-lifecycle-free` (verified)
+- Evidence: `evd:consumer-package-verification-lifecycle-free` (pass)
+- Known limitations: This remains package preparation only; npm publication and deployment and authenticated Convex adoption are not claimed.
+
+### Concurrent immutable artifact writers could observe a target path before the winning process had finished writing its bytes.
+
+- Event: `evt:builder-gym-atomic-cas-publication`
+- Source: `77069c870e6fb94475c6d9253ae9c6e1f85ec2bd`
+- Resolution: Write and fsync a private same-directory temporary inode then atomically publish it with link and remove the private inode in a bounded finally path.
+- Observed failure: A losing create-if-absent writer received EEXIST and compared against the winner's partially written destination; valid identical concurrent writes could be rejected as immutable conflicts.
+- Invariants: `inv:builder-gym-cas-publishes-complete-bytes` (verified)
+- Evidence: `evd:builder-gym-atomic-cas-publication` (pass)
+- Known limitations: This guarantees complete local filesystem publication only; distributed object-store semantics and cross-host locking are not claimed.
+
 ## Harness evolution
 
 ### Visually polished frontend output could still miss the intended creator-workspace topology.
