@@ -1,30 +1,117 @@
 {
-  "_label": "fixture: hand-written importer unit-test data. NOT a sample of the owner's notebook — no note here was ever in Ideaflow. Every id is prefixed 'fixture:' so it cannot be mistaken for user data.",
-  "format": "ideaflow-export-shaped/v1",
-  "notes": [
+  "_label": "fixture: hand-written importer unit-test data shaped like the output of Mew's scripts/export-database.ts (personal-dev-mew, commit 3013c596). NOT an export of the owner's notebook — no record here was ever in any Mew database. Every id is prefixed 'fixture:' so it cannot be mistaken for user data.",
+  "data": [],
+  "users": [
+    { "id": "fixture:user-owner", "username": "fixture-owner", "email": null, "name": "Fixture Owner", "picture": null, "createdAt": null, "settings": "{}" }
+  ],
+  "graphNodes": [
     {
-      "id": "fixture:note-alpha",
-      "text": "Fixture note alpha about migration provenance. Links to beta.",
-      "hashtags": ["#fixture", "#provenance+"],
-      "links": [{ "targetId": "fixture:note-beta", "direction": "forward" }],
+      "pk": "00000000-0000-4000-8000-000000000001",
+      "id": "fixture:node-alpha",
+      "version": 3,
+      "authorId": "fixture:user-owner",
       "createdAt": "2026-07-01T10:00:00.000Z",
       "updatedAt": "2026-07-02T10:00:00.000Z",
-      "completed": false
+      "content": "Fixture node alpha about migration provenance and #fixture hashtags.",
+      "isPublic": false,
+      "isNewRelatedObjectsPublic": false,
+      "canonicalRelationId": null,
+      "isChecked": null,
+      "slug": null,
+      "contentTsvector": "'alpha':3 'fixtur':2,9 'hashtag':10 'migrat':6 'proven':7",
+      "accessMode": 0
     },
     {
-      "id": "fixture:note-beta",
-      "text": "Fixture note beta with a backlink to alpha and a dangling forward link.",
-      "hashtags": ["#fixture"],
-      "links": [
-        { "targetId": "fixture:note-alpha", "direction": "backlink" },
-        { "targetId": "fixture:note-never-exported", "direction": "forward" }
-      ],
-      "createdAt": "2026-07-01T11:00:00.000Z"
+      "pk": "00000000-0000-4000-8000-000000000002",
+      "id": "fixture:node-beta",
+      "version": 1,
+      "authorId": "fixture:user-owner",
+      "createdAt": "2026-07-01T11:00:00.000Z",
+      "updatedAt": null,
+      "content": "Fixture node beta: a checked todo linked to alpha.",
+      "isPublic": false,
+      "isNewRelatedObjectsPublic": false,
+      "canonicalRelationId": "fixture:rel-alpha-beta",
+      "isChecked": true,
+      "slug": "fixture-beta",
+      "contentTsvector": null,
+      "accessMode": 0
     },
     {
-      "id": "fixture:note-gamma",
-      "text": "Fixture note gamma: completed task-like note, no links, no tags.",
-      "completed": true
+      "pk": "00000000-0000-4000-8000-000000000003",
+      "id": "fixture:node-gamma",
+      "version": 1,
+      "authorId": "fixture:user-owner",
+      "createdAt": null,
+      "updatedAt": null,
+      "content": null,
+      "isPublic": false,
+      "isNewRelatedObjectsPublic": false,
+      "canonicalRelationId": null,
+      "isChecked": null,
+      "slug": null,
+      "contentTsvector": null,
+      "accessMode": 0
+    }
+  ],
+  "graphRelations": [
+    {
+      "pk": "00000000-0000-4000-8000-000000000011",
+      "id": "fixture:rel-alpha-beta",
+      "version": 1,
+      "authorId": "fixture:user-owner",
+      "createdAt": "2026-07-01T11:05:00.000Z",
+      "updatedAt": null,
+      "fromId": "fixture:node-alpha",
+      "toId": "fixture:node-beta",
+      "relationTypeId": "fixture:rtype-child",
+      "isPublic": false,
+      "canonicalRelationId": null
+    },
+    {
+      "pk": "00000000-0000-4000-8000-000000000012",
+      "id": "fixture:rel-beta-missing",
+      "version": 1,
+      "authorId": "fixture:user-owner",
+      "createdAt": null,
+      "updatedAt": null,
+      "fromId": "fixture:node-beta",
+      "toId": "fixture:node-never-exported",
+      "relationTypeId": "fixture:rtype-related",
+      "isPublic": false,
+      "canonicalRelationId": null
+    }
+  ],
+  "relationTypes": [
+    {
+      "pk": "00000000-0000-4000-8000-000000000021",
+      "id": "fixture:rtype-child",
+      "authorId": "fixture:user-owner",
+      "version": 1,
+      "label": "child",
+      "reverseLabel": "parent",
+      "isPublic": false
+    },
+    {
+      "pk": "00000000-0000-4000-8000-000000000022",
+      "id": "fixture:rtype-related",
+      "authorId": "fixture:user-owner",
+      "version": 1,
+      "label": "relatedTo",
+      "reverseLabel": "relatedTo",
+      "isPublic": false
+    }
+  ],
+  "relationLists": [
+    {
+      "id": "fixture:rlist-1",
+      "authorId": "fixture:user-owner",
+      "nodeId": "fixture:node-alpha",
+      "relationId": "fixture:rel-alpha-beta",
+      "type": "noteContent",
+      "positionInt": 1,
+      "positionFrac": null,
+      "isPublic": false
     }
   ]
 }

@@ -1,27 +1,27 @@
 {
   "schemaVersion": "mew.serve-probe-receipt/v1",
-  "probedAt": "2026-07-29T09:44:52.772Z",
+  "probedAt": "2026-07-29T10:06:24.095Z",
   "method": "raw-http against a locally served instance; NOT a rendered-DOM observation and usable by no green launch claim",
   "probes": [
     {
       "name": "empty-store",
-      "dataDir": "C:/Users/hshum/AppData/Local/Temp/mew-probe-O0Oiom/empty",
+      "dataDir": "C:/Users/hshum/AppData/Local/Temp/mew-probe-cjH3Jt/empty",
       "observations": [
         {
           "id": "root-discloses-empty-store",
           "method": "raw-http",
           "url": "/",
           "httpStatus": 200,
-          "responseBytes": 614,
-          "bodySha256": "94d81dc1139b015307ad0ed1a2090f85967baad3cdb3317cb2b0dc21b19c3997",
+          "responseBytes": 644,
+          "bodySha256": "334038e8e0df17fb3e85e88105c3f71a70525f18ac6dba8f473be42a739205ca",
           "expectedSignals": [
             "data-nodekit-artifact=\"mew-migration-agent-surface\"",
-            "store: 0 notes, 0 links, 0 tags",
+            "store: 0 nodes, 0 relations, 0 relation types, 0 list entries",
             "No notebook data has been imported"
           ],
           "signalsFound": [
             "data-nodekit-artifact=\"mew-migration-agent-surface\"",
-            "store: 0 notes, 0 links, 0 tags",
+            "store: 0 nodes, 0 relations, 0 relation types, 0 list entries",
             "No notebook data has been imported"
           ],
           "forbiddenSignalsLeaked": [],
@@ -32,17 +32,17 @@
           "method": "raw-http",
           "url": "/ask?q=what+did+I+write+about+provenance",
           "httpStatus": 200,
-          "responseBytes": 864,
-          "bodySha256": "cb23878a5082a76e6e4a4bb3221d1fc9953379ed62ad700d1cc69278b27f81d4",
+          "responseBytes": 894,
+          "bodySha256": "c98af67fec44a400b10f4f68e6a7da5be0951c2fcfbf9c717ea210efa89fbf58",
           "expectedSignals": [
             "data-nodekit-unbound=\"true\"",
             "UNBOUND",
-            "zero notes"
+            "zero nodes"
           ],
           "signalsFound": [
             "data-nodekit-unbound=\"true\"",
             "UNBOUND",
-            "zero notes"
+            "zero nodes"
           ],
           "forbiddenSignalsLeaked": [],
           "pass": true
@@ -53,7 +53,7 @@
           "url": "/ask?q=provenance",
           "httpStatus": 200,
           "responseBytes": 171,
-          "bodySha256": "94d16a77300f557a68fdc283b60cc15fa0a286f90b23a6b2d35943343abb3778",
+          "bodySha256": "681f34be26b39e4a0fc437dc263d0bab8702e43baffdcefd37394ab9b83404b7",
           "expectedSignals": [
             "\"unbound\": true",
             "\"bindings\": []"
@@ -69,23 +69,23 @@
     },
     {
       "name": "fixture-store",
-      "dataDir": "C:/Users/hshum/AppData/Local/Temp/mew-probe-O0Oiom/fixture",
+      "dataDir": "C:/Users/hshum/AppData/Local/Temp/mew-probe-cjH3Jt/fixture",
       "observations": [
         {
           "id": "ask-binds-to-fixture-ids",
           "method": "raw-http",
           "url": "/ask?q=provenance+migration",
           "httpStatus": 200,
-          "responseBytes": 901,
-          "bodySha256": "ec931d28d2f5136b582449595e94f207aaea3aed7e92f63f5b1bc3786e6cf3ec",
+          "responseBytes": 938,
+          "bodySha256": "a8fa4b8d3e3139e1df9dd9f64d305d001e1326754a1dfd34859612fdc479bd3f",
           "expectedSignals": [
             "data-nodekit-unbound=\"false\"",
-            "data-note-id=\"fixture:note-alpha\"",
+            "data-note-id=\"fixture:node-alpha\"",
             "data-note-digest="
           ],
           "signalsFound": [
             "data-nodekit-unbound=\"false\"",
-            "data-note-id=\"fixture:note-alpha\"",
+            "data-note-id=\"fixture:node-alpha\"",
             "data-note-digest="
           ],
           "forbiddenSignalsLeaked": [],
@@ -96,15 +96,15 @@
           "method": "raw-http",
           "url": "/ask?q=zzz-nothing-matches-this",
           "httpStatus": 200,
-          "responseBytes": 876,
-          "bodySha256": "40576dac6051b7e2b7e296908d5f36a89f1f8abeb12bb8ae98aa19524e31b5c7",
+          "responseBytes": 906,
+          "bodySha256": "578386f69b14b93f1b73efd49bfc6eeadb296e3ed0afe98a1fd5fb3846ababe9",
           "expectedSignals": [
             "data-nodekit-unbound=\"true\"",
-            "no stored note matches"
+            "no stored node matches"
           ],
           "signalsFound": [
             "data-nodekit-unbound=\"true\"",
-            "no stored note matches"
+            "no stored node matches"
           ],
           "forbiddenSignalsLeaked": [],
           "pass": true

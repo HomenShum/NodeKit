@@ -1,64 +1,66 @@
 {
   "schemaVersion": "nodekit.opportunity-contract/v1",
-  "user": "The owner of the 'mew' Ideaflow notebook (one person, one notebook), who wants the notes out of Ideaflow and into a store they control. Decision recorded defaulted-with-disclosure: the owner has not countersigned this description.",
-  "problem": "The notebook lives in Ideaflow behind a signed-in session that does not exist on this machine (wave-0B kill receipt, PR #27). Zero notes, zero links, zero tags have been inventoried; the notebook's contents are unreadable from here. Any migration must therefore be built and proven on structure alone, with every data-dependent claim withheld or marked NOT_RUN.",
-  "wedge": "One notebook, one export file, one importer: an Ideaflow-export-shaped JSON goes in, a Convex-schema store with per-note provenance (sourceId, sourceDigest, importedAt) comes out, and an import manifest proves count-in equals count-imported plus refusals. Decision defaulted-with-disclosure: scope confirmed by no one.",
-  "primaryJob": "Migrate every note, link and tag from an EXPORT COPY of the Ideaflow notebook into the Convex-backed store without silent drops, and serve the migrated notes through an agent surface whose every answer carries a source binding (note id + digest) or renders as unbound.",
+  "user": "The owner of the Mew notebook. Ground truth corrected 2026-07-29: Mew IS the Ideaflow application, with full checkouts local at D:/VSCode Projects/Ideaflow (personal-dev-mew is the owner's instance). Decision recorded defaulted-with-disclosure: the owner has not countersigned this description.",
+  "problem": "The notebook's data lives in a remote Postgres database reachable only with credentials in personal-dev-mew/.env.local, which this run does not use (read-only authority; local recon receipt proof/mew-migration/local-recon.json). No local data store or export dump exists, so zero notes have been read — but the REAL data model is now readable from the code: a typed property graph (graph_node, graph_relation, relation_type, relation_lists; personal-dev-mew src/db/schema.ts sha256 d79b2bd01699089c09f61a28493a72a4c66ca488a73eba8a7f112cfa79d3f41e, commit 3013c596). The wave-0B kill receipt (PR #27) tested the wrong premise — a web sign-in that was never needed — and is superseded by the local recon, not deleted.",
+  "wedge": "One database export, one importer: the exact JSON that Mew's own scripts/export-database.ts writes ({data, users, graphNodes, graphRelations, relationTypes, relationLists}) goes in; a Convex-schema graph store with per-record provenance (sourceId, sourceDigest, importedAt) comes out; and an import manifest proves every table closes (in = imported + refused) with every whole-table and per-field drop counted and disclosed. Decision defaulted-with-disclosure: scope confirmed by no one.",
+  "primaryJob": "Migrate every graph node, relation, relation type and relation-list entry from an EXPORT of the owner's Mew database into the Convex-backed graph store without silent drops, and serve the migrated graph through an agent surface whose every answer carries a source binding (node id + digest) or renders as unbound.",
   "inputs": [
-    "An Ideaflow export copy as JSON: notes with body text, hashtags, inter-note links, created/updated timestamps, completion state — the fields Ideaflow's public data model documents. ABSENT at contract time; the importer is built and unit-tested against clearly labeled fixture data (fixture: ids) only.",
-    "Owner input #1 (awaiting): the measured notebook inventory — N notes, M links, K tags. Recorded as unknown; never estimated.",
-    "Owner input #3 (awaiting): semantic acceptance cases authored by the owner. Zero exist (wave-0A receipt, PR #26); the semantic scorecard column stays NOT_RUN until they do.",
+    "A Mew database export: the output of `yarn tsx scripts/export-database.ts` in personal-dev-mew/mew — the app's own exporter, read during recon (sha256 ebdceb96c2d4753be43f629072e533e95a7acd55910658323034a790bfdb66f1). ABSENT at contract time; the importer is built and unit-tested against clearly labeled fixture data (fixture: ids) shaped exactly like that output.",
+    "Owner input #1 (awaiting, now one command): run the exporter above against the owner's database and hand over the JSON. The inventory (N nodes, M relations; there is no tag table) is measured from that file and is recorded unknown until then — never estimated.",
+    "Owner input #3 (present, unevaluated): 3 owner-authored acceptance cases harvested verbatim from Notion page 21b9539b-8f9a-8026-a57b-d8f4042c7c78 (harness/mew-migration/notion-cases.json). All 3 exercise agent CRUD orchestration outside this retrieval-only slice and need a populated graph; the semantic scorecard column stays NOT_RUN.",
     "Convex project credentials for the deploy target (owner input #2). Presence is tested, not assumed, at LAUNCH."
   ],
-  "primaryArtifact": "A Convex-schema migration app (apps/mew-migration): schema for notes/links/tags with provenance columns and erasure enumerability, an importer that digests every source note and emits an import manifest (in = out + refusals), and a local agent surface that answers only with source bindings.",
+  "primaryArtifact": "A Convex-schema migration app (apps/mew-migration): the four graph tables with provenance columns and erasure enumerability, an importer bound to the personal-dev-mew schema whose manifest closes per table, and a local agent surface that answers only with source bindings.",
   "rejectedAlternatives": [
     {
-      "alternative": "Scrape the live Ideaflow DOM or API with a signed-in browser session",
-      "reason": "No signed-in session exists; the wave-0B probe hit its kill condition (PR #27 receipt). The plan's own rule: the migration works on an EXPORT copy and nothing touches live Ideaflow."
+      "alternative": "Connect to the owner's remote Postgres with the credentials in personal-dev-mew/.env.local and measure the inventory directly",
+      "reason": "Credential use outside this run's read-only authority. Only environment variable NAMES were read; no value was read or used, no connection opened. The inventory waits for the owner to run their own exporter."
     },
     {
       "alternative": "Synthesize a plausible 'sample of the owner's notebook' to exercise the pipeline end to end",
-      "reason": "Forbidden fabrication. A sample of a notebook nobody has read is invented user data — the trial-1 failure. Labeled importer unit fixtures are legitimate test data; a fake notebook is not."
+      "reason": "Forbidden fabrication. A sample of a database nobody has read is invented user data — the trial-1 failure. Labeled fixture records shaped like the exporter's output are legitimate test data; a fake notebook is not."
     },
     {
-      "alternative": "Estimate the notebook inventory (note/link/tag counts) from typical Ideaflow usage",
-      "reason": "The RECON exit is a measured inventory. An estimated denominator would let every downstream count claim ride on a guess; inventory stays unknown, awaiting owner input #1."
+      "alternative": "Keep the notes/links/tags schema guessed from Ideaflow's public documentation",
+      "reason": "The real model is now readable and it is different: a typed property graph with no tag table (hashtags are content tokens and relations). Building against a guess when the truth is on disk would be a silent decision to misrepresent the data."
     },
     {
-      "alternative": "Map Ideaflow's hashtag-plus syntax to a bespoke rich-tag table in the first migration",
-      "reason": "Structural decision, defaulted-with-disclosure: hashtag-plus semantics beyond the public data model are unverified from here. First migration preserves the raw token in the tag row (rawToken column) and drops no information; interpretation is deferred, not invented."
+      "alternative": "Accept schema drift from other branches (latest-main's contentText/relationCount/attributes, prod-push's attributes) by mapping those fields opportunistically",
+      "reason": "Structural decision, defaulted-with-disclosure: the importer binds to the personal-dev-mew schema exactly; a record carrying drift fields is refused loudly, because which branch's schema the real export will carry is an open question for the owner, not a guess."
     },
     {
-      "alternative": "Deduplicate notes by normalized body text",
-      "reason": "Structural decision, defaulted-with-disclosure: dedup is by sourceId first (Ideaflow ids are authoritative), then by exact content digest for id-less notes. Fuzzy text dedup can silently merge distinct notes, which is a silent drop wearing a cleanup label."
+      "alternative": "Deduplicate graph objects across versions by content similarity",
+      "reason": "Structural decision, defaulted-with-disclosure: identity in Mew is (id, authorId) with a unique constraint; dedup is by id within one export, first occurrence kept, duplicates refused loudly. Similarity dedup can silently merge distinct objects, a silent drop wearing a cleanup label."
     },
     {
-      "alternative": "Drop Ideaflow backlinks and recompute them from forward links after import",
-      "reason": "Structural decision, defaulted-with-disclosure: backlinks that arrive in the export are stored as link rows with direction preserved; recomputation would erase any asymmetry the export carries. Nothing in the export is dropped — fields outside the mapping are refused loudly in the manifest, never discarded quietly."
+      "alternative": "Migrate mew_user, notification, expansion_state and the legacy data table along with the graph",
+      "reason": "Structural decision, defaulted-with-disclosure: whole-table drops, each counted in the manifest with a reason — identity stays in the auth domain (authorId strings are carried on every row), notifications are ephemeral, expansion state is UI state, dataTable is a legacy blob. Per-field, pk (storage surrogate) and content_tsvector (derived index) are dropped with recorded reasons; nothing is dropped silently."
     }
   ],
   "openUnknowns": [
-    "Notebook inventory: N notes, M links, K tags — awaiting owner input #1; not estimated.",
-    "The exact shape of a real Ideaflow export file; the importer's expected shape is derived from Ideaflow's public data model (notes, hashtags, links, timestamps) and is falsifiable the moment a real export exists.",
-    "Semantic acceptance criteria: zero owner-authored test cases exist (wave-0A NOT_RUN receipt); awaiting owner input #3.",
+    "Notebook inventory: N graph nodes, M relations, relation-type and relation-list counts — awaiting owner input #1 (one exporter run); not estimated.",
+    "Which branch's schema the owner's real export will carry: personal-dev-mew (bound), latest-main (adds contentText/relationCount/attributes/canonical_path_cache), or prod-push (adds attributes + MCP settings). Drift refuses loudly until the owner decides.",
+    "Whether the harvested MewAgent acceptance cases should gate this migration slice (retrieval-only) or only the future CRUD-agent slice — an owner call recorded in the cases file per case.",
     "Whether Convex deploy credentials exist for this machine; tested at LAUNCH, with a kill receipt if absent.",
-    "Ideaflow hashtag-plus semantics beyond the public hashtag model — preserved raw, uninterpreted."
+    "Hashtag semantics: hashtags live in node content and relations, not a table; whether the migration should materialize a derived hashtag index is deferred, not invented."
   ],
-  "successCondition": "On a real export copy: the import manifest closes exactly (notes in = notes imported + refusals, each refusal carrying a reason), every imported row carries sourceId + sourceDigest + importedAt, deterministic checks over the manifest pass, and the agent surface returns no answer without a source binding. Until that export exists, the same properties are demonstrated on labeled fixtures only and every data-dependent verdict stays NOT_RUN.",
+  "successCondition": "On the owner's real export: the import manifest closes exactly per table (in = imported + refused, whole-table drops counted), every imported row carries sourceId + sourceDigest + importedAt, deterministic checks over the manifest pass, and the agent surface returns no answer without a source binding. Until that export exists, the same properties are demonstrated on labeled fixtures only and every data-dependent verdict stays NOT_RUN.",
   "authorityLimits": {
     "read": [
-      "The Ideaflow EXPORT copy, once the owner provides it",
+      "The local Ideaflow checkouts under D:/VSCode Projects/Ideaflow, read-only — code, schema, exporter; environment variable names but never values",
+      "The owner's export JSON, once the owner produces it",
       "This repository and its committed receipts",
-      "Ideaflow's public documentation of its data model"
+      "The Notion workspace via MCP, for the owner's own acceptance-case documents"
     ],
     "propose": [
-      "Schema mapping, dedup policy, and drop policy — all recorded defaulted-with-disclosure pending owner countersignature",
+      "Schema mapping, dedup policy, drop policy, and drift handling — all recorded defaulted-with-disclosure pending owner countersignature",
       "The import manifest format and scorecard checks"
     ],
     "approve": [],
     "prohibited": [
-      "Writing anything back to Ideaflow",
-      "Fabricating notes, links, tags, inventory counts, or acceptance cases",
+      "Writing anything into the Ideaflow directories or any Mew database",
+      "Using any credential found in the checkouts (.env.local values, Postgres, AWS, OpenAI, Pinecone)",
+      "Fabricating records, inventory counts, or acceptance cases",
       "Marking any decision approved or human-reviewed",
       "Blending deterministic and semantic scorecard columns into one number",
       "Recording secrets or credentials in any artifact or receipt"

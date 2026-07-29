@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "mew.notion-cases-harvest/v1",
+  "harvestedAt": "2026-07-29T10:30:00.000Z",
+  "supersedes": "The wave-0A NOT_RUN receipt (PR #26), which ruled this document out as 'case-invention' on the belief that 'the old MewAgent codebase' was a different, unreachable system. Ground truth correction 2026-07-29: Mew IS the local Ideaflow codebase (D:/VSCode Projects/Ideaflow/*-mew), so the document's expected-output trees are owner-authored acceptance expectations for agent behavior over exactly the graph this migration targets. The 0A receipt was honest about what it knew; its premise was wrong, and it is superseded, not deleted.",
+  "source": {
+    "pageTitle": "Notepad CRUD Agent Key Takes",
+    "sourcePageId": "21b9539b-8f9a-8026-a57b-d8f4042c7c78",
+    "url": "https://app.notion.com/p/21b9539b8f9a8026a57bd8f4042c7c78",
+    "parentPage": "Foundation to Agentic AI (2189539b-8f9a-80c0-84ae-ff6fa9f98385)",
+    "pageLastEdited": "2025-06-23T20:05:00.000Z",
+    "fetchedVia": "Notion MCP notion-fetch, 2026-07-29"
+  },
+  "harvestRules": "Commands and expected trees are carried verbatim from the page's 'Ideal Result Output with Indentation Level' section. Structural assertions were derived mechanically from each tree (node presence, parentage, ordering); illustrative prose inside tree nodes (e.g. the Web3 outline text) is marked non-falsifiable rather than paraphrased into testability.",
+  "cases": [
+    {
+      "caseId": "mew-case-1-research-composite",
+      "blockAnchor": "Example 1: Comprehensive Research (Composite Tool)",
+      "command": "/mewagent Research Web3 and its core components",
+      "falsifiable": true,
+      "falsifiableAssertions": [
+        "A work-product root node titled with the research topic is created under the MewAgent command node's parent scope",
+        "The outline is a multi-level tree (>= 2 levels below the root work product)",
+        "Thought/progress events render as child nodes of the MewAgent command node, in order",
+        "A terminal completion node is present",
+        "State persists as __MewAgentMemory__ and __MewAgentPatterns__ nodes containing parseable JSON with episodicMemory / pattern entries naming the tool sequence"
+      ],
+      "nonFalsifiable": [
+        "The specific outline content (Web3 definitions etc.) — illustrative, depends on live web search and model output"
+      ],
+      "evaluation": {
+        "status": "NOT_RUN",
+        "reason": "The migration slice's agent surface is retrieval-only (source-bound answers over the store); it implements none of research_and_create_notes, create_node, or streaming child-node UI. Additionally the graph is empty until the owner's export is imported."
+      }
+    },
+    {
+      "caseId": "mew-case-2-find-organize",
+      "blockAnchor": "Example 2: Find and Organize Existing Notes",
+      "command": "/mewagent Find all my notes about meetings and organize them into a \"Project Meetings\" folder",
+      "falsifiable": true,
+      "falsifiableAssertions": [
+        "Given the Before tree (5 notes under Project Alpha, 3 meeting-related), a new 'Project Meetings' node exists after the run",
+        "Exactly the 3 meeting-related notes are re-parented under it; the other 2 remain in place",
+        "The agent trace records find_nodes, create_node, and 3 move_node calls in that order",
+        "Memory/pattern state nodes are updated with the action sequence"
+      ],
+      "nonFalsifiable": [],
+      "evaluation": {
+        "status": "NOT_RUN",
+        "reason": "Deterministic and fully falsifiable given the fixture Before-tree, but requires an agent with find/create/move tools; the migration slice's surface is retrieval-only. Runnable the moment the CRUD toolset exists."
+      }
+    },
+    {
+      "caseId": "mew-case-3-find-link",
+      "blockAnchor": "Example 3: Finding and Linking Related Concepts",
+      "command": "/mewagent I wrote about \"Mamba architecture\" and \"State Space Models\". Find them and link them with an explanation.",
+      "falsifiable": true,
+      "falsifiableAssertions": [
+        "Both existing notes are found (no duplicates created)",
+        "A new Connection node with explanatory content is created under 'Mamba architecture'",
+        "A relatedTo relation exists from the connection node to 'State Space Models'",
+        "The agent trace records find_nodes, create_node, add_relation"
+      ],
+      "nonFalsifiable": [
+        "The exact explanatory sentence content"
+      ],
+      "evaluation": {
+        "status": "NOT_RUN",
+        "reason": "Requires find/create/add_relation tools absent from the retrieval-only slice, and a populated graph."
+      }
+    }
+  ],
+  "unresolvedShare": "0 of 3 cases are unresolved as to falsifiability (all three carry mechanical assertions); 3 of 3 are NOT_RUN for capability and data reasons stated per case. The >20% unresolved kill condition does not trigger.",
+  "boundary": "This harvest establishes that owner-authored, falsifiable acceptance cases EXIST for agent-over-graph behavior. It does not run them, and it does not claim they cover import integrity — no case in the document addresses the export/import path itself."
+}

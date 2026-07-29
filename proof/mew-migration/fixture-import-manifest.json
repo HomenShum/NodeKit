@@ -1,37 +1,88 @@
 {
-  "schemaVersion": "mew.import-manifest/v1",
-  "importedAt": "2026-07-29T09:43:11.784Z",
-  "expectedShape": "ideaflow-export-shaped/v1 (derived from Ideaflow's public data model; unverified against a real export)",
+  "schemaVersion": "mew.import-manifest/v2",
+  "importedAt": "2026-07-29T10:04:38.692Z",
+  "expectedShape": "mew export-database.ts output (personal-dev-mew commit 3013c596, schema sha256 d79b2bd01699089c09f61a28493a72a4c66ca488a73eba8a7f112cfa79d3f41e): {data, users, graphNodes, graphRelations, relationTypes, relationLists}",
   "counts": {
-    "notesIn": 3,
-    "notesImported": 3,
-    "notesRefused": 0,
-    "linksIn": 3,
-    "linksImported": 3,
-    "danglingLinks": 1,
-    "tagsIn": 3,
-    "tagsImported": 3
+    "graphNodes": {
+      "in": 3,
+      "imported": 3,
+      "refused": 0,
+      "closes": true
+    },
+    "graphRelations": {
+      "in": 2,
+      "imported": 2,
+      "refused": 0,
+      "closes": true
+    },
+    "relationTypes": {
+      "in": 2,
+      "imported": 2,
+      "refused": 0,
+      "closes": true
+    },
+    "relationLists": {
+      "in": 1,
+      "imported": 1,
+      "refused": 0,
+      "closes": true
+    },
+    "danglingRelations": 1
   },
   "closes": true,
   "refusals": [],
-  "notes": [
+  "droppedTables": [
     {
-      "sourceId": "fixture:note-alpha",
-      "sourceDigest": "59e44a33d8d6cd7a9fa5b5a31b0e245a64596aedcc873648f570e473947957db"
+      "table": "data",
+      "rowsDropped": 0,
+      "reason": "legacy blob table (dataTable); not part of the graph"
     },
     {
-      "sourceId": "fixture:note-beta",
-      "sourceDigest": "369ce23aa107b98c35ea783cccf17ba867e447ace4089bb5b877198b163bb20f"
+      "table": "users",
+      "rowsDropped": 1,
+      "reason": "identity domain (mew_user); authorId strings are carried on every row, accounts are not migrated"
+    }
+  ],
+  "fieldDrops": [
+    {
+      "table": "graphNodes",
+      "field": "pk",
+      "reason": "storage-layer surrogate uuid; Mew identity is (id, authorId) and sourceId carries id"
     },
     {
-      "sourceId": "fixture:note-gamma",
-      "sourceDigest": "8fb962a2169633668daa133034f704ee0195faf01ccf83d0b96a9a18ce183eef"
+      "table": "graphNodes",
+      "field": "contentTsvector",
+      "reason": "derived full-text index, recomputable from content"
+    },
+    {
+      "table": "graphRelations",
+      "field": "pk",
+      "reason": "storage-layer surrogate uuid"
+    },
+    {
+      "table": "relationTypes",
+      "field": "pk",
+      "reason": "storage-layer surrogate uuid"
+    }
+  ],
+  "nodes": [
+    {
+      "sourceId": "fixture:node-alpha",
+      "sourceDigest": "b10571ac9cb32fc3e2ae276922548d753348b7330929ef4bff0cfd86d27db04e"
+    },
+    {
+      "sourceId": "fixture:node-beta",
+      "sourceDigest": "25d1147859b97f3f57433e82fb9ecf0678b82c2acdf3783dcfb2d9528eab4d0f"
+    },
+    {
+      "sourceId": "fixture:node-gamma",
+      "sourceDigest": "567541af331380822f7bb898e40fbe5a3532104b5c4d19ee6784f1e918767879"
     }
   ],
   "source": {
     "path": "fixtures/ideaflow-export.fixture.json",
-    "sha256": "6eb1fa5a9a020bb438ba01cc72a22fd5a17f3cc9c8ba0a5f2ce55085cb361674",
-    "byteLength": 1183,
+    "sha256": "141236ae9c0473807cb3b80fde4e291adf891d871bcbff302885c4380206d4e5",
+    "byteLength": 3748,
     "fixtureLabeled": true
   }
 }

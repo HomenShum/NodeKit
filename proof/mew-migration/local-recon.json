@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "mew.local-recon-receipt/v1",
+  "recordedAt": "2026-07-29T10:45:00.000Z",
+  "groundTruthCorrection": "Mew IS the Ideaflow application, and full checkouts live locally under D:/VSCode Projects/Ideaflow/. The wave-0B kill receipt (PR #27) tested the wrong premise — it probed ideaflow.app for a signed-in web session that was never needed. The probe was honest; its premise was wrong. That receipt is SUPERSEDED by this one, not deleted.",
+  "accessMode": "read-only; nothing written to any Ideaflow directory; no environment value read beyond variable NAMES; no database connection opened",
+  "checkouts": [
+    {
+      "path": "D:/VSCode Projects/Ideaflow/personal-dev-mew/mew",
+      "headCommit": "3013c596eb464dff07f2e22b7a5d85670459c1c4",
+      "headCommitDate": "2025-06-04T15:25:10-07:00",
+      "role": "Owner's personal dev instance; the schema this migration binds to.",
+      "schemaFile": "src/db/schema.ts",
+      "schemaSha256": "d79b2bd01699089c09f61a28493a72a4c66ca488a73eba8a7f112cfa79d3f41e",
+      "exporterFile": "scripts/export-database.ts",
+      "exporterSha256": "ebdceb96c2d4753be43f629072e533e95a7acd55910658323034a790bfdb66f1"
+    },
+    {
+      "path": "D:/VSCode Projects/Ideaflow/latest-main-mew/mew",
+      "headCommit": "2013d86d716aa95be5f0832ec08145afc3882651",
+      "schemaSha256": "f3fe9e9b60b67fddb4fff6672d851723ea769d1e592425151b8e06c1236f730e",
+      "schemaDrift": "adds graph_node.contentText/contentTextLength/relationCount/attributes, trigram index, canonical_path_cache table"
+    },
+    {
+      "path": "D:/VSCode Projects/Ideaflow/prod-push-mew/mew",
+      "headCommit": "0de15d79c974b3e5abf2d7ed68ebfc7b1b848e85",
+      "schemaSha256": "2ddc04229a3f980f2b7de2101985c2be4af7ca33592a1e0fe7fe29028526f6d9",
+      "schemaDrift": "adds graph_node.attributes and MCP server settings in user settings"
+    },
+    {
+      "path": "D:/VSCode Projects/Ideaflow/personal-dev-superconnector/superconnector-backend",
+      "role": "Different backend (superconnector); initdb carries only its own schema + sample data, not the notebook"
+    }
+  ],
+  "dataModel": {
+    "finding": "The real Mew data model is a typed property graph in Postgres via drizzle, NOT the notes/hashtags/links shape guessed from public documentation.",
+    "tables": {
+      "graph_node": "pk uuid, id text, version int, author_id, created_at, updated_at, content, is_public, is_new_related_objects_public, canonical_relation_id, is_checked, slug, content_tsvector (derived), access_mode; unique(id, author_id)",
+      "graph_relation": "pk uuid, id, version, author_id, created_at, updated_at, from_id, to_id, relation_type_id, is_public, canonical_relation_id; unique(id, author_id)",
+      "relation_type": "pk uuid, id, author_id, version, label, reverse_label, is_public; unique(id, author_id)",
+      "relation_lists": "id uuid, author_id, node_id, relation_id, type(pinned|noteContent|all), position_int, position_frac, is_public; unique(node_id, relation_id, type)",
+      "not_migrated": "mew_user (identity domain), notification (ephemeral), expansion_state (UI state), data (legacy blob), canonical_path_cache (derived, latest-main only)"
+    },
+    "hashtags": "No tag table exists; hashtags are content tokens and relations in the graph. The earlier notes/links/tags Convex schema was a wrong guess and is replaced."
+  },
+  "inventory": {
+    "finding": "NO LOCAL DATA STORE. The checkouts are code; persistence is remote Postgres (drizzle.config.ts dialect postgresql; POSTGRES_* env keys present in personal-dev-mew/.env.local). No database dump, sqlite file, or export JSON exists anywhere under D:/VSCode Projects/Ideaflow (searched: *export*.json, *.dump, *.sqlite, *backup*).",
+    "nNotes": "unknown — not measured; measuring requires connecting to the remote database with credentials in .env.local, which is credential use outside this run's read-only authority",
+    "mLinks": "unknown — same reason",
+    "kTags": "not a stored dimension in the real model (no tag table)",
+    "unblock": "Owner input #1 is now ONE COMMAND in the owner's own repo: `yarn tsx scripts/export-database.ts <dir>` in personal-dev-mew/mew produces {data, users, graphNodes, graphRelations, relationTypes, relationLists} JSON — exactly the shape this migration's importer now targets."
+  },
+  "secretsHandling": "personal-dev-mew/.env.local contains 59 keys including AWS, OpenAI, Pinecone, Postgres and Sentry credentials. Only key NAMES were read (grep -oE '^[A-Za-z_]+'); no value was read, copied, or used; no connection was attempted."
+}

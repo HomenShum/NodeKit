@@ -65,12 +65,12 @@ const probeA = await probeOnce("empty-store", emptyDir, [
   {
     id: "root-discloses-empty-store",
     url: "/",
-    mustContain: ['data-nodekit-artifact="mew-migration-agent-surface"', "store: 0 notes, 0 links, 0 tags", "No notebook data has been imported"],
+    mustContain: ['data-nodekit-artifact="mew-migration-agent-surface"', "store: 0 nodes, 0 relations, 0 relation types, 0 list entries", "No notebook data has been imported"],
   },
   {
     id: "ask-renders-unbound",
     url: "/ask?q=what+did+I+write+about+provenance",
-    mustContain: ['data-nodekit-unbound="true"', "UNBOUND", "zero notes"],
+    mustContain: ['data-nodekit-unbound="true"', "UNBOUND", "zero nodes"],
     mustNotContain: ['data-nodekit-unbound="false"', "<blockquote"],
   },
   {
@@ -90,12 +90,12 @@ const probeB = await probeOnce("fixture-store", fixtureDir, [
   {
     id: "ask-binds-to-fixture-ids",
     url: "/ask?q=provenance+migration",
-    mustContain: ['data-nodekit-unbound="false"', 'data-note-id="fixture:note-alpha"', "data-note-digest="],
+    mustContain: ['data-nodekit-unbound="false"', 'data-note-id="fixture:node-alpha"', "data-note-digest="],
   },
   {
     id: "unmatched-question-stays-unbound",
     url: "/ask?q=zzz-nothing-matches-this",
-    mustContain: ['data-nodekit-unbound="true"', "no stored note matches"],
+    mustContain: ['data-nodekit-unbound="true"', "no stored node matches"],
   },
 ]);
 

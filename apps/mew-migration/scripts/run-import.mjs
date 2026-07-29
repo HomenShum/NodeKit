@@ -41,7 +41,10 @@ await saveStore(dataDir, { ...emptyStore(), ...rows });
 await mkdir(path.dirname(manifestOut), { recursive: true });
 await writeFile(manifestOut, `${JSON.stringify(full, null, 2)}\n`, "utf8");
 console.log(`import manifest written: ${manifestOut}`);
-console.log(`  in ${full.counts.notesIn} = imported ${full.counts.notesImported} + refused ${full.counts.notesRefused}  closes: ${full.closes}`);
-console.log(`  links ${full.counts.linksImported} (dangling ${full.counts.danglingLinks}), tags ${full.counts.tagsImported}`);
+for (const table of ["graphNodes", "graphRelations", "relationTypes", "relationLists"]) {
+  const c = full.counts[table];
+  console.log(`  ${table}: in ${c.in} = imported ${c.imported} + refused ${c.refused}  closes: ${c.closes}`);
+}
+console.log(`  dangling relations ${full.counts.danglingRelations}; dropped tables: ${full.droppedTables.map((d) => `${d.table}(${d.rowsDropped})`).join(", ")}`);
 console.log(`  source sha256 ${full.source.sha256}  fixtureLabeled: ${full.source.fixtureLabeled}`);
 process.exit(full.closes ? 0 : 1);

@@ -1,30 +1,47 @@
 import { createHash } from "node:crypto";
 
-// The mew importer: an Ideaflow-export-shaped JSON in, rows + an import manifest out.
+// The mew importer: a Mew database export in (the exact JSON `scripts/export-database.ts` in the
+// owner's Mew checkout writes — {data, users, graphNodes, graphRelations, relationTypes,
+// relationLists}), rows + an import manifest out.
 //
-// The manifest is the artifact everything downstream cites: it must CLOSE — every note in the
-// export is either imported or refused with a reason, and notesIn === notesImported + notesRefused
-// is checked by the deterministic scorecard, not asserted here.
+// The manifest is the artifact everything downstream cites. It must CLOSE per table: every record
+// in the export is imported, refused with a reason, or in an explicitly dropped table whose row
+// count is recorded. recordsIn === imported + refused + droppedTableRows, checked by the
+// deterministic scorecard, not asserted here.
 //
-// Contract decisions this code implements (all defaulted-with-disclosure in the
-// OpportunityContract, none owner-countersigned):
-//   - dedup: by sourceId first; exact-content-digest for id-less notes. Never fuzzy text.
-//   - drops: none. A note field outside the documented mapping REFUSES that note loudly;
-//     silently discarding an unknown field would be a silent drop of unknown information.
-//   - hashtag-plus: the raw token is preserved on the tag row; no interpretation.
-//   - backlinks: direction preserved exactly as exported; dangling targets recorded, not dropped.
-//
-// The expected export shape is derived from Ideaflow's PUBLIC data model (notes, hashtags, links,
-// timestamps, completion state). No real export has been seen from this machine (wave-0B kill
-// receipt); the shape is falsifiable the moment one exists, and the manifest records which shape
-// was assumed.
+// Contract decisions this code implements (all defaulted-with-disclosure, none countersigned):
+//   - shape: bound to the personal-dev-mew schema (src/db/schema.ts sha256 d79b2bd0…, commit
+//     3013c596). Fields from other branches' schema drift (contentText, relationCount,
+//     attributes, …) REFUSE the record loudly — drift is a decision for the owner, not a guess.
+//   - dedup: by sourceId `id` per table, mirroring the source's unique(id, author_id) with the
+//     export scoped to one author; a duplicate keeps the first occurrence and refuses the rest.
+//   - drops: whole tables `data`, `users` are not migrated (identity/legacy domains) — counted,
+//     never silent. Per-field: pk (storage surrogate) and contentTsvector (derived) are recorded
+//     in manifest.fieldDrops with reasons; every other field is mapped.
+//   - dangling relation endpoints are recorded on the row and counted, never dropped.
 
-export const IMPORT_MANIFEST_SCHEMA = "mew.import-manifest/v1";
-export const EXPECTED_EXPORT_SHAPE = "ideaflow-export-shaped/v1 (derived from Ideaflow's public data model; unverified against a real export)";
+export const IMPORT_MANIFEST_SCHEMA = "mew.import-manifest/v2";
+export const EXPECTED_EXPORT_SHAPE =
+  "mew export-database.ts output (personal-dev-mew commit 3013c596, schema sha256 d79b2bd01699089c09f61a28493a72a4c66ca488a73eba8a7f112cfa79d3f41e): {data, users, graphNodes, graphRelations, relationTypes, relationLists}";
 
-const NOTE_FIELDS = new Set(["id", "text", "hashtags", "links", "createdAt", "updatedAt", "completed"]);
-const LINK_FIELDS = new Set(["targetId", "direction"]);
-const LINK_DIRECTIONS = new Set(["forward", "backlink"]);
+export const FIELD_DROPS = Object.freeze([
+  { table: "graphNodes", field: "pk", reason: "storage-layer surrogate uuid; Mew identity is (id, authorId) and sourceId carries id" },
+  { table: "graphNodes", field: "contentTsvector", reason: "derived full-text index, recomputable from content" },
+  { table: "graphRelations", field: "pk", reason: "storage-layer surrogate uuid" },
+  { table: "relationTypes", field: "pk", reason: "storage-layer surrogate uuid" },
+]);
+
+const DROPPED_TABLES = Object.freeze({
+  data: "legacy blob table (dataTable); not part of the graph",
+  users: "identity domain (mew_user); authorId strings are carried on every row, accounts are not migrated",
+});
+
+// Field sets from personal-dev-mew src/db/schema.ts, exactly.
+const NODE_FIELDS = new Set(["pk", "id", "version", "authorId", "createdAt", "updatedAt", "content", "isPublic", "isNewRelatedObjectsPublic", "canonicalRelationId", "isChecked", "slug", "contentTsvector", "accessMode"]);
+const RELATION_FIELDS = new Set(["pk", "id", "version", "authorId", "createdAt", "updatedAt", "fromId", "toId", "relationTypeId", "isPublic", "canonicalRelationId"]);
+const RELATION_TYPE_FIELDS = new Set(["pk", "id", "authorId", "version", "label", "reverseLabel", "isPublic"]);
+const RELATION_LIST_FIELDS = new Set(["id", "authorId", "nodeId", "relationId", "type", "positionInt", "positionFrac", "isPublic"]);
+const RELATION_LIST_TYPES = new Set(["pinned", "noteContent", "all"]);
 
 function canonicalize(value) {
   if (Array.isArray(value)) return value.map(canonicalize);
@@ -36,134 +53,185 @@ function canonicalize(value) {
   return value;
 }
 
-/** Canonical JSON digest: keys sorted at every level, no insignificant whitespace. */
-export function noteDigest(note) {
-  return createHash("sha256").update(JSON.stringify(canonicalize(note)), "utf8").digest("hex");
+/** Canonical JSON digest of one exported record: keys sorted, no insignificant whitespace. */
+export function recordDigest(record) {
+  return createHash("sha256").update(JSON.stringify(canonicalize(record)), "utf8").digest("hex");
 }
 
-function isIso(value) {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value));
+function isOptionalInstant(value) {
+  return value === undefined || value === null || (typeof value === "string" && Number.isFinite(Date.parse(value)));
 }
 
-function refusalFor(note, index) {
-  if (!note || typeof note !== "object" || Array.isArray(note)) return "note is not an object";
-  const unknown = Object.keys(note).filter((key) => !NOTE_FIELDS.has(key));
+function structuralRefusal(record, fields, label) {
+  if (!record || typeof record !== "object" || Array.isArray(record)) return `${label} record is not an object`;
+  const unknown = Object.keys(record).filter((key) => !fields.has(key));
   if (unknown.length > 0) {
-    return `unmapped field(s) [${unknown.sort().join(", ")}]: importing would silently discard information the mapping does not cover`;
+    return `unmapped field(s) [${unknown.sort().join(", ")}] — schema drift from the bound personal-dev-mew schema; migrating it silently would drop unknown information, and guessing its meaning would invent a decision`;
   }
-  if (typeof note.text !== "string") return "note.text is absent or not a string; a note with no readable body cannot be migrated as a note";
-  if (note.createdAt !== undefined && !isIso(note.createdAt)) return `note.createdAt "${note.createdAt}" is not an ISO-8601 instant`;
-  if (note.updatedAt !== undefined && !isIso(note.updatedAt)) return `note.updatedAt "${note.updatedAt}" is not an ISO-8601 instant`;
-  if (note.completed !== undefined && typeof note.completed !== "boolean") return "note.completed is present but not a boolean";
-  if (note.hashtags !== undefined) {
-    if (!Array.isArray(note.hashtags)) return "note.hashtags is present but not an array";
-    for (const tag of note.hashtags) {
-      if (typeof tag !== "string" || !tag.startsWith("#")) return `hashtag ${JSON.stringify(tag)} is not a "#"-prefixed string`;
-    }
-  }
-  if (note.links !== undefined) {
-    if (!Array.isArray(note.links)) return "note.links is present but not an array";
-    for (const link of note.links) {
-      if (!link || typeof link !== "object" || Array.isArray(link)) return "a link entry is not an object";
-      const extra = Object.keys(link).filter((key) => !LINK_FIELDS.has(key));
-      if (extra.length > 0) return `link carries unmapped field(s) [${extra.sort().join(", ")}]`;
-      if (typeof link.targetId !== "string" || link.targetId === "") return "link.targetId is absent or empty";
-      if (!LINK_DIRECTIONS.has(link.direction)) return `link.direction "${link.direction}" is not "forward" or "backlink"`;
-    }
-  }
+  if (typeof record.id !== "string" || record.id === "") return `${label}.id is absent or empty; identity in Mew is (id, authorId) and a record without id cannot be re-found or erased`;
+  if (typeof record.authorId !== "string" || record.authorId === "") return `${label}.authorId is absent or empty`;
+  if (!isOptionalInstant(record.createdAt)) return `${label}.createdAt "${record.createdAt}" is not null/absent/parseable`;
+  if (!isOptionalInstant(record.updatedAt)) return `${label}.updatedAt "${record.updatedAt}" is not null/absent/parseable`;
   return null;
 }
 
-function tagName(rawToken) {
-  return rawToken.replace(/^#/, "").replace(/\+$/, "");
+function importTable({ records, fields, label, extraRefusal, toRow }) {
+  const rows = [];
+  const refusals = [];
+  const seen = new Set();
+  records.forEach((record, index) => {
+    let reason = structuralRefusal(record, fields, label);
+    if (!reason && extraRefusal) reason = extraRefusal(record);
+    if (!reason && seen.has(record.id)) {
+      reason = `duplicate id "${record.id}" within one export: dedup keeps the first occurrence and refuses the rest, loudly`;
+    }
+    if (reason) {
+      refusals.push({ table: label, index, sourceId: typeof record?.id === "string" ? record.id : null, reason });
+      return;
+    }
+    seen.add(record.id);
+    rows.push({ record, digest: recordDigest(record) });
+  });
+  return { rows: rows.map(({ record, digest }) => toRow(record, digest)), refusals, seen };
 }
 
 /**
- * Import one export document.
+ * Import one Mew database export.
  *
- * @param {object} exportDoc parsed export JSON: { notes: [...] }
+ * @param {object} exportDoc parsed export JSON from scripts/export-database.ts
  * @param {object} [options]
  * @param {Date|Function} [options.now]
- * @returns {{ rows: { notes: object[], links: object[], tags: object[] }, manifest: object }}
+ * @returns {{ rows: object, manifest: object }}
  */
 export function importExport(exportDoc, { now } = {}) {
   const importedAt = (typeof now === "function" ? now() : now instanceof Date ? now : new Date()).toISOString();
-  if (!exportDoc || typeof exportDoc !== "object" || Array.isArray(exportDoc) || !Array.isArray(exportDoc.notes)) {
-    throw new Error("export document must be an object with a notes array; refusing to import an unrecognized shape");
+  if (!exportDoc || typeof exportDoc !== "object" || Array.isArray(exportDoc)) {
+    throw new Error("export document must be an object; refusing to import an unrecognized shape");
+  }
+  for (const table of ["graphNodes", "graphRelations", "relationTypes", "relationLists"]) {
+    if (!Array.isArray(exportDoc[table])) {
+      throw new Error(`export document lacks the ${table} array of a mew database export; refusing to import an unrecognized shape`);
+    }
   }
 
-  const rows = { notes: [], links: [], tags: [] };
-  const refusals = [];
-  const seenSourceIds = new Set();
-  const seenDigests = new Set();
-  const acceptedIds = new Set();
+  const provenance = (record, digest) => ({ sourceId: record.id, sourceDigest: digest, importedAt });
 
-  // Pass 1: acceptance, dedup, digesting.
-  const accepted = [];
-  exportDoc.notes.forEach((note, index) => {
-    const reason = refusalFor(note, index);
-    if (reason) {
-      refusals.push({ index, sourceId: typeof note?.id === "string" ? note.id : null, reason });
-      return;
-    }
-    const digest = noteDigest(note);
-    if (typeof note.id === "string" && note.id !== "") {
-      if (seenSourceIds.has(note.id)) {
-        refusals.push({ index, sourceId: note.id, reason: `duplicate sourceId "${note.id}": dedup policy keeps the first occurrence and refuses the rest, loudly` });
-        return;
-      }
-      seenSourceIds.add(note.id);
-    } else if (seenDigests.has(digest)) {
-      refusals.push({ index, sourceId: null, reason: "duplicate content digest on an id-less note: dedup policy keeps the first occurrence" });
-      return;
-    }
-    seenDigests.add(digest);
-    accepted.push({ note, index, digest, sourceId: typeof note.id === "string" && note.id !== "" ? note.id : `digest:${digest.slice(0, 16)}` });
+  const nodes = importTable({
+    records: exportDoc.graphNodes,
+    fields: NODE_FIELDS,
+    label: "graphNodes",
+    extraRefusal: (r) => {
+      if (r.content !== undefined && r.content !== null && typeof r.content !== "string") return "graphNodes.content is neither string nor null";
+      if (r.version !== undefined && typeof r.version !== "number") return "graphNodes.version is not a number";
+      return null;
+    },
+    toRow: (r, digest) => ({
+      ...provenance(r, digest),
+      authorId: r.authorId,
+      version: r.version ?? 1,
+      content: r.content ?? null,
+      createdAt: r.createdAt ?? null,
+      updatedAt: r.updatedAt ?? null,
+      isPublic: r.isPublic ?? null,
+      isNewRelatedObjectsPublic: r.isNewRelatedObjectsPublic ?? null,
+      canonicalRelationId: r.canonicalRelationId ?? null,
+      isChecked: r.isChecked ?? null,
+      slug: r.slug ?? null,
+      accessMode: r.accessMode ?? 0,
+    }),
   });
-  for (const entry of accepted) acceptedIds.add(entry.sourceId);
 
-  // Pass 2: rows.
-  let linksIn = 0;
-  let danglingLinks = 0;
-  let tagsIn = 0;
-  for (const { note, digest, sourceId } of accepted) {
-    const provenance = { sourceId, sourceDigest: digest, importedAt };
-    rows.notes.push({
-      ...provenance,
-      text: note.text,
-      ...(note.createdAt !== undefined ? { createdAt: note.createdAt } : {}),
-      ...(note.updatedAt !== undefined ? { updatedAt: note.updatedAt } : {}),
-      ...(note.completed !== undefined ? { completed: note.completed } : {}),
-    });
-    for (const link of note.links ?? []) {
-      linksIn += 1;
-      const dangling = !acceptedIds.has(link.targetId) && !seenSourceIds.has(link.targetId);
-      if (dangling) danglingLinks += 1;
-      rows.links.push({ ...provenance, targetSourceId: link.targetId, direction: link.direction, dangling });
-    }
-    for (const rawToken of note.hashtags ?? []) {
-      tagsIn += 1;
-      rows.tags.push({ ...provenance, rawToken, name: tagName(rawToken) });
-    }
-  }
+  const nodeIds = nodes.seen;
+
+  const relations = importTable({
+    records: exportDoc.graphRelations,
+    fields: RELATION_FIELDS,
+    label: "graphRelations",
+    toRow: (r, digest) => ({
+      ...provenance(r, digest),
+      authorId: r.authorId,
+      version: r.version ?? 1,
+      fromId: r.fromId ?? null,
+      toId: r.toId ?? null,
+      relationTypeId: r.relationTypeId ?? null,
+      createdAt: r.createdAt ?? null,
+      updatedAt: r.updatedAt ?? null,
+      isPublic: r.isPublic ?? null,
+      canonicalRelationId: r.canonicalRelationId ?? null,
+      dangling: Boolean((r.fromId && !nodeIds.has(r.fromId)) || (r.toId && !nodeIds.has(r.toId))),
+    }),
+  });
+
+  const relationTypes = importTable({
+    records: exportDoc.relationTypes,
+    fields: RELATION_TYPE_FIELDS,
+    label: "relationTypes",
+    toRow: (r, digest) => ({
+      ...provenance(r, digest),
+      authorId: r.authorId,
+      version: r.version ?? 1,
+      label: r.label ?? null,
+      reverseLabel: r.reverseLabel ?? null,
+      isPublic: r.isPublic ?? null,
+    }),
+  });
+
+  const relationLists = importTable({
+    records: exportDoc.relationLists,
+    fields: RELATION_LIST_FIELDS,
+    label: "relationLists",
+    extraRefusal: (r) => (RELATION_LIST_TYPES.has(r.type) ? null : `relationLists.type "${r.type}" is outside the source pgEnum [pinned, noteContent, all]`),
+    toRow: (r, digest) => ({
+      ...provenance(r, digest),
+      authorId: r.authorId,
+      nodeId: r.nodeId ?? null,
+      relationId: r.relationId ?? null,
+      type: r.type,
+      positionInt: r.positionInt ?? null,
+      positionFrac: r.positionFrac ?? null,
+      isPublic: r.isPublic ?? null,
+    }),
+  });
+
+  const rows = {
+    nodes: nodes.rows,
+    relations: relations.rows,
+    relationTypes: relationTypes.rows,
+    relationLists: relationLists.rows,
+  };
+  const refusals = [...nodes.refusals, ...relations.refusals, ...relationTypes.refusals, ...relationLists.refusals];
+
+  const droppedTables = Object.entries(DROPPED_TABLES).map(([table, reason]) => ({
+    table,
+    rowsDropped: Array.isArray(exportDoc[table]) ? exportDoc[table].length : 0,
+    reason,
+  }));
+
+  const perTable = (label, inCount, imported) => ({
+    in: inCount,
+    imported,
+    refused: refusals.filter((r) => r.table === label).length,
+    closes: inCount === imported + refusals.filter((r) => r.table === label).length,
+  });
+
+  const counts = {
+    graphNodes: perTable("graphNodes", exportDoc.graphNodes.length, rows.nodes.length),
+    graphRelations: perTable("graphRelations", exportDoc.graphRelations.length, rows.relations.length),
+    relationTypes: perTable("relationTypes", exportDoc.relationTypes.length, rows.relationTypes.length),
+    relationLists: perTable("relationLists", exportDoc.relationLists.length, rows.relationLists.length),
+    danglingRelations: rows.relations.filter((r) => r.dangling).length,
+  };
 
   const manifest = {
     schemaVersion: IMPORT_MANIFEST_SCHEMA,
     importedAt,
     expectedShape: EXPECTED_EXPORT_SHAPE,
-    counts: {
-      notesIn: exportDoc.notes.length,
-      notesImported: rows.notes.length,
-      notesRefused: refusals.length,
-      linksIn,
-      linksImported: rows.links.length,
-      danglingLinks,
-      tagsIn,
-      tagsImported: rows.tags.length,
-    },
-    closes: exportDoc.notes.length === rows.notes.length + refusals.length,
+    counts,
+    closes: Object.values(counts).every((entry) => typeof entry !== "object" || entry.closes),
     refusals,
-    notes: rows.notes.map(({ sourceId, sourceDigest }) => ({ sourceId, sourceDigest })),
+    droppedTables,
+    fieldDrops: [...FIELD_DROPS],
+    nodes: rows.nodes.map(({ sourceId, sourceDigest }) => ({ sourceId, sourceDigest })),
   };
   return { rows, manifest };
 }
