@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "nodekit.reference-observation/v1",
+  "collectionId": "note-surface",
+  "problemStatement": "How does a capture-first notebook surface make entry instant and reading calm, versus the organization-first chrome of conventional note managers?",
+  "whyThisProblem": "NodeKit generates note and stream surfaces (Mew migration, NodeMem views). The owner's direction names Ideaflow/Mew as the target convention. The mechanism must be extracted as facts before any template inherits it, or the template inherits vibes.",
+  "licenceMode": "live-inspection-attributed",
+  "licenceNote": "Mew observations attribute to the owner-authorized local source checkout via file: URI (live inspection of owner-owned code, not a third-party licence question). Mobbin entries store our observations and the mobbin_url only, never pixels.",
+  "capturedAt": "2026-07-29",
+  "capturedVia": "source-code read of personal-dev-mew (read-only), owner-supplied desktop+iOS screenshots, Mobbin MCP search_screens",
+  "observations": [
+    {
+      "id": "obs-mew-tokens",
+      "app": "Ideaflow Mew",
+      "platform": "web",
+      "mobbinUrl": "file:///D:/VSCode%20Projects/Ideaflow/personal-dev-mew/mew/src/app/global.css",
+      "surface": "token layer (src/app/global.css, 259 lines)",
+      "stance": "positive",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "measurement",
+          "subject": "accent",
+          "property": "single accent hue",
+          "value": "teal #2d95a9 (--teal-9), full 12-step ramp --teal-1..11",
+          "locatorDescription": "global.css:98-126"
+        },
+        {
+          "id": "f2",
+          "kind": "measurement",
+          "subject": "base surface",
+          "property": "dark background",
+          "value": "#0d1212 (--almost-black); dark mode remaps --white to #0d1212",
+          "locatorDescription": "global.css:163,247"
+        },
+        {
+          "id": "f3",
+          "kind": "relationship",
+          "subject": "chrome grays",
+          "property": "hue-linked to accent",
+          "value": "grays are teal-tinted: #7f8b8b light / #667373 dark, not neutral gray",
+          "locatorDescription": "global.css:157,243"
+        },
+        {
+          "id": "f4",
+          "kind": "count",
+          "subject": "type scale",
+          "property": "steps",
+          "value": 7,
+          "unit": "font sizes",
+          "locatorDescription": "global.css:165-171 — 11/12/13/14/16/18/32px named micro..xl; one display size only"
+        },
+        {
+          "id": "f5",
+          "kind": "measurement",
+          "subject": "elevation",
+          "property": "shadow usage",
+          "value": "3 shadow tokens, all <=8px blur, low alpha (0.05-0.067)",
+          "locatorDescription": "global.css:176-178"
+        },
+        {
+          "id": "f6",
+          "kind": "measurement",
+          "subject": "layout breakpoints",
+          "property": "responsive thresholds",
+          "value": "450px and 960px",
+          "unit": "px",
+          "locatorDescription": "app.module.css:87,122,128"
+        }
+      ],
+      "observedTension": "A 12-step accent ramp exists but the visible product uses the accent almost exclusively for hashtags and indicators — the ramp serves states, not decoration.",
+      "boundary": "Source tokens prove the vocabulary, not its runtime usage frequency; no computed-style audit was run."
+    },
+    {
+      "id": "obs-mew-stream",
+      "app": "Ideaflow Mew",
+      "platform": "web",
+      "mobbinUrl": "file:///D:/VSCode%20Projects/Ideaflow/personal-dev-mew",
+      "surface": "ThoughtStream (owner-supplied desktop + iOS screenshots, cross-checked against source)",
+      "stance": "positive",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "relationship",
+          "subject": "note separation",
+          "property": "boundary treatment",
+          "value": "horizontal divider only — no cards, no borders, no per-note background",
+          "locatorDescription": "desktop screenshot: stream region; notes end with a 1px rule"
+        },
+        {
+          "id": "f2",
+          "kind": "relationship",
+          "subject": "chromatic emphasis",
+          "property": "carrier",
+          "value": "inline hashtags and links are the only colored elements in body text; all other chrome achromatic",
+          "locatorDescription": "both screenshots: teal #hashtags and links against near-black"
+        },
+        {
+          "id": "f3",
+          "kind": "count",
+          "subject": "left rail",
+          "property": "sections",
+          "value": 5,
+          "unit": "groups",
+          "locatorDescription": "desktop: All Notes/To-dos/Public/Calendar, Pinned, Folders, Hashtags, Help/Settings; per-tag counts right-aligned"
+        },
+        {
+          "id": "f4",
+          "kind": "relationship",
+          "subject": "capture affordance",
+          "property": "always-reachable entry",
+          "value": "cmd+k/ctrl+k adds to top of stream; iOS shows persistent FAB pair (mic + compose) bottom-right",
+          "locatorDescription": "onboarding note text; iOS screenshot bottom-right"
+        },
+        {
+          "id": "f5",
+          "kind": "relationship",
+          "subject": "onboarding",
+          "property": "delivery mechanism",
+          "value": "onboarding content is ordinary notes inside the stream, not a modal tour",
+          "locatorDescription": "both screenshots: welcome/tips are stream entries with dividers"
+        },
+        {
+          "id": "f6",
+          "kind": "relationship",
+          "subject": "mobile parity",
+          "property": "layout transform",
+          "value": "identical single stream; rail collapses; no bottom tab bar",
+          "locatorDescription": "iOS screenshot vs desktop"
+        }
+      ],
+      "observedTension": "Search sits top-center as a pill on both platforms — the one persistent chrome element besides the rail.",
+      "boundary": "Screenshots show the signed-out sample notebook (8 notes); density at 1,000+ notes not observed. iOS corroboration exists but this record is filed under web (schema allows one platform); mobile facts cite the iOS screenshot in their locators."
+    },
+    {
+      "id": "obs-evernote-contrast",
+      "app": "Evernote",
+      "platform": "web",
+      "mobbinUrl": "https://mobbin.com/screens/2400dda3-acda-4fc5-9ae8-5be3fe31eb44",
+      "surface": "notes list + editor (second screen: https://mobbin.com/screens/247536a9-a77c-4d0a-b19f-502d8821cb7b)",
+      "stance": "counterexample",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "count",
+          "subject": "workspace",
+          "property": "simultaneous panes",
+          "value": 3,
+          "unit": "panes",
+          "locatorDescription": "Mobbin screen: sidebar + note list + editor"
+        },
+        {
+          "id": "f2",
+          "kind": "relationship",
+          "subject": "note representation",
+          "property": "boundary treatment",
+          "value": "each note is a bordered card in a dedicated list pane; editing opens a third pane",
+          "locatorDescription": "Mobbin screen: middle column cards"
+        },
+        {
+          "id": "f3",
+          "kind": "count",
+          "subject": "left rail",
+          "property": "top-level destinations",
+          "value": 14,
+          "unit": "items",
+          "locatorDescription": "Mobbin screen: Home through Spaces plus shortcuts"
+        },
+        {
+          "id": "f4",
+          "kind": "relationship",
+          "subject": "capture",
+          "property": "entry path",
+          "value": "capture requires choosing a destination type first (Note/Task/Event buttons)",
+          "locatorDescription": "Mobbin screen: three green CTAs top-left"
+        }
+      ],
+      "observedTension": "The organization chrome that aids retrieval at scale is the same chrome that adds steps before a first keystroke of capture.",
+      "boundary": "Static screens; task-completion timing not observed (M2 ceiling)."
+    },
+    {
+      "id": "obs-fabric-contrast",
+      "app": "Fabric",
+      "platform": "web",
+      "mobbinUrl": "https://mobbin.com/screens/3d3fe1f8-7050-4609-a613-78b688362326",
+      "surface": "note opened as centered modal document with AI side panel",
+      "stance": "counterexample",
+      "facts": [
+        {
+          "id": "f1",
+          "kind": "relationship",
+          "subject": "note representation",
+          "property": "reading mode",
+          "value": "note opens as a floating document card over a dimmed workspace, with heading hierarchy",
+          "locatorDescription": "Mobbin screen: centered white card, H1 + bold section heads"
+        },
+        {
+          "id": "f2",
+          "kind": "relationship",
+          "subject": "AI assistant",
+          "property": "placement",
+          "value": "persistent right-hand panel with its own chat input, separate from the note body",
+          "locatorDescription": "Mobbin screen: right column with model picker"
+        }
+      ],
+      "observedTension": "Document-modal reading rewards long-form structure; it is the opposite trade from stream capture speed.",
+      "boundary": "Single screen; flow not observed."
+    }
+  ],
+  "notRun": [
+    "Roam Research comparator: Mobbin holds no Roam screens — query 'Roam Research daily notes page with bullet outline and backlinks' returned Fabric and Evernote instead; recorded as coverage boundary, not substituted.",
+    "Motion: no runtime observation of Mew transitions was made; motion facts are absent, not fine.",
+    "Density at scale: all Mew evidence is the 8-note sample notebook."
+  ]
+}

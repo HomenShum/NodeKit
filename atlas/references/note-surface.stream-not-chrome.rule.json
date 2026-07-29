@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "nodekit.design-rule/v1",
+  "ruleId": "rule-stream-not-chrome",
+  "derivedFrom": {
+    "collectionId": "note-surface",
+    "observationIds": [
+      "obs-mew-stream",
+      "obs-evernote-contrast",
+      "obs-fabric-contrast"
+    ],
+    "factIds": [
+      "obs-mew-stream/f1",
+      "obs-mew-stream/f5",
+      "obs-evernote-contrast/f1",
+      "obs-evernote-contrast/f2",
+      "obs-evernote-contrast/f4",
+      "obs-fabric-contrast/f1"
+    ]
+  },
+  "statement": "A capture-first note surface renders one column of entries separated by dividers — no cards, no list-pane/editor-pane split, no destination choice before typing.",
+  "mechanismHypothesis": "Every visual boundary (card edge, pane border) and every pre-capture decision (which pane, which type) is a unit of friction paid before or during writing. A single stream with dividers spends the entire friction budget on zero-to-first-keystroke, which is the job of a capture tool. The three-pane pattern spends it on retrieval structure instead — a different job.",
+  "confidence": "medium",
+  "appliesWhen": [
+    "the surface's primary job is capture or review-in-time-order",
+    "entries are short and heterogeneous",
+    "organization is emergent (tags, links) rather than upfront (folders first)"
+  ],
+  "doesNotApplyWhen": [
+    "long-form documents with internal heading hierarchy (obs-fabric-contrast/f1)",
+    "workflows where retrieval at 10k+ items dominates capture (obs-evernote-contrast/f1)",
+    "multi-user triage queues where list-vs-detail is load-bearing"
+  ],
+  "problemTags": [
+    "rapid-capture",
+    "review-in-time-order"
+  ],
+  "intentTags": [
+    "reduce-precapture-friction",
+    "defer-organization"
+  ],
+  "firstSeenAt": "2026-07-29",
+  "lastVerifiedAt": "2026-07-29",
+  "confidenceBasis": "Derived from one source-grounded positive (owner-owned Mew checkout, file:line locators) plus Mobbin counterexamples; no audience-task evidence yet, so confidence is capped below audience-proven per the M-tier rule.",
+  "reVerifyAfterDays": 90,
+  "reVerifyReason": "Mew is under active development in the owner-local checkouts and Mobbin comparators drift with product releases; re-inspect the live surfaces and re-read global.css before continuing to cite these facts.",
+  "evidenceTier": "M2",
+  "tierLadder": "M2: live shipped-product observation (owner-owned source checkout with file:line locators, plus Mobbin live screens). M1 documentation not consulted. M3 audience-task evidence absent — no rule here may be promoted to audience-proven until a real capture task is observed."
+}

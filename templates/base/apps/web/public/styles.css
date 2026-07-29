@@ -29,6 +29,23 @@
   --motion-ease-standard:cubic-bezier(0.2,0.8,0.25,1);
   --motion-ease-expressive:cubic-bezier(0.16,1,0.3,1);
   --motion-ease-spring:cubic-bezier(0.32,0.72,0,1);
+  /* note-surface vocabulary — ADDITIVE. Nothing above is restyled; a generated app that
+     renders a note stream opts in by using these. Every value cites a recorded fact, so a
+     reviewer can trace it back rather than take it on taste:
+       atlas/references/note-surface.observations.json
+       atlas/references/note-surface.{stream-not-chrome,single-accent-inline,capture-always-armed}.rule.json
+     Tier M2 (live shipped-product observation). No audience-task evidence exists yet, so
+     none of these rules may be cited as audience-proven. Re-verify after 90 days. */
+  --stream-max-width:44rem;              /* obs-mew-stream/f1 — single reading column, no panes */
+  --stream-rail-width:220px;             /* obs-mew-stream/f3 — 5 grouped sections, counts right-aligned */
+  --stream-divider:1px solid var(--line);/* obs-mew-stream/f1 — divider IS the boundary; no cards */
+  --stream-note-gap:var(--space-5);      /* breathing room replaces the card that is not there */
+  --stream-breakpoint-compact:450px;     /* obs-mew-tokens/f6 — measured thresholds, not invented */
+  --stream-breakpoint-rail:960px;        /* obs-mew-tokens/f6 — below this the rail collapses */
+  /* rule-single-accent-inline: inline metadata carries ALL chromatic emphasis; chrome stays
+     achromatic but hue-linked (obs-mew-tokens/f3 — grays are tinted toward the accent, not neutral). */
+  --tag-token-color:var(--violet);
+  --tag-token-weight:var(--weight-semibold);
   font-family:Inter,ui-sans-serif,system-ui,sans-serif;
 }
 * { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); } button { font:inherit; } button:focus-visible,a:focus-visible,[tabindex]:focus-visible,summary:focus-visible { outline:3px solid var(--violet); outline-offset:3px; }

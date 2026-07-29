@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "nodekit.design-rule/v1",
+  "ruleId": "rule-single-accent-inline",
+  "derivedFrom": {
+    "collectionId": "note-surface",
+    "observationIds": [
+      "obs-mew-tokens",
+      "obs-mew-stream"
+    ],
+    "factIds": [
+      "obs-mew-tokens/f1",
+      "obs-mew-tokens/f3",
+      "obs-mew-tokens/f5",
+      "obs-mew-stream/f2"
+    ]
+  },
+  "statement": "One accent hue, carried only by meaningful inline elements (tags, links, live indicators); chrome stays achromatic but hue-linked, and elevation stays under 8px blur at low alpha.",
+  "mechanismHypothesis": "When color appears only where it encodes meaning, the eye can use color as a reliable retrieval signal — a teal token IS a tag, everywhere. Tinting the grays toward the accent hue (obs-mew-tokens/f3) keeps the achromatic chrome from reading as a second, colder palette, which is how surfaces acquire visual noise without any single loud element.",
+  "confidence": "medium",
+  "appliesWhen": [
+    "text-dominant surfaces where inline metadata must be scannable",
+    "dark-first products where saturation fatigues quickly"
+  ],
+  "doesNotApplyWhen": [
+    "data visualization surfaces needing categorical palettes (dataviz skill governs there)",
+    "status-heavy dashboards where semantic red/amber/green carry meaning the accent cannot"
+  ],
+  "problemTags": [
+    "inline-metadata-scanning",
+    "visual-noise-control"
+  ],
+  "intentTags": [
+    "color-as-retrieval-signal",
+    "calm-reading-surface"
+  ],
+  "firstSeenAt": "2026-07-29",
+  "lastVerifiedAt": "2026-07-29",
+  "confidenceBasis": "Derived from one source-grounded positive (owner-owned Mew checkout, file:line locators) plus Mobbin counterexamples; no audience-task evidence yet, so confidence is capped below audience-proven per the M-tier rule.",
+  "reVerifyAfterDays": 90,
+  "reVerifyReason": "Mew is under active development in the owner-local checkouts and Mobbin comparators drift with product releases; re-inspect the live surfaces and re-read global.css before continuing to cite these facts.",
+  "evidenceTier": "M2",
+  "tierLadder": "M2: live shipped-product observation (owner-owned source checkout with file:line locators, plus Mobbin live screens). M1 documentation not consulted. M3 audience-task evidence absent — no rule here may be promoted to audience-proven until a real capture task is observed."
+}
