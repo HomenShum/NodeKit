@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "mew.claim-lexicon/v1",
+  "comment": "The docs/PLAN.md-style regulated-phrase lexicon the story-pack phraseScan runs over every rendered statement. A match implies a promise about the DATA, not the software.",
+  "phrases": [
+    { "phrase": "your ", "implies": ["user-owned"] },
+    { "phrase": "the owner's ", "implies": ["user-owned"] },
+    { "phrase": "actual ", "implies": ["factual"] },
+    { "phrase": "based on your data", "implies": ["user-owned", "factual"] },
+    { "phrase": "connected", "implies": ["connected"] },
+    { "phrase": "live data", "implies": ["connected", "current"] },
+    { "phrase": "current ", "implies": ["current"] },
+    { "phrase": "up to date", "implies": ["current"] },
+    { "phrase": "migrated your", "implies": ["user-owned", "factual"] },
+    { "phrase": "real notes", "implies": ["user-owned", "factual"] }
+  ]
+}

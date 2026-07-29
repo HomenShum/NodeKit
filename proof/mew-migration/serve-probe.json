@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "mew.serve-probe-receipt/v1",
+  "probedAt": "2026-07-29T09:44:52.772Z",
+  "method": "raw-http against a locally served instance; NOT a rendered-DOM observation and usable by no green launch claim",
+  "probes": [
+    {
+      "name": "empty-store",
+      "dataDir": "C:/Users/hshum/AppData/Local/Temp/mew-probe-O0Oiom/empty",
+      "observations": [
+        {
+          "id": "root-discloses-empty-store",
+          "method": "raw-http",
+          "url": "/",
+          "httpStatus": 200,
+          "responseBytes": 614,
+          "bodySha256": "94d81dc1139b015307ad0ed1a2090f85967baad3cdb3317cb2b0dc21b19c3997",
+          "expectedSignals": [
+            "data-nodekit-artifact=\"mew-migration-agent-surface\"",
+            "store: 0 notes, 0 links, 0 tags",
+            "No notebook data has been imported"
+          ],
+          "signalsFound": [
+            "data-nodekit-artifact=\"mew-migration-agent-surface\"",
+            "store: 0 notes, 0 links, 0 tags",
+            "No notebook data has been imported"
+          ],
+          "forbiddenSignalsLeaked": [],
+          "pass": true
+        },
+        {
+          "id": "ask-renders-unbound",
+          "method": "raw-http",
+          "url": "/ask?q=what+did+I+write+about+provenance",
+          "httpStatus": 200,
+          "responseBytes": 864,
+          "bodySha256": "cb23878a5082a76e6e4a4bb3221d1fc9953379ed62ad700d1cc69278b27f81d4",
+          "expectedSignals": [
+            "data-nodekit-unbound=\"true\"",
+            "UNBOUND",
+            "zero notes"
+          ],
+          "signalsFound": [
+            "data-nodekit-unbound=\"true\"",
+            "UNBOUND",
+            "zero notes"
+          ],
+          "forbiddenSignalsLeaked": [],
+          "pass": true
+        },
+        {
+          "id": "ask-json-unbound",
+          "method": "raw-http",
+          "url": "/ask?q=provenance",
+          "httpStatus": 200,
+          "responseBytes": 171,
+          "bodySha256": "94d16a77300f557a68fdc283b60cc15fa0a286f90b23a6b2d35943343abb3778",
+          "expectedSignals": [
+            "\"unbound\": true",
+            "\"bindings\": []"
+          ],
+          "signalsFound": [
+            "\"unbound\": true",
+            "\"bindings\": []"
+          ],
+          "forbiddenSignalsLeaked": [],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "name": "fixture-store",
+      "dataDir": "C:/Users/hshum/AppData/Local/Temp/mew-probe-O0Oiom/fixture",
+      "observations": [
+        {
+          "id": "ask-binds-to-fixture-ids",
+          "method": "raw-http",
+          "url": "/ask?q=provenance+migration",
+          "httpStatus": 200,
+          "responseBytes": 901,
+          "bodySha256": "ec931d28d2f5136b582449595e94f207aaea3aed7e92f63f5b1bc3786e6cf3ec",
+          "expectedSignals": [
+            "data-nodekit-unbound=\"false\"",
+            "data-note-id=\"fixture:note-alpha\"",
+            "data-note-digest="
+          ],
+          "signalsFound": [
+            "data-nodekit-unbound=\"false\"",
+            "data-note-id=\"fixture:note-alpha\"",
+            "data-note-digest="
+          ],
+          "forbiddenSignalsLeaked": [],
+          "pass": true
+        },
+        {
+          "id": "unmatched-question-stays-unbound",
+          "method": "raw-http",
+          "url": "/ask?q=zzz-nothing-matches-this",
+          "httpStatus": 200,
+          "responseBytes": 876,
+          "bodySha256": "40576dac6051b7e2b7e296908d5f36a89f1f8abeb12bb8ae98aa19524e31b5c7",
+          "expectedSignals": [
+            "data-nodekit-unbound=\"true\"",
+            "no stored note matches"
+          ],
+          "signalsFound": [
+            "data-nodekit-unbound=\"true\"",
+            "no stored note matches"
+          ],
+          "forbiddenSignalsLeaked": [],
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "pass": true
+}

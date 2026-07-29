@@ -12,7 +12,7 @@ import { loadStore } from "../src/store.mjs";
 //
 // There is deliberately no combined score, no average, and no field where one could live.
 //
-//   node scripts/scorecard.mjs [--data-dir .data] [--out <scorecard.json>]
+//   node scripts/scorecard.mjs [--data-dir .data] [--manifest <path>] [--out <scorecard.json>]
 
 const args = process.argv.slice(2);
 function opt(name, fallback) {
@@ -22,7 +22,8 @@ function opt(name, fallback) {
 const dataDir = opt("--data-dir", ".data");
 const outPath = opt("--out", path.join(dataDir, "scorecard.json"));
 
-const manifest = JSON.parse(await readFile(path.join(dataDir, "import-manifest.json"), "utf8"));
+const manifestPath = opt("--manifest", path.join(dataDir, "import-manifest.json"));
+const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const store = await loadStore(dataDir);
 
 const checks = [];

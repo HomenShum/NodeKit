@@ -100,7 +100,7 @@ export function createApp({ dataDir = ".data" } = {}) {
 
 if (process.argv[1] && process.argv[1].endsWith("serve.mjs")) {
   const port = Number(process.env.PORT ?? 4174);
-  createApp({}).listen(port, "127.0.0.1", () => {
+  createApp({ dataDir: process.env.MEW_DATA_DIR ?? ".data" }).listen(port, "127.0.0.1", () => {
     console.log(`mew agent surface listening on http://127.0.0.1:${port}`);
   });
 }
