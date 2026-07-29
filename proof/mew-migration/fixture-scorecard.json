@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "mew.scorecard/v1",
+  "producedAt": "2026-07-29T09:43:11.902Z",
+  "blended": false,
+  "deterministic": {
+    "verdict": "PASS",
+    "checksRun": 8,
+    "checksFailed": 0,
+    "dataOrigin": "fixture: labeled importer unit fixtures only — no user data exists; these checks prove the machinery, not the notebook",
+    "manifestSourceSha256": "6eb1fa5a9a020bb438ba01cc72a22fd5a17f3cc9c8ba0a5f2ce55085cb361674",
+    "checks": [
+      {
+        "id": "manifest-closes",
+        "detail": "notesIn 3 === notesImported 3 + notesRefused 0",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-notes",
+        "detail": "store holds 3 notes, manifest claims 3",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-links",
+        "detail": "store holds 3 links, manifest claims 3",
+        "pass": true
+      },
+      {
+        "id": "store-matches-manifest-tags",
+        "detail": "store holds 3 tags, manifest claims 3",
+        "pass": true
+      },
+      {
+        "id": "every-row-carries-provenance",
+        "detail": "sourceId + 64-hex sourceDigest + importedAt on every row of every table",
+        "pass": true
+      },
+      {
+        "id": "manifest-digests-match-store",
+        "detail": "every manifest note digest appears on exactly one store note",
+        "pass": true
+      },
+      {
+        "id": "every-refusal-has-reason",
+        "detail": "0 refusal(s), each with a non-empty reason",
+        "pass": true
+      },
+      {
+        "id": "dangling-links-declared",
+        "detail": "manifest declares 1 dangling; store carries 1",
+        "pass": true
+      }
+    ]
+  },
+  "semantic": {
+    "verdict": "NOT_RUN",
+    "reason": "zero owner-authored acceptance cases exist (wave-0A receipt, PR #26); awaiting owner input #3. Cases are never invented, paraphrased into testability, or sampled from anywhere else.",
+    "casesEvaluated": 0
+  }
+}

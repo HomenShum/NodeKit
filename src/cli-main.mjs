@@ -158,7 +158,8 @@ Usage:
   nodekit motion compare <repoA> <repoB> [repoC ...] [--output <receipt.json>] [--json]
   nodekit journey verify [--repo-root <path>] [--json]
   nodekit journey build-evidence --contract <opportunity-contract.json>
-      [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
+      [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>]
+      [--honoured <honoured.json>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
@@ -352,10 +353,23 @@ async function runJourneyBuildEvidence(parsed) {
   const contractPath = parsed.options.contract;
   if (typeof contractPath !== "string") {
     console.error(
-      "usage: nodekit journey build-evidence --contract <opportunity-contract.json> [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]",
+      "usage: nodekit journey build-evidence --contract <opportunity-contract.json> [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--honoured <honoured.json>] [--json]",
     );
     process.exitCode = 2;
     return;
+  }
+  // The ONLY way a decision becomes honoured: a caller-supplied JSON file mapping decision
+  // pointers to { how, sourceFiles }. The file is parsed here and handed to the producer, which
+  // still refuses unknown pointers and missing evidence files — the CLI adds no leniency.
+  let honoured;
+  if (typeof parsed.options.honoured === "string") {
+    try {
+      honoured = JSON.parse(await readFile(parsed.options.honoured, "utf8"));
+    } catch (error) {
+      console.error(`cannot read --honoured file ${parsed.options.honoured}: ${error?.message ?? error}`);
+      process.exitCode = 2;
+      return;
+    }
   }
   try {
     const { pack, packPath } = await produceBuildEvidencePack({
@@ -364,6 +378,7 @@ async function runJourneyBuildEvidence(parsed) {
       outPath: typeof parsed.options.out === "string" ? parsed.options.out : undefined,
       caseId: typeof parsed.options["case-id"] === "string" ? parsed.options["case-id"] : undefined,
       testCommand: typeof parsed.options["test-command"] === "string" ? parsed.options["test-command"] : undefined,
+      honoured,
     });
     const entries = [
       ...Object.values(pack.content.decisions.contract).flatMap((entry) =>

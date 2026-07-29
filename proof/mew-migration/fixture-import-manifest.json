@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "mew.import-manifest/v1",
+  "importedAt": "2026-07-29T09:43:11.784Z",
+  "expectedShape": "ideaflow-export-shaped/v1 (derived from Ideaflow's public data model; unverified against a real export)",
+  "counts": {
+    "notesIn": 3,
+    "notesImported": 3,
+    "notesRefused": 0,
+    "linksIn": 3,
+    "linksImported": 3,
+    "danglingLinks": 1,
+    "tagsIn": 3,
+    "tagsImported": 3
+  },
+  "closes": true,
+  "refusals": [],
+  "notes": [
+    {
+      "sourceId": "fixture:note-alpha",
+      "sourceDigest": "59e44a33d8d6cd7a9fa5b5a31b0e245a64596aedcc873648f570e473947957db"
+    },
+    {
+      "sourceId": "fixture:note-beta",
+      "sourceDigest": "369ce23aa107b98c35ea783cccf17ba867e447ace4089bb5b877198b163bb20f"
+    },
+    {
+      "sourceId": "fixture:note-gamma",
+      "sourceDigest": "8fb962a2169633668daa133034f704ee0195faf01ccf83d0b96a9a18ce183eef"
+    }
+  ],
+  "source": {
+    "path": "fixtures/ideaflow-export.fixture.json",
+    "sha256": "6eb1fa5a9a020bb438ba01cc72a22fd5a17f3cc9c8ba0a5f2ce55085cb361674",
+    "byteLength": 1183,
+    "fixtureLabeled": true
+  }
+}
