@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:builder-gym-atomic-cas-publication",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "77069c870e6fb94475c6d9253ae9c6e1f85ec2bd",
+    "occurredAt": "2026-07-29T05:29:38.511Z"
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "Concurrent immutable artifact writers could observe a target path before the winning process had finished writing its bytes.",
+  "observedFailure": "A losing create-if-absent writer received EEXIST and compared against the winner's partially written destination; valid identical concurrent writes could be rejected as immutable conflicts.",
+  "resolution": "Write and fsync a private same-directory temporary inode then atomically publish it with link and remove the private inode in a bounded finally path.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:builder-gym-cas-publishes-complete-bytes"
+  ],
+  "evidenceIds": [
+    "evd:builder-gym-atomic-cas-publication"
+  ],
+  "predecessorIds": [
+    "evt:behavior-index-and-friction-loop"
+  ],
+  "knownLimitations": [
+    "This guarantees complete local filesystem publication only; distributed object-store semantics and cross-host locking are not claimed."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "HomenShum",
+    "reviewedAt": "2026-07-29T05:29:45.845Z",
+    "approvalHash": "5638fcd980c052404bfcacd688a5deecb139931622e91c78ca96087e243ac042",
+    "trustLevel": "H1"
+  }
+}

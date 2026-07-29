@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:consumer-package-verification-lifecycle-free",
+  "statement": "Consumer-package source verification must compare the supplied archive with bounded clean tracked distribution bytes without executing npm or package lifecycle scripts.",
+  "scope": {
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "consumer package preparation",
+      "archive provenance verification"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/consumer-package-preparation.mjs",
+    "test/consumer-package-preparation.test.mjs"
+  ],
+  "introducedByEventId": "evt:consumer-package-verification-lifecycle-free",
+  "status": "verified"
+}

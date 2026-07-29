@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:consumer-package-verification-lifecycle-free",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "77069c870e6fb94475c6d9253ae9c6e1f85ec2bd",
+    "occurredAt": "2026-07-29T05:29:38.293Z"
+  },
+  "track": "architecture",
+  "category": "release",
+  "challenge": "Consumer preparation could not verify the exact package on Windows because its supposed script-disabled pack still executed prepare.",
+  "observedFailure": "npm pack ran prepare in the reduced distribution copy and failed with MODULE_NOT_FOUND before comparing a valid archive.",
+  "resolution": "Compare the supplied archive manifest directly with bounded clean tracked distribution bytes and never execute npm or lifecycle scripts during verification.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:consumer-package-verification-lifecycle-free"
+  ],
+  "evidenceIds": [
+    "evd:consumer-package-verification-lifecycle-free"
+  ],
+  "predecessorIds": [
+    "evt:source-bound-submission-gates"
+  ],
+  "knownLimitations": [
+    "This remains package preparation only; npm publication and deployment and authenticated Convex adoption are not claimed."
+  ],
+  "interpretation": {
+    "status": "human-reviewed",
+    "reviewedBy": "HomenShum",
+    "reviewedAt": "2026-07-29T05:29:45.736Z",
+    "approvalHash": "477f80a1dc8cbf9c807a7797dcdb095112ffcd7fcd494f455fbdeb7c5dd6e559",
+    "trustLevel": "H1"
+  }
+}

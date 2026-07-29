@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:builder-gym-cas-publishes-complete-bytes",
+  "statement": "A Builder Gym content address becomes visible only after its complete canonical bytes are closed, and concurrent equal writers resolve idempotently.",
+  "scope": {
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "Builder Gym trajectories",
+      "Builder Gym locks",
+      "Builder Gym verdicts"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/builder-gym.mjs",
+    "test/builder-gym.test.mjs"
+  ],
+  "introducedByEventId": "evt:builder-gym-atomic-cas-publication",
+  "status": "verified"
+}

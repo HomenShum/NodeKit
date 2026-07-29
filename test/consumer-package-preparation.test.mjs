@@ -180,6 +180,7 @@ test("tracked source verification never runs a mutating prepare lifecycle while 
   }
 });
 
+// @nodekit-verifies inv:consumer-package-verification-lifecycle-free#missing-helper-does-not-run
 test("source verification does not execute a prepare lifecycle whose helper is outside the distribution", async () => {
   const current = await fixture({
     nodekitPackageJson: NODEKIT_PACKAGE_JSON_WITH_EXTERNAL_PREPARE,

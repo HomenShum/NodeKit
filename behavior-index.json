@@ -243,14 +243,14 @@
   "invariantCoverage": {
     "available": true,
     "counts": {
-      "total": 22,
-      "annotatedSymbol": 22,
+      "total": 24,
+      "annotatedSymbol": 24,
       "namedFileOnly": 0,
       "unowned": 0,
-      "annotatedTest": 22,
+      "annotatedTest": 24,
       "namedTestFileOnly": 0,
       "unverified": 0,
-      "fullyBound": 22,
+      "fullyBound": 24,
       "withMissingRefs": 0
     },
     "invariants": [
@@ -282,6 +282,38 @@
         "verifierRefs": [
           "src/lib/opportunity-compiler.mjs",
           "test/opportunity-build-packet.test.mjs"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:builder-gym-cas-publishes-complete-bytes",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/builder-gym.mjs",
+            "symbol": "writeContentAddressedJson",
+            "line": 138
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/builder-gym.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "burst-and-sustained-contention",
+            "file": "test/builder-gym.test.mjs",
+            "line": 550
+          }
+        ],
+        "namedTestFiles": [
+          "test/builder-gym.test.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/builder-gym.mjs",
+          "test/builder-gym.test.mjs"
         ],
         "missingVerifierRefs": [],
         "gaps": []
@@ -385,6 +417,38 @@
           "src/lib/caseflow-conformance.mjs",
           "test/caseflow.test.mjs",
           "src/component/caseflow.test.ts"
+        ],
+        "missingVerifierRefs": [],
+        "gaps": []
+      },
+      {
+        "invariantId": "inv:consumer-package-verification-lifecycle-free",
+        "status": "verified",
+        "ownership": "annotated-symbol",
+        "owners": [
+          {
+            "file": "src/lib/consumer-package-preparation.mjs",
+            "symbol": "inspectTrackedNodeKitDistribution",
+            "line": 201
+          }
+        ],
+        "namedSourceFiles": [
+          "src/lib/consumer-package-preparation.mjs"
+        ],
+        "verification": "annotated-test",
+        "provenBy": [
+          {
+            "scenario": "missing-helper-does-not-run",
+            "file": "test/consumer-package-preparation.test.mjs",
+            "line": 183
+          }
+        ],
+        "namedTestFiles": [
+          "test/consumer-package-preparation.test.mjs"
+        ],
+        "verifierRefs": [
+          "src/lib/consumer-package-preparation.mjs",
+          "test/consumer-package-preparation.test.mjs"
         ],
         "missingVerifierRefs": [],
         "gaps": []

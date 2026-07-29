@@ -547,6 +547,7 @@ test("concurrent Builder Gym fixtures do not confuse distinct Windows file ident
   assert.equal(new Set(fixtures.map((fixture) => fixture.root)).size, fixtures.length);
 });
 
+// @nodekit-verifies inv:builder-gym-cas-publishes-complete-bytes#burst-and-sustained-contention
 test("content-addressed trajectory writes survive burst and sustained contention while rejecting prepared addresses", async (t) => {
   const { baseline, root } = await preparedBuilderGym(t);
   const output = path.join(root, "harness", "trajectories", "builder", "sha256", `${baseline.trajectoryHash}.json`);
