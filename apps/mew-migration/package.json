@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.19.0" },
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "scripts": {
     "compile": "nodekit compile --repo-root .",
     "inspect": "nodekit inspect --repo-root .",
@@ -18,7 +20,8 @@
     "audit:prod": "node scripts/audit-prod.mjs"
   },
   "dependencies": {
-    "@homenshum/nodekit": "file:vendor/nodekit"
+    "@homenshum/nodekit": "file:vendor/nodekit",
+    "convex": "1.42.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",

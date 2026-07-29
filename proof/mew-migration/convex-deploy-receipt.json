@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "mew.convex-deploy-receipt/v1",
+  "recordedAt": "2026-07-29T09:50:35.397Z",
+  "premiseTested": "Convex CLOUD deploy credentials exist on this machine (owner input #2)",
+  "finding": "ABSENT. No Convex account, no CONVEX_DEPLOY_KEY, no cloud deployment. The cloud deploy path fails at login; convex 1.42.3 instead provisions an ANONYMOUS LOCAL deployment, which is not a launch.",
+  "attempts": [
+    {
+      "command": "npx --no-install convex dev --once  (cwd apps/mew-migration, CI=1)",
+      "exitCode": 0,
+      "outcome": "local-anonymous-deployment",
+      "detail": "Provisioned a local backend at http://127.0.0.1:3210 with 'No Convex account'. Pushed the hand-written convex/schema.ts successfully: tables notes/links/tags accepted, indexes created (notes.by_sourceId, notes.by_sourceDigest, links.by_sourceId, tags.by_sourceId, tags.by_name). This validates the schema; it deploys nothing anywhere reachable.",
+      "sanitizedOutputSha256": "1d9b1a277a79c84f4814d65187f549cd70cfa5113f3a09f410bfa8c89797e9d0"
+    },
+    {
+      "command": "npx --no-install convex deploy -y  (cwd apps/mew-migration, CI=1)",
+      "exitCode": 1,
+      "outcome": "kill-receipt-for-cloud-deploy",
+      "sanitizedOutput": "You are currently developing anonymously with a locally running project.\nTo deploy your Convex app to the cloud, log in by running `npx convex login`.\nSee https://docs.convex.dev/production for more information on how Convex cloud works and instructions on how to set up hosting.",
+      "sanitizedOutputSha256": "34eed7e6f5a8b2bbb83cb6c90d2cd20061a8eb8508344c13d0cb5ed987372d50"
+    }
+  ],
+  "secretsHandling": "No credential was entered, read, or written. .env.local (local-deployment coordinates written by the CLI) is untracked per the app .gitignore and its values appear in no artifact.",
+  "unblock": "Owner input #2: `npx convex login` in an interactive session (or CONVEX_DEPLOY_KEY in the environment), then `npx convex deploy` and the rendered-DOM probe re-run."
+}

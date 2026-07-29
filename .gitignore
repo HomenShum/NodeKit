@@ -26,3 +26,4 @@ proof/ease/downloaded*/
 # and local store state. Tracked receipts live under proof/mew-migration/ instead.
 apps/mew-migration/vendor/
 apps/mew-migration/.data/
+apps/mew-migration/convex/_generated/

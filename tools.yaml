@@ -153,6 +153,17 @@ tools:
     journeyStages: [build]
     packages: [tailwindcss]
     source: thread-2026-07-29
+  - id: convex-backend
+    # Placement call (owner countersignature requested): NOT [APP]. The platform itself ships a
+    # Convex component (src/component/) and already declares convex as an optional peerDependency
+    # plus a devDependency, so an APP placement would (correctly) fail the dependency-free-core
+    # check against a dependency that predates this entry. ADAPTER is what the repo actually does
+    # with it; generated applications take convex through their OWN package.json, never the core's.
+    placement: [ADAPTER]
+    journeyStages: [build, launch]
+    constraint: backend adapter; deploy is credentials-gated at LAUNCH
+    packages: [convex]
+    source: mew-migration wave-4 (2026-07-29)
   - id: convex-prosemirror-sync
     placement: [APP, ADAPTER]
     journeyStages: [build]
