@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.local/schemas/nodekit.stage-task.v1.schema.json",
+  "title": "Canonical current-stage task artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "stageId",
+    "kind",
+    "readSet",
+    "writeSet",
+    "outputSlots",
+    "inputs"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.stage-task/v1" },
+    "taskId": { "$ref": "#/$defs/id" },
+    "stageId": { "$ref": "#/$defs/id" },
+    "kind": { "enum": ["task", "review"] },
+    "readSet": { "$ref": "#/$defs/stringSet" },
+    "writeSet": { "$ref": "#/$defs/stringSet" },
+    "outputSlots": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slot", "schemaVersion"],
+        "properties": {
+          "slot": { "$ref": "#/$defs/id" },
+          "schemaVersion": { "$ref": "#/$defs/nonEmpty" }
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fromTaskId",
+          "outputSlot",
+          "inputSlot",
+          "requiredSchemaVersion",
+          "authorityRequirement",
+          "required"
+        ],
+        "properties": {
+          "fromTaskId": { "$ref": "#/$defs/id" },
+          "outputSlot": { "$ref": "#/$defs/id" },
+          "inputSlot": { "$ref": "#/$defs/id" },
+          "requiredSchemaVersion": { "$ref": "#/$defs/nonEmpty" },
+          "authorityRequirement": {
+            "enum": [
+              "agent-produced",
+              "deterministic",
+              "human-attested",
+              "nodeproof-verified"
+            ]
+          },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "reviewContextRef": { "$ref": "#/$defs/nonEmpty" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "review" } }, "required": ["kind"] },
+      "then": {
+        "required": ["reviewContextRef"],
+        "properties": { "writeSet": { "maxItems": 0 } }
+      },
+      "else": { "not": { "required": ["reviewContextRef"] } }
+    }
+  ],
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "stringSet": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmpty" }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:stage-local-execution-graph",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "634e629e2661f8b5d5ec96a86a4a02bf1ce6d6d0",
+    "occurredAt": "2026-07-29T17:38:36-07:00"
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "The sequential Caseflow lifecycle could return only one next task, while independent note-surface work needed concurrency without creating a second workflow authority or allowing exit codes to stand in for verified handoffs.",
+  "observedFailure": "Knowledge graphs and NodeTrace trajectories existed, but no runtime compiled canonical current-stage work into deterministic, artifact-bound edges or excluded overlapping write scopes before declaring work runnable.",
+  "resolution": "Added a disposable current-stage execution projection compiled from Caseflow stage-task artifacts, immutable exact-artifact edge bindings, a conflict-free fail-closed runnable frontier, verifier-derived review context, three bounded JSON CLI commands, and public schemas/types. Caseflow and advanceStage retain all lifecycle authority; generated design.md and a new ReviewFinding object were cut.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:stage-local-execution-graph"
+  ],
+  "evidenceIds": [
+    "evd:stage-local-execution-graph"
+  ],
+  "predecessorIds": [
+    "evt:caseflow-idempotent-retries"
+  ],
+  "knownLimitations": [
+    "Human-attested and NodeProof-verified bindings require a protected embedding-runtime verifier; the file-only CLI refuses them.",
+    "Runtime NodeTrace recording belongs to the runner that performs real work and is not fabricated by the pure compiler.",
+    "NodeBench, NodeRoom, the full evidence chain, and the paired scheduler experiment remain separate consumer proof.",
+    "Persistent native-agent workspace and session identity remains a separate unimplemented authority and continuity contract.",
+    "ActiveGraph remains an offline, non-authoritative canary.",
+    "Canonical promotion requires a separately verified human approval."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

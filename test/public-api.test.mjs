@@ -38,6 +38,12 @@ import {
   verifySkillBenchmarkVerdict,
   verifySkillPromotionApproval,
 } from "@homenshum/nodekit/skill-evaluation";
+import {
+  NODETRACE_GRAPH_EVENT_TYPES,
+  compileStageExecutionGraph,
+  deriveRunnableFrontier,
+  sealExecutionEdgeBinding,
+} from "@homenshum/nodekit/execution-graph";
 
 // @nodekit-verifies inv:stable-caseflow-package-entrypoint#entrypoint-surface-stable
 test("published Caseflow entry point exposes the supported portable contract", async () => {
@@ -64,6 +70,10 @@ test("published Caseflow entry point exposes the supported portable contract", a
   assert.equal(typeof sealSkillPromotionApproval, "function");
   assert.equal(typeof verifySkillPromotionApproval, "function");
   assert.equal(typeof verifySkillBenchmarkVerdict, "function");
+  assert.equal(NODETRACE_GRAPH_EVENT_TYPES.length, 7);
+  assert.equal(typeof compileStageExecutionGraph, "function");
+  assert.equal(typeof deriveRunnableFrontier, "function");
+  assert.equal(typeof sealExecutionEdgeBinding, "function");
 });
 
 test("published metadata cannot silently drop attestation and evidence-finalization surfaces", async () => {
@@ -98,6 +108,11 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     types: "./src/managed-evidence-capture.d.mts",
     import: "./src/managed-evidence-capture.mjs",
     default: "./src/managed-evidence-capture.mjs",
+  });
+  assert.deepEqual(packageJson.exports["./execution-graph"], {
+    types: "./src/execution-graph.d.mts",
+    import: "./src/execution-graph.mjs",
+    default: "./src/execution-graph.mjs",
   });
   assert.deepEqual(packageJson.exports["./builder-gym"], {
     types: "./src/builder-gym.d.mts",

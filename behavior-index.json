@@ -3,13 +3,13 @@
   "generatedBy": "src/lib/behavior-index.mjs",
   "regenerate": "npm run behavior:index",
   "counts": {
-    "declared": 5,
-    "mapped": 5,
+    "declared": 6,
+    "mapped": 6,
     "unmapped": 0,
-    "verified": 5,
+    "verified": 6,
     "partial": 0,
     "unverified": 0,
-    "orphanAnnotations": 18
+    "orphanAnnotations": 24
   },
   "behaviors": [
     {
@@ -113,7 +113,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 443
+          "line": 452
         }
       ],
       "supporting": [
@@ -234,6 +234,74 @@
           "scenario": "aliases-preserve-behavior",
           "file": "test/motion-portability.test.mjs",
           "line": 168
+        }
+      ],
+      "implementationGaps": [],
+      "verificationGaps": []
+    },
+    {
+      "behaviorId": "runtime.stage-graph",
+      "statement": "The current Caseflow stage compiles deterministically into verified edge-bound work, and only non-conflicting nodes with valid authority enter the runnable frontier.",
+      "implementationState": "mapped",
+      "verificationState": "verified",
+      "owners": [
+        {
+          "file": "src/lib/execution-graph.mjs",
+          "symbol": "compileStageExecutionGraph",
+          "line": 125
+        }
+      ],
+      "supporting": [
+        {
+          "file": "src/lib/execution-graph.mjs",
+          "symbol": "verifyExecutionEdgeBinding",
+          "line": 342
+        },
+        {
+          "file": "src/lib/execution-graph.mjs",
+          "symbol": "deriveRunnableFrontier",
+          "line": 432
+        }
+      ],
+      "requiredScenarios": [
+        "deterministic-current-stage-only",
+        "overlapping-writes-excluded",
+        "mutated-bindings-rejected",
+        "stale-stage-blocked",
+        "protected-authority-fails-closed"
+      ],
+      "provenScenarios": [
+        "deterministic-current-stage-only",
+        "overlapping-writes-excluded",
+        "mutated-bindings-rejected",
+        "stale-stage-blocked",
+        "protected-authority-fails-closed"
+      ],
+      "verifiedBy": [
+        {
+          "scenario": "deterministic-current-stage-only",
+          "file": "test/execution-graph.test.mjs",
+          "line": 90
+        },
+        {
+          "scenario": "overlapping-writes-excluded",
+          "file": "test/execution-graph.test.mjs",
+          "line": 129
+        },
+        {
+          "scenario": "mutated-bindings-rejected",
+          "file": "test/execution-graph.test.mjs",
+          "line": 176
+        },
+        {
+          "scenario": "stale-stage-blocked",
+          "file": "test/execution-graph.test.mjs",
+          "line": 256
+        },
+        {
+          "scenario": "protected-authority-fails-closed",
+          "file": "test/execution-graph.test.mjs",
+          "line": 386
         }
       ],
       "implementationGaps": [],
@@ -947,7 +1015,7 @@
           {
             "scenario": "entrypoint-surface-stable",
             "file": "test/public-api.test.mjs",
-            "line": 42
+            "line": 48
           }
         ],
         "namedTestFiles": [
@@ -1040,7 +1108,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 444
+            "line": 453
           }
         ],
         "namedSourceFiles": [
@@ -1078,6 +1146,11 @@
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
       "line": 368
+    },
+    {
+      "behaviorId": "inv:stage-local-execution-graph",
+      "file": "src/lib/execution-graph.mjs",
+      "line": 126
     },
     {
       "behaviorId": "inv:canonical-promotion-requires-verified-approval",
@@ -1133,6 +1206,31 @@
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
       "line": 104
+    },
+    {
+      "behaviorId": "inv:stage-local-execution-graph",
+      "file": "test/execution-graph.test.mjs",
+      "line": 91
+    },
+    {
+      "behaviorId": "inv:stage-local-execution-graph",
+      "file": "test/execution-graph.test.mjs",
+      "line": 130
+    },
+    {
+      "behaviorId": "inv:stage-local-execution-graph",
+      "file": "test/execution-graph.test.mjs",
+      "line": 177
+    },
+    {
+      "behaviorId": "inv:stage-local-execution-graph",
+      "file": "test/execution-graph.test.mjs",
+      "line": 257
+    },
+    {
+      "behaviorId": "inv:stage-local-execution-graph",
+      "file": "test/execution-graph.test.mjs",
+      "line": 387
     },
     {
       "behaviorId": "inv:journey-contract-self-verifies",

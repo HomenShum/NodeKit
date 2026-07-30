@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:stage-local-execution-graph",
+  "kind": "test",
+  "artifactRef": "evolution/artifacts/stage-local-execution-graph.md",
+  "sha256": "ef8b20b3c0d179819883de51fcda3372b8d052f856fbec60c11422e73f3fd48e",
+  "sourceCommit": "634e629e2661f8b5d5ec96a86a4a02bf1ce6d6d0",
+  "generatedAt": "2026-07-29T17:38:36-07:00",
+  "command": "node --test test/execution-graph.test.mjs test/public-api.test.mjs && npm test && npm run typecheck:public && npm run reference:schemas:check",
+  "environment": {
+    "repository": "HomenShum/node-platform",
+    "targetedTests": "12 passed",
+    "repositoryTests": "536 passed",
+    "componentTests": "8 passed",
+    "platform": "Windows"
+  },
+  "verifiesInvariantIds": [
+    "inv:stage-local-execution-graph"
+  ],
+  "result": "pass"
+}
