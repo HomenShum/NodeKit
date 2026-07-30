@@ -1,0 +1,32 @@
+{
+  "desktop-light": {
+    "characterSet": "UTF-8",
+    "title": "NodeKit governance graph",
+    "graphCount": 9,
+    "selectedTitle": "Restore baseline",
+    "mode": "AUTO PROMOTE WITH ROLLBACK",
+    "pageOverflow": false,
+    "graphScrollable": false,
+    "referenceLinks": 3
+  },
+  "desktop-dark": {
+    "characterSet": "UTF-8",
+    "title": "NodeKit governance graph",
+    "graphCount": 9,
+    "selectedTitle": "Restore baseline",
+    "mode": "AUTO PROMOTE WITH ROLLBACK",
+    "pageOverflow": false,
+    "graphScrollable": false,
+    "referenceLinks": 3
+  },
+  "mobile-light": {
+    "characterSet": "UTF-8",
+    "title": "NodeKit governance graph",
+    "graphCount": 9,
+    "selectedTitle": "Restore baseline",
+    "mode": "AUTO PROMOTE WITH ROLLBACK",
+    "pageOverflow": false,
+    "graphScrollable": true,
+    "referenceLinks": 3
+  }
+}

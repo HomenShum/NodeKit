@@ -1,0 +1,158 @@
+schemaVersion: nodekit.reference-observation-bundle/v1
+licensePolicy:
+  download: false
+  cache: false
+  ragIndexing: false
+  displayThumbnail: true
+  durableContent: analysis-only
+observations:
+  - id: obs-mobbin-n8n-run-evaluation
+    source:
+      url: https://mobbin.com/screens/8e2ed125-52a7-457f-9831-caadfc788629
+      app: n8n
+      surface: run-evaluation
+      capturedVia: mobbin-live
+    firstSeenAt: 2026-07-30
+    lastVerifiedAt: 2026-07-30
+    facts:
+      - id: f1
+        kind: relationship
+        subject: run summary
+        property: placement
+        value: above the test-case detail table
+        unit: none
+        locatorDescription: horizontal metric strip directly under the run title
+      - id: f2
+        kind: count
+        subject: run summary
+        property: visible metrics
+        value: 7
+        unit: metrics
+        locatorDescription: bordered strip containing total cases through correctness
+      - id: f3
+        kind: relationship
+        subject: test-case status
+        property: encoding
+        value: green icon plus Success text
+        unit: none
+        locatorDescription: first data row under All test cases
+      - id: f4
+        kind: relationship
+        subject: run detail
+        property: density
+        value: one summary strip plus one primary table
+        unit: regions
+        locatorDescription: main content column excluding navigation
+    problemTags: [run-status-at-a-glance, dense-proof-scan]
+    intentTags: [inspect-run, compare-output]
+    layoutTags: [summary-over-detail, table]
+    interactionTags: [read-first]
+  - id: obs-mobbin-stackai-run-detail
+    source:
+      url: https://mobbin.com/screens/bb0174f4-60aa-4e30-ac5f-73679b160f38
+      app: StackAI
+      surface: run-detail
+      capturedVia: mobbin-live
+    firstSeenAt: 2026-07-30
+    lastVerifiedAt: 2026-07-30
+    facts:
+      - id: f1
+        kind: count
+        subject: run flow
+        property: visible steps
+        value: 4
+        unit: steps
+        locatorDescription: rows labeled Files, Text Input, OpenAI, and Output
+      - id: f2
+        kind: relationship
+        subject: selected run
+        property: layout
+        value: flow timeline left and fixed detail inspector right
+        unit: columns
+        locatorDescription: main content region beneath Run Details
+      - id: f3
+        kind: measurement
+        subject: detail inspector
+        property: width share
+        value: 29
+        unit: percent-of-content-width
+        locatorDescription: right column beginning at the General and Success tabs
+      - id: f4
+        kind: relationship
+        subject: per-step status
+        property: encoding
+        value: green circular icon plus horizontal duration bar
+        unit: none
+        locatorDescription: each flow-progress row
+      - id: f5
+        kind: relationship
+        subject: run metadata
+        property: grouping
+        value: disclosure rows in the right inspector
+        unit: none
+        locatorDescription: General tab from Run ID through Input
+    problemTags: [selected-node-context, progressive-detail, latency-scan]
+    intentTags: [inspect-step, diagnose-run]
+    layoutTags: [canvas-plus-inspector, timeline]
+    interactionTags: [select-to-inspect, disclosure]
+  - id: obs-mobbin-github-failed-workflow
+    source:
+      url: https://mobbin.com/screens/0690bb8b-3bbb-45be-9dfa-8cef91e2956f
+      app: GitHub
+      surface: failed-workflow
+      capturedVia: mobbin-live
+    firstSeenAt: 2026-07-30
+    lastVerifiedAt: 2026-07-30
+    facts:
+      - id: f1
+        kind: relationship
+        subject: failed run
+        property: hierarchy
+        value: failure title then summary card then workflow canvas then annotations
+        unit: ordered-regions
+        locatorDescription: main column from Create static.yml heading downward
+      - id: f2
+        kind: count
+        subject: run summary
+        property: visible primary fields
+        value: 5
+        unit: fields
+        locatorDescription: summary card containing trigger, status, duration, billable time, and artifacts
+      - id: f3
+        kind: relationship
+        subject: workflow node
+        property: failure encoding
+        value: red icon and red node border
+        unit: none
+        locatorDescription: deploy node inside static.yml canvas
+      - id: f4
+        kind: relationship
+        subject: failure explanation
+        property: placement
+        value: annotation list below the graph
+        unit: none
+        locatorDescription: Annotations card directly under workflow canvas
+    problemTags: [failure-explanation, graph-status-at-a-glance]
+    intentTags: [diagnose-failure, rerun-job]
+    layoutTags: [summary-graph-annotations]
+    interactionTags: [select-job, rerun]
+rules:
+  - id: rule-governance-graph-1
+    statement: A governance graph is scannable when a bounded status strip precedes the graph and exact explanations follow it.
+    mechanismHypothesis: Operators decide whether to inspect the topology only after reading the decision state and can verify a failed branch without opening every node.
+    confidence: high
+    appliesWhen: [one candidate has one current governance decision]
+    doesNotApplyWhen: [the operator is comparing more than four candidates]
+    evidence:
+      - obs-mobbin-n8n-run-evaluation/f1
+      - obs-mobbin-github-failed-workflow/f1
+      - obs-mobbin-github-failed-workflow/f4
+  - id: rule-governance-graph-2
+    statement: A selected graph node should update a fixed inspector instead of expanding controls inside the canvas.
+    mechanismHypothesis: Stable graph geometry preserves causal scan order while the inspector provides detail on demand.
+    confidence: high
+    appliesWhen: [the graph contains five or more stages]
+    doesNotApplyWhen: [every node has only a label and status]
+    evidence:
+      - obs-mobbin-stackai-run-detail/f2
+      - obs-mobbin-stackai-run-detail/f5

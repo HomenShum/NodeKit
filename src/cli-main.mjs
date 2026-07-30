@@ -113,6 +113,10 @@ import {
   planLegacySessionMigration,
   verifyLegacySessionMigration,
 } from "./lib/native-agent-migration.mjs";
+import {
+  createPr32GovernanceScenario,
+  renderGovernanceGraphHtml,
+} from "./lib/governance.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -163,6 +167,7 @@ Usage:
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
+  nodekit governance visualize [--scenario pr32] [--out <governance.html>] [--json]
   nodekit graph import [--repo-root <path>] [--graph-dir <path>] [--repo-id <id>] [--commit <sha>] [--json]
   nodekit graph init [--repo-root <path>] [--graph-id <id>] [--owner-id <id>] [--json]
   nodekit graph ingest --input <file> [--repo-root <path>] [--json]
@@ -634,6 +639,52 @@ async function runDashboard(parsed) {
   await writeFile(output, markdown, "utf8");
   console.log(`WROTE ${output}`);
   if (results.some((result) => !result.passed)) process.exitCode = 1;
+}
+
+async function runGovernanceVisualize(parsed) {
+  const scenario = String(parsed.options.scenario ?? "pr32");
+  if (scenario !== "pr32") {
+    throw new Error(`governance visualize: unsupported scenario ${scenario}`);
+  }
+  const output = path.resolve(String(parsed.options.out ?? path.join(".tmp", "governance-graph.html")));
+  const bundle = createPr32GovernanceScenario();
+  const html = renderGovernanceGraphHtml({
+    ...bundle,
+    referenceProvenance: [
+      {
+        label: "n8n run evaluation",
+        url: "https://mobbin.com/screens/8e2ed125-52a7-457f-9831-caadfc788629",
+        factIds: ["obs-mobbin-n8n-run-evaluation/f1", "obs-mobbin-n8n-run-evaluation/f3"],
+      },
+      {
+        label: "StackAI run detail",
+        url: "https://mobbin.com/screens/bb0174f4-60aa-4e30-ac5f-73679b160f38",
+        factIds: ["obs-mobbin-stackai-run-detail/f2", "obs-mobbin-stackai-run-detail/f4"],
+      },
+      {
+        label: "GitHub failed workflow",
+        url: "https://mobbin.com/screens/0690bb8b-3bbb-45be-9dfa-8cef91e2956f",
+        factIds: ["obs-mobbin-github-failed-workflow/f1", "obs-mobbin-github-failed-workflow/f4"],
+      },
+    ],
+  });
+  await mkdir(path.dirname(output), { recursive: true });
+  await writeFile(output, html, "utf8");
+  const receiptPath = output.replace(/\.html$/i, ".json");
+  await writeFile(receiptPath, `${JSON.stringify(bundle, null, 2)}\n`, "utf8");
+  if (parsed.options.json) {
+    console.log(JSON.stringify({
+      mode: bundle.riskAssessment.mode,
+      ready: bundle.promotionReadiness.ready,
+      html: output,
+      receipt: receiptPath,
+      graphDigest: bundle.graph.graphDigest,
+    }, null, 2));
+    return;
+  }
+  console.log(`GOVERNANCE ${bundle.riskAssessment.mode} ready=${bundle.promotionReadiness.ready}`);
+  console.log(`WROTE ${output}`);
+  console.log(`WROTE ${receiptPath}`);
 }
 
 async function runDoctor(parsed) {
@@ -1866,6 +1917,10 @@ async function main() {
   }
   if (first === "dashboard") {
     await runDashboard(parsed);
+    return;
+  }
+  if (first === "governance" && second === "visualize") {
+    await runGovernanceVisualize(parsed);
     return;
   }
   if (first === "graph" && second === "import") {

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.governance-risk-assessment.v1.schema.json",
+  "title": "Deterministic risk and authority classification for a NodeKit change",
+  "type": "object",
+  "required": [
+    "schemaVersion", "assessmentId", "changeRef", "candidateDigest", "facts", "mode",
+    "decidingRiskInputs", "codeMayContinue", "promotionRequiresHuman",
+    "protectedActionMayRun", "riskAssessmentDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.governance-risk-assessment/v1" },
+    "assessmentId": { "$ref": "#/$defs/ref" },
+    "changeRef": { "$ref": "#/$defs/ref" },
+    "candidateDigest": { "$ref": "#/$defs/hash" },
+    "facts": {
+      "type": "object",
+      "required": ["effects", "evidence", "context"],
+      "properties": {
+        "effects": { "$ref": "#/$defs/booleanMap" },
+        "evidence": { "$ref": "#/$defs/booleanMap" },
+        "context": { "$ref": "#/$defs/booleanMap" }
+      },
+      "additionalProperties": false
+    },
+    "mode": {
+      "enum": [
+        "AUTO_CONTINUE", "AUTO_PROMOTE_WITH_ROLLBACK",
+        "DEFERRED_HUMAN_REVIEW", "PRE_ACTION_HUMAN_GATE"
+      ]
+    },
+    "decidingRiskInputs": {
+      "type": "array", "maxItems": 64, "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "codeMayContinue": { "type": "boolean" },
+    "promotionRequiresHuman": { "type": "boolean" },
+    "protectedActionMayRun": { "type": "boolean" },
+    "riskAssessmentDigest": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:sha256:[a-f0-9]{64}$" },
+    "booleanMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "boolean" }
+    }
+  }
+}

@@ -1,0 +1,3 @@
+GOVERNANCE AUTO_PROMOTE_WITH_ROLLBACK ready=true
+WROTE D:\VSCode Projects\node-platform-governance-graph-20260730\.tmp\governance-graph.html
+WROTE D:\VSCode Projects\node-platform-governance-graph-20260730\.tmp\governance-graph.json

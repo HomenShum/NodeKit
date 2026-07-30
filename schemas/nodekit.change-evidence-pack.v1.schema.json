@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.change-evidence-pack.v1.schema.json",
+  "title": "Exact before and after evidence bound to one NodeKit candidate",
+  "type": "object",
+  "required": [
+    "schemaVersion", "packId", "changeRef", "baselineDigest", "candidateDigest",
+    "materialFiles", "before", "after", "ui", "rollbackTarget", "evidencePackDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.change-evidence-pack/v1" },
+    "packId": { "$ref": "#/$defs/ref" },
+    "changeRef": { "$ref": "#/$defs/ref" },
+    "baselineDigest": { "$ref": "#/$defs/hash" },
+    "candidateDigest": { "$ref": "#/$defs/hash" },
+    "materialFiles": {
+      "type": "array", "maxItems": 512, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/path" }
+    },
+    "before": {
+      "type": "array", "minItems": 1, "maxItems": 32,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "after": {
+      "type": "array", "minItems": 1, "maxItems": 32,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "ui": {
+      "type": "object",
+      "required": ["changed", "mediaRefs", "notApplicableReason"],
+      "properties": {
+        "changed": { "type": "boolean" },
+        "mediaRefs": {
+          "type": "array", "maxItems": 16, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/ref" }
+        },
+        "notApplicableReason": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "changed": { "const": true } }, "required": ["changed"] },
+          "then": { "properties": { "mediaRefs": { "minItems": 1 }, "notApplicableReason": { "type": "null" } } },
+          "else": { "properties": { "mediaRefs": { "maxItems": 0 }, "notApplicableReason": { "type": "string" } } }
+        }
+      ]
+    },
+    "rollbackTarget": {
+      "type": "object",
+      "required": ["ref", "digest"],
+      "properties": {
+        "ref": { "$ref": "#/$defs/ref" },
+        "digest": { "$ref": "#/$defs/hash" }
+      },
+      "additionalProperties": false
+    },
+    "evidencePackDigest": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:sha256:[a-f0-9]{64}$" },
+    "path": {
+      "type": "string", "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["ref", "digest", "kind", "label"],
+      "properties": {
+        "ref": { "$ref": "#/$defs/ref" },
+        "digest": { "$ref": "#/$defs/hash" },
+        "kind": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

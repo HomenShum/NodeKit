@@ -1,0 +1,4 @@
+﻿
+> @homenshum/nodekit@0.2.1 typecheck:public
+> tsc -p tsconfig.public.json
+

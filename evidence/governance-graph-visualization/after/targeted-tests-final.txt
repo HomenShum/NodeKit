@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: founder ships a reversible architecture candidate without an architecture-only interruption
+ok 1 - founder ships a reversible architecture candidate without an architecture-only interruption
+  ---
+  duration_ms: 544.6598
+  type: 'test'
+  ...
+# Subtest: native-session operator can continue isolated engineering but cannot cross an authority boundary
+ok 2 - native-session operator can continue isolated engineering but cannot cross an authority boundary
+  ---
+  duration_ms: 0.9108
+  type: 'test'
+  ...
+# Subtest: product designer gets showcase-ready deferred review for a materially subjective UI change
+ok 3 - product designer gets showcase-ready deferred review for a materially subjective UI change
+  ---
+  duration_ms: 0.6047
+  type: 'test'
+  ...
+# Subtest: missing rollback proof permits evidence work but never rounds up to promotion
+ok 4 - missing rollback proof permits evidence work but never rounds up to promotion
+  ---
+  duration_ms: 0.7601
+  type: 'test'
+  ...
+# Subtest: SRE forced health failure triggers bounded rollback and proves the exact baseline
+ok 5 - SRE forced health failure triggers bounded rollback and proves the exact baseline
+  ---
+  duration_ms: 2.3111
+  type: 'test'
+  ...
+# Subtest: healthy sustained observation performs no rollback mutation
+ok 6 - healthy sustained observation performs no rollback mutation
+  ---
+  duration_ms: 0.8453
+  type: 'test'
+  ...
+# Subtest: degraded rollback dependency times out honestly instead of reporting success
+ok 7 - degraded rollback dependency times out honestly instead of reporting success
+  ---
+  duration_ms: 7.0599
+  type: 'test'
+  ...
+# Subtest: concurrent and sustained classification stays deterministic without accumulated state
+ok 8 - concurrent and sustained classification stays deterministic without accumulated state
+  ---
+  duration_ms: 172.7982
+  type: 'test'
+  ...
+# Subtest: human feedback remains scoped evidence and validates without becoming policy
+ok 9 - human feedback remains scoped evidence and validates without becoming policy
+  ---
+  duration_ms: 61.812
+  type: 'test'
+  ...
+# Subtest: operator sees a content-bound graph, not a decorative diagram
+ok 10 - operator sees a content-bound graph, not a decorative diagram
+  ---
+  duration_ms: 10.1214
+  type: 'test'
+  ...
+# Subtest: adversarial graph references cannot inject an executable URL
+ok 11 - adversarial graph references cannot inject an executable URL
+  ---
+  duration_ms: 1.449
+  type: 'test'
+  ...
+# Subtest: adversarial graph projections remain bounded and structurally valid
+ok 12 - adversarial graph projections remain bounded and structurally valid
+  ---
+  duration_ms: 1.0692
+  type: 'test'
+  ...
+# Subtest: evidence pack rejects a changed UI with no screenshot or clip reference
+ok 13 - evidence pack rejects a changed UI with no screenshot or clip reference
+  ---
+  duration_ms: 0.5365
+  type: 'test'
+  ...
+# Subtest: promotion receipt keeps deferred review and pre-action gates blocked
+ok 14 - promotion receipt keeps deferred review and pre-action gates blocked
+  ---
+  duration_ms: 0.7614
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1007.7403

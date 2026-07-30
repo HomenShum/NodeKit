@@ -1,0 +1,4 @@
+﻿
+> @homenshum/nodekit@0.2.1 build:component
+> node scripts/clean-component-dist.mjs && tsc --project ./tsconfig.component.json && node scripts/copy-component-types.mjs
+

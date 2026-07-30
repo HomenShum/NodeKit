@@ -109,7 +109,10 @@ Graph execution is eligible for broader rollout only when every predeclared gate
 - either median active wall-clock at least 20% lower, or at least 30% more confirmed defects with
   no increase in false findings.
 
-The experiment verdict is evidence; it is not automatic promotion authority.
+The experiment verdict is evidence; it is not automatic promotion authority. A separate
+`nodekit.promotion-readiness-receipt/v1` may derive `AUTO_PROMOTE_WITH_ROLLBACK` only from a
+standing policy, verified exact rollback, configured observation checks, and NodeProof. The
+execution graph never grants that authority to itself.
 
 ## Deliberate exclusions
 
@@ -120,4 +123,5 @@ The experiment verdict is evidence; it is not automatic promotion authority.
 - No fresh-context claim of independence.
 - No unqualified cheap-model routing.
 - No orchestrator edits to canonical records.
-- No automatic promotion.
+- No builder-controlled automatic promotion. Risk-derived promotion under a pre-existing standing
+  policy is documented in `docs/GOVERNANCE_GRAPH.md`.
