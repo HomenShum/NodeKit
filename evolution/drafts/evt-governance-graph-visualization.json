@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:governance-graph-visualization",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "474f374d7b6dc08f73da96b29c4294b70d3228fb",
+    "occurredAt": "2026-07-30T21:05:24.590Z"
+  },
+  "track": "architecture",
+  "category": "security",
+  "challenge": "Blanket architecture approval interrupted reversible NodeKit work and hid the decision path",
+  "resolution": "Derive governance from protected effects and exact proof, bind rollback and UI evidence, and expose a disposable Mobbin-informed graph while Caseflow remains canonical",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:governance-graph-visualization"
+  ],
+  "predecessorIds": [
+    "evt:exact-candidate-contract"
+  ],
+  "knownLimitations": [],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

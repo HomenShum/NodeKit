@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "nodekit.evolution-deferred-review/v1",
+  "id": "deferred-review:sha256:13371d82c9abb7b24eee20df2a1cb8feeb4450328bf2e741c4a92c2f165e48f1",
+  "events": [
+    {
+      "eventId": "evt:governance-graph-visualization",
+      "draftRef": "evolution/drafts/evt-governance-graph-visualization.json",
+      "draftDigest": "45ef999cf2754dd3b2f547a4a8a52c799a5cb652ac72b563d391b4097887a55d",
+      "sourceCommit": "474f374d7b6dc08f73da96b29c4294b70d3228fb"
+    }
+  ],
+  "range": {
+    "from": "d6ed7f085396e8d79a326e63a6f72f523c531caf",
+    "reviewedTo": "474f374d7b6dc08f73da96b29c4294b70d3228fb"
+  },
+  "risk": {
+    "classification": "reversible",
+    "effects": {
+      "destructiveWrite": false,
+      "credentialOrAuthorityChange": false,
+      "irreversibleMigration": false,
+      "materialSpend": false,
+      "externalCommunication": false,
+      "legalOrComplianceCommitment": false,
+      "unverifiedRollback": false
+    }
+  },
+  "coverage": {
+    "materialFiles": [
+      "schemas/nodekit.change-evidence-pack.v1.schema.json",
+      "schemas/nodekit.governance-risk-assessment.v1.schema.json",
+      "schemas/nodekit.human-feedback-event.v1.schema.json",
+      "schemas/nodekit.promotion-readiness-receipt.v1.schema.json",
+      "schemas/nodekit.rollback-receipt.v1.schema.json",
+      "src/cli-main.mjs",
+      "src/governance.d.mts",
+      "src/governance.mjs",
+      "src/index.d.mts",
+      "src/index.mjs",
+      "src/lib/governance.mjs"
+    ]
+  },
+  "evidence": {
+    "before": [
+      {
+        "ref": "evidence/governance-graph-visualization/before/cli.txt",
+        "sha256": "83bfed34d60df75e60c2374e2f35aab5b30b80804b1360f8a003569096c5fa97",
+        "kind": "live-io"
+      }
+    ],
+    "after": [
+      {
+        "ref": "evidence/governance-graph-visualization/after/cli-final.txt",
+        "sha256": "6e0f66d09aff7f7c803dad900b81a9c967f9319a9d2a0183aea6ad1c951b3fc3",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/governance-graph-visualization/comparison.md",
+        "sha256": "7329ae2a02f52a8cf60856eb87f42ac3988842e3d4f330cc9ac12005da68adf7",
+        "kind": "journey-card"
+      },
+      {
+        "ref": "evidence/governance-graph-visualization/after/targeted-tests-final.txt",
+        "sha256": "9064213e6f715e51b2ea8dd16f95cb0364e6bbed887fafeb51c495784f5760ab",
+        "kind": "test-log"
+      },
+      {
+        "ref": "evidence/governance-graph-visualization/after/desktop-light.png",
+        "sha256": "1e33472018ac249baca59da3e20dc62dd24abef307c94d240e3421d4c1a2c831",
+        "kind": "ui-screenshot"
+      },
+      {
+        "ref": "evidence/governance-graph-visualization/after/desktop-dark.png",
+        "sha256": "cecc24e3a10cc22245187176cdfe39f26e19db6a5c742eecf8fff943f550c4c5",
+        "kind": "ui-screenshot"
+      },
+      {
+        "ref": "evidence/governance-graph-visualization/after/mobile-light.png",
+        "sha256": "7f1abf8fb5d203188ccf2e3e7ed8d671cd25c5fa59a224f5dcd88d90640125eb",
+        "kind": "ui-screenshot"
+      }
+    ]
+  },
+  "uiSurface": {
+    "changed": true,
+    "mediaRequired": true,
+    "mediaRefs": [
+      "evidence/governance-graph-visualization/after/desktop-light.png",
+      "evidence/governance-graph-visualization/after/desktop-dark.png",
+      "evidence/governance-graph-visualization/after/mobile-light.png"
+    ]
+  },
+  "rollback": {
+    "targetCommit": "d6ed7f085396e8d79a326e63a6f72f523c531caf",
+    "strategy": "git-revert-range",
+    "verificationRefs": [
+      "evidence/governance-graph-visualization/after/targeted-tests-final.txt"
+    ]
+  },
+  "review": {
+    "status": "deferred-human-review",
+    "feedbackChannel": "pull-request"
+  },
+  "receiptDigest": "ec60e685f369792f82e836ca3b099a00070450ce69c5e6dc1a5d5f00b0adffed"
+}
