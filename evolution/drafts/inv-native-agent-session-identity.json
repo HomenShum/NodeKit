@@ -1,7 +1,7 @@
 {
   "schemaVersion": "nodekit.invariant-claim/v1",
   "id": "inv:native-agent-session-identity",
-  "statement": "A native agent may reconnect only to the exact persisted owner/workspace/agent session authority, and may rotate only one generation through an unexpired exact-snapshot grant whose token is consumed atomically once; continuity metadata can neither advance Caseflow nor assert review or NodeProof authority.",
+  "statement": "A native agent may resume only from the exact Caseflow-canonical workspace, hashed provider session, repository, trusted receipt, and verified checkpoint frontier; RESUMED requires an operational lease and a new durable checkpoint, while graph projections and reference indexes cannot authorize continuity.",
   "scope": {
     "applications": [
       "NodeKit consumers"
@@ -10,9 +10,11 @@
       "@homenshum/nodekit"
     ],
     "surfaces": [
-      "native-agent identity snapshot",
-      "continuation grant",
-      "session resolver",
+      "native workspace artifact",
+      "native agent session artifact",
+      "native session checkpoint artifact",
+      "five-operation session API",
+      "legacy migration CLI",
       "public package entrypoint"
     ]
   },

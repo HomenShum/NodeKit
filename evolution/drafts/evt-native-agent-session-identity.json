@@ -9,9 +9,9 @@
   },
   "track": "architecture",
   "category": "runtime",
-  "challenge": "Stateless MCP tasks and native desktop, scheduled, and inbox agents could resume after disconnection, but NodeKit had no portable owner-scoped contract proving which native agent, workspace, host, credential, and session generation was authorized to continue.",
-  "observedFailure": "A label or fresh process could be mistaken for the same agent across restarts or hosts, while a continuity record could accidentally be treated as graph, review, or verdict authority.",
-  "resolution": "Added immutable native-agent identity snapshots, exact host and credential bindings, single-generation rotation, short-lived content-addressed continuation grants, atomic consumed-once token enforcement with bounded abortable execution, explicit degraded read-only behavior, public schemas/types, and scenario-based replay and sustained-lineage tests. Caseflow, the stage-local graph, reviewer separation, and NodeProof retain their existing authority.",
+  "challenge": "Stateless MCP tasks and native desktop, scheduled, and inbox agents could reconnect after disconnection, but NodeKit had no Caseflow-canonical contract proving the exact workspace, provider-session hash, repository, receipt, and checkpoint frontier authorized to continue.",
+  "observedFailure": "The first draft duplicated authority in a combined identity snapshot and continuation grant, persisted caller-owned status, generation, host, and credential concepts, and could drift from Caseflow and the actual evidence chain.",
+  "resolution": "Replaced the combined snapshot and grant with exactly three canonical Caseflow artifacts: native workspace, native agent session, and native session checkpoint. Added five public operations, authenticated owner derivation, exact repository measurement, private raw-provider identity, nonce-bound trusted receipts, leases, NodeTrace events, derived status, a required post-resume checkpoint, deterministic deduplication, and a bounded non-public migration CLI with verified rollback-before-retirement. The execution graph remains compiled and disposable; NodeProof remains a verifier.",
   "assumptionIds": [],
   "invariantIds": [
     "inv:native-agent-session-identity"
@@ -23,9 +23,7 @@
     "evt:caseflow-idempotent-retries"
   ],
   "knownLimitations": [
-    "Embedding applications own durable storage, atomic token-consumption transactions, and bounded retention.",
-    "Host and credential references require consumer-side issuer or attestation verification.",
-    "A provider outage permits only read-only display of a previously verified snapshot.",
+    "Provider adapters and repository measurement implementations require consumer-specific live proofs.",
     "Consumer integration and production proofs remain separate from this portable package proof.",
     "Canonical promotion requires a separately verified named-human approval."
   ],
