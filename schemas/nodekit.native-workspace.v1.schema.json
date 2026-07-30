@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.native-workspace.v1.schema.json",
+  "title": "NodeKit native workspace v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "workspaceId",
+    "ownerRef",
+    "caseId",
+    "repository",
+    "writeMode",
+    "authorityReceiptRef",
+    "createdAt",
+    "artifactRef",
+    "artifactDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.native-workspace/v1" },
+    "workspaceId": { "$ref": "#/$defs/workspaceId" },
+    "ownerRef": { "$ref": "#/$defs/identifier" },
+    "caseId": { "$ref": "#/$defs/identifier" },
+    "repository": { "$ref": "#/$defs/repository" },
+    "writeMode": {
+      "enum": ["read-only", "direct-worktree", "isolated-worktree"]
+    },
+    "authorityReceiptRef": { "$ref": "#/$defs/identifier" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "artifactRef": {
+      "type": "string",
+      "pattern": "^native-workspace:sha256:[a-f0-9]{64}$"
+    },
+    "artifactDigest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^workspace:sha256:[a-f0-9]{64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalRemote", "commit", "treeHash", "dirty"],
+      "properties": {
+        "canonicalRemote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "commit": { "$ref": "#/$defs/gitObject" },
+        "treeHash": { "$ref": "#/$defs/gitObject" },
+        "dirty": { "type": "boolean" },
+        "dirtyWorkingTreeHash": { "$ref": "#/$defs/sha256" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "dirty": { "const": true } } },
+          "then": { "required": ["dirtyWorkingTreeHash"] },
+          "else": { "not": { "required": ["dirtyWorkingTreeHash"] } }
+        }
+      ]
+    },
+    "gitObject": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    }
+  }
+}

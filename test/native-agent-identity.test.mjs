@@ -1,489 +1,517 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import test from "node:test";
 
+import { contentHash, createMemoryCaseflow } from "../src/lib/caseflow.mjs";
 import {
-  NativeAgentIdentityError,
-  createNativeAgentIdentitySnapshot,
-  issueNativeAgentContinuationGrant,
-  resolveNativeAgentSessionIdentity,
-  verifyNativeAgentContinuationGrant,
-  verifyNativeAgentIdentitySnapshot,
+  NativeAgentSessionError,
+  session_checkpoint,
+  session_resume,
+  session_start,
+  session_status,
+  workspace_bind,
 } from "../src/lib/native-agent-identity.mjs";
 
-const timestamp = (seconds) => `2026-07-30T00:00:${String(seconds).padStart(2, "0")}.000Z`;
+const hash = (value) => contentHash({ value });
+const repository = Object.freeze({
+  canonicalRemote: "https://github.com/example/native-session.git",
+  commit: "a".repeat(40),
+  treeHash: "b".repeat(40),
+  dirty: true,
+  dirtyWorkingTreeHash: hash("dirty-tree"),
+});
 
-function candidate(overrides = {}) {
+function nonceHash(operationNonce) {
+  return contentHash({
+    schemaVersion: "nodekit.native-operation-nonce/v1",
+    nonce: operationNonce,
+  });
+}
+
+function receipt(kind, operationNonce) {
+  const operationNonceHash = nonceHash(operationNonce);
   return {
-    ownerRef: "owner:nodekit",
-    workspaceId: "workspace:nodekit",
-    agentId: "agent:codex",
-    nativeSessionId: "session:1",
-    nativeSessionGeneration: 1,
-    host: {
-      hostId: "host:desktop",
-      instanceId: "host-instance:desktop:1",
-      authorityRef: "authority:desktop-owner",
-    },
-    credential: {
-      credentialRef: "credential:desktop",
-      generation: 1,
-      expiresAt: timestamp(59),
-    },
-    peerId: "peer:nodebench",
+    ref: `receipt:${kind}:${operationNonceHash.slice(0, 16)}`,
+    digest: hash(`${kind}:${operationNonceHash}`),
+    operationNonceHash,
+    verified: true,
+  };
+}
+
+function checkpointOutput(kind, operationNonce, sequence, overrides = {}) {
+  return {
+    resumeCursorHash: hash(`cursor:${sequence}`),
+    repository,
+    traceDigest: hash(`trace:${sequence}`),
+    artifactDigests: [hash(`artifact:${sequence}`)],
+    receipt: receipt(kind, operationNonce),
     ...overrides,
   };
 }
 
-async function rotate(currentSnapshot, overrides = {}, options = {}) {
-  const nextCandidate = candidate({
-    nativeSessionId: `session:${currentSnapshot.nativeSessionGeneration + 1}`,
-    nativeSessionGeneration: currentSnapshot.nativeSessionGeneration + 1,
-    credential: {
-      ...currentSnapshot.credential,
-      generation: currentSnapshot.credential.generation + 1,
+function createLeaseStore() {
+  const held = new Map();
+  return {
+    async acquire({ keys, owner }) {
+      if (keys.some((key) => held.has(key))) return { acquired: false };
+      for (const key of keys) held.set(key, owner);
+      return { acquired: true, keys, owner };
     },
-    ...overrides,
-  });
-  const issued = await issueNativeAgentContinuationGrant({
-    currentSnapshot,
-    candidate: nextCandidate,
-    issuedAt: options.issuedAt ?? timestamp(10),
-    expiresAt: options.expiresAt ?? timestamp(40),
-  });
-  const consumed = options.consumed ?? new Set();
-  const result = await resolveNativeAgentSessionIdentity({
-    providerAvailable: true,
-    currentSnapshot,
-    candidate: nextCandidate,
-    continuation: {
-      token: issued.token,
-      grant: issued.grant,
+    async release(lease) {
+      for (const key of lease.keys ?? []) {
+        if (held.get(key) === lease.owner) held.delete(key);
+      }
     },
-    consumeContinuationToken: async (tokenHash) => {
-      if (consumed.has(tokenHash)) return false;
-      consumed.add(tokenHash);
-      return true;
+    isBusy(key) {
+      return held.has(key);
     },
-    now: options.now ?? timestamp(20),
-  });
-  return { ...result, issued, consumed, nextCandidate };
+    clear() {
+      held.clear();
+    },
+  };
 }
 
-function assertCode(error, code) {
-  assert.ok(error instanceof NativeAgentIdentityError);
-  assert.equal(error.code, code);
-  return true;
-}
-
-// @nodekit-verifies inv:native-agent-session-identity#deterministic-owner-scoped-snapshot
-test("owner creates a deterministic identity snapshot that carries no review or verdict authority", async () => {
-  const first = await createNativeAgentIdentitySnapshot(candidate());
-  const second = await createNativeAgentIdentitySnapshot(candidate());
-
-  assert.deepEqual(first, second);
-  assert.match(first.identityRef, /^native-agent-identity:sha256:[a-f0-9]{64}$/);
-  assert.match(first.snapshotHash, /^[a-f0-9]{64}$/);
-  assert.equal(first.authority.canAssertReviewIndependence, false);
-  assert.equal(first.authority.canIssueNodeProofVerdict, false);
-  assert.equal(first.previousSnapshotHash, undefined);
-
-  const verified = await verifyNativeAgentIdentitySnapshot(first);
-  assert.equal(verified.verified, true);
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#reconnect-does-not-rotate
-test("desktop agent reconnects only to the exact persisted session, host, peer, and credential", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const result = await resolveNativeAgentSessionIdentity({
-    providerAvailable: true,
-    currentSnapshot,
-    candidate: candidate(),
-    now: timestamp(20),
+function createHarness(options = {}) {
+  let tick = 0;
+  const clock = () =>
+    new Date(Date.UTC(2026, 6, 30, 10, 0, tick++)).toISOString();
+  const caseflow = createMemoryCaseflow({
+    ownerId: options.ownerId ?? "owner:authenticated",
+    clock,
   });
-
-  assert.equal(result.status, "ready");
-  assert.equal(result.continuity, "reconnect");
-  assert.equal(result.hostChanged, false);
-  assert.equal(result.writable, true);
-  assert.deepEqual(result.snapshot, currentSnapshot);
-
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: candidate({ nativeSessionId: "session:collision" }),
-      now: timestamp(20),
-    }),
-    (error) => assertCode(error, "native_session_collision"),
-  );
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#rotation-consumes-bound-token-once
-test("scheduled agent rotates with an exact continuation grant and a consumed-once token", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const rotated = await rotate(currentSnapshot);
-
-  assert.equal(rotated.status, "ready");
-  assert.equal(rotated.continuity, "rotate");
-  assert.equal(rotated.hostChanged, false);
-  assert.equal(rotated.snapshot.identityRef, currentSnapshot.identityRef);
-  assert.equal(rotated.snapshot.previousSnapshotHash, currentSnapshot.snapshotHash);
-  assert.equal(rotated.snapshot.nativeSessionGeneration, 2);
-  assert.match(rotated.snapshot.snapshotHash, /^[a-f0-9]{64}$/);
-
-  const verifiedGrant = await verifyNativeAgentContinuationGrant(rotated.issued.grant);
-  assert.equal(verifiedGrant.verified, true);
-  assert.equal(verifiedGrant.grant.currentSnapshotHash, currentSnapshot.snapshotHash);
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#cross-host-handoff-is-explicit
-test("inbox handoff rotates across hosts only when host and credential authority are grant-bound", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const rotated = await rotate(currentSnapshot, {
-    nativeSessionId: "session:headless:2",
-    host: {
-      hostId: "host:headless",
-      instanceId: "host-instance:headless:7",
-      authorityRef: "authority:scheduled-runner",
-    },
-    credential: {
-      credentialRef: "credential:scheduled",
-      generation: 2,
-      expiresAt: timestamp(59),
-    },
-    peerId: "peer:nodekit-inbox",
+  const createdCase = caseflow.createCase({
+    title: "Resume a diligence workspace",
+    primaryJob: "Continue the exact coding-agent session",
+    actor: { type: "user", id: "owner:authenticated" },
   });
-
-  assert.equal(rotated.continuity, "rotate");
-  assert.equal(rotated.hostChanged, true);
-  assert.equal(rotated.snapshot.host.hostId, "host:headless");
-  assert.equal(rotated.snapshot.credential.credentialRef, "credential:scheduled");
-  assert.equal(rotated.snapshot.previousSnapshotHash, currentSnapshot.snapshotHash);
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#stale-collision-and-skip-fail-closed
-test("adversarial generations cannot roll back, collide, or skip lineage", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate({
-    nativeSessionGeneration: 4,
-    nativeSessionId: "session:4",
-    credential: {
-      credentialRef: "credential:desktop",
-      generation: 4,
-      expiresAt: timestamp(59),
+  caseflow.startRun({
+    caseId: createdCase.caseId,
+    stages: [
+      { id: "build", label: "Build", owner: "agent" },
+      { id: "verify", label: "Verify", owner: "reviewer" },
+    ],
+    actor: { type: "system", id: "nodekit" },
+  });
+  const traceEvents = [];
+  const leases = createLeaseStore();
+  const providerSessionIdHash = hash(
+    options.providerIdentity ?? "provider-session-1",
+  );
+  const adapter = {
+    async start({ operationNonce }) {
+      const output = {
+        providerSessionIdHash,
+        adapterVersion: "claude-code-adapter:1.0.0",
+        harnessVersion: "nodekit-harness:1.0.0",
+        creationReceipt: receipt("session-created", operationNonce),
+        initialCheckpoint: checkpointOutput(
+          "initial-checkpoint",
+          operationNonce,
+          0,
+        ),
+        runHandle: "run-handle:start",
+      };
+      return options.startOutput
+        ? options.startOutput(output, operationNonce)
+        : output;
     },
-  }));
-
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: candidate({
-        nativeSessionGeneration: 3,
-        nativeSessionId: "session:3",
-      }),
-      now: timestamp(20),
-    }),
-    (error) => assertCode(error, "native_session_stale"),
-  );
-
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: candidate({
-        nativeSessionGeneration: 4,
-        nativeSessionId: "session:other",
-      }),
-      now: timestamp(20),
-    }),
-    (error) => assertCode(error, "native_session_collision"),
-  );
-
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: candidate({
-        nativeSessionGeneration: 6,
-        nativeSessionId: "session:6",
-      }),
-      now: timestamp(20),
-    }),
-    (error) => assertCode(error, "native_session_generation_gap"),
-  );
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#authority-cannot-drift
-test("owner, workspace, agent, peer, host, and credential authority cannot drift during reconnect", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const attacks = [
-    ["ownerRef", candidate({ ownerRef: "owner:foreign" }), "native_identity_scope_mismatch"],
-    ["workspaceId", candidate({ workspaceId: "workspace:foreign" }), "native_identity_scope_mismatch"],
-    ["agentId", candidate({ agentId: "agent:foreign" }), "native_identity_scope_mismatch"],
-    ["peerId", candidate({ peerId: "peer:foreign" }), "native_peer_mismatch"],
-    [
-      "host",
-      candidate({
-        host: {
-          ...candidate().host,
-          instanceId: "host-instance:desktop:other",
-        },
-      }),
-      "native_host_mismatch",
-    ],
-    [
-      "credential",
-      candidate({
-        credential: {
-          ...candidate().credential,
-          generation: 2,
-        },
-      }),
-      "native_credential_mismatch",
-    ],
-  ];
-
-  for (const [label, nextCandidate, code] of attacks) {
-    await assert.rejects(
-      resolveNativeAgentSessionIdentity({
-        providerAvailable: true,
-        currentSnapshot,
-        candidate: nextCandidate,
-        now: timestamp(20),
-      }),
-      (error) => {
-        assertCode(error, code);
-        return true;
+    async checkpoint({ previousCheckpoint, operationNonce }) {
+      const sequence = previousCheckpoint.sequence + 1;
+      return checkpointOutput("checkpoint", operationNonce, sequence, {
+        paused: options.pauseOnCheckpoint ?? false,
+      });
+    },
+    async resume({ checkpoint, operationNonce }) {
+      if (options.resumeDelayMs) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, options.resumeDelayMs));
+      }
+      const output = {
+        providerSessionIdHash,
+        resumeCursorHash: checkpoint.resumeCursorHash,
+        resumeReceipt: receipt("session-resumed", operationNonce),
+        newCheckpoint: checkpointOutput(
+          "resumed-checkpoint",
+          operationNonce,
+          checkpoint.sequence + 1,
+        ),
+        runHandle: `run-handle:resume:${checkpoint.sequence + 1}`,
+      };
+      return options.resumeOutput
+        ? options.resumeOutput(output, operationNonce)
+        : output;
+    },
+  };
+  const context = {
+    caseflow,
+    clock,
+    timeoutMs: options.timeoutMs ?? 1_000,
+    repository: {
+      async measure({ operationNonce }) {
+        return {
+          repository: options.repositoryAtBind ?? repository,
+          receipt: receipt("repository-bind", operationNonce),
+        };
       },
-      label,
+      async measureCurrent({ operationNonce }) {
+        return {
+          repository: options.repositoryAtResume ?? repository,
+          receipt: receipt("repository-resume", operationNonce),
+        };
+      },
+    },
+    adapters: {
+      get(adapterId) {
+        return adapterId === "claude-code" ? adapter : undefined;
+      },
+    },
+    leases,
+    trace: {
+      async record(event) {
+        traceEvents.push(event);
+      },
+      list(sessionId) {
+        return traceEvents.filter((event) => event.sessionId === sessionId);
+      },
+    },
+  };
+  return { caseflow, caseId: createdCase.caseId, context, leases, traceEvents };
+}
+
+async function startWorkspaceAndSession(harness, writeScope = "isolated-worktree") {
+  const workspace = await workspace_bind(harness.context, {
+    caseId: harness.caseId,
+    canonicalRemote: repository.canonicalRemote,
+    writeMode: writeScope,
+  });
+  const session = await session_start(harness.context, {
+    workspaceId: workspace.workspaceId,
+    adapterId: "claude-code",
+    writeScope,
+  });
+  const checkpoint = harness.caseflow
+    .snapshot()
+    .artifacts
+    .flatMap((artifact) => artifact.versions.map((version) => version.content))
+    .find(
+      (content) =>
+        content.schemaVersion === "nodekit.native-session-checkpoint/v1",
+    );
+  return { workspace, session, checkpoint };
+}
+
+// @nodekit-verifies inv:native-agent-session-identity#canonical-idempotency
+test("repeated workspace binding and provider session start deduplicate canonical artifacts", async () => {
+  const harness = createHarness();
+  const first = await startWorkspaceAndSession(harness);
+  const secondWorkspace = await workspace_bind(harness.context, {
+    caseId: harness.caseId,
+    canonicalRemote: repository.canonicalRemote,
+    writeMode: "isolated-worktree",
+  });
+  const secondSession = await session_start(harness.context, {
+    workspaceId: secondWorkspace.workspaceId,
+    adapterId: "claude-code",
+    writeScope: "isolated-worktree",
+  });
+
+  assert.equal(first.workspace.disposition, "created");
+  assert.equal(first.session.disposition, "created");
+  assert.equal(secondWorkspace.disposition, "deduplicated");
+  assert.equal(secondSession.disposition, "deduplicated");
+  assert.equal(secondWorkspace.workspaceArtifactRef, first.workspace.workspaceArtifactRef);
+  assert.equal(secondSession.sessionArtifactRef, first.session.sessionArtifactRef);
+  assert.equal(
+    harness.caseflow.listCanonicalArtifactContents({ limit: 100 })
+      .filter((content) => content.schemaVersion?.startsWith("nodekit.native"))
+      .length,
+    3,
+  );
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#validate-before-persist
+test("invalid initial repository evidence leaves no partial session artifact", async () => {
+  const harness = createHarness({
+    startOutput(output) {
+      return {
+        ...output,
+        initialCheckpoint: {
+          ...output.initialCheckpoint,
+          repository: { ...repository, treeHash: "c".repeat(40) },
+        },
+      };
+    },
+  });
+  const workspace = await workspace_bind(harness.context, {
+    caseId: harness.caseId,
+    canonicalRemote: repository.canonicalRemote,
+    writeMode: "read-only",
+  });
+
+  await assert.rejects(
+    session_start(harness.context, {
+      workspaceId: workspace.workspaceId,
+      adapterId: "claude-code",
+      writeScope: "read-only",
+    }),
+    (error) =>
+      error instanceof NativeAgentSessionError
+      && error.code === "REPOSITORY_MISMATCH",
+  );
+  const contents = harness.caseflow.listCanonicalArtifactContents({ limit: 100 });
+  assert.equal(
+    contents.some((content) => content.schemaVersion === "nodekit.native-agent-session/v1"),
+    false,
+  );
+  assert.equal(
+    contents.some((content) => content.schemaVersion === "nodekit.native-session-checkpoint/v1"),
+    false,
+  );
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#three-artifact-canonical-model
+test("founder resumes the exact session only after a trusted receipt and a new durable checkpoint", async () => {
+  const harness = createHarness();
+  const { session, checkpoint } = await startWorkspaceAndSession(harness);
+
+  const before = await session_status(harness.context, {
+    sessionId: session.sessionId,
+  });
+  assert.equal(before.derivedState, "CHECKPOINTED");
+
+  const resumed = await session_resume(harness.context, {
+    sessionId: session.sessionId,
+    expectedCheckpointDigest: checkpoint.artifactDigest,
+  });
+  assert.equal(resumed.state, "RESUMED");
+  assert.match(resumed.newCheckpointRef, /^native-session-checkpoint:sha256:/);
+
+  const contents = harness.caseflow.listCanonicalArtifactContents({
+    limit: 2_000,
+  });
+  assert.deepEqual(
+    contents
+      .filter((content) => content.schemaVersion?.startsWith("nodekit.native"))
+      .map((content) => content.schemaVersion),
+    [
+      "nodekit.native-workspace/v1",
+      "nodekit.native-agent-session/v1",
+      "nodekit.native-session-checkpoint/v1",
+      "nodekit.native-session-checkpoint/v1",
+    ],
+  );
+  assert.equal(contents.some((content) => "status" in content), false);
+  assert.equal(contents.some((content) => "credential" in content), false);
+  assert.equal(
+    harness.traceEvents.some(
+      (event) => event.eventType === "native_session.resumed",
+    ),
+    true,
+  );
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#authenticated-owner-only
+test("coding agent cannot supply workspace owner identity", async () => {
+  const harness = createHarness();
+  await assert.rejects(
+    workspace_bind(harness.context, {
+      caseId: harness.caseId,
+      canonicalRemote: repository.canonicalRemote,
+      writeMode: "read-only",
+      ownerRef: "owner:attacker",
+    }),
+    (error) =>
+      error instanceof NativeAgentSessionError
+      && error.code === "CALLER_OWNER_FORBIDDEN",
+  );
+  assert.equal(harness.caseflow.snapshot().artifacts.length, 0);
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#raw-provider-id-never-leaves-adapter
+test("trusted adapter output containing a raw provider session ID is rejected before persistence", async () => {
+  const harness = createHarness({
+    startOutput(output) {
+      return { ...output, providerSessionId: "raw-secret-session-id" };
+    },
+  });
+  const workspace = await workspace_bind(harness.context, {
+    caseId: harness.caseId,
+    canonicalRemote: repository.canonicalRemote,
+    writeMode: "read-only",
+  });
+  await assert.rejects(
+    session_start(harness.context, {
+      workspaceId: workspace.workspaceId,
+      adapterId: "claude-code",
+      writeScope: "read-only",
+    }),
+    (error) =>
+      error instanceof NativeAgentSessionError
+      && error.code === "RAW_PROVIDER_IDENTITY_EXPOSED",
+  );
+  assert.equal(
+    JSON.stringify(harness.caseflow.snapshot()).includes(
+      "raw-secret-session-id",
+    ),
+    false,
+  );
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#repository-substitution-fails-closed
+test("repository movement blocks resume without writing a false checkpoint", async () => {
+  const movedRepository = {
+    ...repository,
+    treeHash: "c".repeat(40),
+  };
+  const harness = createHarness({ repositoryAtResume: movedRepository });
+  const { session, checkpoint } = await startWorkspaceAndSession(harness);
+  const beforeCount = harness.caseflow.snapshot().artifacts.length;
+  const result = await session_resume(harness.context, {
+    sessionId: session.sessionId,
+    expectedCheckpointDigest: checkpoint.artifactDigest,
+  });
+  assert.deepEqual(result, {
+    state: "REPOSITORY_MISMATCH",
+    reasonCode: "REPOSITORY_MISMATCH",
+  });
+  assert.equal(harness.caseflow.snapshot().artifacts.length, beforeCount);
+  assert.equal(harness.leases.isBusy(`session:${session.sessionId}`), false);
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#checkpoint-frontier-is-cas
+test("analyst cannot checkpoint or resume from a stale frontier", async () => {
+  const harness = createHarness();
+  const { session, checkpoint } = await startWorkspaceAndSession(harness);
+  await assert.rejects(
+    session_checkpoint(harness.context, {
+      sessionId: session.sessionId,
+      expectedPreviousCheckpointDigest: hash("stale"),
+    }),
+    (error) =>
+      error instanceof NativeAgentSessionError
+      && error.code === "CHECKPOINT_STALE",
+  );
+  const resume = await session_resume(harness.context, {
+    sessionId: session.sessionId,
+    expectedCheckpointDigest: hash("stale"),
+  });
+  assert.equal(resume.state, "CHECKPOINT_INVALID");
+  assert.equal(checkpoint.sequence, 0);
+});
+
+// @nodekit-verifies inv:native-agent-session-identity#single-resume-lease-winner
+test("100 concurrent resume attempts across ten sessions produce one winner per session", async () => {
+  const groups = await Promise.all(
+    Array.from({ length: 10 }, async (_, index) => {
+      const harness = createHarness({
+        providerIdentity: `provider-session-${index}`,
+        resumeDelayMs: 2,
+      });
+      const started = await startWorkspaceAndSession(harness);
+      const attempts = await Promise.all(
+        Array.from({ length: 10 }, () =>
+          session_resume(harness.context, {
+            sessionId: started.session.sessionId,
+            expectedCheckpointDigest: started.checkpoint.artifactDigest,
+          })),
+      );
+      return attempts;
+    }),
+  );
+  for (const attempts of groups) {
+    assert.equal(attempts.filter((result) => result.state === "RESUMED").length, 1);
+    assert.equal(
+      attempts.filter((result) => result.state === "SESSION_BUSY").length,
+      9,
     );
   }
 });
 
-// @nodekit-verifies inv:native-agent-session-identity#continuation-is-replay-resistant
-test("one continuation token authorizes at most one concurrent rotation", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const nextCandidate = candidate({
-    nativeSessionGeneration: 2,
-    nativeSessionId: "session:2",
-    credential: {
-      ...candidate().credential,
-      generation: 2,
-    },
+// @nodekit-verifies inv:native-agent-session-identity#adapter-timeout-fails-closed
+test("degraded adapter timeout never returns RESUMED or leaks a lease", async () => {
+  const harness = createHarness({
+    timeoutMs: 10,
+    resumeDelayMs: 100,
   });
-  const issued = await issueNativeAgentContinuationGrant({
-    currentSnapshot,
-    candidate: nextCandidate,
-    issuedAt: timestamp(10),
-    expiresAt: timestamp(40),
+  const { session, checkpoint } = await startWorkspaceAndSession(harness);
+  const result = await session_resume(harness.context, {
+    sessionId: session.sessionId,
+    expectedCheckpointDigest: checkpoint.artifactDigest,
   });
-  let consumed = false;
-  const consumeContinuationToken = async () => {
-    await Promise.resolve();
-    if (consumed) return false;
-    consumed = true;
-    return true;
-  };
-  const attempt = () =>
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: nextCandidate,
-      continuation: issued,
-      consumeContinuationToken,
-      now: timestamp(20),
-    });
-
-  const results = await Promise.allSettled([attempt(), attempt()]);
-  assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
-  assert.equal(results.filter((result) => result.status === "rejected").length, 1);
-  const rejected = results.find((result) => result.status === "rejected");
-  assertCode(rejected.reason, "native_continuation_replayed");
+  assert.equal(result.state, "BLOCKED_EXTERNAL");
+  assert.equal(harness.leases.isBusy(`session:${session.sessionId}`), false);
 });
 
-test("a stalled continuation store times out instead of hanging an agent run", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const nextCandidate = candidate({
-    nativeSessionGeneration: 2,
-    nativeSessionId: "session:2",
-    credential: {
-      ...candidate().credential,
-      generation: 2,
+// @nodekit-verifies inv:native-agent-session-identity#provider-hash-substitution
+test("adapter cannot substitute another provider session during resume", async () => {
+  const harness = createHarness({
+    resumeOutput(output) {
+      return { ...output, providerSessionIdHash: hash("another-provider") };
     },
   });
-  const continuation = await issueNativeAgentContinuationGrant({
-    currentSnapshot,
-    candidate: nextCandidate,
-    issuedAt: timestamp(10),
-    expiresAt: timestamp(40),
+  const { session, checkpoint } = await startWorkspaceAndSession(harness);
+  const result = await session_resume(harness.context, {
+    sessionId: session.sessionId,
+    expectedCheckpointDigest: checkpoint.artifactDigest,
   });
-  let consumeSignal;
-
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: nextCandidate,
-      continuation,
-      consumeContinuationToken: async (_tokenHash, _grant, signal) => {
-        consumeSignal = signal;
-        return new Promise(() => {});
-      },
-      consumeTimeoutMs: 10,
-      now: timestamp(20),
-    }),
-    (error) => assertCode(error, "native_continuation_consume_timeout"),
-  );
-  assert.equal(consumeSignal.aborted, true);
+  assert.equal(result.state, "CHECKPOINT_INVALID");
+  assert.equal(harness.leases.isBusy(`session:${session.sessionId}`), false);
 });
 
-// @nodekit-verifies inv:native-agent-session-identity#continuation-expiry-and-binding
-test("expired, mismatched, and credential-rollback continuation attempts fail before consumption", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  const nextCandidate = candidate({
-    nativeSessionGeneration: 2,
-    nativeSessionId: "session:2",
-    credential: {
-      ...candidate().credential,
-      generation: 2,
-    },
-  });
-  const issued = await issueNativeAgentContinuationGrant({
-    currentSnapshot,
-    candidate: nextCandidate,
-    issuedAt: timestamp(10),
-    expiresAt: timestamp(30),
-  });
-  let calls = 0;
-  const consumeContinuationToken = async () => {
-    calls += 1;
-    return true;
-  };
-
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: nextCandidate,
-      continuation: issued,
-      consumeContinuationToken,
-      now: timestamp(31),
-    }),
-    (error) => assertCode(error, "native_continuation_expired"),
-  );
-  await assert.rejects(
-    resolveNativeAgentSessionIdentity({
-      providerAvailable: true,
-      currentSnapshot,
-      candidate: nextCandidate,
-      continuation: {
-        token: `${issued.token}tampered`,
-        grant: issued.grant,
-      },
-      consumeContinuationToken,
-      now: timestamp(20),
-    }),
-    (error) => assertCode(error, "native_continuation_token_mismatch"),
-  );
-  assert.equal(calls, 0);
-
-  await assert.rejects(
-    issueNativeAgentContinuationGrant({
-      currentSnapshot,
-      candidate: {
-        ...nextCandidate,
-        credential: {
-          ...nextCandidate.credential,
-          generation: 0,
+// @nodekit-verifies inv:native-agent-session-identity#bounded-adapter-output
+test("burst adapter output cannot persist an unbounded artifact digest list", async () => {
+  const harness = createHarness({
+    startOutput(output) {
+      return {
+        ...output,
+        initialCheckpoint: {
+          ...output.initialCheckpoint,
+          artifactDigests: Array.from({ length: 257 }, (_, index) =>
+            hash(`artifact:${index}`)),
         },
-      },
-      issuedAt: timestamp(10),
-      expiresAt: timestamp(30),
-    }),
-    (error) => assertCode(error, "native_credential_stale"),
-  );
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#provider-outage-is-read-only
-test("provider outage preserves verified identity for display but refuses writable continuity", async () => {
-  const currentSnapshot = await createNativeAgentIdentitySnapshot(candidate());
-  let consumed = false;
-  const result = await resolveNativeAgentSessionIdentity({
-    providerAvailable: false,
-    currentSnapshot,
-    candidate: candidate(),
-    consumeContinuationToken: async () => {
-      consumed = true;
-      return true;
+      };
     },
-    now: timestamp(20),
   });
-
-  assert.equal(result.status, "degraded");
-  assert.equal(result.reasonCode, "IDENTITY_PROVIDER_UNAVAILABLE");
-  assert.equal(result.writable, false);
-  assert.equal(result.continuity, undefined);
-  assert.deepEqual(result.snapshot, currentSnapshot);
-  assert.equal(consumed, false);
-});
-
-// @nodekit-verifies inv:native-agent-session-identity#identity-cannot-assert-review-authority
-test("identity snapshots reject injected review independence or NodeProof authority", async () => {
-  const snapshot = await createNativeAgentIdentitySnapshot(candidate());
+  const workspace = await workspace_bind(harness.context, {
+    caseId: harness.caseId,
+    canonicalRemote: repository.canonicalRemote,
+    writeMode: "read-only",
+  });
   await assert.rejects(
-    verifyNativeAgentIdentitySnapshot({
-      ...snapshot,
-      reviewSeparation: "independent-model",
+    session_start(harness.context, {
+      workspaceId: workspace.workspaceId,
+      adapterId: "claude-code",
+      writeScope: "read-only",
     }),
-    /must NOT have additional properties/,
-  );
-  await assert.rejects(
-    verifyNativeAgentIdentitySnapshot({
-      ...snapshot,
-      authority: {
-        canAssertReviewIndependence: true,
-        canIssueNodeProofVerdict: false,
-      },
-    }),
-    (error) => assertCode(error, "native_identity_authority_invalid"),
+    (error) =>
+      error instanceof NativeAgentSessionError
+      && error.code === "BOUND_READ_EXCEEDED",
   );
 });
 
-// @nodekit-verifies inv:native-agent-session-identity#burst-and-sustained-lineage
-test("burst grants remain unique and sustained rotations retain exact single-step lineage", async () => {
-  const initial = await createNativeAgentIdentitySnapshot(candidate());
-  const burst = await Promise.all(
-    Array.from({ length: 200 }, (_, index) =>
-      issueNativeAgentContinuationGrant({
-        currentSnapshot: initial,
-        candidate: candidate({
-          nativeSessionGeneration: 2,
-          nativeSessionId: `session:burst:${index}`,
-          credential: {
-            ...candidate().credential,
-            generation: 2,
-          },
-        }),
-        issuedAt: timestamp(10),
-        expiresAt: timestamp(40),
-      }),
-    ),
-  );
-  assert.equal(new Set(burst.map((entry) => entry.grant.tokenHash)).size, 200);
-
-  let currentSnapshot = initial;
-  for (let generation = 2; generation <= 250; generation += 1) {
-    const result = await rotate(currentSnapshot, {
-      nativeSessionGeneration: generation,
-      nativeSessionId: `session:sustained:${generation}`,
-      credential: {
-        ...currentSnapshot.credential,
-        generation,
-      },
+// @nodekit-verifies inv:native-agent-session-identity#sustained-checkpoint-chain
+test("sustained state retains 1,000 exact checkpoint predecessors with no generation field", async () => {
+  const harness = createHarness();
+  const { session, checkpoint } = await startWorkspaceAndSession(harness);
+  let digest = checkpoint.artifactDigest;
+  for (let index = 1; index <= 1_000; index += 1) {
+    const next = await session_checkpoint(harness.context, {
+      sessionId: session.sessionId,
+      expectedPreviousCheckpointDigest: digest,
     });
-    assert.equal(result.snapshot.previousSnapshotHash, currentSnapshot.snapshotHash);
-    assert.equal(result.snapshot.nativeSessionGeneration, generation);
-    currentSnapshot = result.snapshot;
+    assert.equal(next.sequence, index);
+    digest = next.checkpointDigest;
   }
-  assert.equal(currentSnapshot.nativeSessionGeneration, 250);
+  const contents = harness.caseflow.listCanonicalArtifactContents({
+    limit: 2_000,
+  });
+  const checkpoints = contents.filter(
+    (content) =>
+      content.schemaVersion === "nodekit.native-session-checkpoint/v1",
+  );
+  assert.equal(checkpoints.length, 1_001);
+  assert.equal(checkpoints.some((item) => "generation" in item), false);
+  assert.equal(
+    checkpoints[1_000].previousCheckpointDigest,
+    checkpoints[999].artifactDigest,
+  );
 });

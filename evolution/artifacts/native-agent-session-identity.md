@@ -1,77 +1,85 @@
 # Native-agent session identity evidence
 
-Candidate commit: `cc49b80bc53aeaf90bfe23562701482fb28d5958`
-
 ## Decision
 
-NodeKit now exposes an owner- and workspace-scoped continuity contract for native agents. The
-contract binds a stable agent identity to an immutable session generation, exact host authority,
-exact credential authority, and a content-addressed predecessor. Rotation requires a short-lived
-grant whose random token is consumed atomically exactly once.
+Native workspace, session, and checkpoint state are canonical Caseflow artifacts. The previous
+combined identity snapshot and continuation grant are rejected because they duplicated lifecycle
+authority and let caller-owned status, generation, host, or credential concepts drift from the
+evidence chain.
 
-This contract is deliberately separate from Caseflow and the stage-local execution graph. It has
-no field or API that can advance a lifecycle stage, declare a graph node runnable, assert review
-independence, or issue a NodeProof verdict.
+The public surface is exactly:
 
-## Public surface
+- `workspace_bind`
+- `session_start`
+- `session_checkpoint`
+- `session_resume`
+- `session_status`
 
-- `nodekit.native-agent-session-identity/v1`
-- `nodekit.native-agent-continuation-grant/v1`
-- `@homenshum/nodekit/native-agent-identity`
-- `createNativeAgentIdentitySnapshot`
-- `verifyNativeAgentIdentitySnapshot`
-- `issueNativeAgentContinuationGrant`
-- `verifyNativeAgentContinuationGrant`
-- `resolveNativeAgentSessionIdentity`
+The canonical schemas are:
+
+- `nodekit.native-workspace/v1`
+- `nodekit.native-agent-session/v1`
+- `nodekit.native-session-checkpoint/v1`
+
+`RESUMED` requires a lease, exact repository remeasurement, a trusted nonce-bound adapter receipt,
+and a newly persisted checkpoint. Status is derived from Caseflow, leases, and NodeTrace.
+
+## Decision evidence
+
+Source thread:
+`https://chatgpt.com/c/6a571625-3b68-83e8-ad1b-2ebe297528cc`
+
+Reconciled response SHA-256:
+`bb58f10cf8dfb88b7d366bb206d92127f9b573dbdeb502e3e7e9ddcbf8b2357b`
+
+The decision also fixes the architecture boundary:
+
+- Caseflow is canonical.
+- The execution graph is compiled and disposable.
+- NodeTrace records transitions.
+- NodeProof verifies evidence chains.
+- Stateless MCP tools never own durable continuation state.
+- ActiveGraph is excluded from this release.
 
 ## Scenario evidence
 
-`node --test test/native-agent-identity.test.mjs test/public-api.test.mjs` passed 17/17:
+Targeted native identity, Caseflow, public API, migration matrix, and CLI tests cover:
 
-- deterministic owner/workspace/agent identity creation;
-- exact desktop reconnect;
-- same-host scheduled rotation;
-- authority-bound cross-host inbox handoff;
-- stale, colliding, and skipped generation rejection;
-- owner, workspace, agent, peer, host, and credential drift rejection;
-- concurrent replay where only one atomic consume succeeds;
-- bounded token-store timeout with downstream abort;
-- grant expiry, token tampering, and credential rollback rejection;
-- provider outage returning an explicit read-only degraded state;
-- rejection of injected review-independence and NodeProof authority;
-- 200 unique grants in one burst; and
-- 249 sustained rotations with exact predecessor linkage.
-
-`npm test` passed 541 repository tests and 8 component tests after regenerating the derived behavior
-index and repository map.
-
-`npm run typecheck:public`, `npm run reference:schemas:check`, `npm run registry:check`,
-`npm run audit:prod`, and `git diff --check` passed.
+- trusted exact resume and the required new checkpoint;
+- no caller-supplied owner;
+- no raw provider identity outside the trusted adapter;
+- no repository or provider substitution;
+- CAS checkpoint frontiers;
+- deterministic idempotency and deduplication;
+- no partial session on invalid initial evidence;
+- bounded time, reads, digest lists, and leases;
+- 100 concurrent resumes across 10 sessions;
+- a sustained 1,000-checkpoint chain;
+- explicit migrated, workspace-only, not-resumable, rejected, deduplicated, and identity-conflict
+  outcomes;
+- tamper detection; and
+- apply, verify, then recoverable legacy retirement.
 
 ## Reliability audit
 
-- **BOUND:** no replay collection is retained in the package; grants expire within 24 hours; the
-  external consume operation is capped at 30 seconds.
-- **HONEST_STATUS:** unavailable providers return `degraded` and `writable: false`; invalid
-  continuity throws a typed error rather than returning success.
-- **HONEST_SCORES:** the identity contract contains no score.
-- **TIMEOUT:** the atomic-consume callback receives an `AbortSignal` and is bounded by a caller
-  budget no greater than 30 seconds.
-- **SSRF:** the contract accepts no URL and performs no fetch.
-- **BOUND_READ:** the contract accepts bounded schema fields and reads no external body.
-- **ERROR_BOUNDARY:** consumer failures, timeouts, replays, and binding errors fail closed through
-  typed `NativeAgentIdentityError` codes.
-- **DETERMINISTIC:** identity and snapshot hashes use canonical sorted-key hashing; repeated and
-  sustained scenarios verify exact lineage.
+- **BOUND:** canonical reads, artifact digest lists, migration files, records, and operational
+  leases are bounded.
+- **HONEST_STATUS:** blocked resume returns a typed blocked state; `RESUMED` is impossible before a
+  new checkpoint is durable.
+- **HONEST_SCORES:** the contract contains no score.
+- **TIMEOUT:** repository, adapter, trace, and lease operations use an abortable budget capped at
+  30 seconds.
+- **SSRF:** the module performs no fetch; canonical remote values are measured by the trusted
+  repository adapter.
+- **BOUND_READ:** canonical artifact and migration-file reads have explicit limits.
+- **ERROR_BOUNDARY:** external failures and invalid evidence fail closed without false success.
+- **DETERMINISTIC:** canonical artifacts, IDs, migration bundles, and idempotency keys use
+  sorted-key content hashes.
 
 ## Known limitations
 
-- The embedding application owns the durable identity provider and the atomic consumed-token
-  transaction. Its implementation must honor the supplied abort signal and bound retention.
-- Host and credential authority references are exact bindings, not portable proof of an operating
-  system attestation. Consumers must verify their own host and credential issuers.
-- Provider degradation permits display of a previously verified snapshot but never writable
-  continuity.
-- This package-level proof does not claim that every NodeKit consumer has integrated the contract.
-- Canonical promotion of this agent-authored interpretation requires a separately verified named
-  human approval; no approval is invented here.
+- Provider adapters and repository measurement implementations require consumer-specific live
+  proofs.
+- Production deployments must supply their authenticated Caseflow runtime to the internal
+  `importLegacySessionMigration` helper; the CLI and importer remain intentionally non-public.
+- This draft Evolution interpretation requires separately verified named-human approval.

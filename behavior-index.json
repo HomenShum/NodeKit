@@ -9,7 +9,7 @@
     "verified": 5,
     "partial": 0,
     "unverified": 0,
-    "orphanAnnotations": 29
+    "orphanAnnotations": 30
   },
   "behaviors": [
     {
@@ -113,7 +113,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 443
+          "line": 450
         }
       ],
       "supporting": [
@@ -947,7 +947,7 @@
           {
             "scenario": "entrypoint-surface-stable",
             "file": "test/public-api.test.mjs",
-            "line": 49
+            "line": 53
           }
         ],
         "namedTestFiles": [
@@ -1040,7 +1040,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 444
+            "line": 451
           }
         ],
         "namedSourceFiles": [
@@ -1157,57 +1157,62 @@
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 78
+      "line": 202
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 94
+      "line": 231
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 121
+      "line": 271
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 139
+      "line": 312
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 164
+      "line": 329
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 216
+      "line": 359
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 263
+      "line": 380
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 340
+      "line": 401
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 407
+      "line": 429
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 430
+      "line": 444
     },
     {
       "behaviorId": "inv:native-agent-session-identity",
       "file": "test/native-agent-identity.test.mjs",
-      "line": 452
+      "line": 460
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 491
     },
     {
       "behaviorId": "inv:research-verdict-beats-constant",

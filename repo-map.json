@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 100,
-    "modules": 67,
-    "tests": 73
+    "schemas": 101,
+    "modules": 68,
+    "tests": 75
   },
   "architecture": [
     {
@@ -70,6 +70,7 @@
       "registry",
       "repo",
       "routing",
+      "session",
       "skills",
       "tour",
       "trust"
@@ -191,8 +192,9 @@
     "nodekit.model-intelligence-harness-verdict.v1.schema.json",
     "nodekit.model-observation.v1.schema.json",
     "nodekit.motion-portability-receipt.v1.schema.json",
-    "nodekit.native-agent-continuation-grant.v1.schema.json",
-    "nodekit.native-agent-session-identity.v1.schema.json",
+    "nodekit.native-agent-session.v1.schema.json",
+    "nodekit.native-session-checkpoint.v1.schema.json",
+    "nodekit.native-workspace.v1.schema.json",
     "nodekit.nodetrace-trajectory.v1.schema.json",
     "nodekit.observation-pack.v1.schema.json",
     "nodekit.opportunity-contract.v1.schema.json",
@@ -279,6 +281,7 @@
     "model-intelligence.mjs",
     "motion-portability.mjs",
     "native-agent-identity.mjs",
+    "native-agent-migration.mjs",
     "npm-cli-invocation.mjs",
     "npm-package-archive.mjs",
     "official-pricing-proof.mjs",
@@ -316,6 +319,7 @@
     "caseflow.test.mjs",
     "change-story.test.mjs",
     "ci-workflows.test.mjs",
+    "cli-native-migration.test.mjs",
     "conformance.test.mjs",
     "consumer-package-preparation.test.mjs",
     "contracts.test.mjs",
@@ -349,6 +353,7 @@
     "model-intelligence.test.mjs",
     "motion-portability.test.mjs",
     "native-agent-identity.test.mjs",
+    "native-agent-migration.test.mjs",
     "nodekit-proof-campaign-publication.test.mjs",
     "nodekit-proof-campaign-video.test.mjs",
     "npm-cli-invocation.test.mjs",

@@ -1,57 +1,45 @@
 import {
-  createNativeAgentIdentitySnapshot,
-  issueNativeAgentContinuationGrant,
-  resolveNativeAgentSessionIdentity,
-  type NativeAgentIdentityCandidate,
-  type NativeAgentIdentitySnapshotV1,
+  session_checkpoint,
+  session_resume,
+  session_start,
+  session_status,
+  workspace_bind,
+  type NativeAgentSessionContext,
+  type NativeSessionResumeResult,
+  type NativeWriteScope,
 } from "@homenshum/nodekit/native-agent-identity";
-import {
-  verifyNativeAgentIdentitySnapshot,
-} from "@homenshum/nodekit";
+import { workspace_bind as workspaceBindFromRoot } from "@homenshum/nodekit";
 
-const candidate: NativeAgentIdentityCandidate = {
-  ownerRef: "owner:nodekit",
-  workspaceId: "workspace:nodekit",
-  agentId: "agent:codex",
-  nativeSessionId: "session:1",
-  nativeSessionGeneration: 1,
-  host: {
-    hostId: "host:desktop",
-    instanceId: "host-instance:desktop:1",
-    authorityRef: "authority:desktop-owner",
-  },
-  credential: {
-    credentialRef: "credential:desktop",
-    generation: 1,
-  },
-};
+declare const context: NativeAgentSessionContext;
 
-const initial: NativeAgentIdentitySnapshotV1 =
-  await createNativeAgentIdentitySnapshot(candidate);
-await verifyNativeAgentIdentitySnapshot(initial);
-
-const next = {
-  ...candidate,
-  nativeSessionId: "session:2",
-  nativeSessionGeneration: 2,
-};
-const continuation = await issueNativeAgentContinuationGrant({
-  currentSnapshot: initial,
-  candidate: next,
-  issuedAt: "2026-07-30T00:00:00.000Z",
-  expiresAt: "2026-07-30T00:05:00.000Z",
+const writeScope: NativeWriteScope = "isolated-worktree";
+const workspace = await workspace_bind(context, {
+  caseId: "case:nodekit",
+  canonicalRemote: "https://github.com/HomenShum/node-platform.git",
+  writeMode: writeScope,
 });
+workspaceBindFromRoot satisfies typeof workspace_bind;
 
-const resolved = await resolveNativeAgentSessionIdentity({
-  providerAvailable: true,
-  currentSnapshot: initial,
-  candidate: next,
-  continuation,
-  consumeContinuationToken: async () => true,
-  now: "2026-07-30T00:01:00.000Z",
+const session = await session_start(context, {
+  workspaceId: workspace.workspaceId,
+  adapterId: "codex",
+  writeScope,
 });
+const status = await session_status(context, { sessionId: session.sessionId });
+status.limitations satisfies string[];
 
-if (resolved.status === "ready") {
-  resolved.snapshot.authority.canAssertReviewIndependence satisfies false;
-  resolved.snapshot.authority.canIssueNodeProofVerdict satisfies false;
+const checkpoint = await session_checkpoint(context, {
+  sessionId: session.sessionId,
+  expectedPreviousCheckpointDigest: "a".repeat(64),
+});
+checkpoint.sequence satisfies number;
+
+const resumed: NativeSessionResumeResult = await session_resume(context, {
+  sessionId: session.sessionId,
+  expectedCheckpointDigest: checkpoint.checkpointDigest,
+});
+if (resumed.state === "RESUMED") {
+  resumed.newCheckpointRef satisfies string;
+} else {
+  resumed.reasonCode satisfies string;
 }

@@ -39,11 +39,15 @@ import {
   verifySkillPromotionApproval,
 } from "@homenshum/nodekit/skill-evaluation";
 import {
-  createNativeAgentIdentitySnapshot,
-  resolveNativeAgentSessionIdentity,
+  session_checkpoint,
+  session_resume,
+  session_start,
+  session_status,
+  workspace_bind,
 } from "@homenshum/nodekit/native-agent-identity";
+import * as nativeAgentIdentity from "@homenshum/nodekit/native-agent-identity";
 import {
-  createNativeAgentIdentitySnapshot as createNativeAgentIdentitySnapshotFromRoot,
+  workspace_bind as workspaceBindFromRoot,
 } from "@homenshum/nodekit";
 
 // @nodekit-verifies inv:stable-caseflow-package-entrypoint#entrypoint-surface-stable
@@ -71,12 +75,20 @@ test("published Caseflow entry point exposes the supported portable contract", a
   assert.equal(typeof sealSkillPromotionApproval, "function");
   assert.equal(typeof verifySkillPromotionApproval, "function");
   assert.equal(typeof verifySkillBenchmarkVerdict, "function");
-  assert.equal(typeof createNativeAgentIdentitySnapshot, "function");
-  assert.equal(typeof resolveNativeAgentSessionIdentity, "function");
-  assert.equal(
-    createNativeAgentIdentitySnapshotFromRoot,
-    createNativeAgentIdentitySnapshot,
-  );
+  assert.equal(typeof workspace_bind, "function");
+  assert.equal(typeof session_start, "function");
+  assert.equal(typeof session_checkpoint, "function");
+  assert.equal(typeof session_resume, "function");
+  assert.equal(typeof session_status, "function");
+  assert.equal(workspaceBindFromRoot, workspace_bind);
+  assert.deepEqual(Object.keys(nativeAgentIdentity).sort(), [
+    "NativeAgentSessionError",
+    "session_checkpoint",
+    "session_resume",
+    "session_start",
+    "session_status",
+    "workspace_bind",
+  ]);
 });
 
 test("published metadata cannot silently drop attestation and evidence-finalization surfaces", async () => {

@@ -96,13 +96,14 @@ npm run dashboard
 ### Continue native-agent sessions safely
 
 `@homenshum/nodekit/native-agent-identity` provides the owner/workspace-scoped continuity contract
-for desktop restarts, scheduled runs, inbox handoffs, and cross-host rotation. It binds exact host
-and credential authority, advances one session generation at a time, and requires a short-lived
-continuation token to be consumed atomically exactly once.
+for desktop restarts, scheduled runs, and inbox handoffs. Caseflow stores exactly three canonical
+artifacts: workspace, agent session, and checkpoint. Provider session identity is hashed; raw IDs
+stay inside the trusted adapter.
 
-This contract is deliberately separate from Caseflow and execution-graph authority. It cannot
-advance a stage, assert review independence, or issue a NodeProof verdict. When the identity
-provider is unavailable it returns an explicit read-only degraded result.
+The public surface is `workspace_bind`, `session_start`, `session_checkpoint`, `session_resume`,
+and `session_status`. `RESUMED` is returned only after exact repository remeasurement, a trusted
+receipt, an operational lease, and a new durable checkpoint. The execution graph remains a
+disposable projection and cannot authorize continuity.
 
 See the
 [native-agent identity contract](https://github.com/HomenShum/node-platform/blob/main/docs/NATIVE_AGENT_SESSION_IDENTITY.md).

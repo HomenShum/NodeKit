@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.native-agent-session.v1.schema.json",
+  "title": "NodeKit native agent session v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sessionId",
+    "workspaceArtifactRef",
+    "workspaceArtifactDigest",
+    "adapter",
+    "providerSessionIdHash",
+    "writeScope",
+    "creationReceiptRef",
+    "creationReceiptDigest",
+    "createdAt",
+    "artifactRef",
+    "artifactDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.native-agent-session/v1" },
+    "sessionId": {
+      "type": "string",
+      "pattern": "^session:sha256:[a-f0-9]{64}$"
+    },
+    "workspaceArtifactRef": {
+      "type": "string",
+      "pattern": "^native-workspace:sha256:[a-f0-9]{64}$"
+    },
+    "workspaceArtifactDigest": { "$ref": "#/$defs/sha256" },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapterId", "adapterVersion", "harnessVersion"],
+      "properties": {
+        "adapterId": { "$ref": "#/$defs/identifier" },
+        "adapterVersion": { "$ref": "#/$defs/identifier" },
+        "harnessVersion": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "providerSessionIdHash": { "$ref": "#/$defs/sha256" },
+    "writeScope": {
+      "enum": ["read-only", "direct-worktree", "isolated-worktree"]
+    },
+    "creationReceiptRef": { "$ref": "#/$defs/identifier" },
+    "creationReceiptDigest": { "$ref": "#/$defs/sha256" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "artifactRef": {
+      "type": "string",
+      "pattern": "^native-agent-session:sha256:[a-f0-9]{64}$"
+    },
+    "artifactDigest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

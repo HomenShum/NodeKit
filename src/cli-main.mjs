@@ -2,7 +2,7 @@
 // Full command implementation. The public wrapper keeps reference-loop startup bounded.
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderDashboard } from "./lib/dashboard.mjs";
@@ -108,6 +108,10 @@ import {
 } from "./lib/evolution-ledger.mjs";
 import { initializeTrust, readTrustPolicy } from "./lib/evolution-trust.mjs";
 import { approvalSubject, evidenceManifestHash, sealEvolutionApproval } from "./lib/evolution-approval.mjs";
+import {
+  planLegacySessionMigration,
+  verifyLegacySessionMigration,
+} from "./lib/native-agent-migration.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -212,6 +216,9 @@ Usage:
   nodekit evolution materiality --from <commit> --to <commit> [--repo-root <path>] [--json]
   nodekit evolution build-docs [--repo-root <path>] [--json]
   nodekit evolution sync-graph [--graph-path <path>] [--repo-root <path>] [--json]
+  nodekit session migrate-legacy --input <legacy.json>
+      [--mode dry-run|apply|verify|retire] [--output <bundle.json>]
+      [--rollback <rollback-source.json>] [--confirm-bundle-digest <sha256>] [--json]
   nodekit harness init [--repo-root <path>] [--json]
   nodekit harness builder init [--repo-root <path>] [--json]
   nodekit harness builder lock --baseline <trajectory> [--repo-root <path>] [--json]
@@ -1538,6 +1545,127 @@ function printStructured(output, parsed, textSummary) {
   else console.log(textSummary(output));
 }
 
+const MAX_NATIVE_MIGRATION_FILE_BYTES = 1_048_576;
+
+async function readBoundedJson(file, label) {
+  const absolute = path.resolve(file);
+  const metadata = await stat(absolute);
+  if (!metadata.isFile()) throw new Error(`${label} must be a file`);
+  if (metadata.size > MAX_NATIVE_MIGRATION_FILE_BYTES) {
+    throw new Error(
+      `${label} exceeds ${MAX_NATIVE_MIGRATION_FILE_BYTES} bytes`,
+    );
+  }
+  let value;
+  try {
+    value = JSON.parse(await readFile(absolute, "utf8"));
+  } catch {
+    throw new Error(`${label} must contain valid JSON`);
+  }
+  return { absolute, value };
+}
+
+async function runNativeSessionMigration(parsed) {
+  const mode = String(parsed.options.mode ?? "dry-run");
+  if (!["dry-run", "apply", "verify", "retire"].includes(mode)) {
+    throw new Error("--mode must be dry-run, apply, verify, or retire");
+  }
+  const input = mode === "verify"
+    ? null
+    : await readBoundedJson(requireOption(parsed, "input"), "--input");
+  const outputPath = parsed.options.output === undefined
+    ? null
+    : path.resolve(String(parsed.options.output));
+
+  if (mode === "verify") {
+    if (!outputPath) throw new Error("--output is required for verify");
+    const bundle = await readBoundedJson(outputPath, "--output");
+    const verification = verifyLegacySessionMigration(bundle.value);
+    printStructured(
+      verification,
+      parsed,
+      (value) =>
+        `NATIVE MIGRATION VERIFY ${value.passed ? "PASS" : "FAIL"} ${value.bundleDigest}`,
+    );
+    if (!verification.passed) process.exitCode = 1;
+    return;
+  }
+
+  const bundle = planLegacySessionMigration(input.value);
+  if (mode === "dry-run") {
+    printStructured(
+      bundle,
+      parsed,
+      (value) =>
+        `NATIVE MIGRATION DRY RUN ${value.bundleDigest}: ${value.outcomes.length} records, ${value.artifacts.length} canonical artifacts; legacy source unchanged`,
+    );
+    return;
+  }
+  if (!outputPath) throw new Error(`--output is required for ${mode}`);
+
+  if (mode === "apply") {
+    await mkdir(path.dirname(outputPath), { recursive: true });
+    await writeFile(
+      outputPath,
+      `${JSON.stringify(bundle, null, 2)}\n`,
+      { encoding: "utf8", flag: "wx" },
+    );
+    const persisted = await readBoundedJson(outputPath, "--output");
+    const verification = verifyLegacySessionMigration(persisted.value);
+    if (!verification.passed) {
+      throw new Error(
+        `persisted migration bundle failed verification: ${verification.findings.join("; ")}`,
+      );
+    }
+    printStructured(
+      { ...verification, mode, output: outputPath },
+      parsed,
+      (value) =>
+        `NATIVE MIGRATION APPLIED ${value.bundleDigest}; verified bundle ${value.output}; legacy source unchanged`,
+    );
+    return;
+  }
+
+  const persisted = await readBoundedJson(outputPath, "--output");
+  const verification = verifyLegacySessionMigration(persisted.value);
+  if (!verification.passed) {
+    throw new Error(
+      `migration bundle is not verified: ${verification.findings.join("; ")}`,
+    );
+  }
+  if (persisted.value.bundleDigest !== bundle.bundleDigest) {
+    throw new Error("migration bundle does not match the current legacy source");
+  }
+  const confirmation = requireOption(parsed, "confirm-bundle-digest");
+  if (confirmation !== bundle.bundleDigest) {
+    throw new Error("--confirm-bundle-digest does not match the verified bundle");
+  }
+  const rollbackPath = path.resolve(requireOption(parsed, "rollback"));
+  if (
+    rollbackPath === input.absolute
+    || rollbackPath === outputPath
+    || input.absolute === outputPath
+  ) {
+    throw new Error("--input, --output, and --rollback must be distinct paths");
+  }
+  if (await pathExists(rollbackPath)) {
+    throw new Error("--rollback already exists; refusing to overwrite recovery data");
+  }
+  await mkdir(path.dirname(rollbackPath), { recursive: true });
+  await rename(input.absolute, rollbackPath);
+  printStructured(
+    {
+      ...verification,
+      mode,
+      retiredInput: input.absolute,
+      rollback: rollbackPath,
+    },
+    parsed,
+    (value) =>
+      `NATIVE MIGRATION RETIRED ${value.bundleDigest}; legacy source moved to recoverable rollback ${value.rollback}`,
+  );
+}
+
 async function runSkillsPropose(parsed) {
   const output = await proposeSkillCandidates(repoRootFrom(parsed));
   printStructured(output, parsed, (value) => `PROPOSED ${value.candidates.length} evidence-backed skill candidates; none promoted`);
@@ -1662,6 +1790,10 @@ async function main() {
   }
   if (first === "journey" && second === "verify") {
     await runJourneyVerify(parsed);
+    return;
+  }
+  if (first === "session" && second === "migrate-legacy") {
+    await runNativeSessionMigration(parsed);
     return;
   }
   if (first === "tour") {

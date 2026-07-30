@@ -1,121 +1,265 @@
-export interface NativeAgentHostAuthority {
-  hostId: string;
-  instanceId: string;
-  authorityRef: string;
+export type NativeWriteScope =
+  | "read-only"
+  | "direct-worktree"
+  | "isolated-worktree";
+
+export interface NativeRepositorySnapshot {
+  canonicalRemote: string;
+  commit: string;
+  treeHash: string;
+  dirty: boolean;
+  dirtyWorkingTreeHash?: string;
 }
 
-export interface NativeAgentCredentialAuthority {
-  credentialRef: string;
-  generation: number;
-  expiresAt?: string;
+export interface TrustedReceipt {
+  ref: string;
+  digest: string;
+  operationNonceHash: string;
+  verified: true;
 }
 
-export interface NativeAgentIdentityCandidate {
-  ownerRef: string;
+export interface NativeCheckpointAdapterOutput {
+  resumeCursorHash: string;
+  repository: NativeRepositorySnapshot;
+  traceDigest: string;
+  artifactDigests: string[];
+  receipt: TrustedReceipt;
+  runHandle?: string;
+  paused?: boolean;
+}
+
+export interface NativeWorkspaceV1 {
+  schemaVersion: "nodekit.native-workspace/v1";
   workspaceId: string;
-  agentId: string;
-  nativeSessionId: string;
-  nativeSessionGeneration: number;
-  host: NativeAgentHostAuthority;
-  credential: NativeAgentCredentialAuthority;
-  peerId?: string;
+  ownerRef: string;
+  caseId: string;
+  repository: NativeRepositorySnapshot;
+  writeMode: NativeWriteScope;
+  authorityReceiptRef: string;
+  createdAt: string;
+  artifactRef: string;
+  artifactDigest: string;
 }
 
-export interface NativeAgentIdentitySnapshotV1
-  extends NativeAgentIdentityCandidate {
-  schemaVersion: "nodekit.native-agent-session-identity/v1";
-  identityRef: string;
-  previousSnapshotHash?: string;
-  authority: {
-    canAssertReviewIndependence: false;
-    canIssueNodeProofVerdict: false;
+export interface NativeAgentSessionV1 {
+  schemaVersion: "nodekit.native-agent-session/v1";
+  sessionId: string;
+  workspaceArtifactRef: string;
+  workspaceArtifactDigest: string;
+  adapter: {
+    adapterId: string;
+    adapterVersion: string;
+    harnessVersion: string;
   };
-  snapshotHash: string;
+  providerSessionIdHash: string;
+  writeScope: NativeWriteScope;
+  creationReceiptRef: string;
+  creationReceiptDigest: string;
+  createdAt: string;
+  artifactRef: string;
+  artifactDigest: string;
 }
 
-export interface NativeAgentContinuationGrantV1 {
-  schemaVersion: "nodekit.native-agent-continuation-grant/v1";
-  grantId: string;
-  identityRef: string;
-  currentSnapshotHash: string;
-  target: {
-    nativeSessionId: string;
-    nativeSessionGeneration: number;
-    host: NativeAgentHostAuthority;
-    credential: NativeAgentCredentialAuthority;
-    peerId?: string;
+export interface NativeSessionCheckpointV1 {
+  schemaVersion: "nodekit.native-session-checkpoint/v1";
+  sessionArtifactRef: string;
+  sessionArtifactDigest: string;
+  sequence: number;
+  previousCheckpointRef?: string;
+  previousCheckpointDigest?: string;
+  resumeCursorHash: string;
+  repository: NativeRepositorySnapshot;
+  traceDigest: string;
+  artifactDigests: string[];
+  adapterReceiptRef: string;
+  adapterReceiptDigest: string;
+  operationNonceHash: string;
+  createdAt: string;
+  artifactRef: string;
+  artifactDigest: string;
+}
+
+export interface NativeProviderAdapter {
+  start(
+    input: {
+      workspace: NativeWorkspaceV1;
+      writeScope: NativeWriteScope;
+      operationNonce: string;
+    },
+    signal: AbortSignal,
+  ): Promise<{
+    providerSessionIdHash: string;
+    adapterVersion: string;
+    harnessVersion: string;
+    creationReceipt: TrustedReceipt;
+    initialCheckpoint: NativeCheckpointAdapterOutput;
+    runHandle: string;
+  }>;
+  checkpoint(
+    input: {
+      workspace: NativeWorkspaceV1;
+      session: NativeAgentSessionV1;
+      previousCheckpoint: NativeSessionCheckpointV1;
+      operationNonce: string;
+    },
+    signal: AbortSignal,
+  ): Promise<NativeCheckpointAdapterOutput>;
+  resume(
+    input: {
+      workspace: NativeWorkspaceV1;
+      session: NativeAgentSessionV1;
+      checkpoint: NativeSessionCheckpointV1;
+      operationNonce: string;
+    },
+    signal: AbortSignal,
+  ): Promise<{
+    providerSessionIdHash: string;
+    resumeCursorHash: string;
+    resumeReceipt: TrustedReceipt;
+    newCheckpoint: NativeCheckpointAdapterOutput;
+    runHandle: string;
+  }>;
+}
+
+export interface NativeAgentSessionContext {
+  caseflow: {
+    ownerId: string;
+    snapshot(): {
+      cases: unknown[];
+      runs: unknown[];
+      artifacts: unknown[];
+    };
+    createArtifact(input: unknown): unknown;
+    getCase?(caseId: string): {
+      currentRunId: string | null;
+      [key: string]: unknown;
+    };
+    getRun?(runId: string): {
+      status: string;
+      [key: string]: unknown;
+    };
+    listCanonicalArtifactContents?(input?: {
+      caseId?: string;
+      kind?: string;
+      runId?: string;
+      schemaVersion?: string;
+      limit?: number;
+    }): unknown[];
   };
-  tokenHash: string;
-  issuedAt: string;
-  expiresAt: string;
-  grantHash: string;
+  repository: {
+    measure(input: unknown, signal: AbortSignal): Promise<{
+      repository: NativeRepositorySnapshot;
+      receipt: TrustedReceipt;
+    }>;
+    measureCurrent(input: unknown, signal: AbortSignal): Promise<{
+      repository: NativeRepositorySnapshot;
+      receipt: TrustedReceipt;
+    }>;
+  };
+  adapters: {
+    get(adapterId: string): NativeProviderAdapter | undefined;
+  };
+  leases: {
+    acquire(
+      input: { keys: string[]; owner: string; ttlMs: number },
+      signal: AbortSignal,
+    ): Promise<{ acquired: boolean; [key: string]: unknown }>;
+    release(lease: unknown): Promise<void>;
+    isBusy(key: string): boolean | Promise<boolean>;
+  };
+  trace: {
+    record(event: Record<string, unknown>, signal: AbortSignal): Promise<void>;
+    list(sessionId: string): Array<Record<string, unknown>> | Promise<Array<Record<string, unknown>>>;
+  };
+  clock?: () => string;
+  timeoutMs?: number;
 }
 
-export class NativeAgentIdentityError extends Error {
+export class NativeAgentSessionError extends Error {
   readonly code: string;
   constructor(code: string, message: string);
 }
 
-export function createNativeAgentIdentitySnapshot(
-  input: NativeAgentIdentityCandidate,
-): Promise<Readonly<NativeAgentIdentitySnapshotV1>>;
-
-export function verifyNativeAgentIdentitySnapshot(
-  snapshot: NativeAgentIdentitySnapshotV1,
+export function workspace_bind(
+  context: NativeAgentSessionContext,
+  input: {
+    caseId: string;
+    canonicalRemote: string;
+    writeMode: NativeWriteScope;
+  },
 ): Promise<{
-  snapshot: NativeAgentIdentitySnapshotV1;
-  snapshotHash: string;
-  verified: true;
+  disposition: "created" | "deduplicated";
+  workspaceId: string;
+  workspaceArtifactRef: string;
+  workspaceArtifactDigest: string;
 }>;
 
-export function issueNativeAgentContinuationGrant(input: {
-  currentSnapshot: NativeAgentIdentitySnapshotV1;
-  candidate: NativeAgentIdentityCandidate;
-  issuedAt: string;
-  expiresAt: string;
-}): Promise<
-  Readonly<{
-    token: string;
-    grant: Readonly<NativeAgentContinuationGrantV1>;
-  }>
->;
-
-export function verifyNativeAgentContinuationGrant(
-  grant: NativeAgentContinuationGrantV1,
+export function session_start(
+  context: NativeAgentSessionContext,
+  input: {
+    workspaceId: string;
+    adapterId: string;
+    writeScope: NativeWriteScope;
+  },
 ): Promise<{
-  grant: NativeAgentContinuationGrantV1;
-  grantHash: string;
-  verified: true;
+  disposition: "created" | "deduplicated";
+  sessionId: string;
+  sessionArtifactRef: string;
+  initialCheckpointRef: string;
+  runHandle: string;
 }>;
 
-export type NativeAgentIdentityResolution =
-  | Readonly<{
-      status: "ready";
-      continuity: "created" | "reconnect" | "rotate";
-      hostChanged: boolean;
-      writable: true;
-      snapshot: Readonly<NativeAgentIdentitySnapshotV1>;
-    }>
-  | Readonly<{
-      status: "degraded";
-      reasonCode: "IDENTITY_PROVIDER_UNAVAILABLE";
-      writable: false;
-      snapshot?: NativeAgentIdentitySnapshotV1;
-    }>;
+export function session_checkpoint(
+  context: NativeAgentSessionContext,
+  input: {
+    sessionId: string;
+    expectedPreviousCheckpointDigest: string;
+  },
+): Promise<{
+  checkpointRef: string;
+  checkpointDigest: string;
+  sequence: number;
+}>;
 
-export function resolveNativeAgentSessionIdentity(input: {
-  providerAvailable: boolean;
-  currentSnapshot?: NativeAgentIdentitySnapshotV1;
-  candidate: NativeAgentIdentityCandidate;
-  continuation?: {
-    token: string;
-    grant: NativeAgentContinuationGrantV1;
-  };
-  consumeContinuationToken?: (
-    tokenHash: string,
-    grant: NativeAgentContinuationGrantV1,
-    signal: AbortSignal,
-  ) => boolean | Promise<boolean>;
-  consumeTimeoutMs?: number;
-  now: string;
-}): Promise<NativeAgentIdentityResolution>;
+export type NativeSessionResumeResult =
+  | {
+      state: "RESUMED";
+      runHandle: string;
+      adapterReceiptRef: string;
+      newCheckpointRef: string;
+    }
+  | {
+      state:
+        | "SESSION_BUSY"
+        | "HISTORY_ONLY"
+        | "AUTH_REQUIRED"
+        | "REPOSITORY_MISMATCH"
+        | "CHECKPOINT_INVALID"
+        | "BLOCKED_EXTERNAL";
+      reasonCode: string;
+    };
+
+export function session_resume(
+  context: NativeAgentSessionContext,
+  input: {
+    sessionId: string;
+    expectedCheckpointDigest: string;
+  },
+): Promise<NativeSessionResumeResult>;
+
+export function session_status(
+  context: NativeAgentSessionContext,
+  input: { sessionId: string },
+): Promise<{
+  derivedState:
+    | "CREATED"
+    | "CHECKPOINTED"
+    | "BUSY"
+    | "PAUSED"
+    | "RESUMED"
+    | "COMPLETED"
+    | "HISTORY_ONLY"
+    | "INVALID";
+  latestVerifiedCheckpointRef?: string;
+  limitations: string[];
+}>;
