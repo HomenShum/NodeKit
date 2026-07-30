@@ -1,0 +1,26 @@
+[
+  {
+    "id": "claim-cli-run",
+    "text": "One NodeKit command wraps a real local process and emits receipt and report paths.",
+    "status": "verified",
+    "evidenceIds": ["ev-after", "ev-tests"],
+    "scope": "source branch and local process execution",
+    "limitations": ["No hosted service or npm package publication is claimed."]
+  },
+  {
+    "id": "claim-bounded-honest",
+    "text": "Output, events, metadata, time, and retained runs are bounded while failure and timeout remain non-success states.",
+    "status": "verified",
+    "evidenceIds": ["ev-tests"],
+    "scope": "scenario-driven local fixtures",
+    "limitations": ["Detached descendant termination is best-effort."]
+  },
+  {
+    "id": "claim-browser",
+    "text": "The generated static report is visually browser-proven.",
+    "status": "verified",
+    "evidenceIds": ["ev-browser"],
+    "scope": "local static HTML",
+    "limitations": ["The report is a local portable artifact, not a hosted telemetry console."]
+  }
+]

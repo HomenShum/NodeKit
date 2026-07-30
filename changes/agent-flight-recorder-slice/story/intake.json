@@ -1,0 +1,21 @@
+{
+  "problem": "NodeKit lacked one command that records a real local coding-agent/process run as durable, shareable evidence.",
+  "affectedUsers": [
+    "coding-agent researchers",
+    "hackathon participants"
+  ],
+  "desiredOutcome": "A summary-first CLI run produces stable identity, honest bounded evidence, a static HTML execution graph, and a JSON receipt.",
+  "currentWorkaround": "Manually combine terminal logs, process exit state, identifiers, and screenshots.",
+  "demoInput": "node -e \"process.stdout.write('flight-ok')\"",
+  "measurableResult": "Eight scenario-driven tests pass and the identical baseline command changes from unknown-command failure to a completed receipt/report.",
+  "sponsors": [],
+  "timeBudget": "No user deadline supplied; preserve an honest phase timeline.",
+  "spendBudget": "Zero paid activation.",
+  "deploymentRequirement": "None; local deployable artifacts only.",
+  "approvalBoundaries": [
+    "no deployment",
+    "no publication",
+    "no destructive writes outside bounded retention",
+    "no secrets or environment-file access"
+  ]
+}

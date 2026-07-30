@@ -1,0 +1,6 @@
+node : nodekit: unknown command: agent run
+At line:2 char:141
++ ... 0:00.000Z'; node src/cli.mjs agent run --agent fixture-agent --goal ' ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (nodekit: unknown command: agent run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError

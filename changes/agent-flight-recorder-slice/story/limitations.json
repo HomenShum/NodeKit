@@ -1,0 +1,5 @@
+[
+  "The recorder observes the direct process boundary rather than child-created files, tool semantics, or network activity.",
+  "Each output stream retains at most 256 KiB; byte counts and full-stream digests cover truncated tails.",
+  "The report is a local static artifact; no hosted service or npm release is claimed."
+]

@@ -1,0 +1,8 @@
+SUCCESS | fixture-agent
+Exit 0 | 70 ms | stdout 17 B | stderr 0 B | kept 17 B
+
+accepted -> ran -> completed -> evidence saved
+The requested command completed.
+
+Report:  D:\VSCode Projects\node-platform-agent-flight-recorder-20260730\.tmp\agent-flight-recorder\1d27e6e1-2111-4e5a-83f0-d93a023e4ccb\report.html
+Receipt: D:\VSCode Projects\node-platform-agent-flight-recorder-20260730\.tmp\agent-flight-recorder\1d27e6e1-2111-4e5a-83f0-d93a023e4ccb\receipt.json

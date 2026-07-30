@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ev-before",
+    "kind": "terminal",
+    "path": "evidence/agent-flight-recorder/before.txt",
+    "claim": "The CLI did not previously recognize agent run."
+  },
+  {
+    "id": "ev-after",
+    "kind": "terminal",
+    "path": "evidence/agent-flight-recorder/after.txt",
+    "claim": "The identical command now completes and publishes artifact paths."
+  },
+  {
+    "id": "ev-tests",
+    "kind": "test-suite",
+    "path": "test/agent-run.test.mjs",
+    "claim": "Eight scenario-driven process, security, concurrency, and retention tests pass."
+  },
+  {
+    "id": "ev-browser",
+    "kind": "browser-proof",
+    "path": "evidence/agent-flight-recorder/browser-qa.json",
+    "claim": "Chrome desktop and 390x844 checks pass with exact DOM signals, keyboard disclosure, and no overflow.",
+    "screenshots": [
+      "evidence/agent-flight-recorder/after-desktop.png",
+      "evidence/agent-flight-recorder/after-mobile.png"
+    ]
+  }
+]

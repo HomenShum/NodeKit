@@ -1,0 +1,12 @@
+{
+    "runId":  "1d27e6e1-2111-4e5a-83f0-d93a023e4ccb",
+    "status":  "completed",
+    "exitCode":  0,
+    "stdout":  "hello from agent\n",
+    "stdoutObservedBytes":  17,
+    "graphSchema":  "nodekit.agent-run-graph/v1",
+    "graphNodes":  4,
+    "graphEdges":  3,
+    "receiptDigest":  "0d6f1fb4403160dd059ee5cc471465058a7a31e70ff83fe0f60badb20643de5a",
+    "report":  "D:\\VSCode Projects\\node-platform-agent-flight-recorder-20260730\\.tmp\\agent-flight-recorder\\1d27e6e1-2111-4e5a-83f0-d93a023e4ccb\\report.html"
+}

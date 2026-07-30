@@ -1,0 +1,33 @@
+{
+  "browser": "Chrome",
+  "desktop": {
+    "status": "Completed",
+    "testids": {
+      "agent-run-report": 1,
+      "run-status": 1,
+      "execution-graph": 1,
+      "exact-io": 1
+    },
+    "graphNodes": 4,
+    "horizontalOverflow": false
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "graphColumns": 1,
+    "horizontalOverflow": false,
+    "statusVisible": true
+  },
+  "keyboard": {
+    "control": "stdout disclosure",
+    "action": "Enter",
+    "opened": true
+  },
+  "appConsoleErrors": 0,
+  "screenshots": [
+    "after-desktop.png",
+    "after-mobile.png"
+  ]
+}

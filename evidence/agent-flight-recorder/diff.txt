@@ -1,0 +1,20 @@
+diff --git a/evidence/agent-flight-recorder/before.txt b/evidence/agent-flight-recorder/after.txt
+index 66d496a..8b1d90f 100644
+--- a/evidence/agent-flight-recorder/before.txt
++++ b/evidence/agent-flight-recorder/after.txt
+@@ -1,7 +1,8 @@
+-node : nodekit: unknown command: agent run
+-At line:2 char:141
+-+ ... 0:00.000Z'; node src/cli.mjs agent run --agent fixture-agent --goal ' ...
+-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-    + CategoryInfo          : NotSpecified: (nodekit: unknown command: agent run:String) [], RemoteException
+-    + FullyQualifiedErrorId : NativeCommandError
+-
++SUCCESS | fixture-agent
++Exit 0 | 70 ms | stdout 17 B | stderr 0 B | kept 17 B
++
++accepted -> ran -> completed -> evidence saved
++The requested command completed.
++
++Report:  D:\VSCode Projects\node-platform-agent-flight-recorder-20260730\.tmp\agent-flight-recorder\1d27e6e1-2111-4e5a-83f0-d93a023e4ccb\report.html
++Receipt: D:\VSCode Projects\node-platform-agent-flight-recorder-20260730\.tmp\agent-flight-recorder\1d27e6e1-2111-4e5a-83f0-d93a023e4ccb\receipt.json

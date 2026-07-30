@@ -1,0 +1,38 @@
+[
+  {
+    "phase": "intake-architecture-baseline",
+    "startedAt": "2026-07-30T22:13:59.2988277Z",
+    "evidence": "evidence/agent-flight-recorder/before.txt",
+    "note": "Captured before any implementation edit."
+  },
+  {
+    "phase": "implementation",
+    "startedAt": "2026-07-30T22:19:00.2064368Z",
+    "endedAt": "2026-07-30T22:31:28.3581084Z",
+    "evidence": "src/lib/agent-run.mjs",
+    "note": "File timestamps bound the implementation window; intermediate work was not separately timed."
+  },
+  {
+    "phase": "scenario-tests",
+    "startedAt": "2026-07-30T22:25:09.3548877Z",
+    "evidence": "test/agent-run.test.mjs",
+    "note": "Targeted test output is captured separately."
+  },
+  {
+    "phase": "after-proof",
+    "endedAt": "2026-07-30T22:33:46.6499140Z",
+    "evidence": "evidence/agent-flight-recorder/after.txt",
+    "note": "Identical baseline command rerun after the final behavior edit."
+  },
+  {
+    "phase": "browser-qa",
+    "status": "completed",
+    "evidence": "evidence/agent-flight-recorder/browser-qa.json",
+    "note": "Chrome desktop and 390x844 rendered-DOM proof passed through a loopback static server."
+  },
+  {
+    "phase": "deployment",
+    "status": "not-applicable",
+    "note": "This local CLI artifact has no hosted runtime; source publication is tracked separately."
+  }
+]

@@ -113,7 +113,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 457
+          "line": 459
         }
       ],
       "supporting": [
@@ -947,7 +947,7 @@
           {
             "scenario": "entrypoint-surface-stable",
             "file": "test/public-api.test.mjs",
-            "line": 53
+            "line": 57
           }
         ],
         "namedTestFiles": [
@@ -1040,7 +1040,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 458
+            "line": 460
           }
         ],
         "namedSourceFiles": [

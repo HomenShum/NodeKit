@@ -32,6 +32,11 @@
       "import": "./src/caseflow.mjs",
       "default": "./src/caseflow.mjs"
     },
+    "./agent-run": {
+      "types": "./src/agent-run.d.mts",
+      "import": "./src/agent-run.mjs",
+      "default": "./src/agent-run.mjs"
+    },
     "./studio": "./src/studio.mjs",
     "./submission-attestation": {
       "types": "./src/submission-attestation.d.mts",

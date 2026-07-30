@@ -45,6 +45,27 @@ Or use the CLI directly. Install dependencies first — every command below need
 npm install
 ```
 
+Record any agent command and open the generated static report:
+
+```bash
+node src/cli.mjs agent run --agent codex --goal "Inspect the repository" -- node --version
+```
+
+By default, NodeKit writes stable workspace identity to
+`.nodekit/agent-runs/workspace.json`, stable per-agent session identity under
+`.nodekit/agent-runs/sessions/`, and each invocation to
+`.nodekit/agent-runs/<run-id>/{receipt.json,report.html}`. Use `--out <dir>` to
+move the entire store. The newest 50 completed runs are retained.
+
+The recorder runs and captures one local child process: exact command arguments,
+exit state, bounded stdout/stderr, and lifecycle events. Exact I/O may contain
+sensitive data, so treat both artifacts as sensitive and review them before
+sharing. Each stream retains at most 256 KiB while preserving observed byte
+counts and full-stream digests. NodeKit itself performs no network request or
+deployment for `agent run`; the child command may do either. The recorder does
+not independently observe detached descendants, child-created files, tool
+calls, network activity, or inherited environment values.
+
 ```bash
 node src/cli.mjs create ../my-agent-app \
   --name my-agent-app \
