@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:proof-backed-deferred-review",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "24e8b997077590a735d4962f48a4d4898a2e6c0d",
+    "occurredAt": "2026-07-30T11:58:00-07:00"
+  },
+  "track": "architecture",
+  "category": "security",
+  "challenge": "Reversible material changes stopped at a cryptographic named-human promotion gate even after scenario tests and live evidence were complete, forcing an interruption that did not improve the immediate decision surface.",
+  "observedFailure": "PRs #30 and #32 passed implementation gates but remained blocked because an agent proposal could not and must not self-promote. The existing gate exposed no proof-backed autonomous lane and no larger-goal before/after view.",
+  "resolution": "Added a deferred-review receipt that keeps events agent-proposed while binding the exact commit range and material-file coverage to content-addressed before and after live I/O, an intended-goal journey card, UI media when applicable, exact rollback verification, risk exclusions, and visible deferred human review. Authority-policy changes require a bound operator directive, and high-risk path classes fail closed.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:cli-authority-bypass-and-repair"
+  ],
+  "predecessorIds": [
+    "evt:cli-authority-bypass-and-repair"
+  ],
+  "knownLimitations": [
+    "The operator directive is content-addressed but is not a canonical-event signature.",
+    "Static path exclusions are a conservative pre-action guard, not a semantic proof that arbitrary source code has no external effects.",
+    "Deferred review does not promote canonical Evolution history."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

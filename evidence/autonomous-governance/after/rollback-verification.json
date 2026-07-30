@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "nodekit.rollback-verification/v1",
+  "rollbackTarget": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
+  "strategy": "git-revert-range",
+  "checks": {
+    "baselineCannotResume": true,
+    "candidateResumes": true,
+    "durableCheckpoint": true,
+    "rawProviderIdentityPrivate": true,
+    "noCallerOwnedStatus": true
+  },
+  "passed": true
+}

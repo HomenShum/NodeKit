@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.live-io-evidence/v1",
+  "runtimeScope": "package-live-runtime",
+  "deployedBackend": false,
+  "moduleRoot": "D:\\VSCode Projects\\node-platform-native-identity-20260729",
+  "request": {
+    "intendedGoal": "Resume the exact coding-agent session after a desktop restart without substituting repository or provider identity.",
+    "operation": "workspace_bind -> session_start -> session_status -> session_resume",
+    "input": {
+      "canonicalRemote": "https://github.com/example/native-session.git",
+      "writeMode": "isolated-worktree",
+      "adapterId": "claude-code"
+    }
+  },
+  "response": {
+    "ok": true,
+    "workspaceDisposition": "created",
+    "sessionDisposition": "created",
+    "stateBeforeResume": "CHECKPOINTED",
+    "resumeState": "RESUMED",
+    "durableNewCheckpoint": true,
+    "canonicalArtifactTypes": [
+      "nodekit.native-workspace/v1",
+      "nodekit.native-agent-session/v1",
+      "nodekit.native-session-checkpoint/v1",
+      "nodekit.native-session-checkpoint/v1"
+    ],
+    "persistedRawProviderIdentity": false,
+    "persistedCallerOwnedStatus": false
+  }
+}
