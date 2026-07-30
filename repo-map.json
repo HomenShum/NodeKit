@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 101,
-    "modules": 68,
-    "tests": 75
+    "schemas": 102,
+    "modules": 69,
+    "tests": 76
   },
   "architecture": [
     {
@@ -235,7 +235,8 @@
     "nodekit.submission-candidate.v1.schema.json",
     "nodekit.submission-manifest.v1.schema.json",
     "nodekit.tournament.v1.schema.json",
-    "nodekit.visual-review-inventory.v1.schema.json"
+    "nodekit.visual-review-inventory.v1.schema.json",
+    "nodekit.workspace-reference-index.v1.schema.json"
   ],
   "modules": [
     "agent-definition.mjs",
@@ -305,7 +306,8 @@
     "submission-evidence-finalizer.mjs",
     "submission-gate.mjs",
     "submission-preparation.mjs",
-    "understand-anything.mjs"
+    "understand-anything.mjs",
+    "workspace-reference-index.mjs"
   ],
   "tests": [
     "agent-ease-campaign.test.mjs",
@@ -382,6 +384,7 @@
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
     "test-files.test.mjs",
-    "understand-anything.test.mjs"
+    "understand-anything.test.mjs",
+    "workspace-reference-index.test.mjs"
   ]
 }

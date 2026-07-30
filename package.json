@@ -63,6 +63,11 @@
       "import": "./src/native-agent-identity.mjs",
       "default": "./src/native-agent-identity.mjs"
     },
+    "./workspace-reference-index": {
+      "types": "./src/workspace-reference-index.d.mts",
+      "import": "./src/workspace-reference-index.mjs",
+      "default": "./src/workspace-reference-index.mjs"
+    },
     "./builder-gym": {
       "types": "./src/builder-gym.d.mts",
       "import": "./src/builder-gym.mjs",

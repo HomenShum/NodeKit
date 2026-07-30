@@ -8,3 +8,4 @@ export * from "./research-collector.mjs";
 export * from "./managed-evidence-capture.mjs";
 export * from "./reference-loop.mjs";
 export * from "./native-agent-identity.mjs";
+export * from "./workspace-reference-index.mjs";

@@ -29,6 +29,10 @@ The detached-signature trust model, verifier ownership rules, and signing handof
 [`docs/ATTESTATIONS.md`](https://github.com/HomenShum/node-platform/blob/main/docs/ATTESTATIONS.md). A local maintainer-generated signature is not an
 independent external gate attestation.
 
+The disposable [`workspace-reference-index`](docs/WORKSPACE_REFERENCE_INDEX.md) stores bounded
+Caseflow artifact refs and digests only. Native workspace, session, and checkpoint artifacts remain
+canonical; the index cannot resume or authorize a session.
+
 Node Platform remains its ownership layer: it records which repository owns each shared contract and fails CI when a new fork or clear layer violation appears.
 
 ## From a brief to a running app
