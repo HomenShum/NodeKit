@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.execution-trace.v1.schema.json",
+  "title": "NodeTrace execution events for a compiled execution graph",
+  "type": "object",
+  "required": ["schemaVersion", "graphId", "graphDigest", "traceDigest", "events"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.execution-trace/v1" },
+    "graphId": { "type": "string", "pattern": "^execution-graph:sha256:[a-f0-9]{64}$" },
+    "graphDigest": { "$ref": "#/$defs/hash" },
+    "traceDigest": { "$ref": "#/$defs/hash" },
+    "events": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifact": {
+      "type": "object",
+      "required": ["artifactRef", "digest", "schemaVersion", "kind", "revision", "authority", "completeness", "limitations"],
+      "properties": {
+        "artifactRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+        "digest": { "$ref": "#/$defs/hash" },
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "kind": { "$ref": "#/$defs/nonEmpty" },
+        "revision": { "$ref": "#/$defs/nonEmpty" },
+        "authority": { "enum": ["canonical", "proposal", "evidence", "verification", "human-approval"] },
+        "completeness": { "enum": ["complete", "partial"] },
+        "limitations": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "$ref": "#/$defs/nonEmpty" },
+        "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+        "message": { "$ref": "#/$defs/nonEmpty" }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "sequence", "nodeId", "taskHandle", "attempt", "status", "actorClass", "actorRef",
+        "startedAt", "completedAt", "findings", "handoffs"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "nodeId": { "$ref": "#/$defs/nonEmpty" },
+        "taskHandle": { "type": "string", "pattern": "^task:sha256:[a-f0-9]{64}$" },
+        "attempt": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "status": { "enum": ["passed", "failed", "blocked"] },
+        "actorClass": { "enum": ["builder", "reviewer", "evaluator", "human", "runtime"] },
+        "actorRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+        "startedAt": { "$ref": "#/$defs/nonEmpty" },
+        "completedAt": { "$ref": "#/$defs/nonEmpty" },
+        "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "handoffs": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "type": "object",
+            "required": ["edgeId", "artifact"],
+            "properties": {
+              "edgeId": { "type": "string", "pattern": "^edge:sha256:[a-f0-9]{64}$" },
+              "artifact": { "$ref": "#/$defs/artifact" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

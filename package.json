@@ -58,6 +58,11 @@
       "import": "./src/reference-loop.mjs",
       "default": "./src/reference-loop.mjs"
     },
+    "./execution-graph": {
+      "types": "./src/execution-graph.d.mts",
+      "import": "./src/execution-graph.mjs",
+      "default": "./src/execution-graph.mjs"
+    },
     "./builder-gym": {
       "types": "./src/builder-gym.d.mts",
       "import": "./src/builder-gym.mjs",
@@ -152,6 +157,7 @@
     "templates",
     "plugins",
     "evolution",
+    "docs/EXECUTION_GRAPH_OF_LOOPS.md",
     "ownership.yaml",
     "repositories.yaml",
     "architecture.yaml",

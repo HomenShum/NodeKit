@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.execution-strategy-experiment.v1.schema.json",
+  "title": "Sequential versus graph execution experiment verdict",
+  "type": "object",
+  "required": ["schemaVersion", "taskRef", "taskDigest", "thresholds", "arms", "gates", "passed", "experimentDigest"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.execution-strategy-experiment/v1" },
+    "taskRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+    "taskDigest": { "$ref": "#/$defs/hash" },
+    "thresholds": {
+      "type": "object",
+      "required": ["minimumRunsPerArm", "maximumSuccessRateRegression", "maximumMedianDurationRatio", "maximumMedianCostRatio", "minimumCompletenessLift"],
+      "properties": {
+        "minimumRunsPerArm": { "type": "integer", "minimum": 2, "maximum": 100 },
+        "maximumSuccessRateRegression": { "$ref": "#/$defs/rate" },
+        "maximumMedianDurationRatio": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "maximumMedianCostRatio": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "minimumCompletenessLift": { "$ref": "#/$defs/rate" }
+      },
+      "additionalProperties": false
+    },
+    "arms": {
+      "type": "object",
+      "required": ["sequential", "graph"],
+      "properties": {
+        "sequential": { "$ref": "#/$defs/arm" },
+        "graph": { "$ref": "#/$defs/arm" }
+      },
+      "additionalProperties": false
+    },
+    "gates": {
+      "type": "object",
+      "required": ["sampleSize", "successRate", "duration", "cost", "completeness"],
+      "properties": {
+        "sampleSize": { "type": "boolean" },
+        "successRate": { "type": "boolean" },
+        "duration": { "type": "boolean" },
+        "cost": { "type": "boolean" },
+        "completeness": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "passed": { "type": "boolean" },
+    "experimentDigest": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "arm": {
+      "type": "object",
+      "required": ["runs", "successRate", "medianDurationMs", "medianCostUsd", "medianArtifactCompleteness", "medianHumanReprompts", "medianFindingCount"],
+      "properties": {
+        "runs": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "successRate": { "$ref": "#/$defs/rate" },
+        "medianDurationMs": { "type": "number", "minimum": 0, "maximum": 86400000 },
+        "medianCostUsd": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "medianArtifactCompleteness": { "$ref": "#/$defs/rate" },
+        "medianHumanReprompts": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "medianFindingCount": { "type": "number", "minimum": 0, "maximum": 100000 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

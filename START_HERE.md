@@ -47,7 +47,7 @@ Five parts own everything. You should be able to name them after the tour:
 |---|---|
 | **Contracts** (`schemas/`) | The typed shapes everything agrees on |
 | **Factory** (`src/lib/scaffold.mjs`) | Turning a directory into a working application |
-| **Caseflow runtime** (`src/lib/caseflow.mjs`) | The lifecycle: Case → Run → Stage → Artifact → Proposal → Approval → Receipt |
+| **Caseflow runtime** (`src/lib/caseflow.mjs`) | Canonical lifecycle plus its disposable bounded-loop execution projection ([contract](docs/EXECUTION_GRAPH_OF_LOOPS.md)) |
 | **Proof** (`src/lib/frontend-render-contract.mjs`) | Deciding whether a result is real, by generating evidence |
 | **Evolution Ledger** (`src/lib/evolution-ledger.mjs`) | Recording why the system changed |
 
