@@ -113,7 +113,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 450
+          "line": 452
         }
       ],
       "supporting": [
@@ -1040,7 +1040,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 451
+            "line": 453
           }
         ],
         "namedSourceFiles": [
@@ -1077,7 +1077,7 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
-      "line": 368
+      "line": 648
     },
     {
       "behaviorId": "inv:canonical-promotion-requires-verified-approval",

@@ -4,7 +4,7 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 102,
+    "schemas": 103,
     "modules": 69,
     "tests": 76
   },
@@ -157,6 +157,7 @@
     "nodekit.engineering-issue-inventory.v1.schema.json",
     "nodekit.evidence-snapshot.v1.schema.json",
     "nodekit.evolution-adoption.v1.schema.json",
+    "nodekit.evolution-deferred-review.v1.schema.json",
     "nodekit.evolution-event.v1.schema.json",
     "nodekit.evolution-evidence.v1.schema.json",
     "nodekit.experience-asset.v1.schema.json",
