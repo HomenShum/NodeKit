@@ -44,14 +44,14 @@
     "before": [
       {
         "ref": "evidence/governance-graph-visualization/before/cli.txt",
-        "sha256": "83bfed34d60df75e60c2374e2f35aab5b30b80804b1360f8a003569096c5fa97",
+        "sha256": "6e77f4f2f8c6cbe5be041630cec9a8412ae87eefd24d694c942a1f6cabea4947",
         "kind": "live-io"
       }
     ],
     "after": [
       {
         "ref": "evidence/governance-graph-visualization/after/cli-final.txt",
-        "sha256": "6e0f66d09aff7f7c803dad900b81a9c967f9319a9d2a0183aea6ad1c951b3fc3",
+        "sha256": "c4b189d366c652c6a619b191daf3d229e2b41cbbb40f826ce075cc70ee0d2beb",
         "kind": "live-io"
       },
       {
@@ -61,7 +61,7 @@
       },
       {
         "ref": "evidence/governance-graph-visualization/after/targeted-tests-final.txt",
-        "sha256": "9064213e6f715e51b2ea8dd16f95cb0364e6bbed887fafeb51c495784f5760ab",
+        "sha256": "a57d0adf6afb35832f3f1fd30f08fee27e2a91caebf5c7a3da32370bfffcd581",
         "kind": "test-log"
       },
       {
@@ -101,5 +101,5 @@
     "status": "deferred-human-review",
     "feedbackChannel": "pull-request"
   },
-  "receiptDigest": "ec60e685f369792f82e836ca3b099a00070450ce69c5e6dc1a5d5f00b0adffed"
+  "receiptDigest": "e11e4a8b7195f1517726f4670dec29633f37a533a97fe58f1f4b91c341698ff8"
 }

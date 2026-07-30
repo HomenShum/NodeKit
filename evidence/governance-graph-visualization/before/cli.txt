@@ -1,4 +1,4 @@
-﻿node.exe : nodekit: unknown command: governance visualize
+node.exe : nodekit: unknown command: governance visualize
 At line:2 char:443
 + ... cmdOutput = & node src/cli.mjs governance visualize --scenario pr32 - ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

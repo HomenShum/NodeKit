@@ -1,4 +1,4 @@
-﻿TAP version 13
+TAP version 13
 # Subtest: founder ships a reversible architecture candidate without an architecture-only interruption
 ok 1 - founder ships a reversible architecture candidate without an architecture-only interruption
   ---
