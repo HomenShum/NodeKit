@@ -117,6 +117,7 @@ import {
   createPr32GovernanceScenario,
   renderGovernanceGraphHtml,
 } from "./lib/governance.mjs";
+import { runAgent } from "./lib/agent-run.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -161,6 +162,7 @@ Usage:
   nodekit compile [--repo-root <path>] [--check] [--json]
   nodekit inspect [--repo-root <path>] [--json]
   nodekit doctor [--repo-root <path>] [--json]
+  nodekit agent run --agent <label> --goal <text> [--out <dir>] [--timeout-ms <n>] [--json] -- <program> [args...]
   nodekit dev|demo|check|proof [--repo-root <path>] [-- <args>]
   nodekit repo check [--repo-root <path>] [--json]
   nodekit motion compare <repoA> <repoB> [repoC ...] [--output <receipt.json>] [--json]
@@ -1860,6 +1862,75 @@ async function main() {
   }
   if (first === "doctor") {
     await runDoctor(parsed);
+    return;
+  }
+  if (first === "agent" && second === "run") {
+    const allowedOptions = new Set([
+      "agent",
+      "goal",
+      "json",
+      "out",
+      "timeout-ms",
+    ]);
+    const unknownOptions = Object.keys(parsed.options)
+      .filter((name) => !allowedOptions.has(name))
+      .sort();
+    if (unknownOptions.length > 0) {
+      throw new Error(`unknown agent run option: --${unknownOptions[0]}`);
+    }
+    if (parsed.positional.length !== 2) {
+      throw new Error("agent run accepts no positional values before --");
+    }
+    const [program, ...args] = parsed.commandArgs;
+    if (!program) throw new Error("a program is required after the -- separator");
+    if (parsed.options.out === true) throw new Error("--out requires a directory");
+    if (parsed.options["timeout-ms"] === true) {
+      throw new Error("--timeout-ms requires an integer");
+    }
+    const output = await runAgent({
+      agent: parsed.options.agent,
+      args,
+      cwd: process.cwd(),
+      goal: parsed.options.goal,
+      out: parsed.options.out,
+      program,
+      timeoutMs: parsed.options["timeout-ms"],
+    });
+    if (parsed.options.json) {
+      console.log(
+        JSON.stringify({
+          ...output.receipt,
+          artifactPaths: {
+            receipt: output.receiptPath,
+            report: output.reportPath,
+          },
+        }, null, 2),
+      );
+    } else {
+      const receipt = output.receipt;
+      const label = receipt.status === "completed"
+        ? "SUCCESS"
+        : receipt.status.toUpperCase();
+      const pathLine = receipt.status === "completed"
+        ? "accepted -> ran -> completed -> evidence saved"
+        : receipt.status === "timeout"
+          ? "accepted -> ran -> timed out -> partial evidence saved"
+          : "accepted -> ran -> failed -> evidence saved";
+      console.log(`${label} | ${receipt.agent.label}`);
+      console.log(
+        `Exit ${receipt.process.exitCode ?? "none"} | ${receipt.durationMs} ms | stdout ${receipt.io.stdout.observedBytes} B | stderr ${receipt.io.stderr.observedBytes} B | kept ${receipt.io.stdout.retainedBytes + receipt.io.stderr.retainedBytes} B`,
+      );
+      console.log("");
+      console.log(pathLine);
+      console.log(receipt.outcome.summary);
+      console.log("");
+      console.log(`Report:  ${output.reportPath}`);
+      console.log(`Receipt: ${output.receiptPath}`);
+    }
+    if (output.receipt.status === "timeout") process.exitCode = 124;
+    else if (output.receipt.status === "failed") {
+      process.exitCode = output.receipt.process.exitCode || 1;
+    }
     return;
   }
   if (first === "certify") {

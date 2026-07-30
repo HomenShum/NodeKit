@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 112,
-    "modules": 71,
-    "tests": 78
+    "modules": 72,
+    "tests": 79
   },
   "architecture": [
     {
@@ -44,6 +44,7 @@
     "description": "Top-level `nodekit <command>` verbs, derived from the CLI dispatch.",
     "topLevel": [
       "adopt",
+      "agent",
       "atlas",
       "behavior",
       "certify",
@@ -253,6 +254,7 @@
     "agent-definition.mjs",
     "agent-ease-campaign.mjs",
     "agent-ease-report.mjs",
+    "agent-run.mjs",
     "atlas-mcp.mjs",
     "atlas-rank.mjs",
     "atlas-retrieval.mjs",
@@ -325,6 +327,7 @@
   "tests": [
     "agent-ease-campaign.test.mjs",
     "agent-ease-matrix.test.mjs",
+    "agent-run.test.mjs",
     "atlas-retrieval.test.mjs",
     "atlas.test.mjs",
     "behavior-index.test.mjs",

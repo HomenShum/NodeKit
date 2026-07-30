@@ -11,3 +11,4 @@ export * from "./native-agent-identity.mjs";
 export * from "./workspace-reference-index.mjs";
 export * from "./execution-graph.mjs";
 export * from "./governance.mjs";
+export * from "./agent-run.mjs";

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "nodekit.evolution-deferred-review/v1",
+  "id": "deferred-review:sha256:ade2ee4384d18108c81f34b24d83d2710f96ee3512ba51ca84cf27c147a5c11d",
+  "events": [
+    {
+      "eventId": "evt:agent-flight-recorder",
+      "draftRef": "evolution/drafts/evt-agent-flight-recorder.json",
+      "draftDigest": "ed8c1b690ddb38370040639a90c908b5a3a7b5394143c2bf7031ec268e8558fc",
+      "sourceCommit": "3d8bbfde8920db706139fafbeb52837ec08567c0"
+    }
+  ],
+  "range": {
+    "from": "87b8a44d02d1f1b087932814c4e1827713c0c6d0",
+    "reviewedTo": "3d8bbfde8920db706139fafbeb52837ec08567c0"
+  },
+  "risk": {
+    "classification": "reversible",
+    "effects": {
+      "destructiveWrite": false,
+      "credentialOrAuthorityChange": false,
+      "irreversibleMigration": false,
+      "materialSpend": false,
+      "externalCommunication": false,
+      "legalOrComplianceCommitment": false,
+      "unverifiedRollback": false
+    }
+  },
+  "coverage": {
+    "materialFiles": [
+      "src/agent-run.d.mts",
+      "src/agent-run.mjs",
+      "src/cli-main.mjs",
+      "src/index.d.mts",
+      "src/index.mjs",
+      "src/lib/agent-run.mjs"
+    ]
+  },
+  "evidence": {
+    "before": [
+      {
+        "ref": "evidence/agent-flight-recorder/before.txt",
+        "sha256": "b0aaad21dab8733af7bffd2b05fea4eaafa7f90797f2064a2ca6525195f94a3e",
+        "kind": "live-io"
+      }
+    ],
+    "after": [
+      {
+        "ref": "evidence/agent-flight-recorder/after.txt",
+        "sha256": "dcd11e5da7d7ae5c687c0ef892e96d2d927657496a23286acf1ff39a2207ae02",
+        "kind": "live-io"
+      },
+      {
+        "ref": "changes/agent-flight-recorder-slice/presentation/change-card.md",
+        "sha256": "e179feee9fe28b6ff1247e5318656011bf5e5fef934d48300aa50ec4a6031fc0",
+        "kind": "journey-card"
+      },
+      {
+        "ref": "evidence/agent-flight-recorder/rollback-verification.txt",
+        "sha256": "4050da7e119aec5969d7dcd6856972834acbbeafa565e828622fa6b6d17d2314",
+        "kind": "test-log"
+      },
+      {
+        "ref": "evidence/agent-flight-recorder/after-desktop.png",
+        "sha256": "efd7c1efe6e0dd28a4f842f4bbed72acdfec286b5b3d330d8bd447c40d21848a",
+        "kind": "ui-screenshot"
+      },
+      {
+        "ref": "evidence/agent-flight-recorder/after-mobile.png",
+        "sha256": "0ecc9a14afa28049b0c4606c9974942742738a8d1e7d07e2645cf3a10ab2e0d5",
+        "kind": "ui-screenshot"
+      }
+    ]
+  },
+  "uiSurface": {
+    "changed": true,
+    "mediaRequired": true,
+    "mediaRefs": [
+      "evidence/agent-flight-recorder/after-desktop.png",
+      "evidence/agent-flight-recorder/after-mobile.png"
+    ]
+  },
+  "rollback": {
+    "targetCommit": "87b8a44d02d1f1b087932814c4e1827713c0c6d0",
+    "strategy": "git-revert-range",
+    "verificationRefs": [
+      "evidence/agent-flight-recorder/rollback-verification.txt"
+    ]
+  },
+  "review": {
+    "status": "deferred-human-review",
+    "feedbackChannel": "pull-request"
+  },
+  "receiptDigest": "d5ece75a55be35cdbbbe05ea10f37fbd45da0e54e16d087daa2daf86c70d1226"
+}

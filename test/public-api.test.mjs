@@ -49,6 +49,10 @@ import * as nativeAgentIdentity from "@homenshum/nodekit/native-agent-identity";
 import {
   workspace_bind as workspaceBindFromRoot,
 } from "@homenshum/nodekit";
+import {
+  AGENT_RUN_LIMITS,
+  runAgent,
+} from "@homenshum/nodekit/agent-run";
 
 // @nodekit-verifies inv:stable-caseflow-package-entrypoint#entrypoint-surface-stable
 test("published Caseflow entry point exposes the supported portable contract", async () => {
@@ -81,6 +85,8 @@ test("published Caseflow entry point exposes the supported portable contract", a
   assert.equal(typeof session_resume, "function");
   assert.equal(typeof session_status, "function");
   assert.equal(workspaceBindFromRoot, workspace_bind);
+  assert.equal(typeof runAgent, "function");
+  assert.equal(AGENT_RUN_LIMITS.retention, 50);
   assert.deepEqual(Object.keys(nativeAgentIdentity).sort(), [
     "NativeAgentSessionError",
     "session_checkpoint",
@@ -138,6 +144,11 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     types: "./src/native-agent-identity.d.mts",
     import: "./src/native-agent-identity.mjs",
     default: "./src/native-agent-identity.mjs",
+  });
+  assert.deepEqual(packageJson.exports["./agent-run"], {
+    types: "./src/agent-run.d.mts",
+    import: "./src/agent-run.mjs",
+    default: "./src/agent-run.mjs",
   });
   assert.equal(packageJson.bin["nodekit-consumer-prepare"], "scripts/prepare-consumer-package.mjs");
   assert.equal(packageJson.bin["nodekit-evidence-capture"], "scripts/capture-managed-evidence.mjs");

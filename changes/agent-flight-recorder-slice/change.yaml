@@ -1,0 +1,57 @@
+schemaVersion: nodekit.change-story/v1
+id: agent-flight-recorder-slice
+title: First productized Agent Flight Recorder slice
+changeType: feature
+audience:
+  - agent researcher
+  - hackathon builder
+  - NodeKit maintainer
+presentationTier: 1
+problem:
+  previousState: NodeKit exposed identity, execution-graph, and governance primitives but no single local command joined them into durable process evidence.
+  painOrRisk: Researchers had to assemble process output, identity, status, and shareable proof manually, making failed runs easy to mislabel or lose.
+  affectedUsers:
+    - coding-agent researchers
+    - hackathon participants
+    - local tool builders
+decision:
+  selectedApproach: Add one lightweight public agent-run facade and a thin CLI route instead of coupling local subprocess capture to the Caseflow-backed native identity adapter.
+  alternatives:
+    - force every local process through the native identity adapter
+    - emit terminal logs only
+    - add a long-running service and database
+  tradeoffs:
+    - the recorder observes the direct process boundary, not child tool semantics
+    - output is bounded and may be truncated
+    - static reports are portable but not interactive telemetry consoles
+implementation:
+  affectedSystems:
+    - public agent-run module
+    - NodeKit CLI
+    - filesystem identity and run store
+    - static HTML report
+    - public package exports and types
+  importantContracts:
+    - nodekit.agent-run/v1
+    - nodekit.agent-run-graph/v1
+    - nodekit.agent-run-workspace/v1
+    - nodekit.agent-run-session/v1
+proofRequirements:
+  - successful real local process with exact stdout
+  - failed process with honest stderr and exit
+  - timeout with partial evidence and nonzero CLI exit
+  - bounded high-volume output
+  - concurrent unique runs
+  - sustained retention eviction
+  - HTML escaping and literal shell metacharacters
+  - public package export and type consumer
+  - Chrome desktop and 390x844 rendered-DOM proof with keyboard disclosure
+approvalBoundaries:
+  - no deployment
+  - no npm publication
+  - no network calls
+  - no secrets or environment capture
+limitations:
+  - detached descendant processes are terminated best-effort
+  - exact command arguments and bounded I/O may contain sensitive values and must be reviewed before sharing
+nextMilestone: Add opt-in richer process and tool-event adapters without changing the receipt contract.
