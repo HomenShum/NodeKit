@@ -4,9 +4,9 @@
 >
 > **Append rule**: Add entries at the top. Never rewrite historical entries.
 
-## 2026-07-30 — Generate the reference-chain edge validator
+## 2026-07-29 — Generate the reference-chain edge validator
 Include the new edge schema in the committed standalone validator bundle so packaged consumers fail closed with the same schema as the source repository.
-**Commit**: `PENDING`. **Author**: Codex.
+**Commit**: `851ce7c`. **Author**: Codex.
 **Touches**: `CHANGELOG/contracts/reference-chain-edge.md`, `CHANGELOG/server/reference-loop.md`
 
 ---

@@ -4,9 +4,9 @@
 >
 > **Append rule**: Add entries at the top. Never rewrite historical entries.
 
-## 2026-07-30 — Verify reference-chain bindings without granting authority
+## 2026-07-29 — Verify reference-chain bindings without granting authority
 Add deterministic edge construction and exact-context verification for endpoint, Caseflow, repository, attestation, and receipt bindings. Verification is stateless and fail-closed; projections cannot turn the edge into a verdict.
-**Commit**: `PENDING`. **Author**: Codex.
+**Commit**: `851ce7c`. **Author**: Codex.
 **Touches**: `CHANGELOG/contracts/reference-chain-edge.md`, `CHANGELOG/scripts/reference-schema-validators.md`
 
 ---

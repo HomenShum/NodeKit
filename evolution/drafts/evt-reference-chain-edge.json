@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:reference-chain-edge",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "851ce7cf0d57c9e11ba2a136c351c1cc5a812891",
+    "occurredAt": "2026-07-29T21:45:26-07:00"
+  },
+  "track": "architecture",
+  "category": "schema",
+  "challenge": "NodeKit reference records could close inside one scoring workflow, but NodeRoom and other applications had no small public contract that bound an exact record-to-record handoff to the current Caseflow and repository revision without inventing another store or verdict authority.",
+  "observedFailure": "A consumer could display a rule, receipt, or feed projection while the relationship to the exact upstream digest, candidate commit, stage state, or authority evidence remained implicit and therefore vulnerable to stale or inflated status.",
+  "resolution": "Added one immutable content-addressed reference-chain edge with exact source and target record refs, Caseflow and repository bindings, typed attestation or receipt evidence, deterministic verification, strict bounds, and no caller-supplied pass, approval, verification, verdict, or stage-advance field.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:reference-chain-edge"
+  ],
+  "evidenceIds": [
+    "evd:reference-chain-edge"
+  ],
+  "knownLimitations": [
+    "No downstream consumer is registered until its own exact integration lands.",
+    "Endpoint-specific validators, Caseflow, receipt authorities, and external NodeProof retain their own decision authority.",
+    "NodeRoom integration and the 48-render proof remain separate consumer work.",
+    "Canonical promotion requires a separately verified human approval."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

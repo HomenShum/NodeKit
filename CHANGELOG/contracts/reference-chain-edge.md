@@ -4,9 +4,9 @@
 >
 > **Append rule**: Add entries at the top. Never rewrite historical entries.
 
-## 2026-07-30 — Bind exact cross-application reference handoffs
+## 2026-07-29 — Bind exact cross-application reference handoffs
 Define `nodekit.reference-chain-edge/v1` with exact source and target record digests, current Caseflow state, repository revision, typed authority evidence, deterministic identity, and explicit limits. The contract has no verdict or stage authority and rejects caller-supplied pass, approval, or verification fields.
-**Commit**: `PENDING`. **Author**: Codex.
+**Commit**: `851ce7c`. **Author**: Codex.
 **Touches**: `CHANGELOG/server/reference-loop.md`, `CHANGELOG/scripts/reference-schema-validators.md`
 
 ---
