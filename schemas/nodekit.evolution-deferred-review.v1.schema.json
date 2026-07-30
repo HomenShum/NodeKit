@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.evolution-deferred-review.v1.schema.json",
+  "title": "Proof-backed deferred human review for a reversible material change",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "events",
+    "range",
+    "risk",
+    "coverage",
+    "evidence",
+    "uiSurface",
+    "rollback",
+    "review",
+    "receiptDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.evolution-deferred-review/v1" },
+    "id": { "type": "string", "pattern": "^deferred-review:[a-z0-9._:-]+$" },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/eventRef" }
+    },
+    "range": {
+      "type": "object",
+      "required": ["from", "reviewedTo"],
+      "properties": {
+        "from": { "$ref": "#/$defs/commit" },
+        "reviewedTo": { "$ref": "#/$defs/commit" }
+      },
+      "additionalProperties": false
+    },
+    "risk": {
+      "type": "object",
+      "required": ["classification", "effects"],
+      "properties": {
+        "classification": { "const": "reversible" },
+        "effects": {
+          "type": "object",
+          "required": [
+            "destructiveWrite",
+            "credentialOrAuthorityChange",
+            "irreversibleMigration",
+            "materialSpend",
+            "externalCommunication",
+            "legalOrComplianceCommitment",
+            "unverifiedRollback"
+          ],
+          "properties": {
+            "destructiveWrite": { "const": false },
+            "credentialOrAuthorityChange": { "type": "boolean" },
+            "irreversibleMigration": { "const": false },
+            "materialSpend": { "const": false },
+            "externalCommunication": { "const": false },
+            "legalOrComplianceCommitment": { "const": false },
+            "unverifiedRollback": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "authorityDirective": {
+          "type": "object",
+          "required": ["ref", "sha256", "assurance"],
+          "properties": {
+            "ref": { "$ref": "#/$defs/relativePath" },
+            "sha256": { "$ref": "#/$defs/hash" },
+            "assurance": { "const": "operator-directed-in-session" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "effects": {
+                "properties": { "credentialOrAuthorityChange": { "const": true } },
+                "required": ["credentialOrAuthorityChange"]
+              }
+            }
+          },
+          "then": { "required": ["authorityDirective"] },
+          "else": { "not": { "required": ["authorityDirective"] } }
+        }
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["materialFiles"],
+      "properties": {
+        "materialFiles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/relativePath" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["before", "after"],
+      "properties": {
+        "before": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/evidenceRef" }
+        },
+        "after": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/evidenceRef" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "uiSurface": {
+      "type": "object",
+      "required": ["changed", "mediaRequired", "mediaRefs"],
+      "properties": {
+        "changed": { "type": "boolean" },
+        "mediaRequired": { "type": "boolean" },
+        "reason": { "$ref": "#/$defs/nonEmpty" },
+        "mediaRefs": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/relativePath" }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "changed": { "const": true } }, "required": ["changed"] },
+          "then": {
+            "properties": {
+              "mediaRequired": { "const": true },
+              "mediaRefs": { "minItems": 1 }
+            }
+          },
+          "else": {
+            "required": ["reason"],
+            "properties": {
+              "mediaRequired": { "const": false },
+              "mediaRefs": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "rollback": {
+      "type": "object",
+      "required": ["targetCommit", "strategy", "verificationRefs"],
+      "properties": {
+        "targetCommit": { "$ref": "#/$defs/commit" },
+        "strategy": { "const": "git-revert-range" },
+        "verificationRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/relativePath" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "required": ["status", "feedbackChannel"],
+      "properties": {
+        "status": { "const": "deferred-human-review" },
+        "feedbackChannel": { "enum": ["pull-request", "caseflow"] }
+      },
+      "additionalProperties": false
+    },
+    "receiptDigest": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "evidenceRef": {
+      "type": "object",
+      "required": ["ref", "sha256", "kind"],
+      "properties": {
+        "ref": { "$ref": "#/$defs/relativePath" },
+        "sha256": { "$ref": "#/$defs/hash" },
+        "kind": {
+          "enum": [
+            "live-io",
+            "ci-log",
+            "test-log",
+            "schema-diff",
+            "runtime-trace",
+            "journey-card",
+            "operator-directive",
+            "ui-screenshot",
+            "ui-clip"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "eventRef": {
+      "type": "object",
+      "required": ["eventId", "draftRef", "draftDigest", "sourceCommit"],
+      "properties": {
+        "eventId": { "$ref": "#/$defs/nonEmpty" },
+        "draftRef": { "$ref": "#/$defs/relativePath" },
+        "draftDigest": { "$ref": "#/$defs/hash" },
+        "sourceCommit": { "$ref": "#/$defs/commit" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

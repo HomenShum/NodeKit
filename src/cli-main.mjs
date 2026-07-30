@@ -98,6 +98,7 @@ import { serveAtlasMcp } from "./lib/atlas-mcp.mjs";
 import {
   buildEvolutionDocs,
   checkEvolutionMateriality,
+  createDeferredEvolutionReview,
   diffEvolutionLedger,
   draftEvolutionEvent,
   initializeEvolutionLedger,
@@ -214,6 +215,7 @@ Usage:
   nodekit evolution query [--track <track>] [--since <iso>] [--invariant <id>] [--repo-root <path>] [--json]
   nodekit evolution diff --from <commit> --to <commit> [--repo-root <path>] [--json]
   nodekit evolution materiality --from <commit> --to <commit> [--repo-root <path>] [--json]
+  nodekit evolution defer-review --drafts <comma-list> --from <commit> --to <commit> --rollback <commit> --before-live <file> --after-live <file> --journey-card <file> --rollback-verification <comma-list> (--ui-media <comma-list> | --ui-not-applicable <reason>) [--authority-directive <file>] [--repo-root <path>] [--json]
   nodekit evolution build-docs [--repo-root <path>] [--json]
   nodekit evolution sync-graph [--graph-path <path>] [--repo-root <path>] [--json]
   nodekit session migrate-legacy --input <legacy.json>
@@ -1401,8 +1403,45 @@ async function runEvolutionDiff(parsed) {
 
 async function runEvolutionMateriality(parsed) {
   const output = await checkEvolutionMateriality(repoRootFrom(parsed), requireOption(parsed, "from"), requireOption(parsed, "to"));
-  printStructured(output, parsed, (value) => `EVOLUTION MATERIALITY ${value.passed ? "PASS" : "BLOCKED"}: ${value.materialFiles.length} material files, ${value.events.length} recorded events`);
+  printStructured(output, parsed, (value) =>
+    `EVOLUTION MATERIALITY ${value.passed ? "PASS" : "BLOCKED"}: ${value.materialFiles.length} material files, ${value.events.length} recorded events, ${value.deferredReviews.length} proof-backed deferred reviews`);
   if (!output.passed) process.exitCode = 1;
+}
+
+async function runEvolutionDeferReview(parsed) {
+  const uiMedia = optionList(parsed, "ui-media");
+  if (uiMedia.length > 0 && parsed.options["ui-not-applicable"]) {
+    throw new Error("choose either --ui-media or --ui-not-applicable, not both");
+  }
+  const before = [
+    { ref: requireOption(parsed, "before-live"), kind: "live-io" },
+    ...optionList(parsed, "before-ci").map((ref) => ({ ref, kind: "ci-log" })),
+    ...optionList(parsed, "authority-directive").map((ref) => ({ ref, kind: "operator-directive" })),
+  ];
+  const after = [
+    { ref: requireOption(parsed, "after-live"), kind: "live-io" },
+    { ref: requireOption(parsed, "journey-card"), kind: "journey-card" },
+    ...optionList(parsed, "after-test").map((ref) => ({ ref, kind: "test-log" })),
+    ...uiMedia.map((ref) => ({
+      ref,
+      kind: /\.(?:gif|mp4|webm|mov)$/iu.test(ref) ? "ui-clip" : "ui-screenshot",
+    })),
+  ];
+  const output = await createDeferredEvolutionReview(repoRootFrom(parsed), {
+    draftRefs: optionList(parsed, "drafts"),
+    from: requireOption(parsed, "from"),
+    to: requireOption(parsed, "to"),
+    rollbackTarget: requireOption(parsed, "rollback"),
+    before,
+    after,
+    uiChanged: uiMedia.length > 0,
+    uiReason: parsed.options["ui-not-applicable"],
+    rollbackVerificationRefs: optionList(parsed, "rollback-verification"),
+    authorityDirectiveRef: parsed.options["authority-directive"],
+    feedbackChannel: parsed.options["feedback-channel"],
+  });
+  printStructured(output, parsed, (value) =>
+    `DEFERRED REVIEW ${value.receipt.id}: ${value.receipt.coverage.materialFiles.length} material files, ${value.receipt.events.length} agent-proposed events, exact before/after evidence bound`);
 }
 
 async function runEvolutionBuildDocs(parsed) {
@@ -1992,6 +2031,10 @@ async function main() {
   }
   if (first === "evolution" && second === "materiality") {
     await runEvolutionMateriality(parsed);
+    return;
+  }
+  if (first === "evolution" && second === "defer-review") {
+    await runEvolutionDeferReview(parsed);
     return;
   }
   if (first === "evolution" && second === "build-docs") {

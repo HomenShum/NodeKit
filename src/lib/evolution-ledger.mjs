@@ -28,6 +28,286 @@ function canonical(value) {
   return JSON.stringify(value);
 }
 
+const DEFERRED_REVIEW_SCHEMA = "nodekit.evolution-deferred-review.v1.schema.json";
+const DEFERRED_REVIEW_ROOT = path.join("evolution", "deferred-reviews");
+const MAX_DEFERRED_EVIDENCE_BYTES = 2 * 1024 * 1024;
+const AUTHORITY_PATHS = Object.freeze([
+  /^src\/lib\/evolution-(?:approval|ledger|trust)\.mjs$/u,
+  /^schemas\/nodekit\.evolution-(?:approval|deferred-review|trust-policy)\./u,
+  /^evolution\/trust-policy\.json$/u,
+]);
+const PRE_ACTION_REVIEW_PATHS = Object.freeze([
+  /^\.github\/workflows\//u,
+  /(?:^|\/)(?:credentials?|secrets?|migrations?|billing|payments?|deploy|publishing?)(?:\/|\.|$)/iu,
+]);
+
+async function evidenceRef(root, ref, kind) {
+  const absolute = resolveInside(root, ref, "deferred-review evidence");
+  const bytes = await readFile(absolute);
+  if (bytes.byteLength > MAX_DEFERRED_EVIDENCE_BYTES) {
+    throw new Error(`deferred-review evidence exceeds ${MAX_DEFERRED_EVIDENCE_BYTES} bytes: ${ref}`);
+  }
+  return { ref: ref.replaceAll("\\", "/"), sha256: digest(bytes), kind };
+}
+
+function receiptDigest(receipt) {
+  const { receiptDigest: ignored, ...subject } = receipt;
+  return digest(canonical(subject));
+}
+
+function commitsInRange(root, from, to) {
+  return new Set(git(root, ["rev-list", `${from}..${to}`]).split(/\r?\n/).filter(Boolean));
+}
+
+function isAncestor(root, ancestor, descendant) {
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", ancestor, descendant], {
+      cwd: root,
+      stdio: "ignore",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function createDeferredEvolutionReview(repoRoot, input) {
+  const root = path.resolve(repoRoot);
+  const from = git(root, ["rev-parse", input.from]);
+  const reviewedTo = git(root, ["rev-parse", input.to]);
+  const rollbackTarget = git(root, ["rev-parse", input.rollbackTarget]);
+  if (!isAncestor(root, from, reviewedTo)) {
+    throw new Error("deferred review requires from to be an ancestor of reviewedTo");
+  }
+  if (rollbackTarget !== from) {
+    throw new Error("deferred review rollback target must be the exact baseline commit");
+  }
+  const draftRefs = [...new Set(input.draftRefs ?? (input.draftRef ? [input.draftRef] : []))];
+  if (draftRefs.length === 0 || draftRefs.length > 16) {
+    throw new Error("deferred review requires between 1 and 16 event drafts");
+  }
+  const rangeCommits = commitsInRange(root, from, reviewedTo);
+  const events = [];
+  for (const requestedRef of draftRefs) {
+    const draftRef = path.relative(root, resolveInside(root, requestedRef, "deferred-review draft"))
+      .replaceAll("\\", "/");
+    const draftBytes = await readFile(path.join(root, draftRef));
+    const draft = JSON.parse(draftBytes.toString("utf8"));
+    const draftFindings = await validateSchema(
+      EVOLUTION_RECORD_TYPES[EVOLUTION_EVENT_SCHEMA].schema,
+      draft,
+      `deferred-review event ${draft.id ?? draftRef}`,
+    );
+    if (draftFindings.length > 0) {
+      throw new Error(`deferred-review event validation failed:\n${draftFindings.join("\n")}`);
+    }
+    if (draft.interpretation?.status !== "agent-proposed") {
+      throw new EvolutionAuthorityError("deferred review preserves agent-proposed status; it cannot accept a promoted event");
+    }
+    if (!rangeCommits.has(draft.source.commitSha)) {
+      throw new Error(`deferred-review event source commit is not in the reviewed range: ${draft.id}`);
+    }
+    events.push({
+      eventId: draft.id,
+      draftRef,
+      draftDigest: digest(draftBytes),
+      sourceCommit: draft.source.commitSha,
+    });
+  }
+  events.sort((left, right) => left.eventId.localeCompare(right.eventId));
+  if (new Set(events.map((event) => event.eventId)).size !== events.length) {
+    throw new Error("deferred review event ids must be unique");
+  }
+  const changedFiles = git(root, ["diff", "--name-only", `${from}..${reviewedTo}`])
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((file) => file.replaceAll("\\", "/"));
+  const materialFiles = changedFiles
+    .filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file)))
+    .sort();
+  if (materialFiles.length === 0) throw new Error("deferred review requires at least one material file");
+  const preActionReviewFiles = changedFiles.filter((file) =>
+    PRE_ACTION_REVIEW_PATHS.some((pattern) => pattern.test(file)));
+  if (preActionReviewFiles.length > 0) {
+    throw new EvolutionAuthorityError(
+      `deferred review is forbidden for pre-action-review paths: ${preActionReviewFiles.join(", ")}`,
+    );
+  }
+  const authorityChanged = changedFiles.some((file) =>
+    AUTHORITY_PATHS.some((pattern) => pattern.test(file)));
+
+  const before = await Promise.all((input.before ?? []).map((entry) =>
+    evidenceRef(root, entry.ref, entry.kind)));
+  const after = await Promise.all((input.after ?? []).map((entry) =>
+    evidenceRef(root, entry.ref, entry.kind)));
+  if (before.length === 0 || after.length === 0) {
+    throw new Error("deferred review requires before and after evidence");
+  }
+  if (!before.some((entry) => entry.kind === "live-io")
+      || !after.some((entry) => entry.kind === "live-io")) {
+    throw new Error("deferred review requires exact before and after live request/response evidence");
+  }
+  if (!after.some((entry) => entry.kind === "journey-card")) {
+    throw new Error("deferred review requires an at-a-glance intended-goal journey card");
+  }
+  const mediaRefs = after
+    .filter((entry) => ["ui-screenshot", "ui-clip"].includes(entry.kind))
+    .map((entry) => entry.ref);
+  if (input.uiChanged && mediaRefs.length === 0) {
+    throw new Error("a changed UI surface requires screenshot or clip evidence");
+  }
+  if (!input.uiChanged && !String(input.uiReason ?? "").trim()) {
+    throw new Error("a non-UI change requires a human-readable intended-goal reason");
+  }
+  const verificationRefs = [...new Set((input.rollbackVerificationRefs ?? []).map((ref) =>
+    path.relative(root, resolveInside(root, ref, "rollback verification")).replaceAll("\\", "/")))];
+  if (verificationRefs.length === 0) {
+    throw new Error("deferred review requires rollback verification evidence");
+  }
+  const afterRefs = new Set(after.map((entry) => entry.ref));
+  if (verificationRefs.some((ref) => !afterRefs.has(ref))) {
+    throw new Error("rollback verification evidence must be content-bound in after evidence");
+  }
+  let authorityDirective;
+  if (authorityChanged) {
+    if (!input.authorityDirectiveRef) {
+      throw new EvolutionAuthorityError("an authority-sensitive change requires the operator directive that authorized this policy change");
+    }
+    const directive = await evidenceRef(root, input.authorityDirectiveRef, "operator-directive");
+    authorityDirective = {
+      ref: directive.ref,
+      sha256: directive.sha256,
+      assurance: "operator-directed-in-session",
+    };
+    if (![...before, ...after].some((entry) =>
+      entry.ref === directive.ref && entry.sha256 === directive.sha256 && entry.kind === directive.kind)) {
+      throw new Error("operator directive must be content-bound in before or after evidence");
+    }
+  } else if (input.authorityDirectiveRef) {
+    throw new Error("authority directive supplied but the reviewed range does not change an authority-sensitive path");
+  }
+
+  const receipt = {
+    schemaVersion: "nodekit.evolution-deferred-review/v1",
+    id: `deferred-review:sha256:${digest(canonical({
+      eventIds: events.map((event) => event.eventId),
+      from,
+      reviewedTo,
+    }))}`,
+    events,
+    range: { from, reviewedTo },
+    risk: {
+      classification: "reversible",
+      effects: {
+        destructiveWrite: false,
+        credentialOrAuthorityChange: authorityChanged,
+        irreversibleMigration: false,
+        materialSpend: false,
+        externalCommunication: false,
+        legalOrComplianceCommitment: false,
+        unverifiedRollback: false,
+      },
+      ...(authorityDirective ? { authorityDirective } : {}),
+    },
+    coverage: { materialFiles },
+    evidence: { before, after },
+    uiSurface: input.uiChanged
+      ? { changed: true, mediaRequired: true, mediaRefs }
+      : {
+          changed: false,
+          mediaRequired: false,
+          reason: input.uiReason.trim(),
+          mediaRefs: [],
+        },
+    rollback: {
+      targetCommit: rollbackTarget,
+      strategy: "git-revert-range",
+      verificationRefs,
+    },
+    review: {
+      status: "deferred-human-review",
+      feedbackChannel: input.feedbackChannel ?? "pull-request",
+    },
+  };
+  receipt.receiptDigest = receiptDigest(receipt);
+  const findings = await validateSchema(DEFERRED_REVIEW_SCHEMA, receipt, receipt.id);
+  if (findings.length > 0) throw new Error(`deferred-review receipt validation failed:\n${findings.join("\n")}`);
+  const output = path.join(root, DEFERRED_REVIEW_ROOT, `${receipt.id.replaceAll(":", "-")}.json`);
+  await mkdir(path.dirname(output), { recursive: true });
+  await writeFile(output, `${JSON.stringify(receipt, null, 2)}\n`);
+  return { output, receipt };
+}
+
+export async function verifyDeferredEvolutionReview(repoRoot, receipt, from, to, materialFiles) {
+  const root = path.resolve(repoRoot);
+  const findings = await validateSchema(DEFERRED_REVIEW_SCHEMA, receipt, receipt.id ?? "deferred review");
+  if (findings.length > 0) return { passed: false, findings };
+  if (receipt.receiptDigest !== receiptDigest(receipt)) findings.push("receiptDigest mismatch");
+  if (receipt.range.from !== from) findings.push("baseline commit does not match materiality range");
+  if (!isAncestor(root, receipt.range.reviewedTo, to)) findings.push("reviewed candidate is not an ancestor of the tested head");
+  if (!isAncestor(root, from, receipt.range.reviewedTo)) findings.push("reviewed candidate is outside the baseline range");
+  if (receipt.rollback.targetCommit !== from) findings.push("rollback target is not the exact baseline");
+  if (canonical(receipt.coverage.materialFiles) !== canonical([...materialFiles].sort())) {
+    findings.push("material file coverage does not match the tested range");
+  }
+  const rangeCommits = commitsInRange(root, from, receipt.range.reviewedTo);
+  for (const eventRef of receipt.events) {
+    const draftPath = resolveInside(root, eventRef.draftRef, "deferred-review draft");
+    if (!(await pathExists(draftPath))) findings.push(`event draft is missing: ${eventRef.draftRef}`);
+    else {
+      const draftBytes = await readFile(draftPath);
+      const draft = JSON.parse(draftBytes.toString("utf8"));
+      if (digest(draftBytes) !== eventRef.draftDigest) findings.push(`event draft digest mismatch: ${eventRef.eventId}`);
+      if (draft.id !== eventRef.eventId) findings.push(`event id mismatch: ${eventRef.eventId}`);
+      if (draft.source?.commitSha !== eventRef.sourceCommit) findings.push(`event source commit mismatch: ${eventRef.eventId}`);
+      if (draft.interpretation?.status !== "agent-proposed") findings.push(`deferred event is not agent-proposed: ${eventRef.eventId}`);
+      if (!rangeCommits.has(eventRef.sourceCommit)) {
+        findings.push(`event source commit is outside the reviewed range: ${eventRef.eventId}`);
+      }
+    }
+  }
+  const allEvidence = [...receipt.evidence.before, ...receipt.evidence.after];
+  for (const item of allEvidence) {
+    try {
+      const actual = await evidenceRef(root, item.ref, item.kind);
+      if (actual.sha256 !== item.sha256) findings.push(`evidence digest mismatch: ${item.ref}`);
+    } catch (error) {
+      findings.push(error.message);
+    }
+  }
+  const authorityChanged = materialFiles.some((file) =>
+    AUTHORITY_PATHS.some((pattern) => pattern.test(file)));
+  if (receipt.risk.effects.credentialOrAuthorityChange !== authorityChanged) {
+    findings.push("authority-sensitive file classification does not match the tested range");
+  }
+  if (authorityChanged) {
+    const directive = receipt.risk.authorityDirective;
+    const bound = allEvidence.find((entry) =>
+      entry.kind === "operator-directive" && entry.ref === directive?.ref && entry.sha256 === directive?.sha256);
+    if (!bound) findings.push("operator authority directive is not content-bound to the receipt evidence");
+  }
+  if (!receipt.evidence.before.some((entry) => entry.kind === "live-io")
+      || !receipt.evidence.after.some((entry) => entry.kind === "live-io")) {
+    findings.push("exact before or after live request/response evidence is missing");
+  }
+  if (!receipt.evidence.after.some((entry) => entry.kind === "journey-card")) {
+    findings.push("at-a-glance intended-goal journey card is missing");
+  }
+  if (receipt.uiSurface.changed) {
+    const media = new Set(receipt.evidence.after
+      .filter((entry) => ["ui-screenshot", "ui-clip"].includes(entry.kind))
+      .map((entry) => entry.ref));
+    if (receipt.uiSurface.mediaRefs.some((ref) => !media.has(ref))) {
+      findings.push("UI media refs are not bound to after evidence");
+    }
+  }
+  const afterRefs = new Set(receipt.evidence.after.map((entry) => entry.ref));
+  for (const ref of receipt.rollback.verificationRefs) {
+    if (!afterRefs.has(ref)) findings.push(`rollback verification is not bound to after evidence: ${ref}`);
+  }
+  return { passed: findings.length === 0, findings, receipt };
+}
+
 function now() {
   return new Date().toISOString();
 }
@@ -448,7 +728,32 @@ export async function checkEvolutionMateriality(repoRoot, from, to) {
   const changedFiles = git(root, ["diff", "--name-only", `${from}..${to}`]).split(/\r?\n/).filter(Boolean).map((file) => file.replaceAll("\\", "/"));
   const materialFiles = changedFiles.filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file)));
   const diff = await diffEvolutionLedger(root, from, to);
-  const passed = materialFiles.length === 0 || diff.events.length > 0;
+  const deferredReviews = [];
+  const rejectedDeferredReviews = [];
+  for (const file of await jsonFiles(path.join(root, DEFERRED_REVIEW_ROOT))) {
+    try {
+      const receipt = await readJson(file);
+      const verdict = await verifyDeferredEvolutionReview(root, receipt, from, to, materialFiles);
+      if (verdict.passed) deferredReviews.push({
+        id: receipt.id,
+        receiptDigest: receipt.receiptDigest,
+        reviewedTo: receipt.range.reviewedTo,
+        reviewStatus: receipt.review.status,
+      });
+      else rejectedDeferredReviews.push({
+        file: path.relative(root, file).replaceAll("\\", "/"),
+        id: receipt.id ?? null,
+        findings: verdict.findings,
+      });
+    } catch (error) {
+      rejectedDeferredReviews.push({
+        file: path.relative(root, file).replaceAll("\\", "/"),
+        id: null,
+        findings: [error.message],
+      });
+    }
+  }
+  const passed = materialFiles.length === 0 || diff.events.length > 0 || deferredReviews.length > 0;
   return {
     schemaVersion: "nodekit.evolution-materiality-verdict/v1",
     from,
@@ -456,10 +761,16 @@ export async function checkEvolutionMateriality(repoRoot, from, to) {
     changedFiles,
     materialFiles,
     events: diff.events,
+    deferredReviews,
+    rejectedDeferredReviews,
     passed,
     reason: passed
-      ? materialFiles.length === 0 ? "No material NodeKit surfaces changed." : "Material changes are linked to at least one human-reviewed evolution event."
-      : "Material NodeKit surfaces changed without a human-reviewed evolution event sourced from this commit range.",
+      ? materialFiles.length === 0
+        ? "No material NodeKit surfaces changed."
+        : diff.events.length > 0
+          ? "Material changes are linked to at least one human-reviewed evolution event."
+          : "Material changes have exact proof-backed reversible evidence and remain pending deferred human review."
+      : "Material NodeKit surfaces changed without a human-reviewed event or valid proof-backed reversible review receipt.",
   };
 }
 
