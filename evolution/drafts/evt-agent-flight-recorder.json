@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:agent-flight-recorder",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "3d8bbfde8920db706139fafbeb52837ec08567c0",
+    "pullRequest": 34,
+    "occurredAt": "2026-07-30T22:55:47.286Z"
+  },
+  "track": "product",
+  "category": "runtime",
+  "challenge": "NodeKit primitives did not provide one inspectable local agent-run product journey.",
+  "observedFailure": "Researchers had to manually combine process output, identity, status, graphs, and screenshots, so runs were easy to lose or mislabel.",
+  "resolution": "Add one bounded command that records stable identity, honest process state, exact bounded I/O, a serialized graph, a JSON receipt, and a responsive static report.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:agent-flight-recorder-proof"
+  ],
+  "knownLimitations": [
+    "The recorder observes the direct process boundary and is not a hosted telemetry service."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

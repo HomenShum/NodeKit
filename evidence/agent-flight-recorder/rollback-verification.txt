@@ -1,0 +1,14 @@
+Rollback target: 87b8a44d02d1f1b087932814c4e1827713c0c6d0
+Strategy: git revert the Agent Flight Recorder commit range to the exact baseline.
+
+Command:
+git grep -n "agent run" 87b8a44d02d1f1b087932814c4e1827713c0c6d0 -- src/cli-main.mjs src/index.mjs package.json
+
+Result:
+PASS: baseline contains no agent run command or public export signal
+
+Command:
+git cat-file -e 87b8a44d02d1f1b087932814c4e1827713c0c6d0:src/lib/agent-run.mjs
+
+Result:
+PASS: baseline contains no src/lib/agent-run.mjs implementation

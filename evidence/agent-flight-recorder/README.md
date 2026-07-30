@@ -23,3 +23,4 @@ EVIDENCE
 - `after-receipt-summary.json`
 - `after-desktop.png`, `after-mobile.png`
 - `browser-qa.json`
+- `rollback-verification.txt`

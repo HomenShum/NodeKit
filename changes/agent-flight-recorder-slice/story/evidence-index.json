@@ -26,5 +26,11 @@
       "evidence/agent-flight-recorder/after-desktop.png",
       "evidence/agent-flight-recorder/after-mobile.png"
     ]
+  },
+  {
+    "id": "ev-rollback",
+    "kind": "rollback-verification",
+    "path": "evidence/agent-flight-recorder/rollback-verification.txt",
+    "claim": "The exact baseline contains neither the command/export signal nor the Agent Flight Recorder implementation."
   }
 ]
