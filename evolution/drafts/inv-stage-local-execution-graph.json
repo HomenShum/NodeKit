@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:stage-local-execution-graph",
+  "statement": "Only canonical tasks from the current Caseflow stage enter a deterministic execution graph, and a downstream node becomes runnable only through valid exact-artifact edge bindings, required authority, and a non-conflicting declared write scope; the graph has no stage-advancement authority.",
+  "scope": {
+    "applications": [
+      "NodeKit factory"
+    ],
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "stage-local execution graph compiler",
+      "execution edge verifier",
+      "runnable frontier",
+      "graph CLI"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/execution-graph.mjs",
+    "test/execution-graph.test.mjs",
+    "test/public-api.test.mjs"
+  ],
+  "introducedByEventId": "evt:stage-local-execution-graph",
+  "status": "verified"
+}
