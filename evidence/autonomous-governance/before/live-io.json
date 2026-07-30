@@ -2,14 +2,71 @@
   "schemaVersion": "nodekit.live-io-evidence/v1",
   "runtimeScope": "package-live-runtime",
   "deployedBackend": false,
-  "moduleRoot": "D:\\VSCode Projects\\node-platform-proof-baseline-20260730",
+  "modulePath": "D:\\VSCode Projects\\node-platform-proof-baseline-20260730\\src\\execution-graph.mjs",
   "request": {
-    "intendedGoal": "Resume the exact coding-agent session after a desktop restart without substituting repository or provider identity.",
-    "operation": "workspace_bind -> session_start -> session_status -> session_resume",
+    "intendedGoal": "Turn an approved brownfield journey into a bounded, inspectable execution plan.",
+    "operation": "compileExecutionGraph",
     "input": {
-      "canonicalRemote": "https://github.com/example/native-session.git",
-      "writeMode": "isolated-worktree",
-      "adapterId": "claude-code"
+      "projectRef": "caseflow:proof-pr-32",
+      "projectRevision": "proof-candidate",
+      "approvedJourneyRef": "approved-journey:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "approvedJourneyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "designContext": {
+        "primaryUser": "NodeKit builder",
+        "primaryArtifact": "verified brownfield change",
+        "primaryAction": "deliver with bounded proof",
+        "requiredFlows": [
+          "build -> verify -> deliver"
+        ],
+        "requiredStates": [
+          "ready",
+          "complete"
+        ],
+        "approvedProductTopology": [
+          "Caseflow remains canonical"
+        ],
+        "designRules": [],
+        "tokenRoles": [],
+        "trustSurfaces": [
+          "NodeProof"
+        ],
+        "responsiveBehavior": [],
+        "motionRules": [],
+        "copyRules": [
+          "Plain-language status"
+        ],
+        "antiPatterns": [
+          "Unbounded orchestration"
+        ],
+        "knownNovelDecisions": [
+          "Disposable execution graph"
+        ],
+        "proofRequirements": [
+          "Every runnable task is bounded"
+        ]
+      },
+      "nodes": [
+        {
+          "id": "deliver",
+          "type": "DELIVER",
+          "title": "Deliver the bounded change",
+          "authority": "reviewer",
+          "maximumAttempts": 1,
+          "expectedArtifact": {
+            "schemaVersion": "nodekit.delivery-receipt/v1",
+            "kind": "delivery-receipt",
+            "authority": "agent-produced",
+            "completeness": "complete",
+            "limitations": []
+          },
+          "readSet": [
+            "proof/aggregate.json"
+          ],
+          "writeSet": [],
+          "externalSystems": []
+        }
+      ],
+      "edges": []
     }
   },
   "response": {
@@ -17,7 +74,7 @@
     "error": {
       "name": "Error",
       "code": "ERR_MODULE_NOT_FOUND",
-      "message": "Cannot find module 'D:\\VSCode Projects\\node-platform-proof-baseline-20260730\\src\\native-agent-identity.mjs' imported from D:\\VSCode Projects\\node-platform-native-identity-20260729\\scripts\\probe-native-session-journey.mjs"
+      "message": "Cannot find module 'D:\\VSCode Projects\\node-platform-proof-baseline-20260730\\src\\execution-graph.mjs' imported from D:\\VSCode Projects\\node-platform-graph-loops-20260730\\scripts\\probe-execution-graph-journey.mjs"
     }
   }
 }

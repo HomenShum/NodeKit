@@ -3,11 +3,11 @@
   "rollbackTarget": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
   "strategy": "git-revert-range",
   "checks": {
-    "baselineCannotCompile": true,
-    "candidateCompiles": true,
-    "caseflowRemainsCanonical": true,
-    "automaticPromotionDisabled": true,
-    "boundedAttempts": true
+    "baselineCannotResume": true,
+    "candidateResumes": true,
+    "durableCheckpoint": true,
+    "rawProviderIdentityPrivate": true,
+    "noCallerOwnedStatus": true
   },
   "passed": true
 }

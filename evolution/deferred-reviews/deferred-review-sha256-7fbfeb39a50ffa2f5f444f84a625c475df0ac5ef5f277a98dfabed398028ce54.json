@@ -1,23 +1,23 @@
 {
   "schemaVersion": "nodekit.evolution-deferred-review/v1",
-  "id": "deferred-review:sha256:526dd54048c8632b4518cdfdd98557145db03eb2489c95cd8f7af0019fc475f7",
+  "id": "deferred-review:sha256:7fbfeb39a50ffa2f5f444f84a625c475df0ac5ef5f277a98dfabed398028ce54",
   "events": [
     {
-      "eventId": "evt:native-agent-session-identity",
-      "draftRef": "evolution/drafts/evt-native-agent-session-identity.json",
-      "draftDigest": "0b88544ff47bbb9989b86b24dd11ebe758394b591448f346c9000cf25d5e984e",
-      "sourceCommit": "cc49b80bc53aeaf90bfe23562701482fb28d5958"
+      "eventId": "evt:execution-graph-of-bounded-loops",
+      "draftRef": "evolution/drafts/evt-execution-graph-of-bounded-loops.json",
+      "draftDigest": "9422d468e654312d6e01c5d1ad559b37885eec339a6a911d48b1daf13c53d126",
+      "sourceCommit": "05a2c66580449824d4c0c91e36defb1c8b1db64c"
     },
     {
       "eventId": "evt:proof-backed-deferred-review",
       "draftRef": "evolution/drafts/evt-proof-backed-deferred-review.json",
-      "draftDigest": "becf4963775fd3ef2232a179315d445945a195641d76b0d102bbf7e54abefcaf",
-      "sourceCommit": "24e8b997077590a735d4962f48a4d4898a2e6c0d"
+      "draftDigest": "84bab355e4c789947a2844d05394e6adfee96d9df1c5663f2dac06f2924cb15a",
+      "sourceCommit": "afe2f420c2eed125653949fad000371dc221b173"
     }
   ],
   "range": {
     "from": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
-    "reviewedTo": "f9cdb92742fe0a232a2a2f18e7c4b916222b8de8"
+    "reviewedTo": "fc47e3a500e9f78cb6e26197068e6366342cfd69"
   },
   "risk": {
     "classification": "reversible",
@@ -39,34 +39,29 @@
   "coverage": {
     "materialFiles": [
       "schemas/nodekit.evolution-deferred-review.v1.schema.json",
-      "schemas/nodekit.native-agent-session.v1.schema.json",
-      "schemas/nodekit.native-session-checkpoint.v1.schema.json",
-      "schemas/nodekit.native-workspace.v1.schema.json",
-      "schemas/nodekit.workspace-reference-index.v1.schema.json",
+      "schemas/nodekit.execution-graph.v1.schema.json",
+      "schemas/nodekit.execution-nodeproof.v1.schema.json",
+      "schemas/nodekit.execution-strategy-experiment.v1.schema.json",
+      "schemas/nodekit.execution-trace.v1.schema.json",
       "src/cli-main.mjs",
+      "src/execution-graph.d.mts",
+      "src/execution-graph.mjs",
       "src/index.d.mts",
       "src/index.mjs",
-      "src/lib/caseflow.mjs",
       "src/lib/evolution-ledger.mjs",
-      "src/lib/native-agent-identity.mjs",
-      "src/lib/native-agent-migration.mjs",
-      "src/lib/workspace-reference-index.mjs",
-      "src/native-agent-identity.d.mts",
-      "src/native-agent-identity.mjs",
-      "src/workspace-reference-index.d.mts",
-      "src/workspace-reference-index.mjs"
+      "src/lib/execution-graph.mjs"
     ]
   },
   "evidence": {
     "before": [
       {
         "ref": "evidence/autonomous-governance/before/live-io.json",
-        "sha256": "ced1f25c5076f4b823d9f66b790b9f63c7403e0d35c6faef1508cecf314aa518",
+        "sha256": "73b6d092330d8855d3404f174649bb868277e5f26907b3fc7fdadb34ba078236",
         "kind": "live-io"
       },
       {
         "ref": "evidence/autonomous-governance/before/pr-checks.json",
-        "sha256": "53c7e5ede4db390b71bda8167d5da7f0bc7df012dd093d76349c71d0c3189b48",
+        "sha256": "69381a990bb5687db37711279c3097477575d66f6051c2f357a32d8edc027d45",
         "kind": "ci-log"
       },
       {
@@ -78,22 +73,22 @@
     "after": [
       {
         "ref": "evidence/autonomous-governance/after/live-io.json",
-        "sha256": "63592f9cf7cdf6711625ae92441bbff8b217b2959732ab0b539223e92bd401be",
+        "sha256": "9d80af0d2225f416352050f615d301ae1e6855c1c20e516f2d4c33fa3358ae8c",
         "kind": "live-io"
       },
       {
         "ref": "evidence/autonomous-governance/after/journey-card.md",
-        "sha256": "1acc88e3c4f33c459ef254f444a2f3b48aded4ff6e7447d2a3520989ea810eba",
+        "sha256": "900137c945ef21abc80b8f8e6ccebd9dc205d4cf2cb27099c09cf07a6075aab6",
         "kind": "journey-card"
       },
       {
         "ref": "evidence/autonomous-governance/after/scenario-tests.log",
-        "sha256": "0127f3b0b7c6373b0be9be5c9372ee518e04ddc7f44e2b560e06db24bcc59607",
+        "sha256": "47cba792e1b3aca266fadbe5c14b206989c24958d279914086376b3dc5389a63",
         "kind": "test-log"
       },
       {
         "ref": "evidence/autonomous-governance/after/rollback-verification.json",
-        "sha256": "b742b3d1e9103ded2bf5576b1837067c8a7c87a58d1a6d3b177dcb8eb05472fe",
+        "sha256": "7a522fb5b23f96d836f5f8226fbdcdf8d6eb787b6cff58a975cf502808b46059",
         "kind": "test-log"
       }
     ]
@@ -115,5 +110,5 @@
     "status": "deferred-human-review",
     "feedbackChannel": "pull-request"
   },
-  "receiptDigest": "6f04fcf6c38db66d4a234d6cc483087c7c29f7afd35842c39bfaddb17dc6aecc"
+  "receiptDigest": "3701a5aa3fcedd462c2ec128987c08e31226eafc6205bcd3168f9647c6d55428"
 }

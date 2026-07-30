@@ -1,14 +1,14 @@
-# PR #30 journey proof: resume the correct coding-agent session after restart
+# PR #32 journey proof: finish a brownfield change without losing control
 
-Intended larger goal: a founder closes or loses the desktop process, returns later, and needs NodeKit to continue the exact authorized coding session without substituting the workspace, repository, provider session, or checkpoint frontier.
+Intended larger goal: a maintainer wants NodeKit to turn an approved brownfield journey into work that can run in parallel, remain bounded, and end in inspectable proof.
 
-| Human question | Before (`ab7c9e6`) | After (PR #30 candidate) |
+| Human question | Before (`ab7c9e6`) | After (PR #32 candidate) |
 |---|---|---|
-| Can NodeKit bind and resume a native coding session? | No. The exact package import returns `ERR_MODULE_NOT_FOUND`. | Yes. The exact workflow binds a workspace, starts a session, reports `CHECKPOINTED`, and returns `RESUMED`. |
-| Is there durable proof of continuation? | No native continuation artifact exists. | Yes. Resume returns a content-addressed new checkpoint, and Caseflow contains workspace, session, initial checkpoint, and resumed checkpoint artifacts. |
-| Can a raw provider session id leak into canonical state? | No governed native-session contract exists. | No. The live artifact scan reports `persistedRawProviderIdentity: false`. |
-| Can caller-owned status become canonical truth? | No governed contract exists. | No. Status is derived; the live artifact scan reports `persistedCallerOwnedStatus: false`. |
-| What happens if the operator dislikes the architecture? | There is no feature to roll back. | Revert the exact range to `ab7c9e6`; the rollback verifier proves the baseline returns to capability-absent behavior. |
+| Can NodeKit compile the intended journey? | No. The exact package import returns `ERR_MODULE_NOT_FOUND`. | Yes. The exact request returns a deterministic execution graph and runnable `deliver` task. |
+| What remains canonical? | No execution projection exists. | `canonicalState` is `caseflow`; the graph is disposable. |
+| Can the agent silently promote its own result? | Not applicable because the capability is absent. | No. `automaticPromotion` is `false`. |
+| Is work bounded? | No graph-level contract exists. | The live response reports `maximumAttempts: 1` for the proof task; the full contract also bounds nodes, edges, events, and per-node attempts. |
+| What happens if the operator dislikes the result? | Remove or abandon ad hoc work manually. | Revert the exact range to `ab7c9e6`; the rollback verifier proves that baseline behavior is restored. |
 
 ## Exact evidence
 
@@ -19,4 +19,4 @@ Intended larger goal: a founder closes or loses the desktop process, returns lat
 
 ## UI media
 
-Not applicable. PR #30 adds a package/runtime identity contract, schemas, migration support, and tests; it does not add or change a deployed product UI route. The journey and exact runtime I/O are the at-a-glance human proof surface.
+Not applicable. PR #32 changes a package runtime, schemas, tests, and generated design Markdown; it does not add or change a deployed product UI route. The journey and exact runtime I/O are the at-a-glance human proof surface.

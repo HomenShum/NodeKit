@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "nodekit.live-io-evidence/v1",
+  "runtimeScope": "package-live-runtime",
+  "deployedBackend": false,
+  "moduleRoot": "D:\\VSCode Projects\\node-platform-proof-baseline-20260730",
+  "request": {
+    "intendedGoal": "Resume the exact coding-agent session after a desktop restart without substituting repository or provider identity.",
+    "operation": "workspace_bind -> session_start -> session_status -> session_resume",
+    "input": {
+      "canonicalRemote": "https://github.com/example/native-session.git",
+      "writeMode": "isolated-worktree",
+      "adapterId": "claude-code"
+    }
+  },
+  "response": {
+    "ok": false,
+    "error": {
+      "name": "Error",
+      "code": "ERR_MODULE_NOT_FOUND",
+      "message": "Cannot find module 'D:\\VSCode Projects\\node-platform-proof-baseline-20260730\\src\\native-agent-identity.mjs' imported from D:\\VSCode Projects\\node-platform-native-identity-20260729\\scripts\\probe-native-session-journey.mjs"
+    }
+  }
+}
