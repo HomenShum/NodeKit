@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:execution-graph-of-bounded-loops",
+  "kind": "test",
+  "artifactRef": "evolution/artifacts/execution-graph-of-bounded-loops.md",
+  "sha256": "ae17671473794dd2e0c37824d11ed1051b63e6dd452cd5b6c52f78725ebd9284",
+  "sourceCommit": "05a2c66580449824d4c0c91e36defb1c8b1db64c",
+  "generatedAt": "2026-07-30T12:52:32.7162004Z",
+  "command": "node --test test/execution-graph.test.mjs test/repo-tour.test.mjs test/public-api.test.mjs test/contracts.test.mjs && npm run test:repository && npm run typecheck:public && npm run typecheck:component && npm run test:component && npm run reference:schemas:check && npm run registry:check && npm run audit:prod && npm run evolution:verify",
+  "environment": {
+    "repository": "HomenShum/node-platform",
+    "targetedTests": "25 passed",
+    "repositoryTests": "536 passed",
+    "componentTests": "8 passed",
+    "platform": "Windows"
+  },
+  "verifiesInvariantIds": [
+    "inv:execution-graph-of-bounded-loops"
+  ],
+  "result": "pass"
+}

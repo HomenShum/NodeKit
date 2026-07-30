@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:execution-graph-of-bounded-loops",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "05a2c66580449824d4c0c91e36defb1c8b1db64c",
+    "occurredAt": "2026-07-30T05:51:46-07:00"
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "NodeKit had canonical Caseflow lifecycle records, NodeTrace trajectories, and NodeProof receipts, but no first-class compiler that turned an approved project journey into a bounded execution graph with typed artifact handoffs, safe parallelism, durable task handles, and a derived runnable frontier.",
+  "observedFailure": "The architecture existed only as discussion and documentation. An orchestrator could invent node types, parallelize conflicting work, treat fresh context as evaluator independence, aggregate before all evidence arrived, or let a generated design file drift into a second authority.",
+  "resolution": "Added a public graph-of-bounded-loops compiler with the fixed eleven-node vocabulary, deterministic graph, edge, task, and trace identities, declared read/write/external-system authority, disjoint fan-out validation, exact materialized artifact handoffs, bounded attempts and events, headless versus headful browser lanes, qualified independent evaluator enforcement, upstream human gates for external writes, replay-based NodeProof, generated non-authoritative design Markdown, and a fail-closed sequential-versus-graph brownfield experiment evaluator. Caseflow remains canonical and automatic promotion remains disabled.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:execution-graph-of-bounded-loops"
+  ],
+  "evidenceIds": [
+    "evd:execution-graph-of-bounded-loops"
+  ],
+  "predecessorIds": [
+    "evt:caseflow-idempotent-retries"
+  ],
+  "knownLimitations": [
+    "A real coding-agent sequential-versus-graph campaign on the same frozen brownfield task remains a separate evidence run.",
+    "Consumer-specific model qualification receipts and signed-in Chrome proofs remain consumer evidence.",
+    "Canonical promotion requires a separately verified named-human approval."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}
