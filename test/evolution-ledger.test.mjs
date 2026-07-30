@@ -8,6 +8,7 @@ import test from "node:test";
 import {
   buildEvolutionDocs,
   checkEvolutionMateriality,
+  createDeferredEvolutionReview,
   draftEvolutionEvent,
   initializeEvolutionLedger,
   proposeEvolutionKnowledgePatch,
@@ -123,6 +124,237 @@ test("materiality gate blocks unrecorded system changes and accepts a reviewed e
   const passed = await checkEvolutionMateriality(root, before, after);
   assert.equal(passed.passed, true);
   assert.equal(passed.events[0].id, event.id);
+});
+
+test("reversible package change continues with exact live I/O, human-goal proof, and no forged approval", async () => {
+  const { commit: before, root } = await fixture();
+  await mkdir(path.join(root, "src"), { recursive: true });
+  await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = (id) => ({ sessionId: id, resumed: true });\n");
+  git(root, ["add", "src/session-resume.mjs"]);
+  git(root, ["commit", "-m", "add resumable session runtime"]);
+  const after = git(root, ["rev-parse", "HEAD"]);
+
+  const event = {
+    schemaVersion: "nodekit.evolution-event/v1",
+    id: "evt:resumable-session-runtime",
+    projectId: "fixture",
+    repository: "local/fixture",
+    source: { commitSha: after, occurredAt: new Date().toISOString() },
+    track: "architecture",
+    category: "runtime",
+    challenge: "A maintainer cannot safely resume the intended session after restart",
+    observedFailure: "The old package has no resumable-session entry point",
+    resolution: "Bind a session id to a deterministic resume result with rollback proof",
+    assumptionIds: [],
+    invariantIds: [],
+    evidenceIds: ["evd:test"],
+    knownLimitations: ["Package-only change; no product UI surface exists"],
+    interpretation: { status: "agent-proposed" },
+  };
+  const draftRef = path.join("evolution", "drafts", "evt-resumable-session-runtime.json");
+  await mkdir(path.join(root, "evolution", "drafts"), { recursive: true });
+  await writeFile(path.join(root, draftRef), `${JSON.stringify(event, null, 2)}\n`);
+
+  const evidenceRoot = path.join(root, "evidence", "deferred-review");
+  await mkdir(evidenceRoot, { recursive: true });
+  await writeFile(
+    path.join(evidenceRoot, "before-live.json"),
+    `${JSON.stringify({ request: { operation: "resume", sessionId: "session-7" }, response: { error: "ERR_PACKAGE_PATH_NOT_EXPORTED" } }, null, 2)}\n`,
+  );
+  await writeFile(
+    path.join(evidenceRoot, "after-live.json"),
+    `${JSON.stringify({ request: { operation: "resume", sessionId: "session-7" }, response: { sessionId: "session-7", resumed: true } }, null, 2)}\n`,
+  );
+  await writeFile(
+    path.join(evidenceRoot, "journey.md"),
+    "# Resume the correct coding session\n\nBefore: restart loses the trustworthy continuation path.\n\nAfter: the same session id resumes deterministically.\n",
+  );
+  await writeFile(path.join(evidenceRoot, "rollback-test.log"), "PASS baseline import fails; candidate import succeeds; reverting restores baseline behavior\n");
+
+  const relativeEvidence = (name) => path.join("evidence", "deferred-review", name).replaceAll("\\", "/");
+  const created = await createDeferredEvolutionReview(root, {
+    draftRefs: [draftRef],
+    from: before,
+    to: after,
+    rollbackTarget: before,
+    before: [{ ref: relativeEvidence("before-live.json"), kind: "live-io" }],
+    after: [
+      { ref: relativeEvidence("after-live.json"), kind: "live-io" },
+      { ref: relativeEvidence("journey.md"), kind: "journey-card" },
+      { ref: relativeEvidence("rollback-test.log"), kind: "test-log" },
+    ],
+    uiChanged: false,
+    uiReason: "Package runtime only; the intended user goal is shown by the journey card and exact I/O.",
+    rollbackVerificationRefs: [relativeEvidence("rollback-test.log")],
+  });
+
+  assert.equal(created.receipt.events[0].eventId, event.id);
+  assert.equal(created.receipt.review.status, "deferred-human-review");
+  assert.equal(event.interpretation.status, "agent-proposed");
+  const passed = await checkEvolutionMateriality(root, before, after);
+  assert.equal(passed.passed, true, passed.reason);
+  assert.equal(passed.events.length, 0, "deferred review must not forge a canonical event");
+  assert.equal(passed.deferredReviews.length, 1);
+
+  await writeFile(path.join(evidenceRoot, "after-live.json"), "{\"tampered\":true}\n");
+  const tampered = await checkEvolutionMateriality(root, before, after);
+  assert.equal(tampered.passed, false);
+  assert.equal(tampered.deferredReviews.length, 0);
+  assert.match(tampered.rejectedDeferredReviews[0].findings.join("\n"), /evidence digest mismatch/);
+});
+
+test("deferred review refuses missing UI proof and evidence that is not bound to rollback", async () => {
+  const { commit: before, root } = await fixture();
+  await mkdir(path.join(root, "src"), { recursive: true });
+  await writeFile(path.join(root, "src", "ui-runtime.mjs"), "export const changed = true;\n");
+  git(root, ["add", "src/ui-runtime.mjs"]);
+  git(root, ["commit", "-m", "change visible runtime"]);
+  const after = git(root, ["rev-parse", "HEAD"]);
+  const draftRef = path.join("evolution", "drafts", "evt-visible-runtime.json");
+  await mkdir(path.join(root, "evolution", "drafts"), { recursive: true });
+  await writeFile(path.join(root, draftRef), `${JSON.stringify({
+    schemaVersion: "nodekit.evolution-event/v1",
+    id: "evt:visible-runtime",
+    projectId: "fixture",
+    repository: "local/fixture",
+    source: { commitSha: after, occurredAt: new Date().toISOString() },
+    track: "product",
+    category: "ui",
+    challenge: "Visible runtime changed",
+    resolution: "Show the changed state",
+    assumptionIds: [],
+    invariantIds: [],
+    evidenceIds: ["evd:test"],
+    knownLimitations: [],
+    interpretation: { status: "agent-proposed" },
+  }, null, 2)}\n`);
+  await mkdir(path.join(root, "evidence"), { recursive: true });
+  for (const name of ["before.json", "after.json", "journey.md", "rollback.log"]) {
+    await writeFile(path.join(root, "evidence", name), `${name}\n`);
+  }
+  const input = {
+    draftRefs: [draftRef],
+    from: before,
+    to: after,
+    rollbackTarget: before,
+    before: [{ ref: "evidence/before.json", kind: "live-io" }],
+    after: [
+      { ref: "evidence/after.json", kind: "live-io" },
+      { ref: "evidence/journey.md", kind: "journey-card" },
+    ],
+    uiChanged: true,
+    rollbackVerificationRefs: ["evidence/rollback.log"],
+  };
+  await assert.rejects(
+    () => createDeferredEvolutionReview(root, input),
+    /changed UI surface requires screenshot or clip/,
+  );
+  await assert.rejects(
+    () => createDeferredEvolutionReview(root, { ...input, uiChanged: false, uiReason: "No UI" }),
+    /must be content-bound in after evidence/,
+  );
+});
+
+test("approval-architecture changes require a content-bound operator directive", async () => {
+  const { commit: before, root } = await fixture();
+  await mkdir(path.join(root, "src", "lib"), { recursive: true });
+  await writeFile(path.join(root, "src", "lib", "evolution-trust.mjs"), "export const mode = 'deferred-proof';\n");
+  git(root, ["add", "src/lib/evolution-trust.mjs"]);
+  git(root, ["commit", "-m", "change approval architecture"]);
+  const after = git(root, ["rev-parse", "HEAD"]);
+  const draftRef = path.join("evolution", "drafts", "evt-approval-architecture.json");
+  await mkdir(path.join(root, "evolution", "drafts"), { recursive: true });
+  await writeFile(path.join(root, draftRef), `${JSON.stringify({
+    schemaVersion: "nodekit.evolution-event/v1",
+    id: "evt:approval-architecture",
+    projectId: "fixture",
+    repository: "local/fixture",
+    source: { commitSha: after, occurredAt: new Date().toISOString() },
+    track: "architecture",
+    category: "security",
+    challenge: "Approval architecture interrupts reversible work",
+    resolution: "Bind an explicit operator directive to a reversible proof receipt",
+    assumptionIds: [],
+    invariantIds: [],
+    evidenceIds: ["evd:test"],
+    knownLimitations: ["The directive is not a canonical-event signature"],
+    interpretation: { status: "agent-proposed" },
+  }, null, 2)}\n`);
+  await mkdir(path.join(root, "evidence"), { recursive: true });
+  for (const [name, value] of [
+    ["before.json", "{}\n"],
+    ["after.json", "{}\n"],
+    ["journey.md", "# Before / after\n"],
+    ["rollback.log", "PASS\n"],
+    ["directive.md", "Operator directive: reversible architecture changes use proof plus rollback.\n"],
+  ]) await writeFile(path.join(root, "evidence", name), value);
+  const baseInput = {
+    draftRefs: [draftRef],
+    from: before,
+    to: after,
+    rollbackTarget: before,
+    before: [{ ref: "evidence/before.json", kind: "live-io" }],
+    after: [
+      { ref: "evidence/after.json", kind: "live-io" },
+      { ref: "evidence/journey.md", kind: "journey-card" },
+      { ref: "evidence/rollback.log", kind: "test-log" },
+    ],
+    uiChanged: false,
+    uiReason: "Trust-policy package runtime has no product UI.",
+    rollbackVerificationRefs: ["evidence/rollback.log"],
+  };
+  await assert.rejects(
+    () => createDeferredEvolutionReview(root, baseInput),
+    /requires the operator directive/,
+  );
+  const created = await createDeferredEvolutionReview(root, {
+    ...baseInput,
+    before: [...baseInput.before, { ref: "evidence/directive.md", kind: "operator-directive" }],
+    authorityDirectiveRef: "evidence/directive.md",
+  });
+  assert.equal(created.receipt.risk.effects.credentialOrAuthorityChange, true);
+  assert.equal(created.receipt.risk.authorityDirective.assurance, "operator-directed-in-session");
+});
+
+test("deferred review cannot bypass pre-action review for migration paths", async () => {
+  const { commit: before, root } = await fixture();
+  await mkdir(path.join(root, "src", "migrations"), { recursive: true });
+  await writeFile(path.join(root, "src", "migrations", "drop-state.mjs"), "export const destructive = true;\n");
+  git(root, ["add", "src/migrations/drop-state.mjs"]);
+  git(root, ["commit", "-m", "add destructive migration"]);
+  const after = git(root, ["rev-parse", "HEAD"]);
+  const draftRef = path.join("evolution", "drafts", "evt-destructive-migration.json");
+  await mkdir(path.join(root, "evolution", "drafts"), { recursive: true });
+  await writeFile(path.join(root, draftRef), `${JSON.stringify({
+    schemaVersion: "nodekit.evolution-event/v1",
+    id: "evt:destructive-migration",
+    projectId: "fixture",
+    repository: "local/fixture",
+    source: { commitSha: after, occurredAt: new Date().toISOString() },
+    track: "architecture",
+    category: "runtime",
+    challenge: "State layout changed",
+    resolution: "Migrate state",
+    assumptionIds: [],
+    invariantIds: [],
+    evidenceIds: ["evd:test"],
+    knownLimitations: [],
+    interpretation: { status: "agent-proposed" },
+  }, null, 2)}\n`);
+  await assert.rejects(
+    () => createDeferredEvolutionReview(root, {
+      draftRefs: [draftRef],
+      from: before,
+      to: after,
+      rollbackTarget: before,
+      before: [],
+      after: [],
+      uiChanged: false,
+      uiReason: "No UI",
+      rollbackVerificationRefs: [],
+    }),
+    /deferred review is forbidden for pre-action-review paths: src\/migrations\/drop-state\.mjs/,
+  );
 });
 
 test("concurrent agent proposals with one id never become last-writer-wins", async () => {

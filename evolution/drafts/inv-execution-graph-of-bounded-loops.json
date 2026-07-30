@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:execution-graph-of-bounded-loops",
+  "statement": "An approved NodeKit journey may execute only as a disposable graph of bounded loops whose fixed node declarations, disjoint fan-out, exact typed artifact handoffs, qualified independent verification, human authority barriers, NodeTrace events, and replayed NodeProof chain remain derived from and subordinate to canonical Caseflow records.",
+  "scope": {
+    "applications": [
+      "NodeKit consumers"
+    ],
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "execution graph compiler",
+      "execution graph public package entrypoint",
+      "execution graph and trace schemas",
+      "runnable frontier",
+      "NodeTrace result recording",
+      "NodeProof replay verifier",
+      "generated design Markdown",
+      "execution strategy experiment evaluator"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/execution-graph.mjs",
+    "test/execution-graph.test.mjs",
+    "test/types/execution-graph-consumer.ts"
+  ],
+  "introducedByEventId": "evt:execution-graph-of-bounded-loops",
+  "status": "verified"
+}

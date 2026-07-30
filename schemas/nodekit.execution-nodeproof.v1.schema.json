@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.execution-nodeproof.v1.schema.json",
+  "title": "NodeProof verdict over a complete execution edge chain",
+  "type": "object",
+  "required": ["schemaVersion", "passed", "graphId", "traceDigest", "findings", "runnableFrontier"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.execution-nodeproof/v1" },
+    "passed": { "type": "boolean" },
+    "graphId": {
+      "anyOf": [
+        { "type": "string", "pattern": "^execution-graph:sha256:[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "traceDigest": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["code", "severity", "message"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "severity": { "enum": ["critical", "major", "minor", "informational"] },
+              "message": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["findingId", "lens", "severity", "behaviorId", "evidenceRefs", "result"],
+            "properties": {
+              "findingId": { "type": "string", "minLength": 1 },
+              "lens": { "type": "string", "minLength": 1 },
+              "severity": { "enum": ["critical", "major", "minor", "informational"] },
+              "behaviorId": { "type": ["string", "null"], "minLength": 1 },
+              "evidenceRefs": {
+                "type": "array",
+                "maxItems": 256,
+                "uniqueItems": true,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "result": { "enum": ["confirmed", "not-observed", "unsupported"] }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "runnableFrontier": {
+      "type": "array",
+      "maxItems": 512,
+      "items": {
+        "type": "object",
+        "required": ["nodeId", "type", "title", "taskHandle", "requiresHuman", "attempt"],
+        "properties": {
+          "nodeId": { "type": "string", "minLength": 1 },
+          "type": { "enum": ["CONTEXT", "DECISION", "BUILD", "CHECK", "REVIEW", "BROWSER", "AGENT_EVAL", "AGGREGATE", "REPAIR", "DELIVER", "HUMAN_GATE"] },
+          "title": { "type": "string", "minLength": 1 },
+          "taskHandle": { "type": "string", "pattern": "^task:sha256:[a-f0-9]{64}$" },
+          "requiresHuman": { "type": "boolean" },
+          "attempt": { "type": "integer", "minimum": 1, "maximum": 20 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

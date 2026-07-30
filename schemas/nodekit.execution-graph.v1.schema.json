@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.execution-graph.v1.schema.json",
+  "title": "Disposable NodeKit execution graph compiled from canonical Caseflow records",
+  "type": "object",
+  "required": ["schemaVersion", "graphId", "graphDigest", "source", "policy", "nodes", "edges"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.execution-graph/v1" },
+    "graphId": { "type": "string", "pattern": "^execution-graph:sha256:[a-f0-9]{64}$" },
+    "graphDigest": { "$ref": "#/$defs/hash" },
+    "source": {
+      "type": "object",
+      "required": ["projectRef", "projectRevision", "approvedJourneyRef", "approvedJourneyDigest", "designContext"],
+      "properties": {
+        "projectRef": { "$ref": "#/$defs/nonEmpty" },
+        "projectRevision": { "$ref": "#/$defs/nonEmpty" },
+        "approvedJourneyRef": { "$ref": "#/$defs/contentRef" },
+        "approvedJourneyDigest": { "$ref": "#/$defs/hash" },
+        "designContext": { "$ref": "#/$defs/designContext" }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": ["canonicalState", "projection", "automaticPromotion", "maximumNodes", "maximumEdges", "maximumEvents"],
+      "properties": {
+        "canonicalState": { "const": "caseflow" },
+        "projection": { "const": "disposable" },
+        "automaticPromotion": { "const": false },
+        "maximumNodes": { "type": "integer", "minimum": 1, "maximum": 512 },
+        "maximumEdges": { "type": "integer", "minimum": 0, "maximum": 2048 },
+        "maximumEvents": { "type": "integer", "minimum": 1, "maximum": 10000 }
+      },
+      "additionalProperties": false
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 512,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "contentRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+    "designContext": {
+      "type": "object",
+      "required": [
+        "primaryUser", "primaryArtifact", "primaryAction", "requiredFlows", "requiredStates",
+        "approvedProductTopology", "designRules", "tokenRoles", "trustSurfaces",
+        "responsiveBehavior", "motionRules", "copyRules", "antiPatterns",
+        "knownNovelDecisions", "proofRequirements"
+      ],
+      "properties": {
+        "primaryUser": { "$ref": "#/$defs/nonEmpty" },
+        "primaryArtifact": { "$ref": "#/$defs/nonEmpty" },
+        "primaryAction": { "$ref": "#/$defs/nonEmpty" },
+        "requiredFlows": { "$ref": "#/$defs/stringSet" },
+        "requiredStates": { "$ref": "#/$defs/stringSet" },
+        "approvedProductTopology": { "$ref": "#/$defs/stringSet" },
+        "designRules": { "$ref": "#/$defs/stringSet" },
+        "tokenRoles": { "$ref": "#/$defs/stringSet" },
+        "trustSurfaces": { "$ref": "#/$defs/stringSet" },
+        "responsiveBehavior": { "$ref": "#/$defs/stringSet" },
+        "motionRules": { "$ref": "#/$defs/stringSet" },
+        "copyRules": { "$ref": "#/$defs/stringSet" },
+        "antiPatterns": { "$ref": "#/$defs/stringSet" },
+        "knownNovelDecisions": { "$ref": "#/$defs/stringSet" },
+        "proofRequirements": { "$ref": "#/$defs/stringSet" }
+      },
+      "additionalProperties": false
+    },
+    "stringSet": {
+      "type": "array",
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmpty" }
+    },
+    "artifactContract": {
+      "type": "object",
+      "required": ["schemaVersion", "kind", "authority", "completeness", "limitations"],
+      "properties": {
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "kind": { "$ref": "#/$defs/nonEmpty" },
+        "authority": { "enum": ["agent-produced", "deterministic", "human-approved", "externally-observed"] },
+        "completeness": { "enum": ["complete", "partial"] },
+        "limitations": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "id", "type", "title", "taskHandle", "authority", "maximumAttempts", "readSet", "writeSet",
+        "externalSystems", "expectedArtifact", "parallelGroup", "browserMode", "verifierQualificationRef"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmpty" },
+        "type": { "enum": ["CONTEXT", "DECISION", "BUILD", "CHECK", "REVIEW", "BROWSER", "AGENT_EVAL", "AGGREGATE", "REPAIR", "DELIVER", "HUMAN_GATE"] },
+        "title": { "$ref": "#/$defs/nonEmpty" },
+        "taskHandle": { "type": "string", "pattern": "^task:sha256:[a-f0-9]{64}$" },
+        "authority": { "enum": ["runtime", "builder", "reviewer", "evaluator", "human"] },
+        "maximumAttempts": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "readSet": { "$ref": "#/$defs/stringSet" },
+        "writeSet": { "$ref": "#/$defs/stringSet" },
+        "externalSystems": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "required": ["system", "access"],
+            "properties": {
+              "system": { "$ref": "#/$defs/nonEmpty" },
+              "access": { "enum": ["read", "write"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "expectedArtifact": { "$ref": "#/$defs/artifactContract" },
+        "parallelGroup": { "type": ["string", "null"], "minLength": 1 },
+        "browserMode": { "enum": ["headless-embedded", "headful-operational", null] },
+        "verifierQualificationRef": { "anyOf": [{ "$ref": "#/$defs/contentRef" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "required": [
+        "edgeId", "fromNodeId", "toNodeId", "on", "artifactRefs", "artifactDigests",
+        "requiredSchema", "repositoryCommit", "deploymentRevision", "authority", "completeness",
+        "limitations"
+      ],
+      "properties": {
+        "edgeId": { "type": "string", "pattern": "^edge:sha256:[a-f0-9]{64}$" },
+        "fromNodeId": { "$ref": "#/$defs/nonEmpty" },
+        "toNodeId": { "$ref": "#/$defs/nonEmpty" },
+        "on": { "enum": ["success", "failure", "always"] },
+        "artifactRefs": { "type": "array", "maxItems": 0 },
+        "artifactDigests": { "type": "array", "maxItems": 0 },
+        "requiredSchema": { "$ref": "#/$defs/nonEmpty" },
+        "repositoryCommit": { "type": "null" },
+        "deploymentRevision": { "type": "null" },
+        "authority": { "enum": ["agent-produced", "deterministic", "human-approved", "externally-observed"] },
+        "completeness": { "const": "missing" },
+        "limitations": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.execution-strategy-experiment.v1.schema.json",
+  "title": "Sequential versus graph execution experiment verdict",
+  "type": "object",
+  "required": ["schemaVersion", "taskRef", "taskDigest", "controls", "thresholds", "arms", "gates", "passed", "experimentDigest"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.execution-strategy-experiment/v1" },
+    "taskRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+    "taskDigest": { "$ref": "#/$defs/hash" },
+    "controls": {
+      "type": "object",
+      "required": ["startingCommit", "codingAgentHarness", "modelRoutes", "approvalPolicy", "testFixtures", "deliveryTarget"],
+      "properties": {
+        "startingCommit": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+        "codingAgentHarness": { "$ref": "#/$defs/binding" },
+        "modelRoutes": { "$ref": "#/$defs/binding" },
+        "approvalPolicy": { "$ref": "#/$defs/binding" },
+        "testFixtures": { "$ref": "#/$defs/binding" },
+        "deliveryTarget": { "$ref": "#/$defs/binding" }
+      },
+      "additionalProperties": false
+    },
+    "thresholds": {
+      "type": "object",
+      "required": [
+        "minimumRunsPerArm", "maximumSuccessRateRegression", "maximumMedianDurationRatio",
+        "maximumMedianCostRatio", "minimumCompletenessLift", "minimumWallClockReduction",
+        "minimumConfirmedDefectLift", "maximumFalseFindingIncrease"
+      ],
+      "properties": {
+        "minimumRunsPerArm": { "type": "integer", "minimum": 2, "maximum": 100 },
+        "maximumSuccessRateRegression": { "$ref": "#/$defs/rate" },
+        "maximumMedianDurationRatio": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "maximumMedianCostRatio": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "minimumCompletenessLift": { "$ref": "#/$defs/rate" },
+        "minimumWallClockReduction": { "$ref": "#/$defs/rate" },
+        "minimumConfirmedDefectLift": { "$ref": "#/$defs/rate" },
+        "maximumFalseFindingIncrease": { "type": "integer", "minimum": 0, "maximum": 100000 }
+      },
+      "additionalProperties": false
+    },
+    "arms": {
+      "type": "object",
+      "required": ["sequential", "graph"],
+      "properties": {
+        "sequential": { "$ref": "#/$defs/arm" },
+        "graph": { "$ref": "#/$defs/arm" }
+      },
+      "additionalProperties": false
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "sampleSize", "successRate", "duration", "cost", "completeness", "writeConflicts",
+        "validEdgeArtifacts", "hiddenTaskDrops", "falseStageAdvancement", "criticalDefectsMissed",
+        "proofValidCompletion", "advantage"
+      ],
+      "properties": {
+        "sampleSize": { "type": "boolean" },
+        "successRate": { "type": "boolean" },
+        "duration": { "type": "boolean" },
+        "cost": { "type": "boolean" },
+        "completeness": { "type": "boolean" },
+        "writeConflicts": { "type": "boolean" },
+        "validEdgeArtifacts": { "type": "boolean" },
+        "hiddenTaskDrops": { "type": "boolean" },
+        "falseStageAdvancement": { "type": "boolean" },
+        "criticalDefectsMissed": { "type": "boolean" },
+        "proofValidCompletion": { "type": "boolean" },
+        "advantage": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "passed": { "type": "boolean" },
+    "experimentDigest": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "binding": {
+      "type": "object",
+      "required": ["artifactRef", "artifactDigest"],
+      "properties": {
+        "artifactRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+        "artifactDigest": { "$ref": "#/$defs/hash" }
+      },
+      "additionalProperties": false
+    },
+    "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "arm": {
+      "type": "object",
+      "required": [
+        "runs", "successRate", "medianDurationMs", "medianCostUsd", "medianArtifactCompleteness",
+        "medianHumanReprompts", "medianFindingCount", "writeConflicts",
+        "minimumValidEdgeArtifactRate", "hiddenTaskDrops", "falseStageAdvancements",
+        "criticalDefectsMissed", "proofValidCompletionRate", "confirmedDefects", "falseFindings"
+      ],
+      "properties": {
+        "runs": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "successRate": { "$ref": "#/$defs/rate" },
+        "medianDurationMs": { "type": "number", "minimum": 0, "maximum": 86400000 },
+        "medianCostUsd": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "medianArtifactCompleteness": { "$ref": "#/$defs/rate" },
+        "medianHumanReprompts": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "medianFindingCount": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "writeConflicts": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "minimumValidEdgeArtifactRate": { "$ref": "#/$defs/rate" },
+        "hiddenTaskDrops": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "falseStageAdvancements": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "criticalDefectsMissed": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "proofValidCompletionRate": { "$ref": "#/$defs/rate" },
+        "confirmedDefects": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "falseFindings": { "type": "number", "minimum": 0, "maximum": 10000000 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

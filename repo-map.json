@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 98,
-    "modules": 66,
-    "tests": 72
+    "schemas": 103,
+    "modules": 67,
+    "tests": 73
   },
   "architecture": [
     {
@@ -156,8 +156,13 @@
     "nodekit.engineering-issue-inventory.v1.schema.json",
     "nodekit.evidence-snapshot.v1.schema.json",
     "nodekit.evolution-adoption.v1.schema.json",
+    "nodekit.evolution-deferred-review.v1.schema.json",
     "nodekit.evolution-event.v1.schema.json",
     "nodekit.evolution-evidence.v1.schema.json",
+    "nodekit.execution-graph.v1.schema.json",
+    "nodekit.execution-nodeproof.v1.schema.json",
+    "nodekit.execution-strategy-experiment.v1.schema.json",
+    "nodekit.execution-trace.v1.schema.json",
     "nodekit.experience-asset.v1.schema.json",
     "nodekit.experience-build.v1.schema.json",
     "nodekit.experience-recipe.v1.schema.json",
@@ -259,6 +264,7 @@
     "evolution-immutability.mjs",
     "evolution-ledger.mjs",
     "evolution-trust.mjs",
+    "execution-graph.mjs",
     "files.mjs",
     "friction-loop.mjs",
     "frontend-render-contract.mjs",
@@ -325,6 +331,7 @@
     "evolution-approval.test.mjs",
     "evolution-immutability.test.mjs",
     "evolution-ledger.test.mjs",
+    "execution-graph.test.mjs",
     "factory.test.mjs",
     "friction-loop-end-to-end.test.mjs",
     "friction-loop.test.mjs",

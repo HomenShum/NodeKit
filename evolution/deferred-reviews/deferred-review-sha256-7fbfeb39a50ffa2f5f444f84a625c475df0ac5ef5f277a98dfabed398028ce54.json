@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "nodekit.evolution-deferred-review/v1",
+  "id": "deferred-review:sha256:7fbfeb39a50ffa2f5f444f84a625c475df0ac5ef5f277a98dfabed398028ce54",
+  "events": [
+    {
+      "eventId": "evt:execution-graph-of-bounded-loops",
+      "draftRef": "evolution/drafts/evt-execution-graph-of-bounded-loops.json",
+      "draftDigest": "9422d468e654312d6e01c5d1ad559b37885eec339a6a911d48b1daf13c53d126",
+      "sourceCommit": "05a2c66580449824d4c0c91e36defb1c8b1db64c"
+    },
+    {
+      "eventId": "evt:proof-backed-deferred-review",
+      "draftRef": "evolution/drafts/evt-proof-backed-deferred-review.json",
+      "draftDigest": "84bab355e4c789947a2844d05394e6adfee96d9df1c5663f2dac06f2924cb15a",
+      "sourceCommit": "afe2f420c2eed125653949fad000371dc221b173"
+    }
+  ],
+  "range": {
+    "from": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
+    "reviewedTo": "fc47e3a500e9f78cb6e26197068e6366342cfd69"
+  },
+  "risk": {
+    "classification": "reversible",
+    "effects": {
+      "destructiveWrite": false,
+      "credentialOrAuthorityChange": true,
+      "irreversibleMigration": false,
+      "materialSpend": false,
+      "externalCommunication": false,
+      "legalOrComplianceCommitment": false,
+      "unverifiedRollback": false
+    },
+    "authorityDirective": {
+      "ref": "evidence/autonomous-governance/operator-directive.md",
+      "sha256": "0bb635948306525eb3578a2b297ff0fbd2a963a0999734cf2bc458064b346679",
+      "assurance": "operator-directed-in-session"
+    }
+  },
+  "coverage": {
+    "materialFiles": [
+      "schemas/nodekit.evolution-deferred-review.v1.schema.json",
+      "schemas/nodekit.execution-graph.v1.schema.json",
+      "schemas/nodekit.execution-nodeproof.v1.schema.json",
+      "schemas/nodekit.execution-strategy-experiment.v1.schema.json",
+      "schemas/nodekit.execution-trace.v1.schema.json",
+      "src/cli-main.mjs",
+      "src/execution-graph.d.mts",
+      "src/execution-graph.mjs",
+      "src/index.d.mts",
+      "src/index.mjs",
+      "src/lib/evolution-ledger.mjs",
+      "src/lib/execution-graph.mjs"
+    ]
+  },
+  "evidence": {
+    "before": [
+      {
+        "ref": "evidence/autonomous-governance/before/live-io.json",
+        "sha256": "73b6d092330d8855d3404f174649bb868277e5f26907b3fc7fdadb34ba078236",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/autonomous-governance/before/pr-checks.json",
+        "sha256": "69381a990bb5687db37711279c3097477575d66f6051c2f357a32d8edc027d45",
+        "kind": "ci-log"
+      },
+      {
+        "ref": "evidence/autonomous-governance/operator-directive.md",
+        "sha256": "0bb635948306525eb3578a2b297ff0fbd2a963a0999734cf2bc458064b346679",
+        "kind": "operator-directive"
+      }
+    ],
+    "after": [
+      {
+        "ref": "evidence/autonomous-governance/after/live-io.json",
+        "sha256": "9d80af0d2225f416352050f615d301ae1e6855c1c20e516f2d4c33fa3358ae8c",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/autonomous-governance/after/journey-card.md",
+        "sha256": "900137c945ef21abc80b8f8e6ccebd9dc205d4cf2cb27099c09cf07a6075aab6",
+        "kind": "journey-card"
+      },
+      {
+        "ref": "evidence/autonomous-governance/after/scenario-tests.log",
+        "sha256": "47cba792e1b3aca266fadbe5c14b206989c24958d279914086376b3dc5389a63",
+        "kind": "test-log"
+      },
+      {
+        "ref": "evidence/autonomous-governance/after/rollback-verification.json",
+        "sha256": "7a522fb5b23f96d836f5f8226fbdcdf8d6eb787b6cff58a975cf502808b46059",
+        "kind": "test-log"
+      }
+    ]
+  },
+  "uiSurface": {
+    "changed": false,
+    "mediaRequired": false,
+    "reason": "Package runtime only; no deployed product UI route changed. The larger human goal is shown by the journey card and exact live I/O.",
+    "mediaRefs": []
+  },
+  "rollback": {
+    "targetCommit": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
+    "strategy": "git-revert-range",
+    "verificationRefs": [
+      "evidence/autonomous-governance/after/rollback-verification.json"
+    ]
+  },
+  "review": {
+    "status": "deferred-human-review",
+    "feedbackChannel": "pull-request"
+  },
+  "receiptDigest": "3701a5aa3fcedd462c2ec128987c08e31226eafc6205bcd3168f9647c6d55428"
+}
