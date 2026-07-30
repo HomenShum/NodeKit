@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:native-agent-session-identity",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "cc49b80bc53aeaf90bfe23562701482fb28d5958",
+    "occurredAt": "2026-07-29T20:23:47-07:00"
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "Stateless MCP tasks and native desktop, scheduled, and inbox agents could resume after disconnection, but NodeKit had no portable owner-scoped contract proving which native agent, workspace, host, credential, and session generation was authorized to continue.",
+  "observedFailure": "A label or fresh process could be mistaken for the same agent across restarts or hosts, while a continuity record could accidentally be treated as graph, review, or verdict authority.",
+  "resolution": "Added immutable native-agent identity snapshots, exact host and credential bindings, single-generation rotation, short-lived content-addressed continuation grants, atomic consumed-once token enforcement with bounded abortable execution, explicit degraded read-only behavior, public schemas/types, and scenario-based replay and sustained-lineage tests. Caseflow, the stage-local graph, reviewer separation, and NodeProof retain their existing authority.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:native-agent-session-identity"
+  ],
+  "evidenceIds": [
+    "evd:native-agent-session-identity"
+  ],
+  "predecessorIds": [
+    "evt:caseflow-idempotent-retries"
+  ],
+  "knownLimitations": [
+    "Embedding applications own durable storage, atomic token-consumption transactions, and bounded retention.",
+    "Host and credential references require consumer-side issuer or attestation verification.",
+    "A provider outage permits only read-only display of a previously verified snapshot.",
+    "Consumer integration and production proofs remain separate from this portable package proof.",
+    "Canonical promotion requires a separately verified named-human approval."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

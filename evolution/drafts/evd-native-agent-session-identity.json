@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:native-agent-session-identity",
+  "kind": "test",
+  "artifactRef": "evolution/artifacts/native-agent-session-identity.md",
+  "sha256": "d918144b44f8aa0db00ef34556c2e7d4c4cfa065d339aa4ca3adba8a6eefbab3",
+  "sourceCommit": "cc49b80bc53aeaf90bfe23562701482fb28d5958",
+  "generatedAt": "2026-07-29T20:23:47-07:00",
+  "command": "node --test test/native-agent-identity.test.mjs test/public-api.test.mjs && npm test && npm run typecheck:public && npm run reference:schemas:check && npm run registry:check && npm run audit:prod",
+  "environment": {
+    "repository": "HomenShum/node-platform",
+    "targetedTests": "17 passed",
+    "repositoryTests": "541 passed",
+    "componentTests": "8 passed",
+    "platform": "Windows"
+  },
+  "verifiesInvariantIds": [
+    "inv:native-agent-session-identity"
+  ],
+  "result": "pass"
+}

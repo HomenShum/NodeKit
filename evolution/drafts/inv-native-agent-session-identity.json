@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:native-agent-session-identity",
+  "statement": "A native agent may reconnect only to the exact persisted owner/workspace/agent session authority, and may rotate only one generation through an unexpired exact-snapshot grant whose token is consumed atomically once; continuity metadata can neither advance Caseflow nor assert review or NodeProof authority.",
+  "scope": {
+    "applications": [
+      "NodeKit consumers"
+    ],
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "native-agent identity snapshot",
+      "continuation grant",
+      "session resolver",
+      "public package entrypoint"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/native-agent-identity.mjs",
+    "test/native-agent-identity.test.mjs",
+    "test/public-api.test.mjs"
+  ],
+  "introducedByEventId": "evt:native-agent-session-identity",
+  "status": "verified"
+}
