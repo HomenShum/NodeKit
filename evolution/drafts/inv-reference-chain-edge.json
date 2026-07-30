@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:reference-chain-edge",
+  "statement": "A cross-application reference handoff is valid only when its exact source and target record digests, current Caseflow state, repository revision, and typed authority evidence match; the edge can never carry or derive a pass, approval, verification, verdict, or stage-advance decision.",
+  "scope": {
+    "applications": [
+      "NodeKit factory"
+    ],
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "reference chain edge schema",
+      "reference chain edge builder",
+      "reference chain edge verifier"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/reference-loop.mjs",
+    "test/reference-chain-edge.test.mjs",
+    "test/types/reference-chain-edge-consumer.ts"
+  ],
+  "introducedByEventId": "evt:reference-chain-edge",
+  "status": "verified"
+}

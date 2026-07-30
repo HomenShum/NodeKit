@@ -1,6 +1,19 @@
 schemaVersion: nodeplatform.ownership/v1
 
 concepts:
+  nodekit.reference-chain:
+    owner: node-platform
+    package: "@homenshum/nodekit"
+    targetPackage: "@homenshum/nodekit"
+    status: canonical
+    contractVersion: nodekit.reference-chain-edge/v1
+    consumers: []
+    signatures:
+      - id: reference-chain-edge-builder
+        regex: '^\s*export\s+function\s+buildReferenceChainEdge\b'
+      - id: reference-chain-edge-verifier
+        regex: '^\s*export\s+async\s+function\s+verifyReferenceChainEdge\b'
+
   nodeplatform.repo-contract:
     owner: node-platform
     package: "@homenshum/nodekit"

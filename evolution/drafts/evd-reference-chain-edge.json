@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:reference-chain-edge",
+  "kind": "test",
+  "artifactRef": "evolution/artifacts/reference-chain-edge.md",
+  "sha256": "abc79879a89a475e85542b304e57eba676616d3e35d8c3c25722629ba289519f",
+  "sourceCommit": "851ce7cf0d57c9e11ba2a136c351c1cc5a812891",
+  "generatedAt": "2026-07-29T21:45:26-07:00",
+  "command": "node --test test/reference-chain-edge.test.mjs && npm test && npm run typecheck:public && npm run reference:schemas:check && npm run registry:check && npm run audit:prod",
+  "environment": {
+    "repository": "HomenShum/node-platform",
+    "targetedTests": "5 passed",
+    "repositoryTests": "534 passed",
+    "componentTests": "8 passed",
+    "platform": "Windows"
+  },
+  "verifiesInvariantIds": [
+    "inv:reference-chain-edge"
+  ],
+  "result": "pass"
+}
