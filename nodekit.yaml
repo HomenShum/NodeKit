@@ -92,3 +92,11 @@ behaviors:
       - normalizes-equivalent-values
       - incomplete-coverage-is-not-run
       - aliases-preserve-behavior
+  runtime.stage-graph:
+    statement: The current Caseflow stage compiles deterministically into verified edge-bound work, and only non-conflicting nodes with valid authority enter the runnable frontier.
+    requiredScenarios:
+      - deterministic-current-stage-only
+      - overlapping-writes-excluded
+      - mutated-bindings-rejected
+      - stale-stage-blocked
+      - protected-authority-fails-closed

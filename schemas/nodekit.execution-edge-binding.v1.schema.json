@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.local/schemas/nodekit.execution-edge-binding.v1.schema.json",
+  "title": "Immutable Caseflow-backed execution edge binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "bindingId",
+    "graphId",
+    "graphHash",
+    "edgeId",
+    "producer",
+    "artifact",
+    "authority",
+    "createdAt",
+    "bindingHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.execution-edge-binding/v1" },
+    "bindingId": { "type": "string", "pattern": "^execution-edge-binding:sha256:[a-f0-9]{64}$" },
+    "graphId": { "type": "string", "pattern": "^execution-graph:sha256:[a-f0-9]{64}$" },
+    "graphHash": { "$ref": "#/$defs/hash" },
+    "edgeId": { "$ref": "#/$defs/id" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodeId", "runId"],
+      "properties": {
+        "nodeId": { "$ref": "#/$defs/id" },
+        "runId": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactId", "schemaVersion", "contentHash"],
+      "properties": {
+        "artifactId": { "$ref": "#/$defs/nonEmpty" },
+        "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
+        "contentHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "repositoryBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["remote", "commitSha", "treeHash"],
+      "properties": {
+        "remote": { "$ref": "#/$defs/nonEmpty" },
+        "commitSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "treeHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "agent-produced",
+            "deterministic",
+            "human-attested",
+            "nodeproof-verified"
+          ]
+        },
+        "attestationRef": { "$ref": "#/$defs/nonEmpty" },
+        "receiptRef": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "bindingHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

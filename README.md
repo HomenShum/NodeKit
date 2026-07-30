@@ -185,6 +185,11 @@ applications use `@homenshum/nodekit/adapters/postgres/knowledge` with the expor
 [`docs/KNOWLEDGE_EVOLUTION.md`](https://github.com/HomenShum/node-platform/blob/main/docs/KNOWLEDGE_EVOLUTION.md)
 for the authority boundary and protected comparison contract.
 
+Current-stage work can also be compiled into a disposable execution projection with verified edge
+bindings and a conflict-free runnable frontier. Caseflow remains authoritative. See
+[`docs/STAGE_LOCAL_EXECUTION_GRAPH.md`](https://github.com/HomenShum/node-platform/blob/main/docs/STAGE_LOCAL_EXECUTION_GRAPH.md) for the contracts,
+commands, ActiveGraph boundary, and falsifiable scheduler experiment.
+
 From a generated or adopted repository carrying the vendored runtime:
 
 ```bash

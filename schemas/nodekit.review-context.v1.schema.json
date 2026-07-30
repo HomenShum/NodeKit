@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.local/schemas/nodekit.review-context.v1.schema.json",
+  "title": "Verifier-derived review separation context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "builderRunId",
+    "reviewerRunId",
+    "separation",
+    "protectedEvaluator"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.review-context/v1" },
+    "builderRunId": { "$ref": "#/$defs/nonEmpty" },
+    "reviewerRunId": { "$ref": "#/$defs/nonEmpty" },
+    "separation": {
+      "enum": ["same-context", "fresh-context", "independent-model", "independent-human"]
+    },
+    "protectedEvaluator": { "type": "boolean" },
+    "reviewerModelRef": { "$ref": "#/$defs/nonEmpty" },
+    "reviewerIdentityRef": { "$ref": "#/$defs/nonEmpty" },
+    "humanAttestationRef": { "$ref": "#/$defs/nonEmpty" }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 2048 }
+  }
+}

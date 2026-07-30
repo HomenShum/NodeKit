@@ -2,7 +2,7 @@
 // Full command implementation. The public wrapper keeps reference-loop startup bounded.
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderDashboard } from "./lib/dashboard.mjs";
@@ -108,6 +108,12 @@ import {
 } from "./lib/evolution-ledger.mjs";
 import { initializeTrust, readTrustPolicy } from "./lib/evolution-trust.mjs";
 import { approvalSubject, evidenceManifestHash, sealEvolutionApproval } from "./lib/evolution-approval.mjs";
+import {
+  compileStageExecutionGraph,
+  deriveRunnableFrontier,
+  sealExecutionEdgeBinding,
+  verifyExecutionEdgeBinding,
+} from "./lib/execution-graph.mjs";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -159,6 +165,9 @@ Usage:
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
   nodekit graph import [--repo-root <path>] [--graph-dir <path>] [--repo-id <id>] [--commit <sha>] [--json]
+  nodekit graph compile --input <file> [--repo-root <path>] [--json]
+  nodekit graph bind-edge --input <file> [--repo-root <path>] [--json]
+  nodekit graph frontier --input <file> [--repo-root <path>] [--json]
   nodekit graph init [--repo-root <path>] [--graph-id <id>] [--owner-id <id>] [--json]
   nodekit graph ingest --input <file> [--repo-root <path>] [--json]
   nodekit graph evidence-ingest --file <path> --source-uri <uri> --media-type <type>
@@ -856,17 +865,83 @@ async function runGraphQuery(parsed) {
   for (const { node, score } of output.matched) console.log(`  ${score} ${node.name} (${node.type})`);
 }
 
-async function readJsonInput(repoRoot, candidate, label) {
+async function readJsonInput(repoRoot, candidate, label, { maxBytes } = {}) {
   if (!candidate) throw new Error(`${label} file is required`);
   const root = path.resolve(repoRoot);
   const absolute = path.resolve(root, String(candidate));
   const relative = path.relative(root, absolute);
   if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw new Error(`${label} file must stay inside the repository`);
   try {
+    if (maxBytes !== undefined) {
+      const metadata = await stat(absolute);
+      if (!metadata.isFile()) throw new Error("input is not a regular file");
+      if (metadata.size > maxBytes) throw new Error(`input exceeds ${maxBytes} bytes`);
+    }
     return JSON.parse(await readFile(absolute, "utf8"));
   } catch (error) {
     throw new Error(`${label} file is invalid JSON: ${relative}: ${error.message}`);
   }
+}
+
+const EXECUTION_GRAPH_CLI_MAX_INPUT_BYTES = 4 * 1024 * 1024;
+const EXECUTION_GRAPH_CLI_MAX_BINDINGS = 1024;
+
+async function readExecutionGraphInput(parsed, label) {
+  return readJsonInput(
+    repoRootFrom(parsed),
+    parsed.options.input,
+    label,
+    { maxBytes: EXECUTION_GRAPH_CLI_MAX_INPUT_BYTES },
+  );
+}
+
+function boundedExecutionBindings(value) {
+  if (!Array.isArray(value)) throw new Error("execution frontier input bindings must be an array");
+  if (value.length > EXECUTION_GRAPH_CLI_MAX_BINDINGS) {
+    throw new Error(`execution frontier input bindings exceed ${EXECUTION_GRAPH_CLI_MAX_BINDINGS}`);
+  }
+  return value;
+}
+
+async function runExecutionGraphCompile(parsed) {
+  const input = await readExecutionGraphInput(parsed, "execution graph compile input");
+  const graph = await compileStageExecutionGraph(input);
+  printStructured(graph, parsed, (value) =>
+    `EXECUTION GRAPH COMPILED ${value.graphId}: ${value.nodes.length} nodes, ${value.edges.length} edges.`,
+  );
+}
+
+async function runExecutionGraphBindEdge(parsed) {
+  const input = await readExecutionGraphInput(parsed, "execution edge binding input");
+  if (!input?.draft || !input?.graph || !input?.snapshot) {
+    throw new Error("execution edge binding input requires draft, graph, and snapshot");
+  }
+  const binding = sealExecutionEdgeBinding(input.draft);
+  await verifyExecutionEdgeBinding({
+    binding,
+    graph: input.graph,
+    snapshot: input.snapshot,
+    repositoryState: input.repositoryState,
+  });
+  printStructured(binding, parsed, (value) =>
+    `EXECUTION EDGE BOUND ${value.bindingId} to ${value.edgeId}.`,
+  );
+}
+
+async function runExecutionGraphFrontier(parsed) {
+  const input = await readExecutionGraphInput(parsed, "execution frontier input");
+  if (!input?.graph || !input?.snapshot) {
+    throw new Error("execution frontier input requires graph and snapshot");
+  }
+  const frontier = await deriveRunnableFrontier({
+    graph: input.graph,
+    snapshot: input.snapshot,
+    bindings: boundedExecutionBindings(input.bindings),
+    repositoryState: input.repositoryState,
+  });
+  printStructured(frontier, parsed, (value) =>
+    `RUNNABLE FRONTIER ${value.frontierHash}: ${value.runnableNodeIds.length} ready, ${value.blocked.length} blocked.`,
+  );
 }
 
 async function runGraphInit(parsed) {
@@ -1699,6 +1774,18 @@ async function main() {
   }
   if (first === "graph" && second === "import") {
     await runGraphImport(parsed);
+    return;
+  }
+  if (first === "graph" && second === "compile") {
+    await runExecutionGraphCompile(parsed);
+    return;
+  }
+  if (first === "graph" && second === "bind-edge") {
+    await runExecutionGraphBindEdge(parsed);
+    return;
+  }
+  if (first === "graph" && second === "frontier") {
+    await runExecutionGraphFrontier(parsed);
     return;
   }
   if (first === "graph" && second === "init") {

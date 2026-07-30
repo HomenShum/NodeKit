@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 98,
-    "modules": 66,
-    "tests": 72
+    "schemas": 103,
+    "modules": 67,
+    "tests": 73
   },
   "architecture": [
     {
@@ -158,6 +158,8 @@
     "nodekit.evolution-adoption.v1.schema.json",
     "nodekit.evolution-event.v1.schema.json",
     "nodekit.evolution-evidence.v1.schema.json",
+    "nodekit.execution-edge-binding.v1.schema.json",
+    "nodekit.execution-graph.v1.schema.json",
     "nodekit.experience-asset.v1.schema.json",
     "nodekit.experience-build.v1.schema.json",
     "nodekit.experience-recipe.v1.schema.json",
@@ -214,7 +216,9 @@
     "nodekit.reference-profile-manifest.v1.schema.json",
     "nodekit.reference-score-receipt.v1.schema.json",
     "nodekit.research-collection.v1.schema.json",
+    "nodekit.review-context.v1.schema.json",
     "nodekit.routing-policy.v1.schema.json",
+    "nodekit.runnable-frontier.v1.schema.json",
     "nodekit.runtime-capabilities.v1.schema.json",
     "nodekit.schema.json",
     "nodekit.score-receipt.v1.schema.json",
@@ -227,6 +231,7 @@
     "nodekit.skill-promotion-approval-consumption.v1.schema.json",
     "nodekit.skill-promotion-approval.v1.schema.json",
     "nodekit.skill.v1.schema.json",
+    "nodekit.stage-task.v1.schema.json",
     "nodekit.story-pack.v1.schema.json",
     "nodekit.submission-candidate.v1.schema.json",
     "nodekit.submission-manifest.v1.schema.json",
@@ -259,6 +264,7 @@
     "evolution-immutability.mjs",
     "evolution-ledger.mjs",
     "evolution-trust.mjs",
+    "execution-graph.mjs",
     "files.mjs",
     "friction-loop.mjs",
     "frontend-render-contract.mjs",
@@ -325,6 +331,7 @@
     "evolution-approval.test.mjs",
     "evolution-immutability.test.mjs",
     "evolution-ledger.test.mjs",
+    "execution-graph.test.mjs",
     "factory.test.mjs",
     "friction-loop-end-to-end.test.mjs",
     "friction-loop.test.mjs",

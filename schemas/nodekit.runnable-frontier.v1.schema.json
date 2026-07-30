@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.local/schemas/nodekit.runnable-frontier.v1.schema.json",
+  "title": "Generated conflict-free current-stage runnable frontier",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "graphId",
+    "graphHash",
+    "caseBinding",
+    "consumedBindingHashes",
+    "runnableNodeIds",
+    "blocked",
+    "frontierHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.runnable-frontier/v1" },
+    "graphId": { "type": "string", "pattern": "^execution-graph:sha256:[a-f0-9]{64}$" },
+    "graphHash": { "$ref": "#/$defs/hash" },
+    "caseBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["caseId", "stageId", "caseContentHash"],
+      "properties": {
+        "caseId": { "$ref": "#/$defs/nonEmpty" },
+        "stageId": { "$ref": "#/$defs/id" },
+        "caseContentHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "consumedBindingHashes": { "$ref": "#/$defs/hashSet" },
+    "runnableNodeIds": {
+      "type": "array",
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "blocked": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["nodeId", "reasonCode", "blockingEdgeIds", "conflictingNodeIds"],
+        "properties": {
+          "nodeId": { "$ref": "#/$defs/id" },
+          "reasonCode": {
+            "enum": [
+              "MISSING_EDGE",
+              "INVALID_EDGE",
+              "AUTHORITY_REQUIRED",
+              "WRITE_CONFLICT",
+              "BARRIER_CLOSED",
+              "STAGE_NOT_CURRENT"
+            ]
+          },
+          "blockingEdgeIds": {
+            "type": "array",
+            "maxItems": 64,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/id" }
+          },
+          "conflictingNodeIds": {
+            "type": "array",
+            "maxItems": 64,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/id" }
+          }
+        }
+      }
+    },
+    "frontierHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hashSet": {
+      "type": "array",
+      "maxItems": 1024,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/hash" }
+    }
+  }
+}

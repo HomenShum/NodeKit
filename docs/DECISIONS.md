@@ -50,3 +50,15 @@ Application-profile repositories expose `dev`, `demo`, `doctor`, `check`, and `p
 ## No-key Meaning
 
 `certified` means the command requires no API key and no cloud account, uses deterministic fixtures through real contracts, and discloses simulation. `partial` means keys are optional but an external account or service is still needed. The dashboard never rounds `partial` up to `certified`.
+
+## Stage-local execution graph
+
+Execution graphs are disposable projections of the current Caseflow stage, compiled from canonical
+`stage-task` artifacts. They never replace Caseflow lifecycle state or `advanceStage`. Edge
+bindings must verify exact artifact bytes and authority before a downstream node becomes runnable;
+the generated frontier excludes overlapping write scopes.
+
+The first increment intentionally does not add a generated `design.md`, a `ReviewFinding` authority
+object, or persistent workspace/session identity. ActiveGraph remains an offline,
+non-authoritative canary. The complete contract and experiment kill criteria are in
+[`STAGE_LOCAL_EXECUTION_GRAPH.md`](STAGE_LOCAL_EXECUTION_GRAPH.md).
