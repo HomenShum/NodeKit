@@ -147,6 +147,7 @@
   },
   "files": [
     "dist",
+    "docs/WORKSPACE_REFERENCE_INDEX.md",
     "src",
     "scripts/sign-submission-attestation.mjs",
     "scripts/verify-submission-attestation.mjs",
