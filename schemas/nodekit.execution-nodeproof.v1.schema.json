@@ -22,14 +22,36 @@
     "findings": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["code", "severity", "message"],
-        "properties": {
-          "code": { "type": "string", "minLength": 1 },
-          "severity": { "enum": ["P0", "P1", "P2", "P3"] },
-          "message": { "type": "string", "minLength": 1 }
-        },
-        "additionalProperties": false
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["code", "severity", "message"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "severity": { "enum": ["critical", "major", "minor", "informational"] },
+              "message": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["findingId", "lens", "severity", "behaviorId", "evidenceRefs", "result"],
+            "properties": {
+              "findingId": { "type": "string", "minLength": 1 },
+              "lens": { "type": "string", "minLength": 1 },
+              "severity": { "enum": ["critical", "major", "minor", "informational"] },
+              "behaviorId": { "type": ["string", "null"], "minLength": 1 },
+              "evidenceRefs": {
+                "type": "array",
+                "maxItems": 256,
+                "uniqueItems": true,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "result": { "enum": ["confirmed", "not-observed", "unsupported"] }
+            },
+            "additionalProperties": false
+          }
+        ]
       }
     },
     "runnableFrontier": {

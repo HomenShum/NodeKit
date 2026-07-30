@@ -21,24 +21,45 @@ const canonical = (value) => {
   return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(",")}}`;
 };
 
-function contract(schemaVersion, kind, authority = "evidence") {
+function contract(schemaVersion, kind, authority = "deterministic") {
   return { schemaVersion, kind, authority, completeness: "complete", limitations: [] };
 }
 
+function designContext() {
+  return {
+    primaryUser: "NodeKit builder",
+    primaryArtifact: "verified brownfield change",
+    primaryAction: "approve the proof-valid delivery",
+    requiredFlows: ["inspect → build → verify → deliver"],
+    requiredStates: ["running", "waiting-on-you", "complete"],
+    approvedProductTopology: ["Caseflow lifecycle with disposable execution projection"],
+    designRules: ["Progressive disclosure for internal graph detail"],
+    tokenRoles: ["trust=verified", "attention=human-gate"],
+    trustSurfaces: ["NodeProof verdict", "human approval"],
+    responsiveBehavior: ["Current runnable frontier remains primary"],
+    motionRules: ["No motion required for proof state"],
+    copyRules: ["Use plain-language status"],
+    antiPatterns: ["Graph canvas as default UI"],
+    knownNovelDecisions: ["Graph nodes are bounded loops"],
+    proofRequirements: ["Every active edge verifies"],
+  };
+}
+
 function brownfieldGraph(overrides = {}) {
-  const buildArtifact = contract("nodekit.build-output/v1", "build-output", "proposal");
+  const buildArtifact = contract("nodekit.build-output/v1", "build-output", "agent-produced");
   const graph = {
     projectRef: "caseflow:case-brownfield-ui",
     projectRevision: "abc1234",
     approvedJourneyRef: ref("approved-journey", "approved-journey"),
     approvedJourneyDigest: sha("approved-journey"),
+    designContext: designContext(),
     nodes: [
       {
         id: "context",
         type: "CONTEXT",
         title: "Load canonical Caseflow context",
         authority: "runtime",
-        expectedArtifact: contract("nodekit.context-pack/v1", "context-pack", "canonical"),
+        expectedArtifact: contract("nodekit.context-pack/v1", "context-pack", "deterministic"),
         readSet: ["caseflow/case", "caseflow/artifacts"],
       },
       {
@@ -57,7 +78,7 @@ function brownfieldGraph(overrides = {}) {
         title: "Run scenario and type checks",
         authority: "runtime",
         parallelGroup: "verification",
-        expectedArtifact: contract("nodekit.check-receipt/v1", "check-receipt", "verification"),
+        expectedArtifact: contract("nodekit.check-receipt/v1", "check-receipt", "deterministic"),
         readSet: ["src/changed.ts", "test/scenarios.ts"],
       },
       {
@@ -67,7 +88,7 @@ function brownfieldGraph(overrides = {}) {
         authority: "reviewer",
         parallelGroup: "verification",
         browserMode: "headless-embedded",
-        expectedArtifact: contract("nodekit.browser-receipt/v1", "browser-receipt", "verification"),
+        expectedArtifact: contract("nodekit.browser-receipt/v1", "browser-receipt", "externally-observed"),
         readSet: ["dist/app.js"],
       },
       {
@@ -77,7 +98,7 @@ function brownfieldGraph(overrides = {}) {
         authority: "evaluator",
         parallelGroup: "verification",
         verifierQualificationRef: ref("verifier-qualification", "qualified-evaluator"),
-        expectedArtifact: contract("nodekit.agent-eval-receipt/v1", "agent-eval-receipt", "verification"),
+        expectedArtifact: contract("nodekit.agent-eval-receipt/v1", "agent-eval-receipt", "deterministic"),
         readSet: ["proof/candidate.json"],
       },
       {
@@ -85,7 +106,7 @@ function brownfieldGraph(overrides = {}) {
         type: "AGGREGATE",
         title: "Aggregate typed findings without deciding",
         authority: "runtime",
-        expectedArtifact: contract("nodekit.aggregate-receipt/v1", "aggregate-receipt", "evidence"),
+        expectedArtifact: contract("nodekit.aggregate-receipt/v1", "aggregate-receipt", "deterministic"),
         readSet: ["proof/check.json", "proof/browser.json", "proof/eval.json"],
       },
       {
@@ -93,19 +114,19 @@ function brownfieldGraph(overrides = {}) {
         type: "DELIVER",
         title: "Deliver the NodeProof-verified change",
         authority: "reviewer",
-        expectedArtifact: contract("nodekit.delivery-receipt/v1", "delivery-receipt", "canonical"),
+        expectedArtifact: contract("nodekit.delivery-receipt/v1", "delivery-receipt", "agent-produced"),
         readSet: ["proof/aggregate.json"],
       },
     ],
     edges: [
-      { from: "context", to: "build", artifact: contract("nodekit.context-pack/v1", "context-pack", "canonical") },
+      { from: "context", to: "build", artifact: contract("nodekit.context-pack/v1", "context-pack", "deterministic") },
       { from: "build", to: "check", artifact: buildArtifact },
       { from: "build", to: "browser", artifact: buildArtifact },
       { from: "build", to: "agent-eval", artifact: buildArtifact },
-      { from: "check", to: "aggregate", artifact: contract("nodekit.check-receipt/v1", "check-receipt", "verification") },
-      { from: "browser", to: "aggregate", artifact: contract("nodekit.browser-receipt/v1", "browser-receipt", "verification") },
-      { from: "agent-eval", to: "aggregate", artifact: contract("nodekit.agent-eval-receipt/v1", "agent-eval-receipt", "verification") },
-      { from: "aggregate", to: "deliver", artifact: contract("nodekit.aggregate-receipt/v1", "aggregate-receipt", "evidence") },
+      { from: "check", to: "aggregate", artifact: contract("nodekit.check-receipt/v1", "check-receipt", "deterministic") },
+      { from: "browser", to: "aggregate", artifact: contract("nodekit.browser-receipt/v1", "browser-receipt", "externally-observed") },
+      { from: "agent-eval", to: "aggregate", artifact: contract("nodekit.agent-eval-receipt/v1", "agent-eval-receipt", "deterministic") },
+      { from: "aggregate", to: "deliver", artifact: contract("nodekit.aggregate-receipt/v1", "aggregate-receipt", "deterministic") },
     ],
     ...overrides,
   };
@@ -115,19 +136,20 @@ function brownfieldGraph(overrides = {}) {
 function artifactFor(edge, value) {
   const hash = sha(value);
   return {
-    artifactRef: `${edge.artifact.kind}:sha256:${hash}`,
-    digest: hash,
-    schemaVersion: edge.artifact.schemaVersion,
-    kind: edge.artifact.kind,
-    revision: "abc1234",
-    authority: edge.artifact.authority,
-    completeness: edge.artifact.completeness,
-    limitations: edge.artifact.limitations,
+    edgeId: edge.edgeId,
+    artifactRefs: [`edge-artifact:sha256:${hash}`],
+    artifactDigests: [hash],
+    requiredSchema: edge.requiredSchema,
+    repositoryCommit: "abc1234",
+    deploymentRevision: null,
+    authority: edge.authority,
+    completeness: "complete",
+    limitations: edge.limitations,
   };
 }
 
 function resultFor(graph, nodeId, sequence, actorClass, actorRef, status = "passed") {
-  const edges = graph.edges.filter((edge) => edge.from === nodeId
+  const edges = graph.edges.filter((edge) => edge.fromNodeId === nodeId
     && (edge.on === "always" || (edge.on === "success" && status === "passed") || (edge.on === "failure" && status === "failed")));
   return {
     nodeId,
@@ -136,7 +158,7 @@ function resultFor(graph, nodeId, sequence, actorClass, actorRef, status = "pass
     actorRef: ref("actor", actorRef),
     startedAt: timestamp(sequence),
     completedAt: timestamp(sequence + 1),
-    handoffs: edges.map((edge) => ({ edgeId: edge.edgeId, artifact: artifactFor(edge, `${nodeId}-${edge.edgeId}-${sequence}`) })),
+    handoffs: edges.map((edge) => artifactFor(edge, `${nodeId}-${edge.edgeId}-${sequence}`)),
   };
 }
 
@@ -153,6 +175,11 @@ test("brownfield architect compiles a disposable graph with the fixed vocabulary
   assert.match(design, /Generated from canonical Caseflow-approved records/);
   assert.match(design, /disposable projection, not authority/);
   assert.match(design, /current runnable frontier/);
+  assert.match(design, /Primary user: NodeKit builder/);
+  assert.match(design, /Reference-backed design rules/);
+  assert.match(design, /Trust surfaces/);
+  assert.match(design, /Responsive behavior/);
+  assert.match(design, /Proof requirements/);
   assert.deepEqual(await validateSchema("nodekit.execution-graph.v1.schema.json", graph, "execution graph"), []);
 });
 
@@ -210,6 +237,7 @@ test("architect fails closed on unsafe fan-out, unqualified evaluators, and exte
     projectRevision: "deadbeef",
     approvedJourneyRef: ref("approved-journey", "approved"),
     approvedJourneyDigest: sha("approved"),
+    designContext: designContext(),
     nodes: [
       {
         id: "left",
@@ -218,7 +246,7 @@ test("architect fails closed on unsafe fan-out, unqualified evaluators, and exte
         authority: "builder",
         parallelGroup: "unsafe",
         writeSet: ["src/shared.ts"],
-        expectedArtifact: contract("x/v1", "x", "proposal"),
+        expectedArtifact: contract("x/v1", "x", "agent-produced"),
       },
       {
         id: "right",
@@ -227,19 +255,19 @@ test("architect fails closed on unsafe fan-out, unqualified evaluators, and exte
         authority: "runtime",
         parallelGroup: "unsafe",
         readSet: ["src/shared.ts"],
-        expectedArtifact: contract("y/v1", "y", "verification"),
+        expectedArtifact: contract("y/v1", "y", "deterministic"),
       },
       {
         id: "deliver",
         type: "DELIVER",
         title: "Deliver",
         authority: "reviewer",
-        expectedArtifact: contract("z/v1", "z", "canonical"),
+        expectedArtifact: contract("z/v1", "z", "agent-produced"),
       },
     ],
     edges: [
-      { from: "left", to: "deliver", artifact: contract("x/v1", "x", "proposal") },
-      { from: "right", to: "deliver", artifact: contract("y/v1", "y", "verification") },
+      { from: "left", to: "deliver", artifact: contract("x/v1", "x", "agent-produced") },
+      { from: "right", to: "deliver", artifact: contract("y/v1", "y", "deterministic") },
     ],
   };
   assert.throws(() => compileExecutionGraph(input), /overlapping read\/write sets/);
@@ -264,12 +292,13 @@ test("architect fails closed on unsafe fan-out, unqualified evaluators, and exte
 });
 
 test("bounded repair attempts stop a failing agent loop instead of growing trace state forever", () => {
-  const buildContract = contract("nodekit.patch/v1", "patch", "proposal");
+  const buildContract = contract("nodekit.patch/v1", "patch", "agent-produced");
   const graph = compileExecutionGraph({
     projectRef: "caseflow:bounded-repair",
     projectRevision: "abc",
     approvedJourneyRef: ref("approved-journey", "approved"),
     approvedJourneyDigest: sha("approved"),
+    designContext: designContext(),
     nodes: [
       {
         id: "repair",
@@ -284,7 +313,7 @@ test("bounded repair attempts stop a failing agent loop instead of growing trace
         type: "DELIVER",
         title: "Deliver",
         authority: "reviewer",
-        expectedArtifact: contract("nodekit.delivery/v1", "delivery", "canonical"),
+        expectedArtifact: contract("nodekit.delivery/v1", "delivery", "agent-produced"),
       },
     ],
     edges: [{ from: "repair", to: "deliver", on: "success", artifact: buildContract }],
@@ -314,28 +343,59 @@ test("tampered graph or trace identities fail closed instead of returning optimi
 
 test("brownfield sequential-versus-graph experiment uses measured thresholds without score floors", async () => {
   const taskDigest = sha("brownfield-task");
-  const run = (runId, succeeded, durationMs, costUsd, artifactCompleteness, humanReprompts, findingCount) => ({
-    runId, succeeded, durationMs, costUsd, artifactCompleteness, humanReprompts, findingCount,
+  const binding = (kind) => {
+    const artifactDigest = sha(kind);
+    return { artifactRef: `${kind}:sha256:${artifactDigest}`, artifactDigest };
+  };
+  const controls = {
+    startingCommit: "a".repeat(40),
+    codingAgentHarness: binding("coding-agent-harness"),
+    modelRoutes: binding("model-routes"),
+    approvalPolicy: binding("approval-policy"),
+    testFixtures: binding("test-fixtures"),
+    deliveryTarget: binding("delivery-target"),
+  };
+  const run = (runId, overrides = {}) => ({
+    runId,
+    succeeded: true,
+    durationMs: 100,
+    costUsd: 1,
+    artifactCompleteness: 0.7,
+    humanReprompts: 2,
+    findingCount: 4,
+    writeConflicts: 0,
+    validEdgeArtifactRate: 1,
+    hiddenTaskDrops: 0,
+    falseStageAdvancements: 0,
+    criticalDefectsMissed: 0,
+    proofValid: true,
+    confirmedDefects: 1,
+    falseFindings: 0,
+    ...overrides,
   });
   const result = evaluateExecutionStrategyExperiment({
     taskRef: `brownfield-task:sha256:${taskDigest}`,
     taskDigest,
+    controls,
     thresholds: {
       minimumRunsPerArm: 3,
       maximumSuccessRateRegression: 0,
       maximumMedianDurationRatio: 1.2,
       maximumMedianCostRatio: 1.25,
       minimumCompletenessLift: 0.1,
+      minimumWallClockReduction: 0.2,
+      minimumConfirmedDefectLift: 0.3,
+      maximumFalseFindingIncrease: 0,
     },
     sequentialRuns: [
-      run("sequential-1", true, 100, 1, 0.7, 2, 4),
-      run("sequential-2", false, 120, 1.2, 0.6, 3, 6),
-      run("sequential-3", true, 110, 1.1, 0.7, 2, 5),
+      run("sequential-1", { durationMs: 100 }),
+      run("sequential-2", { succeeded: false, proofValid: false, durationMs: 120, costUsd: 1.2, artifactCompleteness: 0.6, humanReprompts: 3, findingCount: 6 }),
+      run("sequential-3", { durationMs: 110, costUsd: 1.1, findingCount: 5 }),
     ],
     graphRuns: [
-      run("graph-1", true, 115, 1.2, 0.9, 0, 1),
-      run("graph-2", true, 120, 1.3, 0.9, 1, 2),
-      run("graph-3", true, 118, 1.25, 0.85, 0, 1),
+      run("graph-1", { durationMs: 115, costUsd: 1.2, artifactCompleteness: 0.9, humanReprompts: 0, findingCount: 1, confirmedDefects: 2 }),
+      run("graph-2", { durationMs: 120, costUsd: 1.3, artifactCompleteness: 0.9, humanReprompts: 1, findingCount: 2, confirmedDefects: 2 }),
+      run("graph-3", { durationMs: 118, costUsd: 1.25, artifactCompleteness: 0.85, humanReprompts: 0, findingCount: 1, confirmedDefects: 2 }),
     ],
   });
   assert.equal(result.passed, true);
@@ -345,6 +405,13 @@ test("brownfield sequential-versus-graph experiment uses measured thresholds wit
     duration: true,
     cost: true,
     completeness: true,
+    writeConflicts: true,
+    validEdgeArtifacts: true,
+    hiddenTaskDrops: true,
+    falseStageAdvancement: true,
+    criticalDefectsMissed: true,
+    proofValidCompletion: true,
+    advantage: true,
   });
   assert.equal(result.arms.sequential.successRate, 2 / 3, "raw measured rate must not receive a hardcoded floor");
   assert.deepEqual(
@@ -355,15 +422,19 @@ test("brownfield sequential-versus-graph experiment uses measured thresholds wit
   const undersampled = evaluateExecutionStrategyExperiment({
     taskRef: `brownfield-task:sha256:${taskDigest}`,
     taskDigest,
+    controls,
     thresholds: {
       minimumRunsPerArm: 3,
       maximumSuccessRateRegression: 0,
       maximumMedianDurationRatio: 1.2,
-      maximumMedianCostRatio: 1.25,
-      minimumCompletenessLift: 0.1,
-    },
-    sequentialRuns: [run("sequential-only-one", true, 1, 0, 1, 0, 0)],
-    graphRuns: [run("graph-only-one", true, 1, 0, 1, 0, 0)],
+        maximumMedianCostRatio: 1.25,
+        minimumCompletenessLift: 0.1,
+        minimumWallClockReduction: 0.2,
+        minimumConfirmedDefectLift: 0.3,
+        maximumFalseFindingIncrease: 0,
+      },
+    sequentialRuns: [run("sequential-only-one")],
+    graphRuns: [run("graph-only-one", { artifactCompleteness: 0.9, confirmedDefects: 2 })],
   });
   assert.equal(undersampled.passed, false);
   assert.equal(undersampled.gates.sampleSize, false);

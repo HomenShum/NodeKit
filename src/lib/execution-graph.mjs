@@ -4,6 +4,14 @@ export const EXECUTION_GRAPH_SCHEMA_VERSION = "nodekit.execution-graph/v1";
 export const EXECUTION_TRACE_SCHEMA_VERSION = "nodekit.execution-trace/v1";
 export const NODEPROOF_SCHEMA_VERSION = "nodekit.execution-nodeproof/v1";
 export const EXECUTION_EXPERIMENT_SCHEMA_VERSION = "nodekit.execution-strategy-experiment/v1";
+export const EXECUTION_EDGE_AUTHORITIES = Object.freeze([
+  "agent-produced",
+  "deterministic",
+  "human-approved",
+  "externally-observed",
+]);
+export const REVIEW_FINDING_SEVERITIES = Object.freeze(["critical", "major", "minor", "informational"]);
+export const REVIEW_FINDING_RESULTS = Object.freeze(["confirmed", "not-observed", "unsupported"]);
 
 export const EXECUTION_NODE_TYPES = Object.freeze([
   "CONTEXT",
@@ -86,7 +94,7 @@ function normalizeArtifactContract(value, label) {
     kind: nonEmpty(value.kind, `${label}.kind`),
     authority: exactEnum(
       value.authority,
-      ["canonical", "proposal", "evidence", "verification", "human-approval"],
+      EXECUTION_EDGE_AUTHORITIES,
       `${label}.authority`,
     ),
     completeness: exactEnum(value.completeness, ["complete", "partial"], `${label}.completeness`),
@@ -191,10 +199,17 @@ function normalizeEdge(value, nodeById) {
   const artifact = normalizeArtifactContract(value.artifact, `edge ${from} -> ${to}.artifact`);
   return {
     edgeId: `edge:sha256:${digest({ from, to, on, artifact })}`,
-    from,
-    to,
+    fromNodeId: from,
+    toNodeId: to,
     on,
-    artifact,
+    artifactRefs: [],
+    artifactDigests: [],
+    requiredSchema: artifact.schemaVersion,
+    repositoryCommit: null,
+    deploymentRevision: null,
+    authority: artifact.authority,
+    completeness: "missing",
+    limitations: artifact.limitations,
   };
 }
 
@@ -202,8 +217,8 @@ function validateAcyclic(nodes, edges) {
   const indegree = new Map(nodes.map((node) => [node.id, 0]));
   const outgoing = new Map(nodes.map((node) => [node.id, []]));
   for (const edge of edges) {
-    indegree.set(edge.to, indegree.get(edge.to) + 1);
-    outgoing.get(edge.from).push(edge.to);
+    indegree.set(edge.toNodeId, indegree.get(edge.toNodeId) + 1);
+    outgoing.get(edge.fromNodeId).push(edge.toNodeId);
   }
   const queue = [...nodes.filter((node) => indegree.get(node.id) === 0).map((node) => node.id)].sort();
   let visited = 0;
@@ -222,7 +237,7 @@ function validateAcyclic(nodes, edges) {
 function validateExternalWriteBarriers(nodes, edges) {
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const predecessors = new Map(nodes.map((node) => [node.id, []]));
-  for (const edge of edges) predecessors.get(edge.to).push(edge.from);
+  for (const edge of edges) predecessors.get(edge.toNodeId).push(edge.fromNodeId);
   const hasHumanGateAncestor = (nodeId) => {
     const pending = [...predecessors.get(nodeId)];
     const visited = new Set();
@@ -244,11 +259,33 @@ function validateExternalWriteBarriers(nodes, edges) {
 
 export function compileExecutionGraph(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) fail("input must be an object");
+  const designInput = input.designContext;
+  if (!designInput || typeof designInput !== "object" || Array.isArray(designInput)) {
+    fail("designContext must be an object compiled from canonical design records");
+  }
+  const designContext = {
+    primaryUser: nonEmpty(designInput.primaryUser, "designContext.primaryUser"),
+    primaryArtifact: nonEmpty(designInput.primaryArtifact, "designContext.primaryArtifact"),
+    primaryAction: nonEmpty(designInput.primaryAction, "designContext.primaryAction"),
+    requiredFlows: boundedStrings(designInput.requiredFlows ?? [], "designContext.requiredFlows"),
+    requiredStates: boundedStrings(designInput.requiredStates ?? [], "designContext.requiredStates"),
+    approvedProductTopology: boundedStrings(designInput.approvedProductTopology ?? [], "designContext.approvedProductTopology"),
+    designRules: boundedStrings(designInput.designRules ?? [], "designContext.designRules"),
+    tokenRoles: boundedStrings(designInput.tokenRoles ?? [], "designContext.tokenRoles"),
+    trustSurfaces: boundedStrings(designInput.trustSurfaces ?? [], "designContext.trustSurfaces"),
+    responsiveBehavior: boundedStrings(designInput.responsiveBehavior ?? [], "designContext.responsiveBehavior"),
+    motionRules: boundedStrings(designInput.motionRules ?? [], "designContext.motionRules"),
+    copyRules: boundedStrings(designInput.copyRules ?? [], "designContext.copyRules"),
+    antiPatterns: boundedStrings(designInput.antiPatterns ?? [], "designContext.antiPatterns"),
+    knownNovelDecisions: boundedStrings(designInput.knownNovelDecisions ?? [], "designContext.knownNovelDecisions"),
+    proofRequirements: boundedStrings(designInput.proofRequirements ?? [], "designContext.proofRequirements"),
+  };
   const source = {
     projectRef: nonEmpty(input.projectRef, "projectRef"),
     projectRevision: nonEmpty(input.projectRevision, "projectRevision"),
     approvedJourneyRef: nonEmpty(input.approvedJourneyRef, "approvedJourneyRef"),
     approvedJourneyDigest: nonEmpty(input.approvedJourneyDigest, "approvedJourneyDigest"),
+    designContext,
   };
   if (!REF.test(source.approvedJourneyRef)) fail("approvedJourneyRef must be content-addressed");
   if (!HASH.test(source.approvedJourneyDigest)) fail("approvedJourneyDigest must be a sha256 digest");
@@ -265,15 +302,22 @@ export function compileExecutionGraph(input) {
   const edges = input.edges.map((edge) => normalizeEdge(edge, nodeById)).sort((left, right) => left.edgeId.localeCompare(right.edgeId));
   if (new Set(edges.map((edge) => edge.edgeId)).size !== edges.length) fail("edges must be unique");
   for (const edge of edges) {
-    const producer = nodeById.get(edge.from);
-    if (canonical(edge.artifact) !== canonical(producer.expectedArtifact)) {
-      fail(`edge ${edge.from} -> ${edge.to} does not match producer ${edge.from}.expectedArtifact`);
+    const producer = nodeById.get(edge.fromNodeId);
+    const projectedContract = {
+      schemaVersion: edge.requiredSchema,
+      kind: producer.expectedArtifact.kind,
+      authority: edge.authority,
+      completeness: producer.expectedArtifact.completeness,
+      limitations: edge.limitations,
+    };
+    if (canonical(projectedContract) !== canonical(producer.expectedArtifact)) {
+      fail(`edge ${edge.fromNodeId} -> ${edge.toNodeId} does not match producer ${edge.fromNodeId}.expectedArtifact`);
     }
   }
   validateAcyclic(nodes, edges);
 
-  const incoming = new Set(edges.map((edge) => edge.to));
-  const outgoing = new Set(edges.map((edge) => edge.from));
+  const incoming = new Set(edges.map((edge) => edge.toNodeId));
+  const outgoing = new Set(edges.map((edge) => edge.fromNodeId));
   const roots = nodes.filter((node) => !incoming.has(node.id));
   const terminals = nodes.filter((node) => !outgoing.has(node.id));
   if (roots.length < 1) fail("graph requires at least one root");
@@ -303,22 +347,36 @@ export function compileExecutionGraph(input) {
   };
 }
 
-function validateArtifact(value, contract, label) {
+function validateMaterializedEdge(value, edge, producer, label) {
   if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${label} must be an object`);
-  if (!REF.test(value.artifactRef)) fail(`${label}.artifactRef must be content-addressed`);
-  if (!HASH.test(value.digest)) fail(`${label}.digest must be a sha256 digest`);
-  if (value.artifactRef.split(":").at(-1) !== value.digest) fail(`${label}.artifactRef must bind digest`);
-  for (const key of ["schemaVersion", "kind", "authority", "completeness"]) {
-    if (value[key] !== contract[key]) fail(`${label}.${key} does not match the edge contract`);
+  const artifactRefs = boundedStrings(value.artifactRefs, `${label}.artifactRefs`);
+  const artifactDigests = boundedStrings(value.artifactDigests, `${label}.artifactDigests`);
+  if (artifactRefs.length < 1 || artifactRefs.length !== artifactDigests.length) {
+    fail(`${label} must bind one digest per artifact ref`);
   }
+  for (let index = 0; index < artifactRefs.length; index += 1) {
+    if (!REF.test(artifactRefs[index])) fail(`${label}.artifactRefs[${index}] must be content-addressed`);
+    if (!HASH.test(artifactDigests[index])) fail(`${label}.artifactDigests[${index}] must be sha256`);
+    if (artifactRefs[index].split(":").at(-1) !== artifactDigests[index]) fail(`${label} artifact ref/digest mismatch`);
+  }
+  if (value.requiredSchema !== edge.requiredSchema) fail(`${label}.requiredSchema does not match the edge contract`);
+  if (value.authority !== edge.authority) fail(`${label}.authority does not match the edge contract`);
+  if (value.completeness !== producer.expectedArtifact.completeness) fail(`${label}.completeness does not match the producer contract`);
   const limitations = boundedStrings(value.limitations ?? [], `${label}.limitations`, MAX_LIMITATIONS);
-  if (canonical(limitations) !== canonical(contract.limitations)) fail(`${label}.limitations do not match the edge contract`);
+  if (canonical(limitations) !== canonical(edge.limitations)) fail(`${label}.limitations do not match the edge contract`);
   return {
-    artifactRef: value.artifactRef,
-    digest: value.digest,
-    schemaVersion: value.schemaVersion,
-    kind: value.kind,
-    revision: nonEmpty(value.revision, `${label}.revision`),
+    edgeId: edge.edgeId,
+    fromNodeId: edge.fromNodeId,
+    toNodeId: edge.toNodeId,
+    artifactRefs,
+    artifactDigests,
+    requiredSchema: edge.requiredSchema,
+    repositoryCommit: value.repositoryCommit === undefined || value.repositoryCommit === null
+      ? null
+      : nonEmpty(value.repositoryCommit, `${label}.repositoryCommit`),
+    deploymentRevision: value.deploymentRevision === undefined || value.deploymentRevision === null
+      ? null
+      : nonEmpty(value.deploymentRevision, `${label}.deploymentRevision`),
     authority: value.authority,
     completeness: value.completeness,
     limitations,
@@ -364,17 +422,17 @@ export function deriveRunnableFrontier(graph, trace) {
     const prior = latest.get(node.id);
     if (prior?.status === "passed" || prior?.status === "blocked") continue;
     if (prior?.status === "failed" && prior.attempt >= node.maximumAttempts) continue;
-    const incoming = graph.edges.filter((edge) => edge.to === node.id);
-    const allPredecessorsResolved = incoming.every((edge) => latest.has(edge.from));
+    const incoming = graph.edges.filter((edge) => edge.toNodeId === node.id);
+    const allPredecessorsResolved = incoming.every((edge) => latest.has(edge.fromNodeId));
     const activeIncoming = incoming.filter((edge) => {
-      const source = latest.get(edge.from);
+      const source = latest.get(edge.fromNodeId);
       return source && statusActivates(edge, source.status);
     });
     const ready = incoming.length === 0
       ? true
       : allPredecessorsResolved
         && activeIncoming.length > 0
-        && activeIncoming.every((edge) => latest.get(edge.from)?.handoffs.some((entry) => entry.edgeId === edge.edgeId));
+        && activeIncoming.every((edge) => latest.get(edge.fromNodeId)?.handoffs.some((entry) => entry.edgeId === edge.edgeId));
     if (ready) {
       frontier.push({
         nodeId: node.id,
@@ -408,7 +466,7 @@ export function recordExecutionResult(graph, trace, result) {
   }
   if (node.type === "HUMAN_GATE" && actorClass !== "human") fail(`HUMAN_GATE node ${node.id} requires a human actor`);
   if (node.type === "AGENT_EVAL" && actorClass !== "evaluator") fail(`AGENT_EVAL node ${node.id} requires an evaluator actor`);
-  const applicableEdges = graph.edges.filter((edge) => edge.from === node.id && statusActivates(edge, status));
+  const applicableEdges = graph.edges.filter((edge) => edge.fromNodeId === node.id && statusActivates(edge, status));
   const supplied = result.handoffs ?? [];
   if (!Array.isArray(supplied) || supplied.length !== applicableEdges.length) {
     fail(`node ${node.id} must materialize exactly ${applicableEdges.length} applicable edge handoffs`);
@@ -417,7 +475,7 @@ export function recordExecutionResult(graph, trace, result) {
   const handoffs = supplied.map((handoff, index) => {
     const edge = edgeById.get(handoff.edgeId);
     if (!edge) fail(`result.handoffs[${index}] references a non-applicable edge`);
-    return { edgeId: edge.edgeId, artifact: validateArtifact(handoff.artifact, edge.artifact, `result.handoffs[${index}].artifact`) };
+    return validateMaterializedEdge(handoff, edge, node, `result.handoffs[${index}]`);
   }).sort((left, right) => left.edgeId.localeCompare(right.edgeId));
   if (new Set(handoffs.map((handoff) => handoff.edgeId)).size !== handoffs.length) fail("result handoffs must be unique");
 
@@ -438,9 +496,12 @@ export function recordExecutionResult(graph, trace, result) {
     startedAt,
     completedAt,
     findings: (result.findings ?? []).map((finding, index) => ({
-      code: nonEmpty(finding.code, `result.findings[${index}].code`),
-      severity: exactEnum(finding.severity, ["P0", "P1", "P2", "P3"], `result.findings[${index}].severity`),
-      message: nonEmpty(finding.message, `result.findings[${index}].message`),
+      findingId: nonEmpty(finding.findingId, `result.findings[${index}].findingId`),
+      lens: nonEmpty(finding.lens, `result.findings[${index}].lens`),
+      severity: exactEnum(finding.severity, REVIEW_FINDING_SEVERITIES, `result.findings[${index}].severity`),
+      behaviorId: finding.behaviorId === undefined ? null : nonEmpty(finding.behaviorId, `result.findings[${index}].behaviorId`),
+      evidenceRefs: boundedStrings(finding.evidenceRefs ?? [], `result.findings[${index}].evidenceRefs`),
+      result: exactEnum(finding.result, REVIEW_FINDING_RESULTS, `result.findings[${index}].result`),
     })),
     handoffs,
   };
@@ -456,12 +517,13 @@ export function verifyExecutionProof(graph, trace) {
     verifyGraphIdentity(graph);
     verifyTraceIdentity(graph, trace);
   } catch (error) {
+    const findings = [{ code: "IDENTITY_MISMATCH", severity: "critical", message: error.message }];
     return {
       schemaVersion: NODEPROOF_SCHEMA_VERSION,
       passed: false,
       graphId: graph?.graphId ?? null,
       traceDigest: trace?.traceDigest ?? null,
-      findings: [{ code: "IDENTITY_MISMATCH", severity: "P0", message: error.message }],
+      findings,
       runnableFrontier: [],
     };
   }
@@ -470,29 +532,29 @@ export function verifyExecutionProof(graph, trace) {
     try {
       replay = recordExecutionResult(graph, replay, event);
     } catch (error) {
-      findings.push({ code: "INVALID_EVENT", severity: "P0", message: error.message });
+      findings.push({ code: "INVALID_EVENT", severity: "critical", message: error.message });
       break;
     }
   }
   if (!findings.some((finding) => finding.code === "INVALID_EVENT") && replay.traceDigest !== trace.traceDigest) {
-    findings.push({ code: "NON_CANONICAL_TRACE", severity: "P0", message: "trace events do not replay to the declared digest" });
+    findings.push({ code: "NON_CANONICAL_TRACE", severity: "critical", message: "trace events do not replay to the declared digest" });
   }
   const latest = latestEvents(replay);
   const eventByNode = new Map();
   for (const event of replay.events) {
     const node = graph.nodes.find((entry) => entry.id === event.nodeId);
     if (!node || event.taskHandle !== node.taskHandle || event.attempt > node.maximumAttempts) {
-      findings.push({ code: "INVALID_EVENT", severity: "P0", message: `invalid event binding for ${event.nodeId}` });
+      findings.push({ code: "INVALID_EVENT", severity: "critical", message: `invalid event binding for ${event.nodeId}` });
       continue;
     }
     const priorActors = graph.edges
-      .filter((edge) => edge.to === node.id)
-      .map((edge) => eventByNode.get(edge.from)?.actorRef)
+      .filter((edge) => edge.toNodeId === node.id)
+      .map((edge) => eventByNode.get(edge.fromNodeId)?.actorRef)
       .filter(Boolean);
     if (["REVIEW", "AGENT_EVAL"].includes(node.type) && priorActors.includes(event.actorRef)) {
       findings.push({
         code: "SELF_VERIFICATION",
-        severity: "P0",
+        severity: "critical",
         message: `${node.type} node ${node.id} reused a producing actor; fresh context is not independence`,
       });
     }
@@ -500,24 +562,24 @@ export function verifyExecutionProof(graph, trace) {
   }
   for (const node of graph.nodes.filter((entry) => entry.type === "AGENT_EVAL")) {
     if (!node.verifierQualificationRef) {
-      findings.push({ code: "UNQUALIFIED_EVALUATOR", severity: "P0", message: `AGENT_EVAL node ${node.id} lacks qualification evidence` });
+      findings.push({ code: "UNQUALIFIED_EVALUATOR", severity: "critical", message: `AGENT_EVAL node ${node.id} lacks qualification evidence` });
     }
   }
   for (const node of graph.nodes.filter((entry) => entry.type === "AGGREGATE")) {
-    if (!graph.edges.some((edge) => edge.from === node.id)) {
-      findings.push({ code: "AGGREGATOR_FINAL_DECIDER", severity: "P0", message: `AGGREGATE node ${node.id} cannot be terminal` });
+    if (!graph.edges.some((edge) => edge.fromNodeId === node.id)) {
+      findings.push({ code: "AGGREGATOR_FINAL_DECIDER", severity: "critical", message: `AGGREGATE node ${node.id} cannot be terminal` });
     }
   }
   for (const event of replay.events) findings.push(...event.findings);
-  const terminals = graph.nodes.filter((node) => !graph.edges.some((edge) => edge.from === node.id));
+  const terminals = graph.nodes.filter((node) => !graph.edges.some((edge) => edge.fromNodeId === node.id));
   const terminalComplete = terminals.every((node) => latest.get(node.id)?.status === "passed");
   if (!terminalComplete) {
-    findings.push({ code: "TERMINAL_INCOMPLETE", severity: "P1", message: "not every terminal delivery or human gate has passed" });
+    findings.push({ code: "TERMINAL_INCOMPLETE", severity: "major", message: "not every terminal delivery or human gate has passed" });
   }
   const runnableFrontier = deriveRunnableFrontier(graph, replay);
   return {
     schemaVersion: NODEPROOF_SCHEMA_VERSION,
-    passed: terminalComplete && !findings.some((finding) => ["P0", "P1"].includes(finding.severity)),
+    passed: terminalComplete && !findings.some((finding) => ["critical", "major"].includes(finding.severity)),
     graphId: graph.graphId,
     traceDigest: trace.traceDigest,
     findings,
@@ -536,9 +598,38 @@ export function renderExecutionDesignMarkdown(graph) {
     `- Project: \`${graph.source.projectRef}@${graph.source.projectRevision}\``,
     `- Approved journey: \`${graph.source.approvedJourneyRef}\` (\`${graph.source.approvedJourneyDigest}\`)`,
     "",
-    "## Nodes",
+    "## Canonical product design",
+    "",
+    `- Primary user: ${graph.source.designContext.primaryUser}`,
+    `- Primary artifact: ${graph.source.designContext.primaryArtifact}`,
+    `- Primary action: ${graph.source.designContext.primaryAction}`,
     "",
   ];
+  const designSections = [
+    ["Required flows", "requiredFlows"],
+    ["Required states", "requiredStates"],
+    ["Approved product topology", "approvedProductTopology"],
+    ["Reference-backed design rules", "designRules"],
+    ["Token roles", "tokenRoles"],
+    ["Trust surfaces", "trustSurfaces"],
+    ["Responsive behavior", "responsiveBehavior"],
+    ["Motion rules", "motionRules"],
+    ["Copy rules", "copyRules"],
+    ["Anti-patterns", "antiPatterns"],
+    ["Known novel decisions", "knownNovelDecisions"],
+    ["Proof requirements", "proofRequirements"],
+  ];
+  for (const [title, key] of designSections) {
+    lines.push(`### ${title}`, "");
+    const values = graph.source.designContext[key];
+    if (values.length === 0) lines.push("- None recorded.");
+    else for (const value of values) lines.push(`- ${value}`);
+    lines.push("");
+  }
+  lines.push(
+    "## Nodes",
+    "",
+  );
   for (const node of graph.nodes) {
     lines.push(`### ${node.id} — ${node.type}`, "");
     lines.push(`- Task handle: \`${node.taskHandle}\``);
@@ -553,7 +644,7 @@ export function renderExecutionDesignMarkdown(graph) {
   }
   lines.push("## Typed handoffs", "");
   for (const edge of graph.edges) {
-    lines.push(`- \`${edge.from}\` → \`${edge.to}\` on **${edge.on}**: \`${edge.artifact.schemaVersion}\`, authority \`${edge.artifact.authority}\`, completeness \`${edge.artifact.completeness}\``);
+    lines.push(`- \`${edge.fromNodeId}\` → \`${edge.toNodeId}\` on **${edge.on}**: \`${edge.requiredSchema}\`, authority \`${edge.authority}\`, materialization \`${edge.completeness}\``);
   }
   lines.push("", "## Runtime rule", "", "The next task is the current runnable frontier derived from NodeTrace receipts. NodeProof, not an orchestrator or aggregator, verifies the complete handoff chain.", "");
   return lines.join("\n");
@@ -582,6 +673,13 @@ function normalizeExperimentRuns(value, label, maximumRuns) {
       ["artifactCompleteness", 1],
       ["humanReprompts", 1_000],
       ["findingCount", 100_000],
+      ["writeConflicts", 100_000],
+      ["validEdgeArtifactRate", 1],
+      ["hiddenTaskDrops", 100_000],
+      ["falseStageAdvancements", 100_000],
+      ["criticalDefectsMissed", 100_000],
+      ["confirmedDefects", 100_000],
+      ["falseFindings", 100_000],
     ]) {
       const entry = run[key];
       if (typeof entry !== "number" || !Number.isFinite(entry) || entry < 0 || entry > maximum) {
@@ -590,9 +688,11 @@ function normalizeExperimentRuns(value, label, maximumRuns) {
       numeric[key] = entry;
     }
     if (numeric.artifactCompleteness > 1) fail(`${label}[${index}].artifactCompleteness must be at most 1`);
+    if (typeof run.proofValid !== "boolean") fail(`${label}[${index}].proofValid must be a boolean`);
     return {
       runId,
       succeeded: run.succeeded,
+      proofValid: run.proofValid,
       ...numeric,
     };
   });
@@ -607,7 +707,25 @@ function summarizeExperimentArm(runs) {
     medianArtifactCompleteness: median(runs.map((run) => run.artifactCompleteness)),
     medianHumanReprompts: median(runs.map((run) => run.humanReprompts)),
     medianFindingCount: median(runs.map((run) => run.findingCount)),
+    writeConflicts: runs.reduce((sum, run) => sum + run.writeConflicts, 0),
+    minimumValidEdgeArtifactRate: Math.min(...runs.map((run) => run.validEdgeArtifactRate)),
+    hiddenTaskDrops: runs.reduce((sum, run) => sum + run.hiddenTaskDrops, 0),
+    falseStageAdvancements: runs.reduce((sum, run) => sum + run.falseStageAdvancements, 0),
+    criticalDefectsMissed: runs.reduce((sum, run) => sum + run.criticalDefectsMissed, 0),
+    proofValidCompletionRate: runs.filter((run) => run.proofValid).length / runs.length,
+    confirmedDefects: runs.reduce((sum, run) => sum + run.confirmedDefects, 0),
+    falseFindings: runs.reduce((sum, run) => sum + run.falseFindings, 0),
   };
+}
+
+function normalizeEvidenceBinding(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${label} must be an object`);
+  const artifactRef = nonEmpty(value.artifactRef, `${label}.artifactRef`);
+  const artifactDigest = nonEmpty(value.artifactDigest, `${label}.artifactDigest`);
+  if (!REF.test(artifactRef) || !HASH.test(artifactDigest) || artifactRef.split(":").at(-1) !== artifactDigest) {
+    fail(`${label} must bind an exact content-addressed artifact`);
+  }
+  return { artifactRef, artifactDigest };
 }
 
 export function evaluateExecutionStrategyExperiment(input) {
@@ -617,17 +735,35 @@ export function evaluateExecutionStrategyExperiment(input) {
   if (!REF.test(taskRef)) fail("experiment.taskRef must be content-addressed");
   const taskDigest = nonEmpty(input.taskDigest, "experiment.taskDigest");
   if (!HASH.test(taskDigest) || taskRef.split(":").at(-1) !== taskDigest) fail("experiment task ref and digest must match");
+  const startingCommit = nonEmpty(input.controls?.startingCommit, "experiment.controls.startingCommit");
+  if (!/^[a-f0-9]{40,64}$/.test(startingCommit)) fail("experiment.controls.startingCommit must be an exact commit");
+  const controls = {
+    startingCommit,
+    codingAgentHarness: normalizeEvidenceBinding(input.controls?.codingAgentHarness, "experiment.controls.codingAgentHarness"),
+    modelRoutes: normalizeEvidenceBinding(input.controls?.modelRoutes, "experiment.controls.modelRoutes"),
+    approvalPolicy: normalizeEvidenceBinding(input.controls?.approvalPolicy, "experiment.controls.approvalPolicy"),
+    testFixtures: normalizeEvidenceBinding(input.controls?.testFixtures, "experiment.controls.testFixtures"),
+    deliveryTarget: normalizeEvidenceBinding(input.controls?.deliveryTarget, "experiment.controls.deliveryTarget"),
+  };
   const thresholds = {
     minimumRunsPerArm: input.thresholds?.minimumRunsPerArm,
     maximumSuccessRateRegression: input.thresholds?.maximumSuccessRateRegression,
     maximumMedianDurationRatio: input.thresholds?.maximumMedianDurationRatio,
     maximumMedianCostRatio: input.thresholds?.maximumMedianCostRatio,
     minimumCompletenessLift: input.thresholds?.minimumCompletenessLift,
+    minimumWallClockReduction: input.thresholds?.minimumWallClockReduction,
+    minimumConfirmedDefectLift: input.thresholds?.minimumConfirmedDefectLift,
+    maximumFalseFindingIncrease: input.thresholds?.maximumFalseFindingIncrease,
   };
   if (!Number.isInteger(thresholds.minimumRunsPerArm) || thresholds.minimumRunsPerArm < 2 || thresholds.minimumRunsPerArm > maximumRunsPerArm) {
     fail(`experiment.thresholds.minimumRunsPerArm must be an integer from 2 to ${maximumRunsPerArm}`);
   }
-  for (const key of ["maximumSuccessRateRegression", "minimumCompletenessLift"]) {
+  for (const key of [
+    "maximumSuccessRateRegression",
+    "minimumCompletenessLift",
+    "minimumWallClockReduction",
+    "minimumConfirmedDefectLift",
+  ]) {
     if (typeof thresholds[key] !== "number" || thresholds[key] < 0 || thresholds[key] > 1) {
       fail(`experiment.thresholds.${key} must be between 0 and 1`);
     }
@@ -637,22 +773,36 @@ export function evaluateExecutionStrategyExperiment(input) {
       fail(`experiment.thresholds.${key} must be greater than 0 and at most 10`);
     }
   }
+  if (!Number.isInteger(thresholds.maximumFalseFindingIncrease) || thresholds.maximumFalseFindingIncrease < 0) {
+    fail("experiment.thresholds.maximumFalseFindingIncrease must be a non-negative integer");
+  }
   const sequentialRuns = normalizeExperimentRuns(input.sequentialRuns, "experiment.sequentialRuns", maximumRunsPerArm);
   const graphRuns = normalizeExperimentRuns(input.graphRuns, "experiment.graphRuns", maximumRunsPerArm);
   const sequential = summarizeExperimentArm(sequentialRuns);
   const graph = summarizeExperimentArm(graphRuns);
   const safeRatio = (numerator, denominator) => denominator === 0 ? (numerator === 0 ? 1 : Number.POSITIVE_INFINITY) : numerator / denominator;
+  const wallClockAdvantage = graph.medianDurationMs <= sequential.medianDurationMs * (1 - thresholds.minimumWallClockReduction);
+  const defectAdvantage = graph.confirmedDefects >= sequential.confirmedDefects * (1 + thresholds.minimumConfirmedDefectLift)
+    && graph.falseFindings <= sequential.falseFindings + thresholds.maximumFalseFindingIncrease;
   const gates = {
     sampleSize: sequential.runs >= thresholds.minimumRunsPerArm && graph.runs >= thresholds.minimumRunsPerArm,
     successRate: graph.successRate >= sequential.successRate - thresholds.maximumSuccessRateRegression,
     duration: safeRatio(graph.medianDurationMs, sequential.medianDurationMs) <= thresholds.maximumMedianDurationRatio,
     cost: safeRatio(graph.medianCostUsd, sequential.medianCostUsd) <= thresholds.maximumMedianCostRatio,
     completeness: graph.medianArtifactCompleteness >= sequential.medianArtifactCompleteness + thresholds.minimumCompletenessLift,
+    writeConflicts: graph.writeConflicts === 0,
+    validEdgeArtifacts: graph.minimumValidEdgeArtifactRate === 1,
+    hiddenTaskDrops: graph.hiddenTaskDrops === 0,
+    falseStageAdvancement: graph.falseStageAdvancements === 0,
+    criticalDefectsMissed: graph.criticalDefectsMissed === 0,
+    proofValidCompletion: graph.proofValidCompletionRate >= sequential.proofValidCompletionRate,
+    advantage: wallClockAdvantage || defectAdvantage,
   };
   const body = {
     schemaVersion: EXECUTION_EXPERIMENT_SCHEMA_VERSION,
     taskRef,
     taskDigest,
+    controls,
     thresholds,
     arms: { sequential, graph },
     gates,

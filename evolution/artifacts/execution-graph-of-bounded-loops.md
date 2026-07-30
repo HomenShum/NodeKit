@@ -33,7 +33,7 @@ The decision preserves these boundaries:
 
 - Caseflow owns Cases, Tasks, Artifacts, Proposals, Approvals, Receipts, and Evolution events.
 - Compiled graph, durable task handles, generated `design.md`, and runnable frontier are projections.
-- Every edge handoff carries an exact artifact ref, digest, schema, revision, authority,
+- Every edge handoff carries exact artifact-ref and digest arrays, schema, revision, authority,
   completeness, and limitations.
 - Parallel groups are admitted only when read/write sets and external-system authority are disjoint.
 - NodeTrace records execution events and NodeProof replays the full edge chain.
@@ -60,8 +60,8 @@ The execution-graph suite covers:
 - bounded repair exhaustion;
 - recomputed but forged trace rejection by deterministic replay;
 - schema validation for graph, trace, NodeProof, and experiment verdicts;
-- a measured sequential-versus-graph evaluator with raw success rates, medians, predeclared
-  thresholds, and fail-closed sample-size gating.
+- a measured sequential-versus-graph evaluator with raw success rates, medians, zero-tolerance seam
+  gates, the 20%-wall-clock/30%-defect advantage rule, and fail-closed sample-size gating.
 
 Repository regression evidence:
 

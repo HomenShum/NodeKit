@@ -10,12 +10,13 @@
     "graphDigest": { "$ref": "#/$defs/hash" },
     "source": {
       "type": "object",
-      "required": ["projectRef", "projectRevision", "approvedJourneyRef", "approvedJourneyDigest"],
+      "required": ["projectRef", "projectRevision", "approvedJourneyRef", "approvedJourneyDigest", "designContext"],
       "properties": {
         "projectRef": { "$ref": "#/$defs/nonEmpty" },
         "projectRevision": { "$ref": "#/$defs/nonEmpty" },
         "approvedJourneyRef": { "$ref": "#/$defs/contentRef" },
-        "approvedJourneyDigest": { "$ref": "#/$defs/hash" }
+        "approvedJourneyDigest": { "$ref": "#/$defs/hash" },
+        "designContext": { "$ref": "#/$defs/designContext" }
       },
       "additionalProperties": false
     },
@@ -48,6 +49,33 @@
     "nonEmpty": { "type": "string", "minLength": 1 },
     "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "contentRef": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:sha256:[a-f0-9]{64}$" },
+    "designContext": {
+      "type": "object",
+      "required": [
+        "primaryUser", "primaryArtifact", "primaryAction", "requiredFlows", "requiredStates",
+        "approvedProductTopology", "designRules", "tokenRoles", "trustSurfaces",
+        "responsiveBehavior", "motionRules", "copyRules", "antiPatterns",
+        "knownNovelDecisions", "proofRequirements"
+      ],
+      "properties": {
+        "primaryUser": { "$ref": "#/$defs/nonEmpty" },
+        "primaryArtifact": { "$ref": "#/$defs/nonEmpty" },
+        "primaryAction": { "$ref": "#/$defs/nonEmpty" },
+        "requiredFlows": { "$ref": "#/$defs/stringSet" },
+        "requiredStates": { "$ref": "#/$defs/stringSet" },
+        "approvedProductTopology": { "$ref": "#/$defs/stringSet" },
+        "designRules": { "$ref": "#/$defs/stringSet" },
+        "tokenRoles": { "$ref": "#/$defs/stringSet" },
+        "trustSurfaces": { "$ref": "#/$defs/stringSet" },
+        "responsiveBehavior": { "$ref": "#/$defs/stringSet" },
+        "motionRules": { "$ref": "#/$defs/stringSet" },
+        "copyRules": { "$ref": "#/$defs/stringSet" },
+        "antiPatterns": { "$ref": "#/$defs/stringSet" },
+        "knownNovelDecisions": { "$ref": "#/$defs/stringSet" },
+        "proofRequirements": { "$ref": "#/$defs/stringSet" }
+      },
+      "additionalProperties": false
+    },
     "stringSet": {
       "type": "array",
       "maxItems": 256,
@@ -60,7 +88,7 @@
       "properties": {
         "schemaVersion": { "$ref": "#/$defs/nonEmpty" },
         "kind": { "$ref": "#/$defs/nonEmpty" },
-        "authority": { "enum": ["canonical", "proposal", "evidence", "verification", "human-approval"] },
+        "authority": { "enum": ["agent-produced", "deterministic", "human-approved", "externally-observed"] },
         "completeness": { "enum": ["complete", "partial"] },
         "limitations": {
           "type": "array",
@@ -108,13 +136,29 @@
     },
     "edge": {
       "type": "object",
-      "required": ["edgeId", "from", "to", "on", "artifact"],
+      "required": [
+        "edgeId", "fromNodeId", "toNodeId", "on", "artifactRefs", "artifactDigests",
+        "requiredSchema", "repositoryCommit", "deploymentRevision", "authority", "completeness",
+        "limitations"
+      ],
       "properties": {
         "edgeId": { "type": "string", "pattern": "^edge:sha256:[a-f0-9]{64}$" },
-        "from": { "$ref": "#/$defs/nonEmpty" },
-        "to": { "$ref": "#/$defs/nonEmpty" },
+        "fromNodeId": { "$ref": "#/$defs/nonEmpty" },
+        "toNodeId": { "$ref": "#/$defs/nonEmpty" },
         "on": { "enum": ["success", "failure", "always"] },
-        "artifact": { "$ref": "#/$defs/artifactContract" }
+        "artifactRefs": { "type": "array", "maxItems": 0 },
+        "artifactDigests": { "type": "array", "maxItems": 0 },
+        "requiredSchema": { "$ref": "#/$defs/nonEmpty" },
+        "repositoryCommit": { "type": "null" },
+        "deploymentRevision": { "type": "null" },
+        "authority": { "enum": ["agent-produced", "deterministic", "human-approved", "externally-observed"] },
+        "completeness": { "const": "missing" },
+        "limitations": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmpty" }
+        }
       },
       "additionalProperties": false
     }

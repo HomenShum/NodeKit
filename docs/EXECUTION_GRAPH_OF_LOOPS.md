@@ -46,8 +46,8 @@ those handles to a caller while Caseflow owns the durable project state.
 1. Create an empty NodeTrace bound to the compiled graph.
 2. Ask `deriveRunnableFrontier` for the current tasks.
 3. Execute only those tasks.
-4. Record exact content-addressed handoffs with schema, revision, authority, completeness, and
-   limitations.
+4. Record exact content-addressed handoffs with artifact-ref and digest arrays, required schema,
+   repository/deployment revision, authority, completeness, and limitations.
 5. Repeat until a delivery or human gate is terminal.
 6. Run `verifyExecutionProof`.
 
@@ -65,6 +65,12 @@ model. Product surfaces should reduce the projection to plain-language states su
 - `AGGREGATE` may combine typed findings but cannot be terminal or decide release.
 - `HUMAN_GATE` requires a human actor.
 - NodeProof replays the full trace against the frontier rules before it can pass.
+
+Verification runs in three scopes:
+
+- **Embedded:** cheap deterministic checks inside a build loop.
+- **Standalone:** narrow read-only semantic or runtime reviews after a coherent artifact exists.
+- **Orchestrated:** required review lanes fanned out before a Caseflow stage-exit barrier.
 
 ## Browser lanes
 
@@ -92,8 +98,18 @@ Record at least the predeclared minimum samples for both arms. Pass the raw runs
 duration, median cost, artifact completeness, human reprompts, and finding count. It fails closed on
 insufficient samples and applies no score floors.
 
-Graph execution is eligible for broader rollout only when every predeclared gate passes. The
-experiment verdict is evidence; it is not automatic promotion authority.
+Graph execution is eligible for broader rollout only when every predeclared gate passes:
+
+- zero write conflicts;
+- 100% valid edge-artifact hashes;
+- zero hidden task drops;
+- zero false stage advancement;
+- zero critical defects missed;
+- proof-valid completion no lower than the sequential arm; and
+- either median active wall-clock at least 20% lower, or at least 30% more confirmed defects with
+  no increase in false findings.
+
+The experiment verdict is evidence; it is not automatic promotion authority.
 
 ## Deliberate exclusions
 

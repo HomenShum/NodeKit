@@ -2,13 +2,18 @@ export const EXECUTION_GRAPH_SCHEMA_VERSION: "nodekit.execution-graph/v1";
 export const EXECUTION_TRACE_SCHEMA_VERSION: "nodekit.execution-trace/v1";
 export const NODEPROOF_SCHEMA_VERSION: "nodekit.execution-nodeproof/v1";
 export const EXECUTION_EXPERIMENT_SCHEMA_VERSION: "nodekit.execution-strategy-experiment/v1";
+export const EXECUTION_EDGE_AUTHORITIES: readonly [
+  "agent-produced", "deterministic", "human-approved", "externally-observed",
+];
+export const REVIEW_FINDING_SEVERITIES: readonly ["critical", "major", "minor", "informational"];
+export const REVIEW_FINDING_RESULTS: readonly ["confirmed", "not-observed", "unsupported"];
 export const EXECUTION_NODE_TYPES: readonly [
   "CONTEXT", "DECISION", "BUILD", "CHECK", "REVIEW", "BROWSER",
   "AGENT_EVAL", "AGGREGATE", "REPAIR", "DELIVER", "HUMAN_GATE",
 ];
 
 export type ExecutionNodeType = typeof EXECUTION_NODE_TYPES[number];
-export type ArtifactAuthority = "canonical" | "proposal" | "evidence" | "verification" | "human-approval";
+export type ArtifactAuthority = typeof EXECUTION_EDGE_AUTHORITIES[number];
 export type ArtifactCompleteness = "complete" | "partial";
 
 export interface ArtifactContract {
@@ -46,8 +51,27 @@ export interface ExecutionGraphInput {
   projectRevision: string;
   approvedJourneyRef: string;
   approvedJourneyDigest: string;
+  designContext: ExecutionDesignContext;
   nodes: ExecutionNodeInput[];
   edges: ExecutionEdgeInput[];
+}
+
+export interface ExecutionDesignContext {
+  primaryUser: string;
+  primaryArtifact: string;
+  primaryAction: string;
+  requiredFlows?: string[];
+  requiredStates?: string[];
+  approvedProductTopology?: string[];
+  designRules?: string[];
+  tokenRoles?: string[];
+  trustSurfaces?: string[];
+  responsiveBehavior?: string[];
+  motionRules?: string[];
+  copyRules?: string[];
+  antiPatterns?: string[];
+  knownNovelDecisions?: string[];
+  proofRequirements?: string[];
 }
 
 export interface CompiledExecutionGraph {
@@ -59,6 +83,7 @@ export interface CompiledExecutionGraph {
     projectRevision: string;
     approvedJourneyRef: string;
     approvedJourneyDigest: string;
+    designContext: Required<ExecutionDesignContext>;
   };
   policy: {
     canonicalState: "caseflow";
@@ -78,13 +103,34 @@ export interface CompiledExecutionGraph {
     browserMode: "headless-embedded" | "headful-operational" | null;
     verifierQualificationRef: string | null;
   }>;
-  edges: Array<Required<ExecutionEdgeInput> & { edgeId: string }>;
+  edges: Array<{
+    edgeId: string;
+    fromNodeId: string;
+    toNodeId: string;
+    on: "success" | "failure" | "always";
+    artifactRefs: string[];
+    artifactDigests: string[];
+    requiredSchema: string;
+    repositoryCommit: string | null;
+    deploymentRevision: string | null;
+    authority: ArtifactAuthority;
+    completeness: "missing";
+    limitations: string[];
+  }>;
 }
 
-export interface MaterializedArtifact extends Required<ArtifactContract> {
-  artifactRef: string;
-  digest: string;
-  revision: string;
+export interface MaterializedExecutionEdge {
+  edgeId: string;
+  fromNodeId: string;
+  toNodeId: string;
+  artifactRefs: string[];
+  artifactDigests: string[];
+  requiredSchema: string;
+  repositoryCommit: string | null;
+  deploymentRevision: string | null;
+  authority: ArtifactAuthority;
+  completeness: ArtifactCompleteness;
+  limitations: string[];
 }
 
 export interface ExecutionTrace {
@@ -102,9 +148,18 @@ export interface ExecutionTrace {
     actorRef: string;
     startedAt: string;
     completedAt: string;
-    findings: Array<{ code: string; severity: "P0" | "P1" | "P2" | "P3"; message: string }>;
-    handoffs: Array<{ edgeId: string; artifact: MaterializedArtifact }>;
+    findings: ReviewFinding[];
+    handoffs: MaterializedExecutionEdge[];
   }>;
+}
+
+export interface ReviewFinding {
+  findingId: string;
+  lens: string;
+  severity: typeof REVIEW_FINDING_SEVERITIES[number];
+  behaviorId: string | null;
+  evidenceRefs: string[];
+  result: typeof REVIEW_FINDING_RESULTS[number];
 }
 
 export function compileExecutionGraph(input: ExecutionGraphInput): CompiledExecutionGraph;
@@ -127,8 +182,8 @@ export function recordExecutionResult(
     actorRef: string;
     startedAt: string;
     completedAt: string;
-    findings?: Array<{ code: string; severity: "P0" | "P1" | "P2" | "P3"; message: string }>;
-    handoffs?: Array<{ edgeId: string; artifact: MaterializedArtifact }>;
+    findings?: Array<Omit<ReviewFinding, "behaviorId"> & { behaviorId?: string }>;
+    handoffs?: Array<Omit<MaterializedExecutionEdge, "fromNodeId" | "toNodeId">>;
   },
 ): ExecutionTrace;
 export function verifyExecutionProof(graph: CompiledExecutionGraph, trace: ExecutionTrace): {
@@ -136,7 +191,10 @@ export function verifyExecutionProof(graph: CompiledExecutionGraph, trace: Execu
   passed: boolean;
   graphId: string | null;
   traceDigest: string | null;
-  findings: Array<{ code: string; severity: "P0" | "P1" | "P2" | "P3"; message: string }>;
+  findings: Array<
+    | { code: string; severity: typeof REVIEW_FINDING_SEVERITIES[number]; message: string }
+    | ReviewFinding
+  >;
   runnableFrontier: ReturnType<typeof deriveRunnableFrontier>;
 };
 export function renderExecutionDesignMarkdown(graph: CompiledExecutionGraph): string;
@@ -148,16 +206,35 @@ export interface ExecutionExperimentRun {
   artifactCompleteness: number;
   humanReprompts: number;
   findingCount: number;
+  writeConflicts: number;
+  validEdgeArtifactRate: number;
+  hiddenTaskDrops: number;
+  falseStageAdvancements: number;
+  criticalDefectsMissed: number;
+  proofValid: boolean;
+  confirmedDefects: number;
+  falseFindings: number;
 }
 export function evaluateExecutionStrategyExperiment(input: {
   taskRef: string;
   taskDigest: string;
+  controls: {
+    startingCommit: string;
+    codingAgentHarness: { artifactRef: string; artifactDigest: string };
+    modelRoutes: { artifactRef: string; artifactDigest: string };
+    approvalPolicy: { artifactRef: string; artifactDigest: string };
+    testFixtures: { artifactRef: string; artifactDigest: string };
+    deliveryTarget: { artifactRef: string; artifactDigest: string };
+  };
   thresholds: {
     minimumRunsPerArm: number;
     maximumSuccessRateRegression: number;
     maximumMedianDurationRatio: number;
     maximumMedianCostRatio: number;
     minimumCompletenessLift: number;
+    minimumWallClockReduction: number;
+    minimumConfirmedDefectLift: number;
+    maximumFalseFindingIncrease: number;
   };
   sequentialRuns: ExecutionExperimentRun[];
   graphRuns: ExecutionExperimentRun[];
@@ -165,6 +242,14 @@ export function evaluateExecutionStrategyExperiment(input: {
   schemaVersion: "nodekit.execution-strategy-experiment/v1";
   taskRef: string;
   taskDigest: string;
+  controls: {
+    startingCommit: string;
+    codingAgentHarness: { artifactRef: string; artifactDigest: string };
+    modelRoutes: { artifactRef: string; artifactDigest: string };
+    approvalPolicy: { artifactRef: string; artifactDigest: string };
+    testFixtures: { artifactRef: string; artifactDigest: string };
+    deliveryTarget: { artifactRef: string; artifactDigest: string };
+  };
   thresholds: {
     minimumRunsPerArm: number;
     maximumSuccessRateRegression: number;
@@ -180,8 +265,21 @@ export function evaluateExecutionStrategyExperiment(input: {
     medianArtifactCompleteness: number;
     medianHumanReprompts: number;
     medianFindingCount: number;
+    writeConflicts: number;
+    minimumValidEdgeArtifactRate: number;
+    hiddenTaskDrops: number;
+    falseStageAdvancements: number;
+    criticalDefectsMissed: number;
+    proofValidCompletionRate: number;
+    confirmedDefects: number;
+    falseFindings: number;
   }>;
-  gates: Record<"sampleSize" | "successRate" | "duration" | "cost" | "completeness", boolean>;
+  gates: Record<
+    | "sampleSize" | "successRate" | "duration" | "cost" | "completeness"
+    | "writeConflicts" | "validEdgeArtifacts" | "hiddenTaskDrops"
+    | "falseStageAdvancement" | "criticalDefectsMissed" | "proofValidCompletion" | "advantage",
+    boolean
+  >;
   passed: boolean;
   experimentDigest: string;
 };
