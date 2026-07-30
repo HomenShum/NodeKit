@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "nodekit.evolution-deferred-review/v1",
+  "id": "deferred-review:sha256:f4479a0e15a771d3220323f16f82a5cc6d6aa7c947a46ed9fb7db572523a6910",
+  "events": [
+    {
+      "eventId": "evt:native-agent-session-identity",
+      "draftRef": "evolution/drafts/evt-native-agent-session-identity.json",
+      "draftDigest": "0b88544ff47bbb9989b86b24dd11ebe758394b591448f346c9000cf25d5e984e",
+      "sourceCommit": "cc49b80bc53aeaf90bfe23562701482fb28d5958"
+    },
+    {
+      "eventId": "evt:range-scoped-deferred-review-selection",
+      "draftRef": "evolution/drafts/evt-range-scoped-deferred-review-selection.json",
+      "draftDigest": "c01f5165550b43ef5f8e4b7cf3961a4d86b02c5b5978359c47ba64e4fbc367c0",
+      "sourceCommit": "2f5c1c9b94a81ba27a3c30eb2161ebb529a81c1f"
+    }
+  ],
+  "range": {
+    "from": "391f1be3c418eb0984338cba81f3f88b544a5560",
+    "reviewedTo": "71ea40f1d1ddfcfe32bff0a61ce030def0690563"
+  },
+  "risk": {
+    "classification": "reversible",
+    "effects": {
+      "destructiveWrite": false,
+      "credentialOrAuthorityChange": true,
+      "irreversibleMigration": false,
+      "materialSpend": false,
+      "externalCommunication": false,
+      "legalOrComplianceCommitment": false,
+      "unverifiedRollback": false
+    },
+    "authorityDirective": {
+      "ref": "evidence/autonomous-governance/operator-directive.md",
+      "sha256": "0bb635948306525eb3578a2b297ff0fbd2a963a0999734cf2bc458064b346679",
+      "assurance": "operator-directed-in-session"
+    }
+  },
+  "coverage": {
+    "materialFiles": [
+      "schemas/nodekit.native-agent-session.v1.schema.json",
+      "schemas/nodekit.native-session-checkpoint.v1.schema.json",
+      "schemas/nodekit.native-workspace.v1.schema.json",
+      "schemas/nodekit.workspace-reference-index.v1.schema.json",
+      "src/cli-main.mjs",
+      "src/index.d.mts",
+      "src/index.mjs",
+      "src/lib/caseflow.mjs",
+      "src/lib/evolution-ledger.mjs",
+      "src/lib/native-agent-identity.mjs",
+      "src/lib/native-agent-migration.mjs",
+      "src/lib/workspace-reference-index.mjs",
+      "src/native-agent-identity.d.mts",
+      "src/native-agent-identity.mjs",
+      "src/workspace-reference-index.d.mts",
+      "src/workspace-reference-index.mjs"
+    ]
+  },
+  "evidence": {
+    "before": [
+      {
+        "ref": "evidence/native-session-deferred-review/before/live-io.json",
+        "sha256": "ced1f25c5076f4b823d9f66b790b9f63c7403e0d35c6faef1508cecf314aa518",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/native-session-deferred-review/before/pr-checks.json",
+        "sha256": "53c7e5ede4db390b71bda8167d5da7f0bc7df012dd093d76349c71d0c3189b48",
+        "kind": "ci-log"
+      },
+      {
+        "ref": "evidence/autonomous-governance/operator-directive.md",
+        "sha256": "0bb635948306525eb3578a2b297ff0fbd2a963a0999734cf2bc458064b346679",
+        "kind": "operator-directive"
+      }
+    ],
+    "after": [
+      {
+        "ref": "evidence/native-session-deferred-review/after/live-io.json",
+        "sha256": "63592f9cf7cdf6711625ae92441bbff8b217b2959732ab0b539223e92bd401be",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/native-session-deferred-review/after/journey-card.md",
+        "sha256": "4564cac481f2aac6dcb7516dea87873b601a406968b073e38a42a29b145eeb29",
+        "kind": "journey-card"
+      },
+      {
+        "ref": "evidence/native-session-deferred-review/after/scenario-tests.log",
+        "sha256": "0127f3b0b7c6373b0be9be5c9372ee518e04ddc7f44e2b560e06db24bcc59607",
+        "kind": "test-log"
+      },
+      {
+        "ref": "evidence/native-session-deferred-review/after/rollback-verification.json",
+        "sha256": "7c5055c755688a189ef18fb7e6f64940d0caf4c85473caa6f4946f796889cdba",
+        "kind": "test-log"
+      }
+    ]
+  },
+  "uiSurface": {
+    "changed": false,
+    "mediaRequired": false,
+    "reason": "Package runtime only; no deployed product UI route changed. The larger human goal is shown by the journey card and exact live I/O.",
+    "mediaRefs": []
+  },
+  "rollback": {
+    "targetCommit": "391f1be3c418eb0984338cba81f3f88b544a5560",
+    "strategy": "git-revert-range",
+    "verificationRefs": [
+      "evidence/native-session-deferred-review/after/rollback-verification.json"
+    ]
+  },
+  "review": {
+    "status": "deferred-human-review",
+    "feedbackChannel": "pull-request"
+  },
+  "receiptDigest": "c1cfbae9b566c5d518f448ec65a73c3d6f0b92d3feabb7bd9778900bc5b2906b"
+}
