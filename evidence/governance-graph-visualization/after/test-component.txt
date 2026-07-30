@@ -1,0 +1,13 @@
+﻿
+> @homenshum/nodekit@0.2.1 test:component
+> vitest run --config ./vitest.component.config.mjs
+
+
+ RUN  v4.1.10 D:/VSCode Projects/node-platform-governance-graph-20260730
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  13:48:33
+   Duration  4.43s (transform 206ms, setup 0ms, import 1.22s, tests 872ms, environment 781ms)
+

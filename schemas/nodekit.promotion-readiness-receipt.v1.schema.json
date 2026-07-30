@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.promotion-readiness-receipt.v1.schema.json",
+  "title": "NodeProof-bound promotion readiness without builder self-approval",
+  "type": "object",
+  "required": [
+    "schemaVersion", "receiptId", "mode", "riskAssessmentRef", "riskAssessmentDigest",
+    "evidencePackRef", "evidencePackDigest", "rollbackReceiptRef", "rollbackReceiptDigest",
+    "nodeProofDigest", "ready", "blockers", "promotionReadinessDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.promotion-readiness-receipt/v1" },
+    "receiptId": { "$ref": "#/$defs/ref" },
+    "mode": {
+      "enum": [
+        "AUTO_CONTINUE", "AUTO_PROMOTE_WITH_ROLLBACK",
+        "DEFERRED_HUMAN_REVIEW", "PRE_ACTION_HUMAN_GATE"
+      ]
+    },
+    "riskAssessmentRef": { "$ref": "#/$defs/ref" },
+    "riskAssessmentDigest": { "$ref": "#/$defs/hash" },
+    "evidencePackRef": { "$ref": "#/$defs/ref" },
+    "evidencePackDigest": { "$ref": "#/$defs/hash" },
+    "rollbackReceiptRef": { "anyOf": [{ "$ref": "#/$defs/ref" }, { "type": "null" }] },
+    "rollbackReceiptDigest": { "anyOf": [{ "$ref": "#/$defs/hash" }, { "type": "null" }] },
+    "nodeProofDigest": { "$ref": "#/$defs/hash" },
+    "ready": { "type": "boolean" },
+    "blockers": {
+      "type": "array", "maxItems": 16, "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "promotionReadinessDigest": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:sha256:[a-f0-9]{64}$" }
+  }
+}

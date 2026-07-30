@@ -1,0 +1,2 @@
+governanceSchemaCount=1
+typedGovernanceSchemaCount=5

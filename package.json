@@ -73,6 +73,11 @@
       "import": "./src/execution-graph.mjs",
       "default": "./src/execution-graph.mjs"
     },
+    "./governance": {
+      "types": "./src/governance.d.mts",
+      "import": "./src/governance.mjs",
+      "default": "./src/governance.mjs"
+    },
     "./builder-gym": {
       "types": "./src/builder-gym.d.mts",
       "import": "./src/builder-gym.mjs",
@@ -169,6 +174,7 @@
     "plugins",
     "evolution",
     "docs/EXECUTION_GRAPH_OF_LOOPS.md",
+    "docs/GOVERNANCE_GRAPH.md",
     "ownership.yaml",
     "repositories.yaml",
     "architecture.yaml",

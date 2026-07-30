@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.human-feedback-event.v1.schema.json",
+  "title": "Evidence-bound human feedback that does not silently become universal policy",
+  "type": "object",
+  "required": [
+    "schemaVersion", "eventId", "candidateRef", "candidateDigest", "evidencePackRef",
+    "evidencePackDigest", "actorRef", "decision", "statement", "scope", "preference",
+    "feedbackDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.human-feedback-event/v1" },
+    "eventId": { "$ref": "#/$defs/ref" },
+    "candidateRef": { "$ref": "#/$defs/ref" },
+    "candidateDigest": { "$ref": "#/$defs/hash" },
+    "evidencePackRef": { "$ref": "#/$defs/ref" },
+    "evidencePackDigest": { "$ref": "#/$defs/hash" },
+    "actorRef": { "$ref": "#/$defs/ref" },
+    "decision": { "enum": ["accept", "reject", "request-changes", "rollback"] },
+    "statement": { "type": "string", "minLength": 1, "maxLength": 4096 },
+    "scope": {
+      "type": "array", "maxItems": 64, "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "preference": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["statement", "appliesWhen", "expiresAt"],
+          "properties": {
+            "statement": { "type": "string", "minLength": 1, "maxLength": 4096 },
+            "appliesWhen": {
+              "type": "array", "maxItems": 64, "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "expiresAt": { "type": ["string", "null"], "format": "date-time" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "feedbackDigest": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:sha256:[a-f0-9]{64}$" }
+  }
+}

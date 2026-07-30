@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.rollback-receipt.v1.schema.json",
+  "title": "Result of a bounded NodeKit rollback observation and adapter run",
+  "type": "object",
+  "required": [
+    "schemaVersion", "receiptId", "deploymentRef", "trigger", "rollbackTarget",
+    "observedHealth", "rollbackAttempted", "actionRef", "verification", "status",
+    "rollbackReceiptDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.rollback-receipt/v1" },
+    "receiptId": { "$ref": "#/$defs/ref" },
+    "deploymentRef": { "$ref": "#/$defs/ref" },
+    "trigger": { "type": "string", "minLength": 1 },
+    "rollbackTarget": {
+      "type": "object",
+      "required": ["ref", "digest"],
+      "properties": { "ref": { "$ref": "#/$defs/ref" }, "digest": { "$ref": "#/$defs/hash" } },
+      "additionalProperties": false
+    },
+    "observedHealth": { "$ref": "#/$defs/checks" },
+    "rollbackAttempted": { "type": "boolean" },
+    "actionRef": { "anyOf": [{ "$ref": "#/$defs/ref" }, { "type": "null" }] },
+    "verification": {
+      "type": "object",
+      "required": ["restored", "checks"],
+      "properties": {
+        "restored": { "type": "boolean" },
+        "checks": {
+          "type": "array", "maxItems": 64, "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": { "enum": ["NOT_REQUIRED", "ROLLED_BACK", "ROLLBACK_FAILED"] },
+    "rollbackReceiptDigest": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:sha256:[a-f0-9]{64}$" },
+    "checks": {
+      "type": "object",
+      "required": ["healthy", "checks"],
+      "properties": {
+        "healthy": { "type": "boolean" },
+        "checks": {
+          "type": "array", "maxItems": 64, "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
