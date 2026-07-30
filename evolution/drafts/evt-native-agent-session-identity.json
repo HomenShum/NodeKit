@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:native-agent-session-identity",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "cc49b80bc53aeaf90bfe23562701482fb28d5958",
+    "occurredAt": "2026-07-29T20:23:47-07:00"
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "Stateless MCP tasks and native desktop, scheduled, and inbox agents could reconnect after disconnection, but NodeKit had no Caseflow-canonical contract proving the exact workspace, provider-session hash, repository, receipt, and checkpoint frontier authorized to continue.",
+  "observedFailure": "The first draft duplicated authority in a combined identity snapshot and continuation grant, persisted caller-owned status, generation, host, and credential concepts, and could drift from Caseflow and the actual evidence chain.",
+  "resolution": "Replaced the combined snapshot and grant with exactly three canonical Caseflow artifacts: native workspace, native agent session, and native session checkpoint. Added five public operations, authenticated owner derivation, exact repository measurement, private raw-provider identity, nonce-bound trusted receipts, leases, NodeTrace events, derived status, a required post-resume checkpoint, deterministic deduplication, and a bounded non-public migration CLI with verified rollback-before-retirement. The execution graph remains compiled and disposable; NodeProof remains a verifier.",
+  "assumptionIds": [],
+  "invariantIds": [
+    "inv:native-agent-session-identity"
+  ],
+  "evidenceIds": [
+    "evd:native-agent-session-identity"
+  ],
+  "predecessorIds": [
+    "evt:caseflow-idempotent-retries"
+  ],
+  "knownLimitations": [
+    "Provider adapters and repository measurement implementations require consumer-specific live proofs.",
+    "Consumer integration and production proofs remain separate from this portable package proof.",
+    "Canonical promotion requires a separately verified named-human approval."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

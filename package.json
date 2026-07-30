@@ -58,6 +58,16 @@
       "import": "./src/reference-loop.mjs",
       "default": "./src/reference-loop.mjs"
     },
+    "./native-agent-identity": {
+      "types": "./src/native-agent-identity.d.mts",
+      "import": "./src/native-agent-identity.mjs",
+      "default": "./src/native-agent-identity.mjs"
+    },
+    "./workspace-reference-index": {
+      "types": "./src/workspace-reference-index.d.mts",
+      "import": "./src/workspace-reference-index.mjs",
+      "default": "./src/workspace-reference-index.mjs"
+    },
     "./execution-graph": {
       "types": "./src/execution-graph.d.mts",
       "import": "./src/execution-graph.mjs",
@@ -142,6 +152,7 @@
   },
   "files": [
     "dist",
+    "docs/WORKSPACE_REFERENCE_INDEX.md",
     "src",
     "scripts/sign-submission-attestation.mjs",
     "scripts/verify-submission-attestation.mjs",

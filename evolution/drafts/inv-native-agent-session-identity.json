@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "nodekit.invariant-claim/v1",
+  "id": "inv:native-agent-session-identity",
+  "statement": "A native agent may resume only from the exact Caseflow-canonical workspace, hashed provider session, repository, trusted receipt, and verified checkpoint frontier; RESUMED requires an operational lease and a new durable checkpoint, while graph projections and reference indexes cannot authorize continuity.",
+  "scope": {
+    "applications": [
+      "NodeKit consumers"
+    ],
+    "packages": [
+      "@homenshum/nodekit"
+    ],
+    "surfaces": [
+      "native workspace artifact",
+      "native agent session artifact",
+      "native session checkpoint artifact",
+      "five-operation session API",
+      "legacy migration CLI",
+      "public package entrypoint"
+    ]
+  },
+  "enforcement": "runtime-gate",
+  "verifierRefs": [
+    "src/lib/native-agent-identity.mjs",
+    "test/native-agent-identity.test.mjs",
+    "test/public-api.test.mjs"
+  ],
+  "introducedByEventId": "evt:native-agent-session-identity",
+  "status": "verified"
+}

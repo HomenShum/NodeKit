@@ -29,6 +29,10 @@ The detached-signature trust model, verifier ownership rules, and signing handof
 [`docs/ATTESTATIONS.md`](https://github.com/HomenShum/node-platform/blob/main/docs/ATTESTATIONS.md). A local maintainer-generated signature is not an
 independent external gate attestation.
 
+The disposable [`workspace-reference-index`](docs/WORKSPACE_REFERENCE_INDEX.md) stores bounded
+Caseflow artifact refs and digests only. Native workspace, session, and checkpoint artifacts remain
+canonical; the index cannot resume or authorize a session.
+
 Node Platform remains its ownership layer: it records which repository owns each shared contract and fails CI when a new fork or clear layer violation appears.
 
 ## From a brief to a running app
@@ -92,6 +96,21 @@ npm test
 npm run ecosystem:check
 npm run dashboard
 ```
+
+### Continue native-agent sessions safely
+
+`@homenshum/nodekit/native-agent-identity` provides the owner/workspace-scoped continuity contract
+for desktop restarts, scheduled runs, and inbox handoffs. Caseflow stores exactly three canonical
+artifacts: workspace, agent session, and checkpoint. Provider session identity is hashed; raw IDs
+stay inside the trusted adapter.
+
+The public surface is `workspace_bind`, `session_start`, `session_checkpoint`, `session_resume`,
+and `session_status`. `RESUMED` is returned only after exact repository remeasurement, a trusted
+receipt, an operational lease, and a new durable checkpoint. The execution graph remains a
+disposable projection and cannot authorize continuity.
+
+See the
+[native-agent identity contract](https://github.com/HomenShum/node-platform/blob/main/docs/NATIVE_AGENT_SESSION_IDENTITY.md).
 
 ### Compare copied behavior
 

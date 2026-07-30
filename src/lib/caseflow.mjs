@@ -27,6 +27,8 @@ export const TERMINAL_RUN_STATUSES = Object.freeze([
   "failed_safely",
 ]);
 
+const MAX_CANONICAL_ARTIFACT_READ = 4096;
+
 function clone(value) {
   return normalizePortableValue(value);
 }
@@ -525,6 +527,51 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     return clone(Object.fromEntries(Object.entries(state).map(([key, value]) => [key, value instanceof Map ? [...value.values()] : value])));
   }
 
+  function getCase(caseId) {
+    return clone(requireRecord(state.cases, caseId, "case"));
+  }
+
+  function getRun(runId) {
+    return clone(requireRecord(state.runs, runId, "run"));
+  }
+
+  function listCanonicalArtifactContents({
+    caseId,
+    kind,
+    runId,
+    schemaVersion,
+    limit = 1024,
+  } = {}) {
+    if (
+      !Number.isSafeInteger(limit)
+      || limit <= 0
+      || limit > MAX_CANONICAL_ARTIFACT_READ
+    ) {
+      throw new RangeError(
+        `limit must be between 1 and ${MAX_CANONICAL_ARTIFACT_READ}`,
+      );
+    }
+    const values = [];
+    for (const artifact of state.artifacts.values()) {
+      if (caseId !== undefined && artifact.caseId !== caseId) continue;
+      if (kind !== undefined && artifact.kind !== kind) continue;
+      if (runId !== undefined && artifact.runId !== runId) continue;
+      const version = artifact.versions.find(
+        (candidate) => candidate.version === artifact.canonicalVersion,
+      );
+      if (!version) continue;
+      if (
+        schemaVersion !== undefined
+        && version.content?.schemaVersion !== schemaVersion
+      ) {
+        continue;
+      }
+      values.push(clone(version.content));
+      if (values.length === limit) break;
+    }
+    return values;
+  }
+
   return {
     capabilities: runtimeProfiles.memory,
     ownerId: owner,
@@ -537,6 +584,9 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     decideProposal,
     enterStage,
     failRunSafely,
+    getCase,
+    getRun,
+    listCanonicalArtifactContents,
     raiseException,
     resolveException,
     snapshot,

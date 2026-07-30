@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.native-session-checkpoint.v1.schema.json",
+  "title": "NodeKit native session checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sessionArtifactRef",
+    "sessionArtifactDigest",
+    "sequence",
+    "resumeCursorHash",
+    "repository",
+    "traceDigest",
+    "artifactDigests",
+    "adapterReceiptRef",
+    "adapterReceiptDigest",
+    "operationNonceHash",
+    "createdAt",
+    "artifactRef",
+    "artifactDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.native-session-checkpoint/v1" },
+    "sessionArtifactRef": {
+      "type": "string",
+      "pattern": "^native-agent-session:sha256:[a-f0-9]{64}$"
+    },
+    "sessionArtifactDigest": { "$ref": "#/$defs/sha256" },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "previousCheckpointRef": {
+      "type": "string",
+      "pattern": "^native-session-checkpoint:sha256:[a-f0-9]{64}$"
+    },
+    "previousCheckpointDigest": { "$ref": "#/$defs/sha256" },
+    "resumeCursorHash": { "$ref": "#/$defs/sha256" },
+    "repository": { "$ref": "#/$defs/repository" },
+    "traceDigest": { "$ref": "#/$defs/sha256" },
+    "artifactDigests": {
+      "type": "array",
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/sha256" }
+    },
+    "adapterReceiptRef": { "$ref": "#/$defs/identifier" },
+    "adapterReceiptDigest": { "$ref": "#/$defs/sha256" },
+    "operationNonceHash": { "$ref": "#/$defs/sha256" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "artifactRef": {
+      "type": "string",
+      "pattern": "^native-session-checkpoint:sha256:[a-f0-9]{64}$"
+    },
+    "artifactDigest": { "$ref": "#/$defs/sha256" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "sequence": { "const": 0 } } },
+      "then": {
+        "not": {
+          "anyOf": [
+            { "required": ["previousCheckpointRef"] },
+            { "required": ["previousCheckpointDigest"] }
+          ]
+        }
+      },
+      "else": {
+        "required": ["previousCheckpointRef", "previousCheckpointDigest"]
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalRemote", "commit", "treeHash", "dirty"],
+      "properties": {
+        "canonicalRemote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "commit": { "$ref": "#/$defs/gitObject" },
+        "treeHash": { "$ref": "#/$defs/gitObject" },
+        "dirty": { "type": "boolean" },
+        "dirtyWorkingTreeHash": { "$ref": "#/$defs/sha256" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "dirty": { "const": true } } },
+          "then": { "required": ["dirtyWorkingTreeHash"] },
+          "else": { "not": { "required": ["dirtyWorkingTreeHash"] } }
+        }
+      ]
+    },
+    "gitObject": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:range-scoped-deferred-review-selection",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "2f5c1c9b94a81ba27a3c30eb2161ebb529a81c1f",
+    "occurredAt": "2026-07-30T12:35:00-07:00"
+  },
+  "track": "architecture",
+  "category": "security",
+  "challenge": "A valid deferred-review receipt from a previously merged baseline appeared as rejected while evaluating a later pull request, adding false failure noise to the human decision surface.",
+  "observedFailure": "After PR #32 merged, PR #30 correctly passed with its own receipt but the materiality JSON also listed PR #32's receipt as rejected because its baseline and material-file coverage intentionally differed.",
+  "resolution": "Classify receipts whose baseline does not equal the active materiality baseline as historical before verification. Receipts claiming the active baseline still fail visibly on tampering, coverage drift, evidence drift, or rollback mismatch.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:cli-authority-bypass-and-repair"
+  ],
+  "predecessorIds": [
+    "evt:proof-backed-deferred-review"
+  ],
+  "knownLimitations": [
+    "Historical classification establishes range relevance only; it does not re-verify the old receipt against a new baseline.",
+    "Canonical promotion remains separate and still requires verified named-human approval."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

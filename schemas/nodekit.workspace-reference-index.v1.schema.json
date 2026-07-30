@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.workspace-reference-index.v1.schema.json",
+  "title": "NodeKit disposable workspace reference index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "builtFromCaseflowDigest",
+    "builtAt",
+    "entries",
+    "indexDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.workspace-reference-index/v1" },
+    "builtFromCaseflowDigest": { "$ref": "#/$defs/hash" },
+    "builtAt": { "type": "string", "format": "date-time" },
+    "entries": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "workspaceId",
+          "workspaceArtifactRef",
+          "workspaceArtifactDigest"
+        ],
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "pattern": "^workspace:sha256:[a-f0-9]{64}$"
+          },
+          "sessionId": {
+            "type": "string",
+            "pattern": "^session:sha256:[a-f0-9]{64}$"
+          },
+          "workspaceArtifactRef": { "$ref": "#/$defs/text" },
+          "workspaceArtifactDigest": { "$ref": "#/$defs/hash" },
+          "sessionArtifactRef": { "$ref": "#/$defs/text" },
+          "sessionArtifactDigest": { "$ref": "#/$defs/hash" },
+          "latestCheckpointRef": { "$ref": "#/$defs/text" },
+          "latestCheckpointDigest": { "$ref": "#/$defs/hash" }
+        },
+        "allOf": [
+          {
+            "if": { "required": ["sessionId"] },
+            "then": {
+              "required": ["sessionArtifactRef", "sessionArtifactDigest"]
+            },
+            "else": {
+              "not": {
+                "anyOf": [
+                  { "required": ["sessionArtifactRef"] },
+                  { "required": ["sessionArtifactDigest"] },
+                  { "required": ["latestCheckpointRef"] },
+                  { "required": ["latestCheckpointDigest"] }
+                ]
+              }
+            }
+          },
+          {
+            "if": { "required": ["latestCheckpointRef"] },
+            "then": {
+              "required": ["sessionId", "latestCheckpointDigest"]
+            },
+            "else": {
+              "not": { "required": ["latestCheckpointDigest"] }
+            }
+          }
+        ]
+      }
+    },
+    "indexDigest": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

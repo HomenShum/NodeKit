@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 103,
-    "modules": 67,
-    "tests": 73
+    "schemas": 107,
+    "modules": 70,
+    "tests": 77
   },
   "architecture": [
     {
@@ -70,6 +70,7 @@
       "registry",
       "repo",
       "routing",
+      "session",
       "skills",
       "tour",
       "trust"
@@ -196,6 +197,9 @@
     "nodekit.model-intelligence-harness-verdict.v1.schema.json",
     "nodekit.model-observation.v1.schema.json",
     "nodekit.motion-portability-receipt.v1.schema.json",
+    "nodekit.native-agent-session.v1.schema.json",
+    "nodekit.native-session-checkpoint.v1.schema.json",
+    "nodekit.native-workspace.v1.schema.json",
     "nodekit.nodetrace-trajectory.v1.schema.json",
     "nodekit.observation-pack.v1.schema.json",
     "nodekit.opportunity-contract.v1.schema.json",
@@ -236,7 +240,8 @@
     "nodekit.submission-candidate.v1.schema.json",
     "nodekit.submission-manifest.v1.schema.json",
     "nodekit.tournament.v1.schema.json",
-    "nodekit.visual-review-inventory.v1.schema.json"
+    "nodekit.visual-review-inventory.v1.schema.json",
+    "nodekit.workspace-reference-index.v1.schema.json"
   ],
   "modules": [
     "agent-definition.mjs",
@@ -282,6 +287,8 @@
     "managed-evidence-capture.mjs",
     "model-intelligence.mjs",
     "motion-portability.mjs",
+    "native-agent-identity.mjs",
+    "native-agent-migration.mjs",
     "npm-cli-invocation.mjs",
     "npm-package-archive.mjs",
     "official-pricing-proof.mjs",
@@ -305,7 +312,8 @@
     "submission-evidence-finalizer.mjs",
     "submission-gate.mjs",
     "submission-preparation.mjs",
-    "understand-anything.mjs"
+    "understand-anything.mjs",
+    "workspace-reference-index.mjs"
   ],
   "tests": [
     "agent-ease-campaign.test.mjs",
@@ -319,6 +327,7 @@
     "caseflow.test.mjs",
     "change-story.test.mjs",
     "ci-workflows.test.mjs",
+    "cli-native-migration.test.mjs",
     "conformance.test.mjs",
     "consumer-package-preparation.test.mjs",
     "contracts.test.mjs",
@@ -352,6 +361,8 @@
     "managed-evidence-capture.test.mjs",
     "model-intelligence.test.mjs",
     "motion-portability.test.mjs",
+    "native-agent-identity.test.mjs",
+    "native-agent-migration.test.mjs",
     "nodekit-proof-campaign-publication.test.mjs",
     "nodekit-proof-campaign-video.test.mjs",
     "npm-cli-invocation.test.mjs",
@@ -380,6 +391,7 @@
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
     "test-files.test.mjs",
-    "understand-anything.test.mjs"
+    "understand-anything.test.mjs",
+    "workspace-reference-index.test.mjs"
   ]
 }
