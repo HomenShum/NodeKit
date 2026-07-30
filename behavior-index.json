@@ -9,7 +9,7 @@
     "verified": 5,
     "partial": 0,
     "unverified": 0,
-    "orphanAnnotations": 18
+    "orphanAnnotations": 29
   },
   "behaviors": [
     {
@@ -947,7 +947,7 @@
           {
             "scenario": "entrypoint-surface-stable",
             "file": "test/public-api.test.mjs",
-            "line": 42
+            "line": 49
           }
         ],
         "namedTestFiles": [
@@ -1153,6 +1153,61 @@
       "behaviorId": "inv:journey-contract-self-verifies",
       "file": "test/journey-contract-verify.test.mjs",
       "line": 80
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 78
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 94
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 121
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 139
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 164
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 216
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 263
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 340
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 407
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 430
+    },
+    {
+      "behaviorId": "inv:native-agent-session-identity",
+      "file": "test/native-agent-identity.test.mjs",
+      "line": 452
     },
     {
       "behaviorId": "inv:research-verdict-beats-constant",

@@ -93,6 +93,20 @@ npm run ecosystem:check
 npm run dashboard
 ```
 
+### Continue native-agent sessions safely
+
+`@homenshum/nodekit/native-agent-identity` provides the owner/workspace-scoped continuity contract
+for desktop restarts, scheduled runs, inbox handoffs, and cross-host rotation. It binds exact host
+and credential authority, advances one session generation at a time, and requires a short-lived
+continuation token to be consumed atomically exactly once.
+
+This contract is deliberately separate from Caseflow and execution-graph authority. It cannot
+advance a stage, assert review independence, or issue a NodeProof verdict. When the identity
+provider is unavailable it returns an explicit read-only degraded result.
+
+See the
+[native-agent identity contract](https://github.com/HomenShum/node-platform/blob/main/docs/NATIVE_AGENT_SESSION_IDENTITY.md).
+
 ### Compare copied behavior
 
 Design tokens can preserve appearance while silently changing interaction timing. NodeKit's first

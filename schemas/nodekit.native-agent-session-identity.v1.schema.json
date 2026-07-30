@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.native-agent-session-identity.v1.schema.json",
+  "title": "NodeKit native agent session identity v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "identityRef",
+    "ownerRef",
+    "workspaceId",
+    "agentId",
+    "nativeSessionId",
+    "nativeSessionGeneration",
+    "host",
+    "credential",
+    "authority",
+    "snapshotHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "nodekit.native-agent-session-identity/v1"
+    },
+    "identityRef": {
+      "type": "string",
+      "pattern": "^native-agent-identity:sha256:[a-f0-9]{64}$"
+    },
+    "ownerRef": {
+      "$ref": "#/$defs/identifier"
+    },
+    "workspaceId": {
+      "$ref": "#/$defs/identifier"
+    },
+    "agentId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "nativeSessionId": {
+      "$ref": "#/$defs/identifier"
+    },
+    "nativeSessionGeneration": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "host": {
+      "$ref": "#/$defs/host"
+    },
+    "credential": {
+      "$ref": "#/$defs/credential"
+    },
+    "peerId": {
+      "$ref": "#/$defs/identifier"
+    },
+    "previousSnapshotHash": {
+      "$ref": "#/$defs/rawSha256"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canAssertReviewIndependence",
+        "canIssueNodeProofVerdict"
+      ],
+      "properties": {
+        "canAssertReviewIndependence": {
+          "const": false
+        },
+        "canIssueNodeProofVerdict": {
+          "const": false
+        }
+      }
+    },
+    "snapshotHash": {
+      "$ref": "#/$defs/rawSha256"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "rawSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostId",
+        "instanceId",
+        "authorityRef"
+      ],
+      "properties": {
+        "hostId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "authorityRef": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "credential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "credentialRef",
+        "generation"
+      ],
+      "properties": {
+        "credentialRef": {
+          "$ref": "#/$defs/identifier"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

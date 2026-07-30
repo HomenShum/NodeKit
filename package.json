@@ -58,6 +58,11 @@
       "import": "./src/reference-loop.mjs",
       "default": "./src/reference-loop.mjs"
     },
+    "./native-agent-identity": {
+      "types": "./src/native-agent-identity.d.mts",
+      "import": "./src/native-agent-identity.mjs",
+      "default": "./src/native-agent-identity.mjs"
+    },
     "./builder-gym": {
       "types": "./src/builder-gym.d.mts",
       "import": "./src/builder-gym.mjs",

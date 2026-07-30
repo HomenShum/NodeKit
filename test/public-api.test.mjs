@@ -38,6 +38,13 @@ import {
   verifySkillBenchmarkVerdict,
   verifySkillPromotionApproval,
 } from "@homenshum/nodekit/skill-evaluation";
+import {
+  createNativeAgentIdentitySnapshot,
+  resolveNativeAgentSessionIdentity,
+} from "@homenshum/nodekit/native-agent-identity";
+import {
+  createNativeAgentIdentitySnapshot as createNativeAgentIdentitySnapshotFromRoot,
+} from "@homenshum/nodekit";
 
 // @nodekit-verifies inv:stable-caseflow-package-entrypoint#entrypoint-surface-stable
 test("published Caseflow entry point exposes the supported portable contract", async () => {
@@ -64,6 +71,12 @@ test("published Caseflow entry point exposes the supported portable contract", a
   assert.equal(typeof sealSkillPromotionApproval, "function");
   assert.equal(typeof verifySkillPromotionApproval, "function");
   assert.equal(typeof verifySkillBenchmarkVerdict, "function");
+  assert.equal(typeof createNativeAgentIdentitySnapshot, "function");
+  assert.equal(typeof resolveNativeAgentSessionIdentity, "function");
+  assert.equal(
+    createNativeAgentIdentitySnapshotFromRoot,
+    createNativeAgentIdentitySnapshot,
+  );
 });
 
 test("published metadata cannot silently drop attestation and evidence-finalization surfaces", async () => {
@@ -108,6 +121,11 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     types: "./src/skill-evaluation.d.mts",
     import: "./src/skill-evaluation.mjs",
     default: "./src/skill-evaluation.mjs",
+  });
+  assert.deepEqual(packageJson.exports["./native-agent-identity"], {
+    types: "./src/native-agent-identity.d.mts",
+    import: "./src/native-agent-identity.mjs",
+    default: "./src/native-agent-identity.mjs",
   });
   assert.equal(packageJson.bin["nodekit-consumer-prepare"], "scripts/prepare-consumer-package.mjs");
   assert.equal(packageJson.bin["nodekit-evidence-capture"], "scripts/capture-managed-evidence.mjs");

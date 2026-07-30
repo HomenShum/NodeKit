@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.native-agent-continuation-grant.v1.schema.json",
+  "title": "NodeKit native agent continuation grant v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "grantId",
+    "identityRef",
+    "currentSnapshotHash",
+    "target",
+    "tokenHash",
+    "issuedAt",
+    "expiresAt",
+    "grantHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "nodekit.native-agent-continuation-grant/v1"
+    },
+    "grantId": {
+      "type": "string",
+      "pattern": "^native-agent-continuation:sha256:[a-f0-9]{64}$"
+    },
+    "identityRef": {
+      "type": "string",
+      "pattern": "^native-agent-identity:sha256:[a-f0-9]{64}$"
+    },
+    "currentSnapshotHash": {
+      "$ref": "#/$defs/rawSha256"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nativeSessionId",
+        "nativeSessionGeneration",
+        "host",
+        "credential"
+      ],
+      "properties": {
+        "nativeSessionId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "nativeSessionGeneration": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "credential": {
+          "$ref": "#/$defs/credential"
+        },
+        "peerId": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "tokenHash": {
+      "$ref": "#/$defs/rawSha256"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "grantHash": {
+      "$ref": "#/$defs/rawSha256"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "rawSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostId",
+        "instanceId",
+        "authorityRef"
+      ],
+      "properties": {
+        "hostId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "authorityRef": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "credential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "credentialRef",
+        "generation"
+      ],
+      "properties": {
+        "credentialRef": {
+          "$ref": "#/$defs/identifier"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

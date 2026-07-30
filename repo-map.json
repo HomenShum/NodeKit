@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 98,
-    "modules": 66,
-    "tests": 72
+    "schemas": 100,
+    "modules": 67,
+    "tests": 73
   },
   "architecture": [
     {
@@ -191,6 +191,8 @@
     "nodekit.model-intelligence-harness-verdict.v1.schema.json",
     "nodekit.model-observation.v1.schema.json",
     "nodekit.motion-portability-receipt.v1.schema.json",
+    "nodekit.native-agent-continuation-grant.v1.schema.json",
+    "nodekit.native-agent-session-identity.v1.schema.json",
     "nodekit.nodetrace-trajectory.v1.schema.json",
     "nodekit.observation-pack.v1.schema.json",
     "nodekit.opportunity-contract.v1.schema.json",
@@ -276,6 +278,7 @@
     "managed-evidence-capture.mjs",
     "model-intelligence.mjs",
     "motion-portability.mjs",
+    "native-agent-identity.mjs",
     "npm-cli-invocation.mjs",
     "npm-package-archive.mjs",
     "official-pricing-proof.mjs",
@@ -345,6 +348,7 @@
     "managed-evidence-capture.test.mjs",
     "model-intelligence.test.mjs",
     "motion-portability.test.mjs",
+    "native-agent-identity.test.mjs",
     "nodekit-proof-campaign-publication.test.mjs",
     "nodekit-proof-campaign-video.test.mjs",
     "npm-cli-invocation.test.mjs",
