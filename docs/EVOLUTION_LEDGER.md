@@ -41,6 +41,8 @@ Changing the approval or trust architecture itself is detected from the changed 
 
 The deferred lane fails closed for workflow, credential, secret, migration, billing, payment, deploy, and publishing paths. Those surfaces cannot opt into this receipt.
 
+Receipts from a different baseline remain visible as historical; only a receipt that claims the active baseline can pass or fail the current materiality decision.
+
 `nodekit evolution verify` fails closed on missing commits, missing or hash-drifted evidence, unverified invariants, unsupported adoption claims, circular supersession, incomplete model identity, incomplete screenshot or benchmark identity, and possible secrets.
 
 `nodekit evolution sync-graph` converts verified records into a Knowledge Evolution patch. It never mutates the canonical graph directly; normal validation and approval remain mandatory.

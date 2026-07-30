@@ -730,9 +730,18 @@ export async function checkEvolutionMateriality(repoRoot, from, to) {
   const diff = await diffEvolutionLedger(root, from, to);
   const deferredReviews = [];
   const rejectedDeferredReviews = [];
+  const historicalDeferredReviews = [];
   for (const file of await jsonFiles(path.join(root, DEFERRED_REVIEW_ROOT))) {
     try {
       const receipt = await readJson(file);
+      if (receipt.range?.from !== from) {
+        historicalDeferredReviews.push({
+          id: receipt.id ?? null,
+          from: receipt.range?.from ?? null,
+          reviewedTo: receipt.range?.reviewedTo ?? null,
+        });
+        continue;
+      }
       const verdict = await verifyDeferredEvolutionReview(root, receipt, from, to, materialFiles);
       if (verdict.passed) deferredReviews.push({
         id: receipt.id,
@@ -763,6 +772,7 @@ export async function checkEvolutionMateriality(repoRoot, from, to) {
     events: diff.events,
     deferredReviews,
     rejectedDeferredReviews,
+    historicalDeferredReviews,
     passed,
     reason: passed
       ? materialFiles.length === 0

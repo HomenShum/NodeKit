@@ -201,6 +201,15 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   assert.equal(tampered.passed, false);
   assert.equal(tampered.deferredReviews.length, 0);
   assert.match(tampered.rejectedDeferredReviews[0].findings.join("\n"), /evidence digest mismatch/);
+
+  await writeFile(path.join(root, "src", "next-runtime.mjs"), "export const next = true;\n");
+  git(root, ["add", "src/next-runtime.mjs"]);
+  git(root, ["commit", "-m", "next unrelated material range"]);
+  const next = git(root, ["rev-parse", "HEAD"]);
+  const unrelatedRange = await checkEvolutionMateriality(root, after, next);
+  assert.equal(unrelatedRange.passed, false);
+  assert.equal(unrelatedRange.rejectedDeferredReviews.length, 0);
+  assert.equal(unrelatedRange.historicalDeferredReviews[0].id, created.receipt.id);
 });
 
 test("deferred review refuses missing UI proof and evidence that is not bound to rollback", async () => {
