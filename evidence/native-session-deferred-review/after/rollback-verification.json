@@ -1,6 +1,6 @@
 {
   "schemaVersion": "nodekit.rollback-verification/v1",
-  "rollbackTarget": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
+  "rollbackTarget": "391f1be3c418eb0984338cba81f3f88b544a5560",
   "strategy": "git-revert-range",
   "checks": {
     "baselineCannotResume": true,
