@@ -75,6 +75,34 @@ Example profile manifest:
 
 The same API is exported from `@homenshum/nodekit/reference-loop`.
 
+## Cross-application reference chain edges
+
+`nodekit.reference-chain-edge/v1` binds one exact reference handoff without
+creating another workflow store or verdict authority. Each immutable edge
+contains:
+
+- exact source and target record schema, ID field, ID, and content digest;
+- the current Caseflow case, stage, and case-content hash;
+- repository remote, candidate commit, and tree hash;
+- typed authority plus exact attestation or receipt references;
+- a canonical creation instant and explicit limitations.
+
+`buildReferenceChainEdge` derives the edge ID and digest from canonical bytes.
+`verifyReferenceChainEdge` requires the caller's independently resolved
+endpoint, Caseflow, repository, and authority bindings to match exactly.
+Changed observation or rule digests, stale repository revisions, and missing
+authority evidence fail closed.
+
+The schema deliberately has no `pass`, `approved`, `verified`, `verdict`, or
+stage-advance field. The builder rejects those fields at any nesting depth.
+An edge proves only that a specific handoff is bound. The endpoint-specific
+validator, Caseflow, the receipt authority, and external NodeProof remain
+responsible for their own decisions.
+
+Consumers store edges with their existing artifacts and receipts. Feed rows,
+inbox summaries, and execution graphs are projections of this chain and may be
+repaired from the canonical records; they are never the chain's authority.
+
 ## Mobbin boundary
 
 Mobbin release evidence requires an authenticated live inspection plus an Ed25519 service

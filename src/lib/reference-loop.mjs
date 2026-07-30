@@ -8,6 +8,7 @@ import referenceValidators from "./reference-schema-validators.cjs";
 const {
   validateDesignRule,
   validateExternalReferenceRun,
+  validateReferenceChainEdge,
   validateReferenceObservation,
   validateReferenceProfileManifest,
   validateReferenceScoreReceipt,
@@ -55,12 +56,14 @@ const RULE_SCHEMA = "nodekit.reference-loop-design-rule.v1.schema.json";
 const SCORE_SCHEMA = "nodekit.reference-score-receipt.v1.schema.json";
 const EXTERNAL_RUN_SCHEMA = "nodekit.external-reference-run.v1.schema.json";
 const PROFILE_MANIFEST_SCHEMA = "nodekit.reference-profile-manifest.v1.schema.json";
+const REFERENCE_CHAIN_EDGE_SCHEMA = "nodekit.reference-chain-edge.v1.schema.json";
 const REFERENCE_VALIDATORS = new Map([
   [OBSERVATION_SCHEMA, validateReferenceObservation],
   [RULE_SCHEMA, validateDesignRule],
   [SCORE_SCHEMA, validateReferenceScoreReceipt],
   [EXTERNAL_RUN_SCHEMA, validateExternalReferenceRun],
   [PROFILE_MANIFEST_SCHEMA, validateReferenceProfileManifest],
+  [REFERENCE_CHAIN_EDGE_SCHEMA, validateReferenceChainEdge],
 ]);
 const execFileAsync = promisify(execFile);
 
@@ -232,6 +235,191 @@ export function buildDesignRule(draft) {
     }
   }
   return derivedRecord(draft, "ruleId", "rule");
+}
+
+const FORBIDDEN_REFERENCE_CHAIN_VERDICT_FIELDS = new Set([
+  "approved",
+  "pass",
+  "passed",
+  "verified",
+  "verdict",
+]);
+
+function findReferenceChainVerdictField(value, trail = []) {
+  if (!value || typeof value !== "object") return null;
+  for (const [key, child] of Object.entries(value)) {
+    const nextTrail = [...trail, key];
+    if (FORBIDDEN_REFERENCE_CHAIN_VERDICT_FIELDS.has(key.toLowerCase())) {
+      return nextTrail.join(".");
+    }
+    const nested = findReferenceChainVerdictField(child, nextTrail);
+    if (nested) return nested;
+  }
+  return null;
+}
+
+function normalizeReferenceChainRecordRef(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    fail("REFERENCE_CHAIN_INVALID", `${label} must be an exact record reference`);
+  }
+  return {
+    ...structuredClone(value),
+    schemaVersion: String(value.schemaVersion ?? "").trim(),
+    idField: String(value.idField ?? "").trim(),
+    recordId: String(value.recordId ?? "").trim(),
+    contentDigest: String(value.contentDigest ?? "").trim(),
+  };
+}
+
+function normalizeReferenceChainRefs(value, label) {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) fail("REFERENCE_CHAIN_INVALID", `${label} must be an array`);
+  const refs = value.map((entry, index) =>
+    normalizeReferenceChainRecordRef(entry, `${label}[${index}]`));
+  refs.sort((left, right) => canonical(left).localeCompare(canonical(right)));
+  if (new Set(refs.map((entry) => canonical(entry))).size !== refs.length) {
+    fail("REFERENCE_CHAIN_INVALID", `${label} must contain unique exact references`);
+  }
+  return refs;
+}
+
+function assertReferenceChainSchema(value) {
+  const findings = referenceSchemaFindings(
+    REFERENCE_CHAIN_EDGE_SCHEMA,
+    value,
+    "reference chain edge",
+  );
+  if (findings.length) fail("REFERENCE_CHAIN_INVALID", findings.join("; "));
+}
+
+export function buildReferenceChainEdge(draft) {
+  if (!draft || typeof draft !== "object" || Array.isArray(draft)) {
+    fail("REFERENCE_CHAIN_INVALID", "reference chain edge must be an object");
+  }
+  const verdictField = findReferenceChainVerdictField(draft);
+  if (verdictField) {
+    fail(
+      "REFERENCE_CHAIN_AUTHORITY_INVALID",
+      `caller cannot set authority verdict field: ${verdictField}`,
+    );
+  }
+  assertCanonicalInstant(draft.createdAt, "createdAt");
+  const createdAt = draft.createdAt;
+  const limitations = Array.isArray(draft.limitations)
+    ? draft.limitations.map((entry) => String(entry).trim()).sort((left, right) =>
+      left.localeCompare(right))
+    : draft.limitations;
+  if (
+    !Array.isArray(limitations)
+    || limitations.some((entry) => !entry)
+    || new Set(limitations).size !== limitations.length
+  ) {
+    fail(
+      "REFERENCE_CHAIN_INVALID",
+      "limitations must contain unique non-empty boundary statements",
+    );
+  }
+  const attestationRefs = normalizeReferenceChainRefs(
+    draft.authority?.attestationRefs,
+    "authority.attestationRefs",
+  );
+  const receiptRefs = normalizeReferenceChainRefs(
+    draft.authority?.receiptRefs,
+    "authority.receiptRefs",
+  );
+  if ((attestationRefs?.length ?? 0) + (receiptRefs?.length ?? 0) === 0) {
+    fail("REFERENCE_CHAIN_AUTHORITY_INVALID", "authority requires exact attestation or receipt evidence");
+  }
+  const normalized = {
+    ...structuredClone(draft),
+    from: normalizeReferenceChainRecordRef(draft.from, "from"),
+    to: normalizeReferenceChainRecordRef(draft.to, "to"),
+    caseBinding: {
+      ...structuredClone(draft.caseBinding),
+      caseId: String(draft.caseBinding?.caseId ?? "").trim(),
+      stageId: String(draft.caseBinding?.stageId ?? "").trim(),
+      caseContentHash: String(draft.caseBinding?.caseContentHash ?? "").trim(),
+    },
+    repositoryBinding: {
+      ...structuredClone(draft.repositoryBinding),
+      remote: String(draft.repositoryBinding?.remote ?? "").trim(),
+      commitSha: String(draft.repositoryBinding?.commitSha ?? "").trim(),
+      treeHash: String(draft.repositoryBinding?.treeHash ?? "").trim(),
+    },
+    authority: {
+      ...structuredClone(draft.authority),
+      kind: String(draft.authority?.kind ?? "").trim(),
+      ...(attestationRefs === undefined ? {} : { attestationRefs }),
+      ...(receiptRefs === undefined ? {} : { receiptRefs }),
+    },
+    createdAt,
+    limitations,
+  };
+  const edge = derivedRecord(
+    normalized,
+    "edgeId",
+    "reference_chain_edge",
+  );
+  assertReferenceChainSchema(edge);
+  return edge;
+}
+
+function referenceChainBindingMatches(actual, expected) {
+  return canonical(actual) === canonical(expected);
+}
+
+export async function verifyReferenceChainEdge(edge, context = {}) {
+  assertReferenceChainSchema(edge);
+  const rebuilt = buildReferenceChainEdge(edge);
+  if (
+    rebuilt.edgeId !== edge.edgeId
+    || rebuilt.contentDigest !== edge.contentDigest
+  ) {
+    fail(
+      "REFERENCE_CHAIN_BINDING_INVALID",
+      "reference chain edge id or content digest does not close",
+    );
+  }
+  if (!referenceChainBindingMatches(context.from, edge.from)) {
+    fail("REFERENCE_CHAIN_BINDING_INVALID", "source endpoint differs from the verified record");
+  }
+  if (!referenceChainBindingMatches(context.to, edge.to)) {
+    fail("REFERENCE_CHAIN_BINDING_INVALID", "target endpoint differs from the verified record");
+  }
+  if (!referenceChainBindingMatches(context.caseBinding, edge.caseBinding)) {
+    fail("REFERENCE_CHAIN_BINDING_INVALID", "Caseflow binding differs from the current stage");
+  }
+  if (!referenceChainBindingMatches(context.repositoryBinding, edge.repositoryBinding)) {
+    fail("REFERENCE_CHAIN_BINDING_INVALID", "repository binding differs from the verified revision");
+  }
+  const attestationRefs = normalizeReferenceChainRefs(
+    context.attestationRefs ?? [],
+    "context.attestationRefs",
+  );
+  const receiptRefs = normalizeReferenceChainRefs(
+    context.receiptRefs ?? [],
+    "context.receiptRefs",
+  );
+  if (
+    !referenceChainBindingMatches(
+      attestationRefs,
+      edge.authority.attestationRefs ?? [],
+    )
+    || !referenceChainBindingMatches(
+      receiptRefs,
+      edge.authority.receiptRefs ?? [],
+    )
+  ) {
+    fail(
+      "REFERENCE_CHAIN_AUTHORITY_INVALID",
+      "authority evidence differs from the exact attestation or receipt bindings",
+    );
+  }
+  return {
+    edge,
+    contentDigest: edge.contentDigest,
+    verified: true,
+  };
 }
 
 function externalRunUnsignedBody(draft) {

@@ -151,6 +151,60 @@ export interface ReferenceScoreReceiptV1 {
   contentDigest: string;
 }
 
+export type ReferenceChainRecordIdField =
+  | "artifactId"
+  | "attestationId"
+  | "consumptionId"
+  | "edgeId"
+  | "observationId"
+  | "receiptId"
+  | "reviewContextId"
+  | "ruleId"
+  | "runId";
+
+export interface ReferenceChainRecordRefV1 {
+  schemaVersion: string;
+  idField: ReferenceChainRecordIdField;
+  recordId: string;
+  contentDigest: string;
+}
+
+export type ReferenceChainAuthorityKind =
+  | "agent-produced"
+  | "deterministic"
+  | "externally-observed"
+  | "human-attested"
+  | "nodeproof-verified";
+
+export interface ReferenceChainEdgeV1 {
+  schemaVersion: "nodekit.reference-chain-edge/v1";
+  edgeId: string;
+  from: ReferenceChainRecordRefV1;
+  to: ReferenceChainRecordRefV1;
+  caseBinding: {
+    caseId: string;
+    stageId: string;
+    caseContentHash: string;
+  };
+  repositoryBinding: {
+    remote: string;
+    commitSha: string;
+    treeHash: string;
+  };
+  authority: {
+    kind: ReferenceChainAuthorityKind;
+    attestationRefs?: ReferenceChainRecordRefV1[];
+    receiptRefs?: ReferenceChainRecordRefV1[];
+  };
+  createdAt: string;
+  limitations: string[];
+  contentDigest: string;
+}
+
+export type ReferenceChainEdgeDraftV1 =
+  Omit<ReferenceChainEdgeV1, "edgeId" | "contentDigest">
+  & Partial<Pick<ReferenceChainEdgeV1, "edgeId" | "contentDigest">>;
+
 export interface ReferenceServiceAttestationV1 {
   schemaVersion: "nodekit.reference-service-attestation/v1";
   purpose: "mobbin-external-reference-run";
@@ -236,6 +290,22 @@ export class ReferenceLoopError extends Error {
 }
 
 export function referenceContentDigest(value: unknown): string;
+export function buildReferenceChainEdge(draft: ReferenceChainEdgeDraftV1): ReferenceChainEdgeV1;
+export function verifyReferenceChainEdge(
+  edge: ReferenceChainEdgeV1,
+  context: {
+    from: ReferenceChainRecordRefV1;
+    to: ReferenceChainRecordRefV1;
+    caseBinding: ReferenceChainEdgeV1["caseBinding"];
+    repositoryBinding: ReferenceChainEdgeV1["repositoryBinding"];
+    attestationRefs?: ReferenceChainRecordRefV1[];
+    receiptRefs?: ReferenceChainRecordRefV1[];
+  },
+): Promise<{
+  edge: ReferenceChainEdgeV1;
+  contentDigest: string;
+  verified: true;
+}>;
 export function buildReferenceObservation(draft: ReferenceObservationDraftV1): ReferenceObservationV1;
 export function buildDesignRule(draft: DesignRuleDraftV1): DesignRuleV1;
 export function buildReferenceCandidateReceipt(

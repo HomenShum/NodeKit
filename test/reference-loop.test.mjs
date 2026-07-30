@@ -1228,7 +1228,7 @@ test("a caller-forged Mobbin PASS cannot create an observation or status receipt
   assert.equal((await getExternalReferenceStatus(root, "mobbin")).status, "not-run");
 });
 
-test("the committed standalone validators match the five source schemas", async () => {
+test("the committed standalone validators match the six source schemas", async () => {
   await execFileAsync(process.execPath, [
     path.resolve("scripts", "generate-reference-schema-validators.mjs"),
     "--check",

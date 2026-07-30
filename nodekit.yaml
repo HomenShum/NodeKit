@@ -11,6 +11,7 @@ canonicalFor:
   - nodekit.knowledge-evolution
   - nodekit.frontend-specialist
   - nodekit.evolution-ledger
+  - nodekit.reference-chain
 
 consumes:
   - betterprhandoff.handoff
@@ -55,6 +56,14 @@ contractDeclarations:
   - concept: nodekit.evolution-ledger
     signature: evolution-event-schema
     path: src/lib/evolution-ledger.mjs
+    mode: canonical
+  - concept: nodekit.reference-chain
+    signature: reference-chain-edge-builder
+    path: src/lib/reference-loop.mjs
+    mode: canonical
+  - concept: nodekit.reference-chain
+    signature: reference-chain-edge-verifier
+    path: src/lib/reference-loop.mjs
     mode: canonical
 architectureExceptions: []
 
