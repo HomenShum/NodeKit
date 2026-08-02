@@ -7,7 +7,7 @@ description: Turn a business pain point, product purpose, hackathon idea, judgin
 
 Build the smallest undeniable vertical slice. Keep an honest launch clock from intake through proof, aiming for 30 minutes and preserving remaining 2-hour and 4-hour hackathon runway.
 
-Read [the launch contract](references/launch-contract.md) before acting.
+Read the 90-second field card in the [idea-to-reality principles](../../../../docs/IDEA_TO_REALITY_PRINCIPLES.md), then read [the launch contract](references/launch-contract.md) before acting. Use the deeper principles only when their trigger matches the current decision; do not turn the manual into ceremony.
 
 ## Workflow
 
