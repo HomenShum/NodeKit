@@ -195,6 +195,8 @@ permission.
 **Decision rule:** auto-approve reversible, bounded, local actions. Stop at consequence boundaries,
 not arbitrary tool boundaries.
 
+**Action:** classify the exact effect before execution and route it by consequence:
+
 **Usually automatic:** local analysis, deterministic transforms, reversible edits, tests, bounded
 retrieval, drafts, and proof capture.
 
@@ -214,6 +216,8 @@ rollback and observation gates are independently verified.
 
 **Decision rule:** complexity must remove a measured failure or shorten the primary job. If the
 benefit is merely architectural neatness or future possibility, defer it.
+
+**Action:** spend from two explicit budgets:
 
 **Interface budget:**
 

@@ -205,6 +205,19 @@ test("a fresh human or coding agent reaches the compact loop before the detailed
   assert.ok(reusableRecords > complexityGate, "copyable records must remain available after the gate");
   assert.match(principles.slice(0, quickStart), /do not turn all 15 principles into a ceremony/u);
   assert.match(principles, /build only the smallest behavior that can earn the next piece of/u);
+
+  const numberedHeadings = [...principles.matchAll(/^## (\d+)\. /gmu)].map((match) => Number(match[1]));
+  assert.deepEqual(numberedHeadings, Array.from({ length: 15 }, (_, index) => index + 1));
+  for (const number of numberedHeadings) {
+    const start = principles.indexOf(`## ${number}. `);
+    const end = number < 15
+      ? principles.indexOf(`## ${number + 1}. `, start)
+      : complexityGate;
+    const decisionContract = principles.slice(start, end);
+    for (const marker of ["**Trigger:**", "**Decision rule:**", "**Action:**", "**Proof:**", "**Exception:**"]) {
+      assert.match(decisionContract, new RegExp(marker.replaceAll("*", "\\*"), "u"), `principle ${number} must expose ${marker}`);
+    }
+  }
 });
 
 test("public package bins expose usable help without credentials or writes", () => {
