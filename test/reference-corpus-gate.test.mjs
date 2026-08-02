@@ -197,3 +197,34 @@ test("a corpus whose rules mostly terminate in nothing is decoration, not requir
   assert.equal(shipped.status, 0, shipped.out);
   assert.match(shipped.out, /rule\(s\) checked for termination; 0 terminate in nothing checkable/);
 });
+
+// A ref is only a termination if it resolves. Each case below is a different way a rule keeps
+// pointing at an artifact after the artifact stops being there — the schema cannot see any of them,
+// because to the schema they are all well-formed strings.
+test("a rule pointing at an artifact that does not exist is not a termination", () => {
+  const cases = [
+    {
+      name: "a JSON pointer into a schema that no longer has that node",
+      ref: "schemas/nodekit.story-pack.v1.schema.json#/$defs/noSuchDef/properties/contentBinding",
+      pattern: /resolves to nothing at/,
+    },
+    { name: "a file that is not in the repository", ref: "schemas/does-not-exist.schema.json#/a", pattern: /is not a file in this repository/ },
+    { name: "a symbol that is not in the file it names", ref: "src/lib/reference-loop.mjs:noSuchSymbol", pattern: /does not appear in/ },
+  ];
+
+  for (const { name, ref, pattern } of cases) {
+    const corpus = mkdtempSync(path.join(tmpdir(), "dangling-ref-corpus-"));
+    for (const entry of readdirSync(path.join(platformRoot, shippedCorpus))) {
+      if (!entry.endsWith(".json")) continue;
+      const doc = loadJson(path.join(shippedCorpus, entry));
+      if (doc.schemaVersion === "nodekit.design-rule/v1") doc.boundToGate = { ...doc.boundToGate, ref };
+      writeFileSync(path.join(corpus, entry), JSON.stringify(doc, null, 2));
+    }
+    const { status, out } = runGate(corpus);
+    assert.equal(status, 1, `${name}: gate accepted a dangling ref:\n${out}`);
+    assert.match(out, pattern, name);
+  }
+
+  // And the shipped corpus resolves, so the check is known to distinguish rather than just reject.
+  assert.match(runGate(shippedCorpus).out, /1 ref\(s\) resolved to a real artifact/);
+});

@@ -57,7 +57,10 @@
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { validateSchema } from "../src/lib/schema-validation.mjs";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const corpusDir = process.argv[2] ?? "atlas/references";
 const BANNED = /\b(clean|beautiful|modern|premium|polished|delightful|good UX|elegant|sleek)\b/i;
@@ -226,6 +229,55 @@ for (const { file, doc } of records) {
 const UNCHECKED_RULE_RATIO_MAX = 0.3;
 const ruleTerminations = [...rulesById.values()].map((r) => r.boundToGate?.kind ?? "none");
 const uncheckedRules = ruleTerminations.filter((k) => k === "none").length;
+
+// A ref is only a termination if it resolves. "src/render.mjs:assertNoPie" naming an assertion that
+// does not exist reads exactly like one that does, and is the shape a rule takes as the code moves
+// out from under it. Resolved against the repository, not the corpus, because that is where the
+// artifact lives.
+let refsResolved = 0;
+for (const rule of rulesById.values()) {
+  const { kind, ref } = rule.boundToGate ?? {};
+  if (kind === "none" || !ref) continue;
+  const [locator, anchor] = ref.includes("#") ? [ref.slice(0, ref.indexOf("#")), ref.slice(ref.indexOf("#") + 1)] : [ref, null];
+  // A trailing :symbol is only a symbol when it is not a Windows drive or a line number.
+  const symbolMatch = anchor === null ? /^(.*?):([A-Za-z_$][\w$.]*)$/.exec(locator) : null;
+  const filePath = symbolMatch ? symbolMatch[1] : locator;
+  const symbol = symbolMatch ? symbolMatch[2] : null;
+  const absolute = path.resolve(repoRoot, filePath);
+
+  let source;
+  try {
+    source = statSync(absolute).isFile() ? readFileSync(absolute, "utf8") : null;
+  } catch {
+    source = null;
+  }
+  if (source === null) {
+    violations.push(`${rule.ruleId}: boundToGate.ref points at ${filePath}, which is not a file in this repository`);
+    continue;
+  }
+
+  if (anchor !== null) {
+    // A JSON pointer into a schema: walk it rather than trust that the path reads plausibly.
+    let node;
+    try {
+      node = JSON.parse(source);
+    } catch {
+      node = undefined;
+    }
+    for (const rawSegment of anchor.split("/").filter(Boolean)) {
+      const segment = rawSegment.replace(/~1/g, "/").replace(/~0/g, "~");
+      node = node && typeof node === "object" ? node[segment] : undefined;
+    }
+    if (node === undefined) {
+      violations.push(`${rule.ruleId}: boundToGate.ref resolves to nothing at ${anchor} in ${filePath}`);
+      continue;
+    }
+  } else if (symbol && !new RegExp(`\\b${symbol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(source)) {
+    violations.push(`${rule.ruleId}: boundToGate.ref names ${symbol}, which does not appear in ${filePath}`);
+    continue;
+  }
+  refsResolved += 1;
+}
 if (ruleTerminations.length > 0) {
   const ratio = uncheckedRules / ruleTerminations.length;
   if (ratio > UNCHECKED_RULE_RATIO_MAX) {
@@ -239,6 +291,6 @@ if (ruleTerminations.length > 0) {
 console.log(`${violations.length === 0 ? "PASS" : "FAIL"}  reference corpus`);
 console.log(`      ${records.length} record(s) read from ${corpusDir}; ${recordsValidated} validated against a declared schema`);
 console.log(`      ${factsRecorded} fact(s) recorded; ${citationsChecked} citation(s) checked; ${criterionScoresChecked} criterion score(s) checked`);
-console.log(`      ${ruleTerminations.length} rule(s) checked for termination; ${uncheckedRules} terminate in nothing checkable`);
+console.log(`      ${ruleTerminations.length} rule(s) checked for termination; ${uncheckedRules} terminate in nothing checkable; ${refsResolved} ref(s) resolved to a real artifact`);
 for (const v of violations) console.log(`      ${v}`);
 process.exit(violations.length === 0 ? 0 : 1);
