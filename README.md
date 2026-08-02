@@ -39,6 +39,10 @@ Node Platform remains its ownership layer: it records which repository owns each
 
 Clone this repository, open it in Codex or Claude Code, and describe the pain point, user, outcome, sponsor tools, and deadline. Root `AGENTS.md` and `CLAUDE.md` route that brief into the bundled NodeKit launch skill.
 
+Before expanding the build, use the [idea-to-reality principles](docs/IDEA_TO_REALITY_PRINCIPLES.md)
+to freeze one user job, one primary artifact, the complexity budget, authority boundaries, proof,
+and the observation that will drive the next iteration.
+
 Or use the CLI directly. Install dependencies first — every command below needs them:
 
 ```bash
