@@ -445,6 +445,34 @@ contract; the extracted layer reduces duplication without creating dual truth.
 **Exception:** a security or trust invariant may be centralized before three consumers when
 divergence itself creates unacceptable risk.
 
+## 16. Bind completion to the exact artifact a human inspected
+
+**Trigger:** a job produces rendered, exported, published, or otherwise human-consumed artifacts
+and an automated validator reports success.
+
+**Decision rule:** the builder cannot self-certify its own output. A finalizer may consume an
+independent assessment, but it may not invent inspection receipts. Bind that assessment to the
+exact render receipt and every page/image digest; any subsequent rebuild invalidates approval.
+
+**Action:** clean generated output directories before rendering, render every required surface,
+open every required page, and record page-indexed findings. Let pixel review veto a green build.
+Keep canonical evidence text separate from concise display text, and make every reconciliation
+gate understand both. When deterministic composition intent crosses a model/provider boundary,
+validate and preserve it explicitly rather than silently dropping it during coercion.
+
+```text
+canonical inputs -> deterministic build -> validation -> clean dual render
+                 -> independent pixel assessment -> digest-bound ledger
+                 -> finalizer rechecks current bytes -> production receipt
+```
+
+**Proof:** the finalizer fails when an image, render receipt, assessment, evidence mapping, or
+compression decision changes after inspection. A regression replay proves that the old semantic or
+visual defect is rejected.
+
+**Exception:** a non-visual backend artifact may replace page inspection with an independent raw
+state/log audit, but the same digest binding and no-self-certification rule still applies.
+
 ## The anti-complexity gate
 
 Before adding anything, answer these in order:
