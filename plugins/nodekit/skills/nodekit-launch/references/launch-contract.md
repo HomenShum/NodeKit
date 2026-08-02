@@ -16,6 +16,12 @@ Capture problem, affected user, desired outcome, current workaround, demo input,
 8. Deployment: exact tested revision with environment identity.
 9. Proof: release receipt plus an honest phase timeline.
 
+For an existing product, insert a brownfield parity gate before Scaffold: immutable baseline
+revision, source-derived active capability inventory, one locked baseline/candidate journey, labeled
+interface boundaries, and explicit inactive stubs. Retirement of a duplicate path is blocked until
+all active capabilities have owners and test bindings and the locked journey has zero unapproved
+behavior loss.
+
 ## Completion language
 
 - Say `scaffolded` after generation only.
