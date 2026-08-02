@@ -23,6 +23,7 @@ import {
   scoreReferenceCandidate,
   verifyReferenceScoreReceipt,
 } from "../src/lib/reference-loop.mjs";
+import { validateSchema } from "../src/lib/schema-validation.mjs";
 
 const execFileAsync = promisify(execFile);
 const CHECKED_AT = new Date(Date.now() - 60_000).toISOString();
@@ -1225,7 +1226,27 @@ test("a caller-forged Mobbin PASS cannot create an observation or status receipt
     () => readdir(path.join(root, "reference", "corpus", "observations")),
     /ENOENT/,
   );
-  assert.equal((await getExternalReferenceStatus(root, "mobbin")).status, "not-run");
+  const unverified = await getExternalReferenceStatus(root, "mobbin");
+  assert.equal(unverified.status, "not-run");
+
+  // A provider that is unreachable produces work built on unverified provenance, and the intent to
+  // re-check it is exactly the kind of thing that survives only in chat scrollback. The obligation
+  // is therefore part of the record, dated, and inside the digest rather than beside it.
+  assert.ok(unverified.reverifyBy, "a non-pass run must leave a dated re-verify obligation");
+  assert.ok(
+    Date.parse(unverified.reverifyBy) > Date.now(),
+    "the obligation must fall due in the future, or it is already an excuse",
+  );
+  assert.deepEqual(
+    await validateSchema("nodekit.external-reference-run.v1.schema.json", unverified, "run"),
+    [],
+  );
+
+  const { reverifyBy: _dropped, ...undated } = unverified;
+  assert.ok(
+    (await validateSchema("nodekit.external-reference-run.v1.schema.json", undated, "run")).length > 0,
+    "a non-pass run with no re-verify date must not be expressible",
+  );
 });
 
 test("the committed standalone validators match the five source schemas", async () => {
