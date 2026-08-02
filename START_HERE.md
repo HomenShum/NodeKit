@@ -81,12 +81,13 @@ before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
 | You want to | Read |
 |---|---|
 | Generate an application | [README.md](README.md#from-a-brief-to-a-running-app) |
+| Turn an idea into the smallest useful product | [docs/IDEA_TO_REALITY_PRINCIPLES.md](docs/IDEA_TO_REALITY_PRINCIPLES.md) |
 | Understand a term | [GLOSSARY.md](GLOSSARY.md) |
 | Work on this repo as a coding agent | [AGENTS.md](AGENTS.md) |
 | Understand why a decision was made | [docs/DECISIONS.md](docs/DECISIONS.md), [docs/EVOLUTION_LEDGER.md](docs/EVOLUTION_LEDGER.md) |
 | See the full command list | `node src/cli.mjs --help` or `repo-map.json` |
 
-`docs/` holds 28 reference documents. They are references, not onboarding — do not start there.
+`docs/` holds deeper reference documents. They are references, not onboarding — do not start there.
 
 ## One honest note
 

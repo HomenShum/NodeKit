@@ -5,6 +5,8 @@ rewritten after release.
 
 ## Index
 
+- [`docs/onboarding.md`](docs/onboarding.md) - newcomer orientation and idea-to-reality operating doctrine
+- [`package/public-docs.md`](package/public-docs.md) - documentation shipped with the npm package
 - [`library/agent-run.md`](library/agent-run.md) - bounded local process recording, receipts, and static reports
 - [`cli/agent-run.md`](cli/agent-run.md) - `nodekit agent run` command and honest process exits
 - [`library/governance.md`](library/governance.md) — risk classification, evidence, rollback, and graph projection

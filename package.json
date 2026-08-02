@@ -162,6 +162,7 @@
   },
   "files": [
     "dist",
+    "docs/IDEA_TO_REALITY_PRINCIPLES.md",
     "docs/WORKSPACE_REFERENCE_INDEX.md",
     "src",
     "scripts/sign-submission-attestation.mjs",
