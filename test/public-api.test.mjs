@@ -192,6 +192,14 @@ test("a first-time builder can reach the principles from both packaged onboardin
   }
 });
 
+test("the bundled launch skill routes coding agents through the compact principles without adding ceremony", async () => {
+  const launchSkill = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/SKILL.md", import.meta.url), "utf8");
+  assert.match(launchSkill, /idea-to-reality principles/u);
+  assert.match(launchSkill, /90-second field card/u);
+  assert.match(launchSkill, /do not turn the manual into ceremony/u);
+  assert.match(launchSkill, /\.\.\/\.\.\/\.\.\/\.\.\/docs\/IDEA_TO_REALITY_PRINCIPLES\.md/u);
+});
+
 test("a fresh human or coding agent reaches the compact loop before the detailed manual", async () => {
   const principles = await readFile(new URL("../docs/IDEA_TO_REALITY_PRINCIPLES.md", import.meta.url), "utf8");
   const quickStart = principles.indexOf("## The whole method in 90 seconds");
