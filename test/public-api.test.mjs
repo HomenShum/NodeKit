@@ -177,6 +177,36 @@ test("every relative README link resolves to a packed package path", async () =>
   assert.deepEqual(broken, []);
 });
 
+test("a first-time builder can reach the principles from both packaged onboarding entry points", async () => {
+  const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  const packedRoots = ["package.json", ...(packageJson.files ?? [])]
+    .map((entry) => String(entry).replace(/^\.\//, "").replace(/\/$/, ""));
+  const principlesPath = "docs/IDEA_TO_REALITY_PRINCIPLES.md";
+  assert.ok(packedRoots.includes(principlesPath), "the installed package must contain the principles manual");
+
+  for (const onboardingPath of ["README.md", "START_HERE.md"]) {
+    const onboarding = await readFile(new URL(`../${onboardingPath}`, import.meta.url), "utf8");
+    const relativeLinks = [...onboarding.matchAll(/\[[^\]]*\]\(([^)]+)\)/gu)]
+      .map((match) => match[1].trim().split(/[?#]/u, 1)[0].replace(/^\.\//u, ""));
+    assert.ok(relativeLinks.includes(principlesPath), `${onboardingPath} must link to the principles manual`);
+  }
+});
+
+test("a fresh human or coding agent reaches the compact loop before the detailed manual", async () => {
+  const principles = await readFile(new URL("../docs/IDEA_TO_REALITY_PRINCIPLES.md", import.meta.url), "utf8");
+  const quickStart = principles.indexOf("## The whole method in 90 seconds");
+  const detailedManual = principles.indexOf("## 1. Start with a person and a job");
+  const complexityGate = principles.indexOf("## The anti-complexity gate");
+  const reusableRecords = principles.indexOf("## Reusable records");
+
+  assert.ok(quickStart > 0, "the compact operating loop must be discoverable");
+  assert.ok(detailedManual > quickStart, "progressive disclosure must put the compact loop first");
+  assert.ok(complexityGate > detailedManual, "the detailed manual must lead to a removal gate");
+  assert.ok(reusableRecords > complexityGate, "copyable records must remain available after the gate");
+  assert.match(principles.slice(0, quickStart), /do not turn all 15 principles into a ceremony/u);
+  assert.match(principles, /build only the smallest behavior that can earn the next piece of/u);
+});
+
 test("public package bins expose usable help without credentials or writes", () => {
   for (const [script, marker] of [
     ["../scripts/finalize-submission-evidence.mjs", "nodekit-evidence-finalize"],

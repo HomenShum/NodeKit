@@ -1,12 +1,25 @@
 # NodeKit idea-to-reality principles
 
-This is the compact operating doctrine for turning a real problem into a small, useful, improving
-product with NodeKit. It is not another framework layered over NodeKit. It explains how to use the
-existing Builder Journey without letting the product, interface, agent, or proof system become the
-work instead of serving the work.
+This is the operating doctrine for turning a real problem into a small, useful, improving product
+with NodeKit. It is not another framework layered over NodeKit. It explains how to use the existing
+Builder Journey without letting the product, interface, agent, or proof system become the work
+instead of serving the work.
 
-The format is deliberately operational. Every principle has a trigger, a decision rule, an action,
-proof, and an exception. A principle that cannot change a decision is decoration.
+The first two sections are the field card. Start there and build. The remaining sections explain
+the decisions when a case becomes ambiguous. Every principle has a trigger, decision rule, action,
+proof, and exception. A principle that cannot change a decision is decoration.
+
+Use progressive disclosure; do not turn all 15 principles into a ceremony:
+
+- **Starting an idea:** read the 90-second method, then fill the Opportunity card.
+- **Making a product or interface decision:** open only the principle whose trigger matches the
+  current problem.
+- **Adding a surface, service, setting, or agent:** run the anti-complexity gate first.
+- **Something failed:** use the Failure deep dive before adding a workaround.
+- **Something worked repeatedly:** write one Learning rule and apply the promotion rule.
+
+This is a decision index, not a checklist. If a principle does not change the next action, stop
+reading and build the smallest proof.
 
 ## The whole method in 90 seconds
 
@@ -20,6 +33,10 @@ proof, and an exception. A principle that cannot change a decision is decoration
 8. Test the real journey across failure, recovery, concurrency, mobile, and sustained use.
 9. Diagnose failures at their first bad boundary and rerun the exact failed case.
 10. Launch the exact proved revision, observe real use, and promote one bounded learning.
+
+The stop rule is as important as the sequence: if the primary job works, the proof matches the
+claim, and the next change does not remove an observed failure, stop building and expose the slice
+to a real user.
 
 The loop is:
 
@@ -44,16 +61,22 @@ For each working session, use the same compact execution contract:
 
 ## Where this doctrine came from
 
-NodeVideo was the field test. It started with strong editing, pose, model-routing, proof, and agent
-capabilities, but the product became harder to use as those capabilities accumulated. Productivity
-improved when the work moved back toward one creator job, one canonical artifact, a smaller mobile
-surface, shared human/agent operations, durable recovery, honest model routing, and observable
-before/after proof.
+NodeSlide, NodeVideo, and NodeVision were the field tests. NodeSlide exposed the sharpest gap
+between system-green and user-good: exact slide counts, valid schemas, broad component inventories,
+and successful exports could still produce repetitive, semantically weak, or visually broken
+decks. NodeVideo showed how capability accumulation can bury the creator's job. NodeVision showed
+the value of completing one phone-sized path, including the handoff into the real device.
 
-The economic constraint comes from Sahil Lavingia's *The Minimalist Entrepreneur*: start and learn,
-solve a problem for a community, keep the operation tight, and protect finite money and energy.
-NodeKit translates that founder discipline into a product-and-agent discipline: **build only the
-smallest behavior that can earn the next piece of evidence.**
+Across them, productivity improved when the work returned to one user job, one canonical artifact,
+a small surface, shared human/agent operations, durable recovery, causal diagnosis, and direct
+inspection of the result a person actually receives.
+
+Ray Dalio's useful pattern is to turn recurring encounters with reality into explicit decision
+rules that others can inspect, test, and improve. The economic constraint comes from Sahil
+Lavingia's *The Minimalist Entrepreneur*: start and learn, solve a problem for a community, keep the
+operation tight, and protect finite money and energy. NodeKit translates both ideas into product
+and agent discipline: **build only the smallest behavior that can earn the next piece of
+evidence, then preserve what the evidence taught.**
 
 ## 1. Start with a person and a job, not a product category
 
@@ -101,7 +124,7 @@ without an accepted boundary.
 
 ## 3. Build the smallest undeniable vertical slice
 
-**Trigger:** scope expands into multiple personas, surfaces, workflows, or “future-proof” systems.
+**Trigger:** scope expands into multiple personas, surfaces, workflows, or "future-proof" systems.
 
 **Decision rule:** choose one path shaped as:
 
@@ -110,7 +133,9 @@ real input -> agent decision -> tool-backed action -> measurable artifact -> vis
 ```
 
 The slice must finish a user job. A polished shell, isolated model call, schema, or dashboard is not
-a slice.
+a slice. Define the terminal condition at the user boundary: a command that writes an intermediate
+file but fails to validate, export, publish, or reopen the requested result has not finished the
+job.
 
 **Action:** at the midpoint of the timebox, freeze the workflow. Defer aesthetic expansion and
 secondary integrations before they consume the proof window.
@@ -135,7 +160,7 @@ control, or receipt.
 - evidence and failure disclosure;
 - the next available action.
 
-Do not create a separate “current step” area if status and progress belong naturally in the agent
+Do not create a separate "current step" area if status and progress belong naturally in the agent
 conversation. Keep chat history visible. Show project files when they explain or recover the work,
 not as a permanent competing workspace.
 
@@ -178,7 +203,7 @@ egress, production writes, deployment, publication, account/identity choices, ri
 destructive actions, and promotion of persistent rules.
 
 **Proof:** the receipt states the authority source, scope, exact effect, rollback target, and what
-was not authorized. “Automatic” must never be rendered as “human approved.”
+was not authorized. "Automatic" must never be rendered as "human approved."
 
 **Exception:** a pre-existing standing policy may automate a higher-risk action only when the exact
 rollback and observation gates are independently verified.
@@ -215,7 +240,7 @@ security failures, or unrecoverable work.
 
 ## 8. Use references as evidence, not decoration
 
-**Trigger:** a team says “make it like” another product or uses adjectives such as clean, modern,
+**Trigger:** a team says "make it like" another product or uses adjectives such as clean, modern,
 premium, or intuitive.
 
 **Decision rule:** a reference earns influence only through atomic observations tied to the same
@@ -258,7 +283,15 @@ Use the proof ladder: schema/unit -> integration -> browser DOM -> rendered pixe
 deployment identity -> live content signal -> observed user outcome. A lower rung cannot certify a
 higher claim.
 
-**Proof:** preserve raw inputs, artifacts, receipts, screenshots when visual, and exact commands.
+For generated artifacts, verify semantics and presentation separately. Check exact requested
+counts, source-grounded claims, internal continuity, and required fields; then render every page or
+state and inspect composition, hierarchy, overflow, repetition, and the artifact as a whole. A
+component inventory does not prove meaningful utilization. A digest does not prove human visual
+inspection. A regex does not prove unpredictability. When regression risk is material, temporarily
+restore the old defect and prove the new scenario test turns red before returning to the repair.
+
+**Proof:** preserve raw inputs, artifacts, receipts, screenshots when visual, exact commands, and
+the observed counterfactual for knockout tests.
 
 **Exception:** a narrow library primitive can stop at its contract boundary if no higher-layer
 claim is made.
@@ -309,7 +342,7 @@ frozen benchmark. Record that constraint.
 **Trigger:** work continues after reload, device change, scheduled execution, compaction, or agent
 handoff.
 
-**Decision rule:** “resume” is not reloading chat text. It requires durable identity, bounded
+**Decision rule:** "resume" is not reloading chat text. It requires durable identity, bounded
 working state, repository remeasurement, conflict detection, and a new checkpoint.
 
 **Action:** persist decisions, active artifact and version, attempted approaches, blockers,
@@ -350,7 +383,7 @@ need an external user and consequence before claiming product learning.
 ## 14. Improve the harness, not the model
 
 **Trigger:** a user repeatedly corrects the agent, the same friction returns across sessions, or a
-team asks the agent to “get better.”
+team asks the agent to "get better."
 
 **Decision rule:** do not ask a model to improve itself. Improve the versioned harness around it:
 instructions, context acquisition, tools, interaction states, recovery, tests, and proof.
@@ -420,6 +453,27 @@ authority_boundaries: []
 kill_condition: "evidence that stops or redirects the build"
 ```
 
+### Minimal interface contract
+
+Write this before changing a visible surface. Draw or capture the exact boundary being changed;
+leave the rest of the screen out of scope.
+
+```yaml
+user_job: "the one action this surface helps finish"
+change_boundary: "route, region, or component"
+primary_artifact: "what deserves most visual weight"
+primary_action: "one next action in this state"
+states:
+  empty: "invitation and safe first action"
+  loading: "honest progress and cancellation"
+  populated: "accepted artifact, evidence, and next action"
+  degraded: "what failed, what remains safe, and recovery"
+  overflow: "long content, narrow viewport, and truncation behavior"
+removed_or_hidden: []
+before_proof: "DOM + pixels + console at one named viewport"
+after_proof: "same evidence set after the change"
+```
+
 ### Failure deep dive
 
 ```yaml
@@ -447,27 +501,42 @@ promotion_authority: "named human or independent gate"
 stale_after: "fact that invalidates this rule"
 ```
 
-## NodeVideo evidence map
+### Completion receipt
 
-These principles are grounded in shipped or replayed NodeVideo work, not reconstructed as a neat
+```yaml
+requested_outcome: "the user's words, paraphrased without expanding authority"
+candidate_revision: "immutable commit or artifact identity"
+observed_result: "what a person or external system actually received"
+proof_rungs_run: []
+knockout_or_counterexample: "the test that would fail if the old defect returned"
+not_proven: []
+rollback: "exact safe recovery target"
+next_learning: "one observation, not another feature list"
+```
+
+## Field evidence map
+
+These principles are grounded in shipped or replayed product work, not reconstructed as a neat
 story afterward:
 
 | Field lesson | Evidence |
 | --- | --- |
-| One NodeAgent runtime and creator workspace beat parallel agent surfaces | [`48fa86d`](https://github.com/HomenShum/NodeVideo/commit/48fa86dc375a3347047c232b430a977dceb2fb92) |
-| Mobile became usable after configuration moved behind disclosure and chat/files recovery stayed contextual | [`7c2fcc7`](https://github.com/HomenShum/NodeVideo/commit/7c2fcc7bcc6f8fb9935bfb32c4cc5e356dd1f65a) |
-| Device QA needed durable, resume-safe state rather than a desktop viewport pretending to be Android | [`bb1b93a`](https://github.com/HomenShum/NodeVideo/commit/bb1b93ada28099ab730e0e2cd10b428597f7ce28) |
-| Free-model routing became maintainable only after automatic workload-specific benchmarking | [`0bc0386`](https://github.com/HomenShum/NodeVideo/commit/0bc0386304d543da9b36d55491984f03d70602d0) |
-| Model failures required boundary-level causal diagnosis and exact-case repair | [`d3ebe73`](https://github.com/HomenShum/NodeVideo/commit/d3ebe73bbfc8dac5b12458bb743a11118dc06efe) |
-| A proposal summary could not safely authorize exact edits | [`62a99b3`](https://github.com/HomenShum/NodeVideo/commit/62a99b3ea8c6fbca9908dc86860df7428f3acf08) |
-| Human and agent edits became legible when current, proposed, accepted, causal proof, and undo shared one timeline | [`3f9b5a6`](https://github.com/HomenShum/NodeVideo/commit/3f9b5a681dbd5a1e6ab1d8f39d2b0333d13aef5e) |
+| A broad visual component catalog did not prevent generic output; composition needed an executable grammar | [NodeSlide `9314e02`](https://github.com/HomenShum/NodeSlide/commit/9314e02) |
+| Requested quantity and scene evolution required explicit invariants rather than prompt wording | [NodeSlide `c4fa486`](https://github.com/HomenShum/NodeSlide/commit/c4fa486) |
+| Deck-level repetition had to fail closed on measured geometry | [NodeSlide `3e5594d`](https://github.com/HomenShum/NodeSlide/commit/3e5594d) |
+| Dense source material needed an enforceable compression benchmark, not a generic summarize instruction | [NodeSlide `1c10be3`](https://github.com/HomenShum/NodeSlide/commit/1c10be3) |
+| A rendered visual claim could not be accepted merely because the artifact schema was valid | [NodeSlide `1ccb51b`](https://github.com/HomenShum/NodeSlide/commit/1ccb51b) |
+| One NodeAgent runtime and creator workspace beat parallel agent surfaces | [NodeVideo `48fa86d`](https://github.com/HomenShum/NodeVideo/commit/48fa86dc375a3347047c232b430a977dceb2fb92) |
+| Mobile became usable after configuration moved behind disclosure and recovery stayed contextual | [NodeVideo `7c2fcc7`](https://github.com/HomenShum/NodeVideo/commit/7c2fcc7bcc6f8fb9935bfb32c4cc5e356dd1f65a) |
+| Model failures required boundary-level causal diagnosis and exact-case repair | [NodeVideo `d3ebe73`](https://github.com/HomenShum/NodeVideo/commit/d3ebe73bbfc8dac5b12458bb743a11118dc06efe) |
 
-Copy the process, not NodeVideo's domain. A new NodeKit application does not inherit video editing,
-pose tracking, OpenRouter, a three-tab mobile shell, or any NodeVideo visual style unless its own
-user job earns them.
+Copy the process, not a product's domain. A new NodeKit application does not inherit slide
+grammars, video editing, pose tracking, model providers, navigation count, or a visual style unless
+its own user job earns them.
 
 ## Source note
 
+- Ray Dalio, [*Principles*](https://www.principles.com/). The official site defines principles as reusable ways of dealing with reality and presents them as tools other people and organizations can inspect and apply.
 - Sahil Lavingia, [*The Minimalist Entrepreneur*](https://www.penguinrandomhouse.com/books/652764/the-minimalist-entrepreneur-by-sahil--lavingia/). The publisher describes the book's operating direction as starting and learning, building a community before solving its problem, running a tight ship, and protecting money and energy.
 - NodeKit's typed stage chain remains defined by [the Builder Journey inter-stage contract](JOURNEY_INTERSTAGE_CONTRACT.md).
 - NodeKit's authority and proof behavior remains normative in [Platform Decisions](DECISIONS.md), [Evolution Ledger](EVOLUTION_LEDGER.md), and the source schemas. This document guides choices; it does not override those contracts.
