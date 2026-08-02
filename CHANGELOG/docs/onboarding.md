@@ -4,6 +4,19 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-08-02 - Add the NodeBook brownfield field case
+
+Turn the NodeBook/MewAgent production-replacement session into a reusable in-place adoption lane:
+inspect the real product, inventory active behavior, freeze product/state/agent/interface/authority
+boundaries, migrate one slice, prove parity on the shipping route, and retire duplicates only after
+evidence. Add the detailed field case and compact launch card without creating a second doctrine,
+workflow engine, graph authority, or approval system. Repair the principles-count regression found
+on current `main` and bind the new packaged documentation to a public scenario test.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `docs/IDEA_TO_REALITY_PRINCIPLES.md`, `docs/NODEBOOK_FIELD_CASE.md`,
+`plugins/nodekit/skills/nodekit-launch/`, `package.json`, `test/public-api.test.mjs`
+
 ## 2026-08-02 - Reconcile NodeVideo's surviving product boundaries
 
 Make three previously implied field rules explicit without adding another framework or principle:

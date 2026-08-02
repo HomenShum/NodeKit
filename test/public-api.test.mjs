@@ -219,14 +219,14 @@ test("a fresh human or coding agent reaches the compact loop before the detailed
   assert.ok(detailedManual > quickStart, "progressive disclosure must put the compact loop first");
   assert.ok(complexityGate > detailedManual, "the detailed manual must lead to a removal gate");
   assert.ok(reusableRecords > complexityGate, "copyable records must remain available after the gate");
-  assert.match(principles.slice(0, quickStart), /do not turn all 15 principles into a ceremony/u);
+  assert.match(principles.slice(0, quickStart), /do not turn all 16 principles into a ceremony/u);
   assert.match(principles, /build only the smallest behavior that can earn the next piece of/u);
 
   const numberedHeadings = [...principles.matchAll(/^## (\d+)\. /gmu)].map((match) => Number(match[1]));
-  assert.deepEqual(numberedHeadings, Array.from({ length: 15 }, (_, index) => index + 1));
+  assert.deepEqual(numberedHeadings, Array.from({ length: 16 }, (_, index) => index + 1));
   for (const number of numberedHeadings) {
     const start = principles.indexOf(`## ${number}. `);
-    const end = number < 15
+    const end = number < 16
       ? principles.indexOf(`## ${number + 1}. `, start)
       : complexityGate;
     const decisionContract = principles.slice(start, end);
@@ -234,6 +234,28 @@ test("a fresh human or coding agent reaches the compact loop before the detailed
       assert.match(decisionContract, new RegExp(marker.replaceAll("*", "\\*"), "u"), `principle ${number} must expose ${marker}`);
     }
   }
+});
+
+test("brownfield launch guidance preserves the working product before replacement", async () => {
+  const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  assert.ok(packageJson.files.includes("docs/NODEBOOK_FIELD_CASE.md"));
+
+  const principles = await readFile(new URL("../docs/IDEA_TO_REALITY_PRINCIPLES.md", import.meta.url), "utf8");
+  const fieldCase = await readFile(new URL("../docs/NODEBOOK_FIELD_CASE.md", import.meta.url), "utf8");
+  const launchSkill = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/SKILL.md", import.meta.url), "utf8");
+  const adoptionCard = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/references/existing-product-adoption.md", import.meta.url), "utf8");
+
+  assert.match(principles, /INSPECT -> INVENTORY -> BOUND -> MIGRATE IN PLACE -> PROVE PARITY -> RETIRE DUPLICATES/u);
+  assert.match(principles, /Existing behavior inventory/u);
+  assert.match(principles, /unmapped_active_capabilities/u);
+  assert.match(principles, /NODEBOOK_FIELD_CASE\.md/u);
+  assert.match(fieldCase, /checkpoint -> automatic execution -> receipt -> whole-run Undo/u);
+  assert.match(fieldCase, /Fresh Builder In-Place Wedge Proof/u);
+  assert.match(fieldCase, /has not yet been\s+run and is not claimed as proof/u);
+  assert.match(launchSkill, /existing-product adoption field card/u);
+  assert.match(launchSkill, /do not generate a replacement shell before parity/u);
+  assert.match(adoptionCard, /zero unapproved behavior loss/u);
+  assert.match(adoptionCard, /Caseflow canonical; graphs and UI maps are projections/u);
 });
 
 test("public package bins expose usable help without credentials or writes", () => {
