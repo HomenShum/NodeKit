@@ -306,6 +306,13 @@ component inventory does not prove meaningful utilization. A digest does not pro
 inspection. A regex does not prove unpredictability. When regression risk is material, temporarily
 restore the old defect and prove the new scenario test turns red before returning to the repair.
 
+For long-form-to-short-form work, treat compression as a conservation ledger rather than a summary
+prompt. Freeze canonical claim IDs and decision questions first; assign each retained claim to an
+explicit destination; require every claim to appear in rendered elements; and reconcile the final
+artifact against the original questions. Measure layout diversity from rendered geometry while
+allowing an explicitly named series to repeat on purpose. Validate each output in every renderer a
+user will receive, because browser-clean does not imply PowerPoint-clean.
+
 **Proof:** preserve raw inputs, artifacts, receipts, screenshots when visual, exact commands, and
 the observed counterfactual for knockout tests.
 
@@ -542,6 +549,7 @@ story afterward:
 | Deck-level repetition had to fail closed on measured geometry | [NodeSlide `3e5594d`](https://github.com/HomenShum/NodeSlide/commit/3e5594d) |
 | Dense source material needed an enforceable compression benchmark, not a generic summarize instruction | [NodeSlide `1c10be3`](https://github.com/HomenShum/NodeSlide/commit/1c10be3) |
 | A rendered visual claim could not be accepted merely because the artifact schema was valid | [NodeSlide `1ccb51b`](https://github.com/HomenShum/NodeSlide/commit/1ccb51b) |
+| A 72 -> 12 -> 4 transaction deck required canonical claims, decision-question reconciliation, exact counts, rendered-claim coverage, dual-render inspection, and a hash-bound production receipt | [NodeSlide `c39861a`](https://github.com/HomenShum/NodeSlide/commit/c39861a) |
 | One NodeAgent runtime and creator workspace beat parallel agent surfaces | [NodeVideo `48fa86d`](https://github.com/HomenShum/NodeVideo/commit/48fa86dc375a3347047c232b430a977dceb2fb92) |
 | Mobile became usable after configuration moved behind disclosure and recovery stayed contextual | [NodeVideo `7c2fcc7`](https://github.com/HomenShum/NodeVideo/commit/7c2fcc7bcc6f8fb9935bfb32c4cc5e356dd1f65a) |
 | Model failures required boundary-level causal diagnosis and exact-case repair | [NodeVideo `d3ebe73`](https://github.com/HomenShum/NodeVideo/commit/d3ebe73bbfc8dac5b12458bb743a11118dc06efe) |
