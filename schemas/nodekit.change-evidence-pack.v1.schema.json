@@ -54,6 +54,36 @@
       },
       "additionalProperties": false
     },
+    "regressionProof": {
+      "description": "A test written alongside a bug becomes its guardian: it pins the buggy behaviour and passes forever. The only evidence that a test constrains the fix is running it at baselineDigest and watching it fail. An entry whose baselineOutcome is anything but 'fail' is not a proof, and must say so in unprovenReason rather than being counted as one.",
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "required": ["testRef", "command", "baselineOutcome", "candidateOutcome"],
+        "properties": {
+          "testRef": { "$ref": "#/$defs/path" },
+          "command": { "type": "string", "minLength": 1 },
+          "baselineOutcome": {
+            "description": "Outcome at baselineDigest — the pre-fix commit. 'fail' is the only value that proves the test constrains this change. 'not-run' includes the case where the test could not execute against the old tree.",
+            "enum": ["fail", "pass", "error", "not-run"]
+          },
+          "candidateOutcome": { "enum": ["pass", "fail", "error"] },
+          "unprovenReason": { "type": "string", "minLength": 1 }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "baselineOutcome": { "const": "fail" }, "candidateOutcome": { "const": "pass" } },
+              "required": ["baselineOutcome", "candidateOutcome"]
+            },
+            "then": { "properties": { "unprovenReason": false } },
+            "else": { "required": ["unprovenReason"] }
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
     "evidencePackDigest": { "$ref": "#/$defs/hash" }
   },
   "additionalProperties": false,

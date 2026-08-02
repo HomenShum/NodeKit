@@ -284,3 +284,45 @@ test("promotion receipt keeps deferred review and pre-action gates blocked", () 
   assert.equal(receipt.ready, false);
   assert.deepEqual(receipt.blockers, ["DEFERRED_HUMAN_REVIEW"]);
 });
+
+// A regression test written alongside a bug pins the buggy behaviour and passes forever. The only
+// evidence a test constrains the fix is running it at the pre-fix commit and watching it fail, so
+// the schema refuses to let a red->green claim and an unproven one look the same.
+test("a regression proof must have been red at baseline, or say why it was not", async () => {
+  const { evidencePack } = createPr32GovernanceScenario();
+  const withProof = (entry) => ({ ...evidencePack, regressionProof: [entry] });
+  const base = { testRef: "test/phase-buckets.test.mjs", command: "node --test test/phase-buckets.test.mjs" };
+  const errorsFor = (entry) =>
+    validateSchema("nodekit.change-evidence-pack.v1.schema.json", withProof(entry), "evidence pack");
+
+  assert.deepEqual(
+    await errorsFor({ ...base, baselineOutcome: "fail", candidateOutcome: "pass" }),
+    [],
+    "red at baseline, green on the candidate, is the one shape that proves anything",
+  );
+
+  // The failure this exists to catch: a test that was already green before the fix.
+  assert.ok(
+    (await errorsFor({ ...base, baselineOutcome: "pass", candidateOutcome: "pass" })).length > 0,
+    "a test that passed on the old code proves nothing and must not be expressible as a proof",
+  );
+  assert.deepEqual(
+    await errorsFor({
+      ...base,
+      baselineOutcome: "not-run",
+      candidateOutcome: "pass",
+      unprovenReason: "the fixture did not exist at baseline; recorded as unproven",
+    }),
+    [],
+    "an honest unproven entry is allowed — it just has to admit it",
+  );
+  assert.ok(
+    (await errorsFor({
+      ...base,
+      baselineOutcome: "fail",
+      candidateOutcome: "pass",
+      unprovenReason: "hedging a real proof",
+    })).length > 0,
+    "a proven entry must not also carry an excuse",
+  );
+});

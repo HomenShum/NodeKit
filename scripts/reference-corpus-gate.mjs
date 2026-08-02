@@ -219,8 +219,26 @@ for (const { file, doc } of records) {
   }
 }
 
+// 6. A DESIGN CONTRACT IS REQUIREMENTS, NOT DECORATION. Each rule declares where it terminates
+//    in something checkable; `kind: none` is a legitimate answer for an advisory rule, but a
+//    contract made mostly of them is a set of paragraphs wearing citations. The schema enforces
+//    per-rule honesty (none must carry a reason); only the corpus can see the ratio.
+const UNCHECKED_RULE_RATIO_MAX = 0.3;
+const ruleTerminations = [...rulesById.values()].map((r) => r.boundToGate?.kind ?? "none");
+const uncheckedRules = ruleTerminations.filter((k) => k === "none").length;
+if (ruleTerminations.length > 0) {
+  const ratio = uncheckedRules / ruleTerminations.length;
+  if (ratio > UNCHECKED_RULE_RATIO_MAX) {
+    violations.push(
+      `${uncheckedRules}/${ruleTerminations.length} rule(s) terminate in nothing checkable ` +
+        `(${(ratio * 100).toFixed(0)}% > ${UNCHECKED_RULE_RATIO_MAX * 100}%); this is a decorated contract, not requirements`,
+    );
+  }
+}
+
 console.log(`${violations.length === 0 ? "PASS" : "FAIL"}  reference corpus`);
 console.log(`      ${records.length} record(s) read from ${corpusDir}; ${recordsValidated} validated against a declared schema`);
 console.log(`      ${factsRecorded} fact(s) recorded; ${citationsChecked} citation(s) checked; ${criterionScoresChecked} criterion score(s) checked`);
+console.log(`      ${ruleTerminations.length} rule(s) checked for termination; ${uncheckedRules} terminate in nothing checkable`);
 for (const v of violations) console.log(`      ${v}`);
 process.exit(violations.length === 0 ? 0 : 1);

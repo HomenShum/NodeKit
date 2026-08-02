@@ -21,7 +21,8 @@
     "reVerifyAfterDays",
     "reVerifyReason",
     "evidenceTier",
-    "tierLadder"
+    "tierLadder",
+    "boundToGate"
   ],
   "properties": {
     "schemaVersion": { "const": "nodekit.design-rule/v1" },
@@ -44,13 +45,33 @@
     },
     "counterexampleNote": { "$ref": "#/$defs/text" },
     "boundToGate": {
+      "description": "Where the rule terminates in something a machine can check. A rule that stops at a mechanism hypothesis is a paragraph nobody can run; kind names the artifact that makes it executable. kind:none is allowed, but it must say why, and the corpus gate fails a contract whose rules are mostly none.",
       "type": "object",
-      "required": ["gate", "relationship"],
+      "required": ["kind"],
       "properties": {
+        "kind": {
+          "description": "schema-field: a field the producer must populate. renderer-assertion: a check the renderer enforces at draw time. test: a test that fails when the rule is violated. none: the rule is advisory and nothing checks it.",
+          "enum": ["schema-field", "renderer-assertion", "test", "none"]
+        },
+        "ref": {
+          "description": "The artifact the rule terminates in, precise enough to open: app/models.py:ResponseMeta.buckets_are_exclusive, src/render.mjs:assertNoPieWhenOverlapping, test/phase-buckets.test.mjs. Required unless kind is none.",
+          "$ref": "#/$defs/text"
+        },
+        "reason": {
+          "description": "Why this rule terminates in nothing checkable. Required when kind is none.",
+          "$ref": "#/$defs/text"
+        },
         "gate": { "$ref": "#/$defs/text" },
         "relationship": { "$ref": "#/$defs/text" },
         "schemaPath": { "$ref": "#/$defs/text" }
       },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "none" } }, "required": ["kind"] },
+          "then": { "required": ["reason"] },
+          "else": { "required": ["ref"] }
+        }
+      ],
       "additionalProperties": false
     },
     "problemTags": {

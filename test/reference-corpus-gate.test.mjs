@@ -13,7 +13,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -171,4 +171,29 @@ test("the schema refuses an override that does not say what it revised the score
     (await validateSchema("nodekit.score-receipt.v1.schema.json", uncited, "receipt")).length > 0,
     "a criterion with no citations is a score with no reference behind it",
   );
+});
+
+// check 6 — a rule that terminates in nothing checkable. Per-rule this is legal (an advisory rule
+// says so and gives a reason); it is the RATIO the corpus rejects, and only the corpus can see it.
+// Built by copying the shipped corpus so citations still resolve: the ratio must be the sole
+// violation, otherwise this test would pass on an unrelated failure.
+test("a corpus whose rules mostly terminate in nothing is decoration, not requirements", () => {
+  const decorated = mkdtempSync(path.join(tmpdir(), "decorated-corpus-"));
+  for (const entry of readdirSync(path.join(platformRoot, shippedCorpus))) {
+    if (!entry.endsWith(".json")) continue;
+    const doc = loadJson(path.join(shippedCorpus, entry));
+    if (doc.schemaVersion === "nodekit.design-rule/v1") {
+      doc.boundToGate = { kind: "none", reason: "deliberately unbound, to prove the ratio gate bites" };
+    }
+    writeFileSync(path.join(decorated, entry), JSON.stringify(doc, null, 2));
+  }
+
+  const { status, out } = runGate(decorated);
+  assert.equal(status, 1, `the ratio gate did not bite:\n${out}`);
+  assert.match(out, /terminate in nothing checkable .*decorated contract, not requirements/);
+
+  // The shipped corpus is the other half of the check: the gate must distinguish, not just reject.
+  const shipped = runGate(shippedCorpus);
+  assert.equal(shipped.status, 0, shipped.out);
+  assert.match(shipped.out, /rule\(s\) checked for termination; 0 terminate in nothing checkable/);
 });
