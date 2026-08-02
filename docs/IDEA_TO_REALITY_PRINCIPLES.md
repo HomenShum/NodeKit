@@ -27,8 +27,9 @@ reading and build the smallest proof.
 2. Observe how they do it now, including workarounds and failure costs.
 3. Freeze the smallest useful outcome and everything that is not part of it.
 4. Build one complete path from real input to an inspectable artifact.
-5. Make the artifact primary; reveal agent machinery only when it helps the next decision.
-6. Let agents perform reversible work automatically through the same typed operations people use.
+5. Make the artifact primary; keep proof and debug machinery in an explicit inspection surface.
+6. Let agents orchestrate reversible work through shared typed operations; let deterministic or
+   specialist tools execute the work they own.
 7. Require explicit human authority at consequence boundaries.
 8. Test the real journey across failure, recovery, concurrency, mobile, and sustained use.
 9. Diagnose failures at their first bad boundary and rerun the exact failed case.
@@ -164,6 +165,10 @@ Do not create a separate "current step" area if status and progress belong natur
 conversation. Keep chat history visible. Show project files when they explain or recover the work,
 not as a permanent competing workspace.
 
+Keep the primary product workflow separate from the proof and debugging workflow. Put raw traces,
+provider diagnostics, detailed settings, and receipts in an explicit inspector reached from the
+artifact; do not make users operate the inspector to finish the primary job.
+
 **Proof:** rendered artifact, exported artifact, receipt, and reopened artifact bind the same ID,
 version, content hash, and content.
 
@@ -180,7 +185,9 @@ same versioned artifact.
 
 **Action:** represent edits as bounded proposals with base version, exact operation, affected
 object, predicted result, evidence, and recovery. Reject stale proposals. Keep undo and rollback
-real.
+real. The agent owns selection, sequencing, and recovery; a deterministic or specialist tool owns
+execution whenever truth, precision, rendering, compilation, or domain safety depends on it. Do
+not ask the model to imitate a tool the system can call and verify.
 
 **Proof:** the same scenario succeeds through human interaction and agent invocation, produces the
 same canonical state transition, and survives reload.
@@ -232,7 +239,8 @@ benefit is merely architectural neatness or future possibility, defer it.
 
 - one owner for canonical state;
 - one core service with several transports, never separate logic per transport;
-- reuse existing packages when they cover the measured job;
+- integrate a validated package, service, or product primitive when it covers the measured job;
+- rebuild only when evidence identifies a material gap, control boundary, or measurable advantage;
 - add a platform abstraction only after repeated consumers expose the same seam;
 - delete or demote surfaces that users do not open.
 
@@ -256,6 +264,10 @@ interaction order, and recovery state. Convert them into a rule with `appliesWhe
 
 Use Mobbin and similar libraries to learn hierarchy and interaction patterns. Keep the generated
 application's own visual language and trust rules.
+
+Acquire patterns, not pixels. Treat a validated incumbent as a candidate integration or reference
+before rebuilding its primitive; preserve NodeKit ownership only where the product needs a distinct
+contract, trust boundary, or measured advantage.
 
 **Proof:** before/after evidence shows that the borrowed rule improved the named task without
 copying brand assets or importing irrelevant flows.

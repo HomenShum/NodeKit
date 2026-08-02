@@ -200,6 +200,14 @@ test("the bundled launch skill routes coding agents through the compact principl
   assert.match(launchSkill, /\.\.\/\.\.\/\.\.\/\.\.\/docs\/IDEA_TO_REALITY_PRINCIPLES\.md/u);
 });
 
+test("the field card preserves the NodeVideo execution and anti-complexity boundaries", async () => {
+  const principles = await readFile(new URL("../docs/IDEA_TO_REALITY_PRINCIPLES.md", import.meta.url), "utf8");
+  assert.match(principles, /proof and debugging workflow/u);
+  assert.match(principles, /deterministic or specialist tool owns\s+execution/u);
+  assert.match(principles, /Acquire patterns, not pixels/u);
+  assert.match(principles, /rebuild only when evidence identifies/u);
+});
+
 test("a fresh human or coding agent reaches the compact loop before the detailed manual", async () => {
   const principles = await readFile(new URL("../docs/IDEA_TO_REALITY_PRINCIPLES.md", import.meta.url), "utf8");
   const quickStart = principles.indexOf("## The whole method in 90 seconds");
