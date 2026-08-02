@@ -4,6 +4,16 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-08-02 - Reconcile NodeVideo's surviving product boundaries
+
+Make three previously implied field rules explicit without adding another framework or principle:
+agents orchestrate deterministic and specialist executors, the primary product workflow stays
+separate from proof/debug inspection, and validated primitives are integrated before they are
+rebuilt. Scenario-bind the wording so later simplification cannot erase the decision boundaries.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `docs/IDEA_TO_REALITY_PRINCIPLES.md`, `test/public-api.test.mjs`
+
 ## 2026-08-02 - Route launch agents through the field card
 
 Require the bundled `nodekit-launch` skill to read the 90-second idea-to-reality field card before
