@@ -71,7 +71,24 @@ you the trip. [ScreensDesign](https://screensdesign.com) covers onboarding and p
 revenue signals attached. Use these to answer "what states does a real flow of this kind contain,
 and which am I skipping?"
 
-**CRAFT references — how a launch film is built.**
+**CRAFT references — how a launch film is built. Start with YouTube.**
+The judge reads a YouTube URL directly — verified: Gemini watched one and described its opening
+seconds and runtime from the URL alone, no download. So a reference is CITED, never copied, which
+dissolves the licensing question entirely and makes the locator a URL plus a timestamp:
+
+```bash
+node judge-video.mjs out/demo.mp4 --reference=<youtube-url> --reference=<youtube-url>
+```
+
+The verdict gains a `reference` block — singleMoment, statePacing, motionPurpose, whatToSteal, and
+whatNotToSteal — with a timestamp required for every claim about the reference. Every product launch
+film worth studying is already on YouTube and is the primary source; the curated libraries below are
+a discovery layer over it, useful for FINDING candidates rather than for watching them.
+
+Cost is real: one 18-minute reference measured 102k prompt tokens. Prefer a 30-90 second cut, and
+pass at most two or three references.
+
+
 [FlowJam](https://www.flowjam.com/library) is hand-curated SaaS and product-launch videos;
 [Tella's library](https://www.tella.com/examples/demo-video) and
 [Vidico's breakdowns](https://vidico.com/news/best-product-demo-video-examples/) publish examples

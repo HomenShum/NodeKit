@@ -21,3 +21,4 @@ proof/ease/downloaded*/
 
 # local tool state
 .serena/
+.nodeagent/
