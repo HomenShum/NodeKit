@@ -24,6 +24,28 @@ deferred:
     deferredAt: "2026-08-02"
     status: open
 
+  - id: replay-packet-producers
+    what: >-
+      nodekit.replay-packet/v1 and its ladder evaluator exist, but nothing produces a packet yet.
+      The NodeKit thread also specified `nodekit reproduce --run <id> --fresh-worktree`,
+      PROMPT_BOOK.md, RECREATE.md, and a typed PromptImprovementRecord; none are built.
+    why: >-
+      The contract is the part that stops a false claim, and it is worth having before a producer
+      exists. Writing producers first would have meant deciding the honesty rules while also
+      deciding the plumbing, and the rules are the half that was actually asked for.
+    deferredAt: "2026-08-02"
+    status: open
+
+  - id: preflight-and-integration-records-unwired
+    what: >-
+      src/lib/preflight.mjs and src/lib/integration-record.mjs are tested libraries with no caller.
+      Nothing runs preflight before a session, and no integrations/*.yaml records exist.
+    why: >-
+      Wiring preflight to a session start needs a decision about where a session begins for this
+      repo, which is a question for the owner rather than an implementation detail to guess at.
+    deferredAt: "2026-08-02"
+    status: open
+
   - id: studio-working-tree-edit
     what: >-
       src/studio.mjs carries an uncommitted local modification that predates this session and was

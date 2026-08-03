@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 113,
-    "modules": 76,
-    "tests": 83
+    "modules": 77,
+    "tests": 84
   },
   "architecture": [
     {
@@ -290,6 +290,7 @@
     "harness-knowledge.mjs",
     "human-study-capture.mjs",
     "immutable-package-snapshot.mjs",
+    "integration-record.mjs",
     "journey-chain-gate.mjs",
     "journey-contract-verify.mjs",
     "knowledge-comparison.mjs",
@@ -368,6 +369,7 @@
     "harness-gym.test.mjs",
     "human-study-capture.test.mjs",
     "immutable-package-snapshot.test.mjs",
+    "integration-record.test.mjs",
     "journey-chain-gate.test.mjs",
     "journey-contract-verify.test.mjs",
     "knowledge-collectors.test.mjs",
