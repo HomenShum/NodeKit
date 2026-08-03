@@ -208,6 +208,35 @@ function completenessFaults(stage, completeness, doc) {
   // only on its own passing tests is unfalsified by its author, which is a weaker thing than
   // verified, and the two must not be spelled the same. Declaring the gap in notRun or refused
   // is a legitimate answer; leaving it unsaid is the one that is not.
+  // An observation window is required, and required to be a closed interval — but "from" and "to"
+  // are two independent date strings, and no schema can say the first must precede the second. A
+  // window whose end is not after its start measured no time and is still shaped exactly like a
+  // measurement, which is the same silence as an absent window wearing a timestamp.
+  const windows = [];
+  const collectWindows = (node, path) => {
+    if (!node || typeof node !== "object") return;
+    if (isNonEmptyString(node.from) && isNonEmptyString(node.to) && /window/i.test(path)) {
+      windows.push({ path, from: node.from, to: node.to });
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (value && typeof value === "object") collectWindows(value, `${path}/${key}`);
+    }
+  };
+  collectWindows(doc?.content, "content");
+  for (const w of windows) {
+    const from = Date.parse(w.from);
+    const to = Date.parse(w.to);
+    if (!Number.isFinite(from) || !Number.isFinite(to)) {
+      faults.push({ stage, clause: "window-unparseable", detail: `${w.path} is not a parseable interval (${w.from} .. ${w.to})` });
+    } else if (to <= from) {
+      faults.push({
+        stage,
+        clause: "window-measured-no-time",
+        detail: `${w.path} ends at or before it starts (${w.from} .. ${w.to}); a window that spans no time is shaped like a measurement and is not one`,
+      });
+    }
+  }
+
   const evidence = Array.isArray(doc?.content?.evidence) ? doc.content.evidence : [];
   if (claimed.length > 0 && evidence.length > 0) {
     const adversarial = evidence.some((entry) => entry?.kind === "adversarial-review");

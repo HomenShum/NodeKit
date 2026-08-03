@@ -564,3 +564,39 @@ test("a pack standing only on its own passing tests is unfalsified, not verified
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+// An observation window is required and required to be a closed interval, but `from` and `to` are
+// two independent date strings and no schema can say the first must precede the second. A window
+// that spans no time is shaped exactly like a measurement and is not one.
+test("a window that ends at or before it starts measured no time", async () => {
+  const dir = await scratchChain();
+  try {
+    const pack = await readArtifact(dir, "learn.observation-pack.json");
+    // The chain fixtures are minimal and carry no window, so supply one — otherwise this clause
+    // would fire on nothing and the test would pass by measuring nothing, which is the exact
+    // failure the surrounding gate exists to catch.
+    const w = { from: "2026-07-21T00:00:00.000Z", to: "2026-07-28T00:00:00.000Z" };
+    pack.content = { ...pack.content, observationWindow: w };
+
+    for (const [name, bad] of [
+      ["inverted", { from: w.to, to: w.from }],
+      ["zero-length", { from: w.from, to: w.from }],
+    ]) {
+      pack.content.observationWindow = bad;
+      await writeArtifact(dir, "learn.observation-pack.json", pack);
+      const verdict = await verifyJourneyChain({ chainDir: dir });
+      assert.ok(
+        verdict.failures.some((f) => f.code === "completeness-window-measured-no-time"),
+        `${name} window was accepted: ${JSON.stringify(verdict.failures.map((f) => f.code))}`,
+      );
+    }
+
+    // And a real interval is not flagged.
+    pack.content.observationWindow = w;
+    await writeArtifact(dir, "learn.observation-pack.json", pack);
+    const ok = await verifyJourneyChain({ chainDir: dir });
+    assert.ok(!ok.failures.some((f) => /window/.test(f.code)), JSON.stringify(ok.failures));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
