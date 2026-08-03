@@ -140,13 +140,24 @@ function parseArgs(argv) {
       continue;
     }
     const [rawName, inlineValue] = token.slice(2).split("=", 2);
+    let value;
     if (inlineValue !== undefined) {
-      options[rawName] = inlineValue;
+      value = inlineValue;
     } else if (tokens[index + 1] && !tokens[index + 1].startsWith("--")) {
-      options[rawName] = tokens[index + 1];
+      value = tokens[index + 1];
       index += 1;
     } else {
-      options[rawName] = true;
+      value = true;
+    }
+    // A repeated flag COLLECTS rather than overwriting. Last-wins silently discarded every earlier
+    // value, so `--test a --test b --test c` ran only c and reported honestly on a quarter of what
+    // was asked — a partial result wearing the shape of a complete one. Verbs that expect a single
+    // string now see an array and refuse on their own type check, which fails closed instead of
+    // quietly acting on one of several values the caller supplied.
+    if (Object.hasOwn(options, rawName)) {
+      options[rawName] = Array.isArray(options[rawName]) ? [...options[rawName], value] : [options[rawName], value];
+    } else {
+      options[rawName] = value;
     }
   }
 
@@ -182,6 +193,7 @@ Usage:
   nodekit journey verify [--repo-root <path>] [--json]
   nodekit journey build-evidence --contract <opportunity-contract.json>
       [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
+  nodekit regression prove --baseline <commit> --test <file> [--test <file>...] [--name <pattern>] [--repo-root <path>] [--json]
   nodekit skills sync [--repo-root <path>] [--json]
   nodekit sessions check --contract <session-contract.json> [--repo-root <path>] [--json]
   nodekit capability declare --out <capability-contract.json> --capability <slug> [--json]
@@ -2315,6 +2327,38 @@ async function main() {
   }
   if (first === "journey" && second === "build-evidence") {
     await runJourneyBuildEvidence(parsed);
+    return;
+  }
+  if (first === "regression" && second === "prove") {
+    const { RegressionProofRefusal, formatRegressionProof, proveRegression } = await import("./lib/regression-proof.mjs");
+    const root = path.resolve(parsed.options["repo-root"] ?? ".");
+    const baseline = parsed.options.baseline;
+    const raw = parsed.options.test;
+    const testFiles = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : [];
+    if (typeof baseline !== "string" || testFiles.length === 0) {
+      console.error("usage: nodekit regression prove --baseline <commit> --test <file> [--test <file>...] [--repo-root <path>]");
+      process.exitCode = 2;
+      return;
+    }
+    try {
+      const verdict = proveRegression(root, {
+        baseline,
+        testFiles,
+        namePattern: typeof parsed.options.name === "string" ? parsed.options.name : undefined,
+        worktreeDir: path.join(root, "..", `.nodekit-regression-${process.pid}`),
+      });
+      printStructured(verdict, parsed, formatRegressionProof);
+      // Only a full proof exits clean. An unproven test and a run that never happened are both
+      // "this has not been demonstrated", and exiting 0 on either is how the check becomes a ritual.
+      if (verdict.status !== "proven") process.exitCode = 1;
+    } catch (error) {
+      if (error instanceof RegressionProofRefusal) {
+        console.error(`REGRESSION PROOF REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+        process.exitCode = 1;
+        return;
+      }
+      throw error;
+    }
     return;
   }
   if (first === "sessions" && second === "check") {
