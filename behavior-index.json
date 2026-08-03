@@ -156,7 +156,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 575
+          "line": 578
         }
       ],
       "supporting": [
@@ -1083,7 +1083,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 576
+            "line": 579
           }
         ],
         "namedSourceFiles": [
@@ -1125,7 +1125,7 @@
     {
       "behaviorId": "journey.explain.produce-story",
       "file": "src/lib/story-pack-producer.mjs",
-      "line": 328
+      "line": 394
     },
     {
       "behaviorId": "inv:canonical-promotion-requires-verified-approval",

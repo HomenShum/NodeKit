@@ -23,9 +23,17 @@ import { validateSchema } from "./schema-validation.mjs";
 //   2. DOES THE SENTENCE IMPLY MORE THAN THE DATA IS. This is the one worth having. "Your Square
 //      export shows revenue up 12%" makes four promises about the DATA — that these bytes are the
 //      reader's, that a live account is attached, that it reflects now, that the numbers happened.
-//      The claim's contentBinding says where the data actually came from. A statement implying
-//      user-owned data over a synthetic fixture is the defect, and it is invisible to review because
-//      the sentence is beautiful and the binding is three files away.
+//      A statement implying user-owned data over a synthetic fixture is the defect, and it is
+//      invisible to review because the sentence is beautiful and the binding is three files away.
+//
+//      Two halves, and only together are they worth anything. The phrase scan finds the promise, and
+//      it has limited recall by construction: a paraphrase using no listed phrase scans clean, which
+//      completeness.notRun states outright rather than leaving a reader to assume coverage. The
+//      origin finds the truth, and it is DERIVED from the declared sources — never read back from
+//      the claim's own contentBinding.origin. That second half is what makes the first a check
+//      instead of a formality: if a caller could write "authority-issued" over a fixture, the one
+//      field everything turns on would be the one field nobody verifies, and a claim could pass by
+//      asserting its own innocence. A claim is only as real as the weakest source it cites.
 //
 // What this producer CANNOT do, stated so completeness.notRun can say it: it cannot tell whether a
 // statement is true, whether the narrative is any good, or whether the audience is the right one. It
@@ -44,6 +52,51 @@ const SCANNER_VERSION = "1.0.0";
 
 /** Origins where the bytes are not the reader's real, current data. */
 const UNREAL_ORIGINS = new Set(["fixture", "synthetic", "model_generated", "unknown"]);
+
+/**
+ * How real each origin is. A claim drawing on several sources is only as real as its weakest one:
+ * mixing an authority-issued export with a synthetic row does not produce authority-issued data, and
+ * a chart that blends them is not partly trustworthy.
+ */
+const ORIGIN_STRENGTH = Object.freeze({
+  "authority-issued": 4,
+  fixture: 3,
+  synthetic: 2,
+  model_generated: 1,
+  unknown: 0,
+});
+
+/**
+ * The origin a claim's data ACTUALLY has, derived from the sources it cites rather than taken from
+ * the caller's own contentBinding.origin.
+ *
+ * This is the difference between a check and a formality. `origin` is a string the caller writes; if
+ * the producer reads it back and believes it, then writing "authority-issued" over a fixture
+ * disables every downstream honesty rule at zero cost, and the one field the whole check turns on is
+ * the one field nobody verifies. The schema names weakest-origin comparison a verifier obligation.
+ * This performs it.
+ */
+function deriveOrigin(sourceRefs, sourceOrigins, at, refusals) {
+  if (!Array.isArray(sourceRefs) || sourceRefs.length === 0) {
+    // No sources cited is not "authority-issued by default". It is the absence of provenance, and
+    // it must land on the weakest rung rather than the strongest.
+    return "unknown";
+  }
+  const unresolved = sourceRefs.filter((ref) => !sourceOrigins.has(ref));
+  if (unresolved.length > 0) {
+    refusals.push(
+      `${at} cites ${unresolved.join(", ")}, which is not a declared source — `
+        + "a provenance reference that resolves to nothing is the same defect as an evidence reference that does",
+    );
+    return "unknown";
+  }
+  let weakest = "authority-issued";
+  for (const ref of sourceRefs) {
+    const origin = sourceOrigins.get(ref) ?? "unknown";
+    if ((ORIGIN_STRENGTH[origin] ?? 0) < (ORIGIN_STRENGTH[weakest] ?? 0)) weakest = origin;
+  }
+  return weakest;
+}
 
 /**
  * The phrase lexicon. Each entry maps a surface phrase to what it promises about the DATA — the
@@ -211,7 +264,7 @@ function packRefusals(pack) {
  * Decide one proposed claim's fate. Returns either {claim} or {withheld}. Nothing is dropped: a
  * claim that cannot be bound becomes a recorded omission with a reason a reader can argue with.
  */
-function adjudicate(proposed, index, { evidence, claims }, surfaces, disclosures, demoMode, scannedAt) {
+function adjudicate(proposed, index, { evidence, claims }, surfaces, sourceOrigins, disclosures, demoMode, scannedAt) {
   const at = `claims[${index}]`;
   const claimId = isNonEmptyString(proposed?.claimId) ? proposed.claimId : `sc-${index + 1}`;
   const statement = proposed?.statement;
@@ -260,8 +313,18 @@ function adjudicate(proposed, index, { evidence, claims }, surfaces, disclosures
   }
 
   // Check 2: does the sentence promise more than the data is?
-  const contentBinding = proposed.contentBinding ?? { origin: "unknown", sourceRefs: [] };
-  const origin = contentBinding.origin ?? "unknown";
+  const proposedBinding = proposed.contentBinding ?? { origin: "unknown", sourceRefs: [] };
+  const sourceRefs = Array.isArray(proposedBinding.sourceRefs) ? proposedBinding.sourceRefs : [];
+  const originRefusals = [];
+  const origin = deriveOrigin(sourceRefs, sourceOrigins, `${at} ("${statement}")`, originRefusals);
+  if (originRefusals.length > 0) throw new StoryPackRefusal(originRefusals);
+  // The caller's own claim about origin is overwritten by the derived one, and the disagreement is
+  // recorded on the claim rather than silently resolved — somebody wrote that word for a reason.
+  const contentBinding = { ...proposedBinding, sourceRefs, origin };
+  const statedOrigin = proposedBinding.origin;
+  const originDisagreement = isNonEmptyString(statedOrigin) && statedOrigin !== origin
+    ? `the claim stated origin ${statedOrigin}; its sources are ${origin}, and the weaker of the two is what the reader gets`
+    : null;
   const dataIsUnreal = UNREAL_ORIGINS.has(origin);
   const promisesReality = implications.some((entry) => entry === "user-owned" || entry === "connected" || entry === "factual");
   const onDemoSurface = demoMode.engaged === true
@@ -314,9 +377,12 @@ function adjudicate(proposed, index, { evidence, claims }, surfaces, disclosures
       ...(binding.strengthDelta ? { strengthDelta: binding.strengthDelta } : {}),
     },
     contentBinding,
-    boundary: isNonEmptyString(proposed.boundary)
-      ? proposed.boundary
-      : "What this claim does not establish was not assessed by the producer; it reads bindings, not meaning.",
+    boundary: [
+      isNonEmptyString(proposed.boundary)
+        ? proposed.boundary
+        : "What this claim does not establish was not assessed by the producer; it reads bindings, not meaning.",
+      originDisagreement,
+    ].filter(Boolean).join(" "),
   };
   if (disclosureRefs.length > 0) claim.disclosureRefs = disclosureRefs;
   return { claim };
@@ -431,10 +497,16 @@ export async function produceStoryPack({
   }
   if (artifactRefusals.length > 0) throw new StoryPackRefusal(artifactRefusals);
 
+  // Provenance as declared by the sources themselves, which is the authority a claim's own
+  // contentBinding.origin does not have.
+  const sourceOrigins = new Map(
+    digestedSources.map((entry) => [entry?.sourceId, entry?.origin ?? "unknown"]).filter(([id]) => isNonEmptyString(id)),
+  );
+
   const kept = [];
   const withheld = [];
   for (const [i, proposed] of claims.entries()) {
-    const verdict = adjudicate(proposed, i, index, surfaceIds, disclosures, demoMode, producedAt);
+    const verdict = adjudicate(proposed, i, index, surfaceIds, sourceOrigins, disclosures, demoMode, producedAt);
     if (verdict.claim) kept.push(verdict.claim);
     else withheld.push(verdict.withheld);
   }
@@ -506,6 +578,7 @@ export async function produceStoryPack({
       claimed: kept.map((entry) => entry.claimId),
       notRun: [
         "Whether any statement is TRUE was not assessed. This producer checks that a claim's references resolve and that its phrasing does not promise more than its data origin supports; both are lookups, and neither is truth.",
+        "The phrase scan has LIMITED RECALL and this is its stated boundary, not a caveat. It matches a fixed phrase list, so a paraphrase that implies user-owned, connected, current or factual data without using a listed phrase is not detected by it — \"Revenue pulled moments ago from the owner's linked account\" scans clean. Claims that slip the scanner are still governed by the derived origin, which comes from the declared sources rather than from the claim's own wording; a scan with no matches is not evidence that a statement is modest.",
         "Whether the narrative is persuasive, well-ordered, or appropriate for the named reader was not assessed.",
         "Whether the audience record names the right reader was not assessed — it was supplied, not derived.",
         ...(pack?.completeness?.notRun ?? []).map((entry) => `inherited from the build stage: ${entry}`),

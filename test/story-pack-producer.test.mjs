@@ -95,14 +95,27 @@ async function writeInputs({ pack = PACK, contract = CONTRACT } = {}) {
   const contractPath = path.join(dir, "contract.json");
   await writeFile(packPath, JSON.stringify(pack), "utf8");
   await writeFile(contractPath, JSON.stringify(contract), "utf8");
-  return { packPath, contractPath };
+  // Sources name files, and the producer digests them, so the fixture has to actually exist.
+  await writeFile(path.join(dir, "fixture-export.csv"), "date,amount\n2026-07-01,120\n", "utf8");
+  return { packPath, contractPath, repoRoot: dir };
 }
+
+/** The fixture the demo runs on, declared honestly as a fixture. */
+const SOURCES = [
+  {
+    sourceId: "src-fixture-export",
+    origin: "fixture",
+    describes: "A sample point-of-sale export from a salon that does not exist",
+    artifact: { path: "fixture-export.csv" },
+  },
+];
 
 const produce = async (over = {}) =>
   produceStoryPack({
     ...(await writeInputs()),
     audience: AUDIENCE,
     surfaces: SURFACES,
+    sources: SOURCES,
     narrative: NARRATIVE,
     now: "2026-08-03T00:00:00.000Z",
     ...over,
@@ -300,4 +313,108 @@ test("the scan records its own lexicon digest, so a later lexicon change is visi
   const { scan } = scanStatement("your data", "2026-08-03T00:00:00.000Z");
   assert.equal(scan.lexiconDigest, LEXICON_DIGEST);
   assert.match(scan.lexiconDigest, /^[0-9a-f]{64}$/);
+});
+
+// --- what an adversarial review found, kept as tests ------------------------------------------
+//
+// Codex refuted the first version of this producer on two counts. Both are recorded here as cases
+// rather than as a note, because a finding that lives only in a review comment is one nobody reruns.
+
+test("a claim cannot launder a fixture by declaring itself authority-issued", async () => {
+  // The attack: origin was a string the caller wrote and the producer read back. Writing
+  // "authority-issued" over a fixture disabled every honesty rule below it at zero cost — the one
+  // field the whole check turns on was the one field nobody verified.
+  const story = await produce({
+    claims: [
+      goodClaim(),
+      goodClaim({
+        claimId: "sc-your-revenue",
+        statement: "See your revenue from your Square export.",
+        contentBinding: { origin: "authority-issued", sourceRefs: ["src-fixture-export"] },
+      }),
+    ],
+  });
+
+  assert.equal(story.content.claims.length, 1);
+  const withheld = story.content.withheldClaims[0];
+  assert.equal(withheld.claimId, "sc-your-revenue");
+  assert.equal(withheld.withheldBecause, "cannot-be-disclosed-honestly");
+  // The declared source says fixture, and the source outranks the claim's opinion of itself.
+  assert.match(withheld.detail, /origin is fixture/);
+});
+
+test("the weakest cited source sets the origin; one synthetic row is not diluted by a real export", async () => {
+  const story = await produce({
+    sources: [
+      ...SOURCES,
+      {
+        sourceId: "src-invented-rows",
+        origin: "synthetic",
+        describes: "Rows generated to fill a sparse month",
+        artifact: { path: "fixture-export.csv" },
+      },
+    ],
+    claims: [
+      goodClaim(),
+      goodClaim({
+        claimId: "sc-your-revenue",
+        statement: "See your revenue from your Square export.",
+        contentBinding: { origin: "authority-issued", sourceRefs: ["src-fixture-export", "src-invented-rows"] },
+      }),
+    ],
+  });
+
+  assert.match(story.content.withheldClaims[0].detail, /origin is synthetic/);
+});
+
+test("a source reference that resolves to nothing is refused, exactly as an evidence reference is", async () => {
+  await assert.rejects(
+    produce({ claims: [goodClaim({ contentBinding: { origin: "fixture", sourceRefs: ["src-nowhere"] } })] }),
+    (error) => error instanceof StoryPackRefusal && /not a declared source/.test(error.message),
+  );
+});
+
+test("citing no source at all lands on unknown, not on authority-issued by default", async () => {
+  const story = await produce({
+    claims: [
+      goodClaim(),
+      goodClaim({
+        claimId: "sc-your-revenue",
+        statement: "See your revenue from your Square export.",
+        contentBinding: { origin: "authority-issued", sourceRefs: [] },
+      }),
+    ],
+  });
+
+  assert.match(story.content.withheldClaims[0].detail, /origin is unknown/);
+});
+
+test("a disagreement between the stated and derived origin is recorded on the claim, not silently resolved", async () => {
+  const story = await produce({
+    claims: [
+      goodClaim({ contentBinding: { origin: "authority-issued", sourceRefs: ["src-fixture-export"] } }),
+    ],
+  });
+
+  // This claim's wording promises nothing about whose data it is, so it survives — but somebody
+  // still wrote "authority-issued" over a fixture, and a reader deserves to see that.
+  assert.equal(story.content.claims[0].contentBinding.origin, "fixture");
+  assert.match(story.content.claims[0].boundary, /stated origin authority-issued/);
+});
+
+test("the phrase scanner has recall limits, and the pack says so rather than implying it caught everything", async () => {
+  // Codex's counterexample, verbatim. It promises user-owned, connected, current and factual data
+  // and contains no lexicon phrase, so the scanner does not fire. That is a real limit of a literal
+  // phrase list, and the fix is not to pretend otherwise — a semantic check is not available to a
+  // deterministic producer. What IS available: the derived origin above catches this claim anyway,
+  // and completeness.notRun states the recall limit in words.
+  const statement = "Revenue pulled moments ago from the salon owner's linked Square account appears in this chart.";
+  const { implications } = scanStatement(statement, "2026-08-03T00:00:00.000Z");
+  assert.deepEqual(implications, [], "if this ever fires, the lexicon grew and this case should be replaced with a harder one");
+
+  const story = await produce({ claims: [goodClaim()] });
+  assert.ok(
+    story.completeness.notRun.some((entry) => /phrase list/.test(entry) && /paraphrase/.test(entry)),
+    "the pack must state the scanner's recall limit; a check that implies more coverage than it has is worse than no check",
+  );
 });

@@ -180,7 +180,7 @@ Usage:
   nodekit journey build-evidence --contract <opportunity-contract.json>
       [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
   nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
-      --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--json]
+      --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
@@ -383,7 +383,7 @@ async function runJourneyStoryPack(parsed) {
   if (typeof pack !== "string" || typeof contract !== "string" || typeof story !== "string") {
     console.error(
       "usage: nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json> "
-        + "--story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--json]",
+        + "--story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]",
     );
     process.exitCode = 2;
     return;
@@ -410,6 +410,9 @@ async function runJourneyStoryPack(parsed) {
       claims: input.claims ?? [],
       narrative: input.narrative ?? [],
       demoMode: input.demoMode ?? { engaged: false, surfaceRefs: [] },
+      // Explicit so a regenerated pack is byte-comparable with the committed one. Without it the
+      // only difference is producedAt, and "it differs" then carries no information.
+      now: typeof parsed.options.now === "string" ? parsed.options.now : undefined,
     });
     printStructured({ storyPack, outPath }, parsed, (value) =>
       [formatStoryPack(value.storyPack), outPath ? `  written to ${outPath}` : "  not written (no --out)"].join("\n"),

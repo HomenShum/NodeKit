@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
 import { mkdtemp, open, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -141,4 +142,58 @@ test("a wedged holder still expires; the budget measures lack of progress, not p
   // It waited the budget rather than giving up on the first contended open — the failure that would
   // reintroduce the lost receipts this whole file exists to prevent.
   assert.ok(Date.now() - startedAt >= 9_000, `expected to wait the full budget, waited ${Date.now() - startedAt}ms`);
+});
+
+// Codex's objection to the progress-based budget, and it was right: resetting the stall deadline on
+// every change of holder makes the wait unbounded. `open(..., "wx")` has no fairness, so a writer
+// can lose every race while others cycle, resetting its budget forever. That trades a lost receipt
+// for a hang — a worse failure, and a much harder one to diagnose from a stuck agent.
+//
+// So there are two deadlines now and the wait ends at whichever comes first. This asserts the one
+// the stationary-holder test above cannot reach: the holder keeps changing, this writer never wins,
+// and it must still fail in bounded time rather than wait forever.
+test("a writer that loses every race still fails; a moving queue is not a licence to wait forever", async (t) => {
+  const root = await graphRoot(t);
+  const lockPath = path.join(root, ".nodeagent", "knowledge", "graph.json.mutation.lock");
+
+  // A ceiling short enough to assert against. A 120-second test is one nobody runs.
+  const previous = process.env.NODEKIT_GRAPH_LOCK_CEILING_MS;
+  process.env.NODEKIT_GRAPH_LOCK_CEILING_MS = "1500";
+  t.after(() => {
+    if (previous === undefined) delete process.env.NODEKIT_GRAPH_LOCK_CEILING_MS;
+    else process.env.NODEKIT_GRAPH_LOCK_CEILING_MS = previous;
+  });
+
+  // Held continuously, but rewritten with a fresh token every 50ms: from the waiter's side this is
+  // indistinguishable from a queue moving briskly, which is exactly the state that reset the budget.
+  const handle = await open(lockPath, "wx", 0o600);
+  let rotating = true;
+  const rotator = (async () => {
+    while (rotating) {
+      await handle.truncate(0);
+      await handle.write(`${JSON.stringify({ acquiredAt: new Date().toISOString(), pid: process.pid, token: randomBytes(8).toString("hex") })}\n`, 0, "utf8");
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  })();
+  t.after(async () => {
+    rotating = false;
+    await rotator.catch(() => {});
+    await handle.close().catch(() => {});
+    await rm(lockPath, { force: true });
+  });
+
+  const startedAt = Date.now();
+  await assert.rejects(
+    recordKnowledgeAction(root, {
+      type: "INSPECT_ARTIFACT",
+      receiptId: "knowledge_action_starved",
+      runId: "run:starved",
+      caseId: "case:starved",
+      actorId: "agent:starved",
+    }),
+    (error) => /lost every race/.test(error.message),
+  );
+  const waited = Date.now() - startedAt;
+  // Bounded: it gave up on the ceiling, not on the stall budget, and not never.
+  assert.ok(waited >= 1_400 && waited < 9_000, `expected to fail on the ceiling, waited ${waited}ms`);
 });

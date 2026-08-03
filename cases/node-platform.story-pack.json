@@ -2,7 +2,7 @@
   "schemaVersion": "nodekit.story-pack/v1",
   "caseId": "node-platform",
   "stage": "explain",
-  "producedAt": "2026-08-03T11:47:25.000Z",
+  "producedAt": "2026-08-03T00:00:00.000Z",
   "inputs": [
     {
       "schemaVersion": "nodekit.build-evidence-pack/v1",
@@ -80,7 +80,7 @@
           "scanner": "src/lib/story-pack-producer.mjs",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "a62c0c023f3698f1bdc8044a39df0995e85078683783a37334bebfdbc815b0b4",
-          "scannedAt": "2026-08-03T11:47:25.000Z",
+          "scannedAt": "2026-08-03T00:00:00.000Z",
           "matches": []
         },
         "status": "bound",
@@ -113,7 +113,7 @@
           "scanner": "src/lib/story-pack-producer.mjs",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "a62c0c023f3698f1bdc8044a39df0995e85078683783a37334bebfdbc815b0b4",
-          "scannedAt": "2026-08-03T11:47:25.000Z",
+          "scannedAt": "2026-08-03T00:00:00.000Z",
           "matches": []
         },
         "status": "bound",
@@ -145,7 +145,7 @@
           "scanner": "src/lib/story-pack-producer.mjs",
           "scannerVersion": "1.0.0",
           "lexiconDigest": "a62c0c023f3698f1bdc8044a39df0995e85078683783a37334bebfdbc815b0b4",
-          "scannedAt": "2026-08-03T11:47:25.000Z",
+          "scannedAt": "2026-08-03T00:00:00.000Z",
           "matches": []
         },
         "status": "bound",
@@ -209,6 +209,7 @@
     ],
     "notRun": [
       "Whether any statement is TRUE was not assessed. This producer checks that a claim's references resolve and that its phrasing does not promise more than its data origin supports; both are lookups, and neither is truth.",
+      "The phrase scan has LIMITED RECALL and this is its stated boundary, not a caveat. It matches a fixed phrase list, so a paraphrase that implies user-owned, connected, current or factual data without using a listed phrase is not detected by it — \"Revenue pulled moments ago from the owner's linked account\" scans clean. Claims that slip the scanner are still governed by the derived origin, which comes from the declared sources rather than from the claim's own wording; a scan with no matches is not evidence that a statement is modest.",
       "Whether the narrative is persuasive, well-ordered, or appropriate for the named reader was not assessed.",
       "Whether the audience record names the right reader was not assessed — it was supplied, not derived.",
       "inherited from the build stage: No semantic assessment of the built system against any contract decision was performed by this producer; every pointer without caller-supplied evidence is recorded as defaulted-with-disclosure, not honoured.",

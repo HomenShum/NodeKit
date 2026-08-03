@@ -27,6 +27,20 @@ const KNOWLEDGE_ACTION_STATUSES = new Set(["completed", "failed", "blocked", "ca
 const GRAPH_LOCK_STALE_MS = 120_000;
 const GRAPH_LOCK_WAIT_MS = 10_000;
 const GRAPH_LOCK_RETRY_MS = 20;
+// Absolute ceiling on acquisition, regardless of how much progress the queue makes. Generous enough
+// that a real queue never reaches it — 32 contended writers finish in about 3.5s measured — and
+// finite so a writer that loses every race fails instead of hanging.
+const GRAPH_LOCK_CEILING_MS = 120_000;
+
+/**
+ * The ceiling, tunable per deployment. Read at call time rather than module load so a long-lived
+ * process can be reconfigured, and so the starvation property is testable in bounded time — a
+ * 120-second assertion is one nobody runs, and a property nobody runs is not a property.
+ */
+function graphLockCeilingMs() {
+  const configured = Number.parseInt(process.env.NODEKIT_GRAPH_LOCK_CEILING_MS ?? "", 10);
+  return Number.isInteger(configured) && configured > 0 ? configured : GRAPH_LOCK_CEILING_MS;
+}
 
 function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -233,7 +247,16 @@ async function withGraphMutationLock(repoRoot, graphPath, operation) {
   // Raising the constant only moves the cliff to a larger writer count; resetting the budget each
   // time the lock changes hands removes it, while a genuinely wedged holder still expires because
   // the token stops changing.
-  let deadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+  // Two deadlines, and the wait ends at whichever comes first.
+  //
+  // The stall deadline resets whenever the lock changes hands, which is what makes a long healthy
+  // queue free. On its own that is unbounded: `open(..., "wx")` has no fairness, so a writer can
+  // lose every race while others cycle, resetting the stall budget forever. That trades a lost
+  // receipt for a hang, which is a worse failure and a harder one to diagnose. The ceiling never
+  // resets, so acquisition stays bounded for every input while still tolerating a real queue.
+  let stallDeadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+  const ceilingMs = graphLockCeilingMs();
+  const ceiling = Date.now() + ceilingMs;
   let lastHolder = null;
   let handle;
   const token = randomBytes(24).toString("hex");
@@ -252,9 +275,15 @@ async function withGraphMutationLock(repoRoot, graphPath, operation) {
       const holder = await observeLockHolder(repoRoot, graphPath, lockPath);
       if (holder !== null && holder !== lastHolder) {
         lastHolder = holder;
-        deadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+        stallDeadline = Date.now() + GRAPH_LOCK_WAIT_MS;
       }
-      if (Date.now() >= deadline) {
+      if (Date.now() >= ceiling) {
+        throw new Error(
+          `knowledge graph mutation lock timed out: ${resolved.relative}`
+            + ` (never acquired within ${ceilingMs}ms; the lock kept changing hands and this writer lost every race)`,
+        );
+      }
+      if (Date.now() >= stallDeadline) {
         throw new Error(
           `knowledge graph mutation lock timed out: ${resolved.relative}`
             + ` (no change of holder for ${GRAPH_LOCK_WAIT_MS}ms; the holder is wedged rather than busy)`,
