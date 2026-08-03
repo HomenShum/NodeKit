@@ -57,12 +57,21 @@
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { validateSchema } from "../src/lib/schema-validation.mjs";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+// The rules belong to the project being gated, not to whatever package this file was installed
+// into, so a ref resolves against that project. Deriving the root from this module's own location
+// works only while the gate lives in the repository it checks: from inside a consumer's
+// node_modules it would resolve every ref against NodeKit and report the consumer's own files as
+// missing — a check that runs, prints a denominator, and answers a question nobody asked.
+const args = process.argv.slice(2);
+const rootFlag = args.findIndex((a) => a === "--repo-root");
+const repoRoot = path.resolve(
+  rootFlag >= 0 ? (args[rootFlag + 1] ?? ".") : (args.find((a) => a.startsWith("--repo-root="))?.slice(12) ?? process.cwd()),
+);
+const positional = args.filter((a, i) => !a.startsWith("--") && !(rootFlag >= 0 && i === rootFlag + 1));
 
-const corpusDir = process.argv[2] ?? "atlas/references";
+const corpusDir = positional[0] ?? "atlas/references";
 const BANNED = /\b(clean|beautiful|modern|premium|polished|delightful|good UX|elegant|sleek)\b/i;
 const SELF_GRADING = /^(reviewedBy|approved|verified|bannedTagCheck|compliant|passesChecks|selfCheck)$/i;
 

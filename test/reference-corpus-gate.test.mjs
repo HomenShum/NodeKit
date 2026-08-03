@@ -13,7 +13,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -25,8 +25,8 @@ const gate = path.join(platformRoot, "scripts/reference-corpus-gate.mjs");
 const shippedCorpus = "atlas/references";
 const malformedCorpus = "test/fixtures/reference-corpus/malformed";
 
-function runGate(corpusDir) {
-  const result = spawnSync(process.execPath, [gate, corpusDir], { cwd: platformRoot, encoding: "utf8" });
+function runGate(corpusDir, { cwd = platformRoot, args = [] } = {}) {
+  const result = spawnSync(process.execPath, [gate, ...args, corpusDir], { cwd, encoding: "utf8" });
   return { status: result.status, out: `${result.stdout ?? ""}${result.stderr ?? ""}` };
 }
 
@@ -227,4 +227,38 @@ test("a rule pointing at an artifact that does not exist is not a termination", 
 
   // And the shipped corpus resolves, so the check is known to distinguish rather than just reject.
   assert.match(runGate(shippedCorpus).out, /1 ref\(s\) resolved to a real artifact/);
+});
+
+// This gate ships in the package, so it runs from inside somebody else's node_modules. The rules
+// belong to the project being gated, and deriving the repository root from this file's own location
+// silently pointed every ref at NodeKit — the consumer's own artifacts read as missing while the
+// gate still printed a full denominator. A check answering the wrong question looks exactly like a
+// check answering the right one.
+test("refs resolve against the project being gated, not the package the gate ships in", () => {
+  const consumer = mkdtempSync(path.join(tmpdir(), "consumer-repo-"));
+  mkdirSync(path.join(consumer, "refs"));
+  mkdirSync(path.join(consumer, "app"));
+  // An artifact that exists in the consumer and does NOT exist in node-platform.
+  writeFileSync(path.join(consumer, "app", "render.py"), "def assert_no_pie_when_overlapping(buckets):\n    raise ValueError('overlapping')\n");
+  for (const entry of readdirSync(path.join(platformRoot, shippedCorpus))) {
+    if (!entry.endsWith(".json")) continue;
+    const doc = loadJson(path.join(shippedCorpus, entry));
+    if (doc.schemaVersion === "nodekit.design-rule/v1") {
+      doc.boundToGate = { kind: "renderer-assertion", ref: "app/render.py:assert_no_pie_when_overlapping" };
+    }
+    writeFileSync(path.join(consumer, "refs", entry), JSON.stringify(doc, null, 2));
+  }
+
+  const fromConsumer = runGate("refs", { cwd: consumer });
+  assert.equal(fromConsumer.status, 0, `the consumer's own artifact was not found:\n${fromConsumer.out}`);
+  assert.match(fromConsumer.out, /1 ref\(s\) resolved to a real artifact/);
+
+  // Explicit root, so the gate is usable from a working directory that is neither.
+  const explicit = runGate(path.join(consumer, "refs"), { cwd: platformRoot, args: ["--repo-root", consumer] });
+  assert.equal(explicit.status, 0, explicit.out);
+
+  // And the negative control: resolved against the wrong project, the same corpus must fail.
+  const wrongRoot = runGate(path.join(consumer, "refs"), { cwd: platformRoot });
+  assert.equal(wrongRoot.status, 1, "resolving against the wrong project must not quietly pass");
+  assert.match(wrongRoot.out, /app\/render\.py, which is not a file in this repository/);
 });

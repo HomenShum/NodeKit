@@ -158,7 +158,8 @@
     "nodekit-consumer-prepare": "scripts/prepare-consumer-package.mjs",
     "nodekit-evidence-capture": "scripts/capture-managed-evidence.mjs",
     "nodekit-human-study": "scripts/capture-human-study.mjs",
-    "nodekit-unpushed-work-gate": "scripts/unpushed-work-gate.mjs"
+    "nodekit-unpushed-work-gate": "scripts/unpushed-work-gate.mjs",
+    "nodekit-reference-corpus-gate": "scripts/reference-corpus-gate.mjs"
   },
   "files": [
     "dist",
@@ -172,6 +173,7 @@
     "scripts/test-files.mjs",
     "scripts/capture-human-study.mjs",
     "scripts/unpushed-work-gate.mjs",
+    "scripts/reference-corpus-gate.mjs",
     "scripts/capture-managed-evidence.mjs",
     "scripts/run-knowledge-runtime-comparison.mjs",
     "adapters",
