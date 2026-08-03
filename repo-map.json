@@ -342,7 +342,7 @@
     "agent-run.test.mjs",
     "atlas-retrieval.test.mjs",
     "atlas.test.mjs",
-    "audience-contract.test.mjs",
+    "audience-gate.test.mjs",
     "behavior-index.test.mjs",
     "build-evidence-pack-schema.test.mjs",
     "builder-gym.test.mjs",

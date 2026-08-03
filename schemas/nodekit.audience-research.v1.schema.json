@@ -1,26 +1,45 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "nodekit.audience-research.v1",
   "title": "NodeKit Audience Research (AUDIENCE gate)",
   "description": "Who will judge this work, what they build, what they name as their stack, and what they say they need. Produced BEFORE the first architecture decision, not after the build. The REFERENCE gate asks what good looks like; this gate asks who is looking.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "capturedAt", "deliverable", "audience", "productThesis", "namedStack", "statedNeeds", "sources"],
+  "required": [
+    "id",
+    "capturedAt",
+    "deliverable",
+    "audience",
+    "productThesis",
+    "namedStack",
+    "statedNeeds",
+    "sources",
+    "designDecidedAt",
+    "primarySourcesRequested"
+  ],
   "properties": {
-    "id": { "type": "string", "pattern": "^audience-[a-z0-9-]+$" },
-    "capturedAt": { "type": "string", "format": "date" },
-
+    "id": {
+      "type": "string",
+      "pattern": "^audience-[a-z0-9-]+$"
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date"
+    },
     "deliverable": {
       "type": "string",
       "description": "What is being judged: take-home, proposal, PR to another team, pitch."
     },
-
     "audience": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["organisation"],
+      "required": [
+        "organisation"
+      ],
       "properties": {
-        "organisation": { "type": "string" },
+        "organisation": {
+          "type": "string"
+        },
         "reviewers": {
           "type": "array",
           "description": "Named where known. A reviewer's background predicts what they will check first.",
@@ -28,62 +47,96 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "name": { "type": "string" },
-              "role": { "type": "string" },
-              "impliesTheyWillCheck": { "type": "string" }
+              "name": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "impliesTheyWillCheck": {
+                "type": "string"
+              }
             }
           }
         },
         "backers": {
           "type": "array",
           "description": "Investors and advisors. Signals the bar and the domain constraints.",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
-
     "productThesis": {
       "type": "string",
       "description": "What the system IS to them, in their words. Quote, do not paraphrase — the vocabulary is the deliverable."
     },
-
     "namedStack": {
       "type": "array",
       "description": "Technologies they explicitly name. Choosing one of these needs no justification; deviating does.",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["technology", "source"],
+        "required": [
+          "technology",
+          "source"
+        ],
         "properties": {
-          "technology": { "type": "string" },
-          "source": { "type": "string", "description": "Where this was stated. An inferred stack is not a named stack." },
-          "confidence": { "enum": ["stated", "inferred"] }
+          "technology": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "description": "Where this was stated. An inferred stack is not a named stack."
+          },
+          "confidence": {
+            "enum": [
+              "stated",
+              "inferred"
+            ]
+          }
         }
       }
     },
-
     "statedNeeds": {
       "type": "array",
       "description": "A job description's bullets are a literal list of what they need. Each one is a thing the deliverable can demonstrate or visibly lack.",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["need", "source"],
+        "required": [
+          "need",
+          "source"
+        ],
         "properties": {
-          "need": { "type": "string" },
-          "source": { "type": "string" },
-          "weight": { "enum": ["most-important", "required", "nice-to-have"] },
-          "addressedBy": { "type": "string", "description": "Artifact in the deliverable that demonstrates it. Empty means a declared gap." }
+          "need": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "weight": {
+            "enum": [
+              "most-important",
+              "required",
+              "nice-to-have"
+            ]
+          },
+          "addressedBy": {
+            "type": "string",
+            "description": "Artifact in the deliverable that demonstrates it. Empty means a declared gap."
+          }
         }
       }
     },
-
     "gaps": {
       "type": "array",
       "description": "Stated needs the deliverable does NOT address. Naming them beats hoping they go unnoticed; an unnamed gap reads as an oversight, a named one reads as judgement.",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
-
     "sources": {
       "type": "array",
       "minItems": 1,
@@ -91,19 +144,70 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["url", "read"],
+        "required": [
+          "url",
+          "read"
+        ],
         "properties": {
-          "url": { "type": "string" },
-          "read": { "type": "boolean", "description": "False when the fetch failed. Record the failure rather than omitting the source." },
-          "yielded": { "type": "string" }
+          "url": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean",
+            "description": "False when the fetch failed. Record the failure rather than omitting the source."
+          },
+          "yielded": {
+            "type": "string"
+          }
         }
       }
     },
-
     "correctionsAvoided": {
       "type": "array",
       "description": "Changes this research PREVENTED. A hunch about an audience is not evidence: on the 2026-08-02 Cheiron take-home, 'knowledge-graph company, so use Neo4j' was about to be acted on when the job description explicitly named Postgres.",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
+    },
+    "designDecidedAt": {
+      "type": "string",
+      "format": "date",
+      "description": "When the design was actually chosen. capturedAt must precede it: \"we researched the audience\" and \"we researched them in time to change anything\" are different claims, and only the second one is worth having. On the 2026-08-02 Cheiron take-home the research was real and landed after the build, so it could only justify what existed."
+    },
+    "primarySourcesRequested": {
+      "type": "array",
+      "description": "Documents the USER may already hold, and whether they were asked for. The Cheiron job description named 'Python, FastAPI, and Postgres' and sat unread in the user's inbox while the newsroom 403'd and the stack was recorded as unknown. The defect was not bad searching; it was searching instead of asking. An inferred namedStack entry alongside an unasked primary source is the shape of that failure.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "asked"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "job-description",
+              "rubric",
+              "rfp",
+              "brief",
+              "contract",
+              "recruiter-email"
+            ]
+          },
+          "asked": {
+            "type": "boolean",
+            "description": "Whether the user was actually asked for it."
+          },
+          "obtained": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why it was not obtained. Asked-and-refused is an answer; never chased is not."
+          }
+        }
+      }
     }
   }
 }

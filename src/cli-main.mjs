@@ -154,7 +154,7 @@ function printHelp() {
 Usage:
   nodekit explain --for <any|node|convex|python|postgres|supabase|frontend> [--json]
       Which surfaces apply to your project, and which you can stop reading. Start here.
-  nodekit audience check [--repo-root <path>] [--json]
+  nodekit audience check [--record <audience-research.json>] [--json]
       Was the reviewer researched BEFORE the design was decided, and was the primary document
       (job description, rubric, RFP) asked for rather than inferred from the web?
   nodekit preflight [--repo-root <path>] [--session-started-at <iso>] [--json]
@@ -1861,13 +1861,13 @@ async function main() {
     return;
   }
   if (first === "audience" && second === "check") {
-    const { evaluateAudienceContract, readAudienceContract } = await import("./lib/audience-contract.mjs");
-    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
-    const { contract, present } = await readAudienceContract(repoRoot);
-    const verdict = evaluateAudienceContract(contract);
-    if (parsed.options.json) console.log(JSON.stringify({ ...verdict, present }, null, 2));
-    else if (verdict.passed) console.log(`AUDIENCE PASS: ${contract.audience.org} — researched before the design was decided.`);
-    else console.log([`AUDIENCE BLOCKED:`, ...verdict.faults.map((f) => `  ${f}`)].join("\n"));
+    const { evaluateAudienceRecord, readAudienceRecord } = await import("./lib/audience-contract.mjs");
+    const file = path.resolve(parsed.options.record ?? parsed.positional[2] ?? "audience-research.json");
+    const { record, present } = await readAudienceRecord(file);
+    const verdict = evaluateAudienceRecord(record);
+    if (parsed.options.json) console.log(JSON.stringify({ ...verdict, present, file }, null, 2));
+    else if (verdict.passed) console.log(`AUDIENCE PASS: ${record.audience.organisation} — researched before the design was decided.`);
+    else console.log(["AUDIENCE BLOCKED:", ...verdict.faults.map((f) => `  ${f}`)].join("\n"));
     if (!verdict.passed) process.exitCode = 1;
     return;
   }
