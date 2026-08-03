@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 112,
-    "modules": 74,
-    "tests": 81
+    "schemas": 113,
+    "modules": 75,
+    "tests": 82
   },
   "architecture": [
     {
@@ -229,6 +229,7 @@
     "nodekit.reference-observation.v1.schema.json",
     "nodekit.reference-profile-manifest.v1.schema.json",
     "nodekit.reference-score-receipt.v1.schema.json",
+    "nodekit.replay-packet.v1.schema.json",
     "nodekit.research-collection.v1.schema.json",
     "nodekit.rollback-receipt.v1.schema.json",
     "nodekit.routing-policy.v1.schema.json",
@@ -312,6 +313,7 @@
     "reference-loop.mjs",
     "registry.mjs",
     "repair-approval.mjs",
+    "replay-packet.mjs",
     "repo-check.mjs",
     "repo-map.mjs",
     "research-collector.mjs",
@@ -395,6 +397,7 @@
     "reference-corpus-gate.test.mjs",
     "reference-loop.test.mjs",
     "repair-approval.test.mjs",
+    "replay-packet.test.mjs",
     "repo-tour.test.mjs",
     "research-verdict-benchmark.test.mjs",
     "story-pack-schema.test.mjs",
