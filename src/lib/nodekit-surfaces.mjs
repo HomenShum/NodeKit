@@ -91,6 +91,13 @@ export const SURFACES = Object.freeze([
     offers: "Deterministic checks on captured frames before any model reviews them: a live-product frame binds to deployment revision, browser trace, journey state and its own screenshot hash; a generated frame may never be presented as the running application.",
   },
   {
+    id: "delivery-brief",
+    entry: "@homenshum/nodekit/delivery-brief",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Compile a finished build into a launch brief whose every claim cites evidence the BuildEvidencePack actually contains — a claim citing an id the pack lacks is an invented capability. Also refuses three story directions that are one direction with three titles.",
+  },
+  {
     id: "knockout",
     entry: "@homenshum/nodekit/knockout",
     gate: true,

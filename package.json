@@ -151,7 +151,8 @@
     "./package.json": "./package.json",
     "./production-gate": "./src/lib/production-gate.mjs",
     "./frame-evidence": "./src/lib/frame-evidence.mjs",
-    "./knockout": "./src/lib/knockout.mjs"
+    "./knockout": "./src/lib/knockout.mjs",
+    "./delivery-brief": "./src/lib/delivery-brief.mjs"
   },
   "bin": {
     "nodekit": "src/cli.mjs",
