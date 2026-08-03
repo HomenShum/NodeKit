@@ -22,6 +22,41 @@ Read [the change-story contract](references/change-story-contract.md) before cre
 9. Export the requested editable format and reopen it. Verify the rendered deck, speaker notes, source bindings, and any PPTX round trip.
 10. Derive the demo script, README section, release notes, and submission copy from the same Change Story and Evidence Index.
 
+## A demo clip is a rendered walkthrough, never a screen recording
+
+This section exists because of a measured failure. A production deploy was verified 11/11 with a
+recorded clip, and the clip was a raw Playwright capture: no focus framing, no captions, no visible
+streaming or tool calls, no slides. The tooling for every one of those already existed and this
+skill named none of it, so it was hand-rolled badly instead of driven well.
+
+**FeatureClipStudio** (`feature-walkthrough-gif/`) is the capture-to-render pipeline, and it covers
+the four things a raw capture never has:
+
+| what a raw capture lacks | what the pipeline does |
+|---|---|
+| focus on what matters | zoom-to-focus camera, animated cursor gliding to each click with a ripple |
+| explanation | step captions per state |
+| the work being visible | loading and streaming captured LIVE — spinner spinning, results arriving |
+| the internals when the claim depends on them | raw JSON/state evidence panels |
+
+```bash
+npm run capture   # Playwright drives the live flow and records every UI state
+npm run studio    # storyboard the captured states
+npm run render    # Remotion renders the walkthrough
+npm run judge     # Gemini watches the RENDER and scores it
+```
+
+`judge-video.mjs` is the gate, and it is the one to run before calling a clip done. It watches the
+rendered MP4 against an anti-hero-shot rubric and returns timestamped defects at P0/P1/P2 — P0
+blocks publishing. Its own header states the point: the final cut stops being the one stage only
+human eyes ever check. Judge the MP4 rather than the GIF; GIF is not a supported video MIME.
+
+Do not enter a re-render polish loop over P2s the judge already passed.
+
+**NodeSlide** for the deck, **NodeVideo** for frame-level evidence — a frame presented as the
+running product must bind to the deployment it came from, and `presentedAs` is what makes that
+checkable.
+
 ## Parallel lane
 
 For a large implementation, run presentation work as a read-mostly lane beside building and QA. Draft the problem and architecture early; replace placeholders only with verified evidence from later gates. Block release only for unsupported claims, missing required proof, stale evidence, or a broken export.

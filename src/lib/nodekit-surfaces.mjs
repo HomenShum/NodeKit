@@ -77,6 +77,14 @@ export const SURFACES = Object.freeze([
     offers: "Refuse a design decided before its audience was researched, and refuse a technology stated as fact that was only inferred. A late reframe is not evidence: switching stacks after seeing what a reviewer builds must cite evidence at least as strong as what established the original choice.",
   },
   {
+    id: "walkthrough-clip",
+    entry: "feature-walkthrough-gif: npm run capture | studio | render | judge",
+    gate: true,
+    appliesTo: ["frontend", "node"],
+    doesNotApply: "A project with no interface to walk through has nothing to capture; the deck and evidence surfaces still apply.",
+    offers: "Turn a live flow into a rendered walkthrough rather than a screen recording: zoom-to-focus camera, cursor with click ripples, step captions, and the loading and streaming captured live. `judge` then watches the RENDER against an anti-hero-shot rubric and returns timestamped defects, P0 blocking — so the final cut stops being the one stage only human eyes ever check.",
+  },
+  {
     id: "motion-compare",
     entry: "nodekit motion compare <repoA> <repoB> [repoC ...]",
     gate: false,
