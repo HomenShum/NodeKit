@@ -68,4 +68,10 @@ deferred:
       It is the repository owner's in-progress work. Committing someone else's unfinished edit to
       main as a side effect of unrelated schema changes is not a decision this session gets to make.
     deferredAt: "2026-08-02"
-    status: open
+    status: resolved
+    outcome: >-
+      Read before committing rather than assumed: a 14-line re-export of motion-portability through
+      the studio surface, no deletions, matching the file's own convention, and green in every suite
+      run because it was present throughout. Landed in 91102bcc9 on the owner's explicit
+      instruction. The change was never what kept it open — committing another party's in-progress
+      work as a side effect of unrelated edits is a different class of act from finishing your own.
