@@ -5,33 +5,41 @@
 // the one everybody reaches for first. Deterministic, bindable checks run before any model
 // judgement, and a model's opinion never overturns a hard zero.
 //
-// Two frame kinds, and conflating them is the fraud this exists to stop:
-//
-//   LIVE_PRODUCT   a frame of the real application. Must bind to the deployment revision, the
-//                  browser trace, the journey state, and its own screenshot hash. Unbound: 0.
-//   GENERATED      an illustration. Must carry provider, model, prompt and input assets, and must
-//                  never be presented as the running product. Mislabelled: 0.
-//
-// A generated mockup shown as the shipped application is the demo equivalent of a fixture-origin
-// number rendered as a measurement — and it is far easier to do by accident, because it looks
-// better than the real thing.
+// The rule underneath: real product footage proves the product, everything else explains the idea.
+// So exactly one kind may be presented as the running application, and it must bind to the exact
+// deployment it was captured from. Anything else presented that way is a false claim about what the
+// viewer is looking at — the demo equivalent of a fixture-origin number rendered as a measurement,
+// and far easier to do by accident, because the made version usually looks better.
 //
 // Deliberately NOT here: OCR, CLIP ranking, VLM review, variant tournaments. Those need a runtime,
 // a model, and a video pipeline; they belong to the app that owns the frames. This is the contract
 // they would report against.
 
-export const FRAME_KINDS = Object.freeze(["LIVE_PRODUCT", "GENERATED"]);
-
-/** Bindings a frame of the real product must carry. Absence of any one makes it unbound. */
-export const LIVE_PRODUCT_BINDINGS = Object.freeze([
-  "deploymentRevision",
-  "browserTraceId",
-  "journeyState",
-  "screenshotSha256",
+// Six kinds, because collapsing them breaks in both directions. A two-value enum forces a motion
+// graphic to be "generated", which then demands a provider, model and prompt it never had — a false
+// positive, and a noisy gate is a disabled gate. Escaping that by labelling it LIVE_PRODUCT is the
+// loophole. Each kind owes different evidence, so each kind is its own value.
+export const FRAME_KINDS = Object.freeze([
+  "LIVE_PRODUCT",            // a capture of the real application
+  "GENERATED_ILLUSTRATION",  // a model made it
+  "MOTION_GRAPHIC",          // deterministic composition — Remotion, SVG, CSS
+  "SOURCE_MEDIA",            // footage or documents the creator already had
+  "STOCK_MEDIA",             // licensed third-party material
+  "TEXT_OR_DIAGRAM",         // authored directly
 ]);
 
-/** Provenance a generated frame must carry, so it can never be mistaken for a capture. */
-export const GENERATED_PROVENANCE = Object.freeze(["provider", "model", "prompt", "inputAssets"]);
+/** What each kind owes. The point is that they owe DIFFERENT things. */
+const REQUIREMENTS = Object.freeze({
+  LIVE_PRODUCT: { field: "bindings", keys: ["deploymentRevision", "browserTraceId", "journeyState", "screenshotSha256"], why: "a claim about the running application must name the exact deployment it was captured from" },
+  GENERATED_ILLUSTRATION: { field: "provenance", keys: ["provider", "model", "prompt", "inputAssets"], why: "a model made this, and which model with what prompt is the only thing that makes it auditable later" },
+  MOTION_GRAPHIC: { field: "composition", keys: ["sourceRef"], why: "deterministic composition is reproducible, so it owes the source that produced it — not a model it never used" },
+  SOURCE_MEDIA: { field: "origin", keys: ["originRef", "rights"], why: "material the creator already had still needs to say where it came from and on what terms" },
+  STOCK_MEDIA: { field: "origin", keys: ["originRef", "licenseId"], why: "licensed material owes its licence, which is the whole basis for using it" },
+  TEXT_OR_DIAGRAM: { field: null, keys: [], why: "authored directly; being labelled is all it owes" },
+});
+
+export const LIVE_PRODUCT_BINDINGS = REQUIREMENTS.LIVE_PRODUCT.keys;
+export const GENERATED_PROVENANCE = REQUIREMENTS.GENERATED_ILLUSTRATION.keys;
 
 const SHA256 = /^[0-9a-f]{64}$/;
 
@@ -72,31 +80,38 @@ export function evaluateFrameEvidence(frames) {
   const unprovenanced = [];
 
   for (const frame of frames) {
+    const requirement = REQUIREMENTS[frame.kind];
+    const missing = requirement.field
+      ? requirement.keys.filter((key) => {
+        const value = frame[requirement.field]?.[key];
+        return key === "inputAssets" ? !Array.isArray(value) : !isNonEmptyString(value);
+      })
+      : [];
+
+    if (missing.length > 0) {
+      const detail = `${frame.frameId} (${frame.kind}) is missing ${requirement.field}.${missing.join(", ")} — ${requirement.why}`;
+      if (frame.kind === "LIVE_PRODUCT") unbound.push(detail);
+      else unprovenanced.push(detail);
+    }
+
     if (frame.kind === "LIVE_PRODUCT") {
-      const missing = LIVE_PRODUCT_BINDINGS.filter((b) => !isNonEmptyString(frame.bindings?.[b]));
-      if (missing.length > 0) unbound.push(`${frame.frameId} (missing ${missing.join(", ")})`);
-      if (frame.bindings?.screenshotSha256 && frame.bindings.screenshotSha256 !== frame.sha256) {
+      const shot = frame.bindings?.screenshotSha256;
+      if (shot && shot !== frame.sha256) {
         unbound.push(`${frame.frameId} (screenshotSha256 does not match the frame's own hash)`);
       }
     }
-    if (frame.kind === "GENERATED") {
-      const missing = GENERATED_PROVENANCE.filter((p) => {
-        const value = frame.provenance?.[p];
-        return p === "inputAssets" ? !Array.isArray(value) : !isNonEmptyString(value);
-      });
-      if (missing.length > 0) unprovenanced.push(`${frame.frameId} (missing ${missing.join(", ")})`);
-      // The load-bearing one. A generated frame presented as the running product is a false claim
-      // about what the viewer is looking at, and it is the easy mistake because it looks better.
-      if (frame.presentedAs === "LIVE_PRODUCT") {
-        mislabelled.push(`${frame.frameId} is generated but presented as the running application`);
-      }
+
+    // Generalised from "generated" to every non-live kind. A motion graphic or a stock clip
+    // presented as the running application is the same false claim about what the viewer is seeing.
+    if (frame.kind !== "LIVE_PRODUCT" && frame.presentedAs === "LIVE_PRODUCT") {
+      mislabelled.push(`${frame.frameId} is ${frame.kind} but presented as the running application`);
     }
   }
 
   const blockers = [
     ...unbound.map((f) => `unbound live-product frame: ${f}`),
     ...mislabelled.map((f) => `mislabelled frame: ${f}`),
-    ...unprovenanced.map((f) => `generated frame without provenance: ${f}`),
+    ...unprovenanced.map((f) => `frame without its required evidence: ${f}`),
   ];
 
   return {
@@ -106,7 +121,7 @@ export function evaluateFrameEvidence(frames) {
     blockers,
     checked: frames.length,
     liveProduct: frames.filter((f) => f.kind === "LIVE_PRODUCT").length,
-    generated: frames.filter((f) => f.kind === "GENERATED").length,
+    generated: frames.filter((f) => f.kind !== "LIVE_PRODUCT").length,
   };
 }
 
