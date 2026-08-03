@@ -326,3 +326,34 @@ test("a regression proof must have been red at baseline, or say why it was not",
     "a proven entry must not also carry an excuse",
   );
 });
+
+// The provenance surface whose failure mode looks like a success: an element citing nothing used to
+// render identically to one standing on evidence. Novel stays legitimate — declaring it is what
+// makes the citation on everything else mean anything.
+test("a shipped element is cited or declared novel, and cannot be neither", () => {
+  const bundle = createPr32GovernanceScenario();
+  const render = (referenceProvenance) => renderGovernanceGraphHtml({ ...bundle, referenceProvenance });
+  const cited = {
+    label: "n8n run evaluation",
+    url: "https://mobbin.com/screens/8e2ed125-52a7-457f-9831-caadfc788629",
+    factIds: ["obs-mobbin-n8n-run-evaluation/f1"],
+  };
+
+  assert.match(render([cited]), /obs-mobbin-n8n-run-evaluation\/f1/);
+
+  const novel = { label: "COMPOSED strip", novel: true, rationale: "no reference surface composes bindings this way" };
+  const html = render([novel]);
+  assert.match(html, /novel — no reference surface composes bindings this way/);
+  assert.doesNotMatch(html, /<a href="">/, "a novel element must not be dressed with an empty link");
+
+  assert.throws(
+    () => render([{ label: "pull-quote", url: "https://mobbin.com/screens/0690bb8b-3bbb-45be-9dfa-8cef91e2956f", factIds: [] }]),
+    /cites no facts and is not declared novel/,
+    "an element that references nothing is the exact case this exists to catch",
+  );
+  assert.throws(
+    () => render([{ ...novel, factIds: ["obs-mobbin-n8n-run-evaluation/f1"] }]),
+    /declared novel but also cites facts/,
+  );
+  assert.throws(() => render([{ label: "badge", novel: true }]), /rationale/);
+});

@@ -444,15 +444,32 @@ export function renderGovernanceGraphHtml({ riskAssessment, evidencePack, promot
     if (!nodeIds.has(from) || !nodeIds.has(to)) fail(`graph.edges[${index}] references an unknown node`);
     return { ...edge, from, to, label: nonEmpty(edge.label, `graph.edges[${index}].label`) };
   });
+  // Every shipped element is either cited or deliberately novel, and it has to say which. An entry
+  // with an empty factIds list used to be accepted, which meant an element that referenced nothing
+  // rendered identically to one standing on evidence — a provenance surface whose failure mode is
+  // looking exactly like a success. "Novel" stays available, because inventing something is
+  // legitimate; declaring it is what makes the citation on everything else mean anything.
   const safeReferences = referenceProvenance.map((entry, index) => {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
       fail(`referenceProvenance[${index}] must be an object`);
     }
-    return {
-      label: nonEmpty(entry.label, `referenceProvenance[${index}].label`),
-      url: httpsUrl(entry.url, `referenceProvenance[${index}].url`),
-      factIds: boundedStrings(entry.factIds, `referenceProvenance[${index}].factIds`),
-    };
+    const at = `referenceProvenance[${index}]`;
+    const label = nonEmpty(entry.label, `${at}.label`);
+    const novel = entry.novel === true;
+    const factIds = entry.factIds === undefined && novel
+      ? []
+      : boundedStrings(entry.factIds, `${at}.factIds`);
+
+    if (novel && factIds.length > 0) {
+      fail(`${at} is declared novel but also cites facts; it is one or the other`);
+    }
+    if (!novel && factIds.length === 0) {
+      fail(`${at} cites no facts and is not declared novel; an unclassified element is not provenance`);
+    }
+    if (novel) {
+      return { label, novel: true, rationale: nonEmpty(entry.rationale, `${at}.rationale`), factIds: [] };
+    }
+    return { label, url: httpsUrl(entry.url, `${at}.url`), factIds };
   });
   const modeLabel = riskAssessment.mode.replaceAll("_", " ");
   const modeTone = riskAssessment.mode === "PRE_ACTION_HUMAN_GATE"
@@ -484,7 +501,10 @@ export function renderGovernanceGraphHtml({ riskAssessment, evidencePack, promot
     ["Observation configured", riskAssessment.facts.evidence.observationConfigured],
     ["Major findings", riskAssessment.facts.evidence.unresolvedMajorFindings],
   ];
-  const references = safeReferences.map((entry) => `<li><a href="${escapeHtml(entry.url)}">${escapeHtml(entry.label)}</a><span>${escapeHtml(entry.factIds.join(", "))}</span></li>`).join("");
+  // A novel element has no source to link to, and must not be dressed as though it had one.
+  const references = safeReferences.map((entry) => (entry.novel
+    ? `<li><span>${escapeHtml(entry.label)}</span><span>novel — ${escapeHtml(entry.rationale)}</span></li>`
+    : `<li><a href="${escapeHtml(entry.url)}">${escapeHtml(entry.label)}</a><span>${escapeHtml(entry.factIds.join(", "))}</span></li>`)).join("");
   const details = Object.fromEntries(graphNodes.map((node) => [node.id, {
     title: node.title,
     type: node.type.replaceAll("_", " "),
