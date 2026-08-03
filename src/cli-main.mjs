@@ -1027,6 +1027,20 @@ async function runAdopt(parsed) {
   console.log(`ADOPTED ${result.name} at ${result.target}`);
   console.log("NodeKit only added missing harness files; existing auth, routes, CSS, and schemas were preserved.");
   console.log(`COLLISIONS ${result.collisions.length}; inspect proof/adoption-receipt.json before installation.`);
+  // An adopted project keeps its OWN `check`, deliberately — hijacking somebody's entry point is
+  // hostile, and adopt is non-destructive by design. But that leaves the gates installed and
+  // uncalled: measured on a real adoption, everything landed correctly and nothing in the project
+  // ran any of it, with no output saying so. Installed-but-unwired is the exact failure this
+  // repository spent a day closing elsewhere; printing the wiring is the cheapest possible fix.
+  console.log([
+    "",
+    "NOT WIRED: your `check` script is still yours, on purpose. These gates are installed and nothing calls them yet:",
+    "  nodekit preflight        harness liveness, plus skill and code-graph freshness",
+    "  nodekit deferrals check  refuses a submission while a deliberate deferral is still open",
+    "  nodekit audience check   refuses a design decided before its audience was researched",
+    "Add them to your own check script when you want them enforced:",
+    '  "check": "<your existing check> && nodekit preflight && nodekit deferrals check"',
+  ].join("\n"));
 }
 
 async function runCompile(parsed) {
