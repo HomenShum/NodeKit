@@ -111,3 +111,56 @@ test("the CLI exposes explain, and refuses an unknown stack rather than guessing
   assert.notEqual(bad.status, 0, "an unknown stack must not exit 0 with a plausible-looking answer");
   assert.match(`${bad.stdout}${bad.stderr}`, /unknown stack/);
 });
+
+test("every CLI verb is either indexed or deliberately internal", async () => {
+  // The export guard above checks package exports. It could not catch the actual failure: five new
+  // CLI verbs shipped this session — capability, sessions, regression, skills sync — every one of
+  // them agent-facing, none of them a package export, and so all five were invisible to
+  // `nodekit explain --for`, which is the command that exists to tell an agent what applies.
+  //
+  // The verb list is the agent-facing surface. Exports are the library-facing one. Guarding only
+  // the second is how the first rots.
+  const { readFile } = await import("node:fs/promises");
+  const usage = await readFile(new URL("../src/cli-main.mjs", import.meta.url), "utf8");
+  const verbs = new Set(
+    [...usage.matchAll(/^\s{2}nodekit ([a-z-]+(?: [a-z-]+)?)/gm)]
+      .map((match) => match[1].trim())
+      // Second word is a flag or placeholder, so the verb is just the first word.
+      .map((verb) => (/^[a-z-]+ [a-z-]+$/.test(verb) ? verb : verb.split(" ")[0])),
+  );
+  assert.ok(verbs.size > 10, `only ${verbs.size} verbs parsed; this check is not measuring the CLI`);
+
+  // Verbs whose absence from the index is a deliberate call, each for a stated reason.
+  const INTERNAL = new Set([
+    "dev", "demo", "doctor", "compile", "inspect", "create", "adopt", "certify", "tour",
+    "dashboard", "explain", "repo check", "registry check", "ecosystem check",
+  ]);
+  const indexed = new Set(
+    SURFACES.flatMap((surface) => {
+      const match = /nodekit ([a-z-]+(?: [a-z-]+)?)/.exec(surface.entry);
+      if (!match) return [];
+      const verb = match[1].trim();
+      return /^[a-z-]+ [a-z-]+$/.test(verb) ? [verb, verb.split(" ")[0]] : [verb];
+    }),
+  );
+
+  const unclassified = [...verbs].filter((verb) => {
+    if (INTERNAL.has(verb) || INTERNAL.has(verb.split(" ")[0])) return false;
+    return !indexed.has(verb) && !indexed.has(verb.split(" ")[0]);
+  });
+
+  // Reported as a sorted list so adding a verb tells you exactly what to index, rather than that
+  // something somewhere is missing.
+  unclassified.sort();
+  assert.ok(
+    unclassified.length <= UNINDEXED_VERB_CEILING,
+    `${unclassified.length} CLI verb(s) are invisible to \`nodekit explain --for\`: ${unclassified.join(", ")}`,
+  );
+});
+
+// Verbs not yet in the surface index, measured rather than aspired to: 52 of them today, which
+// means `nodekit explain --for` describes a fraction of this CLI. The ceiling is a ratchet — a new
+// unindexed verb pushes past it and fails, so the number can only go down. Lowering it as verbs get
+// indexed is the point. Raising it is the thing to argue about in review, and the reason it is a
+// named constant rather than a magic number buried in an assertion.
+const UNINDEXED_VERB_CEILING = 52;

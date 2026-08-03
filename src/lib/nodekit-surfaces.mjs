@@ -28,6 +28,41 @@ export const STACKS = Object.freeze([
  */
 export const SURFACES = Object.freeze([
   {
+    id: "capability-contract",
+    entry: "nodekit capability declare --capability <slug> --out <path>",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Declare what a capability must measurably improve, and what result would make you delete it, BEFORE building it. `nodekit capability settle` scores the bet afterwards and refuses a contract that postdates its own measurement. A capability nothing user-facing can reach is decorative, which is a verdict rather than a warning.",
+  },
+  {
+    id: "session-contract",
+    entry: "nodekit sessions check --contract <session-contract.json>",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Reject a multi-session plan that leaves any contended manifest unclassified, before launching agents that will all write it. Catches the ownership plan that is careful about the files the work is about and silent about the lockfile every session touches.",
+  },
+  {
+    id: "regression-proof",
+    entry: "nodekit regression prove --baseline <commit> --test <file>",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Prove a regression test would actually have failed against the pre-fix code, by running today's tests in a worktree at the baseline commit. A test that passes on both sides is recorded UNPROVEN — from HEAD, a test that guards a bug and one that guards against it are both green.",
+  },
+  {
+    id: "skill-freshness",
+    entry: "nodekit preflight  (and `nodekit skills sync` to repair)",
+    gate: false,
+    appliesTo: ["any"],
+    offers: "Report whether the coding-agent skills projected into this project still match the installed NodeKit, since those copies are what an agent actually loads and they freeze at create time. Reported rather than fatal: pinning or editing a projected skill is legitimate.",
+  },
+  {
+    id: "code-graph-freshness",
+    entry: "nodekit preflight",
+    gate: false,
+    appliesTo: ["any"],
+    offers: "Report how far the commit-pinned code graph has drifted from HEAD, and how much of that drift was source. A stale call edge is indistinguishable from a live one at the point an agent uses it, so the drift has to be stated rather than discovered.",
+  },
+  {
     id: "reference-loop",
     entry: "@homenshum/nodekit/reference-loop",
     gate: true,

@@ -112,8 +112,19 @@ instrument and finds a different class: on one build it returned seven P0s again
 suite. `nodekit journey verify` requires adversarial evidence or a declared absence.
 
 When a review finds a P0, the fix ships a test **and** that test must fail against the pre-fix
-commit. Tests written alongside a bug become its guardians: three tests once failed after a fix
-because they had pinned the buggy behaviour.
+commit — `nodekit regression prove --baseline <pre-fix commit> --test <file> --name <pattern>`.
+Tests written alongside a bug become its guardians: three tests once failed after a fix because
+they had pinned the buggy behaviour. From HEAD, a test that guards a bug and one that guards
+against it are both green, and only the baseline run tells them apart. A test that passes on both
+sides is UNPROVEN, which is not a failure of the fix and is never a pass.
+
+**When the tools themselves look wrong**
+
+`nodekit preflight` reports whether this project's projected skills still match the installed
+NodeKit, and how far its commit-pinned code graph has drifted from HEAD. Both are copies that
+freeze: the skills are what an agent actually loads, and a stale call edge is indistinguishable
+from a live one at the point of use. `nodekit skills sync` refreshes the skill copies —
+`nodekit create` will not, because it refuses a non-empty directory.
 
 ## Sponsor rule
 
