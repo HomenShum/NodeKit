@@ -51,6 +51,15 @@ deferred:
       built and deliberately not faked: PROMPT_BOOK.md, RECREATE.md, and the typed
       PromptImprovementRecord — those are presentation over this data, not new evidence.
 
+      COMPLETED 2026-08-03: the three items this entry's `what` listed as unbuilt now exist.
+      `nodekit reproduce --book <dir>` generates PROMPT_BOOK.md and RECREATE.md from the packet
+      rather than by hand, and nodekit.prompt-improvement/v1 types the change kinds with a required
+      learnedFrom so an improvement traces to something that happened in the run. RECREATE.md leads
+      with the rung actually earned and names the rungs it did not, because a hand-written recreate
+      guide drifts from its packet and then reads with more authority than the receipt it
+      contradicts. Verified by running it against this repo: with --command it built a fresh
+      worktree from the baseline, ran the suite there, earned BUILD_REPLAYABLE rather than
+      asserting it, and left no worktree behind.
   - id: preflight-and-integration-records-unwired
     what: >-
       src/lib/preflight.mjs and src/lib/integration-record.mjs were tested libraries with no caller.

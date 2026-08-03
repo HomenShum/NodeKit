@@ -152,7 +152,8 @@
     "./production-gate": "./src/lib/production-gate.mjs",
     "./frame-evidence": "./src/lib/frame-evidence.mjs",
     "./knockout": "./src/lib/knockout.mjs",
-    "./delivery-brief": "./src/lib/delivery-brief.mjs"
+    "./delivery-brief": "./src/lib/delivery-brief.mjs",
+    "./replay-book": "./src/lib/replay-book.mjs"
   },
   "bin": {
     "nodekit": "src/cli.mjs",

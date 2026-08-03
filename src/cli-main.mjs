@@ -1971,6 +1971,18 @@ async function main() {
       ? await reproduce({ repoRoot, packet, command: parsed.options.command })
       : { packet, verdict: { passed: true, claimed: packet.reproduction.levelClaimed, earned: packet.reproduction.levelClaimed, faults: [] } };
     if (parsed.options.out) await writeReplayPacket(repoRoot, replayed.packet, path.dirname(parsed.options.out));
+
+    // The two documents a person actually opens. Generated, never authored: a hand-written
+    // RECREATE.md drifts from the packet and then reads with more authority than the receipt it
+    // contradicts.
+    if (parsed.options.book) {
+      const { renderPromptBook, renderRecreate } = await import("./lib/replay-book.mjs");
+      const dir = path.resolve(parsed.options.book);
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, "PROMPT_BOOK.md"), renderPromptBook(replayed.packet), "utf8");
+      await writeFile(path.join(dir, "RECREATE.md"), renderRecreate(replayed.packet), "utf8");
+      console.error(`wrote PROMPT_BOOK.md and RECREATE.md to ${dir}`);
+    }
     console.log(parsed.options.json ? JSON.stringify(replayed.packet, null, 2) : formatReplayVerdict(replayed.verdict));
     if (!replayed.verdict.passed) process.exitCode = 1;
     return;

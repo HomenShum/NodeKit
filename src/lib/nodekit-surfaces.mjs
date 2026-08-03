@@ -98,6 +98,13 @@ export const SURFACES = Object.freeze([
     offers: "Compile a finished build into a launch brief whose every claim cites evidence the BuildEvidencePack actually contains — a claim citing an id the pack lacks is an invented capability. Also refuses three story directions that are one direction with three titles.",
   },
   {
+    id: "replay-book",
+    entry: "@homenshum/nodekit/replay-book",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Generate PROMPT_BOOK.md and RECREATE.md from a replay packet instead of writing them. RECREATE leads with the reproduction rung actually earned and names the rungs it did not, so the document a person opens cannot claim more than the receipt behind it.",
+  },
+  {
     id: "knockout",
     entry: "@homenshum/nodekit/knockout",
     gate: true,
