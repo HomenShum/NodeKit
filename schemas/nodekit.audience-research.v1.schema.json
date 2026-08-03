@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nodekit.audience-research.v1",
+  "title": "NodeKit Audience Research (AUDIENCE gate)",
+  "description": "Who will judge this work, what they build, what they name as their stack, and what they say they need. Produced BEFORE the first architecture decision, not after the build. The REFERENCE gate asks what good looks like; this gate asks who is looking.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "capturedAt", "deliverable", "audience", "productThesis", "namedStack", "statedNeeds", "sources"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^audience-[a-z0-9-]+$" },
+    "capturedAt": { "type": "string", "format": "date" },
+
+    "deliverable": {
+      "type": "string",
+      "description": "What is being judged: take-home, proposal, PR to another team, pitch."
+    },
+
+    "audience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organisation"],
+      "properties": {
+        "organisation": { "type": "string" },
+        "reviewers": {
+          "type": "array",
+          "description": "Named where known. A reviewer's background predicts what they will check first.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "role": { "type": "string" },
+              "impliesTheyWillCheck": { "type": "string" }
+            }
+          }
+        },
+        "backers": {
+          "type": "array",
+          "description": "Investors and advisors. Signals the bar and the domain constraints.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "productThesis": {
+      "type": "string",
+      "description": "What the system IS to them, in their words. Quote, do not paraphrase — the vocabulary is the deliverable."
+    },
+
+    "namedStack": {
+      "type": "array",
+      "description": "Technologies they explicitly name. Choosing one of these needs no justification; deviating does.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["technology", "source"],
+        "properties": {
+          "technology": { "type": "string" },
+          "source": { "type": "string", "description": "Where this was stated. An inferred stack is not a named stack." },
+          "confidence": { "enum": ["stated", "inferred"] }
+        }
+      }
+    },
+
+    "statedNeeds": {
+      "type": "array",
+      "description": "A job description's bullets are a literal list of what they need. Each one is a thing the deliverable can demonstrate or visibly lack.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["need", "source"],
+        "properties": {
+          "need": { "type": "string" },
+          "source": { "type": "string" },
+          "weight": { "enum": ["most-important", "required", "nice-to-have"] },
+          "addressedBy": { "type": "string", "description": "Artifact in the deliverable that demonstrates it. Empty means a declared gap." }
+        }
+      }
+    },
+
+    "gaps": {
+      "type": "array",
+      "description": "Stated needs the deliverable does NOT address. Naming them beats hoping they go unnoticed; an unnamed gap reads as an oversight, a named one reads as judgement.",
+      "items": { "type": "string" }
+    },
+
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "description": "URLs actually opened. A claim without a source here is a recollection, and recollections about a company are how a stack gets guessed wrong.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "read"],
+        "properties": {
+          "url": { "type": "string" },
+          "read": { "type": "boolean", "description": "False when the fetch failed. Record the failure rather than omitting the source." },
+          "yielded": { "type": "string" }
+        }
+      }
+    },
+
+    "correctionsAvoided": {
+      "type": "array",
+      "description": "Changes this research PREVENTED. A hunch about an audience is not evidence: on the 2026-08-02 Cheiron take-home, 'knowledge-graph company, so use Neo4j' was about to be acted on when the job description explicitly named Postgres.",
+      "items": { "type": "string" }
+    }
+  }
+}
