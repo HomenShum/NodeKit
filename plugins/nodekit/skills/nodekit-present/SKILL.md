@@ -53,6 +53,29 @@ human eyes ever check. Judge the MP4 rather than the GIF; GIF is not a supported
 
 Do not enter a re-render polish loop over P2s the judge already passed.
 
+### Two axes, and the second one is the one that fails
+
+`judge-video.mjs` scores CRAFT — cursor truth, pacing, legibility, motion — and separately scores
+COMPREHENSION, the ten things a viewer must actually come away with:
+
+    persona · purpose · use_case · feature_clarity · full_interaction
+    responsiveness · flow · result · non_expert_sense · transfer
+
+They are orthogonal, and a cut can be well made and incomprehensible. Measured on a real render:
+craft passed with a verdict of `publish`, and comprehension scored 1 on all ten — nothing absent,
+nothing explicit, everything merely implied — with the judge naming 0:06 as the second a non-expert
+was lost ("layer architecture concepts and terminal log outputs").
+
+`non_expert_sense` is the mom test and it BLOCKS on its own, regardless of the totals. A gate that
+passes a video its own judge says nobody outside the field could follow is not a gate. Uniform
+scores across all ten are flagged rather than averaged, because "all 1s" means all implied and none
+stated, which is a finding and not a middling pass.
+
+THE LOOP IS THE DEFAULT, not a final check: render, judge, read what it says is missing, recut,
+judge again. Three cuts on one film moved it 10/20 to 13/20 and, more usefully, told the maker the
+story had been built around the wrong moment — something no amount of self-review had surfaced.
+Stop when comprehension clears and the remaining defects are P2.
+
 **NodeSlide** for the deck, **NodeVideo** for frame-level evidence — a frame presented as the
 running product must bind to the deployment it came from, and `presentedAs` is what makes that
 checkable.

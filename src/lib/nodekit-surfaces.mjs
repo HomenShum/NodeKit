@@ -82,7 +82,7 @@ export const SURFACES = Object.freeze([
     gate: true,
     appliesTo: ["frontend", "node"],
     doesNotApply: "A project with no interface to walk through has nothing to capture; the deck and evidence surfaces still apply.",
-    offers: "Turn a live flow into a rendered walkthrough rather than a screen recording: zoom-to-focus camera, cursor with click ripples, step captions, and the loading and streaming captured live. `judge` then watches the RENDER against an anti-hero-shot rubric and returns timestamped defects, P0 blocking — so the final cut stops being the one stage only human eyes ever check.",
+    offers: "Turn a live flow into a rendered walkthrough rather than a screen recording: zoom-to-focus camera, cursor with click ripples, step captions, and the loading and streaming captured live. `judge` scores two orthogonal axes — CRAFT (cursor, pacing, legibility, motion) and COMPREHENSION (persona, purpose, use case, feature, full interaction, responsiveness, flow, result, non-expert sense, transfer). A cut can be well made and incomprehensible, so the mom test blocks on its own. Render, judge, recut, judge again is the default loop rather than a final check.",
   },
   {
     id: "motion-compare",
