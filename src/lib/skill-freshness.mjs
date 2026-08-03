@@ -71,14 +71,38 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
     record = null;
   }
 
-  const skillsRoot = path.join(projectRoot, ".claude", "skills");
-  let present = [];
-  try {
-    present = (await readdir(skillsRoot, { withFileTypes: true }))
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.name);
-  } catch {
-    present = [];
+  // BOTH agent roots. scaffold.mjs projects skills into .claude AND .codex, and only .claude was
+  // read — so a project whose Codex copy had drifted reported `current` while Codex loaded
+  // different instructions. Checking one of two copies and reporting on both is the shape of the
+  // bug this module exists to catch.
+  const roots = [".claude", ".codex"].map((agent) => path.join(projectRoot, agent, "skills"));
+  const presentByRoot = new Map();
+  for (const root of roots) {
+    let names = [];
+    try {
+      const entries = await readdir(root, { withFileTypes: true });
+      // Symlinked skill directories count. isDirectory() is false for a symlink, so a symlinked
+      // skill was silently invisible — readable by an agent, unseen by this check.
+      names = entries.filter((entry) => entry.isDirectory() || entry.isSymbolicLink()).map((entry) => entry.name);
+    } catch { names = []; }
+    presentByRoot.set(root, names);
+  }
+  const present = [...new Set([...presentByRoot.values()].flat())];
+
+  // A record naming skills that have ALL been deleted must not exit here as "no skills". The early
+  // return ran before the recorded/present union, so wiping every skill directory read as nothing
+  // to check rather than as everything missing.
+  const recordedNames = Object.keys(record?.skills ?? {});
+  if (present.length === 0 && recordedNames.length > 0) {
+    return {
+      status: "missing",
+      edited: [],
+      unrecorded: [],
+      missing: recordedNames.sort(),
+      versionSkew: null,
+      checked: recordedNames.length,
+      record,
+    };
   }
 
   // No skills at all is not a freshness problem. Say so plainly rather than reporting a clean pass
@@ -111,13 +135,22 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
   const names = new Set([...present, ...Object.keys(record.skills ?? {})]);
   for (const name of names) {
     const recorded = record.skills?.[name];
-    const actual = present.includes(name) ? await digestSkill(path.join(skillsRoot, name)) : null;
-    if (actual === null) {
+    // Every root that claims this skill must match. A drifted copy in either one is what an agent
+    // using that host actually loads.
+    const digests = [];
+    for (const root of roots) {
+      if (!(presentByRoot.get(root) ?? []).includes(name)) continue;
+      digests.push({ root: path.basename(path.dirname(root)), digest: await digestSkill(path.join(root, name)) });
+    }
+    if (digests.length === 0 || digests.some((entry) => entry.digest === null)) {
       missing.push(name);           // recorded but deleted, or present with no readable SKILL.md
       continue;
     }
     if (!recorded) unrecorded.push(name);
-    else if (actual !== recorded) edited.push(name);
+    else if (digests.some((entry) => entry.digest !== recorded)) {
+      const drifted = digests.filter((entry) => entry.digest !== recorded).map((entry) => entry.root);
+      edited.push(drifted.length === digests.length ? name : `${name} (${drifted.join(", ")})`);
+    }
   }
 
   const versionSkew = installedVersion && record.nodekitVersion && installedVersion !== record.nodekitVersion
@@ -129,10 +162,13 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
   // opposite — a check weakened by its own test.
   const skewUnknown = !installedVersion && record.nodekitVersion;
 
-  const status = versionSkew
-    ? "skewed"
-    : missing.length > 0
-      ? "missing"
+  // MISSING outranks skew. A skill the agent cannot load at all is a worse fact than one that is
+  // merely out of date, and reporting `skewed` hid the absent skill from the formatted line
+  // entirely. The bigger fact goes first.
+  const status = missing.length > 0
+    ? "missing"
+    : versionSkew
+      ? "skewed"
       : edited.length > 0 || unrecorded.length > 0
         ? "edited"
         : skewUnknown ? "unknown-version" : "current";

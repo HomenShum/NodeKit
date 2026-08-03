@@ -57,8 +57,33 @@ export class SessionContractRefusal extends Error {
 
 const isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
 
-/** Separators normalised, because a Windows-shaped path must not slip past a POSIX-shaped rule. */
-const posix = (value) => String(value ?? "").split("\\").join("/");
+/**
+ * Canonical form: separators normalised, `.` and `..` resolved, repeated slashes collapsed, leading
+ * `./` dropped.
+ *
+ * Separator-only normalisation was not enough. `app/**` versus `./app/package.json`,
+ * `app//nested` versus `app/nested`, and `package.json` versus `app/../package.json` are the same
+ * file written four ways, and each pair passed the collision check as two different paths. Two
+ * sessions can therefore own one file while the plan reads clean.
+ *
+ * NOT resolved: symbolic links. Two lexically distinct paths that resolve to one file through a
+ * symlink still evade collision detection, because resolving them requires touching the filesystem
+ * and this stays a pure function over the caller's list. Stated rather than silently absent — a
+ * test pins it, so it is a known limit rather than a discovery.
+ */
+function canonical(value) {
+  const raw = String(value ?? "").split("\\").join("/");
+  const segments = [];
+  for (const part of raw.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") { segments.pop(); continue; }
+    segments.push(part);
+  }
+  const joined = segments.join("/");
+  // A trailing marker is meaningful to the pattern matcher and must survive canonicalisation.
+  return raw.endsWith("/**") ? `${joined.replace(/\/\*\*$/, "")}/**` : raw.endsWith("/*") ? `${joined.replace(/\/\*$/, "")}/*` : joined;
+}
+const posix = canonical;
 
 /**
  * Does a declared pattern cover this file?
@@ -154,7 +179,11 @@ export function evaluateSessionContract(contract, repoFiles = []) {
   }
 
   // The real finding. A manifest that exists and is claimed by nobody will be written by everybody.
-  const present = repoFiles.filter((file) => CONTENDED_MANIFESTS.includes(posix(file).split("/").pop()));
+  // Basenames compared case-insensitively: a tracked `Package.json` on a case-insensitive
+  // filesystem is the same contended file as `package.json`, and matching case-sensitively let it
+  // through as if the repository had no manifest at all.
+  const manifestNames = new Set(CONTENDED_MANIFESTS.map((name) => name.toLowerCase()));
+  const present = repoFiles.filter((file) => manifestNames.has((canonical(file).split("/").pop() ?? "").toLowerCase()));
   const unclassified = present.filter((file) => {
     if (shared.has(file)) return false;
     return !sessions.some((session) => session.owns.some((pattern) => covers(pattern, file)));

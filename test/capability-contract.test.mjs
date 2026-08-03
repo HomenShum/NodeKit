@@ -66,6 +66,7 @@ test("the same capability survives once it answers a question that genuinely nee
   const verdict = evaluateCapability(GRAPH(), {
     observedAt: LATER,
     metrics: { "entities-surfaced-delta": 6, "latency-cost-percent": 12 },
+    consumersReachable: ["peer_sponsors"],
   });
 
   assert.equal(verdict.verdict, "load-bearing");
@@ -127,6 +128,7 @@ test("a kill clause whose metric nobody measured cannot clear the capability", (
   const verdict = evaluateCapability(GRAPH(), {
     observedAt: LATER,
     metrics: { "entities-surfaced-delta": 9 },
+    consumersReachable: ["peer_sponsors"],
   });
 
   assert.equal(verdict.verdict, "insufficient");
@@ -187,7 +189,11 @@ test("an offset measurement that is genuinely later still settles", () => {
   // The fix must not reject all offsets — only ones that are earlier as instants.
   const verdict = evaluateCapability(
     { ...GRAPH(), declaredAt: "2026-08-03T10:00:00.000Z" },
-    { observedAt: "2026-08-03T14:00:00+02:00", metrics: { "entities-surfaced-delta": 9, "latency-cost-percent": 2 } },
+    {
+      observedAt: "2026-08-03T14:00:00+02:00",
+      metrics: { "entities-surfaced-delta": 9, "latency-cost-percent": 2 },
+      consumersReachable: ["peer_sponsors"],
+    },
   );
 
   assert.equal(verdict.verdict, "load-bearing");

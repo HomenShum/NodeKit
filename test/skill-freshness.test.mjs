@@ -164,3 +164,49 @@ test("skills sync actually refreshes a stale copy and records provenance", async
   assert.equal(verdict.status, "current");
   assert.deepEqual(verdict.edited, []);
 });
+
+// --- second adversarial pass -------------------------------------------------------------------
+
+test("a drifted .codex copy is caught, not just .claude", async () => {
+  // scaffold projects skills into BOTH roots and only .claude was read, so a project whose Codex
+  // copy had drifted reported current while Codex loaded different instructions.
+  const source = await project();
+  const record = await recordFor(source);
+  const root = await project({ record });
+  await mkdir(path.join(root, ".codex", "skills", "nodekit-launch"), { recursive: true });
+  await writeFile(path.join(root, ".codex", "skills", "nodekit-launch", "SKILL.md"), "# a different copy\n", "utf8");
+
+  const verdict = await evaluateSkillFreshness(root, "0.2.1");
+
+  assert.equal(verdict.status, "edited");
+  assert.ok(verdict.edited.some((entry) => entry.includes(".codex")), JSON.stringify(verdict.edited));
+});
+
+test("a record whose skills have ALL been deleted is missing, not no-skills", async () => {
+  // The early return ran before the recorded/present union, so wiping every skill directory read as
+  // nothing to check rather than as everything missing.
+  const source = await project();
+  const record = await recordFor(source);
+  const root = await mkdtemp(path.join(tmpdir(), "skillfresh-wiped-"));
+  await mkdir(path.join(root, ".claude", "skills"), { recursive: true });
+  await writeFile(path.join(root, ".claude", "skills", SKILL_PROVENANCE_FILE), JSON.stringify(record), "utf8");
+
+  const verdict = await evaluateSkillFreshness(root, "0.2.1");
+
+  assert.equal(verdict.status, "missing");
+  assert.deepEqual(verdict.missing, ["nodekit-launch"]);
+});
+
+test("a missing skill outranks version skew, because absent beats out-of-date", async () => {
+  const source = await project();
+  const record = await recordFor(source, "0.2.1");
+  const root = await mkdtemp(path.join(tmpdir(), "skillfresh-both-"));
+  await mkdir(path.join(root, ".claude", "skills"), { recursive: true });
+  await writeFile(path.join(root, ".claude", "skills", SKILL_PROVENANCE_FILE), JSON.stringify(record), "utf8");
+
+  const verdict = await evaluateSkillFreshness(root, "0.9.0");
+
+  // Skew is real here too, but reporting it hid the absent skill from the formatted line entirely.
+  assert.equal(verdict.status, "missing");
+  assert.match(formatSkillFreshness(verdict), /cannot load an instruction file that is not there/);
+});

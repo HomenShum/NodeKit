@@ -107,6 +107,22 @@ export function evaluateCapability(contract, measurement) {
   // while being an hour EARLIER, so a contract could be authored after its own evidence and settle
   // clean. Codex reproduced exactly that against this gate, which makes the whole mechanism
   // decorative — the one comparison the design turns on, defeated by a timezone offset.
+  // Strict UTC ISO, not whatever Date.parse will swallow. Date.parse accepts "08/03/26 10:00" and
+  // "Aug 3 2026 10:00" and resolves them in the RUNTIME'S LOCAL ZONE, so the same file settles
+  // differently in two timezones and a date-only "2026-08-03" becomes a midnight instant nobody
+  // observed. Codex settled load-bearing with a measurement that was actually earlier. The contract
+  // already had to be strict UTC by schema; the measurement was the half nobody validated.
+  // A full ISO instant: date, time, and an explicit zone that is either Z or a numeric offset.
+  // An offset is unambiguous and stays allowed — the earlier bypass it enabled is caught by
+  // comparing parsed instants, not by banning the format. What is refused is anything whose meaning
+  // depends on where it is read: date-only, and every locale form Date.parse quietly accepts.
+  const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
+  if (isNonEmptyString(measurement.observedAt) && !ISO_INSTANT.test(measurement.observedAt)) {
+    refusals.push(
+      `the measurement's observedAt (${measurement.observedAt}) is not a full ISO instant like 2026-08-03T17:00:00.000Z or 2026-08-03T19:00:00+02:00 — `
+        + "a date-only or locale-dependent value resolves differently on different machines, so it cannot establish which came first",
+    );
+  }
   const declaredMs = Date.parse(contract.declaredAt);
   const observedMs = Date.parse(measurement.observedAt ?? "");
   if (isNonEmptyString(measurement.observedAt) && !Number.isFinite(observedMs)) {
@@ -160,9 +176,14 @@ export function evaluateCapability(contract, measurement) {
   // A consumer that is declared but unreachable is a plan, not a caller. Computing reachability and
   // then deciding on the declared list was a real hole: supplying consumersReachable: [] returned
   // load-bearing with reachable 0, over a reason string that said a consumer "can reach it".
-  const reachableUserFacing = userFacing.filter(
-    (entry) => !measurement.consumersReachable || measurement.consumersReachable.includes(entry.consumerId),
-  );
+  // Absent consumersReachable is UNMEASURED, not "all reachable". Treating omission as success let
+  // a caller who measured nothing get load-bearing with reachableUserFacing: 1, over a reason
+  // saying the consumers were "measured reachable" — a sentence about a measurement that never
+  // happened. It is the same absence-versus-zero rule the rest of this repository turns on.
+  const reachabilityMeasured = Array.isArray(measurement.consumersReachable);
+  const reachableUserFacing = reachabilityMeasured
+    ? userFacing.filter((entry) => measurement.consumersReachable.includes(entry.consumerId))
+    : [];
 
   // Order matters. A killed capability is killed whether or not anything calls it; asking "who
   // consumes this?" about a capability that failed its own threshold is the wrong next question.
@@ -179,6 +200,17 @@ export function evaluateCapability(contract, measurement) {
 
   // Decorative outranks a clean measurement. This is the middle state — real, measured, and serving
   // no question anybody asked — which is the worst outcome to ship and the easiest to miss.
+  // Nobody looked. That is undecided, and distinct from looking and finding nothing.
+  if (!reachabilityMeasured && userFacing.length > 0) {
+    return {
+      verdict: "insufficient",
+      capability: contract.capability,
+      triggered: [],
+      unmeasured: [...unmeasured, "consumersReachable"],
+      consumers: { declared: contract.consumers.length, userFacing: userFacing.length, reachable: null, reachableUserFacing: null },
+      reason: "no measurement of which consumers can actually reach this capability; a declared consumer is a plan until something confirms it, and omission must not read as confirmation",
+    };
+  }
   if (reachableUserFacing.length === 0) {
     return {
       verdict: "decorative",

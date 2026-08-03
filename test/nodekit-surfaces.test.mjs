@@ -135,13 +135,16 @@ test("every CLI verb is either indexed or deliberately internal", async () => {
     "dev", "demo", "doctor", "compile", "inspect", "create", "adopt", "certify", "tour",
     "dashboard", "explain", "repo check", "registry check", "ecosystem check",
   ]);
+  // ALL nodekit prefixes in an entry, not just the first. One surface legitimately covers two
+  // command families (models and routing are one decision), and reading only the leading match left
+  // the second family unindexed while the entry plainly named it.
   const indexed = new Set(
-    SURFACES.flatMap((surface) => {
-      const match = /nodekit ([a-z-]+(?: [a-z-]+)?)/.exec(surface.entry);
-      if (!match) return [];
-      const verb = match[1].trim();
-      return /^[a-z-]+ [a-z-]+$/.test(verb) ? [verb, verb.split(" ")[0]] : [verb];
-    }),
+    SURFACES.flatMap((surface) =>
+      [...surface.entry.matchAll(/nodekit ([a-z-]+(?: [a-z-]+)?)/g)].flatMap((match) => {
+        const verb = match[1].trim();
+        return /^[a-z-]+ [a-z-]+$/.test(verb) ? [verb, verb.split(" ")[0]] : [verb];
+      }),
+    ),
   );
 
   const unclassified = [...verbs].filter((verb) => {
@@ -163,4 +166,7 @@ test("every CLI verb is either indexed or deliberately internal", async () => {
 // unindexed verb pushes past it and fails, so the number can only go down. Lowering it as verbs get
 // indexed is the point. Raising it is the thing to argue about in review, and the reason it is a
 // named constant rather than a magic number buried in an assertion.
-const UNINDEXED_VERB_CEILING = 52;
+// Zero. Every CLI verb is now either in the surface index or in the deliberately-internal list, so
+// this is no longer a ratchet to lower but a floor to hold: any new verb fails until it is either
+// indexed or explicitly declared internal, which is the decision that was previously never made.
+const UNINDEXED_VERB_CEILING = 0;

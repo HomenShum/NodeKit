@@ -176,3 +176,52 @@ test("an empty file list is insufficient, not a pass — the coverage check did 
   assert.equal(verdict.insufficient, true);
   assert.match(formatSessionContract(verdict), /an unrun check is not a passed one/);
 });
+
+// --- second adversarial pass -------------------------------------------------------------------
+
+test("the same file written four ways is one file, and two owners of it collide", () => {
+  // Each of these pairs passed as two different paths, so two sessions owned one file and the plan
+  // read clean. Separator-only normalisation was not enough.
+  for (const [left, right] of [
+    ["app/**", "./app/nested/package.json"],
+    ["app/nested/**", "app//nested/package.json"],
+    ["package.json", "app/../package.json"],
+  ]) {
+    const verdict = evaluateSessionContract(
+      { ...REAL_PLAN(), sessions: [{ id: "A", owns: [left] }, { id: "B", owns: [right] }] },
+      ["app/nested/package.json", "package.json"],
+    );
+    assert.equal(verdict.passed, false, `${left} vs ${right} did not collide`);
+    assert.ok(verdict.faults.some((entry) => /both own/.test(entry)), `${left} vs ${right}`);
+  }
+});
+
+test("a manifest tracked with different case is still a contended manifest", () => {
+  // On a case-insensitive filesystem `Package.json` is the same contended file, and matching
+  // case-sensitively reported a repository with no manifests at all.
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["src/**"] }] },
+    ["src/main.mjs", "Package.json"],
+  );
+
+  assert.equal(verdict.contendedManifestsPresent, 1);
+  assert.equal(verdict.passed, false);
+});
+
+test("KNOWN LIMIT: symlinked aliases are not resolved, and this pins it", () => {
+  // Two lexically distinct paths resolving to one file through a symlink still evade collision
+  // detection. Resolving them means touching the filesystem, and this stays a pure function over
+  // the caller's list. Recorded as a stated limit so it is a known gap rather than a discovery —
+  // if this ever starts failing, the limitation was closed and the test should become the assertion.
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["linked/**"] }, { id: "B", owns: ["target/**"] }] },
+    ["target/package.json", "linked/package.json"],
+  );
+
+  // It PASSES, and that is the honest statement of the limit: each path is classified by one
+  // session, the collision between them is invisible, and nothing else catches it. I first wrote
+  // this assertion as `passed === false` on the theory that the coverage check would save it. It
+  // does not, and asserting the flattering version would have hidden the gap inside its own test.
+  assert.equal(verdict.passed, true);
+  assert.ok(!verdict.faults.some((entry) => /both own/.test(entry)));
+});

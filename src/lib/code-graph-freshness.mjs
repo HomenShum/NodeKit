@@ -26,6 +26,17 @@ import path from "node:path";
 // would repeat the mistake already made once today, where the fix pointed at a command that could
 // not run.
 
+// WHAT THIS DOES NOT ESTABLISH, stated because the distinction is easy to lose: it compares the
+// graph's pinned COMMIT against HEAD. It does not read the graph's nodes against the source tree, so
+// a graph pinned exactly at HEAD whose nodes name files that do not exist reports `current` — that
+// is a correctness question about the analyser's output, and answering it here would mean
+// reimplementing the analyser. Freshness and accuracy are different claims and only the first is
+// made.
+//
+// Its verdict is also REPORTED, never fatal to preflight. A project legitimately pins an old graph,
+// and failing preflight over drift would train people to skip preflight, which costs more than the
+// drift it catches.
+
 export const GRAPH_DIR = ".understand-anything";
 export const GRAPH_FILE = "knowledge-graph.json";
 
@@ -61,13 +72,13 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
   if (!graphCommit || !head) {
     return { ...base, status: "unknown", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
   }
-  // An empty graph pinned at HEAD is perfectly fresh and answers nothing. Reporting it current is
-  // the vacuous pass: "checked" and "nothing to check" must not read the same.
-  if (nodes === 0) {
-    return { ...base, status: "empty", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
-  }
   if (graphCommit === head) {
-    return { ...base, status: "current", commitsBehind: 0, filesChanged: 0, sourceFilesChanged: 0 };
+    // Emptiness is checked here rather than before the commit comparison. Ordering it first was a
+    // defect introduced by the previous fix: an empty graph pinned to a DESCENDANT reported `empty`
+    // and masked that its commit was unrelated to this checkout, which is the larger fact.
+    return nodes === 0
+      ? { ...base, status: "empty", commitsBehind: null, filesChanged: null, sourceFilesChanged: null }
+      : { ...base, status: "current", commitsBehind: 0, filesChanged: 0, sourceFilesChanged: 0 };
   }
 
   // A pinned commit that is not an ANCESTOR of HEAD. Two different situations reach here and both
@@ -95,6 +106,10 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
         ? "the pinned commit exists but is not an ancestor of HEAD; the graph describes a checkout this one does not contain"
         : "the pinned commit is not in this repository's history",
     };
+  }
+
+  if (nodes === 0) {
+    return { ...base, status: "empty", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
   }
 
   const behind = Number.parseInt(git(root, ["rev-list", "--count", `${graphCommit}..HEAD`]) ?? "", 10);

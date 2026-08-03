@@ -156,3 +156,19 @@ test("a graph with no pinned commit is unknown, never current", async () => {
   assert.equal(verdict.status, "unknown");
   assert.match(formatCodeGraphFreshness(verdict), /unknown rather than fine/);
 });
+
+test("an EMPTY graph pinned to a descendant reports unrelated, not empty", async () => {
+  // A defect introduced by the previous fix: ordering the zero-node check before ancestry meant an
+  // empty graph on an unrelated commit reported `empty`, masking the larger fact that its commit is
+  // not in this checkout's history at all.
+  const root = await repoWithGraph({ commits: 2, graphAt: "HEAD", nodes: 0 });
+  git(root, ["checkout", "-q", "HEAD~1"]);
+  const verdict = await evaluateCodeGraphFreshness(root);
+
+  assert.equal(verdict.status, "unrelated");
+});
+
+test("an empty graph pinned at HEAD is still empty", async () => {
+  const root = await repoWithGraph({ commits: 1, nodes: 0 });
+  assert.equal((await evaluateCodeGraphFreshness(root)).status, "empty");
+});
