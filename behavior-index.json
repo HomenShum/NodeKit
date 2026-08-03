@@ -1077,7 +1077,7 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
-      "line": 648
+      "line": 660
     },
     {
       "behaviorId": "inv:canonical-promotion-requires-verified-approval",

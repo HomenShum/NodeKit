@@ -11,6 +11,9 @@
     ]
   },
   "status": "scope-limited",
+  "dimensionsTested": [
+    "single open-ended frontend request with no protected product contract"
+  ],
   "introducedByEventId": "evt:nodevideo-topology-contract",
   "supportingEvidenceIds": [],
   "contradictingEvidenceIds": [

@@ -605,6 +605,18 @@ export async function verifyEvolutionLedger(repoRoot) {
     requireRefs(assumption.id, assumption.supportingEvidenceIds, ["nodekit.evolution-evidence/v1"]);
     requireRefs(assumption.id, assumption.contradictingEvidenceIds, ["nodekit.evolution-evidence/v1"]);
     if (["disproven", "superseded"].includes(assumption.status) && assumption.contradictingEvidenceIds.length === 0) issues.push(`${assumption.id} is ${assumption.status} without contradicting evidence`);
+    // "Supported" is a claim that generalises, and without the axis it generalises to axes nobody
+    // measured. Eight sequential calls drawing no complaint is not evidence about twelve at once.
+    if (["supported", "scope-limited"].includes(assumption.status) && !(assumption.dimensionsTested?.length > 0)) {
+      issues.push(`${assumption.id} is ${assumption.status} without naming the dimension its evidence measured`);
+    }
+    // A measured axis with no evidence behind it is a story about a probe. Either kind counts: the
+    // 429 that bounds a concurrency claim is a contradicting result and still a real measurement.
+    if (assumption.dimensionsTested?.length > 0
+      && assumption.supportingEvidenceIds.length === 0
+      && assumption.contradictingEvidenceIds.length === 0) {
+      issues.push(`${assumption.id} names tested dimensions but cites no evidence of either kind`);
+    }
   }
   for (const invariant of ledger.invariants) {
     requireRefs(invariant.id, [invariant.introducedByEventId], [EVOLUTION_EVENT_SCHEMA]);

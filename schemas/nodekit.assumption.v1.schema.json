@@ -12,8 +12,18 @@
     "introducedByEventId": { "$ref": "#/$defs/id" },
     "invalidatedByEventId": { "$ref": "#/$defs/id" },
     "supportingEvidenceIds": { "$ref": "#/$defs/ids" },
-    "contradictingEvidenceIds": { "$ref": "#/$defs/ids" }
+    "contradictingEvidenceIds": { "$ref": "#/$defs/ids" },
+    "dimensionsTested": {
+      "description": "The axes the supporting evidence actually exercised — 'sequential', 'concurrent', 'sustained', 'burst', 'cold-start', 'large-input', whatever the probe varied. Free text because the interesting axis is usually the one nobody enumerated in advance. An assumption is only supported along the axes it was measured on: eight sequential calls that drew no complaint say nothing about twelve at once, and the gap between those two sentences is where a 429 lives. Naming the axis is what stops a measurement travelling to a question it never asked.",
+      "$ref": "#/$defs/strings"
+    }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["supported", "scope-limited"] } }, "required": ["status"] },
+      "then": { "required": ["dimensionsTested"], "properties": { "dimensionsTested": { "minItems": 1 } } }
+    }
+  ],
   "$defs": {
     "id": { "type": "string", "pattern": "^[a-z][a-z0-9._:-]+$" },
     "text": { "type": "string", "minLength": 1 },
