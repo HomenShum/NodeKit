@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 113,
-    "modules": 75,
-    "tests": 82
+    "modules": 76,
+    "tests": 83
   },
   "architecture": [
     {
@@ -307,6 +307,7 @@
     "official-pricing-proof.mjs",
     "opportunity-compiler.mjs",
     "portable-value.mjs",
+    "preflight.mjs",
     "presentation-pipeline.mjs",
     "protected-browser-evidence.mjs",
     "receipt-bindings.mjs",
@@ -390,6 +391,7 @@
     "opportunity-compiler.test.mjs",
     "package-install-proof-runner.test.mjs",
     "postgres-adapter.test.mjs",
+    "preflight.test.mjs",
     "presentation-pipeline.test.mjs",
     "propose-evolution-cli.test.mjs",
     "protected-evaluator-image-binding.test.mjs",
