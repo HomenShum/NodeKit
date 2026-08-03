@@ -44,13 +44,21 @@ deferred:
 
   - id: preflight-and-integration-records-unwired
     what: >-
-      src/lib/preflight.mjs and src/lib/integration-record.mjs are tested libraries with no caller.
-      Nothing runs preflight before a session, and no integrations/*.yaml records exist.
+      src/lib/preflight.mjs and src/lib/integration-record.mjs were tested libraries with no caller.
+      Nothing ran preflight before a session, and no integrations/*.yaml records exist.
     why: >-
       Wiring preflight to a session start needs a decision about where a session begins for this
       repo, which is a question for the owner rather than an implementation detail to guess at.
     deferredAt: "2026-08-02"
-    status: open
+    status: accepted-risk
+    outcome: >-
+      Half closed, and the remaining half is deliberately left to the owner. `nodekit preflight`
+      now exists and takes --session-started-at explicitly rather than inferring a session boundary
+      from process uptime, which would have answered a question only the caller knows. What is
+      still absent is a harness.yaml for this repository and any integrations/*.yaml records:
+      writing either would mean inventing declarations nobody verified, which is the failure the
+      surrounding contracts exist to prevent. The libraries and the command are proven; the
+      declarations are the owner''s to make.
 
   - id: studio-working-tree-edit
     what: >-

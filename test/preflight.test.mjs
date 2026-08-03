@@ -132,3 +132,33 @@ test("the manifest refuses declarations that would read as complete", async () =
     await rm(missing, { recursive: true, force: true });
   }
 });
+
+// A library nobody calls is a library nobody runs. This is the caller.
+test("the CLI exposes preflight, exits non-zero when blocked, and passes with no manifest", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const { fileURLToPath } = await import("node:url");
+  const platformRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const cli = (args, cwd = platformRoot) =>
+    spawnSync(process.execPath, [path.join(platformRoot, "src/cli.mjs"), "preflight", ...args], { cwd, encoding: "utf8" });
+
+  const blocked = await manifestDir(plugin({ installedAt: "2026-08-02T14:00:00.000Z" }));
+  try {
+    const result = cli(["--repo-root", blocked, "--session-started-at", SESSION_START, "--json"]);
+    assert.equal(result.status, 1, "a blocking dependency that cannot take effect must stop the session");
+    const verdict = JSON.parse(result.stdout);
+    assert.equal(verdict.passed, false);
+    assert.ok(verdict.blockers.some((b) => /inert right now/.test(b)));
+  } finally {
+    await rm(blocked, { recursive: true, force: true });
+  }
+
+  // No declared harness is not a failure; inventing one would make the gate noise.
+  const empty = await manifestDir();
+  try {
+    const result = cli(["--repo-root", empty]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /no harness dependencies declared/);
+  } finally {
+    await rm(empty, { recursive: true, force: true });
+  }
+});

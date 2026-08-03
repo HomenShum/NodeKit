@@ -154,6 +154,9 @@ function printHelp() {
 Usage:
   nodekit explain --for <any|node|convex|python|postgres|supabase|frontend> [--json]
       Which surfaces apply to your project, and which you can stop reading. Start here.
+  nodekit preflight [--repo-root <path>] [--session-started-at <iso>] [--json]
+      Run BEFORE the work: refuses a session whose harness.yaml declares a blocking dependency
+      that cannot take effect yet, or an external service with no recent liveness probe.
   nodekit create <directory> --name <slug> --brief <text>
       [--provider openrouter] [--model openai/gpt-4o-mini] [--backend filesystem]
       [--nodekit-specifier <npm-or-file-spec>] [--sponsors <comma-list>]
@@ -1852,6 +1855,20 @@ async function main() {
   }
   if (first === "adopt") {
     await runAdopt(parsed);
+    return;
+  }
+  if (first === "preflight") {
+    const { evaluatePreflight, formatPreflight, readHarnessManifest } = await import("./lib/preflight.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const manifest = await readHarnessManifest(repoRoot);
+    // Session start is explicit rather than guessed: the whole restart rule turns on whether the
+    // install predates the session, and inferring that from process uptime would quietly answer a
+    // question the caller is the only one who actually knows.
+    const verdict = evaluatePreflight(manifest, {
+      sessionStartedAt: parsed.options["session-started-at"] ?? new Date().toISOString(),
+    });
+    console.log(parsed.options.json ? JSON.stringify({ ...verdict, present: manifest.present }, null, 2) : formatPreflight(verdict));
+    if (!verdict.passed) process.exitCode = 1;
     return;
   }
   if (first === "explain") {
