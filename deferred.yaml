@@ -1,0 +1,35 @@
+# Open threads that were deliberately left undone.
+#
+# Deferring is fine. Deferring silently is how a considered decision becomes a surprise three weeks
+# later, when nobody can name what was consciously skipped. `nodekit-submission-prepare` reads this
+# file and refuses to report a submission ready while anything here is still `open`.
+#
+# status: open | resolved | accepted-risk
+#   open          — nobody has decided yet. This is the state that blocks.
+#   resolved      — it was done. `outcome` says what closed it.
+#   accepted-risk — it will not be done, on purpose. `outcome` says why that is acceptable.
+#
+# Seeded only with threads observed directly. An entry nobody verified is the thing this file exists
+# to prevent, and it would be a strange way to start.
+
+deferred:
+  - id: docs-onboarding-compact-loop
+    what: >-
+      test/docs-onboarding "a fresh human or coding agent reaches the compact loop before the
+      detailed manual" fails, and fails identically at a clean HEAD with no local changes.
+    why: >-
+      Observed while verifying the reference-loop and provenance contract work. It is a
+      pre-existing failure in the onboarding docs ordering, unrelated to those changes, and folding
+      a docs fix into contract commits would have made both harder to review.
+    deferredAt: "2026-08-02"
+    status: open
+
+  - id: studio-working-tree-edit
+    what: >-
+      src/studio.mjs carries an uncommitted local modification that predates this session and was
+      excluded from all seven contract commits.
+    why: >-
+      It is the repository owner's in-progress work. Committing someone else's unfinished edit to
+      main as a side effect of unrelated schema changes is not a decision this session gets to make.
+    deferredAt: "2026-08-02"
+    status: open
