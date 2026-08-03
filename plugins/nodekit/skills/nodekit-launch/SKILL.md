@@ -32,6 +32,89 @@ those words; do not state it. And a late reframe is not evidence: seeing what a 
 reaching for a matching technology feels responsive, but a switch must cite evidence at least as
 strong as whatever established the original choice. `nodekit audience check` enforces both.
 
+## The surfaces this repository already has, and when each one is due
+
+Read this section before step 1. It exists because of a measured failure: on a real build, NodeKit
+carried 116 schemas and this skill mentioned two of the concepts behind them, so every contract
+needed a human who already knew it existed to ask for it. That is what "a lot of manual prompting"
+means, and it is a routing failure rather than a coverage one. Nothing below is new work; it is a
+map to work already shipped.
+
+Run `nodekit explain --for <your stack>` first. It answers which surfaces apply to this project and
+which do not, and it exists because reading the package manifest instead led to the conclusion
+"Convex-shaped, skip it" and missed the entire design-contract surface for three hours.
+
+**Before any work starts**
+
+| Gate | Command | What it prevents |
+|---|---|---|
+| Harness liveness | `nodekit preflight` | A plugin installed mid-session that needs a restart is inert for the whole run, and nobody finds out until hour six. Declare it in `harness.yaml`. |
+| Open threads | `nodekit deferrals check` | A deliberate deferral that lives only in chat scrollback becomes a surprise three weeks later. `deferred.yaml`, status `open` blocks. |
+
+**Before building any capability — the measurement gate**
+
+`nodekit capability declare --capability <slug> --out <path>`, filled in, committed, BEFORE the
+build. Then `nodekit capability settle` afterwards. The single highest-leverage question in a build
+is *what will we measure that this helps with, and what result would make us delete it?* — and it is
+only a bet if it is written down first. `settle` refuses a contract that postdates its own
+measurement, because a kill condition authored once the number is known always passes.
+
+Every `killCondition` clause is a structured threshold — `metric`, `comparator`, `value` — never
+prose. Prose kill conditions get argued with; `below 4` gets evaluated. A clause naming a metric
+nobody measured returns `insufficient`, so measuring only the flattering metric cannot report a pass.
+
+A capability that beats every threshold and is called only by itself is **decorative**, which is a
+verdict, not a warning. The middle state — it exists, it costs latency, it answers no question a
+user asked — is the worst outcome to ship and is invisible to a purely numeric check.
+
+**Before claiming any external capability** (continued): record it with the axis you tested named
+explicitly — `dimensionTested: concurrent` next to a claim measured concurrently. A claim must not
+travel to an axis nobody probed.
+
+**Before making any library load-bearing**
+
+Write `integrations/<lib>.yaml`: resolved version, docs fetched today, deprecations found, and what
+introspecting the installed package showed. Never write integration code from memory — that is how a
+primitive deprecated two versions ago ships. Docs describe the API; introspection describes *your*
+installed copy; do both, in that order.
+
+Answer `frameworkVsProtocol` explicitly. The default is to adopt the advertised framework, and
+asking the question is what avoids it: three separate builds found the protocol underneath was ~40
+lines, or that they would use a tenth of a framework and inherit its costs whole.
+
+**Before claiming any external capability**
+
+State which axis you measured. A concurrency claim backed by a sequential probe is how eight clean
+sequential calls became "no meaningful rate limiting" and then a 429 at twelve concurrent. The claim
+must not travel to an axis nobody tested.
+
+**Before running concurrent sessions**
+
+`nodekit sessions check --contract <session-contract.json>`, and it must pass before you launch
+anything. It enumerates the contended manifests that actually exist in the repository and rejects a
+plan leaving any of them unclassified — `sharedWrite` with an `arbiter`, or owned by exactly one
+session. `defaults.outsideOwnedPaths` must be `read-only`, and `handback.required` must include
+`discoveredFacts`.
+
+The failure this catches is not sloppy ownership. It is ownership that is careful about the files
+the work is about and silent about the files the work incidentally touches: two sessions launched
+with genuinely clean, non-overlapping paths, both about to add dependencies, and `pyproject.toml`
+and `uv.lock` belonging to neither. The plan looked complete because every file anybody had thought
+about was assigned.
+
+`discoveredFacts` is the field that compounds. A session that returns only files makes the next
+session pay again for every discovery this one made.
+
+**Before calling anything verified**
+
+A green suite is *unfalsified by the author*, not verified. Adversarial review is a separate
+instrument and finds a different class: on one build it returned seven P0s against a fully green
+suite. `nodekit journey verify` requires adversarial evidence or a declared absence.
+
+When a review finds a P0, the fix ships a test **and** that test must fail against the pre-fix
+commit. Tests written alongside a bug become its guardians: three tests once failed after a fix
+because they had pinned the buggy behaviour.
+
 ## Sponsor rule
 
 A dependency in `package.json` is not sponsor usage. Each sponsor needs an official-source research note, deterministic fixture, bounded live smoke, visible role in the main workflow, and sanitized receipt.

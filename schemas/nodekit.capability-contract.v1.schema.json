@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nodekit.dev/schemas/nodekit.capability-contract.v1.schema.json",
+  "title": "NodeKit capability contract v1",
+  "$comment": "A falsifiable bet, written BEFORE a capability is built. The question this exists to force is 'what will we measure that this helps with, and what result would make us delete it?' — asked before the build, when the answer is a prediction, rather than after, when it is a defence. declaredAt must precede the measurement it is judged against; a contract written afterwards is a discussion, not a bet, and the gate refuses it.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "capability",
+    "declaredAt",
+    "questionItServes",
+    "whyExistingToolsCannot",
+    "measuredImprovement",
+    "killCondition",
+    "consumers"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "nodekit.capability-contract/v1" },
+    "capability": {
+      "$comment": "The thing being proposed. One capability per contract; a contract covering two is two bets nobody can settle separately.",
+      "$ref": "#/$defs/slug"
+    },
+    "declaredAt": {
+      "$comment": "When the bet was placed. Load-bearing: the gate compares this against the measurement's observedAt and refuses a contract that postdates its own evidence.",
+      "$ref": "#/$defs/utcDateTime"
+    },
+    "questionItServes": {
+      "$comment": "A question a USER asks, in their words. Not a capability restated as a question. 'Which sponsors also work on what X works on?' is one; 'can we traverse the graph?' is the capability wearing a question mark.",
+      "$ref": "#/$defs/prose"
+    },
+    "whyExistingToolsCannot": {
+      "$comment": "Why the tools already in the system cannot answer it. If this is hard to write, that is the finding.",
+      "$ref": "#/$defs/prose"
+    },
+    "measuredImprovement": {
+      "type": "object",
+      "required": ["metric", "baseline", "predicted", "howMeasured"],
+      "additionalProperties": false,
+      "properties": {
+        "metric": { "$ref": "#/$defs/nonEmpty" },
+        "baseline": {
+          "$comment": "What the metric reads WITHOUT the capability, measured rather than assumed. A baseline nobody measured makes every later comparison unfalsifiable.",
+          "type": "number"
+        },
+        "predicted": { "type": "number" },
+        "unit": { "$ref": "#/$defs/nonEmpty" },
+        "howMeasured": {
+          "$comment": "The command or procedure that produces this number, so the same instrument reads the baseline and the result. Two instruments is how a capability wins on paper.",
+          "$ref": "#/$defs/prose"
+        }
+      }
+    },
+    "killCondition": {
+      "$comment": "Structured, not prose. Prose kill conditions are argued with; thresholds are evaluated. ANY clause triggering means the capability is killed. Empty is forbidden — a bet with no losing outcome is not a bet.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["metric", "comparator", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "metric": { "$ref": "#/$defs/nonEmpty" },
+          "comparator": {
+            "$comment": "Read as: kill if the observed value is <comparator> <value>.",
+            "enum": ["below", "above", "at-most", "at-least", "equals"]
+          },
+          "value": { "type": "number" },
+          "unit": { "$ref": "#/$defs/nonEmpty" },
+          "rationale": { "$ref": "#/$defs/prose" }
+        }
+      }
+    },
+    "consumers": {
+      "$comment": "What will CALL this capability once built, named specifically. A capability whose only consumer is itself — padding its own output, enriching a list nobody asked to be enriched — is decorative by definition, and the gate says so regardless of how well it measures. Empty is allowed and is an immediate decorative verdict, which is the honest state for a capability built before anything wanted it.",
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": ["consumerId", "kind"],
+        "additionalProperties": false,
+        "properties": {
+          "consumerId": { "$ref": "#/$defs/nonEmpty" },
+          "kind": {
+            "$comment": "user-facing means a person can ask for it. internal-only is the padding case: real, but not a reason to keep a capability alive on its own.",
+            "enum": ["user-facing-question", "internal-only", "other-capability"]
+          },
+          "reachableFrom": { "$ref": "#/$defs/nonEmpty" }
+        }
+      }
+    },
+    "decoupledFrom": {
+      "$comment": "When a capability decision is entangled with an infrastructure decision, name the confound and say whether it can be removed before deciding either. Choosing a capability while its hosting cost is still in the comparison answers the wrong question.",
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["confound", "separable", "detail"],
+        "additionalProperties": false,
+        "properties": {
+          "confound": { "$ref": "#/$defs/nonEmpty" },
+          "separable": { "type": "boolean" },
+          "detail": { "$ref": "#/$defs/prose" },
+          "costToSeparate": { "$ref": "#/$defs/prose" }
+        }
+      }
+    },
+    "adoptionDecision": {
+      "$comment": "If the capability is a dependency rather than code. fractionUsed is the field that catches adopting a framework for a tenth of it, and inheritedCosts is what that tenth drags in.",
+      "type": "object",
+      "required": ["advertisedPath", "adopted", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "advertisedPath": { "$ref": "#/$defs/nonEmpty" },
+        "adopted": { "enum": ["framework", "protocol-only", "insight-only", "rejected"] },
+        "fractionUsed": { "$ref": "#/$defs/nonEmpty" },
+        "inheritedCosts": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/prose" }
+        },
+        "rationale": { "$ref": "#/$defs/prose" }
+      }
+    }
+  },
+  "$defs": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,62}$" },
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "prose": { "type": "string", "minLength": 12, "maxLength": 2048 },
+    "utcDateTime": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    }
+  }
+}

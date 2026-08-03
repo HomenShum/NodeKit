@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Full command implementation. The public wrapper keeps reference-loop startup bounded.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -16,6 +16,9 @@ import { compareMotionPortability } from "./lib/motion-portability.mjs";
 import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
 import { BuildEvidenceRefusal, produceBuildEvidencePack } from "./lib/build-evidence-producer.mjs";
 import { StoryPackRefusal, formatStoryPack, produceStoryPack } from "./lib/story-pack-producer.mjs";
+import { CapabilityContractRefusal, evaluateCapability, formatCapabilityVerdict, parseCapabilityContract } from "./lib/capability-contract.mjs";
+import { validateSchema as validateNodekitSchema } from "./lib/schema-validation.mjs";
+import { SessionContractRefusal, evaluateSessionContract, formatSessionContract } from "./lib/session-contract.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -179,6 +182,9 @@ Usage:
   nodekit journey verify [--repo-root <path>] [--json]
   nodekit journey build-evidence --contract <opportunity-contract.json>
       [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
+  nodekit sessions check --contract <session-contract.json> [--repo-root <path>] [--json]
+  nodekit capability declare --out <capability-contract.json> --capability <slug> [--json]
+  nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json> [--json]
   nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
       --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
@@ -378,7 +384,110 @@ async function runJourneyVerify(parsed) {
  * The EXPLAIN stage. Audience, surfaces, claims and narrative are structured enough that flags would
  * mangle them, so they arrive as one --story file; the producer decides which claims survive.
  */
+/**
+ * The measurement gate. `declare` writes the bet before the build; `settle` scores it afterwards and
+ * refuses if the bet postdates its own evidence.
+ */
+/** Reject a multi-session plan before launch, while rejecting it is still free. */
+async function runSessionsCheck(parsed) {
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error("usage: nodekit sessions check --contract <session-contract.json> [--repo-root <path>]");
+    process.exitCode = 2;
+    return;
+  }
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    // Tracked files only. An untracked lockfile is not yet a shared-write problem, and demanding a
+    // classification for a build artifact is the noise that gets a gate turned off.
+    const listed = spawnSync("git", ["ls-files"], { cwd: root, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    const repoFiles = listed.status === 0 ? listed.stdout.split("\n").filter(Boolean) : [];
+    if (listed.status !== 0) {
+      console.error("sessions check: not a git repository, so no file list could be read; the manifest coverage check did NOT run");
+      process.exitCode = 1;
+      return;
+    }
+    const verdict = evaluateSessionContract(contract, repoFiles);
+    printStructured(verdict, parsed, formatSessionContract);
+    if (!verdict.passed) process.exitCode = 1;
+  } catch (error) {
+    if (error instanceof SessionContractRefusal) {
+      console.error(`SESSION CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runCapability(parsed, mode) {
+
+  if (mode === "declare") {
+    const capability = parsed.options.capability;
+    const out = parsed.options.out;
+    if (typeof capability !== "string" || typeof out !== "string") {
+      console.error("usage: nodekit capability declare --capability <slug> --out <capability-contract.json>");
+      process.exitCode = 2;
+      return;
+    }
+    // A template with every field present and obviously unanswered. Blanks an author must replace
+    // beat a form they can submit unread, which is how a kill condition becomes a formality.
+    const template = {
+      schemaVersion: "nodekit.capability-contract/v1",
+      capability,
+      declaredAt: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
+      questionItServes: "REPLACE: a question a USER asks, in their words — not this capability with a question mark on it",
+      whyExistingToolsCannot: "REPLACE: why the tools already here cannot answer it. If this is hard to write, that is the finding.",
+      measuredImprovement: {
+        metric: "REPLACE: what you will count",
+        baseline: 0,
+        predicted: 0,
+        howMeasured: "REPLACE: the command that reads this number, used for BOTH baseline and result",
+      },
+      killCondition: [
+        { metric: "REPLACE: same metric", comparator: "below", value: 0, rationale: "REPLACE: what result would make you delete this" },
+      ],
+      consumers: [],
+    };
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), `${JSON.stringify(template, null, 2)}
+`, "utf8");
+    console.log(`CAPABILITY CONTRACT declared: ${out}`);
+    console.log(`  declaredAt ${template.declaredAt} — settle refuses any measurement observed at or before this.`);
+    console.log("  Fill every REPLACE before building. Declaring after the build is the failure this prevents.");
+    return;
+  }
+
+  const { contract: contractPath, measurement: measurementPath } = parsed.options;
+  if (typeof contractPath !== "string" || typeof measurementPath !== "string") {
+    console.error("usage: nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json>");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    const measurement = JSON.parse(await readFile(path.resolve(measurementPath), "utf8"));
+    const errors = await validateNodekitSchema("nodekit.capability-contract.v1.schema.json", contract, contract.capability ?? "capability");
+    if (errors.length > 0) throw new CapabilityContractRefusal(errors);
+    parseCapabilityContract(contract);
+    const verdict = evaluateCapability(contract, measurement);
+    printStructured(verdict, parsed, formatCapabilityVerdict);
+    // Only load-bearing exits clean. decorative, killed and insufficient are all "do not ship this
+    // as-is", and a gate that exits 0 on three of its four verdicts is a report.
+    if (verdict.verdict !== "load-bearing") process.exitCode = 1;
+  } catch (error) {
+    if (error instanceof CapabilityContractRefusal) {
+      console.error(`CAPABILITY CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
 async function runJourneyStoryPack(parsed) {
+
   const { contract, pack, story } = parsed.options;
   if (typeof pack !== "string" || typeof contract !== "string" || typeof story !== "string") {
     console.error(
@@ -2179,6 +2288,14 @@ async function main() {
   }
   if (first === "journey" && second === "build-evidence") {
     await runJourneyBuildEvidence(parsed);
+    return;
+  }
+  if (first === "sessions" && second === "check") {
+    await runSessionsCheck(parsed);
+    return;
+  }
+  if (first === "capability" && (second === "settle" || second === "declare")) {
+    await runCapability(parsed, second);
     return;
   }
   if (first === "journey" && second === "story-pack") {

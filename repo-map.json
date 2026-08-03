@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 116,
-    "modules": 90,
-    "tests": 97
+    "schemas": 117,
+    "modules": 92,
+    "tests": 99
   },
   "architecture": [
     {
@@ -48,6 +48,7 @@
       "atlas",
       "audience",
       "behavior",
+      "capability",
       "certify",
       "check",
       "compile",
@@ -79,6 +80,7 @@
       "reproduce",
       "routing",
       "session",
+      "sessions",
       "skills",
       "tour",
       "trust"
@@ -159,6 +161,7 @@
     "nodekit.builder-gym-verdict.v1.schema.json",
     "nodekit.builder-gym.v1.schema.json",
     "nodekit.canary-receipt.v1.schema.json",
+    "nodekit.capability-contract.v1.schema.json",
     "nodekit.change-evidence-pack.v1.schema.json",
     "nodekit.convex-consumers-verdict.v1.schema.json",
     "nodekit.design-decision.v1.schema.json",
@@ -275,6 +278,7 @@
     "build-evidence-producer.mjs",
     "builder-gym.mjs",
     "builder-journey.mjs",
+    "capability-contract.mjs",
     "caseflow-conformance.mjs",
     "caseflow.mjs",
     "consumer-package-preparation.mjs",
@@ -342,6 +346,7 @@
     "runtime-capabilities.mjs",
     "scaffold.mjs",
     "schema-validation.mjs",
+    "session-contract.mjs",
     "source-hash.mjs",
     "story-pack-producer.mjs",
     "submission-attestation.mjs",
@@ -365,6 +370,7 @@
     "build-evidence-producer.test.mjs",
     "builder-gym.test.mjs",
     "builder-journey.test.mjs",
+    "capability-contract.test.mjs",
     "caseflow.test.mjs",
     "change-story.test.mjs",
     "ci-workflows.test.mjs",
@@ -436,6 +442,7 @@
     "replay-packet.test.mjs",
     "repo-tour.test.mjs",
     "research-verdict-benchmark.test.mjs",
+    "session-contract.test.mjs",
     "story-pack-producer.test.mjs",
     "story-pack-schema.test.mjs",
     "studio-boundary.test.mjs",
