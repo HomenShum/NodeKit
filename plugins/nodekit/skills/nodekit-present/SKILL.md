@@ -76,9 +76,22 @@ The judge reads a YouTube URL directly — verified: Gemini watched one and desc
 seconds and runtime from the URL alone, no download. So a reference is CITED, never copied, which
 dissolves the licensing question entirely and makes the locator a URL plus a timestamp:
 
+The agent builds its own corpus rather than waiting to be handed one. yt-dlp SEARCHES YouTube and
+reads metadata; nothing is downloaded, and Gemini watches the URL:
+
 ```bash
-node judge-video.mjs out/demo.mp4 --reference=<youtube-url> --reference=<youtube-url>
+node find-references.mjs "Raycast product demo" "Linear product demo"   # search, triage, observe
+node judge-video.mjs out/demo.mp4                                       # corpus used automatically
+node judge-video.mjs out/demo.mp4 --no-reference                        # opt out
 ```
+
+`find-references.mjs` triages BEFORE spending tokens: anything over 180s is rejected by default as
+the wrong shape and the wrong cost for a short walkthrough, with the reason printed. Measured on a
+real run — a 39s first-party demo cost 3.9k prompt tokens, an 18-minute one 102k. It then writes
+`references/video/<id>.json`: timestamped atomic facts (`0:07 motion — keycaps turn green on
+keypress`), hookSeconds, statesShown, whatToSteal and whatNotToSteal, plus a `notRun` list for
+anything it could not determine. Facts, never adjectives — a fact scores a candidate, an adjective
+cannot.
 
 The verdict gains a `reference` block — singleMoment, statePacing, motionPurpose, whatToSteal, and
 whatNotToSteal — with a timestamp required for every claim about the reference. Every product launch
