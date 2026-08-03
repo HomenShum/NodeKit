@@ -57,6 +57,36 @@ Do not enter a re-render polish loop over P2s the judge already passed.
 running product must bind to the deployment it came from, and `presentedAs` is what makes that
 checkable.
 
+### Where reference videos come from
+
+Mobbin works for UI because it is a corpus you OBSERVE and CITE, never copy. Video needs the same
+discipline and splits into two kinds, which are not interchangeable:
+
+**FLOW references — what a real product actually does, step by step.**
+[Page Flows](https://pageflows.com) is the direct analogue: recorded user journeys rather than
+screenshots, 20,000+ apps, organised by task — sign up, upgrade, cancel — including the consent
+dialog, the field validation, the empty state and the success screen. Its own framing is the
+anti-hero-shot rule stated from the other side: Mobbin shows you the destination, Page Flows shows
+you the trip. [ScreensDesign](https://screensdesign.com) covers onboarding and paywalls with
+revenue signals attached. Use these to answer "what states does a real flow of this kind contain,
+and which am I skipping?"
+
+**CRAFT references — how a launch film is built.**
+[FlowJam](https://www.flowjam.com/library) is hand-curated SaaS and product-launch videos;
+[Tella's library](https://www.tella.com/examples/demo-video) and
+[Vidico's breakdowns](https://vidico.com/news/best-product-demo-video-examples/) publish examples
+with the reasoning attached. Use these for pacing, the single moment, and where motion is doing work
+versus decorating.
+
+Do not paste either kind into the rubric as prose. Record them the way a Mobbin observation is
+recorded: an atomic fact, with a `locatorDescription` that for video is a TIMESTAMP, cited to the
+source URL. The claim is "at 0:12 the loading state is held for 1.4s before the result", not "their
+pacing is good". A rule derived from a timestamped observation can be scored; an adjective cannot.
+
+Licence: observe and attribute, never re-host. `licenceMode` in the observation schema is an
+enumerated single value on purpose — extending it to a new source class is a licence review and a
+deliberate schema edit, not a typed string.
+
 ## Parallel lane
 
 For a large implementation, run presentation work as a read-mostly lane beside building and QA. Draft the problem and architecture early; replace placeholders only with verified evidence from later gates. Block release only for unsupported claims, missing required proof, stale evidence, or a broken export.
