@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 113,
-    "modules": 77,
-    "tests": 84
+    "schemas": 114,
+    "modules": 78,
+    "tests": 85
   },
   "architecture": [
     {
@@ -46,6 +46,7 @@
       "adopt",
       "agent",
       "atlas",
+      "audience",
       "behavior",
       "certify",
       "check",
@@ -145,6 +146,7 @@
     "nodekit.agent-ease-trial.v2.schema.json",
     "nodekit.assumption.v1.schema.json",
     "nodekit.attestation-signing-key-policy.v1.schema.json",
+    "nodekit.audience-research.v1.schema.json",
     "nodekit.build-evidence-pack.v1.schema.json",
     "nodekit.builder-case.v1.schema.json",
     "nodekit.builder-change-set.v1.schema.json",
@@ -262,6 +264,7 @@
     "atlas-rank.mjs",
     "atlas-retrieval.mjs",
     "atlas.mjs",
+    "audience-contract.mjs",
     "behavior-index.mjs",
     "builder-gym.mjs",
     "builder-journey.mjs",
@@ -338,6 +341,7 @@
     "agent-run.test.mjs",
     "atlas-retrieval.test.mjs",
     "atlas.test.mjs",
+    "audience-contract.test.mjs",
     "behavior-index.test.mjs",
     "build-evidence-pack-schema.test.mjs",
     "builder-gym.test.mjs",

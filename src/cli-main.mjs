@@ -154,6 +154,9 @@ function printHelp() {
 Usage:
   nodekit explain --for <any|node|convex|python|postgres|supabase|frontend> [--json]
       Which surfaces apply to your project, and which you can stop reading. Start here.
+  nodekit audience check [--repo-root <path>] [--json]
+      Was the reviewer researched BEFORE the design was decided, and was the primary document
+      (job description, rubric, RFP) asked for rather than inferred from the web?
   nodekit preflight [--repo-root <path>] [--session-started-at <iso>] [--json]
       Run BEFORE the work: refuses a session whose harness.yaml declares a blocking dependency
       that cannot take effect yet, or an external service with no recent liveness probe.
@@ -1855,6 +1858,17 @@ async function main() {
   }
   if (first === "adopt") {
     await runAdopt(parsed);
+    return;
+  }
+  if (first === "audience" && second === "check") {
+    const { evaluateAudienceContract, readAudienceContract } = await import("./lib/audience-contract.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const { contract, present } = await readAudienceContract(repoRoot);
+    const verdict = evaluateAudienceContract(contract);
+    if (parsed.options.json) console.log(JSON.stringify({ ...verdict, present }, null, 2));
+    else if (verdict.passed) console.log(`AUDIENCE PASS: ${contract.audience.org} — researched before the design was decided.`);
+    else console.log([`AUDIENCE BLOCKED:`, ...verdict.faults.map((f) => `  ${f}`)].join("\n"));
+    if (!verdict.passed) process.exitCode = 1;
     return;
   }
   if (first === "preflight") {
