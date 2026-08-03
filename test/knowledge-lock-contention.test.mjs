@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, open, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -99,4 +99,46 @@ test("a hardlinked lock is still refused", async (t) => {
     /hardlinked/,
     "nlink > 1 must still be refused; only nlink === 0 was relaxed",
   );
+});
+
+// A second, distinct cause of the same symptom, found after the errno fix above and diagnosed the
+// same way: 2 of 32 writers failed under full-suite load, green in isolation on the same machine.
+//
+// The wait budget was a fixed wall clock set once on entry, which conflates "the holder is wedged"
+// with "there are writers queued ahead of me". Thirty-two writers serialize, so the last one waits
+// behind thirty-one predecessors; on a busy machine that exceeds the budget and the caller loses a
+// receipt it was told would be recorded. Raising the constant only moves the cliff to a larger
+// writer count. The budget now resets whenever the lock changes hands, so it measures lack of
+// progress rather than elapsed time.
+//
+// Which creates exactly one new way to be wrong: a holder that never releases must still expire,
+// or the fix has traded a lost receipt for a hang. That is what this asserts.
+test("a wedged holder still expires; the budget measures lack of progress, not patience", async (t) => {
+  const root = await graphRoot(t);
+  const lockPath = path.join(root, ".nodeagent", "knowledge", "graph.json.mutation.lock");
+
+  // Held open and never released, with a token that never changes. Its mtime stays well inside
+  // GRAPH_LOCK_STALE_MS, so stale recovery deliberately does not rescue this — the deadline must.
+  const handle = await open(lockPath, "wx", 0o600);
+  t.after(async () => {
+    await handle.close().catch(() => {});
+    await rm(lockPath, { force: true });
+  });
+  await handle.writeFile(`${JSON.stringify({ acquiredAt: new Date().toISOString(), pid: process.pid, token: "wedged" })}\n`, "utf8");
+  await handle.sync();
+
+  const startedAt = Date.now();
+  await assert.rejects(
+    recordKnowledgeAction(root, {
+      type: "INSPECT_ARTIFACT",
+      receiptId: "knowledge_action_wedged",
+      runId: "run:wedged",
+      caseId: "case:wedged",
+      actorId: "agent:wedged",
+    }),
+    (error) => /mutation lock timed out/.test(error.message) && /wedged rather than busy/.test(error.message),
+  );
+  // It waited the budget rather than giving up on the first contended open — the failure that would
+  // reintroduce the lost receipts this whole file exists to prevent.
+  assert.ok(Date.now() - startedAt >= 9_000, `expected to wait the full budget, waited ${Date.now() - startedAt}ms`);
 });

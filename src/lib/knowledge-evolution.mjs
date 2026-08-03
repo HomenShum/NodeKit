@@ -197,12 +197,44 @@ async function recoverStaleGraphLock(repoRoot, graphPath, lockPath) {
   return true;
 }
 
+/**
+ * Who holds the lock right now, as its identity token — or null if that cannot be observed.
+ *
+ * Never throws. Every failure here (the file vanished between the failed open and this read, a
+ * partial write, a delete-pending handle on Windows) means "no observation", and no observation must
+ * not be mistaken for progress: returning null leaves the caller's stall budget running.
+ */
+async function observeLockHolder(repoRoot, graphPath, lockPath) {
+  try {
+    // The same bounded, symlink-checked reader the release path uses. A raw read here would skip
+    // those guards for the sake of a hint that only ever extends a wait.
+    const file = await stableGraphFile(repoRoot, graphPath, "knowledge graph mutation lock", {
+      targetOverride: lockPath,
+      maximumBytes: 4096,
+    });
+    const holder = JSON.parse(file.bytes.toString("utf8"));
+    return typeof holder?.token === "string" ? holder.token : null;
+  } catch {
+    return null;
+  }
+}
+
 async function withGraphMutationLock(repoRoot, graphPath, operation) {
   const resolved = containedPath(repoRoot, graphPath);
   const lockPath = `${resolved.absolute}.mutation.lock`;
   const root = path.resolve(repoRoot);
   await ensureSecureGraphDirectory(root, path.dirname(lockPath), "knowledge graph mutation lock");
-  const deadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+  // The wait budget measures LACK OF PROGRESS, not elapsed time. A fixed deadline set once at entry
+  // conflates two different situations: the holder is wedged (a real failure, must time out) and
+  // there are writers queued ahead of me (normal, must keep waiting). With 32 contending writers the
+  // last one waits behind 31 predecessors, so a fixed budget calls a healthy queue a failure as soon
+  // as the machine is busy — and the caller loses a receipt it was told would be recorded. Observed
+  // as 2 of 32 writers timing out under full-suite load, green in isolation on the same machine.
+  // Raising the constant only moves the cliff to a larger writer count; resetting the budget each
+  // time the lock changes hands removes it, while a genuinely wedged holder still expires because
+  // the token stops changing.
+  let deadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+  let lastHolder = null;
   let handle;
   const token = randomBytes(24).toString("hex");
   while (!handle) {
@@ -215,7 +247,19 @@ async function withGraphMutationLock(repoRoot, graphPath, operation) {
       // instead of waiting: measured losing 1-2 of 12 concurrent receipts, invisible on Linux CI.
       if (!["EEXIST", "EPERM", "EACCES"].includes(error?.code)) throw error;
       if (await recoverStaleGraphLock(repoRoot, graphPath, lockPath)) continue;
-      if (Date.now() >= deadline) throw new Error(`knowledge graph mutation lock timed out: ${resolved.relative}`);
+      // A different token than last look means the lock changed hands: the queue is moving, so the
+      // wait has not stalled. Unreadable is not observed progress and deliberately does not extend.
+      const holder = await observeLockHolder(repoRoot, graphPath, lockPath);
+      if (holder !== null && holder !== lastHolder) {
+        lastHolder = holder;
+        deadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `knowledge graph mutation lock timed out: ${resolved.relative}`
+            + ` (no change of holder for ${GRAPH_LOCK_WAIT_MS}ms; the holder is wedged rather than busy)`,
+        );
+      }
       await new Promise((resolve) => setTimeout(resolve, GRAPH_LOCK_RETRY_MS));
     }
   }
