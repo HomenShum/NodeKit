@@ -61,14 +61,40 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
   if (!graphCommit || !head) {
     return { ...base, status: "unknown", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
   }
+  // An empty graph pinned at HEAD is perfectly fresh and answers nothing. Reporting it current is
+  // the vacuous pass: "checked" and "nothing to check" must not read the same.
+  if (nodes === 0) {
+    return { ...base, status: "empty", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
+  }
   if (graphCommit === head) {
     return { ...base, status: "current", commitsBehind: 0, filesChanged: 0, sourceFilesChanged: 0 };
   }
 
-  // A pinned commit that is not in this history at all — rebased away, or a graph from another
-  // repository. Counting commits from it would produce a confident wrong number, so it does not.
-  if (git(root, ["cat-file", "-e", `${graphCommit}^{commit}`]) === null) {
-    return { ...base, status: "unrelated", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
+  // A pinned commit that is not an ANCESTOR of HEAD. Two different situations reach here and both
+  // must refuse to produce a number:
+  //
+  //   the object is absent   rebased away, or a graph carried in from another repository
+  //   the object exists but  the graph is pinned to a DESCENDANT of HEAD — a checkout that has been
+  //   is not an ancestor     rolled back, or a graph built on a branch this checkout is behind
+  //
+  // The second was a live false pass: `cat-file -e` proves only that the object exists, and
+  // `rev-list graph..HEAD` returns 0 for a descendant, so a graph describing code this checkout does
+  // NOT have reported current with zero commits behind. Codex reproduced it. Ancestry is the actual
+  // question, so ask it directly.
+  const exists = git(root, ["cat-file", "-e", `${graphCommit}^{commit}`]) !== null;
+  const isAncestor = exists
+    && spawnSync("git", ["merge-base", "--is-ancestor", graphCommit, "HEAD"], { cwd: root }).status === 0;
+  if (!isAncestor) {
+    return {
+      ...base,
+      status: "unrelated",
+      commitsBehind: null,
+      filesChanged: null,
+      sourceFilesChanged: null,
+      reason: exists
+        ? "the pinned commit exists but is not an ancestor of HEAD; the graph describes a checkout this one does not contain"
+        : "the pinned commit is not in this repository's history",
+    };
   }
 
   const behind = Number.parseInt(git(root, ["rev-list", "--count", `${graphCommit}..HEAD`]) ?? "", 10);
@@ -77,7 +103,10 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
 
   return {
     ...base,
-    status: Number.isInteger(behind) && behind > STALE_COMMIT_THRESHOLD ? "stale" : "current",
+    // Tolerated drift is NOT the same as pinned at HEAD. Calling both "current" let the formatter
+    // print "current at HEAD" about a graph several commits behind, which is a small lie in the one
+    // line a reader actually reads.
+    status: !Number.isInteger(behind) ? "unknown" : behind > STALE_COMMIT_THRESHOLD ? "stale" : "tolerated-drift",
     commitsBehind: Number.isInteger(behind) ? behind : null,
     filesChanged: changed.length,
     sourceFilesChanged: sourceChanged.length,
@@ -90,9 +119,14 @@ export function formatCodeGraphFreshness(verdict) {
       return "CODE GRAPH: none in this repository — nothing to check.";
     case "unknown":
       return "CODE GRAPH: present, but its pinned commit or this repository's HEAD could not be read, so whether it is current is unknown rather than fine.";
+    case "empty":
+      return `CODE GRAPH: present but contains no nodes — nothing was measured, and an empty graph is not a fresh one.`;
     case "unrelated":
-      return `CODE GRAPH: pinned to ${verdict.graphCommit.slice(0, 9)}, which is not in this repository's history — `
-        + "rebased away, or built from a different repository. Its answers describe code this checkout does not have.";
+      return `CODE GRAPH: pinned to ${verdict.graphCommit.slice(0, 9)} — ${verdict.reason ?? "not an ancestor of HEAD"}. `
+        + "Its answers describe code this checkout does not have.";
+    case "tolerated-drift":
+      return `CODE GRAPH: pinned to ${verdict.graphCommit.slice(0, 9)}, ${verdict.commitsBehind} commit(s) behind HEAD `
+        + `(${verdict.sourceFilesChanged} source file(s) changed) — within the ${STALE_COMMIT_THRESHOLD}-commit tolerance, but not pinned at HEAD.`;
     case "stale":
       return `CODE GRAPH STALE: pinned to ${verdict.graphCommit.slice(0, 9)}${verdict.analyzedAt ? ` (analysed ${verdict.analyzedAt.slice(0, 10)})` : ""}, `
         + `${verdict.commitsBehind} commits behind HEAD — ${verdict.filesChanged} files changed since, ${verdict.sourceFilesChanged} of them under source. `

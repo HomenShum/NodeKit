@@ -102,11 +102,24 @@ export function evaluateCapability(contract, measurement) {
   const refusals = [];
 
   if (!isNonEmptyString(measurement.observedAt)) refusals.push("the measurement needs observedAt");
-  // THE central rule. A kill condition authored after the number it judges always passes.
-  if (isNonEmptyString(measurement.observedAt) && measurement.observedAt <= contract.declaredAt) {
+  // THE central rule, and it must compare INSTANTS. Comparing the ISO strings lexicographically
+  // looks equivalent and is not: "2026-08-03T11:00:00+02:00" sorts after "2026-08-03T10:00:00.000Z"
+  // while being an hour EARLIER, so a contract could be authored after its own evidence and settle
+  // clean. Codex reproduced exactly that against this gate, which makes the whole mechanism
+  // decorative — the one comparison the design turns on, defeated by a timezone offset.
+  const declaredMs = Date.parse(contract.declaredAt);
+  const observedMs = Date.parse(measurement.observedAt ?? "");
+  if (isNonEmptyString(measurement.observedAt) && !Number.isFinite(observedMs)) {
+    refusals.push(`the measurement's observedAt (${measurement.observedAt}) is not a parseable timestamp; an unparseable time cannot establish that the bet came first`);
+  }
+  if (!Number.isFinite(declaredMs)) {
+    refusals.push(`the contract's declaredAt (${contract.declaredAt}) is not a parseable timestamp`);
+  }
+  if (Number.isFinite(declaredMs) && Number.isFinite(observedMs) && observedMs <= declaredMs) {
     refusals.push(
-      `the measurement was observed at ${measurement.observedAt}, at or before the contract was declared at ${contract.declaredAt} — `
-        + "a kill condition written after its own evidence is a defence of the result, not a threshold it could have failed",
+      `the measurement was observed at ${measurement.observedAt} (${new Date(observedMs).toISOString()}), at or before the contract was declared at `
+        + `${contract.declaredAt} (${new Date(declaredMs).toISOString()}) — a kill condition written after its own evidence is a defence of the `
+        + "result, not a threshold it could have failed",
     );
   }
   if (refusals.length > 0) throw new CapabilityContractRefusal(refusals);
@@ -144,6 +157,12 @@ export function evaluateCapability(contract, measurement) {
   const reachable = measurement.consumersReachable
     ? contract.consumers.filter((entry) => measurement.consumersReachable.includes(entry.consumerId))
     : contract.consumers;
+  // A consumer that is declared but unreachable is a plan, not a caller. Computing reachability and
+  // then deciding on the declared list was a real hole: supplying consumersReachable: [] returned
+  // load-bearing with reachable 0, over a reason string that said a consumer "can reach it".
+  const reachableUserFacing = userFacing.filter(
+    (entry) => !measurement.consumersReachable || measurement.consumersReachable.includes(entry.consumerId),
+  );
 
   // Order matters. A killed capability is killed whether or not anything calls it; asking "who
   // consumes this?" about a capability that failed its own threshold is the wrong next question.
@@ -160,16 +179,18 @@ export function evaluateCapability(contract, measurement) {
 
   // Decorative outranks a clean measurement. This is the middle state — real, measured, and serving
   // no question anybody asked — which is the worst outcome to ship and the easiest to miss.
-  if (userFacing.length === 0) {
+  if (reachableUserFacing.length === 0) {
     return {
       verdict: "decorative",
       capability: contract.capability,
       triggered: [],
       unmeasured,
-      consumers: { declared: contract.consumers.length, userFacing: 0, reachable: reachable.length },
+      consumers: { declared: contract.consumers.length, userFacing: userFacing.length, reachable: reachable.length, reachableUserFacing: 0 },
       reason: contract.consumers.length === 0
         ? "no consumer is declared, so nothing calls this capability but itself"
-        : "every declared consumer is internal-only; the capability enriches its own output and answers no question a user can ask",
+        : userFacing.length === 0
+          ? "every declared consumer is internal-only; the capability enriches its own output and answers no question a user can ask"
+          : "every user-facing consumer was measured as unreachable; a consumer that cannot be reached is a plan, not a caller",
     };
   }
 
@@ -179,7 +200,7 @@ export function evaluateCapability(contract, measurement) {
       capability: contract.capability,
       triggered: [],
       unmeasured,
-      consumers: { declared: contract.consumers.length, userFacing: userFacing.length, reachable: reachable.length },
+      consumers: { declared: contract.consumers.length, userFacing: userFacing.length, reachable: reachable.length, reachableUserFacing: reachableUserFacing.length },
       reason: `${unmeasured.length} kill condition(s) name a metric nobody measured (${unmeasured.join(", ")}); an unrun check is not a passed one`,
     };
   }
@@ -189,8 +210,8 @@ export function evaluateCapability(contract, measurement) {
     capability: contract.capability,
     triggered: [],
     unmeasured: [],
-    consumers: { declared: contract.consumers.length, userFacing: userFacing.length, reachable: reachable.length },
-    reason: `no kill condition triggered and ${userFacing.length} user-facing consumer(s) can reach it`,
+    consumers: { declared: contract.consumers.length, userFacing: userFacing.length, reachable: reachable.length, reachableUserFacing: reachableUserFacing.length },
+    reason: `no kill condition triggered and ${reachableUserFacing.length} user-facing consumer(s) measured reachable`,
   };
 }
 

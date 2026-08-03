@@ -84,13 +84,14 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
   // No skills at all is not a freshness problem. Say so plainly rather than reporting a clean pass
   // over nothing, which is how "checked" and "nothing to check" become indistinguishable.
   if (present.length === 0) {
-    return { status: "no-skills", edited: [], unrecorded: [], versionSkew: null, checked: 0, record: null };
+    return { status: "no-skills", edited: [], unrecorded: [], missing: [], versionSkew: null, checked: 0, record: null };
   }
 
   if (!record) {
     return {
       status: "unrecorded",
       edited: [],
+      missing: [],
       unrecorded: present.sort(),
       versionSkew: null,
       checked: present.length,
@@ -101,19 +102,49 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
 
   const edited = [];
   const unrecorded = [];
-  for (const name of present) {
+  const missing = [];
+  // The UNION of what is recorded and what is on disk. Iterating only the present directories meant
+  // a recorded skill that had been deleted was invisible, and a directory whose SKILL.md could not
+  // be read produced a null digest that was neither edited nor unrecorded — so both reported
+  // `current`. Codex reproduced both. A skill the agent cannot read is the strongest possible
+  // freshness failure, and it was the one state that passed.
+  const names = new Set([...present, ...Object.keys(record.skills ?? {})]);
+  for (const name of names) {
     const recorded = record.skills?.[name];
-    const actual = await digestSkill(path.join(skillsRoot, name));
+    const actual = present.includes(name) ? await digestSkill(path.join(skillsRoot, name)) : null;
+    if (actual === null) {
+      missing.push(name);           // recorded but deleted, or present with no readable SKILL.md
+      continue;
+    }
     if (!recorded) unrecorded.push(name);
-    else if (actual && actual !== recorded) edited.push(name);
+    else if (actual !== recorded) edited.push(name);
   }
 
   const versionSkew = installedVersion && record.nodekitVersion && installedVersion !== record.nodekitVersion
     ? { copiedFrom: record.nodekitVersion, installed: installedVersion }
     : null;
 
-  const status = versionSkew ? "skewed" : edited.length > 0 || unrecorded.length > 0 ? "edited" : "current";
-  return { status, edited: edited.sort(), unrecorded: unrecorded.sort(), versionSkew, checked: present.length, record };
+  // An unknown installed version leaves the skew question OPEN. Reporting `current` there answers
+  // it "no", which is what the test comment claimed the code avoided while the assertion pinned the
+  // opposite — a check weakened by its own test.
+  const skewUnknown = !installedVersion && record.nodekitVersion;
+
+  const status = versionSkew
+    ? "skewed"
+    : missing.length > 0
+      ? "missing"
+      : edited.length > 0 || unrecorded.length > 0
+        ? "edited"
+        : skewUnknown ? "unknown-version" : "current";
+  return {
+    status,
+    edited: edited.sort(),
+    unrecorded: unrecorded.sort(),
+    missing: missing.sort(),
+    versionSkew,
+    checked: names.size,
+    record,
+  };
 }
 
 export function formatSkillFreshness(verdict) {
@@ -130,6 +161,12 @@ export function formatSkillFreshness(verdict) {
         + "the upstream skills have moved on and this project is still reading the old instructions. "
         + "Run `nodekit skills sync` to take the new ones."
         + (verdict.edited.length > 0 ? ` Also locally edited: ${verdict.edited.join(", ")}.` : "");
+    case "missing":
+      return `SKILLS: ${verdict.missing.join(", ")} recorded but unreadable or absent — an agent cannot load an instruction file that is not there, `
+        + "and a missing skill is a bigger freshness failure than an out-of-date one. Run `nodekit skills sync`.";
+    case "unknown-version":
+      return `SKILLS: ${verdict.checked} match their recorded digests, but the installed NodeKit version could not be read, `
+        + "so whether the upstream skills have moved on is unknown rather than answered no.";
     case "edited":
       return `SKILLS: ${verdict.checked} checked; locally edited: ${[...verdict.edited, ...verdict.unrecorded].join(", ")}. `
         + "Editing a projected skill is legitimate — this is a record, not a fault.";

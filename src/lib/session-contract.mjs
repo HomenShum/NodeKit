@@ -57,13 +57,30 @@ export class SessionContractRefusal extends Error {
 
 const isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
 
-/** Does a declared glob or path cover this file? Prefix and basename only — no glob engine needed. */
+/** Separators normalised, because a Windows-shaped path must not slip past a POSIX-shaped rule. */
+const posix = (value) => String(value ?? "").split("\\").join("/");
+
+/**
+ * Does a declared pattern cover this file?
+ *
+ * `/**` is recursive and `/*` is ONE level. Treating them the same was a real hole: `app/*` claimed
+ * `app/nested/package.json`, so a session declared ownership of a directory's files and silently
+ * acquired every manifest beneath it. Codex reproduced it through the CLI. A trailing `/` is a
+ * directory prefix, which is what people mean when they write it.
+ */
 function covers(pattern, filePath) {
   if (!isNonEmptyString(pattern)) return false;
-  const clean = pattern.replace(/\/\*\*?$/, "").replace(/\*\*$/, "").replace(/\/$/, "");
-  if (pattern === filePath) return true;
-  if (pattern.endsWith("/**") || pattern.endsWith("/*")) return filePath.startsWith(`${clean}/`);
-  return filePath === clean;
+  const rule = posix(pattern);
+  const file = posix(filePath);
+  if (rule === file) return true;
+  if (rule.endsWith("/**")) return file.startsWith(`${rule.slice(0, -3)}/`);
+  if (rule.endsWith("/*")) {
+    const prefix = rule.slice(0, -2);
+    // One level: inside this directory, and no further separator after it.
+    return file.startsWith(`${prefix}/`) && !file.slice(prefix.length + 1).includes("/");
+  }
+  if (rule.endsWith("/")) return file.startsWith(rule);
+  return false;
 }
 
 export function parseSessionContract(contract) {
@@ -106,6 +123,19 @@ export function parseSessionContract(contract) {
  */
 export function evaluateSessionContract(contract, repoFiles = []) {
   parseSessionContract(contract);
+  // An empty file list is not a repository with no manifests. It is a repository nobody listed, and
+  // the manifest coverage check — the entire reason this gate exists — did not run. Reporting a
+  // pass there is the vacuous pass, and it passed.
+  if (!Array.isArray(repoFiles) || repoFiles.length === 0) {
+    return {
+      passed: false,
+      insufficient: true,
+      faults: ["no repository file list was supplied, so the contended-manifest check did not run; an unrun check is not a passed one"],
+      sessions: contract.sessions.length,
+      contendedManifestsPresent: 0,
+      unclassified: [],
+    };
+  }
   const faults = [];
   const sessions = contract.sessions;
   const shared = new Map((contract.sharedWrite ?? []).map((entry) => [entry.path, entry]));
@@ -124,7 +154,7 @@ export function evaluateSessionContract(contract, repoFiles = []) {
   }
 
   // The real finding. A manifest that exists and is claimed by nobody will be written by everybody.
-  const present = repoFiles.filter((file) => CONTENDED_MANIFESTS.includes(file.split("/").pop()));
+  const present = repoFiles.filter((file) => CONTENDED_MANIFESTS.includes(posix(file).split("/").pop()));
   const unclassified = present.filter((file) => {
     if (shared.has(file)) return false;
     return !sessions.some((session) => session.owns.some((pattern) => covers(pattern, file)));
@@ -145,7 +175,7 @@ export function evaluateSessionContract(contract, repoFiles = []) {
 
   return {
     passed: faults.length === 0,
-    // Zero sessions cannot reach here (parse refuses), so a pass always measured something.
+    insufficient: false,
     faults,
     sessions: sessions.length,
     contendedManifestsPresent: present.length,
@@ -154,6 +184,7 @@ export function evaluateSessionContract(contract, repoFiles = []) {
 }
 
 export function formatSessionContract(verdict) {
+  if (verdict.insufficient) return `SESSION CONTRACT: ${verdict.faults[0]}`;
   const head = `SESSION CONTRACT ${verdict.passed ? "PASS" : "BLOCKED"}: ${verdict.sessions} session(s), `
     + `${verdict.contendedManifestsPresent} contended manifest(s) present, ${verdict.unclassified.length} unclassified.`;
   return verdict.passed ? head : [head, ...verdict.faults.map((entry) => `  ${entry}`)].join("\n");

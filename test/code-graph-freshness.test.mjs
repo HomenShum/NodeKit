@@ -86,12 +86,41 @@ test("the remedy names the external analyser, because NodeKit cannot rebuild thi
   assert.match(message, /NodeKit consumes this graph and cannot rebuild it/);
 });
 
-test("a few commits of drift is tolerated; a check that cries wolf gets switched off", async () => {
+test("a few commits of drift is tolerated but is NOT reported as pinned at HEAD", async () => {
+  // Was asserting "current" here, which pinned a conflation Codex found: the formatter then printed
+  // "current at HEAD" about a graph three commits behind. Tolerated and pinned-at-HEAD are different
+  // facts and the one-line summary is exactly where the difference matters.
   const root = await repoWithGraph({ commits: 3, graphAt: "FIRST" });
   const verdict = await evaluateCodeGraphFreshness(root);
 
-  assert.equal(verdict.status, "current");
+  assert.equal(verdict.status, "tolerated-drift");
   assert.equal(verdict.commitsBehind, 3);
+  const message = formatCodeGraphFreshness(verdict);
+  assert.match(message, /within the 5-commit tolerance, but not pinned at HEAD/);
+  assert.doesNotMatch(message, /current at/);
+});
+
+// --- what the adversarial review reproduced, kept as cases ---------------------------------------
+
+test("a graph pinned to a DESCENDANT of HEAD is not current, however many commits rev-list counts", async () => {
+  // The false pass Codex found. `cat-file -e` proves the object exists; `rev-list graph..HEAD`
+  // returns 0 for a descendant. So a graph describing code this checkout does not have reported
+  // current with zero commits behind — the single worst answer available here.
+  const root = await repoWithGraph({ commits: 2, graphAt: "HEAD" });
+  git(root, ["checkout", "-q", "HEAD~1"]);
+  const verdict = await evaluateCodeGraphFreshness(root);
+
+  assert.equal(verdict.status, "unrelated");
+  assert.equal(verdict.commitsBehind, null);
+  assert.match(formatCodeGraphFreshness(verdict), /not an ancestor of HEAD/);
+});
+
+test("a graph with zero nodes is not a fresh graph; it measured nothing", async () => {
+  const root = await repoWithGraph({ commits: 1, nodes: 0 });
+  const verdict = await evaluateCodeGraphFreshness(root);
+
+  assert.equal(verdict.status, "empty");
+  assert.match(formatCodeGraphFreshness(verdict), /an empty graph is not a fresh one/);
 });
 
 test("no graph at all is distinguishable from a fresh one", async () => {
