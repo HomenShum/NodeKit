@@ -168,7 +168,7 @@ function findSelfApprovalKeys(value, trail = "", depth = 0) {
  * unattempted and nothing refused, is claiming its whole scope was covered. That is the vacuous
  * pass at artifact scale -- a conclusion with no denominator behind it.
  */
-function completenessFaults(stage, completeness) {
+function completenessFaults(stage, completeness, doc) {
   const faults = [];
   if (!isPlainObject(completeness)) {
     return [{ stage, clause: "missing", detail: "completeness must be an object with claimed, notRun and refused" }];
@@ -201,6 +201,26 @@ function completenessFaults(stage, completeness) {
       });
     }
   });
+
+  // A green suite says nobody has falsified this yet. It does not say anyone tried. Adversarial
+  // review reliably finds classes a test suite is structurally blind to -- the ones where the
+  // tests share the author's model of the problem, so they agree with the bug. A pack standing
+  // only on its own passing tests is unfalsified by its author, which is a weaker thing than
+  // verified, and the two must not be spelled the same. Declaring the gap in notRun or refused
+  // is a legitimate answer; leaving it unsaid is the one that is not.
+  const evidence = Array.isArray(doc?.content?.evidence) ? doc.content.evidence : [];
+  if (claimed.length > 0 && evidence.length > 0) {
+    const adversarial = evidence.some((entry) => entry?.kind === "adversarial-review");
+    const declared = [...notRunSet, ...refused.map((entry) => entry?.item)]
+      .some((entry) => typeof entry === "string" && /adversarial/i.test(entry));
+    if (!adversarial && !declared) {
+      faults.push({
+        stage,
+        clause: "unfalsified-by-author",
+        detail: "carries no adversarial-review evidence and does not declare its absence in notRun or refused; a green suite is not an independent attempt to break the work",
+      });
+    }
+  }
   return faults;
 }
 
@@ -397,7 +417,7 @@ export async function verifyJourneyChain({ chainDir, caseId } = {}) {
       });
     }
     failures.push(
-      ...completenessFaults(spec.stage, doc.completeness).map((fault) => ({
+      ...completenessFaults(spec.stage, doc.completeness, doc).map((fault) => ({
         code: `completeness-${fault.clause}`,
         stage: fault.stage,
         detail: `${record.file}: ${fault.detail}`,

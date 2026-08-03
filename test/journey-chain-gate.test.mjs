@@ -514,3 +514,53 @@ test("the frozen chain is five stages and six edges", () => {
   assert.ok(!explain.consumes.includes("nodekit.launch-manifest/v1"));
   assert.ok(!launch.consumes.includes("nodekit.story-pack/v1"));
 });
+
+// A green suite means nobody has falsified the work yet, not that anyone tried. The two get spelled
+// the same in a pack that stands only on its own tests, so the gate makes the distinction explicit:
+// carry adversarial evidence, or say out loud that you have none.
+test("a pack standing only on its own passing tests is unfalsified, not verified", async () => {
+  const dir = await scratchChain();
+  try {
+    const pack = await readArtifact(dir, "build.build-evidence-pack.json");
+    const evidence = (kind) => [{
+      evidenceId: "ev-1",
+      kind,
+      artifact: { path: "proof/suite.log", sha256: "a".repeat(64) },
+      generatedBy: { command: "npm test" },
+      observation: "the suite reports 592 passing",
+      boundary: "says nothing about classes the suite does not model",
+    }];
+
+    // Only its own tests, and silent about the gap.
+    pack.content = { ...pack.content, evidence: evidence("test-run") };
+    await writeArtifact(dir, "build.build-evidence-pack.json", pack);
+    const silent = await verifyJourneyChain({ chainDir: dir });
+    assert.equal(silent.verdict, "FAIL");
+    assert.ok(
+      silent.failures.some((f) => f.code === "completeness-unfalsified-by-author"),
+      `expected the unfalsified clause, got ${JSON.stringify(silent.failures.map((f) => f.code))}`,
+    );
+
+    // Someone actually tried to break it.
+    pack.content = { ...pack.content, evidence: evidence("adversarial-review") };
+    await writeArtifact(dir, "build.build-evidence-pack.json", pack);
+    assert.ok(
+      !(await verifyJourneyChain({ chainDir: dir })).failures.some((f) => f.code === "completeness-unfalsified-by-author"),
+      "adversarial evidence must satisfy the clause",
+    );
+
+    // Or admitted they did not — an honest gap is a legitimate answer.
+    pack.content = { ...pack.content, evidence: evidence("test-run") };
+    pack.completeness = {
+      ...pack.completeness,
+      notRun: [...pack.completeness.notRun, "No adversarial review was run; the suite is the author's own model of the problem."],
+    };
+    await writeArtifact(dir, "build.build-evidence-pack.json", pack);
+    assert.ok(
+      !(await verifyJourneyChain({ chainDir: dir })).failures.some((f) => f.code === "completeness-unfalsified-by-author"),
+      "declaring the absence must be as acceptable as filling it",
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
