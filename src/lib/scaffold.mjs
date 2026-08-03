@@ -7,6 +7,8 @@ import { pathExists } from "./files.mjs";
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const defaultTemplateRoot = path.join(packageRoot, "templates", "base");
 const pluginSkillsRoot = path.join(packageRoot, "plugins", "nodekit", "skills");
+import { SKILL_PROVENANCE_FILE, buildSkillProvenance } from "./skill-freshness.mjs";
+
 const projectedSkillNames = ["nodekit-launch", "nodekit-present", "nodekit-qa"];
 const vendoredNodeKitSpecifier = "file:vendor/nodekit";
 const nodeKitRuntimeEntries = ["src", "schemas", "LICENSE"];
@@ -139,6 +141,22 @@ async function projectCodingAgentSkills(target, values, { collisions = [], missi
       await mkdir(destination, { recursive: true });
       await copyTemplate(source, destination, values, { collisions, missingOnly });
     }
+  }
+  // These copies are what a coding agent actually reads; the platform originals are never loaded by
+  // a consumer. Without a record they freeze silently, and an improved skill never reaches any
+  // project already generated. The record is what makes that drift answerable later.
+  const provenance = await buildSkillProvenance({
+    sourceRoot: pluginSkillsRoot,
+    skillNames: projectedSkillNames,
+    nodekitVersion: await nodeKitPackageVersion(),
+    copiedAt: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
+  });
+  for (const agentRoot of [".claude", ".codex"]) {
+    await writeFile(
+      path.join(target, agentRoot, "skills", SKILL_PROVENANCE_FILE),
+      JSON.stringify(provenance, null, 2) + String.fromCharCode(10),
+      "utf8",
+    );
   }
   return collisions;
 }

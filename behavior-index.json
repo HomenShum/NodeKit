@@ -541,7 +541,7 @@
           {
             "file": "src/lib/scaffold.mjs",
             "symbol": "createProject",
-            "line": 250
+            "line": 268
           }
         ],
         "namedSourceFiles": [],

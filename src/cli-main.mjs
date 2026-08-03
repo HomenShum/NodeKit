@@ -2162,7 +2162,26 @@ async function main() {
     const verdict = evaluatePreflight(manifest, {
       sessionStartedAt: parsed.options["session-started-at"] ?? new Date().toISOString(),
     });
-    console.log(parsed.options.json ? JSON.stringify({ ...verdict, present: manifest.present }, null, 2) : formatPreflight(verdict));
+    // Skill freshness rides along with preflight rather than getting its own verb, because
+    // preflight already runs in every generated project's `check` and a gate nobody invokes is the
+    // problem this whole session has been about. The projected skills ARE the agent's instructions;
+    // a project reading a superseded copy is a preflight fact by any reasonable reading.
+    const { evaluateSkillFreshness, formatSkillFreshness } = await import("./lib/skill-freshness.mjs");
+    let installedVersion = null;
+    for (const candidate of ["vendor/nodekit/package.json", "node_modules/@homenshum/nodekit/package.json", "package.json"]) {
+      try {
+        const pkg = JSON.parse(await readFile(path.join(repoRoot, candidate), "utf8"));
+        if (pkg.name === "@homenshum/nodekit" && typeof pkg.version === "string") { installedVersion = pkg.version; break; }
+      } catch { /* absent is not an error; it leaves the skew question unanswered rather than answered no */ }
+    }
+    const skills = await evaluateSkillFreshness(repoRoot, installedVersion);
+
+    console.log(parsed.options.json
+      ? JSON.stringify({ ...verdict, present: manifest.present, skills }, null, 2)
+      : `${formatPreflight(verdict)}\n${formatSkillFreshness(skills)}`);
+    // Skew and unrecorded provenance are reported, never fatal. A project legitimately pins an old
+    // skill or predates the record, and failing preflight over it would train people to skip
+    // preflight — which costs more than the drift it was catching.
     if (!verdict.passed) process.exitCode = 1;
     return;
   }
