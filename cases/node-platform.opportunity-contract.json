@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "nodekit.opportunity-contract/v1",
+  "derivedFrom": {
+    "source": "node-platform/START_HERE.md and README.md",
+    "method": "mixed",
+    "derivedBy": "dogfooding pass, 2026-08-03",
+    "unverifiedFields": [
+      "openUnknowns — the READMEs state what the platform is, not what is still uncertain about it; these are judgement",
+      "rejectedAlternatives — inferred from what the docs rule out rather than from a stated decision record"
+    ]
+  },
+  "user": "Someone building an application with a coding agent, who will later have to defend what the agent did.",
+  "problem": "An agent reports that work is done, and the report is a set of claims with nothing behind it. README: NodeKit 'generates applications and then proves what they did' — the proving half is the one that is normally missing.",
+  "wedge": "Contracts that refuse a claim rather than record it: a gate that fails closed on absence, so an unasked question cannot read as a passed one.",
+  "primaryJob": "Generate an application and produce evidence a third party can check without trusting the agent that made it.",
+  "inputs": ["opportunity_contract", "repository_source_tree", "test_command", "agent_run_records"],
+  "primaryArtifact": "A chained set of stage artifacts — contract, build evidence, story, launch manifest, observation — each binding to the previous by digest.",
+  "rejectedAlternatives": [
+    {
+      "alternative": "A report the agent writes at the end of a run.",
+      "reason": "A report is a set of claims. The whole platform exists because that is the artifact that is always available and never sufficient."
+    },
+    {
+      "alternative": "A green test suite as the completion signal.",
+      "reason": "A passing suite says nobody has falsified the work yet, not that anyone tried — the distinction the unfalsified-by-author clause exists to keep."
+    }
+  ],
+  "openUnknowns": [
+    "Whether a consuming project runs the gates it ships with, or only has them available — a generated project ran none of them until this session.",
+    "Whether the contracts are used at all: 86 of 112 schemas in this repository have never produced a single artifact anywhere in the workspace."
+  ],
+  "successCondition": "A person who did not run the agent can open the artifacts, re-run the checks, and reach the same verdict — including reaching a NOT_RUN or a refusal where one is warranted.",
+  "authorityLimits": {
+    "read": ["repository source tree", "test command output", "agent run records", "prior stage artifacts"],
+    "propose": ["stage artifacts", "gate verdicts", "evidence records"],
+    "approve": [],
+    "prohibited": [
+      "write promotionAuthorized true",
+      "assert a verdict a verifier did not derive",
+      "weaken a check to make a stage pass",
+      "publish or deploy without explicit human authorization"
+    ]
+  }
+}
