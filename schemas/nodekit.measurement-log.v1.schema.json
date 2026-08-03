@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nodekit.measurement-log.v1",
+  "title": "NodeKit Measurement Log (MEASUREMENT LOG gate)",
+  "description": "Beliefs that were held, measured, and found false. Not the beliefs that survived - those are the code. Recorded at the moment of falsification and attached at handoff. A passing test suite shows what was checked; only this shows what was believed and found wrong.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "deliverable", "entries"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^measurements-[a-z0-9-]+$" },
+    "deliverable": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "description": "An empty log claims either that nothing was believed and found false, or that nobody was looking. On a non-trivial build the first is not credible.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["believed", "measured", "changed", "recordedAt"],
+        "properties": {
+          "believed": {
+            "type": "string",
+            "description": "The belief as it was actually held, in the confident form it was held in. Softening it retroactively destroys the entry's value."
+          },
+          "measured": {
+            "type": "string",
+            "description": "The EVIDENCE, not the conclusion. 'Buckets overlap' is a claim; '3,205 vs 2,915' is a measurement. Numbers, commands, outputs."
+          },
+          "changed": {
+            "type": "string",
+            "description": "What changed as a result. 'Nothing' is a valid answer and worth recording - it means the belief was wrong but harmless."
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "At the moment of falsification, not at the end. Reconstruction loses the belief: you remember the fix and forget being confident of the opposite an hour earlier."
+          },
+          "wouldHaveShipped": {
+            "type": "string",
+            "description": "The defect this prevented. The strongest entries name a plausible, well-formed, completely wrong output."
+          },
+          "causedByAPriorFix": {
+            "type": "boolean",
+            "description": "True when the repair for an earlier entry caused this one. These are the most valuable entries and the least likely to be volunteered."
+          },
+          "kind": {
+            "enum": ["code", "evaluation", "process"],
+            "description": "process entries - wrong estimates, misread agent output, searching instead of asking - are the ones a reader trusts the file for, because nobody fabricates them."
+          }
+        }
+      }
+    }
+  }
+}

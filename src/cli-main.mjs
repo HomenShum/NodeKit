@@ -14,6 +14,7 @@ import { auditCopy } from "./lib/copy-audit.mjs";
 import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
 import { compareMotionPortability } from "./lib/motion-portability.mjs";
 import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
+import { BuildEvidenceRefusal, produceBuildEvidencePack } from "./lib/build-evidence-producer.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -174,6 +175,9 @@ Usage:
   nodekit dev|demo|check|proof [--repo-root <path>] [-- <args>]
   nodekit repo check [--repo-root <path>] [--json]
   nodekit motion compare <repoA> <repoB> [repoC ...] [--output <receipt.json>] [--json]
+  nodekit journey verify [--repo-root <path>] [--json]
+  nodekit journey build-evidence --contract <opportunity-contract.json>
+      [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
@@ -361,6 +365,57 @@ async function runJourneyVerify(parsed) {
     return lines.join("\n");
   });
   if (!verdict.passed) process.exitCode = 1;
+}
+
+// The BUILD-stage producer, wired to the same journey the chain gate walks. The four stage schemas
+// enforce shape; this is the first thing that writes a conforming artifact from a real repository
+// instead of a hand-authored fixture. It fails closed: an unreconcilable contract or a fabricated
+// evidence path refuses the whole pack rather than shipping a partial truth.
+async function runJourneyBuildEvidence(parsed) {
+  const repoRoot = path.resolve(parsed.options.repo ?? parsed.options["repo-root"] ?? ".");
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error(
+      "usage: nodekit journey build-evidence --contract <opportunity-contract.json> [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]",
+    );
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const { pack, packPath } = await produceBuildEvidencePack({
+      repoRoot,
+      contractPath,
+      outPath: typeof parsed.options.out === "string" ? parsed.options.out : undefined,
+      caseId: typeof parsed.options["case-id"] === "string" ? parsed.options["case-id"] : undefined,
+      testCommand: typeof parsed.options["test-command"] === "string" ? parsed.options["test-command"] : undefined,
+    });
+    const entries = [
+      ...Object.values(pack.content.decisions.contract).flatMap((entry) =>
+        entry.elements ? entry.elements : entry.disposition ? [entry] : Object.values(entry).flatMap((bucket) => bucket.elements),
+      ),
+    ];
+    const byDisposition = entries.reduce((acc, entry) => {
+      acc[entry.disposition] = (acc[entry.disposition] ?? 0) + 1;
+      return acc;
+    }, {});
+    printStructured({ pack, packPath }, parsed, () =>
+      [
+        `BUILD EVIDENCE PACK written: ${packPath}`,
+        `  case ${pack.caseId}; contract bound by canonical sha256 ${pack.inputs[0].sha256.slice(0, 12)}…`,
+        `  reconciled ${entries.length} decision pointer(s): ${byDisposition.honoured ?? 0} honoured, ${byDisposition["defaulted-with-disclosure"] ?? 0} defaulted-with-disclosure, ${byDisposition.contradicted ?? 0} contradicted`,
+        `  evidence ${pack.content.evidence.length} entr(ies), each a real file with digest + generation record`,
+        `  emergent 0 surfaced; sweep receipt at ${pack.content.evidence.find((e) => e.kind === "command-output")?.artifact.path}`,
+        `  notRun ${pack.completeness.notRun.length}, refused ${pack.completeness.refused.length}; promotionAuthorized: false (a producer may never write true)`,
+      ].join("\n"),
+    );
+  } catch (error) {
+    if (error instanceof BuildEvidenceRefusal) {
+      console.error(`BUILD EVIDENCE REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
 }
 
 async function runBehaviorIndex(parsed) {
@@ -2003,6 +2058,10 @@ async function main() {
   }
   if (first === "session" && second === "migrate-legacy") {
     await runNativeSessionMigration(parsed);
+    return;
+  }
+  if (first === "journey" && second === "build-evidence") {
+    await runJourneyBuildEvidence(parsed);
     return;
   }
   if (first === "tour") {

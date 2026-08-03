@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "nodekit.design-rule/v1",
+  "ruleId": "rule-capture-always-armed",
+  "derivedFrom": {
+    "collectionId": "note-surface",
+    "observationIds": [
+      "obs-mew-stream",
+      "obs-evernote-contrast"
+    ],
+    "factIds": [
+      "obs-mew-stream/f4",
+      "obs-mew-stream/f6",
+      "obs-evernote-contrast/f4"
+    ]
+  },
+  "statement": "The capture affordance is reachable from every state without a mode change: one global keystroke on desktop, a persistent floating control on mobile, and it never asks a classification question before accepting text.",
+  "mechanismHypothesis": "Capture value decays in seconds; any dialog between intent and first keystroke loses the thought. Deferring classification (type, folder, destination) to after capture moves that cost to a moment when the thought is already safe.",
+  "confidence": "high",
+  "appliesWhen": [
+    "any surface whose value depends on catching transient input"
+  ],
+  "doesNotApplyWhen": [
+    "compliance-bound intake where classification is legally prior (the trust-surfaces contract governs those forms)"
+  ],
+  "problemTags": [
+    "transient-thought-capture"
+  ],
+  "intentTags": [
+    "zero-friction-entry",
+    "defer-classification"
+  ],
+  "firstSeenAt": "2026-07-29",
+  "lastVerifiedAt": "2026-07-29",
+  "confidenceBasis": "Derived from one source-grounded positive (owner-owned Mew checkout, file:line locators) plus Mobbin counterexamples; no audience-task evidence yet, so confidence is capped below audience-proven per the M-tier rule.",
+  "reVerifyAfterDays": 90,
+  "reVerifyReason": "Mew is under active development in the owner-local checkouts and Mobbin comparators drift with product releases; re-inspect the live surfaces and re-read global.css before continuing to cite these facts.",
+  "evidenceTier": "M2",
+  "tierLadder": "M2: live shipped-product observation (owner-owned source checkout with file:line locators, plus Mobbin live screens). M1 documentation not consulted. M3 audience-task evidence absent — no rule here may be promoted to audience-proven until a real capture task is observed."
+}

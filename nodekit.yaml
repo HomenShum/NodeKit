@@ -68,6 +68,12 @@ behaviors:
       - blocked-without-handoff
       - advances-when-bound
       - forged-binding-stays-blocked
+  journey.build.produce-evidence:
+    statement: A BuildEvidencePack is produced only from generated evidence — digested bytes and recorded exit codes — with every contract decision explicitly dispositioned, so a silent honour or a fabricated evidence path refuses the pack instead of shipping inside it.
+    requiredScenarios:
+      - every-pointer-dispositioned-no-silent-honour
+      - fabricated-evidence-refuses-the-pack
+      - produced-pack-walks-the-chain
   decide.compile-to-build:
     statement: An approved OpportunityContract compiles into the product design contract the build stage reads, carrying the protected decisions.
     requiredScenarios:
