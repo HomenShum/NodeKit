@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 117,
-    "modules": 93,
-    "tests": 100
+    "modules": 94,
+    "tests": 101
   },
   "architecture": [
     {
@@ -281,6 +281,7 @@
     "capability-contract.mjs",
     "caseflow-conformance.mjs",
     "caseflow.mjs",
+    "code-graph-freshness.mjs",
     "consumer-package-preparation.mjs",
     "contracts.mjs",
     "copy-audit.mjs",
@@ -376,6 +377,7 @@
     "change-story.test.mjs",
     "ci-workflows.test.mjs",
     "cli-native-migration.test.mjs",
+    "code-graph-freshness.test.mjs",
     "conformance.test.mjs",
     "consumer-package-preparation.test.mjs",
     "contracts.test.mjs",

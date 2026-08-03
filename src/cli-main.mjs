@@ -2177,9 +2177,16 @@ async function main() {
     }
     const skills = await evaluateSkillFreshness(repoRoot, installedVersion);
 
+    // Same reasoning as the skills above, and the third surface today with this shape. The code
+    // graph is what an agent consults during implementation — "what calls this, what imports it" —
+    // and it is commit-pinned by design. The pin worked; nothing ever mentioned it, so the graph
+    // aged 201 commits while still answering confidently.
+    const { evaluateCodeGraphFreshness, formatCodeGraphFreshness } = await import("./lib/code-graph-freshness.mjs");
+    const codeGraph = await evaluateCodeGraphFreshness(repoRoot);
+
     console.log(parsed.options.json
-      ? JSON.stringify({ ...verdict, present: manifest.present, skills }, null, 2)
-      : `${formatPreflight(verdict)}\n${formatSkillFreshness(skills)}`);
+      ? JSON.stringify({ ...verdict, present: manifest.present, skills, codeGraph }, null, 2)
+      : `${formatPreflight(verdict)}\n${formatSkillFreshness(skills)}\n${formatCodeGraphFreshness(codeGraph)}`);
     // Skew and unrecorded provenance are reported, never fatal. A project legitimately pins an old
     // skill or predates the record, and failing preflight over it would train people to skip
     // preflight — which costs more than the drift it was catching.
