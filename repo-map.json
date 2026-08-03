@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 115,
     "modules": 86,
-    "tests": 92
+    "tests": 93
   },
   "architecture": [
     {
@@ -54,6 +54,7 @@
       "copy",
       "create",
       "dashboard",
+      "deferrals",
       "demo",
       "dev",
       "doctor",
@@ -381,6 +382,7 @@
     "friction-loop.test.mjs",
     "frontend-render-contract.test.mjs",
     "frontend-specialist.test.mjs",
+    "generated-project-gates.test.mjs",
     "github-actions-runtime-pins.test.mjs",
     "governance.test.mjs",
     "harness-gym.test.mjs",

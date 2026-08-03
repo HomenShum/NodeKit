@@ -1926,6 +1926,15 @@ async function main() {
     if (!verdict.passed) process.exitCode = 1;
     return;
   }
+  if (first === "deferrals" && (second === "check" || second === undefined)) {
+    const { evaluateDeferrals, formatDeferrals, readDeferrals } = await import("./lib/deferrals.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const ledger = await readDeferrals(repoRoot);
+    const verdict = evaluateDeferrals(ledger);
+    console.log(parsed.options.json ? JSON.stringify({ ...verdict, present: ledger.present }, null, 2) : formatDeferrals(ledger, verdict));
+    if (!verdict.passed) process.exitCode = 1;
+    return;
+  }
   if (first === "reproduce") {
     const { produceReplayPacket, reproduce, writeReplayPacket } = await import("./lib/replay-packet-producer.mjs");
     const { formatReplayVerdict } = await import("./lib/replay-packet.mjs");
