@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "nodekit.engineering-check-receipt/v1",
+  "candidateCommit": "35a6537a8c3fee175b361a2a9921a31da4285885",
+  "nodekitSourceHash": "d4e443b54b0a57844d9388eba4f19569dbacc1b3cd386029f88aca341b885ca3",
+  "checkId": "publicTypecheck",
+  "command": "npm run typecheck:public",
+  "exitCode": 0,
+  "startedAt": "2026-07-22T13:09:48.833Z",
+  "completedAt": "2026-07-22T13:09:49.706Z"
+}

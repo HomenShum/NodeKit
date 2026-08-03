@@ -1,0 +1,42 @@
+﻿{
+    "schemaVersion":  "nodekit.local-closure/v1",
+    "candidateCommit":  "e398398d7f1dd4ff0b65409d2c8da971e83bc488",
+    "nodekitSourceHash":  "97989e9914aee93b83d5b120599bf4d9c8f69b3434040a3e06164cb58c84b987",
+    "generatedAt":  "2026-07-22T04:53:28.7496416Z",
+    "closed":  {
+                   "sourceChecks":  true,
+                   "factoryAcceptance":  true,
+                   "developerTimingMatrix":  true,
+                   "freshAgentHeldout":  true,
+                   "packageInstallProof":  true,
+                   "exactScreenshotInspection":  true
+               },
+    "openExternal":  [
+                         "freshHumanUsability",
+                         "threeAuthenticatedConvexConsumers",
+                         "previewDeployment",
+                         "livePostgresConformance",
+                         "liveSupabaseConformance",
+                         "proofloopEaseVerification",
+                         "publicationApproval"
+                     ],
+    "evidence":  [
+                     {
+                         "path":  "proof/ease/developer-timing-verdict.json",
+                         "sha256":  "632cab7302d8c8efc3b782702cf4bae285a01d8295b09ec43d51f65706668795",
+                         "byteSize":  20990
+                     },
+                     {
+                         "path":  "proof/ease/fresh-agent-verdict.json",
+                         "sha256":  "ca8bd83ca623add4b6834608b647fac6174599a346cba4944f6595eb1105bd02",
+                         "byteSize":  938
+                     },
+                     {
+                         "path":  "proof/package-install-verdict.json",
+                         "sha256":  "6ff7813f08facb154189a7213dfaccc09834b8a52c8ee946cb78544a40e19012",
+                         "byteSize":  857
+                     }
+                 ],
+    "submissionReady":  false,
+    "verdict":  "LOCAL_AND_CODE_OWNED_GAPS_CLOSED_EXTERNAL_EVIDENCE_REQUIRED"
+}

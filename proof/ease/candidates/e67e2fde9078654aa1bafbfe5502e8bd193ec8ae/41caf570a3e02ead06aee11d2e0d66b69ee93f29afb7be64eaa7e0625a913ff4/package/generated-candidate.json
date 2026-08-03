@@ -1,0 +1,11 @@
+{
+  "applicationHash": "40143f567e7c24fde9eb3092a0cbd61985f2e6e335962117b29e22c377230521",
+  "archiveBytes": 318103,
+  "archivePath": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-app.tar.gz",
+  "archiveSha256": "4232b45788f4aad613d82b19ac971ed85eaa5e4ab688878adc41c0843d48b34d",
+  "commit": "6c30f877f8797687128511e8e95cb41f4b54fef5",
+  "configHash": "40143f567e7c24fde9eb3092a0cbd61985f2e6e335962117b29e22c377230521",
+  "nodekitTarballSha256": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65",
+  "schemaVersion": "nodekit.generated-candidate/v1",
+  "tree": "dc6b8ce1e481c20761b9dbf05852900a0e4e0763"
+}

@@ -1,0 +1,463 @@
+{
+  "commands": [
+    {
+      "args": [
+        "pack",
+        "--json",
+        "--pack-destination",
+        "<pack-1>"
+      ],
+      "command": "npm",
+      "durationMs": 2064,
+      "exitCode": 0,
+      "label": "npm pack 1",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:25.634Z",
+      "stderrBytes": 232,
+      "stderrSha256": "066e8b424708caaaba356168187a2cfcc4f27aa7d41c5dbef64952f546d35d61",
+      "stdoutBytes": 31892,
+      "stdoutSha256": "db1d682ae9ff0b6c2b63e106bfdc1e19f9055e1253d995149e4c7feff1361c4f",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-tzf",
+        "<tarball>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 22,
+      "exitCode": 0,
+      "label": "inspect packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:27.700Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 13112,
+      "stdoutSha256": "f30df57ab57476a8955c7dc4b74f2784fe7e450672c20c23a695fa7e4449b479",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-xzf",
+        "<tarball>",
+        "-C",
+        "<extract-root>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 183,
+      "exitCode": 0,
+      "label": "reopen packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:27.723Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "pack",
+        "--json",
+        "--pack-destination",
+        "<pack-2>"
+      ],
+      "command": "npm",
+      "durationMs": 1993,
+      "exitCode": 0,
+      "label": "npm pack 2",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:32.504Z",
+      "stderrBytes": 232,
+      "stderrSha256": "066e8b424708caaaba356168187a2cfcc4f27aa7d41c5dbef64952f546d35d61",
+      "stdoutBytes": 31892,
+      "stdoutSha256": "db1d682ae9ff0b6c2b63e106bfdc1e19f9055e1253d995149e4c7feff1361c4f",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-tzf",
+        "<tarball>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 19,
+      "exitCode": 0,
+      "label": "inspect packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:34.505Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 13112,
+      "stdoutSha256": "f30df57ab57476a8955c7dc4b74f2784fe7e450672c20c23a695fa7e4449b479",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-xzf",
+        "<tarball>",
+        "-C",
+        "<extract-root>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 158,
+      "exitCode": 0,
+      "label": "reopen packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:34.525Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "install",
+        "<tarball>",
+        "<convex-peer>",
+        "<convex-test>",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "command": "npm",
+      "durationMs": 11369,
+      "exitCode": 0,
+      "label": "fresh consumer install",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:37.045Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 26,
+      "stdoutSha256": "b5c093220b6f46d07fd09bcec9657b2ef55b84f067676f5f3b8ab105bec92767",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "<convex-runtime-proof>"
+      ],
+      "command": "node.exe",
+      "durationMs": 1134,
+      "exitCode": 0,
+      "label": "installed Convex component runtime proof",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:50.626Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 340,
+      "stdoutSha256": "9354084366958de51e61aaafbf68d320bd6bd198a7e3ba697901787766f558ab",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "<installed-nodekit-cli>",
+        "create",
+        "<generated-app>",
+        "--name",
+        "nodekit-package-proof",
+        "--brief",
+        "<neutral-brief>",
+        "--nodekit-specifier",
+        "file:vendor/nodekit.tgz",
+        "--package-manager",
+        "npm",
+        "--no-install",
+        "--no-git"
+      ],
+      "command": "node.exe",
+      "durationMs": 4327,
+      "exitCode": 0,
+      "label": "packaged CLI create",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:51.760Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 120,
+      "stdoutSha256": "9f30e00de0bbd35b1745b2b112569d4b493989133d58b6e54819f2b9447b349b",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "install",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "command": "npm",
+      "durationMs": 3265,
+      "exitCode": 0,
+      "label": "generated application install",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:56.089Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 25,
+      "stdoutSha256": "572ee275b8bd4657b6c1698de400bef07a6d953ed104784a1ee18ef574ac0aca",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "ls",
+        "--all",
+        "--json"
+      ],
+      "command": "npm",
+      "durationMs": 685,
+      "exitCode": 0,
+      "label": "generated application npm ls",
+      "signal": null,
+      "startedAt": "2026-07-22T13:30:59.356Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 2470,
+      "stdoutSha256": "79547ecd769c8c1178e3d0e2e024f5eabf28a46f66f19f5cb6fe35064b0db58c",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "run",
+        "compile"
+      ],
+      "command": "npm",
+      "durationMs": 2198,
+      "exitCode": 0,
+      "label": "generated application compile",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:00.042Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 136,
+      "stdoutSha256": "f865152afdf97baa1c651e137004d400d6d1255f430e7646bc06c0030486f0d9",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "run",
+        "check"
+      ],
+      "command": "npm",
+      "durationMs": 1149,
+      "exitCode": 0,
+      "label": "generated application check",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:02.240Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 426,
+      "stdoutSha256": "ec219698111a8a18a16a9ea05b78260ed807c6309b0b0a826b3b5d15d23a296e",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "run",
+        "demo"
+      ],
+      "command": "npm",
+      "durationMs": 356,
+      "exitCode": 0,
+      "label": "generated application demo",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:03.390Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 24645,
+      "stdoutSha256": "30116333fceb6324a7fba1e9837242713ce8c89695b950883411e9a6360472ba",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "run",
+        "eval"
+      ],
+      "command": "npm",
+      "durationMs": 358,
+      "exitCode": 0,
+      "label": "generated application eval",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:03.747Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 341,
+      "stdoutSha256": "3860348095031737b5cd28fb9bff4929788c5d197789fd45327ef2ea08da3999",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "<typescript-cli>",
+        "--project",
+        "<consumer-tsconfig>"
+      ],
+      "command": "node.exe",
+      "durationMs": 376,
+      "exitCode": 0,
+      "label": "fresh consumer public typecheck",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:04.107Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "init"
+      ],
+      "command": "git",
+      "durationMs": 62,
+      "exitCode": 0,
+      "label": "initialize generated candidate",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:04.920Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 119,
+      "stdoutSha256": "c4d4af0340b67109468fcc3222e3ef93102cc8fc4a59cd3ed0a966854154bd19",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "config",
+        "user.name",
+        "NodeKit"
+      ],
+      "command": "git",
+      "durationMs": 39,
+      "exitCode": 0,
+      "label": "configure generated candidate author",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:04.982Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "config",
+        "user.email",
+        "nodekit@local"
+      ],
+      "command": "git",
+      "durationMs": 37,
+      "exitCode": 0,
+      "label": "configure generated candidate email",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:05.020Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "add",
+        "--all"
+      ],
+      "command": "git",
+      "durationMs": 474,
+      "exitCode": 0,
+      "label": "stage generated candidate",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:05.058Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "add",
+        "--force",
+        ".nodeagent",
+        "proof"
+      ],
+      "command": "git",
+      "durationMs": 93,
+      "exitCode": 0,
+      "label": "stage generated proof identity",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:05.532Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "commit",
+        "-m",
+        "chore: preserve exact package proof candidate"
+      ],
+      "command": "git",
+      "durationMs": 380,
+      "exitCode": 0,
+      "label": "commit generated candidate",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:05.625Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 3806,
+      "stdoutSha256": "3b0164f0894273f2c7e9dd824fadc95ba0fb7febab997104816e632f3adb0f1c",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "command": "git",
+      "durationMs": 38,
+      "exitCode": 0,
+      "label": "read generated candidate commit",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:06.005Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 41,
+      "stdoutSha256": "182fb0d7a8082f8d33715248ec39aa4b8aafb0c37fa59c434ff800e517db8a29",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "command": "git",
+      "durationMs": 42,
+      "exitCode": 0,
+      "label": "read generated candidate tree",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:06.043Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 41,
+      "stdoutSha256": "b59c9d75e4dd02ec2662c5e76025d357002ff67eb952bb3d83f44acfd64dedfb",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "archive",
+        "--format=tar.gz",
+        "--output=<proof>/generated-app.tar.gz",
+        "HEAD"
+      ],
+      "command": "git",
+      "durationMs": 80,
+      "exitCode": 0,
+      "label": "archive generated candidate",
+      "signal": null,
+      "startedAt": "2026-07-22T13:31:06.085Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    }
+  ],
+  "schemaVersion": "nodekit.package-command-ledger/v1"
+}

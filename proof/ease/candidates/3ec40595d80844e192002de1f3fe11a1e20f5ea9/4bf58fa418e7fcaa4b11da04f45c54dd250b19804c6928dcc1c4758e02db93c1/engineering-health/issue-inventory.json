@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "nodekit.engineering-issue-inventory/v1",
+  "candidateCommit": "3ec40595d80844e192002de1f3fe11a1e20f5ea9",
+  "nodekitSourceHash": "4bf58fa418e7fcaa4b11da04f45c54dd250b19804c6928dcc1c4758e02db93c1",
+  "generatedAt": "2026-07-22T13:17:44.592Z",
+  "counts": {
+    "p0": 0,
+    "p1": 0
+  },
+  "issues": []
+}

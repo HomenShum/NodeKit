@@ -1,0 +1,13 @@
+{
+  "assertions": {
+    "artifactPrimary": true,
+    "currentActionVisible": true,
+    "mobileContractPresent": true,
+    "proposalBoundaryVisible": true,
+    "semanticLandmarks": true
+  },
+  "generatedAt": "2026-07-22T13:31:17.246Z",
+  "note": "Structural live HTTP and source-DOM contract only. This is not rendered-browser certification.",
+  "passed": true,
+  "schemaVersion": "nodekit.browser-contract/v1"
+}

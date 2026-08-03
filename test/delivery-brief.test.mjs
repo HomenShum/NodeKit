@@ -119,8 +119,11 @@ test("a derived contract says so, and names what its source did not settle", asy
   const { fileURLToPath } = await import("node:url");
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-  for (const name of ["nodeslide", "noderoom"]) {
-    const contract = JSON.parse(await readFile(path.join(root, "cases", `${name}.opportunity-contract.json`), "utf8"));
+  // A fixture, not a live contract for another product. Those live in the repos they describe —
+  // the producer refuses a contract that does not resolve under the repository it evidences, which
+  // is what caught the original placement here.
+  for (const name of ["derived"]) {
+    const contract = JSON.parse(await readFile(path.join(root, "test/fixtures/derived-contract/derived.opportunity-contract.json"), "utf8"));
     assert.deepEqual(await validateSchema("nodekit.opportunity-contract.v1.schema.json", contract, name), []);
     assert.ok(contract.derivedFrom?.source, `${name} was derived and must cite its source`);
     // The load-bearing half: a derived contract claiming its source answered everything is lying by
@@ -143,7 +146,7 @@ test("derivedFrom refuses a shape that would read as provenance without being it
   const path = await import("node:path");
   const { fileURLToPath } = await import("node:url");
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const base = JSON.parse(await readFile(path.join(root, "cases/nodeslide.opportunity-contract.json"), "utf8"));
+  const base = JSON.parse(await readFile(path.join(root, "test/fixtures/derived-contract/derived.opportunity-contract.json"), "utf8"));
 
   const noSource = { ...base, derivedFrom: { method: "mixed" } };
   assert.ok((await validateSchema("nodekit.opportunity-contract.v1.schema.json", noSource, "x")).length > 0, "derived from nothing is not derived");

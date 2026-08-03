@@ -1,0 +1,20 @@
+$ npm run test:component
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 test:component
+> vitest run --config ./vitest.component.config.mjs
+
+
+ RUN  v4.1.10 D:/VSCode Projects/cafecorner_nodebench/nodebench_ai4/node-platform
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  06:09:47
+   Duration  1.35s (transform 151ms, setup 0ms, import 418ms, tests 691ms, environment 53ms)
+
+
+
+[stderr]
+

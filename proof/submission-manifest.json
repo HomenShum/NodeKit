@@ -1,0 +1,243 @@
+{
+  "schemaVersion": "nodekit.submission-manifest/v1",
+  "candidateCommit": "95dd211d171be67378908f9e7394b03019e08491",
+  "candidateSourceHash": "b838d6c00adb621152535fcde9104c090cbc2168c3cf5e1c90a56eceb65a5693",
+  "releaseCandidate": {
+    "nodekitCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+    "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+    "nodekitTarballSha256": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65",
+    "packageName": "@homenshum/nodekit",
+    "packageVersion": "0.2.1"
+  },
+  "evidenceRootSha256": "0cf384ec0ef88ea7c94f86711cc48ab669953ad08f5665946ac2cc2cb0af9e65",
+  "gates": [
+    {
+      "id": "developerTimingMatrix",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/ease/developer-timing-verdict.json",
+          "sha256": "632cab7302d8c8efc3b782702cf4bae285a01d8295b09ec43d51f65706668795"
+        }
+      ]
+    },
+    {
+      "id": "freshAgentHeldout",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/ease/fresh-agent-verdict.json",
+          "sha256": "ca8bd83ca623add4b6834608b647fac6174599a346cba4944f6595eb1105bd02"
+        }
+      ]
+    },
+    {
+      "id": "freshHumanUsability",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/ease/fresh-users-verdict.json",
+          "sha256": "8913a7b18282174e96a210dbd2e3552213161a0ea64b522c90d62240b68b9687"
+        }
+      ]
+    },
+    {
+      "id": "threeConvexConsumers",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/convex-consumers-verdict.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "id": "previewDeployment",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/preview-verdict.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "id": "managedSupabasePortability",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/managed-supabase-portability-verdict.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "id": "knowledgeEvolutionAdoption",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/knowledge-evolution-adoption-verdict.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "id": "modelIntelligenceHarness",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/model-intelligence-harness-verdict.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "id": "engineeringHealth",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/engineering-health-verdict.json",
+          "sha256": "2fc04b13996adede593e9da488c6e96e446a97c02c24734f137eca0f6240c760"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/01-repositoryTests.json",
+          "sha256": "a9b3e3172fef3d97d08c5618e8751a8a8de276f97d86d53715438ab853de5446"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/02-componentTests.json",
+          "sha256": "ecb92f5d0c79b36b8e00e2526c5e79149cb8d0923fc87f73e9ca1cdef259f1e0"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/03-publicTypecheck.json",
+          "sha256": "50a3cb4d3e8b6353bcfede29b4215192386574119f9f3da137e8741b040b0bdf"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/04-componentTypecheck.json",
+          "sha256": "ef907528cec44fa3758178a41fb17c4b95d882bf720efb3514938f7ba5a16779"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/05-componentBuild.json",
+          "sha256": "41231d208907be67e0b7f8563e9be49cc05f9c3b75e2c841426d0b52671b06bc"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/06-packageAudit.json",
+          "sha256": "e5a8b2333a45d358ad6cb1a61f364dd11684c0559434bbee7b25e20a1376e6ab"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/07-registry.json",
+          "sha256": "ec1f2f31f50276d70c348998154ea202eee43426a2985f2f9b97ee0d2f1c3524"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/08-ecosystem.json",
+          "sha256": "974750c2ccebdbfa8b2ff77be2d3ca0e89a730faa0dad3acfa0e844dd7d0257d"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/09-evolution.json",
+          "sha256": "5272a7b7fd54c903c0f196d07955c692595ea18ee385151399ac9a5c6dbc73c2"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/10-distributionClean.json",
+          "sha256": "376ae727f36d515885bb40c993c28c21f0ebd21b0ea087ce9bc22ead300926a0"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/issue-inventory.json",
+          "sha256": "2cd04bf9ed7f744d5f531493df1778d2155880baa596e235880f6d0403afead1"
+        }
+      ]
+    },
+    {
+      "id": "proofloopEaseVerification",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/proofloop-final.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      "id": "packageInstallProof",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/package-install-verdict.json",
+          "sha256": "cd5d5e8341687b0d06451088e526231099a1b2237ad034f1ba17c305a6534a09"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/homenshum-nodekit-0.2.1.tgz",
+          "sha256": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/application-identity.json",
+          "sha256": "dc6a374b2291194f96fdbf9ea2e9964b41e63c74c83358bdeda6ce5946197d98"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/demo-receipt.json",
+          "sha256": "15f17bf418c2b0ea569a94239a412c9d3485602a2f468b1198581b8f87181247"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/eval-receipt.json",
+          "sha256": "b52207274398669e8c28833f467ebad54b0697874d95641c4a915af82ec1b0d8"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/convex-runtime-proof.mjs",
+          "sha256": "c046ab680241ea70de3703352ed288873e64a9ef8408632067a9d784ee76ebf0"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/command-ledger.json",
+          "sha256": "147f5abc56789a93a646a0556a95b90c5a072105f9c27df8f3212cdcc1b896f8"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/package-files.json",
+          "sha256": "4f556d2f7c1cc014f7dcd85eb90f9c2a520e53c1c2fe20c7727dcac4a0b489c9"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/public-api.ts",
+          "sha256": "f64e6dbf1311d37c93645b83b532d8f515bbed28c798665136a30c732480747e"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/convex-runtime-proof.json",
+          "sha256": "06daacf04bd33147630bd743a08a5fd4b2cd8707e5b3f4c8f6b5f8b8a68feb11"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-package.json",
+          "sha256": "21f60a3f60a22f560eeeb26c972baca6f8622905996fbe17b994d05b305d41ab"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-package-lock.json",
+          "sha256": "51c01fe9775c96dd5cf2d5febd4b494679428d31c2d137df86295ae6aa281f3e"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-npm-ls.json",
+          "sha256": "79547ecd769c8c1178e3d0e2e024f5eabf28a46f66f19f5cb6fe35064b0db58c"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/installed-runtime-identity.json",
+          "sha256": "b022efac3084766a6d133ab4a8ec6dff712e47d8823179da5b503305ed23ca19"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-receipt-bindings.json",
+          "sha256": "5eaec1ed79e43d4800a92746f44de8fbd8234db47915f60e95c514860150941e"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-app.tar.gz",
+          "sha256": "4232b45788f4aad613d82b19ac971ed85eaa5e4ab688878adc41c0843d48b34d"
+        },
+        {
+          "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-candidate.json",
+          "sha256": "706367f477f7af13a83407a5417e38e9c4f2f1b85b0459077619a8935432866a"
+        }
+      ]
+    },
+    {
+      "id": "publicationApproval",
+      "passed": false,
+      "evidence": [
+        {
+          "path": "proof/publication-approval.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}

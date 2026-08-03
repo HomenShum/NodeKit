@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "nodekit.engineering-health-verdict/v1",
+  "candidateCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+  "nodekitCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+  "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+  "nodekitIdentity": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+  "releaseCandidate": {
+    "nodekitCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+    "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+    "nodekitTarballSha256": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65",
+    "packageName": "@homenshum/nodekit",
+    "packageVersion": "0.2.1"
+  },
+  "completedAt": "2026-07-22T13:31:18.538Z",
+  "passed": true,
+  "checks": {
+    "repositoryTests": true,
+    "componentTests": true,
+    "publicTypecheck": true,
+    "componentTypecheck": true,
+    "componentBuild": true,
+    "packageAudit": true,
+    "registry": true,
+    "ecosystem": true,
+    "evolution": true,
+    "distributionClean": true
+  },
+  "unresolved": {
+    "p0": 0,
+    "p1": 0
+  },
+  "commands": [
+    {
+      "id": "repositoryTests",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/01-repositoryTests.json",
+      "sha256": "a9b3e3172fef3d97d08c5618e8751a8a8de276f97d86d53715438ab853de5446"
+    },
+    {
+      "id": "componentTests",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/02-componentTests.json",
+      "sha256": "ecb92f5d0c79b36b8e00e2526c5e79149cb8d0923fc87f73e9ca1cdef259f1e0"
+    },
+    {
+      "id": "publicTypecheck",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/03-publicTypecheck.json",
+      "sha256": "50a3cb4d3e8b6353bcfede29b4215192386574119f9f3da137e8741b040b0bdf"
+    },
+    {
+      "id": "componentTypecheck",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/04-componentTypecheck.json",
+      "sha256": "ef907528cec44fa3758178a41fb17c4b95d882bf720efb3514938f7ba5a16779"
+    },
+    {
+      "id": "componentBuild",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/05-componentBuild.json",
+      "sha256": "41231d208907be67e0b7f8563e9be49cc05f9c3b75e2c841426d0b52671b06bc"
+    },
+    {
+      "id": "packageAudit",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/06-packageAudit.json",
+      "sha256": "e5a8b2333a45d358ad6cb1a61f364dd11684c0559434bbee7b25e20a1376e6ab"
+    },
+    {
+      "id": "registry",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/07-registry.json",
+      "sha256": "ec1f2f31f50276d70c348998154ea202eee43426a2985f2f9b97ee0d2f1c3524"
+    },
+    {
+      "id": "ecosystem",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/08-ecosystem.json",
+      "sha256": "974750c2ccebdbfa8b2ff77be2d3ca0e89a730faa0dad3acfa0e844dd7d0257d"
+    },
+    {
+      "id": "evolution",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/09-evolution.json",
+      "sha256": "5272a7b7fd54c903c0f196d07955c692595ea18ee385151399ac9a5c6dbc73c2"
+    },
+    {
+      "id": "distributionClean",
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/checks/10-distributionClean.json",
+      "sha256": "376ae727f36d515885bb40c993c28c21f0ebd21b0ea087ce9bc22ead300926a0"
+    }
+  ],
+  "issueInventory": {
+    "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/issue-inventory.json",
+    "sha256": "2cd04bf9ed7f744d5f531493df1778d2155880baa596e235880f6d0403afead1",
+    "p0": 0,
+    "p1": 0
+  }
+}

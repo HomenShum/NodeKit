@@ -1,0 +1,11 @@
+$ npm run typecheck:component
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 typecheck:component
+> tsc --noEmit --project ./tsconfig.component-test.json
+
+
+
+[stderr]
+

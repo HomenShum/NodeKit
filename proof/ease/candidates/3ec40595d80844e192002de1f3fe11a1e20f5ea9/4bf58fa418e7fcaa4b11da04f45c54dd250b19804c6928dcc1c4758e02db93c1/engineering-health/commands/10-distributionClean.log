@@ -1,0 +1,8 @@
+$ node scripts/run-local-distribution-gate.mjs --candidate <commit> --source-hash <sha256>
+
+[stdout]
+
+
+[stderr]
+LOCAL DISTRIBUTION FAIL generated application identity, demo receipt, or evaluation receipt is invalid
+

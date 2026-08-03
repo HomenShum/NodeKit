@@ -1,0 +1,23 @@
+{
+  "applicationHash": "40143f567e7c24fde9eb3092a0cbd61985f2e6e335962117b29e22c377230521",
+  "applicationIdentity": {
+    "path": ".nodeagent/application-identity.json",
+    "sha256": "dc6a374b2291194f96fdbf9ea2e9964b41e63c74c83358bdeda6ce5946197d98"
+  },
+  "configHash": "40143f567e7c24fde9eb3092a0cbd61985f2e6e335962117b29e22c377230521",
+  "dependency": "file:vendor/nodekit.tgz",
+  "nodekitPackage": "@homenshum/nodekit",
+  "nodekitTarballSha256": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65",
+  "nodekitVersion": "0.2.1",
+  "receipts": {
+    "demo": {
+      "path": "proof/demo-receipt.json",
+      "sha256": "15f17bf418c2b0ea569a94239a412c9d3485602a2f468b1198581b8f87181247"
+    },
+    "evaluation": {
+      "path": "proof/eval-receipt.json",
+      "sha256": "b52207274398669e8c28833f467ebad54b0697874d95641c4a915af82ec1b0d8"
+    }
+  },
+  "schemaVersion": "nodekit.generated-receipt-bindings/v1"
+}

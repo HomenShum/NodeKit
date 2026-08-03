@@ -1,0 +1,253 @@
+{
+  "applicationHash": "40143f567e7c24fde9eb3092a0cbd61985f2e6e335962117b29e22c377230521",
+  "configHash": "40143f567e7c24fde9eb3092a0cbd61985f2e6e335962117b29e22c377230521",
+  "identity": {
+    "files": [
+      {
+        "bytes": 36,
+        "digest": "9d6fc5919cd132fde6e40ef9bba6875218ae78d6f8029a01fd35d7d0820c88b4",
+        "path": ".dockerignore"
+      },
+      {
+        "bytes": 19,
+        "digest": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+        "path": ".gitattributes"
+      },
+      {
+        "bytes": 89,
+        "digest": "55ec5d517810c1e9962d9640dcbaaca1a81444d805774ab80510d030fd8a84cd",
+        "path": ".gitignore"
+      },
+      {
+        "bytes": 260,
+        "digest": "7dfb37bb520b6fb180c50f7af450cd34347228bbb4acba1c8d379f06721ee850",
+        "path": "adw/workflows/launch.yaml"
+      },
+      {
+        "bytes": 336,
+        "digest": "0ef4755e9a5c3f01c30e5e02eb3d474e4146c0f04d25a012ffd4f7f6a0525f47",
+        "path": "agent/instructions.md"
+      },
+      {
+        "bytes": 2146,
+        "digest": "08bb5a82197ea7644781814a4c146e1e7e87500b9d9e58c599616009737703bd",
+        "path": "agent/workflow.mjs"
+      },
+      {
+        "bytes": 10342,
+        "digest": "c9315588031fce7f2c46f1bce69bc138ba2deec588be645d770eac971535f546",
+        "path": "apps/web/public/app.js"
+      },
+      {
+        "bytes": 5784,
+        "digest": "e44316f4f2edec08284429ce5dd7055807f9d216f291adfb86a6167df3694898",
+        "path": "apps/web/public/index.html"
+      },
+      {
+        "bytes": 305,
+        "digest": "aad68bbea2c8547328e4899f6a8b0346e10613ccd3e9112fc436a448dd1c58f7",
+        "path": "apps/web/public/responsive-refinements.css"
+      },
+      {
+        "bytes": 12035,
+        "digest": "0701d214dafdf642a3bce549e5c3203611795a3784a0f0367efe771dd20becbf",
+        "path": "apps/web/public/styles.css"
+      },
+      {
+        "bytes": 11740,
+        "digest": "9dde9463b8dda3f6915d1d683ee864e6b933d0776adcab4f1f3e121bfc856f08",
+        "path": "apps/web/server.mjs"
+      },
+      {
+        "bytes": 191,
+        "digest": "016bf6921aaea9bbfe804eae0400c0ee10aaee19d094b03d9cd83fc22ed17b8d",
+        "path": "Dockerfile"
+      },
+      {
+        "bytes": 161,
+        "digest": "511a24b4039f43755ec97e9fb86fb5c92bb963445fddc53859e7e08c5987adb7",
+        "path": "evals/figured-out-journey.json"
+      },
+      {
+        "bytes": 160,
+        "digest": "dc72ffb91ce882c50c89943532f4688e98b35e894519c5fdc189b953f41fafce",
+        "path": "evals/stale-proposal-conflict.json"
+      },
+      {
+        "bytes": 91,
+        "digest": "da0d5619735d0818f89cfedeb4a3cacd8413ab0a5d8ce0695a564ce21a73fbee",
+        "path": "fixtures/corpus/validation.txt"
+      },
+      {
+        "bytes": 603,
+        "digest": "e126ff7b41a936754539aa4c39275b11de3f5393a71715fa65b575ec30b10f44",
+        "path": "hackathon.yaml"
+      },
+      {
+        "bytes": 597,
+        "digest": "02f5e3f50a855d30251dc13064610a253c7f67114d760a0ae679085ff6f10648",
+        "path": "integrations/convex/capability-plan.yaml"
+      },
+      {
+        "bytes": 714,
+        "digest": "bca07e75ef691b96f1998456534497ed910e350c42d26bd8d6482650519963cb",
+        "path": "integrations/convex/README.md"
+      },
+      {
+        "bytes": 876,
+        "digest": "cf688a980a78598279cc97dc8961d01c1897c5e8d064a951c866526ba969eaa2",
+        "path": "nodekit.yaml"
+      },
+      {
+        "bytes": 6090,
+        "digest": "51c01fe9775c96dd5cf2d5febd4b494679428d31c2d137df86295ae6aa281f3e",
+        "path": "package-lock.json"
+      },
+      {
+        "bytes": 829,
+        "digest": "c713f6b4e4bcc3d4e92ab8effd79d62f169fce49d12e0d3381491dbf9ea840b8",
+        "path": "package.json"
+      },
+      {
+        "bytes": 342,
+        "digest": "1f25c7d2707019691ae036901bcbd458419cfd42d1b5765dae46e797cb3b4ab5",
+        "path": "packs/primary/pack.yaml"
+      },
+      {
+        "bytes": 131,
+        "digest": "cbb0dedccef6ab069be6132b0e71abda7e5f9f95197101e4f1e9c28fbac150ba",
+        "path": "render.yaml"
+      },
+      {
+        "bytes": 328,
+        "digest": "23eb74d85b55e102aa4ec4213b56666c8993ed5c84d9e2c36572986cd5e3bf5c",
+        "path": "scripts/audit-prod.mjs"
+      },
+      {
+        "bytes": 25351,
+        "digest": "92edface5ca5126c8988000584d5098e25f1a98c6226235089cde4ace1ca9efe",
+        "path": "scripts/browser-certify.mjs"
+      },
+      {
+        "bytes": 2305,
+        "digest": "96c6737b613ab8c0a8384523f1f2dd8164493095362e025a0d122f904219aa8f",
+        "path": "scripts/browser-proof.mjs"
+      },
+      {
+        "bytes": 777,
+        "digest": "1040c9466364f5e348b68177759dc6b9456c0153b44c2b6aa610a8351c37496f",
+        "path": "scripts/check.mjs"
+      },
+      {
+        "bytes": 1386,
+        "digest": "95813e7c557e069d87d5b52088b209f838e4dab7c30ebfac0e46900745cc0f28",
+        "path": "scripts/demo.mjs"
+      },
+      {
+        "bytes": 1947,
+        "digest": "d0309beccd122a1b2bf8a63a91eca61c58f6638d6438af81d56c436f338633a4",
+        "path": "scripts/eval.mjs"
+      },
+      {
+        "bytes": 681,
+        "digest": "02d3ead38d129440339675dc1906f8edfdeabc16512cf68b9b8a197169c8b05a",
+        "path": "scripts/lib/friction.mjs"
+      },
+      {
+        "bytes": 2500,
+        "digest": "c32a024944ab9a523ad41073faf41baf83c0f81b8fe00840cd0cf4174087bf89",
+        "path": "scripts/proof.mjs"
+      },
+      {
+        "bytes": 692,
+        "digest": "6ef82b96ea99e761c70ca627ef778ebabb999f8fdc9c6ce8e66ce53d3424037b",
+        "path": "test/workflow.test.mjs"
+      },
+      {
+        "bytes": 271510,
+        "digest": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65",
+        "path": "vendor/nodekit.tgz"
+      }
+    ],
+    "roots": {
+      "directories": [
+        "api",
+        "agent",
+        "packs",
+        "integrations",
+        "backend",
+        "workers",
+        "evals",
+        "fixtures",
+        "schemas",
+        "src",
+        "apps",
+        "scripts",
+        "adw",
+        "test",
+        "tests",
+        "e2e"
+      ],
+      "identityOnlyDirectories": [
+        "vendor"
+      ],
+      "resolvedDirectories": [
+        "adw",
+        "agent",
+        "api",
+        "apps",
+        "backend",
+        "e2e",
+        "evals",
+        "fixtures",
+        "integrations",
+        "packs",
+        "packs/primary",
+        "schemas",
+        "scripts",
+        "src",
+        "test",
+        "tests",
+        "vendor",
+        "workers"
+      ],
+      "files": [
+        ".dockerignore",
+        ".gitattributes",
+        ".gitignore",
+        ".npmrc",
+        ".nvmrc",
+        ".vercelignore",
+        "nodekit.yaml",
+        "hackathon.yaml",
+        "package.json",
+        "package-lock.json",
+        "pnpm-lock.yaml",
+        "yarn.lock",
+        "bun.lockb",
+        "Dockerfile",
+        "server.ts",
+        "server.js",
+        "server.mjs",
+        "docker-compose.yml",
+        "docker-compose.yaml",
+        "render.yaml",
+        "railway.json",
+        "vercel.json",
+        "netlify.toml",
+        "fly.toml",
+        "Procfile",
+        "convex.json",
+        "vite.config.js",
+        "vite.config.ts",
+        "next.config.js",
+        "next.config.mjs",
+        "playwright.config.js",
+        "playwright.config.ts",
+        "tsconfig.json"
+      ]
+    }
+  },
+  "manifestDigest": "bb7e0928787309ad5384edff5c8378c7d4cb762b89846b4ee2748371be67c5ef",
+  "schemaVersion": "nodeagent.application-identity/v1"
+}

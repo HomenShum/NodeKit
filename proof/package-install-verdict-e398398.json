@@ -1,0 +1,20 @@
+﻿{
+    "schemaVersion":  "nodekit.package-install-proof/v1",
+    "candidateCommit":  "e398398d7f1dd4ff0b65409d2c8da971e83bc488",
+    "package":  "@homenshum/nodekit",
+    "version":  "0.2.1",
+    "tarball":  "D:\\VSCode Projects\\cafecorner_nodebench\\nodebench_ai4\\node-platform\\.tmp\\package-install-e398398\\pack\\homenshum-nodekit-0.2.1.tgz",
+    "tarballSha256":  "e17b7521f39b09a06fdf9b5646d8a0088430914556c0bf3b30c6ae81bd98a7a9",
+    "unpackedSize":  354541,
+    "fileCount":  97,
+    "checks":  {
+                   "freshConsumerInstall":  true,
+                   "packagedCliCreate":  true,
+                   "compile":  true,
+                   "check":  true,
+                   "demo":  true,
+                   "eval":  true
+               },
+    "passed":  true,
+    "generatedAt":  "2026-07-22T04:52:37.1432141Z"
+}

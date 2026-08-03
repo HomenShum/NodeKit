@@ -1,0 +1,178 @@
+{
+  "candidateCommit": "d3229a013e8f51a2980d1a077e086bbcabfa115d",
+  "checks": {
+    "candidateIdentityStable": false,
+    "check": false,
+    "compile": false,
+    "convexComponentRuntime": false,
+    "demo": false,
+    "distributionComplete": true,
+    "eval": false,
+    "freshConsumerInstall": false,
+    "generatedAppInstall": false,
+    "packagedCliCreate": false,
+    "receiptsValid": false,
+    "tarballHashStable": false,
+    "typecheckPublic": false
+  },
+  "commands": [
+    {
+      "args": [
+        "pack",
+        "--json",
+        "--pack-destination",
+        "<pack-1>"
+      ],
+      "command": "npm",
+      "durationMs": 2339,
+      "exitCode": 0,
+      "label": "npm pack 1",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:22.842Z",
+      "stderrBytes": 232,
+      "stderrSha256": "066e8b424708caaaba356168187a2cfcc4f27aa7d41c5dbef64952f546d35d61",
+      "stdoutBytes": 31783,
+      "stdoutSha256": "de0d3a13fd09ce14fce1b89d64d40805f9d9a4bb4ca0f8ea99d42de325741dc9",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-tzf",
+        "<tarball>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 18,
+      "exitCode": 0,
+      "label": "inspect packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:25.182Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 13072,
+      "stdoutSha256": "3271d29594078b8963c5a7d68e6c1894212c2d8699bfd9e988042989ac0755d3",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-xzf",
+        "<tarball>",
+        "-C",
+        "<extract-root>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 150,
+      "exitCode": 0,
+      "label": "reopen packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:25.201Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "pack",
+        "--json",
+        "--pack-destination",
+        "<pack-2>"
+      ],
+      "command": "npm",
+      "durationMs": 2231,
+      "exitCode": 0,
+      "label": "npm pack 2",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:29.246Z",
+      "stderrBytes": 232,
+      "stderrSha256": "066e8b424708caaaba356168187a2cfcc4f27aa7d41c5dbef64952f546d35d61",
+      "stdoutBytes": 31783,
+      "stdoutSha256": "de0d3a13fd09ce14fce1b89d64d40805f9d9a4bb4ca0f8ea99d42de325741dc9",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-tzf",
+        "<tarball>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 20,
+      "exitCode": 0,
+      "label": "inspect packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:31.482Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 13072,
+      "stdoutSha256": "3271d29594078b8963c5a7d68e6c1894212c2d8699bfd9e988042989ac0755d3",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "-xzf",
+        "<tarball>",
+        "-C",
+        "<extract-root>"
+      ],
+      "command": "tar.exe",
+      "durationMs": 166,
+      "exitCode": 0,
+      "label": "reopen packed archive",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:31.502Z",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    },
+    {
+      "args": [
+        "install",
+        "<tarball>",
+        "<convex-peer>",
+        "<convex-test>",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "command": "npm",
+      "durationMs": 777,
+      "exitCode": 4294963238,
+      "label": "fresh consumer install",
+      "signal": null,
+      "startedAt": "2026-07-22T13:13:33.917Z",
+      "stderrBytes": 436,
+      "stderrSha256": "907741fc631f7a78df2112928c65169cf1b96b7d504195a5b963a9db14c3261b",
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timedOut": false
+    }
+  ],
+  "distribution": {
+    "checks": {
+      "attestationSignBin": true,
+      "attestationVerifyBin": true,
+      "caseflowTypes": true,
+      "convexClient": true,
+      "convexConfig": true,
+      "convexComponentApi": true,
+      "convexComponentRuntime": true,
+      "convexTestExport": true,
+      "postgresAdapter": true,
+      "postgresMigration": true,
+      "submissionAttestation": true,
+      "supabaseProfile": true,
+      "supabaseWorkers": true
+    },
+    "missingBinTargets": [],
+    "missingExportTargets": [],
+    "passed": true
+  },
+  "error": "fresh consumer install failed with exit code 4294963238: npm error code ENOENT\nnpm error syscall open\nnpm error path D:\\VSCode\\package.json\nnpm error errno -4058\nnpm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open 'D:\\VSCode\\package.json'\nnpm error enoent This is related to npm not being able to find a file.\nnpm error enoent\nnpm error A complete log of this run can be found in: D:\\ai-agent-hosts\\npm-cache\\_logs\\2026-07-22T13_13_34_190Z-debug-0.log",
+  "generatedAt": "2026-07-22T13:13:34.695Z",
+  "nodekitSourceHash": "5b0e9d882cfabaa487f1c13061087a76eb9a01ee9d8d79ba62e3f647f3433d02",
+  "publicationPerformed": false,
+  "deployPerformed": false,
+  "schemaVersion": "nodekit.package-install-failure/v1"
+}

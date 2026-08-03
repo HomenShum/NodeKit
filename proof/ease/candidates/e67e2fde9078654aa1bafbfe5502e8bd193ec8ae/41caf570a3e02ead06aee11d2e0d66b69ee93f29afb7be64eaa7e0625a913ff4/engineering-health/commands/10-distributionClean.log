@@ -1,0 +1,10 @@
+$ node scripts/run-local-distribution-gate.mjs --candidate <commit> --source-hash <sha256>
+
+[stdout]
+LOCAL DISTRIBUTION PASS e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4
+LOCAL STRUCTURAL BROWSER CONTRACT PASS (NOT RENDERED CERTIFICATION)
+VERDICT <repo>\proof\ease\candidates\e67e2fde9078654aa1bafbfe5502e8bd193ec8ae\41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4\engineering-health\distribution-clean.json
+
+
+[stderr]
+

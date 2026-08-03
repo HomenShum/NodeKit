@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "nodekit.local-distribution-gate/v1",
+  "candidateCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+  "nodekitCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+  "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+  "nodekitIdentity": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+  "releaseCandidate": {
+    "nodekitCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+    "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+    "nodekitTarballSha256": "30a5793de777b177ba0293076cde184d37e0e7a18d47808bb5bdc30e94eebd65",
+    "packageName": "@homenshum/nodekit",
+    "packageVersion": "0.2.1"
+  },
+  "checks": {
+    "browserContractReadiness": true,
+    "candidateIdentityStable": true,
+    "exactPackageArchiveProof": true
+  },
+  "evidence": {
+    "browserContract": {
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/browser-contract.json",
+      "sha256": "fcb6fcc5ce303ef268e9d3b27b82ab12eded35a3bf575f4d1c0a5fb85c8517b2"
+    },
+    "packageInstallProof": {
+      "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/package-install-verdict.json",
+      "sha256": "cd5d5e8341687b0d06451088e526231099a1b2237ad034f1ba17c305a6534a09"
+    }
+  },
+  "commands": [
+    {
+      "command": "npm install <repo>\\proof\\ease\\candidates\\e67e2fde9078654aa1bafbfe5502e8bd193ec8ae\\41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4\\package\\homenshum-nodekit-0.2.1.tgz --ignore-scripts --no-audit --no-fund",
+      "completedAt": "2026-07-22T13:31:09.966Z",
+      "durationMs": 2915,
+      "exitCode": 0,
+      "label": "install exact packed NodeKit for browser-contract readiness",
+      "startedAt": "2026-07-22T13:31:07.050Z",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "9f205e4ab68fd7f66b173b54178c0bd5e2dd1e2e49575d7c9c5c0b8d52ecb29a"
+    },
+    {
+      "command": "node.exe <temp>\\launcher\\node_modules\\@homenshum\\nodekit\\src\\cli.mjs create <temp>\\generated-app --name nodekit-local-browser-contract --brief Carry one neutral case from intention to a verified artifact. --nodekit-specifier file:vendor/nodekit.tgz --package-manager npm --no-install --no-git",
+      "completedAt": "2026-07-22T13:31:12.330Z",
+      "durationMs": 2363,
+      "exitCode": 0,
+      "label": "create exact packed browser-contract application",
+      "startedAt": "2026-07-22T13:31:09.967Z",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "850e882c13127f4d63d1b7070447b808dc68748c702677066bcadb57fbc87e50"
+    },
+    {
+      "command": "npm install --ignore-scripts --no-audit --no-fund",
+      "completedAt": "2026-07-22T13:31:16.548Z",
+      "durationMs": 4215,
+      "exitCode": 0,
+      "label": "install exact browser-contract application",
+      "startedAt": "2026-07-22T13:31:12.333Z",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "a5431d1a75b425e52bba551e8bd51239ca909de0aaf0483902806e1ee66c40b5"
+    },
+    {
+      "command": "npm run proof:browser-contract",
+      "completedAt": "2026-07-22T13:31:17.338Z",
+      "durationMs": 789,
+      "exitCode": 0,
+      "label": "run structural live HTTP browser contract",
+      "startedAt": "2026-07-22T13:31:16.548Z",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "39df5588d3ffd57252f010eaccee0cf1ffc9bf9be3c8492691802255862eb839"
+    }
+  ],
+  "certificationStatus": "LOCAL_STRUCTURAL_READINESS_ONLY",
+  "externalCertificationPerformed": false,
+  "renderedBrowserCertificationPerformed": false,
+  "deployPerformed": false,
+  "publicationPerformed": false,
+  "passed": true,
+  "generatedAt": "2026-07-22T13:31:17.684Z"
+}

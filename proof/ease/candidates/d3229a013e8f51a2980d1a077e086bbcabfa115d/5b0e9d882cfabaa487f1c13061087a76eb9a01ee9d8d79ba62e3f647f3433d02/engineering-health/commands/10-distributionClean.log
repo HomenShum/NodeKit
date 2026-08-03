@@ -1,0 +1,15 @@
+$ node scripts/run-local-distribution-gate.mjs --candidate <commit> --source-hash <sha256>
+
+[stdout]
+
+
+[stderr]
+LOCAL DISTRIBUTION FAIL fresh consumer install failed with exit code 4294963238: npm error code ENOENT
+npm error syscall open
+npm error path D:\VSCode\package.json
+npm error errno -4058
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open 'D:\VSCode\package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: D:\ai-agent-hosts\npm-cache\_logs\2026-07-22T13_13_34_190Z-debug-0.log
+

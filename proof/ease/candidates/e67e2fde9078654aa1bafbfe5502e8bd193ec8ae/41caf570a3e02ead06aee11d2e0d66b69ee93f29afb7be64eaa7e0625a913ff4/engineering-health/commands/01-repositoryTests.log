@@ -1,0 +1,1472 @@
+$ npm run test:repository
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 test:repository
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: fresh-agent evaluator requires an exact packed NodeKit candidate
+ok 1 - fresh-agent evaluator requires an exact packed NodeKit candidate
+  ---
+  duration_ms: 122.283
+  type: 'test'
+  ...
+# Subtest: agent-ease verdict binds all 15 trials to the exact packed candidate and their evidence
+ok 2 - agent-ease verdict binds all 15 trials to the exact packed candidate and their evidence
+  ---
+  duration_ms: 4433.4875
+  type: 'test'
+  ...
+# Subtest: agent-ease verdict reports rather than cherry-picks an extra candidate attempt
+ok 3 - agent-ease verdict reports rather than cherry-picks an extra candidate attempt
+  ---
+  duration_ms: 3761.9469
+  type: 'test'
+  ...
+# Subtest: agent-ease verdict rejects a candidate-bound attempt that substitutes another tarball
+ok 4 - agent-ease verdict rejects a candidate-bound attempt that substitutes another tarball
+  ---
+  duration_ms: 3423.8833
+  type: 'test'
+  ...
+# Subtest: agent-ease verdict rejects aliased evidence paths and application identity drift
+ok 5 - agent-ease verdict rejects aliased evidence paths and application identity drift
+  ---
+  duration_ms: 2429.818
+  type: 'test'
+  ...
+# Subtest: memory runtime passes the provider-neutral adapter conformance suite
+ok 6 - memory runtime passes the provider-neutral adapter conformance suite
+  ---
+  duration_ms: 48.5006
+  type: 'test'
+  ...
+# Subtest: host-bound conformance verifies server-derived identity without requiring caller actor control
+ok 7 - host-bound conformance verifies server-derived identity without requiring caller actor control
+  ---
+  duration_ms: 48.6118
+  type: 'test'
+  ...
+# Subtest: runtime capability negotiation is provider-native and fails closed
+ok 8 - runtime capability negotiation is provider-native and fails closed
+  ---
+  duration_ms: 0.2685
+  type: 'test'
+  ...
+# Subtest: portable values reject representation drift before hashing or storage
+ok 9 - portable values reject representation drift before hashing or storage
+  ---
+  duration_ms: 3.6774
+  type: 'test'
+  ...
+# Subtest: portable values enforce the conservative Convex intersection at exact boundaries
+ok 10 - portable values enforce the conservative Convex intersection at exact boundaries
+  ---
+  duration_ms: 18.3712
+  type: 'test'
+  ...
+# Subtest: receipt bindings use locale-independent portable ID order and complete event tie-breakers
+ok 11 - receipt bindings use locale-independent portable ID order and complete event tie-breakers
+  ---
+  duration_ms: 0.5649
+  type: 'test'
+  ...
+# Subtest: memory caseflow carries one guided transaction to a content-addressed receipt
+ok 12 - memory caseflow carries one guided transaction to a content-addressed receipt
+  ---
+  duration_ms: 5.3447
+  type: 'test'
+  ...
+# Subtest: memory receipts normalize bindings and derive every ID array from that order
+ok 13 - memory receipts normalize bindings and derive every ID array from that order
+  ---
+  duration_ms: 6.1624
+  type: 'test'
+  ...
+# Subtest: memory caseflow fails stale proposals closed and preserves the canonical artifact
+ok 14 - memory caseflow fails stale proposals closed and preserves the canonical artifact
+  ---
+  duration_ms: 2.4516
+  type: 'test'
+  ...
+# Subtest: memory caseflow makes exception recovery and next-action ownership explicit
+ok 15 - memory caseflow makes exception recovery and next-action ownership explicit
+  ---
+  duration_ms: 2.4801
+  type: 'test'
+  ...
+# Subtest: case intake persists idempotently and multiple exceptions remain contained
+ok 16 - case intake persists idempotently and multiple exceptions remain contained
+  ---
+  duration_ms: 1.9984
+  type: 'test'
+  ...
+# Subtest: memory caseflow retries decisions and completion without duplicate writes
+ok 17 - memory caseflow retries decisions and completion without duplicate writes
+  ---
+  duration_ms: 5.0997
+  type: 'test'
+  ...
+# Subtest: P1 Change Story evidence and NodeSlide application graph stay internally bound
+ok 18 - P1 Change Story evidence and NodeSlide application graph stay internally bound
+  ---
+  duration_ms: 28.0356
+  type: 'test'
+  ...
+# Subtest: every GitHub Action dependency is pinned to an immutable commit
+ok 19 - every GitHub Action dependency is pinned to an immutable commit
+  ---
+  duration_ms: 72.9207
+  type: 'test'
+  ...
+# Subtest: EaseProof pairs one cold run with the current warm run before emitting a verdict
+ok 20 - EaseProof pairs one cold run with the current warm run before emitting a verdict
+  ---
+  duration_ms: 13.1678
+  type: 'test'
+  ...
+# Subtest: quality runs both public boundaries and the exact-candidate gate
+ok 21 - quality runs both public boundaries and the exact-candidate gate
+  ---
+  duration_ms: 7.7342
+  type: 'test'
+  ...
+# Subtest: central registry and platform manifest are internally consistent
+ok 22 - central registry and platform manifest are internally consistent
+  ---
+  duration_ms: 3675.945
+  type: 'test'
+  ...
+# Subtest: an undeclared canonical signature fails closed
+ok 23 - an undeclared canonical signature fails closed
+  ---
+  duration_ms: 68.5492
+  type: 'test'
+  ...
+# Subtest: a classified adapter signature is accepted
+ok 24 - a classified adapter signature is accepted
+  ---
+  duration_ms: 61.9084
+  type: 'test'
+  ...
+# Subtest: generated JSON metadata is not scanned as executable source
+ok 25 - generated JSON metadata is not scanned as executable source
+  ---
+  duration_ms: 61.1429
+  type: 'test'
+  ...
+# Subtest: ignored temporary proof copies are not scanned as repository source
+ok 26 - ignored temporary proof copies are not scanned as repository source
+  ---
+  duration_ms: 48.0162
+  type: 'test'
+  ...
+# Subtest: nested temporary-looking source directories remain fail-closed
+ok 27 - nested temporary-looking source directories remain fail-closed
+  ---
+  duration_ms: 50.0793
+  type: 'test'
+  ...
+# Subtest: provider SDK imports in UI fail architecture conformance
+ok 28 - provider SDK imports in UI fail architecture conformance
+  ---
+  duration_ms: 44.7928
+  type: 'test'
+  ...
+# Subtest: malformed lifecycle and no-key fields cannot pass on source conformance alone
+ok 29 - malformed lifecycle and no-key fields cannot pass on source conformance alone
+  ---
+  duration_ms: 40.5331
+  type: 'test'
+  ...
+# Subtest: registry consumers cannot be omitted from a repository manifest
+ok 30 - registry consumers cannot be omitted from a repository manifest
+  ---
+  duration_ms: 41.5149
+  type: 'test'
+  ...
+# Subtest: stale contract declarations fail closed
+ok 31 - stale contract declarations fail closed
+  ---
+  duration_ms: 39.8443
+  type: 'test'
+  ...
+# Subtest: certified no-key paths cannot require external accounts
+ok 32 - certified no-key paths cannot require external accounts
+  ---
+  duration_ms: 50.3588
+  type: 'test'
+  ...
+# Subtest: no-key commands must resolve to repository scripts
+ok 33 - no-key commands must resolve to repository scripts
+  ---
+  duration_ms: 43.4259
+  type: 'test'
+  ...
+# Subtest: generated manifests use the canonical flat contracts and resolve event/trace versions
+ok 34 - generated manifests use the canonical flat contracts and resolve event/trace versions
+  ---
+  duration_ms: 4293.6692
+  type: 'test'
+  ...
+# Subtest: applications authored before contracts references were added remain v1 compatible
+ok 35 - applications authored before contracts references were added remain v1 compatible
+  ---
+  duration_ms: 2586.2602
+  type: 'test'
+  ...
+# Subtest: pack-root SKILL.md files appear in compiled discovery
+ok 36 - pack-root SKILL.md files appear in compiled discovery
+  ---
+  duration_ms: 1690.9987
+  type: 'test'
+  ...
+# Subtest: nodeagent application apiVersion/kind/spec envelopes fail closed
+ok 37 - nodeagent application apiVersion/kind/spec envelopes fail closed
+  ---
+  duration_ms: 622.8199
+  type: 'test'
+  ...
+# Subtest: nodeagent pack apiVersion/kind/spec envelopes fail closed
+ok 38 - nodeagent pack apiVersion/kind/spec envelopes fail closed
+  ---
+  duration_ms: 753.9991
+  type: 'test'
+  ...
+# Subtest: nodekit repository apiVersion/kind/spec envelopes fail closed
+ok 39 - nodekit repository apiVersion/kind/spec envelopes fail closed
+  ---
+  duration_ms: 1529.0107
+  type: 'test'
+  ...
+# Subtest: canonical event envelopes are strict and traceable
+ok 40 - canonical event envelopes are strict and traceable
+  ---
+  duration_ms: 29.8485
+  type: 'test'
+  ...
+# Subtest: NodeBenchAI is tracked honestly as an active production application
+ok 41 - NodeBenchAI is tracked honestly as an active production application
+  ---
+  duration_ms: 29.0305
+  type: 'test'
+  ...
+# Subtest: hosted timing pair binds one cold run and one warm run to one candidate
+ok 42 - hosted timing pair binds one cold run and one warm run to one candidate
+  ---
+  duration_ms: 7.5859
+  type: 'test'
+  ...
+# Subtest: hosted timing pair fails closed on a third run, duplicate receipt, or workflow drift
+ok 43 - hosted timing pair fails closed on a third run, duplicate receipt, or workflow drift
+  ---
+  duration_ms: 3.0961
+  type: 'test'
+  ...
+# Subtest: hosted timing aggregation writes the canonical 60-run matrix and verdict
+ok 44 - hosted timing aggregation writes the canonical 60-run matrix and verdict
+  ---
+  duration_ms: 615.0997
+  type: 'test'
+  ...
+# Subtest: distributable candidate pathspec includes packaged Evolution Ledger files
+ok 45 - distributable candidate pathspec includes packaged Evolution Ledger files
+  ---
+  duration_ms: 1.6991
+  type: 'test'
+  ...
+# Subtest: dirty distributable evolution files fail the shared package and PostgreSQL candidate gate
+ok 46 - dirty distributable evolution files fail the shared package and PostgreSQL candidate gate
+  ---
+  duration_ms: 0.8917
+  type: 'test'
+  ...
+# Subtest: shared porcelain parser preserves both rename paths
+ok 47 - shared porcelain parser preserves both rename paths
+  ---
+  duration_ms: 0.2283
+  type: 'test'
+  ...
+# Subtest: fresh-user evidence fails closed without five real participants
+ok 48 - fresh-user evidence fails closed without five real participants
+  ---
+  duration_ms: 3.0594
+  type: 'test'
+  ...
+# Subtest: developer timing matrix fails closed until all sixty isolated trials exist
+ok 49 - developer timing matrix fails closed until all sixty isolated trials exist
+  ---
+  duration_ms: 2.536
+  type: 'test'
+  ...
+# Subtest: developer timing verdict binds exactly sixty unique recomputed receipts
+ok 50 - developer timing verdict binds exactly sixty unique recomputed receipts
+  ---
+  duration_ms: 15.0749
+  type: 'test'
+  ...
+# Subtest: developer timing evidence cannot mix otherwise valid revisions
+ok 51 - developer timing evidence cannot mix otherwise valid revisions
+  ---
+  duration_ms: 5.9528
+  type: 'test'
+  ...
+# Subtest: developer timing evidence fails closed on a slow individual run even when medians remain fast
+ok 52 - developer timing evidence fails closed on a slow individual run even when medians remain fast
+  ---
+  duration_ms: 6.2933
+  type: 'test'
+  ...
+# Subtest: developer timing evidence fails closed on a slow cell median
+ok 53 - developer timing evidence fails closed on a slow cell median
+  ---
+  duration_ms: 7.1488
+  type: 'test'
+  ...
+# Subtest: developer timing evidence requires hosted provenance and one exact tarball
+ok 54 - developer timing evidence requires hosted provenance and one exact tarball
+  ---
+  duration_ms: 7.2821
+  type: 'test'
+  ...
+# Subtest: fresh-user evidence requires exact revision, consent, timestamps, screenshot and session log
+ok 55 - fresh-user evidence requires exact revision, consent, timestamps, screenshot and session log
+  ---
+  duration_ms: 2.171
+  type: 'test'
+  ...
+# Subtest: fresh-user verdict emits participant-level evidence and recomputable metrics
+ok 56 - fresh-user verdict emits participant-level evidence and recomputable metrics
+  ---
+  duration_ms: 1.8347
+  type: 'test'
+  ...
+# Subtest: human CLI evaluator reads and hashes the exact screenshot and session log files
+ok 57 - human CLI evaluator reads and hashes the exact screenshot and session log files
+  ---
+  duration_ms: 392.6553
+  type: 'test'
+  ...
+# Subtest: EaseProof keeps browser contracts distinct from certification
+ok 58 - EaseProof keeps browser contracts distinct from certification
+  ---
+  duration_ms: 15.5368
+  type: 'test'
+  ...
+# Subtest: generated UI scenarios are backed by caseflow conflict, exception, and receipt records
+ok 59 - generated UI scenarios are backed by caseflow conflict, exception, and receipt records
+  ---
+  duration_ms: 4.5224
+  type: 'test'
+  ...
+# Subtest: generated UI exposes one coherent next action for each lifecycle state
+ok 60 - generated UI exposes one coherent next action for each lifecycle state
+  ---
+  duration_ms: 8.0456
+  type: 'test'
+  ...
+# Subtest: fresh-agent recorder preserves process fields and prohibits routine reprompts
+ok 61 - fresh-agent recorder preserves process fields and prohibits routine reprompts
+  ---
+  duration_ms: 2.5178
+  type: 'test'
+  ...
+# Subtest: fresh-agent evaluator enforces the complete 15-run cross-agent matrix
+ok 62 - fresh-agent evaluator enforces the complete 15-run cross-agent matrix
+  ---
+  duration_ms: 1.6909
+  type: 'test'
+  ...
+# Subtest: fresh-agent completion detection distinguishes domain blockers from write blockage
+ok 63 - fresh-agent completion detection distinguishes domain blockers from write blockage
+  ---
+  duration_ms: 2.8066
+  type: 'test'
+  ...
+# Subtest: submission remains fail-closed while external EaseProof gates are open
+ok 64 - submission remains fail-closed while external EaseProof gates are open
+  ---
+  duration_ms: 2.9926
+  type: 'test'
+  ...
+# Subtest: developer timer starts at an empty launcher and invokes the exact installed tarball
+ok 65 - developer timer starts at an empty launcher and invokes the exact installed tarball
+  ---
+  duration_ms: 2.8533
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: Evolution Ledger verifies causal records, immutable evidence, and consumer adoption
+ok 66 - Evolution Ledger verifies causal records, immutable evidence, and consumer adoption
+  ---
+  duration_ms: 1938.4979
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: Evolution Ledger detects evidence drift and refuses canonical overwrite
+ok 67 - Evolution Ledger detects evidence drift and refuses canonical overwrite
+  ---
+  duration_ms: 1373.8643
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: verified evolution history generates projections and only proposes Knowledge Evolution changes
+ok 68 - verified evolution history generates projections and only proposes Knowledge Evolution changes
+  ---
+  duration_ms: 1105.8461
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/runtime.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: materiality gate blocks unrecorded system changes and accepts a reviewed event in range
+ok 69 - materiality gate blocks unrecorded system changes and accepts a reviewed event in range
+  ---
+  duration_ms: 1439.0792
+  type: 'test'
+  ...
+# Subtest: create emits a parseable, reproducible application from multiline input
+ok 70 - create emits a parseable, reproducible application from multiline input
+  ---
+  duration_ms: 1585.2034
+  type: 'test'
+  ...
+# Subtest: primary create rejects every domain preset without suggesting a narrow alternative
+ok 71 - primary create rejects every domain preset without suggesting a narrow alternative
+  ---
+  duration_ms: 5.8024
+  type: 'test'
+  ...
+# Subtest: the published package and CLI expose only the blank figured-out factory
+ok 72 - the published package and CLI expose only the blank figured-out factory
+  ---
+  duration_ms: 519.4222
+  type: 'test'
+  ...
+# Subtest: compiled hash detects fixture drift and literal secrets fail closed
+ok 73 - compiled hash detects fixture drift and literal secrets fail closed
+  ---
+  duration_ms: 2997.1025
+  type: 'test'
+  ...
+# Subtest: compiled identity is stable across LF and CRLF checkouts
+ok 74 - compiled identity is stable across LF and CRLF checkouts
+  ---
+  duration_ms: 4115.2311
+  type: 'test'
+  ...
+# Subtest: compiled hash binds the shipped app, workflow, dependency, and deployment surface
+ok 75 - compiled hash binds the shipped app, workflow, dependency, and deployment surface
+  ---
+  duration_ms: 4986.9303
+  type: 'test'
+  ...
+# Subtest: authoring.directory outside the conventional root is discovered and hash-bound
+ok 76 - authoring.directory outside the conventional root is discovered and hash-bound
+  ---
+  duration_ms: 2097.0473
+  type: 'test'
+  ...
+# Subtest: authoring.directory cannot escape the repository
+ok 77 - authoring.directory cannot escape the repository
+  ---
+  duration_ms: 489.6575
+  type: 'test'
+  ...
+# Subtest: create refuses nonempty targets
+ok 78 - create refuses nonempty targets
+  ---
+  duration_ms: 15.1069
+  type: 'test'
+  ...
+# Subtest: create rejects an unsupported package manager before writing files
+ok 79 - create rejects an unsupported package manager before writing files
+  ---
+  duration_ms: 3.5442
+  type: 'test'
+  ...
+# Subtest: default projects vendor the exact NodeKit runtime without polluting capability discovery
+ok 80 - default projects vendor the exact NodeKit runtime without polluting capability discovery
+  ---
+  duration_ms: 2175.7344
+  type: 'test'
+  ...
+# Subtest: a default vendored runtime installs cold without NodeKit build-only files
+ok 81 - a default vendored runtime installs cold without NodeKit build-only files
+  ---
+  duration_ms: 9437.9736
+  type: 'test'
+  ...
+# Subtest: create --local-proof emits the deterministic receipt in one CLI workflow
+ok 82 - create --local-proof emits the deterministic receipt in one CLI workflow
+  ---
+  duration_ms: 4850.2678
+  type: 'test'
+  ...
+# Subtest: adopt is additive, runnable, and reports collisions
+ok 83 - adopt is additive, runnable, and reports collisions
+  ---
+  duration_ms: 217.9575
+  type: 'test'
+  ...
+# Initialized empty Git repository in C:/Users/hshum/AppData/Local/Temp/nodekit-local-proof-ZFHa66/.git/
+# warning: in the working copy of 'vendor/nodekit/LICENSE', CRLF will be replaced by LF the next time Git touches it
+# [master (root-commit) ae847da] chore: initialize NodeKit application
+#  171 files changed, 20126 insertions(+)
+#  create mode 100644 .claude/skills/nodekit-launch/SKILL.md
+#  create mode 100644 .claude/skills/nodekit-launch/agents/openai.yaml
+#  create mode 100644 .claude/skills/nodekit-launch/references/launch-contract.md
+#  create mode 100644 .claude/skills/nodekit-present/SKILL.md
+#  create mode 100644 .claude/skills/nodekit-present/agents/openai.yaml
+#  create mode 100644 .claude/skills/nodekit-present/references/change-story-contract.md
+#  create mode 100644 .claude/skills/nodekit-qa/SKILL.md
+#  create mode 100644 .claude/skills/nodekit-qa/agents/openai.yaml
+#  create mode 100644 .claude/skills/nodekit-qa/references/qa-contract.md
+#  create mode 100644 .codex/skills/nodekit-launch/SKILL.md
+#  create mode 100644 .codex/skills/nodekit-launch/agents/openai.yaml
+#  create mode 100644 .codex/skills/nodekit-launch/references/launch-contract.md
+#  create mode 100644 .codex/skills/nodekit-present/SKILL.md
+#  create mode 100644 .codex/skills/nodekit-present/agents/openai.yaml
+#  create mode 100644 .codex/skills/nodekit-present/references/change-story-contract.md
+#  create mode 100644 .codex/skills/nodekit-qa/SKILL.md
+#  create mode 100644 .codex/skills/nodekit-qa/agents/openai.yaml
+#  create mode 100644 .codex/skills/nodekit-qa/references/qa-contract.md
+#  create mode 100644 .dockerignore
+#  create mode 100644 .env.example
+#  create mode 100644 .gitattributes
+#  create mode 100644 .gitignore
+#  create mode 100644 AGENTS.md
+#  create mode 100644 Dockerfile
+#  create mode 100644 README.md
+#  create mode 100644 adw/workflows/launch.yaml
+#  create mode 100644 agent/instructions.md
+#  create mode 100644 agent/workflow.mjs
+#  create mode 100644 apps/web/public/app.js
+#  create mode 100644 apps/web/public/index.html
+#  create mode 100644 apps/web/public/responsive-refinements.css
+#  create mode 100644 apps/web/public/styles.css
+#  create mode 100644 apps/web/server.mjs
+#  create mode 100644 docs/EVOLUTION.md
+#  create mode 100644 docs/FIGURED_OUT.md
+#  create mode 100644 docs/KNOWLEDGE_EVOLUTION.md
+#  create mode 100644 evals/figured-out-journey.json
+#  create mode 100644 evals/stale-proposal-conflict.json
+#  create mode 100644 fixtures/corpus/validation.txt
+#  create mode 100644 hackathon.yaml
+#  create mode 100644 integrations/convex/README.md
+#  create mode 100644 integrations/convex/capability-plan.yaml
+#  create mode 100644 nodeagent.yaml
+#  create mode 100644 nodekit.yaml
+#  create mode 100644 package.json
+#  create mode 100644 packs/primary/pack.yaml
+#  create mode 100644 product/AUDIENCE.md
+#  create mode 100644 product/BRIEF.md
+#  create mode 100644 product/DESIGN.md
+#  create mode 100644 product/EXPERIENCE.yaml
+#  create mode 100644 product/SERVICE_BLUEPRINT.md
+#  create mode 100644 product/TASTE.md
+#  create mode 100644 product/USER_JOURNEY.md
+#  create mode 100644 proof/README.md
+#  create mode 100644 proof/build-friction.json
+#  create mode 100644 render.yaml
+#  create mode 100644 scripts/audit-prod.mjs
+#  create mode 100644 scripts/browser-certify.mjs
+#  create mode 100644 scripts/browser-proof.mjs
+#  create mode 100644 scripts/check.mjs
+#  create mode 100644 scripts/demo.mjs
+#  create mode 100644 scripts/eval.mjs
+#  create mode 100644 scripts/lib/friction.mjs
+#  create mode 100644 scripts/proof.mjs
+#  create mode 100644 test/workflow.test.mjs
+#  create mode 100644 vendor/nodekit/LICENSE
+#  create mode 100644 vendor/nodekit/package.json
+#  create mode 100644 vendor/nodekit/schemas/nodeagent.application.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodeagent.event.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodeagent.pack.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.assumption.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.canary-receipt.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.convex-consumers-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.design-decision.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.developer-timing-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.engineering-check-receipt.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.engineering-health-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.engineering-issue-inventory.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.evolution-adoption.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.evolution-event.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.evolution-evidence.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.fresh-agent-verdict.v2.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.fresh-user-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.frontend-benchmark.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.frontend-direction-set.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.frontend-route.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.graph-patch.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.harness.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.invariant-claim.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.knowledge-action-receipt.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.knowledge-evolution-adoption-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.knowledge-graph.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.knowledge-state.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.managed-supabase-portability-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.model-capability-card.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.model-intelligence-harness-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.model-observation.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.package-install-proof.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.preview-verdict.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.product-design-contract.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.promotion-receipt.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.proofloop-ease-verification.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.publication-approval.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.routing-policy.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.runtime-capabilities.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.skill-candidate.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.skill-comparison.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.skill.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.submission-candidate.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.submission-manifest.v1.schema.json
+#  create mode 100644 vendor/nodekit/schemas/nodekit.tournament.v1.schema.json
+#  create mode 100644 vendor/nodekit/src/adapters/postgres-caseflow.mjs
+#  create mode 100644 vendor/nodekit/src/adapters/postgres.d.mts
+#  create mode 100644 vendor/nodekit/src/adapters/postgres.mjs
+#  create mode 100644 vendor/nodekit/src/caseflow.d.mts
+#  create mode 100644 vendor/nodekit/src/caseflow.mjs
+#  create mode 100755 vendor/nodekit/src/cli.mjs
+#  create mode 100644 vendor/nodekit/src/client/index.ts
+#  create mode 100644 vendor/nodekit/src/component/_generated/api.d.ts
+#  create mode 100644 vendor/nodekit/src/component/_generated/api.js
+#  create mode 100644 vendor/nodekit/src/component/_generated/component.d.ts
+#  create mode 100644 vendor/nodekit/src/component/_generated/dataModel.d.ts
+#  create mode 100644 vendor/nodekit/src/component/_generated/server.d.ts
+#  create mode 100644 vendor/nodekit/src/component/_generated/server.js
+#  create mode 100644 vendor/nodekit/src/component/caseflow.test.ts
+#  create mode 100644 vendor/nodekit/src/component/caseflow.ts
+#  create mode 100644 vendor/nodekit/src/component/c
+# onvex.config.ts
+#  create mode 100644 vendor/nodekit/src/component/hash.ts
+#  create mode 100644 vendor/nodekit/src/component/schema.ts
+#  create mode 100644 vendor/nodekit/src/component/setup.ts
+#  create mode 100644 vendor/nodekit/src/component/validators.ts
+#  create mode 100644 vendor/nodekit/src/convex-test.ts
+#  create mode 100644 vendor/nodekit/src/factory-acceptance.mjs
+#  create mode 100644 vendor/nodekit/src/index.d.mts
+#  create mode 100644 vendor/nodekit/src/index.mjs
+#  create mode 100644 vendor/nodekit/src/lib/agent-definition.mjs
+#  create mode 100644 vendor/nodekit/src/lib/agent-ease-report.mjs
+#  create mode 100644 vendor/nodekit/src/lib/caseflow-conformance.mjs
+#  create mode 100644 vendor/nodekit/src/lib/caseflow.mjs
+#  create mode 100644 vendor/nodekit/src/lib/contracts.mjs
+#  create mode 100644 vendor/nodekit/src/lib/dashboard.mjs
+#  create mode 100644 vendor/nodekit/src/lib/developer-timing-aggregation.mjs
+#  create mode 100644 vendor/nodekit/src/lib/distributable-candidate.mjs
+#  create mode 100644 vendor/nodekit/src/lib/ease-evidence.mjs
+#  create mode 100644 vendor/nodekit/src/lib/evolution-ledger.mjs
+#  create mode 100644 vendor/nodekit/src/lib/files.mjs
+#  create mode 100644 vendor/nodekit/src/lib/frontend-specialist.mjs
+#  create mode 100644 vendor/nodekit/src/lib/harness-gym.mjs
+#  create mode 100644 vendor/nodekit/src/lib/harness-knowledge.mjs
+#  create mode 100644 vendor/nodekit/src/lib/knowledge-evolution.mjs
+#  create mode 100644 vendor/nodekit/src/lib/model-intelligence.mjs
+#  create mode 100644 vendor/nodekit/src/lib/npm-cli-invocation.mjs
+#  create mode 100644 vendor/nodekit/src/lib/npm-package-archive.mjs
+#  create mode 100644 vendor/nodekit/src/lib/portable-value.d.mts
+#  create mode 100644 vendor/nodekit/src/lib/portable-value.mjs
+#  create mode 100644 vendor/nodekit/src/lib/presentation-pipeline.mjs
+#  create mode 100644 vendor/nodekit/src/lib/receipt-bindings.d.mts
+#  create mode 100644 vendor/nodekit/src/lib/receipt-bindings.mjs
+#  create mode 100644 vendor/nodekit/src/lib/registry.mjs
+#  create mode 100644 vendor/nodekit/src/lib/repo-check.mjs
+#  create mode 100644 vendor/nodekit/src/lib/runtime-capabilities.mjs
+#  create mode 100644 vendor/nodekit/src/lib/scaffold.mjs
+#  create mode 100644 vendor/nodekit/src/lib/schema-validation.mjs
+#  create mode 100644 vendor/nodekit/src/lib/source-hash.mjs
+#  create mode 100644 vendor/nodekit/src/lib/submission-attestation.mjs
+#  create mode 100644 vendor/nodekit/src/lib/submission-gate.mjs
+#  create mode 100644 vendor/nodekit/src/lib/submission-preparation.mjs
+#  create mode 100644 vendor/nodekit/src/lib/understand-anything.mjs
+#  create mode 100644 vendor/nodekit/src/submission-attestation.d.mts
+#  create mode 100644 vendor/nodekit/src/submission-attestation.mjs
+# Subtest: a fresh no-key Git candidate reaches an honest local-ready proof
+ok 84 - a fresh no-key Git candidate reaches an honest local-ready proof
+  ---
+  duration_ms: 5577.0208
+  type: 'test'
+  ...
+# Subtest: frontend planning protects product decisions and refuses reputation-only routing
+ok 85 - frontend planning protects product decisions and refuses reputation-only routing
+  ---
+  duration_ms: 541.4931
+  type: 'test'
+  ...
+# Subtest: Frontend Gym requires three materially distinct rendered directions and blind independent selection
+ok 86 - Frontend Gym requires three materially distinct rendered directions and blind independent selection
+  ---
+  duration_ms: 280.3263
+  type: 'test'
+  ...
+# Subtest: frontend repair is bounded and a canary requires exact model, screenshots, NodeProof, and human approval
+ok 87 - frontend repair is bounded and a canary requires exact model, screenshots, NodeProof, and human approval
+  ---
+  duration_ms: 76.2665
+  type: 'test'
+  ...
+# Subtest: skill compiler proposes only evidence-threshold candidates with executable contracts
+ok 88 - skill compiler proposes only evidence-threshold candidates with executable contracts
+  ---
+  duration_ms: 1904.4228
+  type: 'test'
+  ...
+# Subtest: skill benchmark holds model harness and protected benchmark fixed and rejects regressions
+ok 89 - skill benchmark holds model harness and protected benchmark fixed and rejects regressions
+  ---
+  duration_ms: 1472.3399
+  type: 'test'
+  ...
+# Subtest: routing compiler honors project evidence and remains provisional
+ok 90 - routing compiler honors project evidence and remains provisional
+  ---
+  duration_ms: 1115.3167
+  type: 'test'
+  ...
+# Subtest: tournament rejects self-judging and never authorizes promotion
+ok 91 - tournament rejects self-judging and never authorizes promotion
+  ---
+  duration_ms: 1027.266
+  type: 'test'
+  ...
+# Subtest: manual promotion requires benchmark canary and NodeProof and remains reversible
+ok 92 - manual promotion requires benchmark canary and NodeProof and remains reversible
+  ---
+  duration_ms: 806.0617
+  type: 'test'
+  ...
+# Subtest: initializes a backend-neutral six-layer graph with proposal-only authority
+ok 93 - initializes a backend-neutral six-layer graph with proposal-only authority
+  ---
+  duration_ms: 413.0253
+  type: 'test'
+  ...
+# Subtest: ingests immutable multimodal evidence only through an accepted patch
+ok 94 - ingests immutable multimodal evidence only through an accepted patch
+  ---
+  duration_ms: 195.9105
+  type: 'test'
+  ...
+# Subtest: supports source-grounded hyperedges, retrieval, gaps, actions, replay, and benchmark
+ok 95 - supports source-grounded hyperedges, retrieval, gaps, actions, replay, and benchmark
+  ---
+  duration_ms: 340.0804
+  type: 'test'
+  ...
+# Subtest: blocks ungrounded, stale, and direct source mutations while retaining deprecated history
+ok 96 - blocks ungrounded, stale, and direct source mutations while retaining deprecated history
+  ---
+  duration_ms: 465.1286
+  type: 'test'
+  ...
+# Subtest: rejects stale accepted proposals instead of overwriting a newer graph version
+ok 97 - rejects stale accepted proposals instead of overwriting a newer graph version
+  ---
+  duration_ms: 215.9503
+  type: 'test'
+  ...
+# Subtest: projects evaluated Harness Gym observations as a proposal, never as an automatic promotion
+ok 98 - projects evaluated Harness Gym observations as a proposal, never as an automatic promotion
+  ---
+  duration_ms: 1540.2017
+  type: 'test'
+  ...
+# Subtest: CLI exposes the complete safe graph lifecycle
+ok 99 - CLI exposes the complete safe graph lifecycle
+  ---
+  duration_ms: 3022.2598
+  type: 'test'
+  ...
+# Subtest: candidate gate exposes exactly the ten decisive local engineering checks
+ok 100 - candidate gate exposes exactly the ten decisive local engineering checks
+  ---
+  duration_ms: 3.4861
+  type: 'test'
+  ...
+# Subtest: engineering issue input is strict about open lowercase P0/P1 blockers
+ok 101 - engineering issue input is strict about open lowercase P0/P1 blockers
+  ---
+  duration_ms: 0.6417
+  type: 'test'
+  ...
+# Subtest: candidate prove composes schema-valid decisive receipts without claiming certification
+ok 102 - candidate prove composes schema-valid decisive receipts without claiming certification
+  ---
+  duration_ms: 230.3818
+  type: 'test'
+  ...
+# Subtest: browser-contract readiness requires every structural assertion and a certification disclaimer
+ok 103 - browser-contract readiness requires every structural assertion and a certification disclaimer
+  ---
+  duration_ms: 1.0545
+  type: 'test'
+  ...
+# Subtest: package metadata exposes preflight and exact proof commands
+ok 104 - package metadata exposes preflight and exact proof commands
+  ---
+  duration_ms: 8.4738
+  type: 'test'
+  ...
+# Subtest: candidate preflight materializes the intentionally non-JSON template dependency placeholder
+ok 105 - candidate preflight materializes the intentionally non-JSON template dependency placeholder
+  ---
+  duration_ms: 2.094
+  type: 'test'
+  ...
+# Subtest: model observation and capability-card schemas require exact resolved identity
+ok 106 - model observation and capability-card schemas require exact resolved identity
+  ---
+  duration_ms: 625.7831
+  type: 'test'
+  ...
+# Subtest: harness init is additive and baseline fails closed to an unmeasured registry
+ok 107 - harness init is additive and baseline fails closed to an unmeasured registry
+  ---
+  duration_ms: 1401.4077
+  type: 'test'
+  ...
+# Subtest: compiler validates observations and cards and keeps requested aliases separate from resolved models
+ok 108 - compiler validates observations and cards and keeps requested aliases separate from resolved models
+  ---
+  duration_ms: 1441.6334
+  type: 'test'
+  ...
+# Subtest: compiler rejects escaped evidence roots and unsupported project-card claims
+ok 109 - compiler rejects escaped evidence roots and unsupported project-card claims
+  ---
+  duration_ms: 1075.6852
+  type: 'test'
+  ...
+# Subtest: failure diagnosis only marks repeated multi-brief findings as skill candidates
+ok 110 - failure diagnosis only marks repeated multi-brief findings as skill candidates
+  ---
+  duration_ms: 1.141
+  type: 'test'
+  ...
+# Subtest: Founder Quest production identity stays synchronized across campaign inputs
+ok 111 - Founder Quest production identity stays synchronized across campaign inputs
+  ---
+  duration_ms: 37.1408
+  type: 'test'
+  ...
+# Subtest: public drafts contain no unresolved tokens and preserve platform and scope boundaries
+ok 112 - public drafts contain no unresolved tokens and preserve platform and scope boundaries
+  ---
+  duration_ms: 9.583
+  type: 'test'
+  ...
+# Subtest: Founder Quest video spec is claim-safe and duration-bounded
+ok 113 - Founder Quest video spec is claim-safe and duration-bounded
+  ---
+  duration_ms: 5.6597
+  type: 'test'
+  ...
+# Subtest: checked-in spec contains no literal, local, or synthetic production URL
+ok 114 - checked-in spec contains no literal, local, or synthetic production URL
+  ---
+  duration_ms: 0.7413
+  type: 'test'
+  ...
+# Subtest: walkthrough remains read-only and traverses graph, answer, sources, and proof
+ok 115 - walkthrough remains read-only and traverses graph, answer, sources, and proof
+  ---
+  duration_ms: 0.6869
+  type: 'test'
+  ...
+# Subtest: Remotion commands call the pinned Feature Proof Studio stage
+ok 116 - Remotion commands call the pinned Feature Proof Studio stage
+  ---
+  duration_ms: 1.4158
+  type: 'test'
+  ...
+# Subtest: package commands are executable without direct .cmd spawning on Windows
+ok 117 - package commands are executable without direct .cmd spawning on Windows
+  ---
+  duration_ms: 0.3238
+  type: 'test'
+  ...
+# Subtest: capture adapter adds a bounded visible-text wait to the pinned script contract
+ok 118 - capture adapter adds a bounded visible-text wait to the pinned script contract
+  ---
+  duration_ms: 51.1218
+  type: 'test'
+  ...
+# Subtest: campaign renderer pulls result frames back to the full product surface
+ok 119 - campaign renderer pulls result frames back to the full product surface
+  ---
+  duration_ms: 0.9051
+  type: 'test'
+  ...
+# Subtest: preflight fails closed when deployment, browser, and screenshot proof are absent
+ok 120 - preflight fails closed when deployment, browser, and screenshot proof are absent
+  ---
+  duration_ms: 37.5332
+  type: 'test'
+  ...
+# Subtest: planned Founder Quest claim cannot authorize a final capture
+ok 121 - planned Founder Quest claim cannot authorize a final capture
+  ---
+  duration_ms: 1.1997
+  type: 'test'
+  ...
+# Subtest: verified Founder Quest claim is bound to the exact checked-in production proof
+ok 122 - verified Founder Quest claim is bound to the exact checked-in production proof
+  ---
+  duration_ms: 0.8089
+  type: 'test'
+  ...
+# Subtest: Windows npm invocation preserves path-with-spaces arguments without a shell
+ok 123 - Windows npm invocation preserves path-with-spaces arguments without a shell
+  ---
+  duration_ms: 2.5237
+  type: 'test'
+  ...
+# Subtest: Windows npm invocation fails closed instead of falling back to shell parsing
+ok 124 - Windows npm invocation fails closed instead of falling back to shell parsing
+  ---
+  duration_ms: 0.8048
+  type: 'test'
+  ...
+# Subtest: POSIX npm invocation has a shell-free binary fallback
+ok 125 - POSIX npm invocation has a shell-free binary fallback
+  ---
+  duration_ms: 1.3119
+  type: 'test'
+  ...
+# Subtest: inspects an npm-shaped gzip tar, applies PAX paths, and emits a canonical file manifest
+ok 126 - inspects an npm-shaped gzip tar, applies PAX paths, and emits a canonical file manifest
+  ---
+  duration_ms: 59.8599
+  type: 'test'
+  ...
+# Subtest: manifest identity is stable across tar ordering while the tarball identity remains byte-exact
+ok 127 - manifest identity is stable across tar ordering while the tarball identity remains byte-exact
+  ---
+  duration_ms: 5.6856
+  type: 'test'
+  ...
+# Subtest: rejects traversal, absolute, backslash, dot-segment, and non-package paths
+ok 128 - rejects traversal, absolute, backslash, dot-segment, and non-package paths
+  ---
+  duration_ms: 11.7854
+  type: 'test'
+  ...
+# Subtest: rejects symbolic links, hard links, and link targets hidden on regular entries
+ok 129 - rejects symbolic links, hard links, and link targets hidden on regular entries
+  ---
+  duration_ms: 3.3776
+  type: 'test'
+  ...
+# Subtest: rejects exact, case-insensitive, and file-versus-directory path collisions
+ok 130 - rejects exact, case-insensitive, and file-versus-directory path collisions
+  ---
+  duration_ms: 4.4739
+  type: 'test'
+  ...
+# Subtest: rejects header tampering, non-zero padding, trailing tar payload, and a missing second end block
+ok 131 - rejects header tampering, non-zero padding, trailing tar payload, and a missing second end block
+  ---
+  duration_ms: 5.9919
+  type: 'test'
+  ...
+# Subtest: rejects malformed package metadata and archives without package.json
+ok 132 - rejects malformed package metadata and archives without package.json
+  ---
+  duration_ms: 4.4436
+  type: 'test'
+  ...
+# Subtest: fails closed on compressed, decompressed, file-count, entry, PAX, and unpacked-size limits
+ok 133 - fails closed on compressed, decompressed, file-count, entry, PAX, and unpacked-size limits
+  ---
+  duration_ms: 6.1077
+  type: 'test'
+  ...
+# Subtest: rejects mismatched caller expectations
+ok 134 - rejects mismatched caller expectations
+  ---
+  duration_ms: 7.1278
+  type: 'test'
+  ...
+# Subtest: argument parser requires exact-candidate identity inputs
+ok 135 - argument parser requires exact-candidate identity inputs
+  ---
+  duration_ms: 3.7762
+  type: 'test'
+  ...
+# Subtest: source identity uses locale-independent code-unit path ordering
+ok 136 - source identity uses locale-independent code-unit path ordering
+  ---
+  duration_ms: 8.9505
+  type: 'test'
+  ...
+# Subtest: distribution verification fails closed when the Convex component API is absent
+ok 137 - distribution verification fails closed when the Convex component API is absent
+  ---
+  duration_ms: 2.1801
+  type: 'test'
+  ...
+# Subtest: distribution verification requires the attestation subpath and both named attestation bins
+ok 138 - distribution verification requires the attestation subpath and both named attestation bins
+  ---
+  duration_ms: 0.8317
+  type: 'test'
+  ...
+# Subtest: independent package comparison fails closed on changed bytes or file manifests
+ok 139 - independent package comparison fails closed on changed bytes or file manifests
+  ---
+  duration_ms: 1.1083
+  type: 'test'
+  ...
+# Subtest: candidate check rejects dirty files inside the distributable tree
+ok 140 - candidate check rejects dirty files inside the distributable tree
+  ---
+  duration_ms: 3049.6254
+  type: 'test'
+  ...
+# Subtest: candidate check preserves porcelain status columns for modified tracked files
+ok 141 - candidate check preserves porcelain status columns for modified tracked files
+  ---
+  duration_ms: 2830.1109
+  type: 'test'
+  ...
+# Subtest: candidate check parses NUL-delimited rename records without losing either path
+ok 142 - candidate check parses NUL-delimited rename records without losing either path
+  ---
+  duration_ms: 2636.5046
+  type: 'test'
+  ...
+# Subtest: runner proves the exact packed artifact in fresh consumers without publishing or deploying
+ok 143 - runner proves the exact packed artifact in fresh consumers without publishing or deploying
+  ---
+  duration_ms: 27277.1651
+  type: 'test'
+  ...
+# Subtest: PostgreSQL adapter is available through the supported package entry point
+ok 144 - PostgreSQL adapter is available through the supported package entry point
+  ---
+  duration_ms: 2.8863
+  type: 'test'
+  ...
+# Subtest: PostgreSQL legacy proposal rehash uses NodeKit canonical contentHash in an atomic owner batch
+ok 145 - PostgreSQL legacy proposal rehash uses NodeKit canonical contentHash in an atomic owner batch
+  ---
+  duration_ms: 5.9689
+  type: 'test'
+  ...
+# Subtest: PostgreSQL legacy proposal rehash rolls back a non-portable legacy patch
+ok 146 - PostgreSQL legacy proposal rehash rolls back a non-portable legacy patch
+  ---
+  duration_ms: 0.8928
+  type: 'test'
+  ...
+# Subtest: PostgreSQL receipt construction normalizes provider query results before hashing
+ok 147 - PostgreSQL receipt construction normalizes provider query results before hashing
+  ---
+  duration_ms: 12.8304
+  type: 'test'
+  ...
+# Subtest: portable and component receipt hashing share a fixed-ID fixed-clock golden vector
+ok 148 - portable and component receipt hashing share a fixed-ID fixed-clock golden vector
+  ---
+  duration_ms: 1.0173
+  type: 'test'
+  ...
+# Subtest: PostgreSQL migration defines the complete owner-scoped Caseflow record set
+ok 149 - PostgreSQL migration defines the complete owner-scoped Caseflow record set
+  ---
+  duration_ms: 2.6218
+  type: 'test'
+  ...
+# Subtest: PostgreSQL adapter stores the canonical proposal digest once and never sends a hash to apply
+ok 150 - PostgreSQL adapter stores the canonical proposal digest once and never sends a hash to apply
+  ---
+  duration_ms: 1.6889
+  type: 'test'
+  ...
+# Subtest: live PostgreSQL proof exercises a two-client artifact-versus-completion lock barrier
+ok 151 - live PostgreSQL proof exercises a two-client artifact-versus-completion lock barrier
+  ---
+  duration_ms: 1.4432
+  type: 'test'
+  ...
+# Subtest: Supabase profile extends the complete portable record set with owner RLS
+ok 152 - Supabase profile extends the complete portable record set with owner RLS
+  ---
+  duration_ms: 2.059
+  type: 'test'
+  ...
+# Subtest: claim/evidence gate accepts verified evidence and future-only planned copy
+ok 153 - claim/evidence gate accepts verified evidence and future-only planned copy
+  ---
+  duration_ms: 30.6354
+  type: 'test'
+  ...
+# Subtest: claim/evidence gate fails closed on planned product copy asserted as current reality
+ok 154 - claim/evidence gate fails closed on planned product copy asserted as current reality
+  ---
+  duration_ms: 2.4573
+  type: 'test'
+  ...
+# Subtest: claim/evidence gate fails closed on missing required evidence
+ok 155 - claim/evidence gate fails closed on missing required evidence
+  ---
+  duration_ms: 0.5086
+  type: 'test'
+  ...
+# Subtest: campaign slide plan binds verified Founder Quest production evidence and keeps publication separate
+ok 156 - campaign slide plan binds verified Founder Quest production evidence and keeps publication separate
+  ---
+  duration_ms: 12.4924
+  type: 'test'
+  ...
+# Subtest: verified Founder Quest slide carries production copy without erasing the synthetic boundary
+ok 157 - verified Founder Quest slide carries production copy without erasing the synthetic boundary
+  ---
+  duration_ms: 1677.8936
+  type: 'test'
+  ...
+# Subtest: final media gate validates the receipt contract and re-hashes both current MP4s
+ok 158 - final media gate validates the receipt contract and re-hashes both current MP4s
+  ---
+  duration_ms: 325.4202
+  type: 'test'
+  ...
+# Subtest: default generation receipt remains canonical, deterministic, hash-bound, and draft-only
+ok 159 - default generation receipt remains canonical, deterministic, hash-bound, and draft-only
+  ---
+  duration_ms: 2.8459
+  type: 'test'
+  ...
+# Subtest: final generation receipt is media-bound, ready, and explicitly not published
+ok 160 - final generation receipt is media-bound, ready, and explicitly not published
+  ---
+  duration_ms: 1.32
+  type: 'test'
+  ...
+# Subtest: published Caseflow entry point exposes the supported portable contract
+ok 161 - published Caseflow entry point exposes the supported portable contract
+  ---
+  duration_ms: 52.7887
+  type: 'test'
+  ...
+# Subtest: published metadata cannot silently drop attestation exports or command bins
+ok 162 - published metadata cannot silently drop attestation exports or command bins
+  ---
+  duration_ms: 7.3885
+  type: 'test'
+  ...
+# Subtest: canonical payload encoding and hashing are independent of object key insertion order
+ok 163 - canonical payload encoding and hashing are independent of object key insertion order
+  ---
+  duration_ms: 5.6736
+  type: 'test'
+  ...
+# Subtest: canonical payload encoding rejects lossy, cyclic, sparse, or non-plain values
+ok 164 - canonical payload encoding rejects lossy, cyclic, sparse, or non-plain values
+  ---
+  duration_ms: 1.3366
+  type: 'test'
+  ...
+# Subtest: payload factories bind exact candidate identity and canonical evidence references
+ok 165 - payload factories bind exact candidate identity and canonical evidence references
+  ---
+  duration_ms: 9.1609
+  type: 'test'
+  ...
+# Subtest: trusted detached Ed25519 attestations verify only through purpose-scoped trust entries
+ok 166 - trusted detached Ed25519 attestations verify only through purpose-scoped trust entries
+  ---
+  duration_ms: 17.2981
+  type: 'test'
+  ...
+# Subtest: external gate payload binds exact verdict body and canonical underlying evidence root
+ok 167 - external gate payload binds exact verdict body and canonical underlying evidence root
+  ---
+  duration_ms: 1.0448
+  type: 'test'
+  ...
+# Subtest: ProofLoop evidence roots bind decisive-evidence order
+ok 168 - ProofLoop evidence roots bind decisive-evidence order
+  ---
+  duration_ms: 0.6916
+  type: 'test'
+  ...
+# Subtest: trusted-key env JSON requires externally supplied, purpose-scoped Ed25519 public PEM values
+ok 169 - trusted-key env JSON requires externally supplied, purpose-scoped Ed25519 public PEM values
+  ---
+  duration_ms: 6.1498
+  type: 'test'
+  ...
+# Subtest: verification rejects payload and signed-metadata tampering
+ok 170 - verification rejects payload and signed-metadata tampering
+  ---
+  duration_ms: 2.2657
+  type: 'test'
+  ...
+# Subtest: verification rejects unknown keys and never accepts an embedded candidate key
+ok 171 - verification rejects unknown keys and never accepts an embedded candidate key
+  ---
+  duration_ms: 2.2081
+  type: 'test'
+  ...
+# Subtest: verification rejects malformed timestamps, malformed signatures, and future attestations
+ok 172 - verification rejects malformed timestamps, malformed signatures, and future attestations
+  ---
+  duration_ms: 2.155
+  type: 'test'
+  ...
+# Subtest: verification enforces the caller's expected attestation purpose
+ok 173 - verification enforces the caller's expected attestation purpose
+  ---
+  duration_ms: 1.2655
+  type: 'test'
+  ...
+# Subtest: a valid signature is rejected when its key is not trusted for that payload purpose
+ok 174 - a valid signature is rejected when its key is not trusted for that payload purpose
+  ---
+  duration_ms: 1.0778
+  type: 'test'
+  ...
+# Subtest: offline commands sign from a private-key file and verify from the external trust env
+ok 175 - offline commands sign from a private-key file and verify from the external trust env
+  ---
+  duration_ms: 322.011
+  type: 'test'
+  ...
+# Subtest: submission preparation accepts explicit named options
+ok 176 - submission preparation accepts explicit named options
+  ---
+  duration_ms: 1529.1987
+  type: 'test'
+  ...
+# Subtest: submission scripts fail clearly on unknown options
+ok 177 - submission scripts fail clearly on unknown options
+  ---
+  duration_ms: 1161.6377
+  type: 'test'
+  ...
+# Subtest: decisive evidence contracts reject shallow counts and unproven live adoption
+ok 178 - decisive evidence contracts reject shallow counts and unproven live adoption
+  ---
+  duration_ms: 1126.6935
+  type: 'test'
+  ...
+# Subtest: evidence paths are canonical and browser certification closes over every byte
+ok 179 - evidence paths are canonical and browser certification closes over every byte
+  ---
+  duration_ms: 2127.7062
+  type: 'test'
+  ...
+# Subtest: engineering health recomputes command identity and unresolved P0/P1 from machine evidence
+ok 180 - engineering health recomputes command identity and unresolved P0/P1 from machine evidence
+  ---
+  duration_ms: 434.3473
+  type: 'test'
+  ...
+# warning: in the working copy of 'candidate.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'schemas/nodekit.submission-manifest.v1.schema.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: submission gate requires all evidence, hashes, and explicit approval
+ok 181 - submission gate requires all evidence, hashes, and explicit approval
+  ---
+  duration_ms: 17606.9039
+  type: 'test'
+  ...
+# warning: in the working copy of 'candidate.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'schemas/nodekit.submission-manifest.v1.schema.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/changed.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: submission gate rejects stale source revisions and evidence without decisive contracts
+ok 182 - submission gate rejects stale source revisions and evidence without decisive contracts
+  ---
+  duration_ms: 841.0541
+  type: 'test'
+  ...
+# warning: in the working copy of 'candidate.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'schemas/nodekit.submission-manifest.v1.schema.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: submission gate rejects uncommitted source and incomplete package proof
+ok 183 - submission gate rejects uncommitted source and incomplete package proof
+  ---
+  duration_ms: 5166.1436
+  type: 'test'
+  ...
+# warning: in the working copy of 'candidate.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'schemas/nodekit.submission-manifest.v1.schema.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: submission gate rejects tampered, omitted, and extra transitive evidence
+ok 184 - submission gate rejects tampered, omitted, and extra transitive evidence
+  ---
+  duration_ms: 10408.9869
+  type: 'test'
+  ...
+# warning: in the working copy of 'candidate.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'schemas/nodekit.submission-manifest.v1.schema.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: submission gate rejects evidence reached through an escaping junction
+ok 185 - submission gate rejects evidence reached through an escaping junction
+  ---
+  duration_ms: 4223.5656
+  type: 'test'
+  ...
+# Subtest: null-delimited Git status parsing preserves rename endpoints and embedded newlines
+ok 186 - null-delimited Git status parsing preserves rename endpoints and embedded newlines
+  ---
+  duration_ms: 1.5698
+  type: 'test'
+  ...
+# Subtest: submission preparation emits every distinct fail-closed gate when evidence is missing
+ok 187 - submission preparation emits every distinct fail-closed gate when evidence is missing
+  ---
+  duration_ms: 862.129
+  type: 'test'
+  ...
+# Subtest: submission preparation passes only exact-candidate decisive evidence
+ok 188 - submission preparation passes only exact-candidate decisive evidence
+  ---
+  duration_ms: 8852.5348
+  type: 'test'
+  ...
+# Subtest: submission preparation never upgrades stale, invalid, or unapproved evidence
+ok 189 - submission preparation never upgrades stale, invalid, or unapproved evidence
+  ---
+  duration_ms: 3311.8206
+  type: 'test'
+  ...
+# Subtest: submission preparation never overwrites a decisive schema failure with hand-coded checks
+ok 190 - submission preparation never overwrites a decisive schema failure with hand-coded checks
+  ---
+  duration_ms: 3319.2991
+  type: 'test'
+  ...
+# Subtest: submission preparation blocks otherwise passing evidence while source is dirty
+ok 191 - submission preparation blocks otherwise passing evidence while source is dirty
+  ---
+  duration_ms: 3133.2504
+  type: 'test'
+  ...
+# Subtest: submission preparation byte-verifies every transitive reference and package tarball
+ok 192 - submission preparation byte-verifies every transitive reference and package tarball
+  ---
+  duration_ms: 3013.2962
+  type: 'test'
+  ...
+# Subtest: submission preparation fails closed for missing transitive evidence
+ok 193 - submission preparation fails closed for missing transitive evidence
+  ---
+  duration_ms: 2958.9823
+  type: 'test'
+  ...
+# Subtest: submission preparation rejects a transitive evidence path through an escaping junction
+ok 194 - submission preparation rejects a transitive evidence path through an escaping junction
+  ---
+  duration_ms: 2438.976
+  type: 'test'
+  ...
+# Subtest: submission preparation treats both sides of a Git rename as changed source
+ok 195 - submission preparation treats both sides of a Git rename as changed source
+  ---
+  duration_ms: 10686.1249
+  type: 'test'
+  ...
+# Subtest: all decisive submission verdict schemas accept the exact fixture contracts
+ok 196 - all decisive submission verdict schemas accept the exact fixture contracts
+  ---
+  duration_ms: 725.4272
+  type: 'test'
+  ...
+# Subtest: decisive verdict schemas reject unknown top-level and release-candidate fields
+ok 197 - decisive verdict schemas reject unknown top-level and release-candidate fields
+  ---
+  duration_ms: 509.713
+  type: 'test'
+  ...
+# Subtest: decisive verdict schemas require their complete evidence-bearing structures
+ok 198 - decisive verdict schemas require their complete evidence-bearing structures
+  ---
+  duration_ms: 506.6912
+  type: 'test'
+  ...
+# Subtest: all evidence-bearing verdict schemas reject non-canonical repository paths
+ok 199 - all evidence-bearing verdict schemas reject non-canonical repository paths
+  ---
+  duration_ms: 589.5421
+  type: 'test'
+  ...
+# Subtest: decisive schemas reject downgraded outcomes and incomplete exact evidence sets
+ok 200 - decisive schemas reject downgraded outcomes and incomplete exact evidence sets
+  ---
+  duration_ms: 617.5109
+  type: 'test'
+  ...
+# Subtest: externally observed verdict schemas require strict attestations and hosted preview identity
+ok 201 - externally observed verdict schemas require strict attestations and hosted preview identity
+  ---
+  duration_ms: 559.214
+  type: 'test'
+  ...
+# Subtest: Supabase core profile keeps browser lifecycle access read-only and owner-scoped
+ok 202 - Supabase core profile keeps browser lifecycle access read-only and owner-scoped
+  ---
+  duration_ms: 11.2416
+  type: 'test'
+  ...
+# Subtest: Supabase mutation RPC derives authority, time, and artifact hash instead of accepting them
+ok 203 - Supabase mutation RPC derives authority, time, and artifact hash instead of accepting them
+  ---
+  duration_ms: 2.2347
+  type: 'test'
+  ...
+# Subtest: Supabase local proof rejects the obsolete caller-controlled hash overload
+ok 204 - Supabase local proof rejects the obsolete caller-controlled hash overload
+  ---
+  duration_ms: 2.2409
+  type: 'test'
+  ...
+# Subtest: Supabase Storage policy is private-owner-folder scoped and never mutates metadata
+ok 205 - Supabase Storage policy is private-owner-folder scoped and never mutates metadata
+  ---
+  duration_ms: 4.7101
+  type: 'test'
+  ...
+# Subtest: Supabase worker module is opt-in, durable, server-only, and schedule-neutral
+ok 206 - Supabase worker module is opt-in, durable, server-only, and schedule-neutral
+  ---
+  duration_ms: 3.099
+  type: 'test'
+  ...
+# Subtest: imports a pinned Understand Anything code graph as a namespaced snapshot
+ok 207 - imports a pinned Understand Anything code graph as a namespaced snapshot
+  ---
+  duration_ms: 1452.6181
+  type: 'test'
+  ...
+# Subtest: queries the imported graph without treating it as an autonomous write authority
+ok 208 - queries the imported graph without treating it as an autonomous write authority
+  ---
+  duration_ms: 847.2103
+  type: 'test'
+  ...
+# Subtest: rejects stale or falsely pinned Understand Anything graphs
+ok 209 - rejects stale or falsely pinned Understand Anything graphs
+  ---
+  duration_ms: 1293.3157
+  type: 'test'
+  ...
+1..209
+# tests 209
+# suites 0
+# pass 209
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42818.7877
+
+
+[stderr]
+

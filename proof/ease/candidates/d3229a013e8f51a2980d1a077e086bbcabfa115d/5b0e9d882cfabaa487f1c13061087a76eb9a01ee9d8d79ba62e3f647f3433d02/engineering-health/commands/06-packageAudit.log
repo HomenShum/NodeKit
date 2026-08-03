@@ -1,0 +1,12 @@
+$ npm run audit:prod
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 audit:prod
+> npm audit --omit=dev
+
+found 0 vulnerabilities
+
+
+[stderr]
+

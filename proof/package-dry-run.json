@@ -1,0 +1,496 @@
+﻿[
+  {
+    "id": "@homenshum/nodekit@0.2.1",
+    "name": "@homenshum/nodekit",
+    "version": "0.2.1",
+    "size": 90427,
+    "unpackedSize": 351287,
+    "shasum": "769888022a3feaba04aee08f2c1066c57aed66cf",
+    "integrity": "sha512-EVEyXVDkuJWsoNj0EswaQzcYcd2U75cSjOjEYdMg6L6fq8OrTZfjgx6dzbeI10ovWh4OKs4DVpEd7NYDMywoIw==",
+    "filename": "homenshum-nodekit-0.2.1.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1088,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 9902,
+        "mode": 420
+      },
+      {
+        "path": "architecture.yaml",
+        "size": 1054,
+        "mode": 420
+      },
+      {
+        "path": "ownership.yaml",
+        "size": 6931,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 1690,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/.claude-plugin/plugin.json",
+        "size": 366,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/.codex-plugin/plugin.json",
+        "size": 814,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-launch/agents/openai.yaml",
+        "size": 317,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-launch/references/launch-contract.md",
+        "size": 1234,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-launch/SKILL.md",
+        "size": 3603,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-present/agents/openai.yaml",
+        "size": 282,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-present/references/change-story-contract.md",
+        "size": 2184,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-present/SKILL.md",
+        "size": 3212,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-qa/agents/openai.yaml",
+        "size": 311,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-qa/references/qa-contract.md",
+        "size": 884,
+        "mode": 420
+      },
+      {
+        "path": "plugins/nodekit/skills/nodekit-qa/SKILL.md",
+        "size": 2650,
+        "mode": 420
+      },
+      {
+        "path": "repositories.yaml",
+        "size": 3147,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodeagent.application.v1.schema.json",
+        "size": 3356,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodeagent.event.v1.schema.json",
+        "size": 1500,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodeagent.pack.v1.schema.json",
+        "size": 1637,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.canary-receipt.v1.schema.json",
+        "size": 1034,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.harness.v1.schema.json",
+        "size": 1792,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.model-capability-card.v1.schema.json",
+        "size": 3837,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.model-observation.v1.schema.json",
+        "size": 6624,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.promotion-receipt.v1.schema.json",
+        "size": 1228,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.routing-policy.v1.schema.json",
+        "size": 3773,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.runtime-capabilities.v1.schema.json",
+        "size": 1066,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.schema.json",
+        "size": 3872,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.skill-candidate.v1.schema.json",
+        "size": 2012,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.skill-comparison.v1.schema.json",
+        "size": 2007,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.skill.v1.schema.json",
+        "size": 2091,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.submission-manifest.v1.schema.json",
+        "size": 1405,
+        "mode": 420
+      },
+      {
+        "path": "schemas/nodekit.tournament.v1.schema.json",
+        "size": 1767,
+        "mode": 420
+      },
+      {
+        "path": "src/cli.mjs",
+        "size": 30864,
+        "mode": 420
+      },
+      {
+        "path": "src/factory-acceptance.mjs",
+        "size": 12638,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/agent-definition.mjs",
+        "size": 16247,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/caseflow-conformance.mjs",
+        "size": 2889,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/caseflow.mjs",
+        "size": 12321,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/contracts.mjs",
+        "size": 2896,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/dashboard.mjs",
+        "size": 3083,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/ease-evidence.mjs",
+        "size": 5665,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/files.mjs",
+        "size": 1783,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/harness-gym.mjs",
+        "size": 21315,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/model-intelligence.mjs",
+        "size": 15089,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/presentation-pipeline.mjs",
+        "size": 26460,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/registry.mjs",
+        "size": 6550,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/repo-check.mjs",
+        "size": 17967,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/runtime-capabilities.mjs",
+        "size": 2653,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/scaffold.mjs",
+        "size": 14092,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/schema-validation.mjs",
+        "size": 852,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/source-hash.mjs",
+        "size": 1510,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/submission-gate.mjs",
+        "size": 2076,
+        "mode": 420
+      },
+      {
+        "path": "src/lib/understand-anything.mjs",
+        "size": 8151,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/.dockerignore",
+        "size": 36,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/.env.example",
+        "size": 157,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/.gitattributes",
+        "size": 19,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/adw/workflows/launch.yaml",
+        "size": 260,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/agent/instructions.md",
+        "size": 336,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/agent/workflow.mjs",
+        "size": 2088,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/AGENTS.md",
+        "size": 1076,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/apps/web/public/app.js",
+        "size": 5535,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/apps/web/public/index.html",
+        "size": 4122,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/apps/web/public/styles.css",
+        "size": 9904,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/apps/web/server.mjs",
+        "size": 8507,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/Dockerfile",
+        "size": 191,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/docs/FIGURED_OUT.md",
+        "size": 1507,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/evals/figured-out-journey.json",
+        "size": 161,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/evals/stale-proposal-conflict.json",
+        "size": 160,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/fixtures/corpus/validation.txt",
+        "size": 91,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/gitignore.template",
+        "size": 89,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/hackathon.yaml",
+        "size": 562,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/integrations/convex/capability-plan.yaml",
+        "size": 597,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/integrations/convex/README.md",
+        "size": 714,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/nodeagent.yaml",
+        "size": 875,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/nodekit.yaml",
+        "size": 867,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/package.json",
+        "size": 821,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/packs/primary/pack.yaml",
+        "size": 342,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/AUDIENCE.md",
+        "size": 300,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/BRIEF.md",
+        "size": 383,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/DESIGN.md",
+        "size": 311,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/EXPERIENCE.yaml",
+        "size": 606,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/SERVICE_BLUEPRINT.md",
+        "size": 598,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/TASTE.md",
+        "size": 328,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/product/USER_JOURNEY.md",
+        "size": 382,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/proof/README.md",
+        "size": 110,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/README.md",
+        "size": 1338,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/render.yaml",
+        "size": 122,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/audit-prod.mjs",
+        "size": 328,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/browser-certify.mjs",
+        "size": 13868,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/browser-proof.mjs",
+        "size": 2004,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/check.mjs",
+        "size": 777,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/demo.mjs",
+        "size": 1386,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/eval.mjs",
+        "size": 1947,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/lib/friction.mjs",
+        "size": 681,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/scripts/proof.mjs",
+        "size": 2338,
+        "mode": 420
+      },
+      {
+        "path": "templates/base/test/workflow.test.mjs",
+        "size": 692,
+        "mode": 420
+      }
+    ],
+    "entryCount": 96,
+    "bundled": []
+  }
+]
