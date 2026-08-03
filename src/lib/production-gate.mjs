@@ -30,6 +30,14 @@ export const FORBIDDEN_ATTESTORS = Object.freeze(["nodekit", "platform", "builde
 
 const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 
+// " nodekit", "NodeKit Inc", "nodekit-ci" and a Cyrillic lookalike all slipped past a bare
+// lowercase compare. Normalising unicode and matching on a token boundary closes the cheap ones;
+// the real fix is canonical principal identity, which this repo does not yet have.
+function isForbiddenAttestor(value) {
+  const normalized = String(value).normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return FORBIDDEN_ATTESTORS.some((f) => normalized === f || normalized.startsWith(`${f} `) || normalized.endsWith(` ${f}`) || normalized.includes(` ${f} `));
+}
+
 function fail(message) {
   const error = new Error(message);
   error.code = "PRODUCTION_GATE_INVALID";
@@ -54,7 +62,7 @@ export function parseProductionReadiness(record) {
     if (check.outcome === "PASS" || check.outcome === "FAIL") {
       if (!isNonEmptyString(check.evidenceRef)) fail(`${at} is ${check.outcome} with no evidenceRef`);
       if (!isNonEmptyString(check.attestedBy)) fail(`${at} is ${check.outcome} with no attestedBy`);
-      if (FORBIDDEN_ATTESTORS.includes(String(check.attestedBy).toLowerCase())) {
+      if (isForbiddenAttestor(check.attestedBy)) {
         fail(`${at} is attested by "${check.attestedBy}"; the party that produced the application may not certify it`);
       }
     }
@@ -62,6 +70,10 @@ export function parseProductionReadiness(record) {
       if (!WAIVABLE.includes(check.id)) fail(`${at}: ${check.id} is not waivable — it applies to every application holding user data`);
       if (!isNonEmptyString(check.verifiedAbsentBy)) {
         fail(`${at} is NOT_APPLICABLE without verifiedAbsentBy; a waiver requires someone who looked for the surface and found none`);
+      }
+      // A waiver is an attestation. Exempting it from the attestor rule let the builder waive itself.
+      if (isForbiddenAttestor(check.verifiedAbsentBy)) {
+        fail(`${at} is waived by "${check.verifiedAbsentBy}"; the party that produced the application may not waive its own check`);
       }
     }
   }
@@ -73,6 +85,15 @@ export function parseProductionReadiness(record) {
  * of an application without tenants — it is a record of a question nobody asked.
  */
 export function evaluateProductionReadiness(record) {
+  // Codex refuted the first version: parse and evaluate were separate exports, and evaluate assumed
+  // parse had run. Seven checks with outcome "BOGUS" returned releasable:true, because the loop only
+  // blocked absent/NOT_RUN/FAIL and let everything else fall through. A release decision that trusts
+  // its caller to have validated the input is not a gate. It validates its own input now.
+  try {
+    parseProductionReadiness(record);
+  } catch (error) {
+    return { releasable: false, blockers: [`record is not a valid production readiness record: ${error.message}`], checked: PRODUCTION_CHECKS.length, passed: 0, waived: 0 };
+  }
   const byId = new Map((record.checks ?? []).map((c) => [c.id, c]));
   const blockers = [];
 

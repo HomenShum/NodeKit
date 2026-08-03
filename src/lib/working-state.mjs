@@ -63,35 +63,79 @@ export function verifyContinuity(before, after) {
   if (after.objective !== before.objective && !isNonEmptyString(after.objectiveChangeReason)) {
     losses.push("the objective changed with no objectiveChangeReason; a run that quietly re-aims is not the same run");
   }
-  for (const key of ["decisions", "constraints", "failedApproaches", "openQuestions", "blockers"]) {
-    const beforeKeys = new Set(before[key].map((e) => JSON.stringify(e?.approach ?? e?.id ?? e)));
-    const afterKeys = new Set(after[key].map((e) => JSON.stringify(e?.approach ?? e?.id ?? e)));
-    const dropped = [...beforeKeys].filter((k) => !afterKeys.has(k));
-    if (dropped.length > 0) {
-      losses.push(`${key}: ${dropped.length} entr(ies) present before compaction and absent after`);
+  // Codex refuted the first comparison three ways: it projected each entry down to `approach ?? id`,
+  // so rewriting whyItFailed to "unknown" was invisible; it used a Set, so two distinct failures
+  // sharing an approach collapsed into one and a deletion vanished; and it skipped `evidence`
+  // entirely. Compare canonicalised WHOLE entries as a multiset, over every protected section.
+  const canon = (v) => (v === null || typeof v !== "object"
+    ? JSON.stringify(v)
+    : Array.isArray(v) ? `[${v.map(canon).join(",")}]`
+      : `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(",")}}`);
+  const counts = (list) => list.reduce((m, e) => m.set(canon(e), (m.get(canon(e)) ?? 0) + 1), new Map());
+
+  for (const key of ["decisions", "constraints", "evidence", "failedApproaches", "openQuestions", "blockers"]) {
+    const b = counts(before[key]);
+    const a = counts(after[key]);
+    let dropped = 0;
+    for (const [entry, n] of b) dropped += Math.max(0, n - (a.get(entry) ?? 0));
+    if (dropped > 0) {
+      losses.push(`${key}: ${dropped} entr(ies) present before compaction and absent or altered after`);
     }
   }
 
+  const ledgerEntries = ["decisions", "constraints", "evidence", "failedApproaches", "openQuestions", "blockers"]
+    .reduce((n, k) => n + before[k].length, 0);
+
   return {
-    continuous: losses.length === 0,
-    losses,
+    // A pass over an empty history established nothing. Callers reading `continuous` as a gate
+    // result must not get true from a state that had no ledger to lose.
+    continuous: losses.length === 0 && ledgerEntries > 0,
+    insufficientHistory: ledgerEntries === 0,
+    losses: ledgerEntries === 0 ? ["no ledger entries before compaction; there was nothing to establish continuity over"] : losses,
     // Reported so a pass over an empty state cannot look like a pass over a real one.
     carried: REQUIRED_SECTIONS.reduce((n, k) => n + (Array.isArray(after[k]) ? after[k].length : (after[k] ? 1 : 0)), 0),
   };
 }
 
 /**
- * Gap #2. The ceremony exists and the policy pins it at the level the agent can forge.
+ * Gap #2, second attempt. The first version took a trust LEVEL and compared it to a floor, which
+ * Codex refuted in one line: `requireTrustForCanonicalPromotion("H2")` returns "H2". The caller —
+ * the agent the ledger exists to constrain — simply supplies the label. My own test codified the
+ * bypass by asserting exactly that call succeeds.
+ *
+ * A level is a conclusion, so it cannot also be the input. This takes the key's provenance and
+ * derives the level: a key the agent's own process can export, in the agent's own protection
+ * domain, is H1 whatever anyone labels it.
  */
-export function requireTrustForCanonicalPromotion(trustLevel) {
-  if (!TRUST_LEVELS.includes(trustLevel)) fail(`unknown trust level "${trustLevel}"`, "TRUST_LEVEL_UNKNOWN");
-  if (TRUST_LEVELS.indexOf(trustLevel) < TRUST_LEVELS.indexOf(CANONICAL_PROMOTION_MIN_TRUST)) {
+export function deriveTrustLevel(key) {
+  if (!key || typeof key !== "object") fail("trust requires a key descriptor, not a level", "TRUST_DESCRIPTOR_MISSING");
+  if (!isNonEmptyString(key.keyId)) fail("key descriptor needs a keyId", "TRUST_DESCRIPTOR_MISSING");
+  if (!isNonEmptyString(key.protectionDomain)) {
+    fail("key descriptor needs a protectionDomain — where the private key actually lives", "TRUST_DESCRIPTOR_MISSING");
+  }
+  if (typeof key.exportable !== "boolean") fail("key descriptor needs exportable as a boolean", "TRUST_DESCRIPTOR_MISSING");
+  if (!isNonEmptyString(key.agentDomain)) {
+    fail("key descriptor needs agentDomain — the domain the constrained agent runs in, to compare against", "TRUST_DESCRIPTOR_MISSING");
+  }
+
+  const sameDomain = key.protectionDomain.normalize("NFKC").toLowerCase().trim()
+    === key.agentDomain.normalize("NFKC").toLowerCase().trim();
+
+  // H0: no key. H1: a key the agent can reach or export. H2: a separate protection domain.
+  // H3: a separate domain that also required a human presence gesture per signature.
+  if (key.exportable || sameDomain) return { level: "H1", reason: sameDomain ? "the key lives in the agent's own protection domain" : "the key is exportable, so possession does not bind the signer" };
+  if (key.humanPresencePerSignature === true) return { level: "H3", reason: "separate protection domain with a human presence gesture per signature" };
+  return { level: "H2", reason: "separate, non-exportable protection domain" };
+}
+
+export function requireTrustForCanonicalPromotion(key) {
+  const derived = deriveTrustLevel(key);
+  if (TRUST_LEVELS.indexOf(derived.level) < TRUST_LEVELS.indexOf(CANONICAL_PROMOTION_MIN_TRUST)) {
     fail(
-      `trust level ${trustLevel} may not promote a canonical record: ${CANONICAL_PROMOTION_MIN_TRUST} or above is required, `
-        + "because below it the signing key sits in the same protection domain as the agent being constrained — "
-        + "the signature then attests only that the writer had the key, and the writer is who the ledger exists to bind",
+      `derived trust ${derived.level} may not promote a canonical record (${CANONICAL_PROMOTION_MIN_TRUST}+ required): ${derived.reason}. `
+        + "Below that floor the signature attests only that the writer had the key, and the writer is who the ledger exists to bind",
       "TRUST_LEVEL_INSUFFICIENT",
     );
   }
-  return trustLevel;
+  return derived;
 }

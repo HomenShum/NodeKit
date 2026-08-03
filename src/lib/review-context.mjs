@@ -26,11 +26,17 @@ const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 
 export function parseReviewContext(record) {
   if (!record || typeof record !== "object") fail("review context must be an object");
-  for (const key of Object.keys(record)) {
-    if (SELF_ASSERTED.test(key)) {
-      fail(`"${key}" is a verdict about this record, supplied by the record; independence is derived from the parties, never declared`);
+  const walk = (node, path = "") => {
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node)) {
+      // Only a verdict-shaped VALUE is a claim; `thirdParty: { vendor: "auditor-co" }` is metadata.
+      if (SELF_ASSERTED.test(key) && (value === true || typeof value === "string")) {
+        fail(`"${path}${key}" is a verdict about this record, supplied by the record; independence is derived from the parties, never declared`);
+      }
+      if (value && typeof value === "object" && key !== "parties") walk(value, `${path}${key}.`);
     }
-  }
+  };
+  walk(record);
   if (!Array.isArray(record.parties) || record.parties.length === 0) fail("needs parties");
 
   const byRole = new Map();
@@ -39,7 +45,8 @@ export function parseReviewContext(record) {
     if (!REVIEW_ROLES.includes(party?.role)) fail(`${at} role must be one of ${REVIEW_ROLES.join(", ")}`);
     if (!isNonEmptyString(party.principal)) fail(`${at} needs a principal — who, concretely`);
     if (byRole.has(party.role)) fail(`${at} repeats role ${party.role}`);
-    byRole.set(party.role, party.principal.trim().toLowerCase());
+    // "Team A" and "Team  A" are the same party; internal whitespace must not read as two.
+    byRole.set(party.role, party.principal.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim());
   }
   for (const role of ["producer", "evaluator"]) {
     if (!byRole.has(role)) fail(`no ${role} named; independence cannot be derived from an incomplete party list`);
@@ -82,6 +89,13 @@ export function deriveIndependence(record) {
 
 export function requireIndependence(record, minimum = "party") {
   const order = ["none", "process", "party"];
+  // indexOf("PARTY") is -1, which made every level pass the comparison. A policy argument the
+  // caller got wrong must fail closed, not disable the check.
+  if (!order.includes(minimum)) {
+    const error = new Error(`unknown independence minimum "${minimum}"; expected one of ${order.join(", ")}`);
+    error.code = "INDEPENDENCE_MINIMUM_UNKNOWN";
+    throw error;
+  }
   const actual = deriveIndependence(record);
   if (order.indexOf(actual.level) < order.indexOf(minimum)) {
     const error = new Error(`independence ${actual.level} is below the required ${minimum}: ${actual.reason}`);

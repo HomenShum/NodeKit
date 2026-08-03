@@ -35,9 +35,11 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{1F000}-\u{1F2FF}]
 export function checkLexicon(labels) {
   const findings = [];
   const seen = new Map();
+  let examined = 0;
 
   for (const { text, where } of labels) {
     if (typeof text !== "string" || !text.trim()) continue;
+    examined += 1;
     const normalized = text.trim().toLowerCase();
 
     if (EMOJI.test(text)) {
@@ -70,7 +72,9 @@ export function checkLexicon(labels) {
     });
   }
 
-  return { passed: findings.length === 0, findings, checked: labels.length };
+  // A gate that passes having measured nothing is the failure this repo is named after. `checked`
+  // counts labels actually examined, not labels handed in, and zero of them is never a pass.
+  return { passed: findings.length === 0 && examined > 0, findings, checked: examined, supplied: labels.length };
 }
 
 /**
@@ -86,8 +90,9 @@ export function checkAccentBudget(elements) {
     if (typeof color !== "string" || !color.trim()) continue;
     const key = color.trim().toLowerCase();
     const entry = accents.get(key) ?? { meaningful: 0, chrome: [] };
-    if (meaningful) entry.meaningful += 1;
-    else entry.chrome.push(where);
+    if (meaningful === true) entry.meaningful += 1;
+    else if (meaningful === false) entry.chrome.push(where);
+    else continue;
     accents.set(key, entry);
   }
 
@@ -107,7 +112,7 @@ export function checkAccentBudget(elements) {
       });
     }
   }
-  return { passed: findings.length === 0, findings, hues: hues.length, checked: elements.length };
+  return { passed: findings.length === 0 && accents.size > 0, findings, hues: hues.length, checked: accents.size, supplied: elements.length };
 }
 
 export function formatLexicon(verdict) {

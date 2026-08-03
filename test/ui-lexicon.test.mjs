@@ -42,5 +42,14 @@ test("a word that merely contains a verb is not a false positive", () => {
 });
 
 test("nothing supplied is reported as nothing checked, not as a pass", () => {
-  assert.match(formatLexicon(checkLexicon([])), /nothing was checked/);
+  // This asserted only the formatted string, so it passed while verdict.passed was true — a test
+  // that named the right rule and pinned the wrong thing.
+  const empty = checkLexicon([]);
+  assert.equal(empty.passed, false, "a scan of nothing is not a pass");
+  assert.equal(empty.checked, 0);
+  assert.match(formatLexicon(empty), /nothing was checked/);
+
+  // Entries that are skipped must not inflate the denominator either.
+  const skipped = checkLexicon([{ text: "" }, {}]);
+  assert.equal(skipped.passed, false, "two unusable labels measured nothing");
 });
