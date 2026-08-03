@@ -18,7 +18,7 @@ import {
   produceBuildEvidencePack,
 } from "../src/lib/build-evidence-producer.mjs";
 import { validateSchema } from "../src/lib/schema-validation.mjs";
-import { verifyJourneyChain } from "../src/lib/journey-chain-gate.mjs";
+import { canonicalSha256, verifyJourneyChain } from "../src/lib/journey-chain-gate.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FIXTURES = path.join(REPO, "test/fixtures/builder-journey");
@@ -28,14 +28,10 @@ const CASE_ID = "salon-weekly-profit-2026-07";
 // Canonical JSON per docs/JOURNEY_INTERSTAGE_CONTRACT.md, computed here INDEPENDENTLY of both the
 // producer and the gate, so a digest agreement between the three is three implementations agreeing
 // rather than one implementation quoted three times.
-function canonical(value) {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
-  if (value && typeof value === "object") {
-    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(",")}}`;
-  }
-  return JSON.stringify(value);
-}
-const canonicalDigest = (value) => createHash("sha256").update(canonical(value), "utf8").digest("hex");
+// The gate verifies with canonicalSha256. A hand-rolled second canonicalizer here would let this
+// test agree with itself while disagreeing with the thing that actually decides PASS — the same
+// dual-truth failure the chain contract exists to prevent. Use the shipped one.
+const canonicalDigest = (value) => canonicalSha256(value);
 const fileSha256 = (buffer) => createHash("sha256").update(buffer).digest("hex");
 
 const scratchDirs = [];
@@ -287,13 +283,16 @@ test("the produced pack chains: rebound downstream fixtures walk PASS through th
     ["salon.observation-pack.json", "nodekit.observation-pack/v1"],
   ]) {
     const doc = JSON.parse(await readFile(path.join(FIXTURES, name), "utf8"));
-    for (const binding of doc.inputs) binding.sha256 = digests.get(binding.schemaVersion);
+    // Rebind only what this chain actually reproduced. Nulling an unrecognised binding turns a
+    // fixture that was already consistent into a broken one, and the resulting FAIL looks like a
+    // gate finding rather than a test defect.
+    for (const binding of doc.inputs) binding.sha256 = digests.get(binding.schemaVersion) ?? binding.sha256;
     await writeFile(path.join(dir, name), `${JSON.stringify(doc, null, 2)}\n`, "utf8");
     digests.set(schemaVersion, canonicalDigest(doc));
   }
 
   const verdict = await verifyJourneyChain({ chainDir: dir });
-  assert.equal(verdict.verdict, "PASS");
+  assert.equal(verdict.verdict, "PASS", JSON.stringify(verdict.failures, null, 1));
   assert.equal(verdict.exitCode, 0);
   assert.equal(verdict.denominator.stagesFound, 5);
   assert.equal(verdict.denominator.digestsMatched, 6);

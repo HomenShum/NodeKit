@@ -82,17 +82,17 @@
         {
           "scenario": "every-pointer-dispositioned-no-silent-honour",
           "file": "test/build-evidence-producer.test.mjs",
-          "line": 66
+          "line": 62
         },
         {
           "scenario": "fabricated-evidence-refuses-the-pack",
           "file": "test/build-evidence-producer.test.mjs",
-          "line": 197
+          "line": 193
         },
         {
           "scenario": "produced-pack-walks-the-chain",
           "file": "test/build-evidence-producer.test.mjs",
-          "line": 266
+          "line": 262
         }
       ],
       "implementationGaps": [],

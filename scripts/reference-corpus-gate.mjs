@@ -238,6 +238,7 @@ for (const { file, doc } of records) {
 const UNCHECKED_RULE_RATIO_MAX = 0.3;
 const ruleTerminations = [...rulesById.values()].map((r) => r.boundToGate?.kind ?? "none");
 const uncheckedRules = ruleTerminations.filter((k) => k === "none").length;
+const delegatedRules = ruleTerminations.filter((k) => k === "delegated").length;
 
 // A ref is only a termination if it resolves. "src/render.mjs:assertNoPie" naming an assertion that
 // does not exist reads exactly like one that does, and is the shape a rule takes as the code moves
@@ -300,6 +301,6 @@ if (ruleTerminations.length > 0) {
 console.log(`${violations.length === 0 ? "PASS" : "FAIL"}  reference corpus`);
 console.log(`      ${records.length} record(s) read from ${corpusDir}; ${recordsValidated} validated against a declared schema`);
 console.log(`      ${factsRecorded} fact(s) recorded; ${citationsChecked} citation(s) checked; ${criterionScoresChecked} criterion score(s) checked`);
-console.log(`      ${ruleTerminations.length} rule(s) checked for termination; ${uncheckedRules} terminate in nothing checkable; ${refsResolved} ref(s) resolved to a real artifact`);
+console.log(`      ${ruleTerminations.length} rule(s) checked for termination; ${uncheckedRules} terminate in nothing checkable; ${delegatedRules} delegated to a consumer; ${refsResolved} ref(s) resolved to a real artifact`);
 for (const v of violations) console.log(`      ${v}`);
 process.exit(violations.length === 0 ? 0 : 1);

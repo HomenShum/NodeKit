@@ -502,6 +502,10 @@ export async function produceBuildEvidencePack({
       "No human has read the disclosure artifact; it exists on disk with a digest, and nothing more is claimed for it.",
       "The emergent sweep inventoried tracked file paths only; decisions expressed inside code semantics, copy, or configuration values were not searched for.",
       ...(evTestRun ? [] : ["No test command was configured, so this pack contains no test-run evidence at all."]),
+      // A green suite says nobody has falsified this yet, not that anyone tried. This producer runs
+      // the author's own test command and nothing else, so it must say so rather than let a passing
+      // run read as verification.
+      "No adversarial review was run. This pack carries the author's own test command and no independent attempt to break the build, which is unfalsified rather than verified.",
     ],
     refused: [
       {

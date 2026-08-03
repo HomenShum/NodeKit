@@ -25,33 +25,68 @@
     "boundToGate"
   ],
   "properties": {
-    "schemaVersion": { "const": "nodekit.design-rule/v1" },
-    "ruleId": { "$ref": "#/$defs/id" },
-    "derivedFrom": { "$ref": "#/$defs/derivedFrom" },
-    "statement": { "$ref": "#/$defs/text" },
+    "schemaVersion": {
+      "const": "nodekit.design-rule/v1"
+    },
+    "ruleId": {
+      "$ref": "#/$defs/id"
+    },
+    "derivedFrom": {
+      "$ref": "#/$defs/derivedFrom"
+    },
+    "statement": {
+      "$ref": "#/$defs/text"
+    },
     "mechanismHypothesis": {
       "description": "Why the rule is believed to work. Named a hypothesis, not a finding, unless the evidence tier is M3.",
       "$ref": "#/$defs/text"
     },
-    "confidence": { "enum": ["low", "medium", "high"] },
-    "confidenceBasis": { "$ref": "#/$defs/text" },
-    "appliesWhen": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" }, "uniqueItems": true },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "confidenceBasis": {
+      "$ref": "#/$defs/text"
+    },
+    "appliesWhen": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/text"
+      },
+      "uniqueItems": true
+    },
     "doesNotApplyWhen": {
       "description": "The conditions under which citing this rule is a misuse. Required and non-empty.",
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/text" },
+      "items": {
+        "$ref": "#/$defs/text"
+      },
       "uniqueItems": true
     },
-    "counterexampleNote": { "$ref": "#/$defs/text" },
+    "counterexampleNote": {
+      "$ref": "#/$defs/text"
+    },
     "boundToGate": {
       "description": "Where the rule terminates in something a machine can check. A rule that stops at a mechanism hypothesis is a paragraph nobody can run; kind names the artifact that makes it executable. kind:none is allowed, but it must say why, and the corpus gate fails a contract whose rules are mostly none.",
       "type": "object",
-      "required": ["kind"],
+      "required": [
+        "kind"
+      ],
       "properties": {
         "kind": {
-          "description": "schema-field: a field the producer must populate. renderer-assertion: a check the renderer enforces at draw time. test: a test that fails when the rule is violated. none: the rule is advisory and nothing checks it.",
-          "enum": ["schema-field", "renderer-assertion", "test", "none"]
+          "description": "schema-field: a field the producer must populate. renderer-assertion: a check the renderer enforces at draw time. test: a test that fails when the rule is violated. delegated: the assertion belongs to a consuming application, not to this repository — the rule was derived here and is enforced there. none: the rule is advisory and nothing checks it anywhere.",
+          "enum": [
+            "schema-field",
+            "renderer-assertion",
+            "test",
+            "delegated",
+            "none"
+          ]
         },
         "ref": {
           "description": "The artifact the rule terminates in, precise enough to open: app/models.py:ResponseMeta.buckets_are_exclusive, src/render.mjs:assertNoPieWhenOverlapping, test/phase-buckets.test.mjs. Required unless kind is none.",
@@ -61,15 +96,60 @@
           "description": "Why this rule terminates in nothing checkable. Required when kind is none.",
           "$ref": "#/$defs/text"
         },
-        "gate": { "$ref": "#/$defs/text" },
-        "relationship": { "$ref": "#/$defs/text" },
-        "schemaPath": { "$ref": "#/$defs/text" }
+        "gate": {
+          "$ref": "#/$defs/text"
+        },
+        "relationship": {
+          "$ref": "#/$defs/text"
+        },
+        "schemaPath": {
+          "$ref": "#/$defs/text"
+        },
+        "consumer": {
+          "description": "Which application owns the assertion. Required when kind is delegated: a rule delegated to nobody is decoration wearing a forwarding address.",
+          "$ref": "#/$defs/text"
+        }
       },
       "allOf": [
         {
-          "if": { "properties": { "kind": { "const": "none" } }, "required": ["kind"] },
-          "then": { "required": ["reason"] },
-          "else": { "required": ["ref"] }
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "none"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "delegated"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "required": [
+                "consumer",
+                "reason"
+              ]
+            },
+            "else": {
+              "required": [
+                "ref"
+              ]
+            }
+          }
         }
       ],
       "additionalProperties": false
@@ -78,30 +158,64 @@
       "description": "Retrieval tags naming the problem the rule solves. Appearance adjectives are refused by the corpus gate: a corpus you cannot query by problem is a scrapbook.",
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/tag" },
+      "items": {
+        "$ref": "#/$defs/tag"
+      },
       "uniqueItems": true
     },
-    "intentTags": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/tag" }, "uniqueItems": true },
-    "firstSeenAt": { "$ref": "#/$defs/date" },
-    "lastVerifiedAt": { "$ref": "#/$defs/date" },
+    "intentTags": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/tag"
+      },
+      "uniqueItems": true
+    },
+    "firstSeenAt": {
+      "$ref": "#/$defs/date"
+    },
+    "lastVerifiedAt": {
+      "$ref": "#/$defs/date"
+    },
     "reVerifyAfterDays": {
       "description": "Sources stay remote and uncached by licence, so a record can drift from the live product with no local signal. This is the only expiry the corpus has.",
       "type": "integer",
       "minimum": 1
     },
-    "reVerifyReason": { "$ref": "#/$defs/text" },
+    "reVerifyReason": {
+      "$ref": "#/$defs/text"
+    },
     "evidenceTier": {
       "description": "M3 audience-task evidence > M2 live shipped-product observation > M1 official demonstration or documentation > M0 recipe or showcase.",
-      "enum": ["M0", "M1", "M2", "M3"]
+      "enum": [
+        "M0",
+        "M1",
+        "M2",
+        "M3"
+      ]
     },
-    "tierLadder": { "$ref": "#/$defs/text" }
+    "tierLadder": {
+      "$ref": "#/$defs/text"
+    }
   },
   "additionalProperties": false,
   "$defs": {
-    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "text": { "type": "string", "minLength": 1 },
-    "tag": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tag": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
     "qualifiedFactId": {
       "description": "observationId/factId. The corpus gate resolves every one of these against the recorded facts; a citation that resolves to nothing looks like evidence and binds to none.",
       "type": "string",
@@ -109,11 +223,31 @@
     },
     "derivedFrom": {
       "type": "object",
-      "required": ["collectionId", "observationIds", "factIds"],
+      "required": [
+        "collectionId",
+        "observationIds",
+        "factIds"
+      ],
       "properties": {
-        "collectionId": { "$ref": "#/$defs/id" },
-        "observationIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
-        "factIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/qualifiedFactId" }, "uniqueItems": true }
+        "collectionId": {
+          "$ref": "#/$defs/id"
+        },
+        "observationIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "factIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/qualifiedFactId"
+          },
+          "uniqueItems": true
+        }
       },
       "additionalProperties": false
     }

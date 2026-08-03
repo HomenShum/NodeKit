@@ -226,7 +226,7 @@ test("a rule pointing at an artifact that does not exist is not a termination", 
   }
 
   // And the shipped corpus resolves, so the check is known to distinguish rather than just reject.
-  assert.match(runGate(shippedCorpus).out, /1 ref\(s\) resolved to a real artifact/);
+  assert.match(runGate(shippedCorpus).out, /[1-9]\d* ref\(s\) resolved to a real artifact/);
 });
 
 // This gate ships in the package, so it runs from inside somebody else's node_modules. The rules
@@ -251,7 +251,7 @@ test("refs resolve against the project being gated, not the package the gate shi
 
   const fromConsumer = runGate("refs", { cwd: consumer });
   assert.equal(fromConsumer.status, 0, `the consumer's own artifact was not found:\n${fromConsumer.out}`);
-  assert.match(fromConsumer.out, /1 ref\(s\) resolved to a real artifact/);
+  assert.match(fromConsumer.out, /[1-9]\d* ref\(s\) resolved to a real artifact/);
 
   // Explicit root, so the gate is usable from a working directory that is neither.
   const explicit = runGate(path.join(consumer, "refs"), { cwd: platformRoot, args: ["--repo-root", consumer] });
@@ -261,4 +261,27 @@ test("refs resolve against the project being gated, not the package the gate shi
   const wrongRoot = runGate(path.join(consumer, "refs"), { cwd: platformRoot });
   assert.equal(wrongRoot.status, 1, "resolving against the wrong project must not quietly pass");
   assert.match(wrongRoot.out, /app\/render\.py, which is not a file in this repository/);
+});
+
+// `none` was conflating two different states: "nothing checks this rule" and "the assertion belongs
+// to a consuming app". Only the first is decoration. A rule derived in the platform and enforced in
+// the app that consumes it is doing its job — but it must name the consumer, or "delegated" becomes
+// decoration wearing a forwarding address.
+test("a rule delegated to a consumer is not decoration, but must name one", async () => {
+  const { validateSchema } = await import("../src/lib/schema-validation.mjs");
+  const rule = loadJson("atlas/references/note-surface.stream-not-chrome.rule.json");
+  assert.equal(rule.boundToGate.kind, "delegated");
+  assert.ok(rule.boundToGate.consumer, "a delegated rule must say who enforces it");
+  assert.deepEqual(await validateSchema("nodekit.design-rule.v1.schema.json", rule, "rule"), []);
+
+  const orphaned = clone(rule);
+  delete orphaned.boundToGate.consumer;
+  assert.ok(
+    (await validateSchema("nodekit.design-rule.v1.schema.json", orphaned, "rule")).length > 0,
+    "delegating to nobody must not be expressible",
+  );
+
+  // And the ratio gate must count delegated separately from undone.
+  const { out } = runGate(shippedCorpus);
+  assert.match(out, /0 terminate in nothing checkable; 2 delegated to a consumer/);
 });

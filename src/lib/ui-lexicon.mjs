@@ -73,6 +73,43 @@ export function checkLexicon(labels) {
   return { passed: findings.length === 0, findings, checked: labels.length };
 }
 
+/**
+ * One accent hue, carried only by elements that encode meaning. Chrome stays achromatic. This is
+ * the same assertion from two directions: the community advice that a dashboard full of coloured
+ * buttons looks cheap while colour reserved for data looks expensive, and the observed convention
+ * that a single accent lets the eye use colour as a retrieval signal. A second accent destroys
+ * both — it stops being a signal the moment it means two things.
+ */
+export function checkAccentBudget(elements) {
+  const accents = new Map();
+  for (const { color, meaningful, where } of elements) {
+    if (typeof color !== "string" || !color.trim()) continue;
+    const key = color.trim().toLowerCase();
+    const entry = accents.get(key) ?? { meaningful: 0, chrome: [] };
+    if (meaningful) entry.meaningful += 1;
+    else entry.chrome.push(where);
+    accents.set(key, entry);
+  }
+
+  const findings = [];
+  const hues = [...accents.keys()];
+  if (hues.length > 1) {
+    findings.push({
+      kind: "multiple-accents",
+      detail: `${hues.length} accent hues (${hues.join(", ")}); one accent is a retrieval signal, two are decoration`,
+    });
+  }
+  for (const [hue, entry] of accents) {
+    if (entry.chrome.length > 0) {
+      findings.push({
+        kind: "accent-on-chrome",
+        detail: `${hue} is carried by chrome (${entry.chrome.join(", ")}); colour on a surface that encodes nothing spends the signal`,
+      });
+    }
+  }
+  return { passed: findings.length === 0, findings, hues: hues.length, checked: elements.length };
+}
+
 export function formatLexicon(verdict) {
   if (verdict.checked === 0) return "UI LEXICON: no labels supplied — nothing was checked.";
   if (verdict.passed) return `UI LEXICON PASS: ${verdict.checked} label(s), one verb per action.`;

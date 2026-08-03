@@ -44,5 +44,10 @@
   "reVerifyAfterDays": 90,
   "reVerifyReason": "Mew is under active development in the owner-local checkouts and Mobbin comparators drift with product releases; re-inspect the live surfaces and re-read global.css before continuing to cite these facts.",
   "evidenceTier": "M2",
-  "tierLadder": "M2: live shipped-product observation (owner-owned source checkout with file:line locators, plus Mobbin live screens). M1 documentation not consulted. M3 audience-task evidence absent — no rule here may be promoted to audience-proven until a real capture task is observed."
+  "tierLadder": "M2: live shipped-product observation (owner-owned source checkout with file:line locators, plus Mobbin live screens). M1 documentation not consulted. M3 audience-task evidence absent — no rule here may be promoted to audience-proven until a real capture task is observed.",
+  "boundToGate": {
+    "kind": "delegated",
+    "reason": "Governs entry-list rendering node-platform does not implement; the assertion belongs to the consuming note surface, not to the platform that derived the rule.",
+    "consumer": "NodeBench/NodeRoom note surface"
+  }
 }
