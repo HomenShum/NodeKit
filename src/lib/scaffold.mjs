@@ -12,7 +12,11 @@ import { SKILL_PROVENANCE_FILE, buildSkillProvenance } from "./skill-freshness.m
 
 const projectedSkillNames = ["nodekit-launch", "nodekit-present", "nodekit-qa"];
 const vendoredNodeKitSpecifier = "file:vendor/nodekit";
-const nodeKitRuntimeEntries = ["src", "schemas", "LICENSE"];
+// Skills are vendored so a generated project can compare its own .claude/skills copy against the
+// upstream it came from, OFFLINE. Without this the freshness check could only detect a local edit
+// or a version bump — and a skill whose content changed upstream without a version bump reported
+// `current` while being genuinely stale, which is exactly what happened.
+const nodeKitRuntimeEntries = ["src", "schemas", "LICENSE", "plugins/nodekit/skills"];
 
 async function nodeKitPackageVersion() {
   const packageJson = JSON.parse(await readFile(path.join(packageRoot, "package.json"), "utf8"));

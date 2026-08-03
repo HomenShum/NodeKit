@@ -63,6 +63,23 @@ export async function buildSkillProvenance({ sourceRoot, skillNames, nodekitVers
  * @param projectRoot     the generated project
  * @param installedVersion the NodeKit version currently vendored, or null if unreadable
  */
+/**
+ * The vendored upstream copy of a skill, when the project carries one.
+ *
+ * This is the reference the check was missing. It previously compared a project's copy only against
+ * its OWN recorded digest and the recorded version — so a skill whose content changed upstream
+ * without a version bump matched its record, matched the version, and reported `current` while
+ * being stale. Measured: a project reported "3 projected skills match" and `skills sync` then
+ * replaced four files.
+ */
+async function vendoredSkillDigest(projectRoot, name) {
+  for (const base of ["vendor/nodekit/plugins/nodekit/skills", "node_modules/@homenshum/nodekit/plugins/nodekit/skills"]) {
+    const digest = await digestSkill(path.join(projectRoot, base, name));
+    if (digest) return digest;
+  }
+  return null;
+}
+
 export async function evaluateSkillFreshness(projectRoot, installedVersion = null) {
   let record = null;
   try {
@@ -127,6 +144,7 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
   const edited = [];
   const unrecorded = [];
   const missing = [];
+  const behind = [];
   // The UNION of what is recorded and what is on disk. Iterating only the present directories meant
   // a recorded skill that had been deleted was invisible, and a directory whose SKILL.md could not
   // be read produced a null digest that was neither edited nor unrecorded — so both reported
@@ -150,6 +168,10 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
     else if (digests.some((entry) => entry.digest !== recorded)) {
       const drifted = digests.filter((entry) => entry.digest !== recorded).map((entry) => entry.root);
       edited.push(drifted.length === digests.length ? name : `${name} (${drifted.join(", ")})`);
+    } else {
+      // Copy matches its record. Ask the harder question: has UPSTREAM moved since?
+      const upstream = await vendoredSkillDigest(projectRoot, name);
+      if (upstream && upstream !== recorded) behind.push(name);
     }
   }
 
@@ -167,7 +189,10 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
   // entirely. The bigger fact goes first.
   const status = missing.length > 0
     ? "missing"
-    : versionSkew
+    // Upstream content drift outranks a version bump: it is the case that used to pass silently.
+    : behind.length > 0
+      ? "behind-upstream"
+      : versionSkew
       ? "skewed"
       : edited.length > 0 || unrecorded.length > 0
         ? "edited"
@@ -177,6 +202,7 @@ export async function evaluateSkillFreshness(projectRoot, installedVersion = nul
     edited: edited.sort(),
     unrecorded: unrecorded.sort(),
     missing: missing.sort(),
+    behind: behind.sort(),
     versionSkew,
     checked: names.size,
     record,
@@ -197,6 +223,10 @@ export function formatSkillFreshness(verdict) {
         + "the upstream skills have moved on and this project is still reading the old instructions. "
         + "Run `nodekit skills sync` to take the new ones."
         + (verdict.edited.length > 0 ? ` Also locally edited: ${verdict.edited.join(", ")}.` : "");
+    case "behind-upstream":
+      return `SKILLS BEHIND UPSTREAM: ${verdict.behind.join(", ")} differ from the vendored NodeKit copy — `
+        + "the skill changed upstream without a version bump, so this project is reading older instructions "
+        + "than the NodeKit it ships with. Run `nodekit skills sync`.";
     case "missing":
       return `SKILLS: ${verdict.missing.join(", ")} recorded but unreadable or absent — an agent cannot load an instruction file that is not there, `
         + "and a missing skill is a bigger freshness failure than an out-of-date one. Run `nodekit skills sync`.";

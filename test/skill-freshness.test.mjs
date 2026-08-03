@@ -210,3 +210,35 @@ test("a missing skill outranks version skew, because absent beats out-of-date", 
   assert.equal(verdict.status, "missing");
   assert.match(formatSkillFreshness(verdict), /cannot load an instruction file that is not there/);
 });
+
+test("a skill changed UPSTREAM without a version bump is caught, not reported current", async () => {
+  // The hole that reported a pass on genuinely stale skills. The project's copy matched its own
+  // recorded digest (not edited) and the version was unchanged (not skewed), so both existing
+  // checks were satisfied while the platform skill had moved on. Measured live: preflight said
+  // "3 projected skills match" and `skills sync` then replaced four files.
+  const source = await project();
+  const record = await recordFor(source);
+  const root = await project({ record });
+  // The vendored upstream now carries DIFFERENT content — the platform edited its skill.
+  const vendored = path.join(root, "vendor", "nodekit", "plugins", "nodekit", "skills", "nodekit-launch");
+  await mkdir(vendored, { recursive: true });
+  await writeFile(path.join(vendored, "SKILL.md"), "# v2 — the platform moved on\n", "utf8");
+
+  const verdict = await evaluateSkillFreshness(root, "0.2.1");
+
+  assert.equal(verdict.status, "behind-upstream", JSON.stringify(verdict));
+  assert.deepEqual(verdict.behind, ["nodekit-launch"]);
+  assert.match(formatSkillFreshness(verdict), /changed upstream without a version bump/);
+});
+
+test("a vendored copy that matches is still current", async () => {
+  const source = await project();
+  const record = await recordFor(source);
+  const root = await project({ record });
+  const vendored = path.join(root, "vendor", "nodekit", "plugins", "nodekit", "skills", "nodekit-launch");
+  await mkdir(vendored, { recursive: true });
+  // Byte-identical to what the record captured.
+  await writeFile(path.join(vendored, "SKILL.md"), "# v1\n", "utf8");
+
+  assert.equal((await evaluateSkillFreshness(root, "0.2.1")).status, "current");
+});
