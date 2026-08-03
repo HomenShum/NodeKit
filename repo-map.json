@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 115,
-    "modules": 86,
-    "tests": 93
+    "schemas": 116,
+    "modules": 87,
+    "tests": 94
   },
   "architecture": [
     {
@@ -146,6 +146,7 @@
     "nodeagent.application.v1.schema.json",
     "nodeagent.event.v1.schema.json",
     "nodeagent.pack.v1.schema.json",
+    "nodekit.adversarial-verdict.v1.schema.json",
     "nodekit.agent-ease-trial.v2.schema.json",
     "nodekit.assumption.v1.schema.json",
     "nodekit.attestation-signing-key-policy.v1.schema.json",
@@ -291,6 +292,7 @@
     "evolution-trust.mjs",
     "execution-graph.mjs",
     "files.mjs",
+    "frame-evidence.mjs",
     "friction-loop.mjs",
     "frontend-render-contract.mjs",
     "frontend-specialist.mjs",
@@ -378,6 +380,7 @@
     "evolution-ledger.test.mjs",
     "execution-graph.test.mjs",
     "factory.test.mjs",
+    "frame-evidence.test.mjs",
     "friction-loop-end-to-end.test.mjs",
     "friction-loop.test.mjs",
     "frontend-render-contract.test.mjs",
