@@ -108,7 +108,7 @@ function runTestFile(cwd, file, namePattern) {
  * @param testFiles    repo-relative test paths, taken from the WORKING TREE and copied in
  * @param worktreeDir  where to build the throwaway checkout; must not already exist
  */
-export function proveRegression(repoRoot, { baseline, testFiles = [], namePattern, worktreeDir, keepWorktree = false } = {}) {
+export function proveRegression(repoRoot, { baseline, testFiles = [], namePattern, worktreeDir, keepWorktree = false, copyNodeModules = false } = {}) {
   const root = path.resolve(repoRoot);
   const refusals = [];
   if (!baseline) refusals.push("a baseline commit is required");
@@ -179,8 +179,13 @@ export function proveRegression(repoRoot, { baseline, testFiles = [], namePatter
     for (const file of testFiles) {
       cpSync(path.join(root, file), path.join(target, file), { force: true });
     }
+    // Opt-in, because it is expensive and usually unnecessary. Copying a full node_modules into a
+    // throwaway worktree costs seconds and gigabytes; doing it unconditionally made this module's
+    // own suite fail under parallel load while passing in isolation — a flake I introduced by
+    // copying a tree sixteen times for fixtures that import only node: builtins. The CLI enables it
+    // because real test files do have dependencies.
     const modules = path.join(root, "node_modules");
-    if (existsSync(modules) && !existsSync(path.join(target, "node_modules"))) {
+    if (copyNodeModules && existsSync(modules) && !existsSync(path.join(target, "node_modules"))) {
       cpSync(modules, path.join(target, "node_modules"), { recursive: true, force: true });
     }
 

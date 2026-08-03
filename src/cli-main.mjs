@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Full command implementation. The public wrapper keeps reference-loop startup bounded.
 import { spawn, spawnSync } from "node:child_process";
+import { realpathSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -421,7 +422,12 @@ async function runSessionsCheck(parsed) {
       process.exitCode = 1;
       return;
     }
-    const verdict = evaluateSessionContract(contract, repoFiles);
+    // realpath supplied so symlinked aliases collide instead of reading as two separate paths.
+    // Resolution is relative to the repository, and a path that cannot be resolved falls back to
+    // its lexical form inside the library rather than failing the run.
+    const verdict = evaluateSessionContract(contract, repoFiles, {
+      resolvePath: (relative) => path.relative(root, realpathSync.native(path.resolve(root, relative))).split(path.sep).join("/"),
+    });
     printStructured(verdict, parsed, formatSessionContract);
     if (!verdict.passed) process.exitCode = 1;
   } catch (error) {
@@ -2346,6 +2352,8 @@ async function main() {
         testFiles,
         namePattern: typeof parsed.options.name === "string" ? parsed.options.name : undefined,
         worktreeDir: path.join(root, "..", `.nodekit-regression-${process.pid}`),
+        // Real test files import real dependencies; the throwaway checkout has none of its own.
+        copyNodeModules: true,
       });
       printStructured(verdict, parsed, formatRegressionProof);
       // Only a full proof exits clean. An unproven test and a run that never happened are both

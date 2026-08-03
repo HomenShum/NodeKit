@@ -172,3 +172,48 @@ test("an empty graph pinned at HEAD is still empty", async () => {
   const root = await repoWithGraph({ commits: 1, nodes: 0 });
   assert.equal((await evaluateCodeGraphFreshness(root)).status, "empty");
 });
+
+test("a graph pinned at HEAD whose nodes name deleted files is INACCURATE, not current", async () => {
+  // Previously excused as "accuracy, not freshness — answering it means reimplementing the
+  // analyser". Every node carries a filePath, so it is an existence check, not an analysis. Two
+  // questions had been collapsed to justify skipping the cheap one.
+  const root = await repoWithGraph({ commits: 1, nodes: 0 });
+  const pinned = git(root, ["rev-parse", "HEAD"]);
+  await writeFile(
+    path.join(root, GRAPH_DIR, GRAPH_FILE),
+    JSON.stringify({
+      project: { gitCommitHash: pinned, lastAnalyzedAt: "2026-07-22T00:00:00.000Z" },
+      nodes: [
+        { id: "n1", type: "file", filePath: "README.md" },
+        { id: "n2", type: "file", filePath: "src/deleted-last-week.mjs" },
+      ],
+      edges: [],
+    }),
+    "utf8",
+  );
+  const verdict = await evaluateCodeGraphFreshness(root);
+
+  assert.equal(verdict.status, "inaccurate");
+  assert.equal(verdict.danglingNodes, 1);
+  assert.deepEqual(verdict.danglingSample, ["src/deleted-last-week.mjs"]);
+  assert.match(formatCodeGraphFreshness(verdict), /the contents describe a tree that has moved/);
+});
+
+test("a graph whose every node resolves says so, rather than only that its commit matches", async () => {
+  const root = await repoWithGraph({ commits: 1, nodes: 0 });
+  const pinned = git(root, ["rev-parse", "HEAD"]);
+  await writeFile(
+    path.join(root, GRAPH_DIR, GRAPH_FILE),
+    JSON.stringify({
+      project: { gitCommitHash: pinned, lastAnalyzedAt: "2026-07-22T00:00:00.000Z" },
+      nodes: [{ id: "n1", type: "file", filePath: "README.md" }],
+      edges: [],
+    }),
+    "utf8",
+  );
+  const verdict = await evaluateCodeGraphFreshness(root);
+
+  assert.equal(verdict.status, "current");
+  assert.equal(verdict.danglingNodes, 0);
+  assert.match(formatCodeGraphFreshness(verdict), /every node path resolves/);
+});

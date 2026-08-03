@@ -208,20 +208,39 @@ test("a manifest tracked with different case is still a contended manifest", () 
   assert.equal(verdict.passed, false);
 });
 
-test("KNOWN LIMIT: symlinked aliases are not resolved, and this pins it", () => {
-  // Two lexically distinct paths resolving to one file through a symlink still evade collision
-  // detection. Resolving them means touching the filesystem, and this stays a pure function over
-  // the caller's list. Recorded as a stated limit so it is a known gap rather than a discovery —
-  // if this ever starts failing, the limitation was closed and the test should become the assertion.
+test("symlinked aliases collide, with a resolver supplied", () => {
+  // Was pinned as a KNOWN LIMIT with the excuse that resolving paths means touching the filesystem
+  // and this is a pure function. The purity was mine to give up: the resolver is an optional
+  // argument, the function stays pure without one, and the CLI always supplies it. Leaving two
+  // sessions owning one file through a symlink was the easier answer, not the right one.
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["linked/**"] }, { id: "B", owns: ["target/**"] }] },
+    ["target/package.json", "linked/package.json"],
+    { resolvePath: (value) => (value.startsWith("linked") ? value.replace("linked", "target") : value) },
+  );
+
+  assert.equal(verdict.passed, false);
+  assert.ok(verdict.faults.some((entry) => /both own/.test(entry)), JSON.stringify(verdict.faults));
+});
+
+test("without a resolver the function stays pure, and says nothing it cannot know", () => {
   const verdict = evaluateSessionContract(
     { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["linked/**"] }, { id: "B", owns: ["target/**"] }] },
     ["target/package.json", "linked/package.json"],
   );
 
-  // It PASSES, and that is the honest statement of the limit: each path is classified by one
-  // session, the collision between them is invisible, and nothing else catches it. I first wrote
-  // this assertion as `passed === false` on the theory that the coverage check would save it. It
-  // does not, and asserting the flattering version would have hidden the gap inside its own test.
-  assert.equal(verdict.passed, true);
+  // No filesystem access means no way to know these alias. It does not pretend otherwise, and the
+  // CLI never runs in this mode.
   assert.ok(!verdict.faults.some((entry) => /both own/.test(entry)));
+});
+
+test("a path that cannot be resolved falls back to its lexical form rather than failing the run", () => {
+  // A session may legitimately own a directory it is about to create.
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["not-created-yet/**", "pyproject.toml", "uv.lock"] }] },
+    ["pyproject.toml", "uv.lock"],
+    { resolvePath: () => { throw new Error("ENOENT"); } },
+  );
+
+  assert.equal(verdict.passed, true);
 });

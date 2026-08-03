@@ -66,10 +66,10 @@ const isNonEmptyString = (value) => typeof value === "string" && value.trim().le
  * file written four ways, and each pair passed the collision check as two different paths. Two
  * sessions can therefore own one file while the plan reads clean.
  *
- * NOT resolved: symbolic links. Two lexically distinct paths that resolve to one file through a
- * symlink still evade collision detection, because resolving them requires touching the filesystem
- * and this stays a pure function over the caller's list. Stated rather than silently absent — a
- * test pins it, so it is a known limit rather than a discovery.
+ * Symbolic links are resolved when the caller supplies a `resolvePath`. Without one this stays a
+ * pure function over the caller's list and symlinked aliases are not detected — which is why the
+ * CLI always supplies one. Leaving that as a documented limit was the easier answer and the wrong
+ * one: two sessions owning one file through a symlink is exactly the collision this gate exists for.
  */
 function canonical(value) {
   const raw = String(value ?? "").split("\\").join("/");
@@ -146,8 +146,25 @@ export function parseSessionContract(contract) {
  * @param contract        a parsed session contract
  * @param repoFiles       every tracked file path, POSIX-relative
  */
-export function evaluateSessionContract(contract, repoFiles = []) {
+export function evaluateSessionContract(contract, repoFiles = [], { resolvePath } = {}) {
   parseSessionContract(contract);
+  // Resolve a pattern or path to its real location when a resolver is available. For a glob, the
+  // directory prefix is what can be resolved — `linked/**` and `target/**` are the same rule when
+  // `linked` is a symlink to `target`, and comparing them lexically called that two rules.
+  const real = (value) => {
+    const canon = canonical(value);
+    if (typeof resolvePath !== "function") return canon;
+    const suffix = canon.endsWith("/**") ? "/**" : canon.endsWith("/*") ? "/*" : "";
+    const bare = suffix ? canon.slice(0, -suffix.length) : canon;
+    try {
+      const resolved = canonical(resolvePath(bare));
+      return `${resolved}${suffix}`;
+    } catch {
+      // A path that does not exist cannot be resolved and is not an error: a session may own a
+      // directory it is about to create. Fall back to the lexical form rather than dropping it.
+      return canon;
+    }
+  };
   // An empty file list is not a repository with no manifests. It is a repository nobody listed, and
   // the manifest coverage check — the entire reason this gate exists — did not run. Reporting a
   // pass there is the vacuous pass, and it passed.
@@ -170,7 +187,8 @@ export function evaluateSessionContract(contract, repoFiles = []) {
     for (let b = a + 1; b < sessions.length; b += 1) {
       for (const left of sessions[a].owns) {
         for (const right of sessions[b].owns) {
-          if (left === right || covers(left, right) || covers(right, left)) {
+          const [l, r] = [real(left), real(right)];
+          if (l === r || covers(l, r) || covers(r, l)) {
             faults.push(`sessions ${sessions[a].id} and ${sessions[b].id} both own ${left === right ? left : `${left} / ${right}`}`);
           }
         }
@@ -184,9 +202,11 @@ export function evaluateSessionContract(contract, repoFiles = []) {
   // through as if the repository had no manifest at all.
   const manifestNames = new Set(CONTENDED_MANIFESTS.map((name) => name.toLowerCase()));
   const present = repoFiles.filter((file) => manifestNames.has((canonical(file).split("/").pop() ?? "").toLowerCase()));
+  const sharedReal = new Set([...shared.keys()].map(real));
   const unclassified = present.filter((file) => {
-    if (shared.has(file)) return false;
-    return !sessions.some((session) => session.owns.some((pattern) => covers(pattern, file)));
+    const target = real(file);
+    if (shared.has(file) || sharedReal.has(target)) return false;
+    return !sessions.some((session) => session.owns.some((pattern) => covers(real(pattern), target)));
   });
   for (const file of unclassified) {
     faults.push(

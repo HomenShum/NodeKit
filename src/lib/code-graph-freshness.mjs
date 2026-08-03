@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -26,12 +27,19 @@ import path from "node:path";
 // would repeat the mistake already made once today, where the fix pointed at a command that could
 // not run.
 
-// WHAT THIS DOES NOT ESTABLISH, stated because the distinction is easy to lose: it compares the
-// graph's pinned COMMIT against HEAD. It does not read the graph's nodes against the source tree, so
-// a graph pinned exactly at HEAD whose nodes name files that do not exist reports `current` — that
-// is a correctness question about the analyser's output, and answering it here would mean
-// reimplementing the analyser. Freshness and accuracy are different claims and only the first is
-// made.
+// WHAT THIS ESTABLISHES, and where the line actually falls. It compares the graph's pinned COMMIT
+// against HEAD, and it checks that every node's filePath still resolves in the working tree.
+//
+// That second check was originally refused on the grounds that accuracy "would mean reimplementing
+// the analyser". That justification does not survive contact with the data: every node carries a
+// filePath, so asking whether those files exist is 656 existence checks, not an analysis. Two
+// different questions had been collapsed to excuse skipping the cheap one —
+//
+//   do the graph's nodes name files that EXIST      cheap, and now checked
+//   are its call and import EDGES correct           needs the analyser, and is not claimed
+//
+// A graph pinned exactly at HEAD whose nodes point at deleted files is not fresh in any sense a
+// reader cares about, and it used to report `current`.
 //
 // Its verdict is also REPORTED, never fatal to preflight. A project legitimately pins an old graph,
 // and failing preflight over drift would train people to skip preflight, which costs more than the
@@ -52,7 +60,7 @@ function git(repoRoot, args) {
  * @param repoRoot  repository to check
  * @returns { status, commitsBehind, filesChanged, sourceFilesChanged, graphCommit, head, analyzedAt }
  */
-export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src/" } = {}) {
+export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src/", checkNodePaths = true } = {}) {
   const root = path.resolve(repoRoot);
   let graph;
   try {
@@ -66,8 +74,27 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
   const graphCommit = graph?.project?.gitCommitHash ?? null;
   const head = git(root, ["rev-parse", "HEAD"]);
   const analyzedAt = graph?.project?.lastAnalyzedAt ?? null;
-  const nodes = Array.isArray(graph?.nodes) ? graph.nodes.length : 0;
-  const base = { graphCommit, head, analyzedAt, nodes };
+  const nodeList = Array.isArray(graph?.nodes) ? graph.nodes : [];
+  const nodes = nodeList.length;
+
+  // Nodes naming files that are no longer there. Reported for every verdict, because a graph can be
+  // perfectly current by commit and still describe a tree that has moved underneath it.
+  const dangling = [];
+  if (checkNodePaths) {
+    for (const node of nodeList) {
+      const file = node?.filePath ?? node?.path ?? node?.file;
+      if (typeof file !== "string" || file === "") continue;
+      if (!existsSync(path.join(root, file))) dangling.push(file);
+    }
+  }
+  const base = {
+    graphCommit,
+    head,
+    analyzedAt,
+    nodes,
+    danglingNodes: dangling.length,
+    danglingSample: [...new Set(dangling)].slice(0, 5),
+  };
 
   if (!graphCommit || !head) {
     return { ...base, status: "unknown", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
@@ -76,9 +103,10 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
     // Emptiness is checked here rather than before the commit comparison. Ordering it first was a
     // defect introduced by the previous fix: an empty graph pinned to a DESCENDANT reported `empty`
     // and masked that its commit was unrelated to this checkout, which is the larger fact.
-    return nodes === 0
-      ? { ...base, status: "empty", commitsBehind: null, filesChanged: null, sourceFilesChanged: null }
-      : { ...base, status: "current", commitsBehind: 0, filesChanged: 0, sourceFilesChanged: 0 };
+    if (nodes === 0) return { ...base, status: "empty", commitsBehind: null, filesChanged: null, sourceFilesChanged: null };
+    // Pinned at HEAD and still pointing at files that are gone. The commit says fresh; the contents
+    // say otherwise, and the contents are what an agent actually reads.
+    return { ...base, status: dangling.length > 0 ? "inaccurate" : "current", commitsBehind: 0, filesChanged: 0, sourceFilesChanged: 0 };
   }
 
   // A pinned commit that is not an ANCESTOR of HEAD. Two different situations reach here and both
@@ -121,7 +149,11 @@ export async function evaluateCodeGraphFreshness(repoRoot, { sourcePrefix = "src
     // Tolerated drift is NOT the same as pinned at HEAD. Calling both "current" let the formatter
     // print "current at HEAD" about a graph several commits behind, which is a small lie in the one
     // line a reader actually reads.
-    status: !Number.isInteger(behind) ? "unknown" : behind > STALE_COMMIT_THRESHOLD ? "stale" : "tolerated-drift",
+    status: !Number.isInteger(behind)
+      ? "unknown"
+      : behind > STALE_COMMIT_THRESHOLD
+        ? "stale"
+        : dangling.length > 0 ? "inaccurate" : "tolerated-drift",
     commitsBehind: Number.isInteger(behind) ? behind : null,
     filesChanged: changed.length,
     sourceFilesChanged: sourceChanged.length,
@@ -134,6 +166,10 @@ export function formatCodeGraphFreshness(verdict) {
       return "CODE GRAPH: none in this repository — nothing to check.";
     case "unknown":
       return "CODE GRAPH: present, but its pinned commit or this repository's HEAD could not be read, so whether it is current is unknown rather than fine.";
+    case "inaccurate":
+      return `CODE GRAPH INACCURATE: pinned to ${verdict.graphCommit.slice(0, 9)} and within commit tolerance, but ${verdict.danglingNodes} of `
+        + `${verdict.nodes} node(s) name files that no longer exist (${verdict.danglingSample.join(", ")}). `
+        + "The commit says fresh; the contents describe a tree that has moved.";
     case "empty":
       return `CODE GRAPH: present but contains no nodes — nothing was measured, and an empty graph is not a fresh one.`;
     case "unrelated":
@@ -148,6 +184,6 @@ export function formatCodeGraphFreshness(verdict) {
         + "Its call and import edges describe code that has moved. Re-run the Understand Anything analyser to regenerate "
         + `${GRAPH_DIR}/${GRAPH_FILE} at HEAD; NodeKit consumes this graph and cannot rebuild it.`;
     default:
-      return `CODE GRAPH: current at ${verdict.head?.slice(0, 9) ?? "HEAD"}, ${verdict.nodes} node(s).`;
+      return `CODE GRAPH: current at ${verdict.head?.slice(0, 9) ?? "HEAD"}, ${verdict.nodes} node(s), every node path resolves.`;
   }
 }
