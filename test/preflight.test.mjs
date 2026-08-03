@@ -162,3 +162,46 @@ test("the CLI exposes preflight, exits non-zero when blocked, and passes with no
     await rm(empty, { recursive: true, force: true });
   }
 });
+
+// Found by writing this repository's own harness.yaml and running the gate against it: a
+// dependency explicitly marked confirmedActive:false was reported as active, because a timestamp
+// inference silently overruled the observation.
+test("an explicit 'not confirmed active' is not overturned by a timestamp", async () => {
+  const yaml = (confirmed) => `harness:
+  - id: claude-mem
+    kind: plugin
+    verifyBefore: npm test
+    installedAt: "2026-08-03T09:00:00.000Z"
+    activation:
+      requires: restart
+      blocking: true
+${confirmed === undefined ? "" : `      confirmedActive: ${confirmed}\n`}`;
+
+  // Session began AFTER the install, so the timestamp path would say "active".
+  const later = { sessionStartedAt: "2026-08-03T10:00:00.000Z", now: NOW };
+
+  const stated = await manifestDir(yaml(false));
+  try {
+    const verdict = evaluatePreflight(await readHarnessManifest(stated), later);
+    assert.equal(verdict.passed, false, "somebody looked and did not confirm it; a clock cannot confirm it for them");
+    assert.ok(verdict.blockers.some((b) => /has not been confirmed active/.test(b)));
+  } finally {
+    await rm(stated, { recursive: true, force: true });
+  }
+
+  // Absent is genuinely unknown, so the timestamp is allowed to answer.
+  const unknown = await manifestDir(yaml(undefined));
+  try {
+    assert.equal(evaluatePreflight(await readHarnessManifest(unknown), later).passed, true);
+  } finally {
+    await rm(unknown, { recursive: true, force: true });
+  }
+
+  // And true still wins outright.
+  const yes = await manifestDir(yaml(true));
+  try {
+    assert.equal(evaluatePreflight(await readHarnessManifest(yes), { sessionStartedAt: SESSION_START, now: NOW }).passed, true);
+  } finally {
+    await rm(yes, { recursive: true, force: true });
+  }
+});

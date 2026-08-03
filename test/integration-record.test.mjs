@@ -57,3 +57,25 @@ test("the record refuses to omit the questions that did the work", () => {
   const none = record().replace(/deprecationsFound:\n  - .*\n/, "deprecationsFound: []\n");
   assert.deepEqual(parseIntegrationRecord(none).deprecationsFound, []);
 });
+
+// The record for the library every gate in this repository stands on. A test that only exercises a
+// fixture would leave the real record unchecked, which is how these rot.
+test("this repository's own ajv record matches the ajv that is actually installed", async () => {
+  const { readIntegrationRecord, evaluateIntegrationRecord } = await import("../src/lib/integration-record.mjs");
+  const { createRequire } = await import("node:module");
+  const path = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const require = createRequire(import.meta.url);
+
+  const record = await readIntegrationRecord(root, "ajv");
+  const installed = require("ajv/package.json").version;
+  const verdict = evaluateIntegrationRecord(record, { installedVersion: installed });
+  assert.equal(verdict.passed, true, verdict.faults.join("; "));
+
+  // The finding the docs pass produced, kept as an assertion so a future edit cannot quietly drop
+  // it: 2020-12 needs a different Ajv class, and this repo's schemas are all 2020-12.
+  assert.match(record.deprecationsFound.join(" "), /draft-2020-12 is documented as BREAKING/);
+  assert.match(record.introspection, /Ajv2020/);
+  assert.ok(record.knownLimitations?.length > 0, "a record claiming no limitations examined nothing");
+});

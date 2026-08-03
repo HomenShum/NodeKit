@@ -76,8 +76,16 @@ export function evaluatePreflight({ dependencies }, { sessionStartedAt, now = Da
 
     if (activation.requires !== "none") {
       const installedAt = dep.installedAt ? Date.parse(dep.installedAt) : null;
+      // Precedence matters, and getting it wrong is how this gate first passed a dependency nobody
+      // had seen work. An explicit `confirmedActive: false` is an OBSERVATION — someone looked and
+      // it was not confirmed — so a timestamp may not overturn it. The timestamp only shows the
+      // install predates the session, which is necessary for a restart to have taken effect and
+      // nowhere near sufficient. It is therefore the fallback for when nobody looked at all.
       const active = dep.activation.confirmedActive === true
-        || (activation.requires === "restart" && sessionStart !== null && installedAt !== null && installedAt < sessionStart);
+        ? true
+        : dep.activation.confirmedActive === false
+          ? false
+          : (activation.requires === "restart" && sessionStart !== null && installedAt !== null && installedAt < sessionStart);
       if (!active) {
         const detail = `${id} needs ${activation.requires} to take effect and has not been confirmed active`
           + (activation.requires === "restart" && installedAt !== null && sessionStart !== null

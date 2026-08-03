@@ -68,8 +68,30 @@ deferred:
       Wiring preflight to a session start needs a decision about where a session begins for this
       repo, which is a question for the owner rather than an implementation detail to guess at.
     deferredAt: "2026-08-02"
-    status: accepted-risk
+    status: resolved
     outcome: >-
+      CLOSED 2026-08-03 by deriving both declarations from observation rather than leaving them to
+      the owner. That earlier framing was too cautious: plugin ids, versions and commit SHAs are
+      readable from ~/.claude/plugins/installed_plugins_v2.json, and ajv's version and entry point
+      are readable from the installed package, so neither record required inventing anything.
+
+      harness.yaml records five dependencies and two caveats that weaken it: all four plugins carry
+      an identical installedAt to the millisecond, which is a bulk re-registration timestamp rather
+      than four install times; and the restart assumption was contradicted by observation, since
+      fable-* installed mid-session into ~/.claude/skills and was invocable with no restart.
+
+      Writing it immediately exposed a defect in the gate itself. claude-mem is marked
+      confirmedActive:false — somebody looked and did not confirm it — and preflight reported it
+      active anyway, because a timestamp inference silently overruled the observation. Precedence
+      is now explicit: true wins, false wins, and the timestamp only answers when nobody looked.
+
+      integrations/ajv.yaml was written docs-first and it earned its keep: the current docs say
+      draft-2020-12 is BREAKING and needs a different Ajv class, and all 114 schemas here are
+      2020-12. Introspection confirmed src/lib/schema-validation.mjs:24 uses Ajv2020 correctly. It
+      also records a real loosening nobody had flagged — strict:false is set, so unknown keywords
+      and ignored formats pass unreported.
+
+      Superseded framing follows:
       Half closed, and the remaining half is deliberately left to the owner. `nodekit preflight`
       now exists and takes --session-started-at explicitly rather than inferring a session boundary
       from process uptime, which would have answered a question only the caller knows. What is
