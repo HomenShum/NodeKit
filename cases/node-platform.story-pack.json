@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "nodekit.story-pack/v1",
+  "caseId": "node-platform",
+  "stage": "explain",
+  "producedAt": "2026-08-03T11:47:25.000Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.build-evidence-pack/v1",
+      "caseId": "node-platform",
+      "sha256": "d8153ef320d39c5f75a3aff96cdfdf6fd55b21b804f694deaa43e4b93fef6928",
+      "path": "node-platform.build-evidence-pack.json"
+    },
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "node-platform",
+      "sha256": "1000235cdccef280f159bb338e294da551373550aa2ad46a324be61afffc63f3",
+      "path": "node-platform.opportunity-contract.json"
+    }
+  ],
+  "content": {
+    "audience": {
+      "reader": "An engineer deciding whether to let an agent build something they will have to defend",
+      "decision": "whether the proof this platform produces is worth the ceremony it costs",
+      "stakes": "prospective-user",
+      "priorBeliefs": [
+        "agent output cannot be trusted and cannot be checked either",
+        "every proof framework is a report generator with extra steps"
+      ]
+    },
+    "surfaces": [
+      {
+        "surfaceId": "surface-readme",
+        "kind": "readme",
+        "description": "README.md, the reference page",
+        "route": "README.md"
+      },
+      {
+        "surfaceId": "surface-start",
+        "kind": "readme",
+        "description": "START_HERE.md, the ten-minute onboarding",
+        "route": "START_HERE.md"
+      }
+    ],
+    "sources": [
+      {
+        "sourceId": "src-this-repo",
+        "origin": "authority-issued",
+        "describes": "The node-platform repository at the commit these claims were produced from",
+        "artifact": {
+          "path": "cases/node-platform.build-evidence-pack.json",
+          "sha256": "4da2bc14a80669bede62b985e1d1d401f88a17374062627263fced5f639e78e4",
+          "byteLength": 34532,
+          "mediaType": "application/json"
+        },
+        "authority": {
+          "issuer": "the repository owner",
+          "issuerKind": "human-attestation",
+          "artifactType": "source tree",
+          "receivedAt": "2026-08-03T00:00:00.000Z",
+          "receipt": {
+            "path": "cases/evidence/test-run.log",
+            "sha256": "fc9bfd9f2f323238bdf7a67b019bb817a4c06c618bbd2eabcc92edd2bb476590",
+            "byteLength": 4849
+          }
+        }
+      }
+    ],
+    "disclosures": [],
+    "claims": [
+      {
+        "claimId": "sc-gates-run",
+        "statement": "The platform runs its own gates against itself, and the run is recorded rather than reported.",
+        "surfaceRefs": [
+          "surface-readme"
+        ],
+        "consequential": true,
+        "rendersData": false,
+        "dataImplications": [],
+        "phraseScan": {
+          "scanner": "src/lib/story-pack-producer.mjs",
+          "scannerVersion": "1.0.0",
+          "lexiconDigest": "a62c0c023f3698f1bdc8044a39df0995e85078683783a37334bebfdbc815b0b4",
+          "scannedAt": "2026-08-03T11:47:25.000Z",
+          "matches": []
+        },
+        "status": "bound",
+        "buildBinding": {
+          "bepClaimIds": [],
+          "evidenceRefs": [
+            "ev-test-run"
+          ],
+          "restatement": "narrowed",
+          "strengthDelta": "weaker"
+        },
+        "contentBinding": {
+          "origin": "authority-issued",
+          "sourceRefs": [
+            "src-this-repo"
+          ]
+        },
+        "boundary": "It establishes that the suite ran and what it returned. It does not establish that the suite tests the right things."
+      },
+      {
+        "claimId": "sc-contract-derived",
+        "statement": "The opportunity contract is derived from the repository's own documentation, and the fields the docs do not support are named as unverified.",
+        "surfaceRefs": [
+          "surface-start"
+        ],
+        "consequential": true,
+        "rendersData": false,
+        "dataImplications": [],
+        "phraseScan": {
+          "scanner": "src/lib/story-pack-producer.mjs",
+          "scannerVersion": "1.0.0",
+          "lexiconDigest": "a62c0c023f3698f1bdc8044a39df0995e85078683783a37334bebfdbc815b0b4",
+          "scannedAt": "2026-08-03T11:47:25.000Z",
+          "matches": []
+        },
+        "status": "bound",
+        "buildBinding": {
+          "bepClaimIds": [],
+          "evidenceRefs": [
+            "ev-opportunity-contract-source"
+          ],
+          "restatement": "verbatim"
+        },
+        "contentBinding": {
+          "origin": "authority-issued",
+          "sourceRefs": [
+            "src-this-repo"
+          ]
+        },
+        "boundary": "Naming a field unverified is not the same as verifying the rest."
+      },
+      {
+        "claimId": "sc-emergent",
+        "statement": "A sweep for undeclared behaviour ran and produced a receipt, so an empty result and an unasked question do not look the same.",
+        "surfaceRefs": [
+          "surface-readme"
+        ],
+        "consequential": true,
+        "rendersData": false,
+        "dataImplications": [],
+        "phraseScan": {
+          "scanner": "src/lib/story-pack-producer.mjs",
+          "scannerVersion": "1.0.0",
+          "lexiconDigest": "a62c0c023f3698f1bdc8044a39df0995e85078683783a37334bebfdbc815b0b4",
+          "scannedAt": "2026-08-03T11:47:25.000Z",
+          "matches": []
+        },
+        "status": "bound",
+        "buildBinding": {
+          "bepClaimIds": [],
+          "evidenceRefs": [
+            "ev-emergent-sweep"
+          ]
+        },
+        "contentBinding": {
+          "origin": "authority-issued",
+          "sourceRefs": [
+            "src-this-repo"
+          ]
+        },
+        "boundary": "The sweep surfaced nothing. That is a recorded zero, not a guarantee there was nothing to find."
+      }
+    ],
+    "withheldClaims": [
+      {
+        "claimId": "sc-faster",
+        "statement": "Teams ship 40% faster with NodeKit.",
+        "withheldBecause": "no-build-evidence",
+        "detail": "cites ev-velocity-study, which the build evidence pack does not contain — a reference that resolves to nothing is an invented capability, not a typo",
+        "wouldHaveImplied": [
+          "factual"
+        ]
+      }
+    ],
+    "narrative": [
+      {
+        "order": 1,
+        "heading": "It checks itself",
+        "claimRefs": [
+          "sc-gates-run",
+          "sc-emergent"
+        ],
+        "surfaceRef": "surface-readme"
+      },
+      {
+        "order": 2,
+        "heading": "The contract came from somewhere",
+        "claimRefs": [
+          "sc-contract-derived"
+        ],
+        "surfaceRef": "surface-start"
+      }
+    ],
+    "demoMode": {
+      "engaged": false,
+      "surfaceRefs": [],
+      "reason": "the platform is the product; there is no demo data"
+    },
+    "promotionAuthorized": false
+  },
+  "completeness": {
+    "claimed": [
+      "sc-gates-run",
+      "sc-contract-derived",
+      "sc-emergent"
+    ],
+    "notRun": [
+      "Whether any statement is TRUE was not assessed. This producer checks that a claim's references resolve and that its phrasing does not promise more than its data origin supports; both are lookups, and neither is truth.",
+      "Whether the narrative is persuasive, well-ordered, or appropriate for the named reader was not assessed.",
+      "Whether the audience record names the right reader was not assessed — it was supplied, not derived.",
+      "inherited from the build stage: No semantic assessment of the built system against any contract decision was performed by this producer; every pointer without caller-supplied evidence is recorded as defaulted-with-disclosure, not honoured.",
+      "inherited from the build stage: No human has read the disclosure artifact; it exists on disk with a digest, and nothing more is claimed for it.",
+      "inherited from the build stage: The emergent sweep inventoried tracked file paths only; decisions expressed inside code semantics, copy, or configuration values were not searched for.",
+      "inherited from the build stage: No adversarial review was run. This pack carries the author's own test command and no independent attempt to break the build, which is unfalsified rather than verified."
+    ],
+    "refused": [
+      {
+        "item": "claim sc-faster: Teams ship 40% faster with NodeKit.",
+        "reason": "no-build-evidence — cites ev-velocity-study, which the build evidence pack does not contain — a reference that resolves to nothing is an invented capability, not a typo"
+      },
+      {
+        "item": "Marking any contract decision honoured without caller-supplied evidence files",
+        "reason": "inherited from the build stage: An honoured disposition asserts the build did something specific, and this producer cannot see intent — only bytes and exit codes. Where no evidence was supplied it defaulted with disclosure instead."
+      },
+      {
+        "item": "Writing promotionAuthorized: true",
+        "reason": "inherited from the build stage: Authorization is derived by verification from an attestation. A producer granting it to itself is the self-approval the authority model forbids, so the field is pinned false."
+      }
+    ]
+  }
+}

@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 116,
-    "modules": 89,
-    "tests": 96
+    "modules": 90,
+    "tests": 97
   },
   "architecture": [
     {
@@ -343,6 +343,7 @@
     "scaffold.mjs",
     "schema-validation.mjs",
     "source-hash.mjs",
+    "story-pack-producer.mjs",
     "submission-attestation.mjs",
     "submission-evidence-finalizer.mjs",
     "submission-gate.mjs",
@@ -435,6 +436,7 @@
     "replay-packet.test.mjs",
     "repo-tour.test.mjs",
     "research-verdict-benchmark.test.mjs",
+    "story-pack-producer.test.mjs",
     "story-pack-schema.test.mjs",
     "studio-boundary.test.mjs",
     "submission-attestation.test.mjs",

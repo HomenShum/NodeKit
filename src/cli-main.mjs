@@ -15,6 +15,7 @@ import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
 import { compareMotionPortability } from "./lib/motion-portability.mjs";
 import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
 import { BuildEvidenceRefusal, produceBuildEvidencePack } from "./lib/build-evidence-producer.mjs";
+import { StoryPackRefusal, formatStoryPack, produceStoryPack } from "./lib/story-pack-producer.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -178,6 +179,8 @@ Usage:
   nodekit journey verify [--repo-root <path>] [--json]
   nodekit journey build-evidence --contract <opportunity-contract.json>
       [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
+  nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
+      --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
@@ -371,6 +374,56 @@ async function runJourneyVerify(parsed) {
 // enforce shape; this is the first thing that writes a conforming artifact from a real repository
 // instead of a hand-authored fixture. It fails closed: an unreconcilable contract or a fabricated
 // evidence path refuses the whole pack rather than shipping a partial truth.
+/**
+ * The EXPLAIN stage. Audience, surfaces, claims and narrative are structured enough that flags would
+ * mangle them, so they arrive as one --story file; the producer decides which claims survive.
+ */
+async function runJourneyStoryPack(parsed) {
+  const { contract, pack, story } = parsed.options;
+  if (typeof pack !== "string" || typeof contract !== "string" || typeof story !== "string") {
+    console.error(
+      "usage: nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json> "
+        + "--story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--json]",
+    );
+    process.exitCode = 2;
+    return;
+  }
+  let input;
+  try {
+    input = JSON.parse(await readFile(path.resolve(story), "utf8"));
+  } catch (error) {
+    console.error(`cannot read the story input at ${story}: ${error?.message ?? error}`);
+    process.exitCode = 2;
+    return;
+  }
+  const outPath = typeof parsed.options.out === "string" ? parsed.options.out : undefined;
+  try {
+    const storyPack = await produceStoryPack({
+      packPath: pack,
+      contractPath: contract,
+      outPath,
+      caseId: typeof parsed.options["case-id"] === "string" ? parsed.options["case-id"] : undefined,
+      audience: input.audience,
+      surfaces: input.surfaces ?? [],
+      sources: input.sources ?? [],
+      disclosures: input.disclosures ?? [],
+      claims: input.claims ?? [],
+      narrative: input.narrative ?? [],
+      demoMode: input.demoMode ?? { engaged: false, surfaceRefs: [] },
+    });
+    printStructured({ storyPack, outPath }, parsed, (value) =>
+      [formatStoryPack(value.storyPack), outPath ? `  written to ${outPath}` : "  not written (no --out)"].join("\n"),
+    );
+  } catch (error) {
+    if (error instanceof StoryPackRefusal) {
+      console.error(`STORY PACK REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
 async function runJourneyBuildEvidence(parsed) {
   const repoRoot = path.resolve(parsed.options.repo ?? parsed.options["repo-root"] ?? ".");
   const contractPath = parsed.options.contract;
@@ -2123,6 +2176,10 @@ async function main() {
   }
   if (first === "journey" && second === "build-evidence") {
     await runJourneyBuildEvidence(parsed);
+    return;
+  }
+  if (first === "journey" && second === "story-pack") {
+    await runJourneyStoryPack(parsed);
     return;
   }
   if (first === "tour") {

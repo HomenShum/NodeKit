@@ -9,7 +9,7 @@
     "verified": 6,
     "partial": 0,
     "unverified": 0,
-    "orphanAnnotations": 30
+    "orphanAnnotations": 31
   },
   "behaviors": [
     {
@@ -156,7 +156,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 522
+          "line": 575
         }
       ],
       "supporting": [
@@ -1083,7 +1083,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 523
+            "line": 576
           }
         ],
         "namedSourceFiles": [
@@ -1121,6 +1121,11 @@
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
       "line": 660
+    },
+    {
+      "behaviorId": "journey.explain.produce-story",
+      "file": "src/lib/story-pack-producer.mjs",
+      "line": 328
     },
     {
       "behaviorId": "inv:canonical-promotion-requires-verified-approval",

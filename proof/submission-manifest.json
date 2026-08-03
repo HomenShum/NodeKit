@@ -1,7 +1,7 @@
 {
   "schemaVersion": "nodekit.submission-manifest/v1",
-  "candidateCommit": "95dd211d171be67378908f9e7394b03019e08491",
-  "candidateSourceHash": "b838d6c00adb621152535fcde9104c090cbc2168c3cf5e1c90a56eceb65a5693",
+  "candidateCommit": "44f5172275ba3be1dc8f1d36fda508f8f5e15688",
+  "candidateSourceHash": "9b2cd9ad80c13b9be931c10aafe1a0d714a162b512257cd7ebcfa6775e7e5460",
   "releaseCandidate": {
     "nodekitCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
     "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
