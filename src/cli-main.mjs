@@ -152,6 +152,8 @@ function printHelp() {
   console.log(`NodeKit
 
 Usage:
+  nodekit explain --for <any|node|convex|python|postgres|supabase|frontend> [--json]
+      Which surfaces apply to your project, and which you can stop reading. Start here.
   nodekit create <directory> --name <slug> --brief <text>
       [--provider openrouter] [--model openai/gpt-4o-mini] [--backend filesystem]
       [--nodekit-specifier <npm-or-file-spec>] [--sponsors <comma-list>]
@@ -1850,6 +1852,21 @@ async function main() {
   }
   if (first === "adopt") {
     await runAdopt(parsed);
+    return;
+  }
+  if (first === "explain") {
+    const { explainFor, formatExplanation, STACKS } = await import("./lib/nodekit-surfaces.mjs");
+    const stack = parsed.options.for ?? parsed.positional[1] ?? "any";
+    let explanation;
+    try {
+      explanation = explainFor(String(stack));
+    } catch (error) {
+      if (error.code !== "UNKNOWN_STACK") throw error;
+      console.error(`${error.message}\nUsage: nodekit explain --for <${STACKS.join("|")}> [--json]`);
+      process.exitCode = 2;
+      return;
+    }
+    console.log(parsed.options.json ? JSON.stringify(explanation, null, 2) : formatExplanation(explanation));
     return;
   }
   if (first === "compile") {

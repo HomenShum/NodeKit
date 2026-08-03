@@ -5,8 +5,8 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 112,
-    "modules": 72,
-    "tests": 79
+    "modules": 73,
+    "tests": 80
   },
   "architecture": [
     {
@@ -58,6 +58,7 @@
       "doctor",
       "ecosystem",
       "evolution",
+      "explain",
       "frontend",
       "governance",
       "graph",
@@ -298,6 +299,7 @@
     "motion-portability.mjs",
     "native-agent-identity.mjs",
     "native-agent-migration.mjs",
+    "nodekit-surfaces.mjs",
     "npm-cli-invocation.mjs",
     "npm-package-archive.mjs",
     "official-pricing-proof.mjs",
@@ -376,6 +378,7 @@
     "native-agent-migration.test.mjs",
     "nodekit-proof-campaign-publication.test.mjs",
     "nodekit-proof-campaign-video.test.mjs",
+    "nodekit-surfaces.test.mjs",
     "npm-cli-invocation.test.mjs",
     "npm-package-archive.test.mjs",
     "observation-pack-schema.test.mjs",
