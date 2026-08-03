@@ -148,8 +148,6 @@ test("the attestor rule survives spacing, suffixes and a unicode lookalike", () 
   for (const attestedBy of [" nodekit", "NodeKit Inc", "nodekit-ci", "nоdekit"]) {
     const record = allPass();
     record.checks[0].attestedBy = attestedBy;
-    // The Cyrillic lookalike is not caught by normalisation, and is named as a known ceiling.
-    if (attestedBy === "nоdekit") continue;
     assert.throws(() => parseProductionReadiness(record), /may not certify it/, JSON.stringify(attestedBy));
   }
 

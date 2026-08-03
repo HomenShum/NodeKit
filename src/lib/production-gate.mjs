@@ -33,8 +33,22 @@ const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 // " nodekit", "NodeKit Inc", "nodekit-ci" and a Cyrillic lookalike all slipped past a bare
 // lowercase compare. Normalising unicode and matching on a token boundary closes the cheap ones;
 // the real fix is canonical principal identity, which this repo does not yet have.
+// Cyrillic о, е, а, с, р, х and friends render identically to Latin and defeat any denylist. Folding
+// the common confusables closes the copy-paste attack. It is still a denylist, and a determined
+// caller can pick a homoglyph not in this table — the real answer remains canonical principal
+// identity, which this repo does not have. This raises the cost; it does not close the class.
+const CONFUSABLES = new Map(Object.entries({
+  "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "х": "x",
+  "у": "y", "і": "i", "ј": "j", "һ": "h", "ԁ": "d", "ԛ": "q",
+  "ο": "o", "α": "a", "ρ": "p", "ɡ": "g", "ẞ": "s",
+}));
+
+function foldConfusables(text) {
+  return [...text].map((ch) => CONFUSABLES.get(ch) ?? ch).join("");
+}
+
 function isForbiddenAttestor(value) {
-  const normalized = String(value).normalize("NFKC").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const normalized = foldConfusables(String(value).normalize("NFKC").toLowerCase()).replace(/[^a-z0-9]+/g, " ").trim();
   return FORBIDDEN_ATTESTORS.some((f) => normalized === f || normalized.startsWith(`${f} `) || normalized.endsWith(` ${f}`) || normalized.includes(` ${f} `));
 }
 
