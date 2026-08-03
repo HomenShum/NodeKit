@@ -1926,6 +1926,23 @@ async function main() {
     if (!verdict.passed) process.exitCode = 1;
     return;
   }
+  if (first === "production" && (second === "check" || second === undefined)) {
+    const { evaluateProductionReadiness, formatProductionReadiness } = await import("./lib/production-gate.mjs");
+    const file = path.resolve(parsed.options.record ?? "production-readiness.json");
+    let record = null;
+    try {
+      record = JSON.parse(await readFile(file, "utf8"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    // No record is not a pass. Seven questions nobody asked is seven NOT_RUNs.
+    const verdict = record
+      ? evaluateProductionReadiness(record)
+      : { releasable: false, blockers: [`no ${path.basename(file)}; every production check is unasked, and an unasked question is NOT_RUN`], checked: 7, passed: 0, waived: 0 };
+    console.log(parsed.options.json ? JSON.stringify(verdict, null, 2) : formatProductionReadiness(verdict));
+    if (!verdict.releasable) process.exitCode = 1;
+    return;
+  }
   if (first === "deferrals" && (second === "check" || second === undefined)) {
     const { evaluateDeferrals, formatDeferrals, readDeferrals } = await import("./lib/deferrals.mjs");
     const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");

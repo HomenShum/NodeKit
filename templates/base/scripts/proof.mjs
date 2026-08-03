@@ -7,19 +7,30 @@ async function readJson(relative, required = true) {
   catch (error) { if (!required && error.code === "ENOENT") return null; throw new Error(`missing or invalid ${relative}`); }
 }
 
-const [demo, evaluation, browserContract, browserJourney, identity] = await Promise.all([
+const [demo, evaluation, browserContract, browserJourney, identity, production] = await Promise.all([
   readJson("proof/demo-receipt.json"),
   readJson("proof/eval-receipt.json"),
   readJson("proof/browser-contract.json", false),
   readJson("proof/browser-certification.json", false),
   readJson(".nodeagent/application-identity.json"),
+  readJson("production-readiness.json", false),
 ]);
+
+// The seven checks before real user data is on the line. Absence is NOT_RUN and NOT_RUN blocks
+// RELEASE — not local proof, which is why this lands in missingReleaseGates rather than in passed.
+// A generated app must still be able to prove itself locally on day one.
+const { evaluateProductionReadiness } = await import("@homenshum/nodekit/production-gate")
+  .catch(() => ({ evaluateProductionReadiness: null }));
+const productionVerdict = production && evaluateProductionReadiness
+  ? evaluateProductionReadiness(production)
+  : { releasable: false, blockers: ["production-readiness.json absent or unreadable"] };
 const checks = {
   browserContractPassed: browserContract === null ? null : browserContract.passed === true,
   browserJourneyPassed: browserJourney === null ? null : browserJourney.passed === true,
   browserCertified: browserJourney === null ? null : browserJourney.certified === true,
   deterministicDemo: demo.passed === true,
   deterministicEvaluation: evaluation.passed === true,
+  productionReadinessSatisfied: productionVerdict.releasable === true,
   identityBound: typeof identity.applicationHash === "string" && typeof identity.configHash === "string",
   secretFree: !/(?:sk-[A-Za-z0-9_-]{12,}|-----BEGIN [A-Z ]+PRIVATE KEY-----)/.test(JSON.stringify({ browserContract, browserJourney, demo, evaluation })),
 };
@@ -36,7 +47,7 @@ const receipt = {
   configHash: identity.configHash,
   generatedAt: new Date().toISOString(),
   level: checks.browserCertified === true && localReady ? "browser-certified" : "local-ready",
-  missingReleaseGates: [...(checks.browserCertified === true ? [] : ["browserCertification"]), "deployment", "freshAgentHeldout", "freshHumanUsability", "threeConvexConsumers"],
+  missingReleaseGates: [...(checks.browserCertified === true ? [] : ["browserCertification"]), ...(checks.productionReadinessSatisfied ? [] : ["productionReadiness"]), "deployment", "freshAgentHeldout", "freshHumanUsability", "threeConvexConsumers"],
   passed: localReady,
   releaseReady: false,
   schemaVersion: "nodekit.proof-receipt/v1",

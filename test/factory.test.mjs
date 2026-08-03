@@ -390,11 +390,19 @@ test("a fresh no-key Git candidate reaches an honest local-ready proof", async (
   assert.equal(receipt.releaseReady, false);
   assert.equal(receipt.applicationHash, compiled.definition.applicationHash);
   assert.equal(receipt.configHash, compiled.definition.configHash);
+  // productionReadiness joined this list when the seven fail-closed checks landed. This is an
+  // expected value changed to match new behaviour, which is normally the shape of a weakened test —
+  // legitimate here because the list IS the declaration of what is still missing, and a newly added
+  // gate that nobody has run is exactly a missing release gate. A fresh candidate ships with all
+  // seven checks NOT_RUN, so it must appear.
   assert.deepEqual(receipt.missingReleaseGates, [
     "browserCertification",
+    "productionReadiness",
     "deployment",
     "freshAgentHeldout",
     "freshHumanUsability",
     "threeConvexConsumers",
   ]);
+  assert.equal(receipt.checks.productionReadinessSatisfied, false, "a scaffold that starts satisfied is a lie about work nobody did");
+  assert.equal(receipt.passed, true, "local proof must still pass on day one; production readiness gates RELEASE, not local proof");
 });

@@ -77,6 +77,27 @@ export const SURFACES = Object.freeze([
     offers: "Detached signatures over a submission's evidence, verified independently of the process that produced it. Also on the CLI as npx nodekit-attestation-sign and npx nodekit-attestation-verify.",
   },
   {
+    id: "production-gate",
+    entry: "@homenshum/nodekit/production-gate",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Seven fail-closed checks before real user data is on the line — secret boundary, server authorization, tenant isolation, error observability, restore proof, change regression, payment integrity. Absence is NOT_RUN and NOT_RUN blocks; the party that built the application may not certify or waive it.",
+  },
+  {
+    id: "frame-evidence",
+    entry: "@homenshum/nodekit/frame-evidence",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Deterministic checks on captured frames before any model reviews them: a live-product frame binds to deployment revision, browser trace, journey state and its own screenshot hash; a generated frame may never be presented as the running application.",
+  },
+  {
+    id: "knockout",
+    entry: "@homenshum/nodekit/knockout",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Causal necessity by removal: prove a mechanism is responsible rather than merely present. Refuses fast-forward and duration-zeroed knockouts by name, and refuses one whose observation equals the baseline's terminal state.",
+  },
+  {
     id: "agent-run",
     entry: "@homenshum/nodekit/agent-run",
     appliesTo: ["any"],

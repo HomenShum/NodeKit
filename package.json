@@ -148,7 +148,10 @@
       "import": "./dist/convex-test.js",
       "default": "./dist/convex-test.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./production-gate": "./src/lib/production-gate.mjs",
+    "./frame-evidence": "./src/lib/frame-evidence.mjs",
+    "./knockout": "./src/lib/knockout.mjs"
   },
   "bin": {
     "nodekit": "src/cli.mjs",
