@@ -70,13 +70,6 @@ export const SURFACES = Object.freeze([
     offers: "Profile models against a baseline and compile a routing matrix from the result, with `canary` checking a routing receipt before it takes effect. `diagnose` explains why a route was chosen rather than only which.",
   },
   {
-    id: "journey-chain",
-    entry: "nodekit journey verify | build-evidence | story-pack",
-    gate: true,
-    appliesTo: ["any"],
-    offers: "Produce the Builder Journey stage artifacts and check the chain between them. Each stage binds its predecessor by canonical digest, and a producer may never write promotionAuthorized true.",
-  },
-  {
     id: "audience-gate",
     entry: "nodekit audience check",
     gate: true,
@@ -97,13 +90,6 @@ export const SURFACES = Object.freeze([
     gate: false,
     appliesTo: ["any"],
     offers: "Render the governance state — who approved what, and which gates a change passed — as a page a reviewer can read without running anything.",
-  },
-  {
-    id: "agent-run",
-    entry: "nodekit agent run --agent <label> --goal <text>",
-    gate: false,
-    appliesTo: ["any"],
-    offers: "Run a bounded agent loop against a stated goal, producing a trajectory the harness gym can lock, replay and evaluate.",
   },
   {
     id: "session-migrate",
@@ -177,7 +163,7 @@ export const SURFACES = Object.freeze([
   },
   {
     id: "journey-chain",
-    entry: "@homenshum/nodekit build/story/launch evidence packs",
+    entry: "@homenshum/nodekit build/story/launch evidence packs  ·  nodekit journey verify | build-evidence | story-pack",
     gate: true,
     appliesTo: ["any"],
     offers: "DECIDE to LEARN stage artifacts that must chain by digest, and refuse a stage claiming completeness it cannot show.",
@@ -233,7 +219,7 @@ export const SURFACES = Object.freeze([
   },
   {
     id: "agent-run",
-    entry: "@homenshum/nodekit/agent-run",
+    entry: "@homenshum/nodekit/agent-run  ·  nodekit agent run --agent <label> --goal <text>",
     appliesTo: ["any"],
     offers: "Run any subprocess agent under a timeout and capture what it actually did as a replayable record.",
   },

@@ -170,3 +170,13 @@ test("every CLI verb is either indexed or deliberately internal", async () => {
 // this is no longer a ratchet to lower but a floor to hold: any new verb fails until it is either
 // indexed or explicitly declared internal, which is the decision that was previously never made.
 const UNINDEXED_VERB_CEILING = 0;
+
+test("no two surfaces share an id", () => {
+  // Two entries claiming `journey-chain` and two claiming `agent-run` shipped, because the concept
+  // already existed as a package export and a CLI-verb entry was added beside it. `explain --for`
+  // then printed the same name twice with different text, which reads as a bug in the reader rather
+  // than in the index. One concept, one id, and both entry points named in it.
+  const ids = SURFACES.map((surface) => surface.id);
+  const duplicates = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
+  assert.deepEqual(duplicates, [], `duplicate surface id(s): ${duplicates.join(", ")}`);
+});
