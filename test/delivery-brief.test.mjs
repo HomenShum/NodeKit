@@ -108,3 +108,46 @@ test("the brief refuses shapes that would read as complete", () => {
     /delivery.goal must be one of/,
   );
 });
+
+// A contract derived from a product's README and one authored by the product's owner read
+// identically, and the difference decides how much weight a reader gives it. Same distinction the
+// audience gate draws between a stated and an inferred stack.
+test("a derived contract says so, and names what its source did not settle", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { validateSchema } = await import("../src/lib/schema-validation.mjs");
+  const path = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+  for (const name of ["nodeslide", "noderoom"]) {
+    const contract = JSON.parse(await readFile(path.join(root, "cases", `${name}.opportunity-contract.json`), "utf8"));
+    assert.deepEqual(await validateSchema("nodekit.opportunity-contract.v1.schema.json", contract, name), []);
+    assert.ok(contract.derivedFrom?.source, `${name} was derived and must cite its source`);
+    // The load-bearing half: a derived contract claiming its source answered everything is lying by
+    // omission. These two were derived from a README, which does not state open unknowns.
+    assert.ok(
+      contract.derivedFrom.unverifiedFields?.length > 0,
+      `${name} claims its source settled every field, which a README does not`,
+    );
+  }
+
+  // And an authored contract needs no provenance — the absence is what marks it as authored.
+  const salon = JSON.parse(await readFile(path.join(root, "test/fixtures/builder-journey/salon.opportunity-contract.json"), "utf8"));
+  assert.equal(salon.derivedFrom, undefined);
+  assert.deepEqual(await validateSchema("nodekit.opportunity-contract.v1.schema.json", salon, "salon"), []);
+});
+
+test("derivedFrom refuses a shape that would read as provenance without being it", async () => {
+  const { validateSchema } = await import("../src/lib/schema-validation.mjs");
+  const { readFile } = await import("node:fs/promises");
+  const path = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const base = JSON.parse(await readFile(path.join(root, "cases/nodeslide.opportunity-contract.json"), "utf8"));
+
+  const noSource = { ...base, derivedFrom: { method: "mixed" } };
+  assert.ok((await validateSchema("nodekit.opportunity-contract.v1.schema.json", noSource, "x")).length > 0, "derived from nothing is not derived");
+
+  const badMethod = { ...base, derivedFrom: { ...base.derivedFrom, method: "vibes" } };
+  assert.ok((await validateSchema("nodekit.opportunity-contract.v1.schema.json", badMethod, "x")).length > 0);
+});
