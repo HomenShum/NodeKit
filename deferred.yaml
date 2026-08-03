@@ -40,7 +40,16 @@ deferred:
       exists. Writing producers first would have meant deciding the honesty rules while also
       deciding the plumbing, and the rules are the half that was actually asked for.
     deferredAt: "2026-08-02"
-    status: open
+    status: resolved
+    outcome: >-
+      Producer shipped: src/lib/replay-packet-producer.mjs plus `nodekit reproduce`. The design
+      constraint is the deliverable — writing a packet earns PROMPT_REPLAYABLE and nothing more,
+      because recording a prompt proves the instruction survived and nothing else. --command creates
+      a real worktree at the baseline commit and runs there, so BUILD_REPLAYABLE is earned rather
+      than asserted, and a failed replay stays at the lower rung as a recorded observation. The
+      level is never an argument, which was the defect Codex refuted in the trust gate. Still not
+      built and deliberately not faked: PROMPT_BOOK.md, RECREATE.md, and the typed
+      PromptImprovementRecord — those are presentation over this data, not new evidence.
 
   - id: preflight-and-integration-records-unwired
     what: >-

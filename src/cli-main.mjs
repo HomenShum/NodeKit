@@ -1926,6 +1926,29 @@ async function main() {
     if (!verdict.passed) process.exitCode = 1;
     return;
   }
+  if (first === "reproduce") {
+    const { produceReplayPacket, reproduce, writeReplayPacket } = await import("./lib/replay-packet-producer.mjs");
+    const { formatReplayVerdict } = await import("./lib/replay-packet.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const packet = await produceReplayPacket({
+      repoRoot,
+      runId: parsed.options.run ?? `run-${Date.now().toString(36)}`,
+      originalPrompt: parsed.options.prompt ?? "",
+      resolvedPrompt: parsed.options["resolved-prompt"],
+      agent: parsed.options.agent ?? "unknown-agent",
+      model: parsed.options.model ?? "unknown-model",
+    });
+    // --fresh-worktree is not a flag that asserts a fresh worktree; it is the flag that CREATES one
+    // and runs the command there. Without a command there is nothing to replay and the packet
+    // honestly stays at PROMPT_REPLAYABLE.
+    const replayed = parsed.options.command
+      ? await reproduce({ repoRoot, packet, command: parsed.options.command })
+      : { packet, verdict: { passed: true, claimed: packet.reproduction.levelClaimed, earned: packet.reproduction.levelClaimed, faults: [] } };
+    if (parsed.options.out) await writeReplayPacket(repoRoot, replayed.packet, path.dirname(parsed.options.out));
+    console.log(parsed.options.json ? JSON.stringify(replayed.packet, null, 2) : formatReplayVerdict(replayed.verdict));
+    if (!replayed.verdict.passed) process.exitCode = 1;
+    return;
+  }
   if (first === "preflight") {
     const { evaluatePreflight, formatPreflight, readHarnessManifest } = await import("./lib/preflight.mjs");
     const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
