@@ -219,14 +219,30 @@ test("a fresh human or coding agent reaches the compact loop before the detailed
   assert.ok(detailedManual > quickStart, "progressive disclosure must put the compact loop first");
   assert.ok(complexityGate > detailedManual, "the detailed manual must lead to a removal gate");
   assert.ok(reusableRecords > complexityGate, "copyable records must remain available after the gate");
-  assert.match(principles.slice(0, quickStart), /do not turn all 15 principles into a ceremony/u);
   assert.match(principles, /build only the smallest behavior that can earn the next piece of/u);
 
+  // The count was written down three times — this length, the boundary of the last principle, and
+  // the summary sentence — so adding a sixteenth principle meant editing three places or breaking
+  // the suite. It broke the suite. The count is now derived, and what is asserted instead is that
+  // the numbering is contiguous and the prose agrees with it: a document that gains a principle
+  // stays green, and one that gains a principle while still claiming the old total does not.
   const numberedHeadings = [...principles.matchAll(/^## (\d+)\. /gmu)].map((match) => Number(match[1]));
-  assert.deepEqual(numberedHeadings, Array.from({ length: 15 }, (_, index) => index + 1));
+  const principleCount = numberedHeadings.length;
+  assert.ok(principleCount >= 15, `expected the principle set to still be there, found ${principleCount}`);
+  assert.deepEqual(
+    numberedHeadings,
+    Array.from({ length: principleCount }, (_, index) => index + 1),
+    "principle numbering must be contiguous and in order",
+  );
+  assert.match(
+    principles.slice(0, quickStart),
+    new RegExp(`do not turn all ${principleCount} principles into a ceremony`, "u"),
+    `the summary says a different number than the ${principleCount} principles actually present`,
+  );
+
   for (const number of numberedHeadings) {
     const start = principles.indexOf(`## ${number}. `);
-    const end = number < 15
+    const end = number < principleCount
       ? principles.indexOf(`## ${number + 1}. `, start)
       : complexityGate;
     const decisionContract = principles.slice(start, end);

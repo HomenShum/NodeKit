@@ -22,7 +22,13 @@ deferred:
       pre-existing failure in the onboarding docs ordering, unrelated to those changes, and folding
       a docs fix into contract commits would have made both harder to review.
     deferredAt: "2026-08-02"
-    status: open
+    status: resolved
+    outcome: >-
+      Root cause was a duplicated constant, not the docs ordering: the principle count was written
+      in three places (the summary sentence, the expected array length, and the last principle's
+      boundary), so adding a sixteenth principle in fe8f7aa4d required editing three and edited
+      none. The test now derives the count and asserts numbering contiguity plus prose agreement,
+      so gaining a principle stays green and claiming a stale total does not. Suite is 622/622.
 
   - id: replay-packet-producers
     what: >-

@@ -9,7 +9,7 @@ The first two sections are the field card. Start there and build. The remaining 
 the decisions when a case becomes ambiguous. Every principle has a trigger, decision rule, action,
 proof, and exception. A principle that cannot change a decision is decoration.
 
-Use progressive disclosure; do not turn all 15 principles into a ceremony:
+Use progressive disclosure; do not turn all 16 principles into a ceremony:
 
 - **Starting an idea:** read the 90-second method, then fill the Opportunity card.
 - **Making a product or interface decision:** open only the principle whose trigger matches the
