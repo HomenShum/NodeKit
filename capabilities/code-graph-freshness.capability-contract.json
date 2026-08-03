@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "nodekit.capability-contract/v1",
+  "capability": "code-graph-freshness",
+  "declaredAt": "2026-08-03T19:30:00.000Z",
+  "questionItServes": "I am about to change this function — what calls it, what imports it, and what schema or config depends on it?",
+  "whyExistingToolsCannot": "grep finds text matches, not call and import edges, and it cannot tell you which of its hits are in dead code. The graph already models exactly these edges. What neither can do today is tell an agent that the graph's answer is 201 commits out of date, which makes a confident wrong answer the default failure.",
+  "measuredImprovement": {
+    "metric": "commits-between-graph-and-head",
+    "baseline": 201,
+    "predicted": 0,
+    "unit": "commits",
+    "howMeasured": "git rev-list --count <graph.commit>..HEAD, read from .understand-anything/meta.json and the working tree"
+  },
+  "killCondition": [
+    {
+      "metric": "commits-between-graph-and-head",
+      "comparator": "above",
+      "value": 5,
+      "unit": "commits",
+      "rationale": "A graph more than a few commits behind answers questions about code that has since moved. Confidently wrong beats silent — but only if something says so."
+    },
+    {
+      "metric": "stale-answer-rate-percent",
+      "comparator": "above",
+      "value": 10,
+      "unit": "percent",
+      "rationale": "Share of graph answers naming a symbol that no longer exists at HEAD. Above one in ten, an agent learns to distrust the graph and goes back to grep, and the capability is dead whatever its other numbers say."
+    }
+  ],
+  "consumers": [
+    {
+      "consumerId": "nodekit graph query",
+      "kind": "user-facing-question",
+      "reachableFrom": "CLI, and the implementation phase of the launch skill"
+    },
+    {
+      "consumerId": "nodekit graph gaps",
+      "kind": "user-facing-question",
+      "reachableFrom": "CLI"
+    }
+  ],
+  "decoupledFrom": [
+    {
+      "confound": "Whether to adopt an external GraphRAG engine (LightRAG, Graphiti, MS GraphRAG, KAG)",
+      "separable": true,
+      "detail": "The engine question cannot be posed against this baseline. A retrieval engine is judged on recall and multi-hop correctness over a corpus, and this corpus is 201 commits and 1,698 changed files behind HEAD — so any measured difference between engines would be dominated by staleness rather than by retrieval quality. Refresh first, then the comparison means something.",
+      "costToSeparate": "One import run plus a freshness check; both are local and need no engine chosen."
+    }
+  ],
+  "adoptionDecision": {
+    "advertisedPath": "LightRAG or Graphiti as the retrieval layer over NodeKit's corpus",
+    "adopted": "insight-only",
+    "fractionUsed": "0% today",
+    "inheritedCosts": [
+      "LLM-based entity extraction between the source and the structure, when this graph's entities already come from parsed code rather than prose",
+      "a second index that also goes stale, with a second freshness problem nobody is measuring either"
+    ],
+    "rationale": "The insight worth taking is Graphiti's: bi-temporal facts, so a graph can answer what was true then versus what is true now. That is exactly the property whose absence here let 201 commits pass unnoticed. Taking the insight costs a timestamp comparison; taking the dependency costs an extraction pipeline this corpus does not need."
+  }
+}

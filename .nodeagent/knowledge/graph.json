@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "nodekit.knowledge-graph/v1",
+  "graphId": "np",
+  "version": 0,
+  "authority": {
+    "canonicalMutation": "accepted-patch-only",
+    "destructiveDelete": false,
+    "oneAuthoritativeGraph": true,
+    "ownerId": "homen"
+  },
+  "layers": [
+    {
+      "id": "source",
+      "writableThrough": "ingest-proposal"
+    },
+    {
+      "id": "derived",
+      "writableThrough": "graph-patch"
+    },
+    {
+      "id": "working",
+      "writableThrough": "graph-patch"
+    },
+    {
+      "id": "proposal",
+      "writableThrough": "graph-patch"
+    },
+    {
+      "id": "canonical",
+      "writableThrough": "graph-patch"
+    },
+    {
+      "id": "hypothesis",
+      "writableThrough": "graph-patch"
+    }
+  ],
+  "nodes": [],
+  "hyperedges": [],
+  "proposals": [],
+  "actionReceipts": [],
+  "evolutionReceipts": [],
+  "genesis": {
+    "createdAt": "2026-08-03T19:20:14.069Z",
+    "graphId": "np"
+  },
+  "createdAt": "2026-08-03T19:20:14.069Z",
+  "updatedAt": "2026-08-03T19:20:14.069Z",
+  "contentHash": "71ae4506abbde49a0a5cd06e2665d50f520f58870d1291242fbd842a99038fd1"
+}

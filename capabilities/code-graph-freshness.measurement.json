@@ -1,0 +1,5 @@
+{
+  "observedAt": "2026-08-03T19:35:00.000Z",
+  "note": "Read from .understand-anything/meta.json (graph commit c701819f0, 2026-07-21) against HEAD 73cd772e0 (2026-08-03). 1,698 files changed between them, 90 of them in src/lib. stale-answer-rate-percent is deliberately absent: nobody has run graph queries against HEAD and counted the misses, and guessing it would be the vacuous pass this whole gate exists to refuse.",
+  "metrics": { "commits-between-graph-and-head": 201 }
+}
