@@ -24,7 +24,7 @@ function fail(message) {
 
 const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 
-export function parseReviewContext(record) {
+export function parseReviewContext(record, registry = null) {
   if (!record || typeof record !== "object") fail("review context must be an object");
   const walk = (node, path = "") => {
     if (!node || typeof node !== "object") return;
@@ -40,18 +40,22 @@ export function parseReviewContext(record) {
   if (!Array.isArray(record.parties) || record.parties.length === 0) fail("needs parties");
 
   const byRole = new Map();
+  const unregistered = [];
   for (const [i, party] of record.parties.entries()) {
     const at = `parties[${i}]`;
     if (!REVIEW_ROLES.includes(party?.role)) fail(`${at} role must be one of ${REVIEW_ROLES.join(", ")}`);
     if (!isNonEmptyString(party.principal)) fail(`${at} needs a principal — who, concretely`);
     if (byRole.has(party.role)) fail(`${at} repeats role ${party.role}`);
-    // "Team A" and "Team  A" are the same party; internal whitespace must not read as two.
-    byRole.set(party.role, party.principal.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim());
+    // Normalising a display name is not identity — it is string matching wearing a better coat.
+    // With a registry, two names resolve to one canonical principal or honestly to neither.
+    const canonical = registry ? registry.resolve(party.principal) : null;
+    byRole.set(party.role, canonical ?? party.principal.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim());
+    if (registry && canonical === null) unregistered.push(`${party.role} "${party.principal}"`);
   }
   for (const role of ["producer", "evaluator"]) {
     if (!byRole.has(role)) fail(`no ${role} named; independence cannot be derived from an incomplete party list`);
   }
-  return { record, byRole };
+  return { record, byRole, unregistered };
 }
 
 /**
@@ -60,8 +64,13 @@ export function parseReviewContext(record) {
  *   process   — a different evaluator, but the operator is the producer (the YC-S26 gap)
  *   party     — evaluator, approver and operator are all distinct from the producer
  */
-export function deriveIndependence(record) {
-  const { byRole } = parseReviewContext(record);
+export function deriveIndependence(record, registry = null) {
+  const { byRole, unregistered } = parseReviewContext(record, registry);
+  // Unknown parties cannot establish independence. Without a registry this stays a name comparison,
+  // which is the pre-existing behaviour and is stated rather than silently relied on.
+  if (registry && unregistered.length > 0) {
+    return { level: "none", reason: `unregistered principal(s): ${unregistered.join(", ")}; independence cannot be derived from names nobody resolved` };
+  }
   const producer = byRole.get("producer");
   const evaluator = byRole.get("evaluator");
   const approver = byRole.get("approver");
@@ -87,7 +96,7 @@ export function deriveIndependence(record) {
   return { level: "party", reason: "producer, evaluator, approver and operator are distinct principals" };
 }
 
-export function requireIndependence(record, minimum = "party") {
+export function requireIndependence(record, minimum = "party", registry = null) {
   const order = ["none", "process", "party"];
   // indexOf("PARTY") is -1, which made every level pass the comparison. A policy argument the
   // caller got wrong must fail closed, not disable the check.
@@ -96,7 +105,7 @@ export function requireIndependence(record, minimum = "party") {
     error.code = "INDEPENDENCE_MINIMUM_UNKNOWN";
     throw error;
   }
-  const actual = deriveIndependence(record);
+  const actual = deriveIndependence(record, registry);
   if (order.indexOf(actual.level) < order.indexOf(minimum)) {
     const error = new Error(`independence ${actual.level} is below the required ${minimum}: ${actual.reason}`);
     error.code = "INDEPENDENCE_INSUFFICIENT";

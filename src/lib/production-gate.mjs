@@ -58,7 +58,23 @@ function fail(message) {
   throw error;
 }
 
-export function parseProductionReadiness(record) {
+function assertIndependentAttestor(registry, who, at, verb) {
+  if (registry) {
+    const resolved = registry.resolve(who);
+    if (resolved === null) fail(`${at} is ${verb} "${who}", who is not a registered principal; an unknown attestor cannot be shown independent`);
+    if (registry.producerIds?.includes(resolved)) fail(`${at} is ${verb} "${who}", which resolves to ${resolved} — the party that produced the application`);
+    return;
+  }
+  if (isForbiddenAttestor(who)) {
+    fail(verb === "waived by"
+      ? `${at} is waived by "${who}"; the party that produced the application may not waive its own check`
+      : `${at} is attested by "${who}"; the party that produced the application may not certify it`);
+  }
+}
+
+export function parseProductionReadiness(record, registry = null) {
+  // With a registry, "who attested" is an identity question and the denylist stops being the
+  // mechanism — it remains only as the fallback for callers that have not built one yet.
   if (!record || typeof record !== "object") fail("production readiness must be an object");
   if (!isNonEmptyString(record.application)) fail("needs an application");
   if (!isNonEmptyString(record.revision)) fail("needs the exact revision being certified");
@@ -76,9 +92,7 @@ export function parseProductionReadiness(record) {
     if (check.outcome === "PASS" || check.outcome === "FAIL") {
       if (!isNonEmptyString(check.evidenceRef)) fail(`${at} is ${check.outcome} with no evidenceRef`);
       if (!isNonEmptyString(check.attestedBy)) fail(`${at} is ${check.outcome} with no attestedBy`);
-      if (isForbiddenAttestor(check.attestedBy)) {
-        fail(`${at} is attested by "${check.attestedBy}"; the party that produced the application may not certify it`);
-      }
+      assertIndependentAttestor(registry, check.attestedBy, at, "attested by");
     }
     if (check.outcome === "NOT_APPLICABLE") {
       if (!WAIVABLE.includes(check.id)) fail(`${at}: ${check.id} is not waivable — it applies to every application holding user data`);
@@ -86,9 +100,7 @@ export function parseProductionReadiness(record) {
         fail(`${at} is NOT_APPLICABLE without verifiedAbsentBy; a waiver requires someone who looked for the surface and found none`);
       }
       // A waiver is an attestation. Exempting it from the attestor rule let the builder waive itself.
-      if (isForbiddenAttestor(check.verifiedAbsentBy)) {
-        fail(`${at} is waived by "${check.verifiedAbsentBy}"; the party that produced the application may not waive its own check`);
-      }
+      assertIndependentAttestor(registry, check.verifiedAbsentBy, at, "waived by");
     }
   }
   return record;
@@ -98,13 +110,13 @@ export function parseProductionReadiness(record) {
  * Absence is the default and it blocks. A record that simply omits TENANT_ISOLATION is not a record
  * of an application without tenants — it is a record of a question nobody asked.
  */
-export function evaluateProductionReadiness(record) {
+export function evaluateProductionReadiness(record, registry = null) {
   // Codex refuted the first version: parse and evaluate were separate exports, and evaluate assumed
   // parse had run. Seven checks with outcome "BOGUS" returned releasable:true, because the loop only
   // blocked absent/NOT_RUN/FAIL and let everything else fall through. A release decision that trusts
   // its caller to have validated the input is not a gate. It validates its own input now.
   try {
-    parseProductionReadiness(record);
+    parseProductionReadiness(record, registry);
   } catch (error) {
     return { releasable: false, blockers: [`record is not a valid production readiness record: ${error.message}`], checked: PRODUCTION_CHECKS.length, passed: 0, waived: 0 };
   }
