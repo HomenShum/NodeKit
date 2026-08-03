@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 114,
     "modules": 79,
-    "tests": 86
+    "tests": 87
   },
   "architecture": [
     {
@@ -114,6 +114,7 @@
       "evidence:capture",
       "evolution:docs",
       "evolution:verify",
+      "gate:trust-surface",
       "journey:verify",
       "knowledge:compare",
       "motion:compare",
@@ -420,6 +421,7 @@
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
     "test-files.test.mjs",
+    "ui-gates-reachable.test.mjs",
     "ui-lexicon.test.mjs",
     "understand-anything.test.mjs",
     "workspace-reference-index.test.mjs"

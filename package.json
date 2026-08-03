@@ -243,7 +243,8 @@
     "recall": "node scripts/recall.mjs",
     "verify:evidence": "node scripts/verify-evidence-drift.mjs",
     "test:slow": "node scripts/test-files.mjs slow",
-    "test:all": "node scripts/test-files.mjs all && npm run test:component"
+    "test:all": "node scripts/test-files.mjs all && npm run test:component",
+    "gate:trust-surface": "node scripts/ui-gates/trust-surface-selftest.mjs"
   },
   "engines": {
     "node": ">=20"
