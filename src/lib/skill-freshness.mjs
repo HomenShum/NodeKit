@@ -121,10 +121,14 @@ export function formatSkillFreshness(verdict) {
     case "no-skills":
       return "SKILLS: none projected into this project — nothing to compare.";
     case "unrecorded":
-      return `SKILLS: ${verdict.detail}. Re-run \`nodekit create\` into this directory, or accept that these copies are of unknown vintage.`;
+      // The remedy names `nodekit skills sync` and not `nodekit create`, because create refuses a
+      // non-empty directory — advising it here would have named the one command that cannot run on
+      // the only projects that ever see this message.
+      return `SKILLS: ${verdict.detail}. Run \`nodekit skills sync\` to refresh them and record their provenance.`;
     case "skewed":
       return `SKILLS: copied from NodeKit ${verdict.versionSkew.copiedFrom}, but ${verdict.versionSkew.installed} is installed — `
-        + "the upstream skills have moved on and this project is still reading the old instructions."
+        + "the upstream skills have moved on and this project is still reading the old instructions. "
+        + "Run `nodekit skills sync` to take the new ones."
         + (verdict.edited.length > 0 ? ` Also locally edited: ${verdict.edited.join(", ")}.` : "");
     case "edited":
       return `SKILLS: ${verdict.checked} checked; locally edited: ${[...verdict.edited, ...verdict.unrecorded].join(", ")}. `

@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { chmod, cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -159,6 +160,47 @@ async function projectCodingAgentSkills(target, values, { collisions = [], missi
     );
   }
   return collisions;
+}
+
+/**
+ * Refresh an existing project's projected skills to the installed NodeKit's, and rewrite the
+ * provenance record.
+ *
+ * This exists because the remedy shipped alongside the freshness check did not work. The message
+ * said "re-run `nodekit create`", and `create` refuses a non-empty directory — so it advised the one
+ * command that cannot run on the only projects that would ever see the advice. `adopt` does not
+ * help either: it projects skills with missingOnly, so an existing stale SKILL.md is skipped
+ * precisely because it exists. There was no upgrade path at all, which made every generated project
+ * permanently frozen at its creation date.
+ *
+ * Overwrites deliberately, and says which files it changed. A local edit to a projected skill is
+ * legitimate, so the caller is told what was replaced rather than discovering it later.
+ */
+export async function syncCodingAgentSkills(target) {
+  const before = {};
+  for (const agentRoot of [".claude", ".codex"]) {
+    for (const skillName of projectedSkillNames) {
+      const file = path.join(target, agentRoot, "skills", skillName, "SKILL.md");
+      try { before[`${agentRoot}/${skillName}`] = createHash("sha256").update(await readFile(file, "utf8")).digest("hex"); }
+      catch { before[`${agentRoot}/${skillName}`] = null; }
+    }
+  }
+  // Skills carry no template tokens, so there is nothing project-specific to substitute.
+  await projectCodingAgentSkills(target, {});
+
+  const changed = [];
+  const added = [];
+  for (const agentRoot of [".claude", ".codex"]) {
+    for (const skillName of projectedSkillNames) {
+      const key = `${agentRoot}/${skillName}`;
+      const file = path.join(target, agentRoot, "skills", skillName, "SKILL.md");
+      let after = null;
+      try { after = createHash("sha256").update(await readFile(file, "utf8")).digest("hex"); } catch { /* unreadable */ }
+      if (before[key] === null && after) added.push(key);
+      else if (after && before[key] && after !== before[key]) changed.push(key);
+    }
+  }
+  return { changed: changed.sort(), added: added.sort(), version: await nodeKitPackageVersion() };
 }
 
 function run(command, args, cwd) {

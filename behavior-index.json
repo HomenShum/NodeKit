@@ -156,7 +156,7 @@
         {
           "file": "src/cli-main.mjs",
           "symbol": "runTour",
-          "line": 687
+          "line": 688
         }
       ],
       "supporting": [
@@ -541,7 +541,7 @@
           {
             "file": "src/lib/scaffold.mjs",
             "symbol": "createProject",
-            "line": 268
+            "line": 310
           }
         ],
         "namedSourceFiles": [],
@@ -1083,7 +1083,7 @@
           {
             "file": "src/cli-main.mjs",
             "symbol": "runTour",
-            "line": 688
+            "line": 689
           }
         ],
         "namedSourceFiles": [

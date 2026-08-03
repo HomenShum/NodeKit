@@ -113,3 +113,28 @@ test("an unreadable installed version does not fabricate a skew verdict", async 
   assert.equal(verdict.versionSkew, null);
   assert.equal(verdict.status, "current");
 });
+
+// The remedy needs its own check, because the first remedy shipped here was wrong: the message said
+// to re-run `nodekit create`, and create refuses a non-empty directory — it named the one command
+// that cannot run on the only projects that would ever read the advice. `adopt` was no help either,
+// projecting skills with missingOnly so an existing stale copy is skipped precisely because it
+// exists. There was no upgrade path at all, and the check would have reported drift forever.
+test("skills sync actually refreshes a stale copy and records provenance", async () => {
+  const { syncCodingAgentSkills } = await import("../src/lib/scaffold.mjs");
+  const root = await mkdtemp(path.join(tmpdir(), "skillsync-"));
+  const stale = path.join(root, ".claude", "skills", "nodekit-launch");
+  await mkdir(stale, { recursive: true });
+  await writeFile(path.join(stale, "SKILL.md"), "# an old copy nobody updated\n", "utf8");
+
+  const result = await syncCodingAgentSkills(root);
+
+  assert.ok(result.changed.includes(".claude/nodekit-launch"), `expected the stale copy to be replaced, got ${JSON.stringify(result)}`);
+  // The project had only one skill; the other two are added rather than replaced, and the
+  // distinction is reported so a caller can see what was overwritten versus what was new.
+  assert.ok(result.added.includes(".claude/nodekit-qa"));
+
+  // And the whole point: the freshness check now reads current against the installed version.
+  const verdict = await evaluateSkillFreshness(root, result.version);
+  assert.equal(verdict.status, "current");
+  assert.deepEqual(verdict.edited, []);
+});

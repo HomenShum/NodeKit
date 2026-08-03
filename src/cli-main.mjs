@@ -182,6 +182,7 @@ Usage:
   nodekit journey verify [--repo-root <path>] [--json]
   nodekit journey build-evidence --contract <opportunity-contract.json>
       [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
+  nodekit skills sync [--repo-root <path>] [--json]
   nodekit sessions check --contract <session-contract.json> [--repo-root <path>] [--json]
   nodekit capability declare --out <capability-contract.json> --capability <slug> [--json]
   nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json> [--json]
@@ -2613,6 +2614,20 @@ async function main() {
   }
   if (first === "harness" && second === "promote") {
     await runSkillsPromote(parsed);
+    return;
+  }
+  if (first === "skills" && second === "sync") {
+    const { syncCodingAgentSkills } = await import("./lib/scaffold.mjs");
+    const root = path.resolve(parsed.options["repo-root"] ?? parsed.positional[2] ?? ".");
+    const result = await syncCodingAgentSkills(root);
+    printStructured(result, parsed, (value) => {
+      const lines = [`SKILLS SYNCED to NodeKit ${value.version}`];
+      if (value.added.length > 0) lines.push(`  added:   ${value.added.join(", ")}`);
+      if (value.changed.length > 0) lines.push(`  replaced: ${value.changed.join(", ")}`);
+      if (value.added.length === 0 && value.changed.length === 0) lines.push("  nothing changed; the copies already matched.");
+      else lines.push("  A local edit to a projected skill is legitimate — this says what was overwritten so it is not discovered later.");
+      return lines.join(String.fromCharCode(10));
+    });
     return;
   }
   if (first === "skills" && second === "propose") {
