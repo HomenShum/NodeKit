@@ -70,6 +70,13 @@ export const SURFACES = Object.freeze([
     offers: "Profile models against a baseline and compile a routing matrix from the result, with `canary` checking a routing receipt before it takes effect. `diagnose` explains why a route was chosen rather than only which.",
   },
   {
+    id: "production-agent-gate",
+    entry: "nodekit production-agent declare --application <slug> --out <file>  ·  nodekit production-agent check --contract <file>",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Refuse to ship an agent loop that has not answered the senior-engineer questions: which actions suspend for a human, what happens when a tool call fails twice (interception, exponential backoff, a NAMED fallback), what breaks a runaway loop, what trips the spend fuse, which three golden metrics gate the release (task-completion-rate, tool-call-error-rate, p99-latency-ms — all three by name), and what rolls a canary back automatically. Declared before the build, checked before deploy. docs/PRODUCTION_AGENT_GATE.md.",
+  },
+  {
     id: "audience-gate",
     entry: "nodekit audience check",
     gate: true,

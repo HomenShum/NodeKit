@@ -71,6 +71,20 @@ user asked — is the worst outcome to ship and is invisible to a purely numeric
 explicitly — `dimensionTested: concurrent` next to a claim measured concurrently. A claim must not
 travel to an axis nobody probed.
 
+**Before shipping any agent loop — the production-agent gate**
+
+`nodekit production-agent declare --application <slug> --out <production-agent.json>`, filled in before
+the loop is built; `nodekit production-agent check --contract <file>` before deploy. This is the
+senior-agent-engineer contract (see [the PRODUCTION-AGENT gate](../../../../docs/PRODUCTION_AGENT_GATE.md)):
+the quantified business target, the HITL tier for every action (high-risk suspends for approval and
+resumes after it), the fault-tolerance trio (interception, exponential backoff, a NAMED fallback),
+a context strategy with a token budget, the three golden metrics by name (task-completion-rate,
+tool-call-error-rate, p99-latency-ms), loop breaker, circuit breaker, cost fuse, judge-backed
+regression, an automatic-rollback canary, a pinned model with a migration eval, and a propagated
+trace id. The check refuses an unfilled template, a high-risk action that runs alone, and a golden
+metric swapped for a flattering substitute. The demo-to-production gap is exactly this list, and a
+responsibility living in chat scrollback is one the driven agent will not carry.
+
 **Before making any library load-bearing**
 
 Write `integrations/<lib>.yaml`: resolved version, docs fetched today, deprecations found, and what

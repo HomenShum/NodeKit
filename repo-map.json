@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 117,
-    "modules": 95,
-    "tests": 102
+    "schemas": 118,
+    "modules": 96,
+    "tests": 103
   },
   "architecture": [
     {
@@ -73,6 +73,7 @@
       "motion",
       "preflight",
       "production",
+      "production-agent",
       "proof",
       "reference",
       "registry",
@@ -226,6 +227,7 @@
     "nodekit.postgres-conformance.v2.schema.json",
     "nodekit.preview-verdict.v1.schema.json",
     "nodekit.product-design-contract.v1.schema.json",
+    "nodekit.production-agent.v1.schema.json",
     "nodekit.promotion-readiness-receipt.v1.schema.json",
     "nodekit.promotion-receipt.v1.schema.json",
     "nodekit.proofloop-ease-verification.v1.schema.json",
@@ -331,6 +333,7 @@
     "preflight.mjs",
     "presentation-pipeline.mjs",
     "principal-identity.mjs",
+    "production-agent.mjs",
     "production-gate.mjs",
     "protected-browser-evidence.mjs",
     "receipt-bindings.mjs",
@@ -436,6 +439,7 @@
     "preflight.test.mjs",
     "presentation-pipeline.test.mjs",
     "principal-identity.test.mjs",
+    "production-agent.test.mjs",
     "propose-evolution-cli.test.mjs",
     "protected-evaluator-image-binding.test.mjs",
     "public-api.test.mjs",

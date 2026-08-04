@@ -199,6 +199,8 @@ Usage:
   nodekit sessions check --contract <session-contract.json> [--repo-root <path>] [--json]
   nodekit capability declare --out <capability-contract.json> --capability <slug> [--json]
   nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json> [--json]
+  nodekit production-agent declare --out <production-agent.json> --application <slug> [--json]
+  nodekit production-agent check --contract <production-agent.json> [--json]
   nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
       --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
@@ -498,6 +500,52 @@ async function runCapability(parsed, mode) {
   } catch (error) {
     if (error instanceof CapabilityContractRefusal) {
       console.error(`CAPABILITY CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runProductionAgent(parsed, mode) {
+  const { parseProductionAgentContract, productionAgentTemplate, formatProductionAgentVerdict, ProductionAgentRefusal, PRODUCTION_AGENT_SCHEMA } = await import("./lib/production-agent.mjs");
+
+  if (mode === "declare") {
+    const application = parsed.options.application;
+    const out = parsed.options.out;
+    if (typeof application !== "string" || typeof out !== "string") {
+      console.error("usage: nodekit production-agent declare --application <slug> --out <production-agent.json>");
+      process.exitCode = 2;
+      return;
+    }
+    const template = productionAgentTemplate(application, new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"));
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), `${JSON.stringify(template, null, 2)}\n`, "utf8");
+    console.log(`PRODUCTION-AGENT CONTRACT declared: ${out}`);
+    console.log("  Fill every REPLACE before the agent loop ships. `production-agent check` refuses an unfilled form.");
+    return;
+  }
+
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error("usage: nodekit production-agent check --contract <production-agent.json>");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    const errors = await validateNodekitSchema(PRODUCTION_AGENT_SCHEMA, contract, contract.application ?? "production-agent");
+    if (errors.length > 0) throw new ProductionAgentRefusal(errors);
+    parseProductionAgentContract(contract);
+    printStructured(contract, parsed, formatProductionAgentVerdict);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error(`cannot parse the contract at ${contractPath}: ${error.message}`);
+      process.exitCode = 2;
+      return;
+    }
+    if (error?.name === "ProductionAgentRefusal") {
+      console.error(`PRODUCTION-AGENT CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
       process.exitCode = 1;
       return;
     }
@@ -2389,6 +2437,14 @@ async function main() {
   }
   if (first === "capability" && (second === "settle" || second === "declare")) {
     await runCapability(parsed, second);
+    return;
+  }
+  // "production-agent", not "production" — `nodekit production` already belongs to the seven-check
+  // data-safety gate above, and a second meaning grafted onto the same word would be dispatch-order
+  // roulette. Discovered live: the first name chosen here WAS "production", and the existing
+  // handler swallowed every `production check` call.
+  if (first === "production-agent" && (second === "declare" || second === "check")) {
+    await runProductionAgent(parsed, second);
     return;
   }
   if (first === "journey" && second === "story-pack") {
