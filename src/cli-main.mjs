@@ -201,6 +201,8 @@ Usage:
   nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json> [--json]
   nodekit production-agent declare --out <production-agent.json> --application <slug> [--json]
   nodekit production-agent check --contract <production-agent.json> [--json]
+  nodekit workspace index [--repo-root <path>] [--json]
+  nodekit workspace check [--repo-root <path>] [--json]
   nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
       --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
@@ -551,6 +553,29 @@ async function runProductionAgent(parsed, mode) {
     }
     throw error;
   }
+}
+
+async function runWorkspace(parsed, mode) {
+  const { buildWorkspaceIndex, renderWorkspaceMd, checkWorkspace, WORKSPACE_MD, WORKSPACE_JSON } = await import("./lib/workspace-index.mjs");
+  const root = path.resolve(typeof parsed.options["repo-root"] === "string" ? parsed.options["repo-root"] : ".");
+
+  if (mode === "index") {
+    const index = buildWorkspaceIndex(root);
+    await writeFile(path.join(root, WORKSPACE_JSON), `${JSON.stringify(index, null, 2)}\n`, "utf8");
+    await writeFile(path.join(root, WORKSPACE_MD), renderWorkspaceMd(index), "utf8");
+    const counts = Object.entries(index.branches).map(([k, l]) => `${k} ${l.length}`).join(" · ");
+    console.log(`WORKSPACE INDEX: ${counts}${index.unfiled.length ? ` · UNFILED ${index.unfiled.length}` : ""} (wrote ${WORKSPACE_MD} + ${WORKSPACE_JSON})`);
+    if (index.unfiled.length) process.exitCode = 1;
+    return;
+  }
+
+  const refusals = checkWorkspace(root);
+  if (refusals.length > 0) {
+    console.error(`WORKSPACE CHECK REFUSED\n${refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log("WORKSPACE CHECK OK — the committed map still tells the truth");
 }
 
 async function runJourneyStoryPack(parsed) {
@@ -2445,6 +2470,10 @@ async function main() {
   // handler swallowed every `production check` call.
   if (first === "production-agent" && (second === "declare" || second === "check")) {
     await runProductionAgent(parsed, second);
+    return;
+  }
+  if (first === "workspace" && (second === "index" || second === "check")) {
+    await runWorkspace(parsed, second);
     return;
   }
   if (first === "journey" && second === "story-pack") {

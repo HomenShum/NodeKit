@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 118,
-    "modules": 96,
-    "tests": 103
+    "schemas": 119,
+    "modules": 97,
+    "tests": 104
   },
   "architecture": [
     {
@@ -85,7 +85,8 @@
       "sessions",
       "skills",
       "tour",
-      "trust"
+      "trust",
+      "workspace"
     ],
     "lifecycleNote": "dev, demo, check, and proof are lifecycle commands declared per application in nodekit.yaml. The platform repository declares only a subset; a generated application declares all of them."
   },
@@ -265,7 +266,8 @@
     "nodekit.submission-manifest.v1.schema.json",
     "nodekit.tournament.v1.schema.json",
     "nodekit.visual-review-inventory.v1.schema.json",
-    "nodekit.workspace-reference-index.v1.schema.json"
+    "nodekit.workspace-reference-index.v1.schema.json",
+    "nodekit.workspace.v1.schema.json"
   ],
   "modules": [
     "agent-definition.mjs",
@@ -363,6 +365,7 @@
     "ui-lexicon.mjs",
     "understand-anything.mjs",
     "working-state.mjs",
+    "workspace-index.mjs",
     "workspace-reference-index.mjs"
   ],
   "tests": [
@@ -468,6 +471,7 @@
     "ui-gates-reachable.test.mjs",
     "ui-lexicon.test.mjs",
     "understand-anything.test.mjs",
+    "workspace-index.test.mjs",
     "workspace-reference-index.test.mjs"
   ]
 }

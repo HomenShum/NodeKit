@@ -1,0 +1,606 @@
+{
+  "schemaVersion": "nodekit.workspace/v1",
+  "generatedAt": "2026-08-04T21:47:54.103Z",
+  "branches": {
+    "record": [
+      {
+        "path": "atlas/benchmarks/relevance-v0.json",
+        "kind": "nodekit.atlas-relevance/v0"
+      },
+      {
+        "path": "atlas/benchmarks/relevance-v1.json",
+        "kind": "nodekit.atlas-relevance/v1"
+      },
+      {
+        "path": "atlas/references/absence-vs-zero.observations.json",
+        "kind": "nodekit.reference-observation/v1"
+      },
+      {
+        "path": "atlas/references/absence-vs-zero.rule.json",
+        "kind": "nodekit.design-rule/v1"
+      },
+      {
+        "path": "atlas/references/absence-vs-zero.trial1-arm-a.score-receipt.json",
+        "kind": "nodekit.score-receipt/v1"
+      },
+      {
+        "path": "atlas/references/note-surface.capture-always-armed.rule.json",
+        "kind": "nodekit.design-rule/v1"
+      },
+      {
+        "path": "atlas/references/note-surface.observations.json",
+        "kind": "nodekit.reference-observation/v1"
+      },
+      {
+        "path": "atlas/references/note-surface.single-accent-inline.rule.json",
+        "kind": "nodekit.design-rule/v1"
+      },
+      {
+        "path": "atlas/references/note-surface.stream-not-chrome.rule.json",
+        "kind": "nodekit.design-rule/v1"
+      },
+      {
+        "path": "benchmarks/research-verdict-v1.json",
+        "kind": "nodekit.research-verdict-corpus/v1"
+      },
+      {
+        "path": "capabilities/code-graph-freshness.capability-contract.json",
+        "kind": "nodekit.capability-contract/v1"
+      },
+      {
+        "path": "cases/node-platform.build-evidence-pack.json",
+        "kind": "nodekit.build-evidence-pack/v1"
+      },
+      {
+        "path": "changes/nodekit-factory-p1/presentation/change-card.transport-proof.json",
+        "kind": "nodekit.nodeslide-external-proof/v1"
+      },
+      {
+        "path": "changes/nodekit-factory-p1/story/architecture-diff.json",
+        "kind": "nodekit.architecture-diff/v1"
+      },
+      {
+        "path": "changes/nodekit-factory-p1/story/claims.json",
+        "kind": "nodekit.presentation-claims/v1"
+      },
+      {
+        "path": "changes/nodekit-factory-p1/story/evidence-index.json",
+        "kind": "nodekit.evidence-index/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/campaign/receipts/distribution-receipt.json",
+        "kind": "nodekit.distribution-receipt/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/presentation/proof/pdf-validation.json",
+        "kind": "nodekit.presentation-pdf-proof/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/proof/publication-preflight.json",
+        "kind": "nodekit.publication-preflight/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/story/claims.json",
+        "kind": "nodekit.claim-ledger/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/story/evidence-index.json",
+        "kind": "nodekit.evidence-index/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/video/founder-quest-walkthrough.json",
+        "kind": "nodekit.campaign-video/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/video/proof/founder-quest-capture-manifest.json",
+        "kind": "nodekit.video-capture-receipt/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/video/proof/founder-quest-media-visual-qa.json",
+        "kind": "nodekit.media-visual-qa/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/video/proof/founder-quest-video-receipt.json",
+        "kind": "nodekit.video-proof-receipt/v1"
+      },
+      {
+        "path": "evals/ease/lower-cost-model-evidence.json",
+        "kind": "nodekit.lower-cost-model-evidence/v1"
+      },
+      {
+        "path": "evidence/autonomous-governance/after/live-io.json",
+        "kind": "nodekit.live-io-evidence/v1"
+      },
+      {
+        "path": "evidence/autonomous-governance/after/rollback-verification.json",
+        "kind": "nodekit.rollback-verification/v1"
+      },
+      {
+        "path": "evidence/autonomous-governance/before/live-io.json",
+        "kind": "nodekit.live-io-evidence/v1"
+      },
+      {
+        "path": "evidence/native-session-deferred-review/after/live-io.json",
+        "kind": "nodekit.live-io-evidence/v1"
+      },
+      {
+        "path": "evidence/native-session-deferred-review/after/rollback-verification.json",
+        "kind": "nodekit.rollback-verification/v1"
+      },
+      {
+        "path": "evidence/native-session-deferred-review/before/live-io.json",
+        "kind": "nodekit.live-io-evidence/v1"
+      },
+      {
+        "path": "evolution/assumptions/asm-caseflow-idempotency-can-be-inferred.json",
+        "kind": "nodekit.assumption/v1"
+      },
+      {
+        "path": "evolution/assumptions/asm-domain-preset-harmless.json",
+        "kind": "nodekit.assumption/v1"
+      },
+      {
+        "path": "evolution/assumptions/asm-evidence-filename-sufficient.json",
+        "kind": "nodekit.assumption/v1"
+      },
+      {
+        "path": "evolution/assumptions/asm-postgres-ddl-is-adapter.json",
+        "kind": "nodekit.assumption/v1"
+      },
+      {
+        "path": "evolution/assumptions/asm-strong-model-infers-topology.json",
+        "kind": "nodekit.assumption/v1"
+      },
+      {
+        "path": "evolution/assumptions/asm-structural-browser-proof-sufficient.json",
+        "kind": "nodekit.assumption/v1"
+      },
+      {
+        "path": "evolution/invariants/",
+        "kind": "nodekit.invariant-claim/v1",
+        "count": 24
+      },
+      {
+        "path": "proof/ease/",
+        "kind": "nodekit.developer-timing-run/v1",
+        "count": 617
+      },
+      {
+        "path": "proof/ease/",
+        "kind": "nodekit.browser-certification/v1",
+        "count": 342
+      },
+      {
+        "path": "proof/ease/",
+        "kind": "nodekit.screenshot-proof/v1",
+        "count": 58068
+      },
+      {
+        "path": "proof/ease/candidates/",
+        "kind": "nodekit.engineering-check-receipt/v1",
+        "count": 36
+      },
+      {
+        "path": "proof/ease/candidates/5cc61578b3c1bd5b5c8195b83347b91f8b83242b/0ced0adf6e0f719be9a5fabefd69754a79102f39b6b6a54b20daeb60ceba7c0b/backend/postgres-conformance.json",
+        "kind": "nodekit.postgres-conformance/v1"
+      },
+      {
+        "path": "proof/ease/candidates/5cc61578b3c1bd5b5c8195b83347b91f8b83242b/0ced0adf6e0f719be9a5fabefd69754a79102f39b6b6a54b20daeb60ceba7c0b/package/demo-receipt.json",
+        "kind": "nodekit.receipt/v1"
+      },
+      {
+        "path": "proof/ease/candidates/5cc61578b3c1bd5b5c8195b83347b91f8b83242b/0ced0adf6e0f719be9a5fabefd69754a79102f39b6b6a54b20daeb60ceba7c0b/package/eval-receipt.json",
+        "kind": "nodekit.eval-receipt/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/browser-contract.json",
+        "kind": "nodekit.browser-contract/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/distribution-clean.json",
+        "kind": "nodekit.local-distribution-gate/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/engineering-health-verdict.json",
+        "kind": "nodekit.engineering-health-verdict/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/convex-runtime-proof.json",
+        "kind": "nodekit.installed-convex-runtime-proof/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/eval-receipt.json",
+        "kind": "nodekit.eval-receipt/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-receipt-bindings.json",
+        "kind": "nodekit.generated-receipt-bindings/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/package-install-verdict.json",
+        "kind": "nodekit.package-install-proof/v1"
+      },
+      {
+        "path": "proof/ease/candidates/f3471c7fd31b4839ffeb9c9f43bd0d4ab7ef6bfc/e4e6a8849115fc70203e1d56228a5bdc3cd44af92ff20f87626657ff4d017d0f/package/demo-receipt.json",
+        "kind": "nodekit.receipt/v1"
+      },
+      {
+        "path": "proof/ease/candidates/f3471c7fd31b4839ffeb9c9f43bd0d4ab7ef6bfc/e4e6a8849115fc70203e1d56228a5bdc3cd44af92ff20f87626657ff4d017d0f/package/eval-receipt.json",
+        "kind": "nodekit.eval-receipt/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-runs-0cc282c-verdict.json",
+        "kind": "nodekit.developer-timing-verdict/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-runs-8e72750-verdict.json",
+        "kind": "nodekit.developer-timing-verdict/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-runs-e398398-verdict.json",
+        "kind": "nodekit.developer-timing-verdict/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-runs-ebb43b6-verdict.json",
+        "kind": "nodekit.developer-timing-verdict/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-runs-verdict.json",
+        "kind": "nodekit.developer-timing-verdict/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-runs.template.json",
+        "kind": "nodekit.developer-timing-runs/v1"
+      },
+      {
+        "path": "proof/ease/developer-timing-verdict.json",
+        "kind": "nodekit.developer-timing-verdict/v1"
+      },
+      {
+        "path": "proof/ease/fresh-agent-verdict-e398398.json",
+        "kind": "nodekit.fresh-agent-verdict/v1"
+      },
+      {
+        "path": "proof/ease/fresh-agent-verdict.json",
+        "kind": "nodekit.fresh-agent-verdict/v1"
+      },
+      {
+        "path": "proof/ease/fresh-users-verdict.json",
+        "kind": "nodekit.fresh-user-verdict/v1"
+      },
+      {
+        "path": "proof/ease/fresh-users.template.json",
+        "kind": "nodekit.fresh-user-study/v1"
+      },
+      {
+        "path": "proof/engineering-health-failure.json",
+        "kind": "nodekit.engineering-health-failure/v1"
+      },
+      {
+        "path": "proof/engineering-health-verdict.json",
+        "kind": "nodekit.engineering-health-verdict/v1"
+      },
+      {
+        "path": "proof/local-closure-e398398.json",
+        "kind": "nodekit.local-closure/v1"
+      },
+      {
+        "path": "proof/nodekit-figured-out-presentation.json",
+        "kind": "nodekit.presentation-proof/v1"
+      },
+      {
+        "path": "proof/package-install-verdict-e398398.json",
+        "kind": "nodekit.package-install-proof/v1"
+      },
+      {
+        "path": "proof/package-install-verdict.json",
+        "kind": "nodekit.package-install-proof/v1"
+      },
+      {
+        "path": "proof/postgres-conformance.json",
+        "kind": "nodekit.postgres-conformance/v1"
+      },
+      {
+        "path": "proof/publication-approval.template.json",
+        "kind": "nodekit.publication-approval/v1"
+      },
+      {
+        "path": "templates/base/evals/figured-out-journey.json",
+        "kind": "nodekit.eval/v1"
+      },
+      {
+        "path": "templates/base/evals/stale-proposal-conflict.json",
+        "kind": "nodekit.eval/v1"
+      }
+    ],
+    "openThreads": [
+      {
+        "path": "changes/nodekit-factory-p1/story/limitations.json",
+        "kind": "nodekit.change-limitations/v1"
+      },
+      {
+        "path": "changes/nodekit-proof-campaign-2026-07-20/story/limitations.json",
+        "kind": "nodekit.limitations/v1"
+      },
+      {
+        "path": "deferred.yaml",
+        "kind": "deferred-ledger"
+      },
+      {
+        "path": "engineering-issues.input.json",
+        "kind": "nodekit.engineering-issue-input/v1"
+      },
+      {
+        "path": "proof/ease/candidates/35a6537a8c3fee175b361a2a9921a31da4285885/d4e443b54b0a57844d9388eba4f19569dbacc1b3cd386029f88aca341b885ca3/engineering-health/issue-inventory.json",
+        "kind": "nodekit.engineering-issue-inventory/v1"
+      },
+      {
+        "path": "proof/ease/candidates/3ec40595d80844e192002de1f3fe11a1e20f5ea9/4bf58fa418e7fcaa4b11da04f45c54dd250b19804c6928dcc1c4758e02db93c1/engineering-health/issue-inventory.json",
+        "kind": "nodekit.engineering-issue-inventory/v1"
+      },
+      {
+        "path": "proof/ease/candidates/d3229a013e8f51a2980d1a077e086bbcabfa115d/5b0e9d882cfabaa487f1c13061087a76eb9a01ee9d8d79ba62e3f647f3433d02/engineering-health/issue-inventory.json",
+        "kind": "nodekit.engineering-issue-inventory/v1"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/engineering-health/issue-inventory.json",
+        "kind": "nodekit.engineering-issue-inventory/v1"
+      },
+      {
+        "path": "templates/base/deferred.yaml",
+        "kind": "deferred-ledger"
+      }
+    ],
+    "agents": [
+      {
+        "path": "evals/ease/heldout-tasks.json",
+        "kind": "nodekit.agent-ease-tasks/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_launch_presentation_0cc282c/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_launch_presentation_9521076/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_launch_presentation_e398398/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_launch_presentation_ebb43b6/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_research_map_0cc282c/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_research_map_9521076/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_research_map_e398398/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_research_map_ebb43b6/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer_onboarding_0cc282c/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer_onboarding_8e72750/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer_onboarding_9521076/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer_onboarding_e398398/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer_onboarding_ebb43b6/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer_onboarding_qapass3/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer-onboarding_02d60f94e321/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer-onboarding_165fb8466787/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer-onboarding_83477e55472f/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer-onboarding_ada4e4d70b93/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer-onboarding_b169f08e2cae/adjudication.json",
+        "kind": "nodekit.agent-ease-adjudication/v1"
+      },
+      {
+        "path": "proof/ease/agents/agent_volunteer-onboarding_b169f08e2cae/manifest.json",
+        "kind": "nodekit.agent-ease-trial/v1"
+      },
+      {
+        "path": "proof/ease/fresh-agent-matrix.template.json",
+        "kind": "nodekit.agent-ease-matrix-plan/v1"
+      },
+      {
+        "path": "reference-apps/agentic-rl-research/evals/deterministic-foundation.json",
+        "kind": "nodeagent.eval-suite/v1"
+      },
+      {
+        "path": "reference-apps/agentic-rl-research/evals/heldout-stability.json",
+        "kind": "nodeagent.eval-suite/v1"
+      },
+      {
+        "path": "reference-apps/agentic-rl-research/evals/protected-reward.json",
+        "kind": "nodeagent.eval-suite/v1"
+      },
+      {
+        "path": "reference-apps/research-loop/evals/deterministic-smoke.json",
+        "kind": "nodeagent.eval-suite/v1"
+      },
+      {
+        "path": "reference-apps/smb-lending-fde/evals/deterministic-smoke.json",
+        "kind": "nodeagent.eval-suite/v1"
+      },
+      {
+        "path": "reference-apps/smb-lending-fde/evals/human-authority-boundary.json",
+        "kind": "nodeagent.eval-suite/v1"
+      },
+      {
+        "path": "reference-apps/smb-lending-fde/evals/interrupted-proposal-recovery.json",
+        "kind": "nodeagent.eval-suite/v1"
+      }
+    ],
+    "connections": [
+      {
+        "path": "integrations/ajv.yaml",
+        "kind": "integration-note"
+      }
+    ],
+    "journey": [
+      {
+        "path": "cases/node-platform.opportunity-contract.json",
+        "kind": "nodekit.opportunity-contract/v1"
+      },
+      {
+        "path": "cases/node-platform.story-pack.json",
+        "kind": "nodekit.story-pack/v1"
+      },
+      {
+        "path": "evolution/",
+        "kind": "nodekit.evolution-evidence/v1",
+        "count": 36
+      },
+      {
+        "path": "evolution/",
+        "kind": "nodekit.evolution-event/v1",
+        "count": 56
+      },
+      {
+        "path": "evolution/adoptions/adp-nodekit-browser-certification.json",
+        "kind": "nodekit.evolution-adoption/v1"
+      },
+      {
+        "path": "evolution/adoptions/adp-nodekit-domain-blank.json",
+        "kind": "nodekit.evolution-adoption/v1"
+      },
+      {
+        "path": "evolution/adoptions/adp-nodekit-frontend-tournament.json",
+        "kind": "nodekit.evolution-adoption/v1"
+      },
+      {
+        "path": "evolution/approval-evt-builder-gym-atomic-cas-publication.json",
+        "kind": "nodekit.evolution-approval/v1"
+      },
+      {
+        "path": "evolution/approval-evt-consumer-package-verification-lifecycle-free.json",
+        "kind": "nodekit.evolution-approval/v1"
+      },
+      {
+        "path": "evolution/approval-motion-portability-static-receipt.json",
+        "kind": "nodekit.evolution-approval/v1"
+      },
+      {
+        "path": "evolution/approvals/consumed.json",
+        "kind": "nodekit.evolution-approval-nonces/v1"
+      },
+      {
+        "path": "evolution/deferred-reviews/deferred-review-sha256-13371d82c9abb7b24eee20df2a1cb8feeb4450328bf2e741c4a92c2f165e48f1.json",
+        "kind": "nodekit.evolution-deferred-review/v1"
+      },
+      {
+        "path": "evolution/deferred-reviews/deferred-review-sha256-7fbfeb39a50ffa2f5f444f84a625c475df0ac5ef5f277a98dfabed398028ce54.json",
+        "kind": "nodekit.evolution-deferred-review/v1"
+      },
+      {
+        "path": "evolution/deferred-reviews/deferred-review-sha256-ade2ee4384d18108c81f34b24d83d2710f96ee3512ba51ca84cf27c147a5c11d.json",
+        "kind": "nodekit.evolution-deferred-review/v1"
+      },
+      {
+        "path": "evolution/deferred-reviews/deferred-review-sha256-f4479a0e15a771d3220323f16f82a5cc6d6aa7c947a46ed9fb7db572523a6910.json",
+        "kind": "nodekit.evolution-deferred-review/v1"
+      },
+      {
+        "path": "evolution/ledger.json",
+        "kind": "nodekit.evolution-ledger/v1"
+      },
+      {
+        "path": "evolution/trust-policy.json",
+        "kind": "nodekit.evolution-trust-policy/v1"
+      },
+      {
+        "path": "harness/journey/baseline-2026-07-24.json",
+        "kind": "nodekit.journey-baseline/v1"
+      },
+      {
+        "path": "harness/journey/journey-contract.json",
+        "kind": "nodekit.journey-contract/v1"
+      },
+      {
+        "path": "proof/submission-manifest.json",
+        "kind": "nodekit.submission-manifest/v1"
+      },
+      {
+        "path": "proof/submission-manifest.template.json",
+        "kind": "nodekit.submission-manifest/v1"
+      },
+      {
+        "path": "reference-apps/agentic-rl-research/hackathon.yaml",
+        "kind": "launch-brief"
+      },
+      {
+        "path": "reference-apps/research-loop/hackathon.yaml",
+        "kind": "launch-brief"
+      },
+      {
+        "path": "reference-apps/smb-lending-fde/hackathon.yaml",
+        "kind": "launch-brief"
+      },
+      {
+        "path": "templates/base/hackathon.yaml",
+        "kind": "launch-brief"
+      }
+    ],
+    "platform": [
+      {
+        "path": "behavior-index.json",
+        "kind": "behavior-index"
+      },
+      {
+        "path": "evals/ease/openai-pricing-2026-07-22.json",
+        "kind": "nodekit.external-source-snapshot/v1"
+      },
+      {
+        "path": "harness.yaml",
+        "kind": "harness-declaration"
+      },
+      {
+        "path": "proof/ease/candidates/e67e2fde9078654aa1bafbfe5502e8bd193ec8ae/41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4/package/generated-candidate.json",
+        "kind": "nodekit.generated-candidate/v1"
+      },
+      {
+        "path": "repo-map.json",
+        "kind": "repo-map"
+      }
+    ]
+  },
+  "unfiled": []
+}

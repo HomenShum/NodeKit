@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.workspace.v1.schema.json",
+  "type": "object",
+  "required": ["schemaVersion", "generatedAt", "branches", "unfiled"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.workspace/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "branches": {
+      "description": "The six fixed branches. Each is a QUESTION an orienting agent asks, not a folder it browses. The set is frozen — stability of the top level is what makes any repo navigable in thirty seconds; sub-filing inside a branch is free-form.",
+      "type": "object",
+      "required": ["record", "openThreads", "agents", "connections", "journey", "platform"],
+      "properties": {
+        "record": { "$ref": "#/$defs/items" },
+        "openThreads": { "$ref": "#/$defs/items" },
+        "agents": { "$ref": "#/$defs/items" },
+        "connections": { "$ref": "#/$defs/items" },
+        "journey": { "$ref": "#/$defs/items" },
+        "platform": { "$ref": "#/$defs/items" }
+      },
+      "additionalProperties": false
+    },
+    "unfiled": {
+      "description": "Contract-shaped files whose kind the router does not recognize. Listed, never dropped — an artifact silently absent from the map is the routing failure this surface exists to prevent.",
+      "$ref": "#/$defs/items"
+    }
+  },
+  "$defs": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "count": {
+            "description": "Present only on an aggregated row: this kind had more files than the map will enumerate, so one row carries the shared directory and the file count. The count participates in freshness — new receipts still change the map.",
+            "type": "integer",
+            "minimum": 2
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

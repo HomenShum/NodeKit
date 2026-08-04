@@ -70,6 +70,13 @@ export const SURFACES = Object.freeze([
     offers: "Profile models against a baseline and compile a routing matrix from the result, with `canary` checking a routing receipt before it takes effect. `diagnose` explains why a route was chosen rather than only which.",
   },
   {
+    id: "workspace-map",
+    entry: "nodekit workspace index [--repo-root <path>]  ·  nodekit workspace check [--repo-root <path>]",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "One generated map (WORKSPACE.md + workspace.json) filing every governance artifact under six FROZEN branches, each the question an orienting agent asks: record (decided/proven), openThreads, agents (who knows what), connections (load-bearing externals), journey, platform. Generated, never hand-maintained — `check` refuses a map that no longer matches the repository, and a contract-shaped file the router cannot place fails as UNFILED rather than vanishing. Run at launch and adopt; the first read in any repo. docs/WORKSPACE_GATE.md.",
+  },
+  {
     id: "production-agent-gate",
     entry: "nodekit production-agent declare --application <slug> --out <file>  ·  nodekit production-agent check --contract <file>",
     gate: true,

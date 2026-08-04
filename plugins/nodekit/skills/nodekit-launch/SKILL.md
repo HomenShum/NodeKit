@@ -48,6 +48,7 @@ which do not, and it exists because reading the package manifest instead led to 
 
 | Gate | Command | What it prevents |
 |---|---|---|
+| Workspace map | `nodekit workspace index` then `check` | Orientation by archaeology. Six frozen branches file every governance artifact under the question it answers (see [the WORKSPACE surface](../../../../docs/WORKSPACE_GATE.md)); the generated `WORKSPACE.md` is the first read in any repository, the way `nodekit explain` is the first command. On `adopt`, generate it alongside the collision receipt. A map that no longer matches the repository refuses. |
 | Harness liveness | `nodekit preflight` | A plugin installed mid-session that needs a restart is inert for the whole run, and nobody finds out until hour six. Declare it in `harness.yaml`. |
 | Open threads | `nodekit deferrals check` | A deliberate deferral that lives only in chat scrollback becomes a surprise three weeks later. `deferred.yaml`, status `open` blocks. |
 
