@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 119,
-    "modules": 97,
-    "tests": 104
+    "schemas": 120,
+    "modules": 98,
+    "tests": 105
   },
   "architecture": [
     {
@@ -69,6 +69,7 @@
       "help",
       "inspect",
       "journey",
+      "launch-video",
       "models",
       "motion",
       "preflight",
@@ -128,6 +129,7 @@
       "motion:compare",
       "prepare",
       "presentation:nodekit-proof",
+      "production-agent:check",
       "proof:package-install",
       "recall",
       "reference:schemas",
@@ -211,6 +213,7 @@
     "nodekit.knowledge-retrieval-receipt.v1.schema.json",
     "nodekit.knowledge-state.v1.schema.json",
     "nodekit.launch-manifest.v1.schema.json",
+    "nodekit.launch-video.v1.schema.json",
     "nodekit.managed-evidence-campaign.v1.schema.json",
     "nodekit.managed-supabase-portability-verdict.v1.schema.json",
     "nodekit.measurement-log.v1.schema.json",
@@ -321,6 +324,7 @@
     "knowledge-context.mjs",
     "knowledge-evolution.mjs",
     "knowledge-runtime.mjs",
+    "launch-video.mjs",
     "managed-evidence-capture.mjs",
     "model-intelligence.mjs",
     "motion-portability.mjs",
@@ -422,6 +426,7 @@
     "knowledge-lock-contention.test.mjs",
     "knowledge-runtime.test.mjs",
     "launch-manifest-schema.test.mjs",
+    "launch-video.test.mjs",
     "local-candidate-gate.test.mjs",
     "managed-evidence-capture.test.mjs",
     "model-intelligence.test.mjs",

@@ -77,6 +77,13 @@ export const SURFACES = Object.freeze([
     offers: "One generated map (WORKSPACE.md + workspace.json) filing every governance artifact under six FROZEN branches, each the question an orienting agent asks: record (decided/proven), openThreads, agents (who knows what), connections (load-bearing externals), journey, platform. Generated, never hand-maintained — `check` refuses a map that no longer matches the repository, and a contract-shaped file the router cannot place fails as UNFILED rather than vanishing. Run at launch and adopt; the first read in any repo. docs/WORKSPACE_GATE.md.",
   },
   {
+    id: "launch-video-gate",
+    entry: "nodekit launch-video declare --application <slug> --out <file>  ·  nodekit launch-video check --contract <file>",
+    gate: true,
+    appliesTo: ["any"],
+    offers: "Walk a coding agent through Motion Studio's four launch-film stages as a refusable contract: BRIEF (story, audience, launch date, channel), DIRECTION (the single moment, ordered beats, timestamped reference facts — approved by a HUMAN before the first render), DRAFTS (render → judge → human notes → recut, each cycle a ledger entry), DELIVERY (final cut + judge receipt + human approval, BEFORE the launch date). Refuses drafts made before direction was approved, reference adjectives without timestamps, a final cycle that fails the mom test (non_expert_sense blocks alone), and a delivery dated after the launch. The render/judge machinery is nodekit-present + FeatureClipStudio; this gate sequences it.",
+  },
+  {
     id: "production-agent-gate",
     entry: "nodekit production-agent declare --application <slug> --out <file>  ·  nodekit production-agent check --contract <file>",
     gate: true,

@@ -45,6 +45,7 @@ Six fixed branches, each the question an orienting agent asks first. Run `nodeki
 - `evolution/assumptions/asm-strong-model-infers-topology.json` (nodekit.assumption/v1)
 - `evolution/assumptions/asm-structural-browser-proof-sufficient.json` (nodekit.assumption/v1)
 - `evolution/invariants/` (nodekit.invariant-claim/v1, 24 files)
+- `production-agent.json` (nodekit.production-agent/v1)
 - `proof/ease/` (nodekit.developer-timing-run/v1, 617 files)
 - `proof/ease/` (nodekit.browser-certification/v1, 342 files)
 - `proof/ease/` (nodekit.screenshot-proof/v1, 58068 files)
@@ -168,4 +169,4 @@ Six fixed branches, each the question an orienting agent asks first. Run `nodeki
 - `repo-map.json` (repo-map)
 
 
-_2026-08-04T21:47:54.103Z_
+_2026-08-04T23:48:00.706Z_

@@ -140,6 +140,40 @@ Licence: observe and attribute, never re-host. `licenceMode` in the observation 
 enumerated single value on purpose — extending it to a new source class is a licence review and a
 deliberate schema edit, not a typed string.
 
+## A launch film is directed, then rendered — the launch-video contract
+
+Everything above judges a cut that already exists. A LAUNCH film fails earlier than that: it is
+built around the wrong moment, or delivered after the launch, and no judge loop can recover either.
+Studied live at [Motion Studio](https://motion.so/studio) (launch films for YC-tier startups):
+their process is Direction → First draft → Revisions → Delivery, and "a human director makes every
+taste call". That ordering is the product. `nodekit launch-video` carries it as a refusable
+contract, so a driven coding agent walks the stages instead of jumping to `npm run render`:
+
+```bash
+nodekit launch-video declare --application <slug> --out launch-video.json
+# 1 BRIEF      fill product, story (stakeholder's words), audience, launchDate, channels
+# 2 DIRECTION  singleMoment, ordered beats, references via find-references.mjs (timestamped
+#              facts, never adjectives), durationTargetSeconds ≤ 180 — then a HUMAN approves
+# 3 DRAFTS     capture → studio → render (FeatureClipStudio or NodeVideo), judge-video.mjs on
+#              the MP4, record the cycle: cut, judge scores, humanNotes, disposition
+# 4 DELIVERY   finalCut + judgeReceipt + human approval, deliveredAt BEFORE launchDate
+nodekit launch-video check --contract launch-video.json   # refuses at every stage exit
+```
+
+What the check refuses, and why each refusal exists:
+- **drafts before an approved direction** — the first cut aligns on a direction, it does not
+  discover one; a render made before direction came back is the revision bill.
+- **a reference claim without a timestamp** — "their pacing is good" cannot be scored; "at 0:12
+  the loading state holds 1.4s" can.
+- **a final cycle failing `non_expert_sense`** — the mom test blocks delivery alone, same rule as
+  the judge loop above; the contract makes it a stage exit rather than advice.
+- **`deliveredAt` after `launchDate`** — a launch film delivered after the launch is a
+  retrospective.
+- **delivery without a human approval** — the judge is advisory; the taste call is a person.
+
+The judge loop stays the inner loop of stage 3 exactly as described above. The contract adds what
+the loop alone never held: the stages in order, the human at the two taste gates, and the date.
+
 ## Parallel lane
 
 For a large implementation, run presentation work as a read-mostly lane beside building and QA. Draft the problem and architecture early; replace placeholders only with verified evidence from later gates. Block release only for unsupported claims, missing required proof, stale evidence, or a broken export.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "nodekit.workspace/v1",
-  "generatedAt": "2026-08-04T21:47:54.103Z",
+  "generatedAt": "2026-08-04T23:48:00.706Z",
   "branches": {
     "record": [
       {
@@ -159,6 +159,10 @@
         "path": "evolution/invariants/",
         "kind": "nodekit.invariant-claim/v1",
         "count": 24
+      },
+      {
+        "path": "production-agent.json",
+        "kind": "nodekit.production-agent/v1"
       },
       {
         "path": "proof/ease/",

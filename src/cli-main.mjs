@@ -201,6 +201,8 @@ Usage:
   nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json> [--json]
   nodekit production-agent declare --out <production-agent.json> --application <slug> [--json]
   nodekit production-agent check --contract <production-agent.json> [--json]
+  nodekit launch-video declare --out <launch-video.json> --application <slug> [--json]
+  nodekit launch-video check --contract <launch-video.json> [--json]
   nodekit workspace index [--repo-root <path>] [--json]
   nodekit workspace check [--repo-root <path>] [--json]
   nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
@@ -548,6 +550,52 @@ async function runProductionAgent(parsed, mode) {
     }
     if (error?.name === "ProductionAgentRefusal") {
       console.error(`PRODUCTION-AGENT CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runLaunchVideo(parsed, mode) {
+  const { parseLaunchVideoContract, launchVideoTemplate, formatLaunchVideoVerdict, LaunchVideoRefusal, LAUNCH_VIDEO_SCHEMA } = await import("./lib/launch-video.mjs");
+
+  if (mode === "declare") {
+    const application = parsed.options.application;
+    const out = parsed.options.out;
+    if (typeof application !== "string" || typeof out !== "string") {
+      console.error("usage: nodekit launch-video declare --application <slug> --out <launch-video.json>");
+      process.exitCode = 2;
+      return;
+    }
+    const template = launchVideoTemplate(application, new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"));
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), `${JSON.stringify(template, null, 2)}\n`, "utf8");
+    console.log(`LAUNCH-VIDEO CONTRACT declared: ${out}`);
+    console.log("  Direction before the first render, a human taste call at direction and delivery. `launch-video check` refuses a render made before direction was approved.");
+    return;
+  }
+
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error("usage: nodekit launch-video check --contract <launch-video.json>");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    const errors = await validateNodekitSchema(LAUNCH_VIDEO_SCHEMA, contract, contract.application ?? "launch-video");
+    if (errors.length > 0) throw new LaunchVideoRefusal(errors);
+    parseLaunchVideoContract(contract);
+    printStructured(contract, parsed, formatLaunchVideoVerdict);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error(`cannot parse the contract at ${contractPath}: ${error.message}`);
+      process.exitCode = 2;
+      return;
+    }
+    if (error?.name === "LaunchVideoRefusal") {
+      console.error(`LAUNCH-VIDEO CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
       process.exitCode = 1;
       return;
     }
@@ -2470,6 +2518,10 @@ async function main() {
   // handler swallowed every `production check` call.
   if (first === "production-agent" && (second === "declare" || second === "check")) {
     await runProductionAgent(parsed, second);
+    return;
+  }
+  if (first === "launch-video" && (second === "declare" || second === "check")) {
+    await runLaunchVideo(parsed, second);
     return;
   }
   if (first === "workspace" && (second === "index" || second === "check")) {
