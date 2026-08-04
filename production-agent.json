@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "nodekit.production-agent/v1",
+  "application": "node-platform",
+  "declaredAt": "2026-08-04T23:07:22.000Z",
+  "goalTranslation": {
+    "businessGoal": "every agent CLI the platform spawns leaves behind a verifiable, bounded run receipt instead of an unaccountable side effect",
+    "quantifiedTarget": {
+      "metric": "receipts-per-completed-run",
+      "comparator": "equals",
+      "value": 1,
+      "rationale": "runAgent (src/lib/agent-run.mjs) writes receipt.json and report.html atomically and renames the run directory into place; a run that produced no receipt does not exist as a run"
+    }
+  },
+  "hitl": {
+    "tiers": [
+      {
+        "action": "spawn an agent CLI with shell:false and capture bounded stdout/stderr into a run receipt (src/lib/agent-run.mjs execute)",
+        "risk": "low",
+        "mode": "auto"
+      },
+      {
+        "action": "advance an execution-graph external-write node: src/lib/execution-graph.mjs refuses any graph whose external-write node lacks an upstream HUMAN_GATE barrier, and a HUMAN_GATE event is only accepted from a human actor",
+        "risk": "high",
+        "mode": "suspend-approve",
+        "resumeAfterApproval": true
+      }
+    ]
+  },
+  "toolFaultTolerance": {
+    "interception": {
+      "rawErrorsReachUser": false,
+      "how": "spawn failures are normalized in src/lib/agent-run.mjs (normalizeProcessError): errno code plus the first line of the message, capped at 200 characters, never a stack; stdout/stderr are capped at 262144 bytes per stream by createBoundedCapture. No retry block is declared because no retry-with-backoff loop exists in this repo: execution-graph maximumAttempts is a bounded re-attempt allowance driven by recorded events, not an automatic retry."
+    },
+    "fallback": {
+      "kind": "degraded-ui",
+      "description": "a failed or timed-out run still writes receipt.json and a static report.html carrying status failed/timeout, the normalized process error, captured bounded stderr, and the lifecycle events; nothing is retried silently and nothing is hidden"
+    },
+    "toolContract": {
+      "descriptionsUnambiguous": true,
+      "fewShotForComplexParams": false
+    }
+  },
+  "context": {
+    "strategies": ["none"],
+    "tokenBudgetPerRun": 262144,
+    "noneRationale": "there is no LLM provider call site in this repo; src/lib/agent-run.mjs spawns agent CLI processes and never assembles a prompt, so there is no context to compress. The budget above is AGENT_RUN_LIMITS.outputBytes — 262144 BYTES retained per output stream, not tokens; no tokenizer exists here to count tokens, and declaring a token number would invent one."
+  },
+  "slos": [
+    {
+      "metric": "p99-latency-ms",
+      "comparator": "at-most",
+      "value": 600000,
+      "rationale": "enforced rather than observed: AGENT_RUN_LIMITS.timeoutMaxMs caps every run's timeout budget, and the timeout timer aborts then SIGKILLs the child (src/lib/agent-run.mjs execute)"
+    },
+    {
+      "metric": "output-bytes-per-stream",
+      "comparator": "at-most",
+      "value": 262144,
+      "rationale": "AGENT_RUN_LIMITS.outputBytes, enforced by createBoundedCapture; the receipt records the truncation"
+    },
+    {
+      "metric": "receipts-per-completed-run",
+      "comparator": "equals",
+      "value": 1,
+      "rationale": "atomic write plus rename in runAgent; the two golden rate metrics are deliberately absent because no measurement pipeline exists in this repo to observe them, and a rate nothing measures is an invented guard"
+    }
+  ],
+  "runtimeGuards": {
+    "loopBreaker": {
+      "maxIterations": 20,
+      "maxDepth": 512
+    }
+  },
+  "release": {
+    "judgeRegression": {
+      "trigger": "on-pr",
+      "command": "npm run test:all"
+    },
+    "tracing": {
+      "traceIdPropagated": true,
+      "field": "runId"
+    }
+  }
+}

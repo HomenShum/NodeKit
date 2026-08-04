@@ -386,3 +386,30 @@ test("operator rejects missing commands, broad output roots, absurd timeouts, an
     /args exceed 65536 UTF-8 bytes in total/u,
   );
 });
+
+test("a spawn failure lands in the receipt as one bounded line, never a raw error dump", async () => {
+  const store = await temporaryStore();
+  try {
+    // Long enough that the raw message would blow past the cap: the ENOENT message embeds the
+    // whole program path, and the receipt is agent-visible.
+    const missingProgram = path.join(repositoryRoot, `${"definitely-not-installed-".repeat(30)}agent`);
+    const { receipt } = await runAgent({
+      agent: "operator",
+      goal: "Drive an agent CLI that does not exist on this machine",
+      cwd: repositoryRoot,
+      out: store,
+      program: missingProgram,
+    });
+    assert.equal(receipt.status, "failed");
+    assert.equal(typeof receipt.process.error, "string");
+    assert.match(receipt.process.error, /^ENOENT: /u);
+    assert.ok(!receipt.process.error.includes("\n"), "the receipt error must be a single line");
+    assert.ok(!/ {2,}at /u.test(receipt.process.error), "no stack frames in an agent-visible field");
+    assert.ok(
+      receipt.process.error.length <= "ENOENT: ".length + 200,
+      `error must stay bounded, got ${receipt.process.error.length} characters`,
+    );
+  } finally {
+    await rm(store, { recursive: true, force: true });
+  }
+});

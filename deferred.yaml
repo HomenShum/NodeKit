@@ -115,3 +115,90 @@ deferred:
       run because it was present throughout. Landed in 91102bcc9 on the owner's explicit
       instruction. The change was never what kept it open — committing another party's in-progress
       work as a side effect of unrelated edits is a different class of act from finishing your own.
+
+  - id: production-agent-retry-backoff
+    what: >-
+      `production-agent check` refuses the platform's own contract: toolFaultTolerance must have
+      required property 'retry' (backoff const exponential). No retry-with-backoff loop exists in
+      this repo; the contract omits the block rather than declaring one.
+    why: >-
+      Automatically re-running a spawned agent CLI would replay its side effects invisibly.
+      Re-attempts here are deliberate and event-recorded: execution-graph maximumAttempts
+      (src/lib/execution-graph.mjs) is a bounded allowance a caller spends by recording a new
+      attempt, not an automatic retry. Declaring exponential backoff would invent a guard.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      The refusal is correct and stands. A spawned CLI is not an idempotent provider call, so
+      automatic retry is the wrong guard for this loop; the truthful contract records its absence
+      instead of faking it. Revisit only if agent-run ever wraps a call that is safe to replay.
+
+  - id: production-agent-circuit-breaker
+    what: >-
+      `production-agent check` refuses the platform's own contract: runtimeGuards must have
+      required property 'circuitBreaker'. No error-rate circuit breaker exists in this repo —
+      nothing trips after N failed runs in a window.
+    why: >-
+      A breaker over run receipts (trip when the failed-run rate in a window crosses a threshold)
+      is buildable from data agent-run already writes, but it does not exist yet and declaring one
+      would be the invented guard the gate refuses.
+    deferredAt: "2026-08-04"
+    status: open
+
+  - id: production-agent-cost-fuse
+    what: >-
+      `production-agent check` refuses the platform's own contract: runtimeGuards must have
+      required property 'costFuse' (maxTokensPerRun or maxSpendUsdPerDay). There is no LLM
+      provider call site in this repo, so no tokens are counted and no spend accrues.
+    why: >-
+      The fuses that do exist are time (AGENT_RUN_LIMITS.timeoutMaxMs, abort + SIGKILL) and bytes
+      (AGENT_RUN_LIMITS.outputBytes per stream), both declared in the contract's slos. A token or
+      dollar fuse would meter a resource this platform never consumes.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      Correct refusal, accepted: the schema's cost vocabulary assumes a provider. The platform's
+      real cost boundaries are enforced in code and declared truthfully. Revisit the moment a
+      provider call site lands in this repo.
+
+  - id: production-agent-canary
+    what: >-
+      `production-agent check` refuses the platform's own contract: release must have required
+      property 'canary' (trafficPercent with automatic rollback). node-platform ships as an npm
+      package and CLI; there is no request traffic to split and no router to roll back.
+    why: >-
+      A canary needs a traffic plane. The nearest real analogue here is the quality workflow's
+      pack-and-install job, which proves the published artifact before it ships, and that is
+      already in CI.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      Correct refusal, accepted: declaring a trafficPercent for a package registry would be
+      fiction. Revisit if the platform ever runs as a hosted service.
+
+  - id: production-agent-model-migration
+    what: >-
+      `production-agent check` refuses the platform's own contract: release must have required
+      property 'modelMigration' (pinnedModel plus a migration eval). There is no model to pin —
+      agent-run spawns whatever agent CLI the caller names and never selects an LLM.
+    why: >-
+      Model pinning belongs to the applications the platform launches, which do have providers.
+      Writing a model id into this repo's contract would claim a dependency that is not there.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      Correct refusal, accepted: the provider-shaped fields stay absent until a provider exists.
+      Generated projects that call providers must fill this block for themselves.
+
+  - id: production-agent-golden-metrics
+    what: >-
+      Behind the schema refusals sits a semantic one the check has not reached yet: the contract
+      deliberately omits task-completion-rate and tool-call-error-rate, so parseProductionAgentContract
+      would refuse it even with the schema satisfied. No measurement pipeline aggregates rates over
+      run receipts today.
+    why: >-
+      Declaring a rate nothing measures is a number wearing a guard's clothes. The receipts
+      already carry status per run, so a rate aggregator is buildable — it just is not built, and
+      the contract says so instead of pretending.
+    deferredAt: "2026-08-04"
+    status: open
