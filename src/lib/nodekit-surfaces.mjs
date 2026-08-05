@@ -77,6 +77,13 @@ export const SURFACES = Object.freeze([
     offers: "One generated map (WORKSPACE.md + workspace.json) filing every governance artifact under six FROZEN branches, each the question an orienting agent asks: record (decided/proven), openThreads, agents (who knows what), connections (load-bearing externals), journey, platform. Generated, never hand-maintained — `check` refuses a map that no longer matches the repository, and a contract-shaped file the router cannot place fails as UNFILED rather than vanishing. Run at launch and adopt; the first read in any repo. docs/WORKSPACE_GATE.md.",
   },
   {
+    id: "product-evidence",
+    entry: "skill nodekit-product-evidence  ·  find-references.mjs + analyze-reference.mjs --lens product --competencies <contested items>",
+    gate: false,
+    appliesTo: ["any"],
+    offers: "Settle contested roadmap/checklist items with observed product evidence, self-driving: the agent derives search queries from the brief (never asks for links), finds the target's demo and announcement videos, extracts what is verbatim on screen through a Gemini product lens, and returns justified / refused / unclear verdicts — a refused item records its flip trigger in deferred.yaml instead of building a speculative gate. 'None observed' is a first-class answer. Calibrated on the Cheiron take-home: two videos settled three items, reproduced cold.",
+  },
+  {
     id: "launch-video-gate",
     entry: "nodekit launch-video declare --application <slug> --out <file>  ·  nodekit launch-video check --contract <file>",
     gate: true,

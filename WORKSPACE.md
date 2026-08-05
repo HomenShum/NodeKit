@@ -169,4 +169,4 @@ Six fixed branches, each the question an orienting agent asks first. Run `nodeki
 - `repo-map.json` (repo-map)
 
 
-_2026-08-04T23:48:00.706Z_
+_2026-08-05T00:37:39.812Z_
