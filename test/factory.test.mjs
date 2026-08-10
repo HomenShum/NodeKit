@@ -42,10 +42,17 @@ test("create emits a parseable, reproducible application from multiline input", 
     await readFile(path.join(target, ".claude", "skills", "nodekit-present", "SKILL.md"), "utf8"),
     /evidence-backed presentation/,
   );
-  assert.match(
-    await readFile(path.join(target, ".codex", "skills", "nodekit-launch", "SKILL.md"), "utf8"),
-    /smallest undeniable vertical slice/,
-  );
+  const projectedLaunchPath = path.join(target, ".codex", "skills", "nodekit-launch", "SKILL.md");
+  const projectedLaunch = await readFile(projectedLaunchPath, "utf8");
+  assert.match(projectedLaunch, /smallest undeniable vertical slice/);
+  for (const match of projectedLaunch.matchAll(/\[[^\]]*\]\((?![a-z]+:|#)([^)]+)\)/giu)) {
+    await readFile(path.resolve(path.dirname(projectedLaunchPath), match[1].split(/[?#]/u, 1)[0]), "utf8");
+  }
+  for (const match of projectedLaunch.matchAll(/sibling `([^`]+)` skill/gu)) {
+    for (const agentRoot of [".codex", ".claude"]) {
+      await readFile(path.join(target, agentRoot, "skills", match[1], "SKILL.md"), "utf8");
+    }
+  }
   assert.match(
     await readFile(path.join(target, ".claude", "skills", "nodekit-qa", "SKILL.md"), "utf8"),
     /rendered user surface/,

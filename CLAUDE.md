@@ -1,7 +1,7 @@
-# NodeKit launch routing
+# NodeKit Claude Code entrypoint
 
-If the user describes an idea, business problem, use case, hackathon, or required sponsor stack, immediately load and follow:
+The canonical project instructions are imported from:
 
-`plugins/nodekit/skills/nodekit-launch/SKILL.md`
+@AGENTS.md
 
-Treat the user's prose as the intake brief. Research only the high-impact unknowns, choose one demonstrable vertical slice, and use NodeKit to produce a working application and proof. Preserve the approval and secret-handling rules in `AGENTS.md`.
+Read the imported instructions before changing NodeKit. Do not duplicate them here.

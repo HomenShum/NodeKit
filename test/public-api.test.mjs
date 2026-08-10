@@ -192,12 +192,29 @@ test("a first-time builder can reach the principles from both packaged onboardin
   }
 });
 
-test("the bundled launch skill routes coding agents through the compact principles without adding ceremony", async () => {
+test("the bundled launch skill is the compact, self-contained coding-agent authority", async () => {
   const launchSkill = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/SKILL.md", import.meta.url), "utf8");
-  assert.match(launchSkill, /idea-to-reality principles/u);
-  assert.match(launchSkill, /90-second field card/u);
-  assert.match(launchSkill, /do not turn the manual into ceremony/u);
-  assert.match(launchSkill, /\.\.\/\.\.\/\.\.\/\.\.\/docs\/IDEA_TO_REALITY_PRINCIPLES\.md/u);
+  assert.match(launchSkill, /Proportional engineering and convergence/u);
+  assert.match(launchSkill, /three or more new exception branches/u);
+  assert.match(launchSkill, /concepts, dependencies, public APIs, configuration, indirection, and files/u);
+  assert.match(launchSkill, /Stop when the named user-visible proof passes/u);
+  assert.match(launchSkill, /available capability catalog, not a default checklist/u);
+  assert.match(launchSkill, /## Launch\/adoption workflow/u);
+  assert.match(launchSkill, /For an ordinary implementation or review.*do not scaffold, deploy, or create presentation work/su);
+  assert.match(launchSkill, /Never print values or persist secrets in source, manifests, YAML, browser bundles, logs, or receipts/u);
+  assert.doesNotMatch(launchSkill, /\.\.\/\.\.\/\.\.\/\.\.\/docs\//u);
+  assert.doesNotMatch(launchSkill, /nodekit-product-evidence/u);
+
+  const openAiInterface = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/agents/openai.yaml", import.meta.url), "utf8");
+  assert.match(openAiInterface, /For an ordinary implementation or review.*For a launch or adoption/u);
+});
+
+test("the package and both coding-agent plugin manifests share one version", async () => {
+  const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  const codexPlugin = JSON.parse(await readFile(new URL("../plugins/nodekit/.codex-plugin/plugin.json", import.meta.url), "utf8"));
+  const claudePlugin = JSON.parse(await readFile(new URL("../plugins/nodekit/.claude-plugin/plugin.json", import.meta.url), "utf8"));
+  assert.equal(codexPlugin.version, packageJson.version);
+  assert.equal(claudePlugin.version, packageJson.version);
 });
 
 test("the field card preserves the NodeVideo execution and anti-complexity boundaries", async () => {

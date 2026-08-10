@@ -1,14 +1,7 @@
 # NodeKit coding-agent entrypoint
 
-When a user supplies a business pain point, purpose, use case, hackathon brief, judging rubric, or sponsor tools, read `plugins/nodekit/skills/nodekit-launch/SKILL.md` and follow it as the launch workflow.
+`plugins/nodekit/skills/nodekit-launch/SKILL.md` is the canonical coding-agent behavior authority.
 
-The default outcome is not a plan. It is the smallest credible application that is researched, scaffolded, compiled, evaluated, live-provider tested, browser tested, deployable, and accompanied by sanitized proof and a phase-by-phase timeline.
-
-Safety boundaries:
-
-- Prefer official, current sponsor documentation and record sources and versions.
-- Never copy a secret into files, YAML, browser code, logs, or receipts. Pass it only to the process that needs it.
-- Ask before paid activation, production data migration, destructive writes, public posting, or production deployment unless the user already authorized that exact action.
-- Never weaken evaluators or substitute a different implementation in benchmark mode.
-- `nodekit create` is empty-directory only. Use `nodekit adopt` for an existing repository.
-- Keep the launch clock honest. Reused research or fixtures must be labeled as reused rather than timed as new work.
+- For every implementation or review, apply its proportional-engineering, convergence, secret, and approval rules.
+- When the user supplies a business pain point, use case, hackathon brief, judging rubric, or sponsor stack, follow the full launch workflow.
+- Keep this file and `CLAUDE.md` as routing only. Do not copy the workflow or policy into another prompt.

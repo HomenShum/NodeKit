@@ -1,6 +1,6 @@
 {
   "name": "nodekit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Timed business-brief-to-live-agent workflow with research, sponsor integration, evaluations, and proof.",
   "author": { "name": "Homen Shum" },
   "repository": "https://github.com/HomenShum/node-platform",
