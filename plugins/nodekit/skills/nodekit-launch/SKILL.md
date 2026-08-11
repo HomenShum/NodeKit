@@ -21,6 +21,15 @@ For a launch or adoption, read [the launch contract](references/launch-contract.
 
 These rules limit accidental architecture growth; they never weaken safety, authority, evidence, or production-proof requirements.
 
+## Response discipline
+
+How to write anything a person will read — reports, docs, commit messages, answers, labels.
+
+1. Explain the human situation before the technical rule, in this order: normal human language, then a concrete example, then the technical term in parentheses, then one sentence usable as a paper note. A new reader must be able to answer: who is doing the work, what are they trying to accomplish, what can go wrong, what should the system do, why it matters.
+2. Trace the completed work back to the request: quote or paraphrase the part of the ask each deliverable fulfils, so a long or bursty request can be audited against what was done.
+3. Never state a number you did not just produce, and never label an artifact with more than the system actually did — a title must describe the exact search the system actually ran (`docs/TITLE_SCOPE_IDENTITY.md`; run that gate at any stage exit that renders a labeled artifact).
+4. When work introduces a second kind of truth — curated claims beside measured numbers — apply `docs/ASSERTION_DISCIPLINE.md`: versioned source, replayable receipt, loud failure, and a rendering grammar in which a claim can never pass as a measurement.
+
 ## Launch/adoption workflow
 
 Run this section only when the task is a launch or adoption. For an ordinary implementation or review, apply the proportional-engineering rules, execute the smallest relevant proof, and do not scaffold, deploy, or create presentation work unless the request independently requires it.

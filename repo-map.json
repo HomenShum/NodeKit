@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 120,
     "modules": 98,
-    "tests": 105
+    "tests": 106
   },
   "architecture": [
     {
@@ -460,6 +460,7 @@
     "replay-packet.test.mjs",
     "repo-tour.test.mjs",
     "research-verdict-benchmark.test.mjs",
+    "response-discipline.test.mjs",
     "session-contract.test.mjs",
     "skill-freshness.test.mjs",
     "story-pack-producer.test.mjs",

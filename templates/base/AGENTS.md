@@ -5,11 +5,12 @@ Read these files in order before changing the product:
 1. `docs/FIGURED_OUT.md`
 2. `docs/KNOWLEDGE_EVOLUTION.md`
 3. `docs/EVOLUTION.md`
-4. `product/BRIEF.md`
-5. `product/USER_JOURNEY.md`
-6. `product/SERVICE_BLUEPRINT.md`
-7. `product/EXPERIENCE.yaml`
-8. `nodeagent.yaml`
+4. `docs/RESPONSE_DISCIPLINE.md`
+5. `product/BRIEF.md`
+6. `product/USER_JOURNEY.md`
+7. `product/SERVICE_BLUEPRINT.md`
+8. `product/EXPERIENCE.yaml`
+9. `nodeagent.yaml`
 
 Keep the application blank in domain until the real user workflow is researched. Preserve the universal `Case -> Run -> Stage -> Artifact -> Proposal -> Approval -> Receipt` behavior and the in-memory deterministic demonstration.
 
