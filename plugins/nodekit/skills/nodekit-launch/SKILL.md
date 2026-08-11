@@ -30,6 +30,10 @@ How to write anything a person will read — reports, docs, commit messages, ans
 3. Never state a number you did not just produce, and never label an artifact with more than the system actually did — a title must describe the exact search the system actually ran (`docs/TITLE_SCOPE_IDENTITY.md`; run that gate at any stage exit that renders a labeled artifact).
 4. When work introduces a second kind of truth — curated claims beside measured numbers — apply `docs/ASSERTION_DISCIPLINE.md`: versioned source, replayable receipt, loud failure, and a rendering grammar in which a claim can never pass as a measurement.
 
+## Closure rule
+
+Sub-issue completion is not parent completion. A parent goal — a handoff queue, a feature broken into forward-chained issues, a plan document — closes only when every sub-issue passed its own acceptance test AND the parent's named proof is re-run after the last one lands. Record that parent proof command in the plan or handoff document itself, with an explicit OPEN/CLOSED status line, so the next reader can tell a finished queue from a verified goal.
+
 ## Launch/adoption workflow
 
 Run this section only when the task is a launch or adoption. For an ordinary implementation or review, apply the proportional-engineering rules, execute the smallest relevant proof, and do not scaffold, deploy, or create presentation work unless the request independently requires it.

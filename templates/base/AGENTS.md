@@ -15,6 +15,7 @@ Read these files in order before changing the product:
 Keep the application blank in domain until the real user workflow is researched. Preserve the universal `Case -> Run -> Stage -> Artifact -> Proposal -> Approval -> Receipt` behavior and the in-memory deterministic demonstration.
 
 - Do not let generated work overwrite a canonical artifact without a base-version check and decision.
+- Sub-issue completion is not parent completion: a plan or queue closes only when its own named proof is re-run after the last sub-issue lands, and the plan document carries that proof command with an OPEN/CLOSED status line.
 - Keep the primary artifact above chat, tools, and traces in the information hierarchy.
 - Make the current stage, next action, and next-action owner visible.
 - Preserve valid state through cancellation, conflicts, and failures.

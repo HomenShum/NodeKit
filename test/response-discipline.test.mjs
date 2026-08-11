@@ -41,6 +41,17 @@ test("the gate docs are wired from the skill, not orphaned", async () => {
   assert.match(skill, /docs\/ASSERTION_DISCIPLINE\.md/);
 });
 
+test("the closure rule exists and reaches consumers: sub-issue completion is not parent completion", async () => {
+  const skill = await read("plugins/nodekit/skills/nodekit-launch/SKILL.md");
+  assert.match(skill, /## Closure rule/);
+  assert.match(skill, /Sub-issue completion is not parent completion/);
+  assert.match(skill, /parent proof command in the plan or handoff document/i);
+
+  const entry = await read("templates/base/AGENTS.md");
+  assert.match(entry, /Sub-issue completion is not parent completion/);
+  assert.match(entry, /OPEN\/CLOSED status line/);
+});
+
 test("a scaffolded consumer project inherits the discipline", async () => {
   const consumerDoc = await read("templates/base/docs/RESPONSE_DISCIPLINE.md");
   assert.match(consumerDoc, /Normal human language first/i);
