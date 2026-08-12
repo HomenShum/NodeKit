@@ -11,6 +11,10 @@ node src/cli.mjs create ../my-app --name my-app --brief "triage inbound support 
 cd ../my-app && npm install && npm run demo
 ```
 
+<img src="docs/media/readme-first-win.gif" alt="The created app's own web surface (npm run dev), recorded headless: the guided case for 'triage inbound support tickets' walks confirm outcome, prepare proposal, approve the bounded change, and ends on Completion verified with a content-addressed receipt" width="940">
+
+*That command sequence produced this: the created app's `npm run dev` page, recorded headless with Playwright ([`scripts/record-readme-first-win.mjs`](scripts/record-readme-first-win.mjs)) after its `npm run demo` reported `"passed": true`. The guided case walks confirm → propose → approve → **Completion verified**, ending on the canonical artifact and its content-addressed receipt. Deterministic demo runtime, no API keys.*
+
 That is a working agent application with a compiled definition, deterministic
 fixtures, and a no-key demo — 40 seconds end to end when this section was
 written, `"passed": true` from the demo's own output, and it is the same
