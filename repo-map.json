@@ -127,7 +127,7 @@
       "journey:verify",
       "knowledge:compare",
       "motion:compare",
-      "prepare",
+      "prepack",
       "presentation:nodekit-proof",
       "production-agent:check",
       "proof:package-install",

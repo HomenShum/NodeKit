@@ -4,6 +4,11 @@ You are looking at **NodeKit**, and this repository is the *platform* — the th
 applications and then proves what they did. It is not itself the application. That one sentence
 resolves the most common wrong turn.
 
+**Fastest first win (measured at 40 seconds, cold clone):** the README's
+"40 seconds to a running, proof-carrying app" block — clone, install,
+`node src/cli.mjs create`, demo. Do that before reading anything here; this
+page explains what you just ran.
+
 New here? Do these four things in order. It takes about ten minutes.
 
 ## 1. Install, then check your setup

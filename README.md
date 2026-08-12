@@ -1,10 +1,28 @@
 # NodeKit / Node Platform
 
-**New here? Read [START_HERE.md](START_HERE.md) first** — it orients you in about ten minutes. This
-page is the reference. Unfamiliar terms below are defined in [GLOSSARY.md](GLOSSARY.md).
+In one sentence: **NodeKit generates applications and then proves what they did.**
 
-In one sentence: **NodeKit generates applications and then proves what they did.** This repository is
-the platform that does the generating, not an application you can run directly.
+## 40 seconds to a running, proof-carrying app (measured from a cold clone)
+
+```sh
+git clone https://github.com/HomenShum/node-platform
+cd node-platform && npm install
+node src/cli.mjs create ../my-app --name my-app --brief "triage inbound support tickets"
+cd ../my-app && npm install && npm run demo
+```
+
+That is a working agent application with a compiled definition, deterministic
+fixtures, and a no-key demo — 40 seconds end to end when this section was
+written, `"passed": true` from the demo's own output, and it is the same
+path the factory acceptance proves on every release. When it works, run
+`npm run proof` inside your app to see the receipt trail. **Coding-agent users skip all of this:** open this repo in
+Claude Code or Codex and describe your pain point — the bundled
+`nodekit-launch` skill routes it.
+
+Everything below is the reference for what the platform is and how it proves
+itself. You do not need it to build your first app. Unfamiliar terms are in
+[GLOSSARY.md](GLOSSARY.md); a ten-minute orientation is in
+[START_HERE.md](START_HERE.md).
 
 NodeKit is the figured-out product foundation and conformance layer for proof-carrying agent applications. It turns an empty directory or existing repository into a domain-blank application with one guided lifecycle, a compiled definition, deterministic fixtures, browser proof, and receipts.
 
