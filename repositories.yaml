@@ -1,8 +1,8 @@
 schemaVersion: nodeplatform.repositories/v1
 
 repositories:
-  - name: node-platform
-    github: HomenShum/node-platform
+  - name: NodeKit
+    github: HomenShum/NodeKit
     lifecycle: preview
     support: active
     role: platform

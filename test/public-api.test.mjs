@@ -101,7 +101,10 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   assert.deepEqual(packageJson.repository, {
     type: "git",
-    url: "git+https://github.com/HomenShum/node-platform.git",
+    // Was git+https://github.com/HomenShum/node-platform.git until the
+    // owner-instructed repo rename on 2026-08-12; GitHub redirects the
+    // old URL, but published metadata must name the canonical repo.
+    url: "git+https://github.com/HomenShum/NodeKit.git",
   });
   assert.equal(packageJson.homepage, "https://github.com/HomenShum/node-platform#readme");
   assert.deepEqual(packageJson.bugs, { url: "https://github.com/HomenShum/node-platform/issues" });

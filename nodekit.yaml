@@ -1,5 +1,5 @@
 schemaVersion: nodekit.repo/v1
-repository: HomenShum/node-platform
+repository: HomenShum/NodeKit
 lifecycle: preview
 support: active
 role: platform

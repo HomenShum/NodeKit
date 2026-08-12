@@ -4,7 +4,7 @@
   "description": "Portable agent-application scaffolding, compilation, conformance, and proof tooling",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HomenShum/node-platform.git"
+    "url": "git+https://github.com/HomenShum/NodeKit.git"
   },
   "homepage": "https://github.com/HomenShum/node-platform#readme",
   "bugs": {
