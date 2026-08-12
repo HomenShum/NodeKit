@@ -352,7 +352,9 @@ test("the nodekit atlas CLI prints usage, initializes, and lists with matching e
   assert.match(usage.stdout, /nodekit atlas init \[--repo-root <path>\] \[--json\]/);
   assert.match(usage.stdout, /nodekit atlas inspect --id <assetId-or-flowId>/);
 
-  const help = await run("help");
+  // Product audit 2026-08-12: `help` is now the consumer tier; platform
+  // verbs like atlas live in `help --all`. Was: run("help") alone.
+  const help = await run("help", "--all");
   assert.match(help.stdout, /nodekit atlas add --asset <yaml-file> --observation <path>/);
 
   const initialized = await run("atlas", "init", "--repo-root", root, "--json");

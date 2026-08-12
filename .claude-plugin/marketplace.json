@@ -1,0 +1,11 @@
+{
+  "name": "nodekit",
+  "owner": { "name": "Homen Shum" },
+  "plugins": [
+    {
+      "name": "nodekit",
+      "source": "./plugins/nodekit",
+      "description": "Generate an agent application that carries its own proof: launch, QA, and present skills for Claude Code and Codex."
+    }
+  ]
+}

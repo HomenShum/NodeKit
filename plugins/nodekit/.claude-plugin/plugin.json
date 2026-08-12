@@ -2,8 +2,16 @@
   "name": "nodekit",
   "version": "0.2.1",
   "description": "Timed business-brief-to-live-agent workflow with research, sponsor integration, evaluations, and proof.",
-  "author": { "name": "Homen Shum" },
-  "repository": "https://github.com/HomenShum/node-platform",
+  "author": {
+    "name": "Homen Shum"
+  },
+  "repository": "https://github.com/HomenShum/NodeKit",
   "license": "MIT",
-  "keywords": ["agent", "hackathon", "scaffolding", "evaluation", "pi-ai"]
+  "keywords": [
+    "agent",
+    "hackathon",
+    "scaffolding",
+    "evaluation",
+    "pi-ai"
+  ]
 }

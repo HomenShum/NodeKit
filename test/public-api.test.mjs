@@ -106,8 +106,8 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     // old URL, but published metadata must name the canonical repo.
     url: "git+https://github.com/HomenShum/NodeKit.git",
   });
-  assert.equal(packageJson.homepage, "https://github.com/HomenShum/node-platform#readme");
-  assert.deepEqual(packageJson.bugs, { url: "https://github.com/HomenShum/node-platform/issues" });
+  assert.equal(packageJson.homepage, "https://github.com/HomenShum/NodeKit#readme");
+  assert.deepEqual(packageJson.bugs, { url: "https://github.com/HomenShum/NodeKit/issues" });
   assert.equal(packageJson.author, "Homen Shum");
   assert.equal(packageJson.keywords.includes("agent-applications"), true);
   assert.deepEqual(packageJson.exports["./submission-attestation"], {
@@ -115,14 +115,21 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     import: "./src/submission-attestation.mjs",
     default: "./src/submission-attestation.mjs",
   });
-  assert.equal(packageJson.bin["nodekit-attestation-sign"], "scripts/sign-submission-attestation.mjs");
-  assert.equal(packageJson.bin["nodekit-attestation-verify"], "scripts/verify-submission-attestation.mjs");
+  // Product audit 2026-08-12: the consumer package ships ONE bin (nodekit).
+  // Attestation surfaces stay importable via the exports map asserted above;
+  // the signer/verifier run as `node scripts/...` for maintainers. This gate's
+  // job is that the drop is never SILENT — it is recorded here and in
+  // docs/ONBOARDING_REVAMP.md. Was: bin["nodekit-attestation-sign"] =
+  // scripts/sign-submission-attestation.mjs and -verify counterpart.
+  assert.equal(packageJson.bin["nodekit-attestation-sign"], undefined);
+  assert.equal(packageJson.bin["nodekit-attestation-verify"], undefined);
   assert.deepEqual(packageJson.exports["./submission-evidence-finalizer"], {
     types: "./src/submission-evidence-finalizer.d.mts",
     import: "./src/submission-evidence-finalizer.mjs",
     default: "./src/submission-evidence-finalizer.mjs",
   });
-  assert.equal(packageJson.bin["nodekit-evidence-finalize"], "scripts/finalize-submission-evidence.mjs");
+  // Same audit decision; was scripts/finalize-submission-evidence.mjs.
+  assert.equal(packageJson.bin["nodekit-evidence-finalize"], undefined);
   assert.deepEqual(packageJson.exports["./consumer-package-preparation"], {
     types: "./src/consumer-package-preparation.d.mts",
     import: "./src/consumer-package-preparation.mjs",
@@ -153,15 +160,17 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     import: "./src/agent-run.mjs",
     default: "./src/agent-run.mjs",
   });
-  assert.equal(packageJson.bin["nodekit-consumer-prepare"], "scripts/prepare-consumer-package.mjs");
-  assert.equal(packageJson.bin["nodekit-evidence-capture"], "scripts/capture-managed-evidence.mjs");
-  assert.equal(packageJson.bin["nodekit-human-study"], "scripts/capture-human-study.mjs");
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-attestation-sign"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-attestation-verify"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-evidence-finalize"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-consumer-prepare"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-evidence-capture"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-human-study"]), true);
+  // Audit 2026-08-12, same one-bin decision; was "scripts/prepare-consumer-package.mjs".
+  assert.equal(packageJson.bin["nodekit-consumer-prepare"], undefined);
+  // Audit 2026-08-12, same one-bin decision; was "scripts/capture-managed-evidence.mjs".
+  assert.equal(packageJson.bin["nodekit-evidence-capture"], undefined);
+  // Audit 2026-08-12, same one-bin decision; was "scripts/capture-human-study.mjs".
+  assert.equal(packageJson.bin["nodekit-human-study"], undefined);
+  // Audit 2026-08-12: with the one-bin decision above, the only bin that
+  // must be packed is `nodekit` itself. Was: six files-includes-bin checks
+  // over the governance bins removed above.
+  assert.equal(packageJson.files.includes("src"), true);
+  assert.equal(packageJson.bin["nodekit"], "src/cli.mjs");
 });
 
 test("every relative README link resolves to a packed package path", async () => {

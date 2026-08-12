@@ -6,9 +6,9 @@
     "type": "git",
     "url": "git+https://github.com/HomenShum/NodeKit.git"
   },
-  "homepage": "https://github.com/HomenShum/node-platform#readme",
+  "homepage": "https://github.com/HomenShum/NodeKit#readme",
   "bugs": {
-    "url": "https://github.com/HomenShum/node-platform/issues"
+    "url": "https://github.com/HomenShum/NodeKit/issues"
   },
   "keywords": [
     "ai-agents",
@@ -156,45 +156,28 @@
     "./replay-book": "./src/lib/replay-book.mjs"
   },
   "bin": {
-    "nodekit": "src/cli.mjs",
-    "nodekit-attestation-sign": "scripts/sign-submission-attestation.mjs",
-    "nodekit-attestation-verify": "scripts/verify-submission-attestation.mjs",
-    "nodekit-evidence-finalize": "scripts/finalize-submission-evidence.mjs",
-    "nodekit-consumer-prepare": "scripts/prepare-consumer-package.mjs",
-    "nodekit-evidence-capture": "scripts/capture-managed-evidence.mjs",
-    "nodekit-human-study": "scripts/capture-human-study.mjs",
-    "nodekit-unpushed-work-gate": "scripts/unpushed-work-gate.mjs",
-    "nodekit-reference-corpus-gate": "scripts/reference-corpus-gate.mjs"
+    "nodekit": "src/cli.mjs"
   },
   "files": [
     "dist",
-    "docs/IDEA_TO_REALITY_PRINCIPLES.md",
-    "docs/WORKSPACE_REFERENCE_INDEX.md",
     "src",
-    "scripts/sign-submission-attestation.mjs",
-    "scripts/verify-submission-attestation.mjs",
-    "scripts/finalize-submission-evidence.mjs",
-    "scripts/prepare-consumer-package.mjs",
-    "scripts/test-files.mjs",
-    "scripts/capture-human-study.mjs",
-    "scripts/unpushed-work-gate.mjs",
-    "scripts/reference-corpus-gate.mjs",
-    "scripts/capture-managed-evidence.mjs",
-    "scripts/run-knowledge-runtime-comparison.mjs",
     "adapters",
     "schemas",
     "templates",
     "plugins",
-    "evolution",
+    "docs/IDEA_TO_REALITY_PRINCIPLES.md",
+    "docs/WORKSPACE_REFERENCE_INDEX.md",
     "docs/EXECUTION_GRAPH_OF_LOOPS.md",
     "docs/GOVERNANCE_GRAPH.md",
-    "ownership.yaml",
-    "repositories.yaml",
-    "architecture.yaml",
     "GLOSSARY.md",
     "START_HERE.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "scripts/run-knowledge-runtime-comparison.mjs",
+    "docs/GOVERNANCE.md",
+    "ownership.yaml",
+    "repositories.yaml",
+    "architecture.yaml"
   ],
   "scripts": {
     "doctor": "node src/cli.mjs registry check --registry-root .",

@@ -178,7 +178,7 @@ export const SURFACES = Object.freeze([
   },
   {
     id: "reference-corpus-gate",
-    entry: "npx nodekit-reference-corpus-gate [corpusDir] [--repo-root <path>]",
+    entry: "node scripts/reference-corpus-gate.mjs [corpusDir] [--repo-root <path>]",
     gate: true,
     appliesTo: ["any"],
     offers: "Fail a design contract whose rules terminate in nothing checkable, or whose termination refs point at artifacts that no longer exist. Resolves refs against your repository, not this package.",
@@ -216,7 +216,7 @@ export const SURFACES = Object.freeze([
     entry: "@homenshum/nodekit/submission-attestation",
     gate: true,
     appliesTo: ["any"],
-    offers: "Detached signatures over a submission's evidence, verified independently of the process that produced it. Also on the CLI as npx nodekit-attestation-sign and npx nodekit-attestation-verify.",
+    offers: "Detached signatures over a submission's evidence, verified independently of the process that produced it. Also runnable as node scripts/sign-submission-attestation.mjs and node scripts/verify-submission-attestation.mjs (maintainer tools; the published package ships one bin).",
   },
   {
     id: "production-gate",

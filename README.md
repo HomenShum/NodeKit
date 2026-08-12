@@ -1,4 +1,4 @@
-# NodeKit / Node Platform
+# NodeKit
 
 In one sentence: **NodeKit generates applications and then proves what they did.**
 
@@ -15,9 +15,15 @@ That is a working agent application with a compiled definition, deterministic
 fixtures, and a no-key demo — 40 seconds end to end when this section was
 written, `"passed": true` from the demo's own output, and it is the same
 path the factory acceptance proves on every release. When it works, run
-`npm run proof` inside your app to see the receipt trail. **Coding-agent users skip all of this:** open this repo in
-Claude Code or Codex and describe your pain point — the bundled
-`nodekit-launch` skill routes it.
+`npm run proof` inside your app to see the receipt trail. **Coding-agent users skip all of this:**
+
+```
+/plugin marketplace add HomenShum/NodeKit
+/plugin install nodekit
+```
+
+then describe your pain point — the `nodekit-launch` skill routes it.
+(Or clone the repo and open it; `AGENTS.md`/`CLAUDE.md` route the same way.)
 
 Everything below is the reference for what the platform is and how it proves
 itself. You do not need it to build your first app. Unfamiliar terms are in
@@ -28,24 +34,7 @@ NodeKit is the figured-out product foundation and conformance layer for proof-ca
 
 > Blank in domain. Figured out in behavior. Convex-first, not Convex-locked.
 
-## Current status
-
-- **Closed locally:** domain-blank factory; portable Caseflow; PostgreSQL adapter; Convex component
-  and installed-package runtime; Supabase local managed profile; browser proof-bundle
-  download/reopen verification; recursive evidence verification; and the EvoGraph-R1-inspired
-  Knowledge Evolution and Evolution Ledger mechanics.
-- **Open locally:** complete integration review, run the full repository suite, freeze one immutable
-  candidate, and regenerate its package/browser receipts. This README does not claim the current
-  mutable working tree is fully green.
-- **Open externally:** exactly 60 candidate-bound timing runs, 15 real fresh-agent v2 runs, five
-  consented humans, three authenticated Convex consumers, an isolated preview, live Supabase proof,
-  real Knowledge Evolution adoption, final independent ProofLoop, and publication approval.
-
-Current certification verdict: **`EASE_NOT_CERTIFIED` - DO NOT SUBMIT**.
-
-The detached-signature trust model, verifier ownership rules, and signing handoff are documented in
-[`docs/ATTESTATIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/ATTESTATIONS.md). A local maintainer-generated signature is not an
-independent external gate attestation.
+Release gating, certification status, and the attestation trust model live in [docs/GOVERNANCE.md](docs/GOVERNANCE.md) — maintainer territory; you do not need it to build your first app.
 
 The disposable [`workspace-reference-index`](docs/WORKSPACE_REFERENCE_INDEX.md) stores bounded
 Caseflow artifact refs and digests only. Native workspace, session, and checkpoint artifacts remain

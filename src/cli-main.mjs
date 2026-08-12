@@ -166,7 +166,24 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`NodeKit
+  console.log(`NodeKit — generate an agent application, then prove what it did.
+
+Build your app
+  nodekit create <dir> --name <slug> --brief <text>   scaffold a proof-carrying app (demo passes in ~40s)
+  nodekit adopt [dir] --name <slug> --brief <text>    add NodeKit to an existing repository
+  nodekit explain --for <node|convex|postgres|...>    which surfaces apply to you; start here
+  nodekit demo | check | proof                        run your app's demo, checks, receipt trail
+  nodekit compile | inspect | doctor                  definition, environment, diagnosis
+  nodekit agent run --agent <name> --goal <text> -- <command>
+                                                      record any agent command with a receipt
+
+Platform & governance (maintainers, CI)
+  Run "nodekit help --all" for the other 25 command groups: evolution, graph,
+  harness, atlas, frontend, registry, certify, skills, attestation ...`);
+}
+
+function printFullHelp() {
+  console.log(`NodeKit — every command
 
 Usage:
   nodekit explain --for <any|node|convex|python|postgres|supabase|frontend> [--json]
@@ -2219,7 +2236,8 @@ async function main() {
   const parsed = parseArgs(process.argv.slice(2));
   const [first, second, third] = parsed.positional;
   if (!first || first === "help" || first === "--help") {
-    printHelp();
+    if (parsed.options.all || parsed.positional.includes("--all")) printFullHelp();
+    else printHelp();
     return;
   }
   if (["dev", "demo", "check", "proof"].includes(first)) {
