@@ -170,6 +170,37 @@ the stack, say so in the row rather than leaving it blank.
 If any gate fails, report **HUMAN_READY: BLOCKED**, name the highest-impact
 reproducible failure, repair it, and rerun the relevant verification.
 
+## A citation guard must assert content, not existence
+
+Added 2026-08-13, after five repositories independently built the same broken
+check in the same wave.
+
+Every repo that wrote an ordered walkthrough also wrote a guard to keep it honest.
+Every one of those guards verified that the cited **line number is in range** and
+stopped there. None verified that the line says what the citation claims. The
+measured consequences, all found by cold readers and none by the guards:
+
+- A walkthrough and a tour both anchored "the primary user action, and the only one
+  that starts a run" to an *edit* composer rather than the real one. The guard
+  passed, because the line existed and was unique.
+- A guard testing only `line > total` cannot see a twenty-line drift inside a
+  six-hundred-line file.
+- A step whose check was `existsSync(file)` passed whether or not its claim about
+  the file's contents held.
+
+**A guard that only proves a line number is in range proves anchor stability, not
+anchor correctness — and a walkthrough's whole value is correctness.** It is worse
+than no guard, because it earns trust it has not established.
+
+Every citation in `START_HERE.md` and every `.tour` step must carry the symbol or a
+short expected substring, and the guard must assert the cited line matches it.
+When the anchor moves, the guard fails and names the step. When the anchor is
+simply wrong, the guard fails on the first run.
+
+The same rule applies to any claim a document makes about a command: if the
+walkthrough says a test proves seven cases, the guard asserts seven, or the
+sentence changes to the number that is true.
+
 ## The final independent test — the cold reader
 
 **The strongest gate is not the same coding agent declaring that its own work is
