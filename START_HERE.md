@@ -76,6 +76,13 @@ npm test
 npm run evolution:verify
 ```
 
+> **This one currently reports `EVOLUTION BLOCKED` on a clean checkout, before you
+> change anything.** You did not break it. The ledger cites a commit that is not in
+> this repository's history, and one assumption record was edited in place instead
+> of superseded. Reproduction, the four exact reasons, and the fix are in
+> [docs/codebase/CONCERNS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md#3-npm-run-evolutionverify-exits-1-on-an-unmodified-clean-checkout).
+> Use `npm test` as your proof step until that is corrected.
+
 If you changed `src/`, `schemas/`, `templates/base/`, `harness/`, `nodekit.yaml`, `ownership.yaml`,
 or `.github/workflows/`, that is a **material** change and needs a reviewed Evolution Ledger entry
 before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
@@ -85,6 +92,7 @@ before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
 
 | You want to | Read |
 |---|---|
+| **Change the code, not just use it** | [docs/START_HERE.md](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) — the same `create` command traced through the source in execution order, then [docs/codebase/](https://github.com/HomenShum/NodeKit/tree/main/docs/codebase) and [.tours/](https://github.com/HomenShum/NodeKit/tree/main/.tours) |
 | Generate an application | [README.md](README.md#from-a-brief-to-a-running-app) |
 | Turn an idea into the smallest useful product | [docs/IDEA_TO_REALITY_PRINCIPLES.md](docs/IDEA_TO_REALITY_PRINCIPLES.md) |
 | Understand a term | [GLOSSARY.md](GLOSSARY.md) |

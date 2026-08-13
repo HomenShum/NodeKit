@@ -183,6 +183,7 @@
   ],
   "scripts": {
     "doctor": "node src/cli.mjs registry check --registry-root .",
+    "unreached": "node scripts/unreached-modules.mjs",
     "component:codegen": "convex codegen --component-dir ./src/component",
     "build:component": "node scripts/clean-component-dist.mjs && node ./node_modules/typescript/bin/tsc --project ./tsconfig.component.json && node scripts/copy-component-types.mjs",
     "typecheck:component": "node ./node_modules/typescript/bin/tsc --noEmit --project ./tsconfig.component-test.json",

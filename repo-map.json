@@ -5,7 +5,7 @@
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
     "schemas": 120,
-    "modules": 98,
+    "modules": 96,
     "tests": 106
   },
   "architecture": [
@@ -149,6 +149,7 @@
       "tour",
       "typecheck:component",
       "typecheck:public",
+      "unreached",
       "verify:evidence"
     ]
   },
@@ -318,7 +319,6 @@
     "harness-knowledge.mjs",
     "human-study-capture.mjs",
     "immutable-package-snapshot.mjs",
-    "integration-record.mjs",
     "journey-chain-gate.mjs",
     "journey-contract-verify.mjs",
     "knockout.mjs",
@@ -335,7 +335,6 @@
     "nodekit-surfaces.mjs",
     "npm-cli-invocation.mjs",
     "npm-package-archive.mjs",
-    "official-pricing-proof.mjs",
     "opportunity-compiler.mjs",
     "portable-value.mjs",
     "preflight.mjs",
@@ -419,7 +418,6 @@
     "harness-gym.test.mjs",
     "human-study-capture.test.mjs",
     "immutable-package-snapshot.test.mjs",
-    "integration-record.test.mjs",
     "journey-chain-gate.test.mjs",
     "journey-contract-verify.test.mjs",
     "knockout.test.mjs",
@@ -476,6 +474,7 @@
     "submission-verdict-schemas.test.mjs",
     "supabase-profile.test.mjs",
     "test-files.test.mjs",
+    "tours.test.mjs",
     "ui-gates-reachable.test.mjs",
     "ui-lexicon.test.mjs",
     "understand-anything.test.mjs",

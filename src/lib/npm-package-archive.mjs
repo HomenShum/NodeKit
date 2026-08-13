@@ -406,5 +406,3 @@ export async function inspectNpmPackageArchiveFile(archivePath, options = {}) {
   return inspectNpmPackageArchiveBytes(await readFile(archivePath), options);
 }
 
-export const verifyNpmPackageArchiveBytes = inspectNpmPackageArchiveBytes;
-export const verifyNpmPackageArchiveFile = inspectNpmPackageArchiveFile;

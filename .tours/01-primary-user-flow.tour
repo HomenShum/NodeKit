@@ -1,0 +1,63 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "1 · From one typed sentence to a working application",
+  "description": "Follow `nodekit create ./my-app --brief \"…\"` from the shell to the directory it writes. This is the primary user action: a person describes the job to be done in one sentence, and the factory writes out a complete application whose runtime cannot change a saved result without an approval and a receipt.",
+  "steps": [
+    {
+      "file": "src/cli.mjs",
+      "line": 4,
+      "pattern": "^await import\\(command === \"reference\"",
+      "title": "The four-line front door",
+      "description": "Everything starts here. Two command families live behind one binary, and the `reference` family loads a much larger module graph, so the public entry point imports exactly one of them instead of both.\n\nThere is no argument validation in this file. An unknown command falls through to the next step."
+    },
+    {
+      "file": "src/cli-main.mjs",
+      "line": 130,
+      "pattern": "^function parseArgs\\(argv\\)",
+      "title": "Words and flags are separated",
+      "description": "`parseArgs` splits the command line into `positional` (the words, like `create ./my-app`) and `options` (the `--flags`). Nothing is validated yet — this only decides what is a word and what is a flag."
+    },
+    {
+      "file": "src/cli-main.mjs",
+      "line": 2235,
+      "pattern": "^async function main\\(\\)",
+      "title": "One flat dispatch table",
+      "description": "109 commands, each a flat `if`. Deliberately one long function: to find where a command goes you search one file, instead of following a handler registry through three indirections.\n\nSearch this function for any command you see in the README and you will land on its implementation."
+    },
+    {
+      "file": "src/cli-main.mjs",
+      "line": 1105,
+      "pattern": "^async function runCreate\\(parsed\\)",
+      "title": "The primary user action",
+      "description": "The boundary between the command line and the factory. Loose `--flags` become one options object, and impossible combinations are refused **before** any directory is created.\n\nThe `--local-proof` guard just below is the interesting one: a receipt has to be bound to an immutable commit, and there is no commit without a Git repository, so asking for local proof with `--no-git` is refused rather than half-satisfied."
+    },
+    {
+      "file": "src/lib/scaffold.mjs",
+      "line": 315,
+      "pattern": "^export async function createProject\\(options\\)",
+      "title": "Copy the template, fill in the brief",
+      "description": "`templates/base/` is copied into the target directory and the brief is written into `product/BRIEF.md`. That template directory is real running code, not documentation — the generated application's agent loop and web server both come from it."
+    },
+    {
+      "file": "src/lib/agent-definition.mjs",
+      "line": 248,
+      "pattern": "^export async function compileAgentDefinition\\(repoRoot",
+      "title": "Read it back off disk and validate it",
+      "description": "The round trip is deliberate. This validates the bytes that actually landed on disk, not the object that produced them, so a template bug cannot pass validation by never being written down.\n\nOutput: `.nodeagent/resolved-definition.json` and a `configHash` in the generated application."
+    },
+    {
+      "file": "src/lib/schema-validation.mjs",
+      "line": 24,
+      "pattern": "const ajv = new Ajv2020",
+      "title": "Where the 120 schemas are enforced",
+      "description": "Every domain shape — Case, Run, Stage, Artifact, Proposal, Approval, Receipt — is defined once in `schemas/*.json` and checked here.\n\nNote `strict: false`. Ajv will accept unknown keywords and silently ignore unrecognised `format` values, so a misspelled schema keyword is not reported. That loosening is recorded in `integrations/ajv.yaml`."
+    },
+    {
+      "file": "test/factory.test.mjs",
+      "line": 13,
+      "pattern": "^test\\(\"create emits a parseable, reproducible application",
+      "title": "The test that proves this whole path",
+      "description": "`node --test test/factory.test.mjs` builds a project the way `nodekit create` does and asserts it compiles and validates. If you change anything in steps 4–7 of this tour, this is the first test to run."
+    }
+  ]
+}

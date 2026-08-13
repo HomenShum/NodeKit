@@ -1,0 +1,49 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "3 · What breaks, and where to look when it does",
+  "description": "Five failures a new engineer will actually hit here, each at the line that produces it. Start here when something is red and you do not yet know why.",
+  "steps": [
+    {
+      "file": "src/cli-main.mjs",
+      "line": 2908,
+      "pattern": "^main\\(\\)\\.catch\\(\\(error\\) => \\{",
+      "title": "Every command failure ends here",
+      "description": "One line on stderr, exit code 1, no stack trace — the person reading it is a user, not a debugger. Nothing above this calls `process.exit` directly, so buffered stdout still flushes.\n\nIf you are debugging and want the stack, run the module directly rather than removing this handler."
+    },
+    {
+      "file": "src/lib/caseflow.mjs",
+      "line": 307,
+      "pattern": "if \\(!repeatedDecisionMatches\\) throw new Error",
+      "title": "\"proposal retry does not match original decision request\"",
+      "description": "You will see this if a client re-sends a decision that differs from the one already recorded. It is working as designed: the first decision stands, and the second is refused rather than silently overwriting it.\n\nAn *identical* retry does not reach this line — it returns the original result with `reused: true`."
+    },
+    {
+      "file": "scripts/test-files.mjs",
+      "line": 26,
+      "pattern": "^const SLOW = \\[",
+      "title": "Why `npm test` does not run everything",
+      "description": "`node --test test/*.test.mjs` runs files concurrently, so the wall clock is set by the single slowest file — measured at 236 seconds for one acceptance proof while 61 other files finished.\n\n`npm test` runs the fast lane. `npm run test:all` runs everything. The slow list is explicit rather than a duration threshold, because a threshold silently reclassifies files on a different machine and that is how coverage disappears."
+    },
+    {
+      "file": "test/repo-tour.test.mjs",
+      "line": 131,
+      "pattern": "repo-map\\.json is stale",
+      "title": "\"repo-map.json is stale\" is not a broken test",
+      "description": "`repo-map.json` and `behavior-index.json` are generated from source and committed. Adding or deleting a module makes them stale and this test fails.\n\nThe fix is `npm run repo:map` and `npm run behavior:index`, then commit the regenerated files. Editing the expected value in the test instead would be the exact failure the repository's adversarial gate hunts for."
+    },
+    {
+      "file": "src/lib/schema-validation.mjs",
+      "line": 24,
+      "pattern": "const ajv = new Ajv2020",
+      "title": "A schema error that will never be reported",
+      "description": "`strict: false` means Ajv accepts unknown keywords. If a schema says `\"require\"` instead of `\"required\"`, validation passes and the constraint quietly does not exist.\n\nIf a schema seems not to be enforcing something, check the keyword spelling here first. Recorded in `integrations/ajv.yaml`."
+    },
+    {
+      "file": "test/generated-project-gates.test.mjs",
+      "line": 137,
+      "pattern": "^test\\(\"the generated server presents the outcome achieved",
+      "title": "The defect that motivated step 8 of START_HERE",
+      "description": "This test starts the generated server on an OS-assigned port and asserts all three outcomes over real HTTP. It exists because the interface once showed what the user *asked for* rather than what the runtime *did* — approving a stale proposal displayed \"Completion verified\" while the runtime had actually contained a conflict.\n\nA regex assertion over the source could not have caught that. Only driving the server could."
+    }
+  ]
+}

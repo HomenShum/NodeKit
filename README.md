@@ -34,6 +34,26 @@ itself. You do not need it to build your first app. Unfamiliar terms are in
 [GLOSSARY.md](GLOSSARY.md); a ten-minute orientation is in
 [START_HERE.md](START_HERE.md).
 
+### Going to change the code rather than use it?
+
+Read these instead, in this order. They exist so a new engineer can run, trace and
+change this repository without the person who built it sitting beside them — the
+[HUMAN-READY gate](https://github.com/HomenShum/NodeKit/blob/main/templates/promotion/HUMAN_READY.md) is the standard they answer to.
+
+| Read | For |
+|---|---|
+| [`docs/START_HERE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) | One real command traced through the code **in the order it executes**, ten steps, entry to tests |
+| [`.tours/`](https://github.com/HomenShum/NodeKit/tree/main/.tours) | The same three walkthroughs inside VS Code, pointing at live source ([CodeTour](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)) |
+| [`docs/codebase/STRUCTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STRUCTURE.md) | Which of the 2,118 files are code (207) and which are records |
+| [`docs/codebase/ARCHITECTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/ARCHITECTURE.md) | The one invariant everything else is downstream of |
+| [`docs/codebase/CONCERNS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md) | What is known to be wrong, each with the command that reproduces it |
+| [`docs/SIMPLIFICATION_REPORT.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/SIMPLIFICATION_REPORT.md) | Before/after measurements for the last reduction pass, with every evidence command |
+
+Also: [`docs/codebase/STACK.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STACK.md),
+[`CONVENTIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONVENTIONS.md),
+[`INTEGRATIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/INTEGRATIONS.md),
+[`TESTING.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/TESTING.md).
+
 NodeKit is the figured-out product foundation and conformance layer for proof-carrying agent applications. It turns an empty directory or existing repository into a domain-blank application with one guided lifecycle, a compiled definition, deterministic fixtures, browser proof, and receipts.
 
 > Blank in domain. Figured out in behavior. Convex-first, not Convex-locked.
