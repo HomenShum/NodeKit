@@ -13,34 +13,42 @@ number instead of a memory. Most of this board is UNVERIFIED, and that is the
 correct result — a baseline that scored well would have meant the scoring was
 broken.
 
-## The board
+## The board, after correction
 
-Claimed is what the baseline agent wrote. Confirmed is what its adversarial judge
-could independently reproduce from committed artifacts.
+Claimed is what the baseline agent wrote on the day. Confirmed is what its
+adversarial judge could independently reproduce. Standing is what the repo shows
+now, after the correction pass applied the amended evidence rule — verified by me
+through the authenticated GitHub API, not the agents' reports.
 
-| repo | gate | claimed | confirmed | journeys | defects | verdict |
-|------|------|--------:|----------:|---------:|--------:|---------|
-| NodeRoom | full | 4 | 4 | 5 | 7 | caveats |
-| NodeBenchAI | full | 0 | 0 | 5 | 4 | caveats |
-| NodeAgent | full | 3 | 3 | 5 | 3 | caveats |
-| trialscope | full | 3 | 1 | 4 | 5 | caveats |
-| NodeSlide | full | 0 | 0 | 6 | 6 | caveats · in PR #181 |
-| NodeVoice | full | 5 | 5 | 5 | 4 | caveats |
-| NodeGraph | reduced | 2 | 2 | 5 | 7 | caveats |
-| NodeKit | reduced | 6 | 6 | 5 | 4 | caveats |
-| NodeProof | reduced | 6 | 1 | 5 | 3 | caveats |
-| NodeTrace | reduced | 3 | 0 | 4 | 8 | **REFUTED** |
-| NodeMem | reduced | 4 | 3 | 5 | 6 | caveats |
-| FeatureClipStudio | reduced | 3 | 2 | 5 | 4 | caveats |
-| agentic-ui-qa | reduced | 4 | 4 | 5 | 5 | caveats |
-| NodeSEO | reduced | 4 | 3 | 5 | 4 | caveats |
-| NodeRL | reduced | 1 | 1 | 5 | 7 | caveats · provisional |
-| NodeAgentSpec | reduced | 1 | 0 | 5 | 2 | caveats · provisional |
-| BetterPRHandoff | reduced | 5 | 5 | 5 | 6 | caveats · provisional |
+| repo | gate | claimed | confirmed | **standing** | journeys | defects |
+|------|------|--------:|----------:|-------------:|---------:|--------:|
+| NodeRoom | full | 4 | 4 | **4** | 5 | 7 |
+| NodeBenchAI | full | 0 | 0 | **0** | 5 | 4 |
+| NodeAgent | full | 3 | 3 | **3** | 5 | 3 |
+| trialscope | full | 3 | 1 | **2** | 4 | 5 |
+| NodeSlide | full | 0 | 0 | **0** (in PR #181) | 6 | 6 |
+| NodeVoice | full | 5 | 5 | **5** | 5 | 4 |
+| NodeGraph | reduced | 2 | 2 | **2** | 5 | 7 |
+| NodeKit | reduced | 6 | 6 | **6** | 5 | 4 |
+| NodeProof | reduced | 6 | 1 | **1** | 5 | 3 |
+| NodeTrace | reduced | 3 | 0 | **0** | 4 | 8 |
+| NodeMem | reduced | 4 | 3 | **3** | 5 | 6 |
+| FeatureClipStudio | reduced | 3 | 2 | **0** | 5 | 4 |
+| agentic-ui-qa | reduced | 4 | 4 | **4** | 5 | 5 |
+| NodeSEO | reduced | 4 | 3 | **2** | 5 | 4 |
+| NodeRL | reduced | 1 | 1 | **1** | 5 | 7 |
+| NodeAgentSpec | reduced | 1 | 0 | **0** | 5 | 2 |
+| BetterPRHandoff | reduced | 5 | 5 | **5** | 5 | 6 |
 
-**54 claimed, 40 confirmed, out of 204.** 85 defects with reproductions. Every repo
-linked the gate rather than restating it, and every repo's journeys were judged
-specific to that repo rather than generic filler.
+**54 claimed, 40 confirmed, 38 standing**, out of 204. 85 defects with
+reproductions. Sixteen PASS rows were downgraded across seven repos; not one was
+fabricated, and every correction kept the original claim visible beside it rather
+than replacing the number.
+
+Verified 2026-08-13 through `gh api .../contents/promotion/PRODUCT_GOAL.md`: all
+sixteen repos on their default branch show exactly twelve rows, PASS+FAIL+UNVERIFIED
+summing to twelve, a trailing status line matching the table, and the gate linked
+rather than restated.
 
 ## Finding 1 — the evidence mechanism, missing from the kit
 
