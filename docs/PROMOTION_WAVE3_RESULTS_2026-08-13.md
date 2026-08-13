@@ -1,0 +1,127 @@
+# Promotion Wave 3 — can a stranger maintain it
+
+Date: 2026-08-13. Gate: [templates/promotion/HUMAN_READY.md](../templates/promotion/HUMAN_READY.md).
+Follows [Wave 2](PROMOTION_WAVE2_RESULTS_2026-08-13.md).
+Runs: 34 agents (reduce + cold read), then 34 more (repair + cold read again), then a
+P0 pass. 2 agent errors, both cold readers lost to a connection drop and both re-run.
+
+## What changed about the destination
+
+The source thread added a fifth turn, and it moved the finish line. The end state is
+no longer one condition but two:
+
+> **REAL_USER_READY AND HUMAN_CODEBASE_READY** — "a real user can use the application
+> confidently, and a new engineer can understand, modify, test, and explain the
+> application without the original builder sitting beside them."
+
+Wave 1 and 2 proved the first. Wave 3 exists to prove the second, and its final judge
+is deliberately not us: a **cold reader** — a fresh agent session with no memory of
+this work, given only the repository URL — asked to run the application and then trace
+nine stages, naming a `file:line` for each.
+
+## Result
+
+| | iteration 1 | iteration 2 |
+|---|---:|---:|
+| HUMAN_CODEBASE_READY | 9 | **12** |
+| READY_WITH_CAVEATS | 6 | **5** |
+| lost to agent error | 2 | 0 |
+| ran the application | 15/15 | **17/17** |
+| answered all nine questions | 15/15 | 16/17 (one 8/9) |
+
+Sixteen repos carry the full packet on their default branch — `docs/START_HERE.md`
+(13–22KB, runtime-ordered), `docs/SIMPLIFICATION_REPORT.md`, exactly seven files in
+`docs/codebase/`, and validated `.tours/`. NodeSlide's is in a pull request because
+its main is protected.
+
+## The finding that mattered most
+
+**Five repositories independently shipped the same broken guard, in the same wave.**
+
+Each one wrote an ordered walkthrough, and each one wrote a check to keep it honest.
+Every check verified that the cited **line number was in range** and stopped there.
+None verified that the line said what the citation claimed. What the cold readers
+found that the guards could not:
+
+- trialscope's walkthrough and tour both anchored *"the primary user action and the
+  only one that starts a run"* to `web/components/thread.tsx:561` — which is the
+  **edit** composer, `aui-edit-composer-root`. The real one is the `Composer`
+  component at `:275`, submitting via `onSend` at `:286`. Verified independently. The
+  guard passed because the line resolved uniquely.
+- NodeKit's onboarding told the reader to master `advanceStage` in
+  `src/lib/builder-journey.mjs` — a module reachable only from its own test, on no
+  product path. The live rule is `decideProposal` in `src/lib/caseflow.mjs:327-338`.
+  The tour step reported `[ ok ]` because `src/cli-main.mjs:896` checked only that the
+  file existed.
+- NodeGraph's `check-docs.mjs` tested `line > total`, so a twenty-line drift inside a
+  six-hundred-line file passed silently.
+- FeatureClipStudio's and agentic-ui-qa's guards had the same shape.
+
+**A guard that proves only that a line number is in range proves anchor stability, not
+anchor correctness — and a walkthrough's entire value is correctness.** It is worse
+than no guard, because it earns trust it has not established. The rule is now in the
+gate, and NodeRoom's `tests/walkthroughCitations.test.ts` shows the corrected shape:
+it asserts the cited line contains the anchor it claims.
+
+## What only a cold reader could find
+
+Every one of these was a confident sentence that turned out to be false, or a
+documented command that does not work. None was caught by a test.
+
+- **NodeProof**: `npx proofloop` — used in ~30 README commands and nearly every
+  package.json script — resolves the *published* package, not the clone, and fails
+  silently. Every documented command was exercising code the reader was not looking at.
+  **BetterPRHandoff** had the identical defect with `npx easier`, printed in 33 places.
+- **NodeVoice**: `POST /compare/demo {"turns":3000000}` produced 3,000,000 steps and
+  **1.6 GB RSS in 4.8 seconds** on a public route with `CORS *` and no body cap — while
+  the repo's own live path already caps at 20MB. Separately, `{"target":"abc"}` reached
+  a field typed `number`, making the room unable to ever complete.
+- **NodeVoice** again: provenance reported `mode:'openai'` and the label
+  "live · real reducer & scheduler" for runs whose model calls all failed and whose text
+  was deterministic — violating the authors' own comment two lines above:
+  *"Provenance must reflect what actually generated text, not what was requested."*
+- **NodeTrace**: `scripts/capture-live-graph-rail.mjs:12` hardcodes port 5187 and shells
+  `npm run dev` without `--strictPort`. On a machine already using that port, vite moves
+  to 5188, the script screenshots **a foreign process**, and reports PASS with that
+  process's entity counts. A proof that can prove the wrong application, silently.
+- **NodeRoom**: the paragraph explicitly labelled "This is the trust boundary" said the
+  agent is addressable *only* as `@nodeagent`; `src/ui/Chat.tsx:1166` accepts three
+  prefixes (`@nodeagent`, `/ask`, `/free`). An incomplete enumeration in the worst
+  possible place.
+- **NodeMem**: a walkthrough claimed a test proved "the seven gates, one test per
+  reason". Five were asserted; two were absent.
+- **NodeRL**: the same trajectory reported two different total rewards on two surfaces
+  — `npm run demo` printed 0.238 while the storybook badged 0.171.
+
+## Reduction can go too far, and CI caught it
+
+NodeSlide's reduction removed `convex`, `katex`, `pptxgenjs` and `@types/katex` from
+`mcp/package.json` on Knip's report that they were unused. But `mcp/tsconfig.json` sets
+`baseUrl: ".."` and typechecks files outside its own workspace —
+`packages/cli/src/generate.ts` imports `convex/browser` and `convex/server`,
+`slidelang/mathRaster.ts` imports `katex`, `pptx.ts` imports `pptxgenjs`. Five TS2307s.
+
+**Unused within a workspace is not the same as unused, when the workspace compiles code
+from outside itself.** Restored in `2997f42`. Worth recording as a standing caution
+about automated unused-code reports.
+
+## Remaining caveats
+
+- **NodeBenchAI** — stages 3–8 live server-side in Convex and the repo ships no local or
+  fixture backend, so a third-party cloud account is required to observe a single answer
+  stream. Traceable and unit-tested, not observable. A fixture backend is the named next
+  feature, not a defect.
+- **trialscope** — the documented test command fails from a clean clone, and three
+  documents give three different suite sizes (README 1270 *and* 451, CLAUDE.md 1246;
+  the truth is 1270). In a repo whose standing rule is measure-then-claim.
+- **NodeSlide** — the README's headline deterministic-path promise is still false on
+  main until the pull requests land.
+- **NodeTrace**, **FeatureClipStudio** — see the P0 list above; both in flight.
+
+## The honest summary
+
+Wave 3's own documentation was wrong in specific, checkable ways, and the wave's own
+guards could not see it. That is the finding, not an embarrassment: it is exactly what
+the thread predicted when it said *"the strongest gate is not the same coding agent
+declaring that its own work is understandable."* Twelve repositories now pass a test
+that no one who built them administered.
