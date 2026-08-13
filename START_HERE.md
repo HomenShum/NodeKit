@@ -60,11 +60,19 @@ Five parts own everything. You should be able to name them after the tour:
 
 ## 4. Trace one real action
 
-Read `advanceStage` in [`src/lib/builder-journey.mjs`](src/lib/builder-journey.mjs). It is the whole
-governing rule in one function: **a case cannot advance a stage unless that stage's artifact exists
-and a receipt binds it by content hash.** A forged or mismatched reference stays blocked.
+Read `decideProposal` (src/lib/caseflow.mjs line 289). It is the one function in this repository
+that changes a saved artifact, and it is the whole governing rule in one function: **an accepted
+proposal is applied only if the version it was written against is still the current one.** If the
+artifact moved on in the meantime the proposal is marked `conflicted`, no version is written, and
+the stale change is contained rather than silently overwriting newer work. Acceptance appends a
+version carrying `contentHash` of the exact patch that was approved.
 
 That single function is the system in miniature. Understand it and the rest follows.
+
+`src/lib/builder-journey.mjs` states the same idea per builder stage and reads well, but **nothing
+a user can run calls it** — its file header says so, `npm run unreached` lists it, and
+[docs/codebase/CONCERNS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md#1-eight-modules-that-nothing-runnable-calls--1180-lines)
+records why it was kept. Read it as a worked example, never as the live rule.
 
 ## Then: make one small change and prove it
 

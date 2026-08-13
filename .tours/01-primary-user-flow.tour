@@ -19,14 +19,14 @@
     },
     {
       "file": "src/cli-main.mjs",
-      "line": 2235,
+      "line": 2249,
       "pattern": "^async function main\\(\\)",
       "title": "One flat dispatch table",
       "description": "109 commands, each a flat `if`. Deliberately one long function: to find where a command goes you search one file, instead of following a handler registry through three indirections.\n\nSearch this function for any command you see in the README and you will land on its implementation."
     },
     {
       "file": "src/cli-main.mjs",
-      "line": 1105,
+      "line": 1119,
       "pattern": "^async function runCreate\\(parsed\\)",
       "title": "The primary user action",
       "description": "The boundary between the command line and the factory. Loose `--flags` become one options object, and impossible combinations are refused **before** any directory is created.\n\nThe `--local-proof` guard just below is the interesting one: a receipt has to be bound to an immutable commit, and there is no commit without a Git repository, so asking for local proof with `--no-git` is refused rather than half-satisfied."

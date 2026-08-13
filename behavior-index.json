@@ -21,7 +21,7 @@
         {
           "file": "src/lib/builder-journey.mjs",
           "symbol": "advanceStage",
-          "line": 158
+          "line": 168
         }
       ],
       "supporting": [],
@@ -183,7 +183,7 @@
         {
           "scenario": "fails-closed-on-missing-part",
           "file": "test/repo-tour.test.mjs",
-          "line": 54
+          "line": 79
         }
       ],
       "implementationGaps": [],
@@ -369,7 +369,7 @@
           {
             "file": "src/lib/builder-journey.mjs",
             "symbol": "advanceStage",
-            "line": 159
+            "line": 169
           }
         ],
         "namedSourceFiles": [
@@ -1093,9 +1093,14 @@
         "verification": "annotated-test",
         "provenBy": [
           {
+            "scenario": "citation-content-not-existence",
+            "file": "test/repo-tour.test.mjs",
+            "line": 59
+          },
+          {
             "scenario": "fails-closed-on-missing-part",
             "file": "test/repo-tour.test.mjs",
-            "line": 55
+            "line": 80
           }
         ],
         "namedTestFiles": [

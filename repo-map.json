@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 120,
     "modules": 96,
-    "tests": 106
+    "tests": 107
   },
   "architecture": [
     {
@@ -463,6 +463,7 @@
     "response-discipline.test.mjs",
     "session-contract.test.mjs",
     "skill-freshness.test.mjs",
+    "start-here-citations.test.mjs",
     "story-pack-producer.test.mjs",
     "story-pack-schema.test.mjs",
     "studio-boundary.test.mjs",

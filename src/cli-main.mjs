@@ -892,18 +892,32 @@ async function runTour(parsed) {
     fix: missingParts.length === 0 ? null : `These parts are named in the map but missing on disk: ${missingParts.join(", ")}. The map is stale; run \`npm run repo:map\`.`,
   });
 
-  const traceFiles = ["src/lib/caseflow.mjs", "src/lib/builder-journey.mjs", "schemas/nodekit.builder-case.v1.schema.json"];
-  const traceMissing = (await Promise.all(traceFiles.map(async (f) => ({ f, ok: await pathExists(path.join(root, f)) })))).filter((x) => !x.ok).map((x) => x.f);
+  // A citation is a claim about CONTENT. Checking that the cited FILE EXISTS proves anchor
+  // stability and nothing else — it passes unchanged while the symbol it names has moved to
+  // another module or stopped existing. So each citation carries the substring it promises the
+  // reader will be there, and the step fails when the source stops saying it.
+  const traceCitations = [
+    { file: "src/lib/caseflow.mjs", expect: "function decideProposal(" },
+    { file: "schemas/nodekit.builder-case.v1.schema.json", expect: "\"currentStage\"" },
+    { file: "src/lib/builder-journey.mjs", expect: "export async function advanceStage(" },
+  ];
+  const traceBroken = [];
+  for (const citation of traceCitations) {
+    const source = await readFile(path.join(root, citation.file), "utf8").catch(() => null);
+    if (source === null) traceBroken.push(`${citation.file} is missing`);
+    else if (!source.includes(citation.expect)) traceBroken.push(`${citation.file} no longer contains \`${citation.expect}\``);
+  }
   steps.push({
     id: "trace.one-action",
     title: "Trace one action from start to receipt",
     checked: true,
-    passed: traceMissing.length === 0,
+    passed: traceBroken.length === 0,
     detail:
-      "A builder case advances a stage only when that stage's handoff artifact exists AND a receipt binds it by content hash:\n    " +
-      traceFiles.join("\n    ") +
-      "\n    Read advanceStage in src/lib/builder-journey.mjs — it is the whole rule in one function.",
-    fix: traceMissing.length ? `Missing: ${traceMissing.join(", ")}` : null,
+      "A saved artifact changes in exactly one function, and only when the approval names the version it was written against:\n    " +
+      traceCitations.map((c) => `${c.file} — ${c.expect}`).join("\n    ") +
+      "\n    Read decideProposal in src/lib/caseflow.mjs — that is the whole governing rule, and it is on the path every generated application runs." +
+      "\n    advanceStage in src/lib/builder-journey.mjs is the same idea per builder stage, but nothing runnable calls it: a reference implementation, not the live rule.",
+    fix: traceBroken.length ? `These citations no longer match the source: ${traceBroken.join("; ")}. Fix the source or update this step and START_HERE.md together.` : null,
   });
 
   steps.push({

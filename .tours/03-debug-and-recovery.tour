@@ -5,7 +5,7 @@
   "steps": [
     {
       "file": "src/cli-main.mjs",
-      "line": 2908,
+      "line": 2922,
       "pattern": "^main\\(\\)\\.catch\\(\\(error\\) => \\{",
       "title": "Every command failure ends here",
       "description": "One line on stderr, exit code 1, no stack trace — the person reading it is a user, not a debugger. Nothing above this calls `process.exit` directly, so buffered stdout still flushes.\n\nIf you are debugging and want the stack, run the module directly rather than removing this handler."
@@ -26,7 +26,7 @@
     },
     {
       "file": "test/repo-tour.test.mjs",
-      "line": 131,
+      "line": 156,
       "pattern": "repo-map\\.json is stale",
       "title": "\"repo-map.json is stale\" is not a broken test",
       "description": "`repo-map.json` and `behavior-index.json` are generated from source and committed. Adding or deleting a module makes them stale and this test fails.\n\nThe fix is `npm run repo:map` and `npm run behavior:index`, then commit the regenerated files. Editing the expected value in the test instead would be the exact failure the repository's adversarial gate hunts for."

@@ -67,7 +67,7 @@ to `cli-main.mjs`, which throws `unknown command: …` in Step 2.
 ## Step 2 — Arguments are parsed and the command is dispatched
 
 **File:** `src/cli-main.mjs`
-**Symbol:** `parseArgs` (line 130), `main` (line 2235)
+**Symbol:** `parseArgs` (line 130), `main` (line 2249)
 **Called by:** the top-level `await import` in Step 1
 **Calls next:** `runCreate`
 
@@ -105,7 +105,7 @@ exit code 1. No files have been touched at this point.
 ## Step 3 — The primary user action: scaffold an application
 
 **File:** `src/cli-main.mjs`
-**Symbol:** `runCreate` (line 1105)
+**Symbol:** `runCreate` (line 1119)
 **Called by:** `main`
 **Calls next:** `createProject` in `src/lib/scaffold.mjs`
 
@@ -314,8 +314,9 @@ because it tells the user their change was *not* applied.
 
 ## Step 9 — Failure and recovery
 
-**File:** `src/cli-main.mjs` (line 2908) and `src/lib/caseflow.mjs` (line 289)
-**Symbol:** the top-level `main().catch`, and the `reused` return path
+**File:** `src/cli-main.mjs`, then `src/lib/caseflow.mjs`
+**Symbol:** the top-level `main().catch` (cli-main.mjs line 2922), and the idempotent-retry return
+`reused: true` (caseflow.mjs line 308)
 **Called by:** the Node process, and any client that retries
 **Calls next:** nothing — these are the ends of the chain
 
@@ -361,8 +362,8 @@ three to run first when something is wrong:
 | Step 7 (persistence) | `node --test test/caseflow.test.mjs` | the runtime passes the provider-neutral conformance suite, so the in-memory and Postgres backends agree |
 
 **Input** — none; the tests build their own fixtures.
-**Output** — TAP on stdout. `npm test` runs 838 of these plus 8 Convex component
-tests.
+**Output** — TAP on stdout. Measured 2026-08-13: `npm test` runs 846 of these plus
+8 Convex component tests.
 **Failure behavior** — `npm test` exits non-zero. Two of these tests compare a
 *generated* index (`repo-map.json`, `behavior-index.json`) against the source and
 tell you to run `npm run repo:map` / `npm run behavior:index`. That is not a broken

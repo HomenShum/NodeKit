@@ -36,7 +36,7 @@ refactoring rules do not allow to be mixed into a structural pass.
 
 | Module | Why it survived deletion | What wiring it would take |
 |---|---|---|
-| `builder-journey.mjs` | `src/cli-main.mjs:895` and the root `START_HERE.md` both point a new reader at `advanceStage` in this file as *the* worked example. Deleting it breaks `nodekit tour`. | It is a reference implementation on purpose. The honest fix is to say so in the file header. |
+| `builder-journey.mjs` | `runTour` in `src/cli-main.mjs` still cites `advanceStage` here, so deleting it breaks `nodekit tour`. **Fixed 2026-08-13:** the file header now says it is a reference implementation, and the root `START_HERE.md` sends readers to `decideProposal` in `caseflow.mjs` — the rule that actually runs — instead of here. A cold reader followed the old wording in good faith and lost the time. | Nothing further. It is a labelled worked example; delete it whenever the tour stops citing it. |
 | `friction-loop.mjs` | `src/lib/journey-contract-verify.mjs:100` passes a journey gate by checking that this **file exists**. Deleting it flips that gate to fail. | Replace the existence check with a call, or accept that the gate is checking the wrong thing. |
 | `repair-approval.mjs` | `evolution/invariants/inv-repair-approval-is-signed.json` declares an invariant this module implements. | Call it from the repair path in `src/lib/friction-loop.mjs`. |
 | `research-verdict-benchmark.mjs` | `workspace.json` registers `benchmarks/research-verdict-v1.json` as a committed corpus, and this is the only code that scores against it. Deleting it orphans the corpus. *(Deleted during Wave 3, then restored when the test suite caught the orphaned invariant.)* | An `npm run bench:research-verdict` name. |
