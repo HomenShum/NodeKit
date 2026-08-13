@@ -5,6 +5,12 @@ Date: 2026-08-13. Source of doctrine: the "Ultimate Agentic App Goal" thread
 Source of portfolio state: [PORTFOLIO_AUDIT_2026-08-12.md](PORTFOLIO_AUDIT_2026-08-12.md)
 and the integration/clip campaign of 2026-08-10..12.
 
+> **Execution status, 2026-08-13.** Wave 0 shipped (`b1c7932`, amended `e7a0302`).
+> Wave 1 ran across 17 repos with 34 agents — results and the four findings it
+> produced are in [PROMOTION_WAVE1_RESULTS_2026-08-13.md](PROMOTION_WAVE1_RESULTS_2026-08-13.md).
+> Wave 2 entry conditions are listed at the end of that document and supersede the
+> wave description below where they conflict.
+
 ## The human situation first
 
 A person opens one of these repos for the first time, runs the app, and tries
