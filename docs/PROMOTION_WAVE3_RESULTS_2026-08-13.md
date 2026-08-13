@@ -118,6 +118,38 @@ about automated unused-code reports.
   main until the pull requests land.
 - **NodeTrace**, **FeatureClipStudio** — see the P0 list above; both in flight.
 
+## The guard caught the repo that wrote it, on its first run
+
+NodeSlide's Wave 3 work sat in a pull request because its main is protected. Its
+iteration-2 fix — which added the corrected citation guard — merged first. That guard
+then ran against NodeSlide's *own* Wave 3 branch and failed it: **thirteen `file:line`
+citations naming no symbol**, two of them citing a bare `NodeSlideStudio.tsx` that does
+not resolve from the repository root at all.
+
+The branch that wrote the walkthrough could not tell its citations were unverifiable.
+The check written afterwards could, immediately. Every one now names a symbol verified
+present on the cited line or range — checked with an independent reimplementation of
+the guard rather than by trusting the edit. Landed in `6027823`.
+
+One self-inflicted failure worth recording: restoring the four dependencies reformatted
+two `package.json` files with `JSON.stringify`, which expands short arrays that biome
+collapses (`"files": ["dist"]`). Caught by the lint job, fixed with the repo's pinned
+biome 1.9.4. A formatter is a guard too.
+
+## Final state, verified 2026-08-13
+
+Measured through the authenticated GitHub API, not from any agent's report:
+
+- **17 of 17** repositories carry the complete packet on their default branch:
+  `docs/START_HERE.md` (14–23KB), `docs/SIMPLIFICATION_REPORT.md`, exactly seven files
+  in `docs/codebase/`, and 2–4 validated tours.
+- **65 of 204** promotion conditions PASS, each with a committed artifact and a
+  committed producer. The path there: 54 claimed → 40 judge-confirmed → 38 standing
+  after correction → 61 after Wave 2 → 65 after Wave 3.
+- Every conformance gate in the portfolio runs and passes.
+- 12 repositories are HUMAN_CODEBASE_READY by a cold reader who was given nothing but
+  the repository URL.
+
 ## The honest summary
 
 Wave 3's own documentation was wrong in specific, checkable ways, and the wave's own
