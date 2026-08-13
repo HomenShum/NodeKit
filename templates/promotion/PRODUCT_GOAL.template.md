@@ -21,6 +21,10 @@ surface and quickstart; see the GATE's reduced-gate section -->
 
 Scoring vocabulary is PASS / FAIL / **UNVERIFIED**, and UNVERIFIED is never PASS.
 
+Every PASS names an artifact committed under `promotion/evidence/` **and** the
+committed script that regenerates it. A measurement whose tool was not retained
+is UNVERIFIED, however real the number was — see the gate's evidence section.
+
 ## Canonical journeys
 
 The work queue lives in [PRODUCT_JOURNEYS.md](PRODUCT_JOURNEYS.md). A journey

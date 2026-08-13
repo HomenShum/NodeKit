@@ -59,6 +59,39 @@ Each condition is recorded as exactly one of:
 Write the reason next to every UNVERIFIED. "Not run" is a state; "no reason
 given" is a defect in the scorecard.
 
+## Where evidence lives, and what counts as an artifact
+
+Added 2026-08-13, after the first wave measured this failure across seven
+repositories at once. Agents really did drive browsers and really did read true
+numbers — then wrote the numbers into PASS rows while the tool that produced them
+was a scratch script they deleted, or an in-session screenshot handle like
+`ss_5046tck1a` that no other reader can ever open. Fourteen PASS rows across the
+portfolio were real measurements with unretrievable evidence. The gate demanded an
+evidence path and did not say where paths come from, so prose filled the gap.
+
+**Evidence lives in `promotion/evidence/` inside the repo, and it is committed.**
+
+An artifact qualifies only if both halves hold:
+
+1. **The output is committed** — a JSON receipt, a PNG, a log — at a path the
+   scorecard row names.
+2. **The producer is committed and re-runnable** — the script, the test, or the
+   npm target that generated it, living in the repo, runnable by someone who
+   just cloned it.
+
+A number in prose is not an artifact. An ephemeral tool handle is not an
+artifact. A screenshot whose generator was deleted is half an artifact, and half
+does not pass.
+
+**If you measured it but did not retain the tool, the row is UNVERIFIED.** The
+measurement was real; the evidence is not. Say exactly that in the reason —
+"measured at 375/768/1440, probe not retained" is an honest UNVERIFIED and tells
+the next wave precisely what to rebuild.
+
+This cuts both ways. A FAIL or a defect resting on an unretained run is equally
+unauditable — it does not inflate the score, but the next wave cannot confirm the
+fix, so record the same caveat there.
+
 ## Reduced gate (libraries, CLIs, renderers)
 
 A package with no application of its own is judged on the surface a stranger
