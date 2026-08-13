@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "nodekit.reject-steering-proof/v1",
+  "journey": "J3 — reject the proposal and see unambiguously that it was not applied",
+  "generatedAt": "2026-08-13T11:54:32.151Z",
+  "producer": "scripts/capture-reject-steering.mjs",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "before": {
+    "stageBanner": {
+      "kind": "review",
+      "title": "Proposal ready for review",
+      "message": "Compare the bounded change with the canonical artifact before deciding."
+    },
+    "primaryArtifact": {
+      "currentAction": "Approve or reject the proposed change"
+    },
+    "reviewPanel": {
+      "eyebrow": "DECISION REQUIRED",
+      "title": "Review proposed change",
+      "copy": "No generated work becomes canonical until you approve this bounded proposal."
+    },
+    "activeStage": "Review the proposed change",
+    "visibleDecisionControls": [
+      "approve",
+      "reject"
+    ]
+  },
+  "after": {
+    "stageBanner": {
+      "kind": "decision",
+      "title": "Proposal rejected",
+      "message": "The rejected change was not applied and the canonical artifact is unchanged. Prepare a revised proposal when you are ready."
+    },
+    "primaryArtifact": {
+      "currentAction": "Prepare a revised proposal"
+    },
+    "reviewPanel": {
+      "eyebrow": "DECISION RECORDED",
+      "title": "Prepare a revised proposal",
+      "copy": "The rejected change was not applied. The canonical artifact remains intact."
+    },
+    "activeStage": "Prepare a proposal",
+    "visibleDecisionControls": [
+      "propose"
+    ]
+  },
+  "staleRegionsAfterReject": [],
+  "regionsStillDemandingADecision": [],
+  "offersPrepareRevisedProposal": true,
+  "revisedProposalApproved": {
+    "artifactVersion": "v2",
+    "receipt": "Receipt 7f91d691956b6e78",
+    "stageBannerTitle": "Completion verified",
+    "completed": true
+  },
+  "consoleErrors": [],
+  "screenshots": [
+    "j3-1-review-pending.png",
+    "j3-2-after-reject.png",
+    "j3-3-revised-proposal-approved.png"
+  ],
+  "passed": true
+}

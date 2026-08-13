@@ -182,7 +182,10 @@ async function api(request, response, url) {
     const proposal = view().proposal;
     if (!proposal) throw new Error("create a proposal first");
     demo.decide({ decision: input.decision, proposalId: proposal.proposalId, runId: current.run.runId });
+    // Both decisions retire the review. The stage banner is the page's loudest status region, so
+    // leaving it on the review presentation after a rejection contradicted the review panel.
     if (input.decision === "accepted") setPresentation("completed_receipt", "complete", "Completion verified", "The canonical artifact and content-addressed receipt are ready.");
+    else setPresentation("proposal_rejected", "decision", "Proposal rejected", "The rejected change was not applied and the canonical artifact is unchanged. Prepare a revised proposal when you are ready.");
     return send(response, 200, view());
   }
   return false;

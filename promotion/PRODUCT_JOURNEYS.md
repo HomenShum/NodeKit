@@ -77,15 +77,25 @@ Each journey states, in this order:
   3. Read the page to find out what state the case is now in.
 - **Done when:** every status region on the page agrees that there is no
   proposal waiting, and the next action offered is to prepare a new one.
-- **Evidence:** **FAILS.** `evidence/defect-1-stale-review-copy-after-reject.png`,
-  `evidence/reject-detail.json`. The right-hand panel updates correctly
-  (`DECISION RECORDED — Prepare a revised proposal — The rejected change was not
-  applied`), but the stage banner still reads `REVIEW — Proposal ready for
-  review — Compare the bounded change with the canonical artifact before
-  deciding`, and the primary artifact panel still reads `CURRENT ACTION —
-  Approve or reject the proposed change`. Two regions instruct the user to
-  decide on a proposal that no longer exists; the only visible control is
-  "Prepare proposal". See defect D1.
+- **Evidence:** **PASSES as of iteration 1.**
+  `evidence/reject-steering/reject-steering.json` (`"passed": true`,
+  `staleRegionsAfterReject: []`, `regionsStillDemandingADecision: []`, zero
+  console errors), `evidence/reject-steering/j3-2-after-reject.png`,
+  `evidence/reject-steering/j3-3-revised-proposal-approved.png`. Regenerate with
+  `npm run promotion:reject-steering`. After Reject all three regions agree —
+  `DECISION / Proposal rejected`, `CURRENT ACTION / Prepare a revised proposal`,
+  `DECISION RECORDED / Prepare a revised proposal` — the stage rail moves to
+  `Prepare a proposal`, next owner is `agent`, the only visible control is
+  "Prepare proposal", and the artifact stays v1 at `1077e34cc8ffae57`. The
+  retry then completes: `Completion verified`, artifact `v2`, `Receipt
+  7f91d691956b6e78`.
+  Previously **FAILED** as defect D1 —
+  `evidence/defect-1-stale-review-copy-after-reject.png`,
+  `evidence/reject-detail.json`: the right-hand panel updated correctly, but the
+  stage banner still read `REVIEW — Proposal ready for review`, the primary
+  artifact panel still read `CURRENT ACTION — Approve or reject the proposed
+  change`, and the stage rail still highlighted Review. Three regions instructed
+  the user to decide on a proposal that no longer existed.
 
 ## J4 — "Prove to someone else that this actually ran"
 
@@ -137,6 +147,9 @@ Each journey states, in this order:
   mid-confirm — produces the raw string `Failed to fetch` and no route back.
   See defect D2. Evidence: `evidence/capture-report.json` (`recoveryControls`),
   `evidence/error-state.json`.
-- **Steering** — J3. Exercised; fails.
+- **Steering** — J3. Exercised; passes as of iteration 1. The reject path is
+  still not addressable as a `?scenario=` id, so the protected browser matrix
+  cannot screenshot it across viewports and themes — which is why D1 shipped at
+  all. Recorded as the next iteration's target, not as a passing condition.
 - **Receipt** — J2 (footer receipt hash and `GET /api/export`) and J4
   (`report.html` + `receipt.json`). Both pass.

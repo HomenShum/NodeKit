@@ -47,6 +47,13 @@ export function createGuidedDemo(options = {}) {
       runtime.enterStage({ runId, stageId: "complete" });
       return { ...result, ...runtime.completeRun({ runId }) };
     }
+    // A rejection ends the review as surely as an approval does. Leaving the run parked on the
+    // review stage left `run.nextAction` reading "Approve or reject the proposed change" and the
+    // stage rail highlighting Review, so the page told the user to decide on a proposal that no
+    // longer existed. Both decisions must move the run.
+    if (decision === "rejected" && result.proposal.status === "rejected") {
+      return { ...result, run: runtime.enterStage({ runId, stageId: "working", nextAction: "Prepare a revised proposal", nextActionOwner: "agent" }) };
+    }
     return result;
   }
 
