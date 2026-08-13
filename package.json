@@ -175,6 +175,7 @@
     "LICENSE",
     "scripts/run-knowledge-runtime-comparison.mjs",
     "scripts/record-readme-first-win.mjs",
+    "scripts/install-promotion-kit.mjs",
     "docs/GOVERNANCE.md",
     "ownership.yaml",
     "repositories.yaml",
