@@ -1,0 +1,85 @@
+{
+  "base": "http://127.0.0.1:4187",
+  "states": [
+    {
+      "name": "desktop-1-orientation",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nORIENTATION\nReady for your direction\n\nConfirm the outcome before the run begi"
+    },
+    {
+      "name": "desktop-2-agent-running",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nRUNNING\nOutcome confirmed\n\nThe agent can now prepare a bo"
+    },
+    {
+      "name": "desktop-3-review-decision",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nREVIEW\nProposal ready for review\n\nCompare the bounded cha"
+    },
+    {
+      "name": "desktop-4-after-reject",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nREVIEW\nProposal ready for review\n\nCompare the bounded cha"
+    },
+    {
+      "name": "desktop-5-completion-receipt",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nCOMPLETE\nCompletion verified\n\nThe canonical artifact and "
+    },
+    {
+      "name": "mobile-1-completion",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nCOMPLETE\nCompletion verified\n\nThe canonical artifact and "
+    },
+    {
+      "name": "mobile-2-narrow-320",
+      "text": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nCOMPLETE\nCompletion verified\n\nThe canonical artifact and "
+    }
+  ],
+  "overflow": {
+    "desktop1280": {
+      "innerW": 1280,
+      "scrollW": 1280,
+      "offenders": []
+    },
+    "mobile375": {
+      "innerW": 375,
+      "scrollW": 375,
+      "offenders": []
+    },
+    "narrow320": {
+      "innerW": 320,
+      "scrollW": 320,
+      "offenders": []
+    }
+  },
+  "keyboard": {
+    "firstTabStop": "Skip to primary artifact",
+    "focusRingFirstStop": "solid 3px",
+    "confirmedByEnterKey": true
+  },
+  "axe": {
+    "desktop1280": [],
+    "mobile375": []
+  },
+  "timing": {
+    "confirmMs": 28,
+    "proposeMs": 77,
+    "approveMs": 56
+  },
+  "afterReject": "GUIDED CASE\n\nOne clear job.\nCarried all the way through.\n\ntriage inbound support tickets\n\nReset demonstration\nConfirm the intended outcome\nPrepare a proposal\nReview the proposed change\nVerify and export\nREVIEW\nProposal ready for review\n\nCompare the bounded change with the canonical artifact before deciding.\n\nCASE\n\nMy A",
+  "recoveryControls": [
+    {
+      "sel": "#resume",
+      "present": true,
+      "display": "none",
+      "label": "Resume from preserved state"
+    },
+    {
+      "sel": "#resolve-conflict",
+      "present": true,
+      "display": "none",
+      "label": "Continue from canonical version"
+    }
+  ],
+  "receiptFooter": "Blank in domain. Figured out in behavior.\nReceipt 6ef3a89f7a456f76",
+  "exportStatus": 200,
+  "exportBody": "{\n  \"artifact\": {\n    \"artifactId\": \"artifact_1c0b516ae2614de2ae8b5ca986\",\n    \"caseId\": \"case_6d694df17c3c4293b78cd7c6cb\",\n    \"canonicalVersion\": 2,\n    \"createdAt\": \"2026-08-13T09:15:40.777Z\",\n    \"kind\": \"structured-document\",\n    \"runId\": \"run_ede60e9b25fd439aa236a2b90f\",\n    \"schemaVersion\": \"nodekit.artifact/v1\",\n    \"title\": \"Primary artifact\",\n    \"updatedAt\": \"2026-08-13T09:15:42.871Z\",\n    \"versions\": [\n      {\n        \"content\": {\n          \"summary\": \"The last approved result remain",
+  "mobileActionBarDisplay": "none",
+  "consoleMsgs": [],
+  "failedRequests": []
+}

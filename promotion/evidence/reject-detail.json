@@ -1,0 +1,55 @@
+{
+  "desktopBeforeReject": {
+    "stageBanner": "REVIEW Proposal ready for review Compare the bounded change with the canonical artifact before deciding.",
+    "alert": "",
+    "reviewPanel": "Review Agent activity DECISION REQUIRED Review proposed change No generated work becomes canonical until you approve this bounded proposal. Proposed change A bounded, reviewable result is ready. Replace this with the researched domain artifact. Based on artifact v1 · Demonstrate proposal-before-mutation without assuming a domain. Approve Reject Advanced trace",
+    "visibleButtons": [
+      "reset",
+      "review-tab",
+      "activity-tab",
+      "approve",
+      "reject"
+    ]
+  },
+  "desktopAfterReject": {
+    "stageBanner": "REVIEW Proposal ready for review Compare the bounded change with the canonical artifact before deciding.",
+    "alert": "",
+    "reviewPanel": "Review Agent activity DECISION RECORDED Prepare a revised proposal The rejected change was not applied. The canonical artifact remains intact. Proposal rejected. Prepare proposal Advanced trace",
+    "visibleButtons": [
+      "reset",
+      "review-tab",
+      "activity-tab",
+      "propose"
+    ]
+  },
+  "mobileDuplicateControls": [
+    {
+      "id": "#approve",
+      "label": "Approve",
+      "h": 0,
+      "w": 0,
+      "top": 0
+    },
+    {
+      "id": "#reject",
+      "label": "Reject",
+      "h": 0,
+      "w": 0,
+      "top": 0
+    },
+    {
+      "id": "#mobile-approve",
+      "label": "Approve",
+      "h": 42,
+      "w": 75,
+      "top": 745
+    },
+    {
+      "id": "#mobile-reject",
+      "label": "Reject",
+      "h": 42,
+      "w": 60,
+      "top": 745
+    }
+  ]
+}

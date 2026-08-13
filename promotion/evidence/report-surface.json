@@ -1,0 +1,27 @@
+{
+  "url": "file:///C:/Users/hshum/AppData/Local/Temp/claude/D--VSCode-Projects-cheiron-ai-take-home/440ef9e9-83bb-4fe6-8676-4fdaaf332f3e/scratchpad/promotion/NodeKit/promotion/evidence/agent-run/e6ca7f66-33f6-4abd-a84a-add55a42c39d/report.html",
+  "report-desktop-1280": {
+    "title": "codex - Agent run report",
+    "hasLang": true,
+    "hasViewportMeta": true,
+    "h1": "codex",
+    "innerW": 1280,
+    "scrollW": 1280,
+    "overflowCount": 0,
+    "firstText": "NodeKit Agent Flight Recorder codex Inspect the repository Completed Outcome The requested command completed. Duration 311 ms Exit code 0 Run ID e6ca7f66-33f6-4abd-a84a-add55a42c39d Execution graph Goal Inspect the repository completed -> Agent process node (1"
+  },
+  "report-desktop-1280-axe": [],
+  "report-mobile-375": {
+    "title": "codex - Agent run report",
+    "hasLang": true,
+    "hasViewportMeta": true,
+    "h1": "codex",
+    "innerW": 375,
+    "scrollW": 375,
+    "overflowCount": 0,
+    "firstText": "NodeKit Agent Flight Recorder codex Inspect the repository Completed Outcome The requested command completed. Duration 311 ms Exit code 0 Run ID e6ca7f66-33f6-4abd-a84a-add55a42c39d Execution graph Goal Inspect the repository completed -> Agent process node (1"
+  },
+  "report-mobile-375-axe": [],
+  "consoleMsgs": [],
+  "failedRequests": []
+}

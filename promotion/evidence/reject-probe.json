@@ -1,0 +1,26 @@
+{
+  "beforeReject": {
+    "status": "active",
+    "main": "GUIDED CASE One clear job. Carried all the way through. triage inbound support tickets Reset demonstration Confirm the intended outcome Prepare a proposal Review the proposed change Verify and export REVIEW Proposal ready for review Compare the bounded change with the canonical artifact before deciding. CASE My App case Primary artifact Review Activity NEXT OWNER user PRIMARY ARTIFACT Primary arti",
+    "approveVisible": "block",
+    "rejectVisible": "block",
+    "proposeVisible": "none"
+  },
+  "decideStatus": 200,
+  "decideBody": "{\"artifact\":{\"artifactId\":\"artifact_d46f33de277c4be3bfdce7d48e\",\"caseId\":\"case_ee8691953afe46d2962144ed89\",\"canonicalVersion\":1,\"createdAt\":\"2026-08-13T09:16:31.032Z\",\"kind\":\"structured-document\",\"runId\":\"run_486a98b6794f4e67b2e69c8de5\",\"schemaVersion\":\"nodekit.artifact/v1\",\"title\":\"Primary artifact\",\"updatedAt\":\"2026-08-13T09:16:31.032Z\",\"versions\":[{\"content\":{\"summary\":\"The last approved result remains here.\",\"status\":\"baseline\"},\"contentHash\":\"1077e34cc8ffae57d4f0bcd7a40d9e5f152b05da45ab643d36195773c10a7de8\",\"createdAt\":\"2026-08-13T09:16:31.032Z\",\"version\":1}]},\"approvals\":[{\"approvalId\":\"",
+  "afterReject": {
+    "status": "active",
+    "main": "GUIDED CASE One clear job. Carried all the way through. triage inbound support tickets Reset demonstration Confirm the intended outcome Prepare a proposal Review the proposed change Verify and export REVIEW Proposal ready for review Compare the bounded change with the canonical artifact before deciding. CASE My App case Primary artifact Review Activity NEXT OWNER user PRIMARY ARTIFACT Primary arti",
+    "approveVisible": "none",
+    "rejectVisible": "none",
+    "proposeVisible": "block"
+  },
+  "rejectChangedSomething": true,
+  "mobileMidJourney": {
+    "actionBarDisplay": "flex",
+    "mobileApproveRect": 42,
+    "desktopApproveDisplay": "inline-block",
+    "scrollW": 375,
+    "innerW": 375
+  }
+}
