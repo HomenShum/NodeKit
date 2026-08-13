@@ -30,7 +30,8 @@ than removed, and the reason per module is in `docs/codebase/CONCERNS.md`.
 | Lines in unreached modules | 1,708 | 1,180 | −528 | `npm run unreached` |
 | Canonical workflow tests | 843 + 8 | 842 + 8 | −1 | `npm test` |
 | Typecheck | pass | pass | — | `npm run typecheck:public` |
-| Browser workflow passes | not applicable — no browser check runs in the default suite; Playwright is used only to capture evidence (`scripts/run-protected-browser-lane.mjs`) and needs browsers installed | | | |
+| Browser workflow passes | not applicable as a pass/fail count — no browser-driven check runs in the default suite. Playwright is used only to capture evidence (`scripts/run-protected-browser-lane.mjs`) and needs browsers installed. The nearest equivalent that does run everywhere is the trust-surface gate, measured below | | | |
+| Trust-surface gate | pass | pass | 0 | `npm run gate:trust-surface` — exits 0 and self-reports "GATE PROBED IN BOTH DIRECTIONS", i.e. it was shown to pass, fail and abstain |
 | Production bundle size | not applicable — there is no bundler. `src/**/*.mjs` is what ships and what runs; the only build step compiles the optional Convex component | | | |
 | Additions/deletions (whole repo) | — | — | +1,650 / −1,114 | `git diff HEAD --shortstat` |
 | Additions/deletions (`src` + `scripts` only) | — | — | +83 / −1,029 | `git diff HEAD --shortstat -- src scripts` |
