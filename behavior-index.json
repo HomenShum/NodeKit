@@ -617,7 +617,7 @@
           {
             "scenario": "one-next-action-per-state",
             "file": "test/ease-proof.test.mjs",
-            "line": 83
+            "line": 89
           }
         ],
         "namedTestFiles": [

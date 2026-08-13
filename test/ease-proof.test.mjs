@@ -63,7 +63,13 @@ test("EaseProof keeps browser contracts distinct from certification", async () =
 
 test("generated UI scenarios are backed by caseflow conflict, exception, and receipt records", async () => {
   const server = await readFile(path.resolve("templates", "base", "apps", "web", "server.mjs"), "utf8");
-  assert.match(server, /decideProposal\(\{ proposalId: stale\.proposalId, decision: "accepted" \}\)/);
+  // The conflict scenario must still put a REAL stale accept through the runtime rather than paint
+  // a conflict banner over nothing. Iteration 2 moved that call behind `applyDecision`, which routes
+  // to `demo.decide` -> `runtime.decideProposal` and then derives the banner from the status that
+  // comes back. Both halves are asserted, so this is not the old check loosened.
+  // Previous assertion: /decideProposal\(\{ proposalId: stale\.proposalId, decision: "accepted" \}\)/
+  assert.match(server, /applyDecision\("accepted", stale\.proposalId\)/);
+  assert.match(server, /const \{ proposal \} = demo\.decide\(\{ decision, proposalId, runId: current\.run\.runId \}\)/);
   assert.match(server, /raiseException\(\{ runId: current\.run\.runId/);
   assert.match(server, /"receipt_inspection", "export_share"/);
   assert.match(server, /\/api\/scenario/);

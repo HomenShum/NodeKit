@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "nodekit.decide-outcome-proof/v1",
+  "defect": "D5 — /api/decide presented the decision requested, not the outcome achieved",
+  "generatedAt": "2026-08-13T13:14:07.167Z",
+  "producer": "scripts/capture-decide-outcome.mjs",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "conflict": {
+    "httpStatus": 200,
+    "presentation": {
+      "id": "conflict",
+      "kind": "conflict",
+      "message": "The stale proposal was not applied. Canonical version 2 remains intact.",
+      "title": "Conflict contained"
+    },
+    "proposalStatus": "conflicted",
+    "receipt": null,
+    "runStatus": "active",
+    "currentStageId": "review",
+    "nextAction": "Resolve the version conflict",
+    "artifactVersion": 2,
+    "stagedProposalStatus": "conflicted",
+    "falseCompletionClaim": false
+  },
+  "honestAccept": {
+    "httpStatus": 200,
+    "presentation": {
+      "id": "completed_receipt",
+      "kind": "complete",
+      "message": "The canonical artifact and content-addressed receipt are ready.",
+      "title": "Completion verified"
+    },
+    "proposalStatus": "accepted",
+    "receiptPresent": true,
+    "runStatus": "completed",
+    "artifactVersion": 2,
+    "completionClaimIsBacked": true
+  },
+  "browser": {
+    "beforeDecide": {
+      "stageBanner": {
+        "kind": "conflict",
+        "title": "Conflict contained",
+        "message": "The stale proposal was not applied. Canonical version 2 remains intact."
+      },
+      "primaryArtifact": {
+        "currentAction": "Resolve the version conflict"
+      },
+      "reviewPanel": {
+        "eyebrow": "CONFLICT CONTAINED",
+        "title": "Resolve version conflict",
+        "copy": "A stale proposal was blocked. Continue from the latest canonical artifact without overwriting it."
+      },
+      "completionBlockVisible": false,
+      "receiptLine": "No receipt yet",
+      "visibleDecisionControls": [
+        "resolve-conflict"
+      ]
+    },
+    "afterDecide": {
+      "stageBanner": {
+        "kind": "conflict",
+        "title": "Conflict contained",
+        "message": "The stale proposal was not applied. Canonical version 2 remains intact."
+      },
+      "primaryArtifact": {
+        "currentAction": "Resolve the version conflict"
+      },
+      "reviewPanel": {
+        "eyebrow": "CONFLICT CONTAINED",
+        "title": "Resolve version conflict",
+        "copy": "A stale proposal was blocked. Continue from the latest canonical artifact without overwriting it."
+      },
+      "completionBlockVisible": false,
+      "receiptLine": "No receipt yet",
+      "visibleDecisionControls": [
+        "resolve-conflict"
+      ]
+    },
+    "renderedFalseClaim": false,
+    "regionsAgree": true
+  },
+  "consoleErrors": [],
+  "screenshots": [
+    "d5-1-conflict-contained.png",
+    "d5-2-after-direct-accept.png"
+  ],
+  "passed": true
+}

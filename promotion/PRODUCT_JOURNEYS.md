@@ -60,9 +60,10 @@ Each journey states, in this order:
   `evidence/desktop-3-review-decision.png`,
   `evidence/desktop-5-completion-receipt.png`,
   `evidence/mobile-1-completion.png`, `evidence/capture-report.json`.
-  Canonical hash moved `1077e34cc8ffae57 → 5cbf8cdb4ab5ba5d`; receipt
-  `6ef3a89f7a456f76`; `GET /api/export` returned 200 with the artifact and its
-  versions.
+  The canonical hash changed on approval and a receipt hash replaced "No receipt
+  yet"; `GET /api/export` returned 200 with the artifact and its versions. The
+  Wave 1 run's own values are in `evidence/capture-report.json` — they are
+  per-run, so quote the field, not the digits.
 
 ## J3 — "That is not what I asked for" (steering)
 
@@ -86,9 +87,12 @@ Each journey states, in this order:
   `DECISION / Proposal rejected`, `CURRENT ACTION / Prepare a revised proposal`,
   `DECISION RECORDED / Prepare a revised proposal` — the stage rail moves to
   `Prepare a proposal`, next owner is `agent`, the only visible control is
-  "Prepare proposal", and the artifact stays v1 at `1077e34cc8ffae57`. The
-  retry then completes: `Completion verified`, artifact `v2`, `Receipt
-  7f91d691956b6e78`.
+  "Prepare proposal", and the artifact stays at v1. The retry then completes:
+  `Completion verified`, artifact `v2`, and a receipt matching the shape the
+  producer asserts, `/^Receipt [a-f0-9]{16}$/` (field
+  `revisedProposalApproved.receipt`). The hash itself is per-run and is not a
+  property of this tree; iteration 1 quoted one as though it were, and iteration 2
+  removed it — see the correction in PROMOTION_LOG.md.
   Previously **FAILED** as defect D1 —
   `evidence/defect-1-stale-review-copy-after-reject.png`,
   `evidence/reject-detail.json`: the right-hand panel updated correctly, but the

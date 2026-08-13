@@ -130,6 +130,7 @@
       "prepack",
       "presentation:nodekit-proof",
       "production-agent:check",
+      "promotion:decide-outcome",
       "promotion:reject-steering",
       "proof:package-install",
       "recall",

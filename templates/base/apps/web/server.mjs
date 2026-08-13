@@ -46,6 +46,19 @@ function prepareProposal() {
   return demo.propose({ artifactId: current.artifact.artifactId, runId: current.run.runId });
 }
 
+// Every decision routes through here, and the presentation is a function of the status the runtime
+// ACHIEVED, never of the decision the caller REQUESTED. `decideProposal` contains a stale accept as
+// `conflicted` — no receipt, run still active — so keying on the request announced "Completion
+// verified" over a null receipt. The three statuses a decided proposal can hold are total here;
+// there is no fallback because there is no fourth outcome.
+function applyDecision(decision, proposalId) {
+  const { proposal } = demo.decide({ decision, proposalId, runId: current.run.runId });
+  if (proposal.status === "accepted") setPresentation("completed_receipt", "complete", "Completion verified", "The canonical artifact and content-addressed receipt are ready.");
+  else if (proposal.status === "rejected") setPresentation("proposal_rejected", "decision", "Proposal rejected", "The rejected change was not applied and the canonical artifact is unchanged. Prepare a revised proposal when you are ready.");
+  else setPresentation("conflict", "conflict", "Conflict contained", `The stale proposal was not applied. Canonical version ${view().artifact.canonicalVersion} remains intact.`);
+  return proposal;
+}
+
 function loadScenario(id) {
   reset();
   if (id === "first_arrival") return view();
@@ -71,9 +84,8 @@ function loadScenario(id) {
     const winner = demo.runtime.createProposal({ artifactId: current.artifact.artifactId, baseVersion: 1, patch: { summary: "A newer approved result.", status: "accepted" }, rationale: "Create the newer canonical version." });
     const stale = demo.runtime.createProposal({ artifactId: current.artifact.artifactId, baseVersion: 1, patch: { summary: "A stale competing result.", status: "proposed" }, rationale: "Exercise stale-write protection." });
     demo.runtime.decideProposal({ proposalId: winner.proposalId, decision: "accepted" });
-    demo.runtime.decideProposal({ proposalId: stale.proposalId, decision: "accepted" });
+    applyDecision("accepted", stale.proposalId);
     demo.runtime.enterStage({ runId: current.run.runId, stageId: "review", nextAction: "Resolve the version conflict", nextActionOwner: "user" });
-    setPresentation(id, "conflict", "Conflict contained", "The stale proposal was not applied. Canonical version 2 remains intact.");
   } else if (id === "recoverable_failure") {
     demo.runtime.raiseException({ runId: current.run.runId, code: "source_unavailable", message: "A required source could not be reached.", preservedState: { artifactVersion: 1 } });
     setPresentation(id, "failure", "Failed safely", "The last valid artifact is preserved. Retry the unavailable source or continue with a warning.");
@@ -81,14 +93,9 @@ function loadScenario(id) {
     prepareProposal();
     setPresentation(id, "resume", "Run resumed after reload", "The pending proposal and next action survived reload without restarting the case.");
   } else if (["completed_receipt", "receipt_inspection", "export_share"].includes(id)) {
-    const proposal = prepareProposal();
-    demo.decide({ decision: "accepted", proposalId: proposal.proposalId, runId: current.run.runId });
-    const copy = id === "receipt_inspection"
-      ? ["Receipt inspection", "Review the bound artifact, proposal, event, and receipt identifiers."]
-      : id === "export_share"
-        ? ["Ready to export and share", "The canonical artifact and its content-addressed receipt travel together."]
-        : ["Completion verified", "The canonical artifact and content-addressed receipt are ready."];
-    setPresentation(id, id === "completed_receipt" ? "complete" : id, copy[0], copy[1]);
+    applyDecision("accepted", prepareProposal().proposalId);
+    if (id === "receipt_inspection") setPresentation(id, id, "Receipt inspection", "Review the bound artifact, proposal, event, and receipt identifiers.");
+    else if (id === "export_share") setPresentation(id, id, "Ready to export and share", "The canonical artifact and its content-addressed receipt travel together.");
   } else {
     throw new Error(`unknown browser scenario: ${id}`);
   }
@@ -181,11 +188,10 @@ async function api(request, response, url) {
     const input = await body(request);
     const proposal = view().proposal;
     if (!proposal) throw new Error("create a proposal first");
-    demo.decide({ decision: input.decision, proposalId: proposal.proposalId, runId: current.run.runId });
-    // Both decisions retire the review. The stage banner is the page's loudest status region, so
-    // leaving it on the review presentation after a rejection contradicted the review panel.
-    if (input.decision === "accepted") setPresentation("completed_receipt", "complete", "Completion verified", "The canonical artifact and content-addressed receipt are ready.");
-    else setPresentation("proposal_rejected", "decision", "Proposal rejected", "The rejected change was not applied and the canonical artifact is unchanged. Prepare a revised proposal when you are ready.");
+    // Both decisions retire the review, and a contained conflict retires it without completing the
+    // case. The stage banner is the page's loudest status region, so it follows the decided
+    // proposal's status rather than the decision that was asked for.
+    applyDecision(input.decision, proposal.proposalId);
     return send(response, 200, view());
   }
   return false;

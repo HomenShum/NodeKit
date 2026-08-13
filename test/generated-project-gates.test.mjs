@@ -4,7 +4,9 @@
 // they run in milliseconds; the end-to-end proof was done by hand against a real `nodekit create`.
 
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -16,14 +18,67 @@ const read = (rel) => readFileSync(path.join(platformRoot, rel), "utf8");
 
 // The template is source with substitution tokens, so it cannot be imported as-is. Substituting
 // them here runs the generated workflow's real behaviour without paying for a `nodekit create`.
-function importGeneratedWorkflow() {
-  const source = read("templates/base/agent/workflow.mjs")
+function generatedWorkflowSource() {
+  return read("templates/base/agent/workflow.mjs")
     .replace("__NODEKIT_RUNTIME_IMPORT__", pathToFileURL(path.join(platformRoot, "src", "lib", "caseflow.mjs")).href)
     .replace("__BRIEF_JSON__", JSON.stringify("triage inbound support tickets"))
     .replaceAll("__APP_TITLE__", "Generated App");
+}
+
+function importGeneratedWorkflow() {
   const file = path.join(mkdtempSync(path.join(tmpdir(), "nodekit-workflow-")), "workflow.mjs");
-  writeFileSync(file, source);
+  writeFileSync(file, generatedWorkflowSource());
   return import(pathToFileURL(file).href);
+}
+
+function freePort() {
+  return new Promise((resolve, reject) => {
+    const probe = createServer();
+    probe.on("error", reject);
+    probe.listen(0, "127.0.0.1", () => {
+      const { port } = probe.address();
+      probe.close(() => resolve(port));
+    });
+  });
+}
+
+// The generated server imports the generated workflow by relative path, so proving what its routes
+// answer means laying both files out the way `nodekit create` does and running them. A regex over
+// the template source can only prove the source still contains a shape.
+async function startGeneratedServer() {
+  const root = mkdtempSync(path.join(tmpdir(), "nodekit-server-"));
+  mkdirSync(path.join(root, "agent"), { recursive: true });
+  mkdirSync(path.join(root, "apps", "web"), { recursive: true });
+  writeFileSync(path.join(root, "agent", "workflow.mjs"), generatedWorkflowSource());
+  writeFileSync(path.join(root, "apps", "web", "server.mjs"), read("templates/base/apps/web/server.mjs")
+    .replaceAll("__APP_TITLE__", "Generated App")
+    .replaceAll("__APP_NAME__", "generated-app"));
+  const port = await freePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  const child = spawn(process.execPath, [path.join(root, "apps", "web", "server.mjs")], {
+    cwd: root,
+    env: { ...process.env, HOST: "127.0.0.1", PORT: String(port) },
+    stdio: "ignore",
+  });
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    try {
+      if ((await fetch(`${baseUrl}/api/health`, { signal: AbortSignal.timeout(500) })).ok) break;
+    } catch {
+      // The server starts concurrently; retry only inside this bounded window.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return {
+    close: () => child.kill(),
+    post: async (pathname, payload = {}) => {
+      const response = await fetch(`${baseUrl}${pathname}`, {
+        body: JSON.stringify(payload),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      });
+      return { body: await response.json(), status: response.status };
+    },
+  };
 }
 
 test("a generated project runs the gates, not merely ships them", () => {
@@ -69,12 +124,50 @@ test("rejecting a proposal moves the run off the review stage", async () => {
   assert.equal(demo.runtime.snapshot().artifacts[0].canonicalVersion, 1, "a rejection must not become canonical");
 });
 
-// The stage banner is a second, independent writer: the server holds its own `presentation`, and
-// only the accepted branch updated it. Symmetry between the two branches is the invariant.
-test("the generated server gives a rejected decision its own presentation", () => {
-  const server = read("templates/base/apps/web/server.mjs");
-  const decide = server.slice(server.indexOf('url.pathname === "/api/decide"'));
-  const accepted = decide.indexOf('input.decision === "accepted"');
-  assert.ok(accepted >= 0, "the decide route no longer branches on the decision");
-  assert.match(decide.slice(accepted, accepted + 600), /else setPresentation\(/, "a rejection leaves the stage banner on the review copy");
+// The stage banner is a second, independent writer: the server holds its own `presentation`. D1
+// closed the rejected half of that branch; D5 was that BOTH halves keyed on the decision the caller
+// requested rather than the status the runtime achieved, so a stale accept the runtime contained as
+// `conflicted` still announced "Completion verified" with `receipt: null`.
+//
+// This replaces a source regex that asserted the decide route still contained
+// `input.decision === "accepted"` followed by an `else setPresentation(`. That assertion could only
+// hold while the defect did — it named the broken shape — so it is replaced by running the routes
+// rather than loosened. All three outcomes are asserted here, including the rejected presentation
+// the old test was there to protect.
+test("the generated server presents the outcome achieved, not the decision requested", async () => {
+  const app = await startGeneratedServer();
+  try {
+    // A stale write the runtime contains. Not click-reachable (the client hides Approve unless a
+    // proposal is pending) but reachable by direct POST and through `?scenario=`.
+    await app.post("/api/scenario", { id: "conflict" });
+    const conflicted = await app.post("/api/decide", { decision: "accepted" });
+    assert.equal(conflicted.body.proposal.status, "conflicted");
+    assert.equal(conflicted.body.receipt, null);
+    assert.equal(conflicted.body.run.status, "active");
+    assert.notEqual(conflicted.body.presentation.kind, "complete", "a completion banner over a null receipt is a false completion claim");
+    assert.equal(conflicted.body.presentation.kind, "conflict");
+    assert.doesNotMatch(conflicted.body.presentation.title, /completion verified/i);
+
+    // The honest accept must still complete. A fix that simply stopped claiming completion would
+    // satisfy the assertions above and destroy the product.
+    await app.post("/api/reset");
+    await app.post("/api/confirm", { outcome: "Route billing tickets to the billing queue" });
+    await app.post("/api/propose");
+    const accepted = await app.post("/api/decide", { decision: "accepted" });
+    assert.equal(accepted.body.presentation.kind, "complete");
+    assert.equal(accepted.body.proposal.status, "accepted");
+    assert.equal(accepted.body.run.status, "completed");
+    assert.ok(accepted.body.receipt, "the accepted path must still produce a receipt");
+
+    // D1's half of the same seam, still closed.
+    await app.post("/api/reset");
+    await app.post("/api/confirm", { outcome: "Route billing tickets to the billing queue" });
+    await app.post("/api/propose");
+    const rejected = await app.post("/api/decide", { decision: "rejected" });
+    assert.equal(rejected.body.proposal.status, "rejected");
+    assert.equal(rejected.body.presentation.id, "proposal_rejected");
+    assert.doesNotMatch(rejected.body.presentation.title, /completion verified/i);
+  } finally {
+    app.close();
+  }
 });
