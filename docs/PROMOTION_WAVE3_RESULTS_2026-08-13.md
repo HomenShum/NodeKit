@@ -235,3 +235,88 @@ second complete implementation of the same surface elsewhere in the tree. NodeSl
 mcp workspace compiled code from outside itself; NodeVoice serves its public API twice.
 Before declaring a seam closed, search for a *second* implementation of the surface, not
 just other callers of the one you found.
+
+## The limits, resolved
+
+The three things Wave 3 had to leave open were all blocked on the same thing: no
+permission to stand up a live deployment, and no audit toolchain installed. Both were
+granted, so all three were closed.
+
+**Live deployments.** Two repos needed one. Each got an **isolated Convex dev
+deployment** — never production — and both proved what they could not prove before:
+
+- **NodeVoice** — the body cap and input narrowing on `convex/http.ts` had been proved
+  at code level only. Now measured against the hosted routes.
+- **NodeBenchAI** — its cold reader wrote *"you cannot observe the half of the system
+  that matters."* With a deployment behind it, the primary journey runs end to end and
+  conditions 1, 3, 4, 5, 6 and 9 moved on captured evidence.
+
+**Conditions 7 and 8.** Lighthouse 13.4.1 and axe-core 4.13.0 ran against every real
+surface, and every repo got a genuine Web Interface Guidelines review. **All 17 WIG
+reviews were confirmed real by the verifiers** — nobody passed a Lighthouse score off
+as a review, which was the specific dishonesty this pass was watching for.
+
+**105 condition moves claimed, 104 supported.** Portfolio: **65 → 129 of 204.**
+
+Not every move went up, and that is the point. NodeVoice, NodeRoom, NodeSlide and
+NodeTrace moved conditions 7 and 8 from UNVERIFIED to **FAIL**, because running the
+audit for the first time found real problems. An audit that only ever produces passes
+is not an audit.
+
+**Three repositories are now PROMOTED** — 12/12 PASS, 0 FAIL, 0 UNVERIFIED, each with
+a committed evidence directory: **NodeGraph, NodeKit, NodeProof.**
+
+Two repos correctly recorded conditions as **not applicable** rather than inventing a
+surface to audit: NodeRL (no rendered surface — `git ls-files` for html/tsx/jsx/vue/svelte
+returns zero) and NodeAgentSpec, which ran the audits anyway *"precisely so the
+not-applicable verdict rests on an observation"* and noted that auditing a
+markdown-only repo audits github.com's rendering, not the repository.
+
+## A credential, and the ignore pattern that let it in
+
+A verifier's secret sweep found `packages/mcp-local/.mcpregistry_registry_token` tracked
+in **NodeBenchAI, a public repository**. Decoded without printing it: a real
+`mcp-registry` publish JWT, `permissions: publish io.github.HomenShum/*`.
+
+It expired **2026-03-06** and was committed **2026-03-12** — dead six days before it
+landed, and 161 days ago now. So there is no live exposure from this token, and that is
+luck rather than design.
+
+The cause was the ignore pattern: `.gitignore` listed `.mcpregistry_github_token` and
+nothing else, so the *registry* token was never ignored. Widened to
+`.mcpregistry_*_token`, and the file is untracked at HEAD (`facf7958`). A sweep of all
+seventeen repositories for `.env`, `*_token`, `*.pem`, `credentials.json` and `id_rsa`
+found **no other credential-shaped tracked file**.
+
+Two things are deliberately left for the owner: the blob remains in git history, and
+rewriting a public repository's history breaks every existing clone and fork — that is
+not an agent's call. GitGuardian will keep flagging the historical incident until the
+history is purged or the finding is resolved in that dashboard.
+
+## NodeKit's own gate was broken in three ways at once
+
+A verifier ran NodeKit's WIG producer three times from a fresh clone and got exit 1,
+exit 1, exit 0. Chasing that down found three stacked defects, and the first is the one
+worth remembering:
+
+1. **`spawn` with `shell: true` on Windows re-splits arguments at whitespace** — and
+   this repository's own path is `D:\VSCode Projects\node-platform`, so the child became
+   `node D:\VSCode` and exited 1. **This is the identical defect NodeKit had just told
+   FeatureClipStudio to fix, sitting in NodeKit's own producer.** The correct fix is not
+   quoting but removing the shell — except Node 22 refuses to spawn a `.cmd` shim
+   *without* one (EINVAL), and `npm` on Windows is `npm.cmd`. So: no shell for real
+   executables, a shell only for the shim, quoted so the first problem cannot return.
+2. **`stdio: "ignore"` made every child failure a bare "exited 1"** with no cause, which
+   is why this needed a bisect to attribute at all.
+3. **The measurement raced the render.** `#error` becoming visible is not the error
+   region being finished; it read `retryVisible: false` and an empty message, while
+   `W-RETRY` — which waits first — saw the same control and passed.
+
+Fixed at `087cfe0`: deterministic 3/3 at exit 0, and defeat-tested by restoring the
+browser's own wording in `app.js`, which makes the gate fail and the script exit 1.
+
+**The lesson, stated plainly: a stale committed artifact reads exactly like a passing
+run.** The first three diagnostic runs here reported a clean `passed: true` artifact
+while the script was exiting 1 — because the artifact on disk was from an earlier
+environment and the current runs never got far enough to overwrite it. Delete the
+artifact before re-running a producer, or you will measure the past.
