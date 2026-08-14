@@ -29,10 +29,10 @@ nine stages, naming a `file:line` for each.
 | ran the application | 15/15 | **17/17** |
 | answered all nine questions | 15/15 | 16/17 (one 8/9) |
 
-Sixteen repos carry the full packet on their default branch — `docs/START_HERE.md`
-(13–22KB, runtime-ordered), `docs/SIMPLIFICATION_REPORT.md`, exactly seven files in
-`docs/codebase/`, and validated `.tours/`. NodeSlide's is in a pull request because
-its main is protected.
+At the close of iteration 2, sixteen repos carried the full packet on their default
+branch and NodeSlide's sat in a pull request, because its main is protected. Both of
+its pull requests have since merged, so the current count is **17 of 17** — see
+"Final state" below, which is the number to trust if these two disagree.
 
 ## The finding that mattered most
 
