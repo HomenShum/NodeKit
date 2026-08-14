@@ -157,3 +157,61 @@ guards could not see it. That is the finding, not an embarrassment: it is exactl
 the thread predicted when it said *"the strongest gate is not the same coding agent
 declaring that its own work is understandable."* Twelve repositories now pass a test
 that no one who built them administered.
+
+## The P0 pass, and what adversarial verification is actually worth
+
+The cold readers surfaced four P0-class defects that no test caught. Fixing them took
+two rounds, because the first round's verifiers refused to pass work that did not hold
+up under re-measurement.
+
+**Closed and independently re-measured:**
+
+- **NodeVoice** — a public `CORS *` route accepted `{"turns":3000000}` and peaked at
+  **2,884 MB RSS** before returning HTTP 500. Now bounded. `{"target":"abc"}` reached a
+  field typed `number`; now narrowed on both routes. Provenance reported
+  `mode:"openai"` and "live" for runs whose model calls all failed; it now reports
+  `mode:"deterministic"` with a fallback count. The bare `catch { return deterministic }`
+  now logs and fires a callback while keeping the fallback.
+- **NodeTrace** — the capture script could screenshot a *foreign process* on a busy port
+  and print PASS with that process's numbers. Closed at a shared seam all three capture
+  callers route through, with an identity regression probe the verifier defeated-tested
+  by reverting the script and watching it fail.
+- **trialscope** — five items, no regressions.
+- **FeatureClipStudio** — the misleading `ENOENT` now names Windows MAX_PATH.
+
+**What the verifiers caught that the fixes claimed were done:**
+
+- FeatureClipStudio said eight callers routed through its new handler. There were
+  **nine** — `iterate.mjs:66`, the documented stage-5 gate, bypassed it entirely. Worse,
+  the guard meant to prove the wiring was decorative: reverting a CI step to the
+  bypassing shape still printed PASS, because a **comment** two lines above contained
+  the string it grepped for. And the fix introduced its own defect —
+  `spawnSync(…, {shell:true})` with no quoting silently wrote `out/my.mp4` for
+  `"out/my clip.mp4"` and exited 0.
+- NodeVoice's body cap traded one defect for another: a client crossing the cap then
+  going silent was dropped in **49 ms** before, and held for **300 s** after.
+
+Both were repaired. FeatureClipStudio's guard now *discovers* callers instead of
+consulting a list — a five-mutation battery reverting each caller in turn is caught,
+each named by `file:line` — and the quoting fix reuses an expression the repo already
+owned rather than inventing a second one.
+
+**What survived even the repair round:** NodeVoice's seam is still not closed.
+`convex/http.ts` is a **second complete implementation of the same public API** —
+registering POST `/compare/demo`, `/nodeagents/run` and `/live/rooms` — reading every
+body with `req.json()`, so the Node-side cap does not protect it. The anti-enumeration
+guard could not see it because it walked `src/` only. That is in flight.
+
+**The lesson worth keeping:** every one of these was found by re-running a measurement,
+never by reading a diff. Three separate guards in this wave — a citation checker, a
+wiring probe, and an anti-enumeration test — passed while the thing they guarded was
+broken, each because the guard checked a proxy (a line number, a substring, a
+directory) instead of the property. A guard is only worth what it fails on.
+
+## Standing caution: a second implementation is the bypass you will miss
+
+Two repositories in this wave had the same shape — a fix applied at "the" seam, with a
+second complete implementation of the same surface elsewhere in the tree. NodeSlide's
+mcp workspace compiled code from outside itself; NodeVoice serves its public API twice.
+Before declaring a seam closed, search for a *second* implementation of the surface, not
+just other callers of the one you found.
