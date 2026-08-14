@@ -495,6 +495,16 @@ the thing failed.
   files produced `not ok 6`, `not ok 7`, `not ok 8` (5 pass / 3 fail); restoring
   them gave 8/8. Both new browser producers were confirmed the same way — each
   exits 1 on the pre-fix tree and 0 after.
+- **Evidence hygiene, corrected here rather than quietly.** Both producers were
+  then run a second time with no arguments, from a cold `nodekit create`, to
+  prove the path a verifier actually uses. They pass — and the second run
+  returned a different LCP (1356 ms vs 1258 ms) and a different performance
+  score (1.00 vs 0.99) from the same tree. The scorecard had quoted one run's
+  numbers as though they were properties of the repository, which is the same
+  mistake iteration 2 recorded for receipt hashes. Rows 8 and 10 now quote what
+  is actually stable — CLS 0.054 and TBT 0 ms, identical in all five runs, and
+  the category scores — and give ranges for LCP and FCP, which move. What the
+  producer asserts, and what the row rests on, is the threshold, not the number.
 - **Conditions newly PASS:** **2, 5, 7, 8** — and 3, 6, 9, 10 and 11 were
   re-evidenced with measurements that cover more than they did before. The
   scorecard is now 12/12.

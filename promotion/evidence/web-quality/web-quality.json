@@ -9,14 +9,14 @@
     "sweepViolations": 0
   },
   "commands": [
-    "npx --yes lighthouse@13.4.1 http://127.0.0.1:4916/ --output=json --output-path=promotion/evidence/web-quality/lighthouse-app.json --chrome-flags=\"--headless\"",
-    "npx --yes @axe-core/cli@4.13.0 http://127.0.0.1:4916/ --save promotion/evidence/web-quality/axe-app.json",
+    "npx --yes lighthouse@13.4.1 http://127.0.0.1:4908/ --output=json --output-path=promotion/evidence/web-quality/lighthouse-app.json --chrome-flags=\"--headless\"",
+    "npx --yes @axe-core/cli@4.13.0 http://127.0.0.1:4908/ --save promotion/evidence/web-quality/axe-app.json",
     "node scripts/capture-web-quality.mjs"
   ],
   "consoleErrors": [],
   "lighthouse": {
     "categories": {
-      "performance": 0.99,
+      "performance": 1,
       "accessibility": 1,
       "best-practices": 1,
       "seo": 1,
@@ -26,15 +26,15 @@
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
     "vitals": {
       "cls": 0.05362264114324445,
-      "fcpMs": 1103,
-      "lcpMs": 1258,
+      "fcpMs": 1054,
+      "lcpMs": 1356,
       "tbtMs": 0
     }
   },
-  "measuredAt": "2026-08-14T02:18:59.636Z",
+  "measuredAt": "2026-08-14T03:07:14.820Z",
   "passed": true,
   "failures": [],
-  "surface": "http://127.0.0.1:4916/ (application produced by `nodekit create`)",
+  "surface": "http://127.0.0.1:4908/ (application produced by `nodekit create`)",
   "thresholds": {
     "accessibility": 1,
     "best-practices": 1,

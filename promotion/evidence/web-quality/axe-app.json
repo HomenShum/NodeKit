@@ -14,8 +14,8 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-08-14T02:18:11.578Z",
-    "url": "http://127.0.0.1:4916/",
+    "timestamp": "2026-08-14T03:06:26.798Z",
+    "url": "http://127.0.0.1:4908/",
     "toolOptions": {
       "reporter": "v1"
     },
@@ -1134,7 +1134,7 @@
               }
             ],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -1411,7 +1411,7 @@
             ],
             "none": [],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -1629,7 +1629,7 @@
               }
             ],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -1929,7 +1929,7 @@
             ],
             "none": [],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -2133,7 +2133,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -2865,7 +2865,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -3383,7 +3383,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -3495,7 +3495,7 @@
               }
             ],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -3692,7 +3692,7 @@
               }
             ],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -3750,7 +3750,7 @@
               }
             ],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
@@ -4666,7 +4666,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<div>\n          <p class=\"eyebrow\">GUIDED CASE</p>\n          <h1 id=\"case-title\">One clear job.<br><em>Carried all the way through.</em></h1>\n          <p class=\"lede\">triage inbound support tickets</p>\n        </div>",
+            "html": "<div>\n          <p class=\"eyebrow\">GUIDED CASE</p>\n          <h1 id=\"case-title\">One clear job.<br><em>Carried all the way through.</em></h1>\n          <p class=\"lede\">triage</p>\n        </div>",
             "target": [
               ".orientation > div"
             ]
@@ -5366,7 +5366,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<div><input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\"><button class=\"button secondary\" type=\"submit\">Confirm outcome</button></div>",
+            "html": "<div><input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\"><button class=\"button secondary\" type=\"submit\">Confirm outcome</button></div>",
             "target": [
               "#primary-input > div"
             ]
@@ -5386,7 +5386,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage inbound support tickets\" required=\"\" aria-invalid=\"false\">",
+            "html": "<input id=\"outcome\" name=\"outcome\" value=\"triage\" required=\"\" aria-invalid=\"false\">",
             "target": [
               "#outcome"
             ]
