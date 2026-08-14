@@ -33,11 +33,37 @@ const baseUrl = `http://127.0.0.1:${port}`;
 const GUIDELINES_URL = "https://vercel.com/design/guidelines";
 const GUIDELINES_RETRIEVED = "2026-08-13";
 
+// Two constraints pull in opposite directions on Windows, and this script used to
+// satisfy neither:
+//   * `shell: true` makes cmd.exe re-split every argument at whitespace, so this
+//     repository's own path -- "D:\VSCode Projects\node-platform" -- became
+//     `node D:\VSCode` and exited 1.
+//   * Node 22 refuses to spawn a `.cmd` shim WITHOUT a shell (EINVAL), and `npm`
+//     on Windows is `npm.cmd`.
+// So: no shell for real executables, a shell only for the shim, and quoting when
+// the shell is in play so the first problem cannot come back.
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const needsShell = (command) => process.platform === "win32" && /\.(cmd|bat)$/i.test(command);
+const quoteForShell = (value) => (/[\s"]/.test(value) ? `"${value.replace(/"/g, '\\"')}"` : value);
+
 function run(command, commandArgs, cwd) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, commandArgs, { cwd, shell: process.platform === "win32", stdio: "ignore" });
+    const shell = needsShell(command);
+    const child = spawn(
+      shell ? quoteForShell(command) : command,
+      shell ? commandArgs.map(quoteForShell) : commandArgs,
+      { cwd, shell, stdio: ["ignore", "ignore", "pipe"] },
+    );
+    let stderr = "";
+    child.stderr?.on("data", (chunk) => { stderr += chunk.toString(); });
     child.on("error", reject);
-    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${command} exited ${code}`))));
+    child.on("exit", (code) => {
+      if (code === 0) return resolve();
+      // Carry the child's own words. `stdio: "ignore"` turned every failure here
+      // into a bare "exited 1", which is why this took a bisect to attribute.
+      const detail = stderr.trim().split("\n").slice(-5).join("\n");
+      reject(new Error(`${command} ${commandArgs.join(" ")} exited ${code}${detail ? `\n${detail}` : ""}`));
+    });
   });
 }
 
@@ -67,7 +93,7 @@ async function main() {
       temporaryRoot = await mkdtemp(path.join(tmpdir(), "nodekit-wig-"));
       appDir = path.join(temporaryRoot, "app");
       await run(process.execPath, [path.join(repoRoot, "src", "cli.mjs"), "create", appDir, "--name", "audit-app", "--brief", "triage inbound support tickets"], repoRoot);
-      await run("npm", ["install", "--no-audit", "--no-fund"], appDir);
+      await run(npmCommand, ["install", "--no-audit", "--no-fund"], appDir);
     }
     const server = spawn(process.execPath, [path.join(appDir, "apps", "web", "server.mjs")], {
       cwd: appDir, env: { ...process.env, PORT: String(port) }, stdio: "ignore",
@@ -220,6 +246,19 @@ async function main() {
     await desktopPage.route("**/api/propose", (route) => route.abort("failed"));
     await desktopPage.locator("#propose").click();
     await desktopPage.locator("#error").waitFor({ state: "visible" });
+    // #error turning visible is not the same as the error region being finished:
+    // the message text and the Retry control land on a later paint. Measuring on
+    // visibility alone read retryVisible:false and text:"" while W-RETRY, which
+    // waits first, saw the same control and passed -- a race, not a defect.
+    // Bounded, so a region that genuinely never renders still fails honestly
+    // rather than hanging.
+    await desktopPage
+      .waitForFunction(() => {
+        const retry = document.getElementById("retry");
+        const message = document.getElementById("error-message") ?? document.getElementById("error");
+        return Boolean(retry) && !retry.hidden && Boolean(message?.textContent?.trim());
+      }, null, { timeout: 5_000 })
+      .catch(() => {});
     const errorState = await desktopPage.evaluate(() => ({
       retryVisible: Boolean(document.getElementById("retry")) && !document.getElementById("retry").hidden,
       role: document.getElementById("error")?.getAttribute("role") ?? null,

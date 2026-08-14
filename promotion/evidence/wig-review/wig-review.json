@@ -368,6 +368,6 @@
   "minorUnresolved": [],
   "note": "A Lighthouse or axe score is NOT evidence for this condition. Every row here is a WIG rule measured on the rendered surface; condition 8's audit is a separate instrument with no shared rule.",
   "passed": true,
-  "reviewedAt": "2026-08-14T03:05:41.395Z",
+  "reviewedAt": "2026-08-14T04:28:48.595Z",
   "surface": "http://127.0.0.1:4909/ (application produced by `nodekit create`)"
 }
