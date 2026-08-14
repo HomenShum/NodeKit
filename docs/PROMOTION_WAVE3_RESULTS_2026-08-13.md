@@ -196,11 +196,31 @@ consulting a list — a five-mutation battery reverting each caller in turn is c
 each named by `file:line` — and the quoting fix reuses an expression the repo already
 owned rather than inventing a second one.
 
-**What survived even the repair round:** NodeVoice's seam is still not closed.
+**What survived the repair round, and how it closed.** NodeVoice's seam was still open:
 `convex/http.ts` is a **second complete implementation of the same public API** —
 registering POST `/compare/demo`, `/nodeagents/run` and `/live/rooms` — reading every
-body with `req.json()`, so the Node-side cap does not protect it. The anti-enumeration
-guard could not see it because it walked `src/` only. That is in flight.
+body with `req.json()`, so the Node-side cap never protected it. The anti-enumeration
+guard could not see it for *two* independent reasons: it walked `src/` only, and its
+detector matched only the two node-stream shapes (`.on("data")`, `for await`), so a web
+`Request` read was invisible even inside `src/`.
+
+Closed in `30253b4`: ten raw reads in `convex/http.ts` now go through one shared reader,
+`MAX_BODY_BYTES` is declared once in `src/core/requestBody.ts` and imported by the Node
+path, and the duplicated `clampTarget`/`clampTurns` were deleted in favour of the
+existing validators. One cap, two readers — because a socket and a web stream refuse
+differently, but a cap written twice drifts.
+
+Verified independently rather than accepted: `convex/http.ts` contains zero raw body
+reads; the suite is 55 tests across 9 files; and a bypass written fresh for this check —
+a file the fixing agent never saw — makes the guard **fail and name that file**, then
+pass again when removed.
+
+The fixing agent also drew the line honestly where it could not measure: no request was
+ever issued to a running Convex deployment, because that needs an account this pass does
+not create. What is proved is that every Convex route reads through the bounded reader
+and that the bounded reader refuses. The hosted route answering 413 to an oversized body
+is **not** proved the way its Node twin was, and the report says so rather than implying
+otherwise.
 
 **The lesson worth keeping:** every one of these was found by re-running a measurement,
 never by reading a diff. Three separate guards in this wave — a citation checker, a
