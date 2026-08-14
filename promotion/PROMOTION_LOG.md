@@ -499,9 +499,13 @@ the thing failed.
   re-evidenced with measurements that cover more than they did before. The
   scorecard is now 12/12.
 - **Not done, recorded rather than silently skipped:**
-  - `scripts/run-protected-browser-lane.mjs` is **still unwired**. This iteration
-    proved by measurement that it would have caught the defect it did not catch,
-    but wiring it means giving an evaluator contract with `wx` writes a runner and
+  - `scripts/run-protected-browser-lane.mjs` is **still unwired**. This iteration did
+    not run it — stated plainly, because the lane wants a candidate archive, a runId
+    and a taskId it is not given here, so "it would have caught this" is an
+    inference from its policy and its theme matrix, not an observation. What *was*
+    observed is that an equivalent sweep over the same states in both themes, held
+    to the same serious-critical-zero policy, fails 28 cells on the pre-fix tree.
+    Wiring the lane means giving an evaluator contract with `wx` writes a runner and
     a CI budget, which is a larger change than one iteration should carry. It is
     now the single highest-value thing left in this repository, and the case for
     it is no longer an argument — it is 28 violating cells.
