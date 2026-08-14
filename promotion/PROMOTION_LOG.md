@@ -94,7 +94,7 @@ reproduction; a hunch is not a defect.
 | # | Severity | Journey | Reproduction | Status |
 |---|----------|---------|--------------|--------|
 | D1 | major | J3 | **CLOSED in iteration 1.** Chromium 1280x900 on `PORT=4187 npm run dev` in the quickstart-created app. `POST /api/reset`, reload, type any outcome, submit, press "Prepare proposal", wait for `Proposal ready for review`, press **Reject**, wait 1.2s. The right panel correctly becomes `DECISION RECORDED — Prepare a revised proposal — The rejected change was not applied. The canonical artifact remains intact.` The stage banner is byte-identical to before the click: `REVIEW — Proposal ready for review — Compare the bounded change with the canonical artifact before deciding.` The primary artifact panel likewise still reads `CURRENT ACTION — Approve or reject the proposed change`, and the stage rail still highlights step 3. The only visible control is "Prepare proposal". Two of three status regions instruct the user to act on a proposal that does not exist. `evidence/defect-1-stale-review-copy-after-reject.png`, `evidence/reject-detail.json` | closed |
-| D2 | major | recovery | Same app, 1280x900. Reach the orientation state, then block the confirm call (`page.route("**/api/confirm", r => r.abort("failed"))`), enter an outcome and submit. The error slot renders the browser's own exception text, verbatim: **`Failed to fetch`**. The stage banner stays on `ORIENTATION — Ready for your direction — Confirm the outcome before the run begins`, so the page shows no sign that anything went wrong, and offers no retry. The app's two recovery controls (`#resume`, `#resolve-conflict`) stay `display:none`. Contrast the form-validation path, which is designed properly (`role=alert`, `aria-invalid=true`, "Add a concrete outcome before continuing."). `evidence/error-state.json`, `evidence/desktop-7-transport-failure.png` | open |
+| D2 | major | recovery | **CLOSED in iteration 3.** Same app, 1280x900. Reach the orientation state, then block the confirm call (`page.route("**/api/confirm", r => r.abort("failed"))`), enter an outcome and submit. The error slot renders the browser's own exception text, verbatim: **`Failed to fetch`**. The stage banner stays on `ORIENTATION — Ready for your direction — Confirm the outcome before the run begins`, so the page shows no sign that anything went wrong, and offers no retry. The app's two recovery controls (`#resume`, `#resolve-conflict`) stay `display:none`. Contrast the form-validation path, which is designed properly (`role=alert`, `aria-invalid=true`, "Add a concrete outcome before continuing."). `evidence/error-state.json`, `evidence/desktop-7-transport-failure.png`. Fixed at `api()` in `templates/base/apps/web/public/app.js`, the single seam every call routes through: a transport rejection is replaced with app-authored wording that names the exit, and the error region carries a Retry that re-issues the failed action. Re-proved in the rendered app: `evidence/wig-review/wig-error-exit.png`, `evidence/wig-review/wig-review.json` (`W-ERREXIT`, `W-RETRY`) | closed |
 | D3 | minor | J2 | `npm run dev` in the created app when port 4173 is taken: the process dies on an unhandled `'error'` event and prints a Node stack trace with `EADDRINUSE`, with no message telling the user to set `PORT`. `apps/web/server.mjs` line 208 calls `server.listen(...)` with no `error` handler. Reproduced by starting any other listener on 4173 first | open |
 | D4 | minor | J1 | The README headline promises "40 seconds to a running, proof-carrying app (measured from a cold clone)". On this machine `npm install` alone reported `added 82 packages, and audited 83 packages in 1m` — the budget is spent before `create` starts. The claim is environment-bound and the README does not say on what. Not a functional break; recorded so the number is not quoted as universal | open |
 | D5 | major | J3 / conflict | **CLOSED in iteration 2.** Sibling of D1, found by the adversarial verifier of iteration 1's fix, and worse than D1: a false completion claim rather than a stale one. Same app on `PORT=4401`. `POST /api/scenario {"id":"conflict"}` (or open `?scenario=conflict`), then `POST /api/decide {"decision":"accepted"}`. Answers **HTTP 200** with the stage banner `COMPLETE — Completion verified — The canonical artifact and content-addressed receipt are ready` while `proposal.status = "conflicted"`, `receipt = null`, `run.status = "active"`, `run.currentStageId = "review"`, `run.nextAction = "Resolve the version conflict"`. The same page simultaneously reads `CONFLICT CONTAINED / Resolve version conflict` in the review panel and `No receipt yet` in the footer. Not click-reachable — `app.js` sets `elements.approve.hidden = !pending` — but reachable by direct POST and through the `?scenario=` debug surface. `evidence/defect-5-false-completion-on-contained-conflict.png`, `evidence/decide-outcome/decide-outcome.json` | closed |
@@ -332,5 +332,187 @@ reproduction; a hunch is not a defect.
   Adding it means editing `REQUIRED_STATES` in
   `scripts/run-protected-browser-lane.mjs`, an evaluator contract with `wx`
   writes. Still the next iteration's best target.
+
+
+### Iteration 3 — 2026-08-13 — the audits that were never run, and the two rows that were PASS anyway
+
+- **Journey exercised:** J2 (quickstart to a running app) and J3 (steering), plus
+  every `?scenario=` state the generated app can be driven to, at two widths and
+  two colour schemes.
+- **What this iteration was for:** conditions 7 and 8 had been UNVERIFIED since
+  the baseline for one honest reason — no Web Interface Guidelines review and no
+  performance audit had ever been run against this surface. Both toolchains were
+  available on this machine, so both were run, and both were retained.
+
+#### Condition 8 — the web-quality audit
+
+- **Observed, pre-fix**, on a `nodekit create` app on port 4908, Windows 11 /
+  Node v22.22.2, Chromium headless. Lighthouse 13.4.1 scored accessibility
+  **0.95** and best-practices **0.96**, with two failing audits: `color-contrast`
+  and `errors-in-console`. `@axe-core/cli@4.13.0` independently reported the same
+  single violation: serious `color-contrast` on `.active.step > span`, foreground
+  `#f3f1e9` on background `#b8e85b`, ratio **1.26:1** against a required 4.5:1.
+- **Root cause, traced rather than guessed.** `--lime` is a brand colour that
+  stays light in *both* themes (`#d8ff72` light, `#b8e85b` dark), while `--ink`
+  flips from near-black to near-white. Any text on lime that inherits `--ink` is
+  therefore legible in light mode and invisible in dark. The stylesheet had four
+  lime-background rules. The dark block patched **three** of them by hand
+  (`.primary,.approve`, `.completion`, and the complete/receipt/export banners,
+  all to `#111313`) and missed `.step.active`. The rule was being enforced once
+  per callsite, so the fourth callsite drifted — and the same mistake had been
+  made a second time, with `--ok-fill` never given a dark value at all, leaving
+  `--muted` on a composited `#606d44` at 2.35:1.
+- **Why no test caught it.** `scripts/run-protected-browser-lane.mjs` already
+  sweeps 15 states x 6 viewports x 2 themes with an axe policy of
+  `serious-critical-zero` — it would have caught this on the day it shipped.
+  **Nothing runs it.** It has no npm script and no CI job; `evaluate-agent-ease.mjs`
+  and `run-agent-ease-matrix.mjs` reference it only to take the sha256 of the
+  file, treating it as an evaluator contract input rather than as a check.
+  `docs/SIMPLIFICATION_REPORT.md` says so out loud: "no browser-driven check runs
+  in the default suite." This is the repository's own documented failure mode — a
+  finished, tested, unwired mechanism — and it is why a serious defect shipped.
+- **Why the CLIs alone were not enough either.** Both audit one page in one
+  colour scheme, whichever headless Chrome happens to default to. Wave 1's axe
+  run swept light only and honestly reported 0 violations, which is how condition
+  6 came to read PASS while a serious violation sat on the first screen in dark
+  mode. So the new producer adds a third phase: 15 states x 2 schemes x 2 widths
+  = 60 cells, same axe engine, in-process. On the pre-fix tree that phase fails
+  **28 of 60 cells, every one of them dark**; the two CLIs saw 1.
+- **Fixed at the token layer, not per callsite.** `--on-lime:#171817` is defined
+  once in `:root` and never redefined in the dark block, because the surface it
+  paints never flips; the four lime rules now use it, and the three hand-patched
+  dark overrides it replaces were deleted. `--ok-fill` gained the dark value it
+  never had. `#exception` — the one light-danger surface with no hue-matched dark
+  text — got the same treatment the danger banner already used. Net: three
+  overrides removed, one token added.
+  - One correction made in flight, recorded because it was nearly a silent
+    regression: `--danger-fill` was first darkened alongside `--ok-fill`, which
+    fixed `#exception` but broke the two danger banners whose dark text existed
+    precisely because that surface stays light. The `:root` comment says the two
+    tokens "diverge in dark" on purpose. The change was reverted and the narrower
+    fix applied instead. The intermediate run is what caught it.
+  - A second self-inflicted one: scoping `.receipt-actions a` to `color:inherit`
+    outranked `.primary` (0,1,1 beats 0,1,0) and left the lime Download-proof
+    button at 1.26:1 anyway. Now scoped to `a:not(.primary)`.
+- **The favicon 404.** `errors-in-console` failed because the document requested
+  `/favicon.ico`, which the server does not serve — a console error and a failed
+  request on *every* page load, while condition 9 read PASS. The page now
+  declares an inline SVG icon and asks for nothing it does not serve.
+- **Re-proved:** `promotion/evidence/web-quality/web-quality.json` — `passed: true`,
+  Lighthouse performance 0.99 / accessibility 1.00 / best-practices 1.00 / SEO
+  1.00, LCP 1258 ms, CLS 0.054, TBT 0 ms, `consoleErrors: []`, axe CLI 0
+  violations, sweep 0 violations across 60 cells. The pre-fix run of the same
+  producer is committed beside it at `promotion/evidence/web-quality/before/`
+  (`passed: false`, 32 failures, 28 violating cells, plus a screenshot of each),
+  so before and after come from one instrument rather than two.
+- **Producer:** `scripts/capture-web-quality.mjs`, wired as
+  `npm run promotion:web-quality`. With no arguments it runs `nodekit create`
+  into a temp directory, installs it, starts it, runs both pinned CLIs, sweeps
+  the 60 cells, and exits 1 on any serious/critical violation, any console error,
+  any category below threshold, or any Core Web Vital outside its "good"
+  boundary. Confirmed to exit 1 on the pre-fix tree and 0 on this one.
+
+#### Condition 7 — the Web Interface Guidelines review
+
+This is a review, and it is deliberately **not** the audit above wearing a
+different hat. A Lighthouse score cannot answer a single one of the rules below,
+and an app can score 100 on every category while showing a user the browser's own
+`Failed to fetch` with nothing to click — which is exactly what this surface did.
+The two producers share no rule.
+
+- **Source:** the Vercel Web Interface Guidelines, https://vercel.com/design/guidelines,
+  retrieved 2026-08-13. Reachable; no fallback checklist was needed.
+- **Method:** 21 rules measured on the rendered surface in Chromium at 1280x900
+  and 375x812, dark scheme, across the states each rule applies to. Every row in
+  `promotion/evidence/wig-review/wig-review.json` carries the rule text it checks
+  and the measurement it took.
+- **Major findings, all three fixed:**
+  1. **Error messages guide exit / No dead ends.** Aborting `/api/propose` in the
+     browser rendered the literal string `Failed to fetch` — the browser's
+     wording, naming neither cause nor exit — with no retry. Root cause: `act()`
+     wrote `error.message` straight to the page, and `api()` let the fetch
+     rejection through untouched. Fixed at `api()`, the one seam every call
+     routes through, so no caller can leak it: a transport rejection becomes
+     `Could not reach the server. Check that it is still running, then retry.`
+     with `retryable` set, and the error region gained a Retry control that
+     re-issues the failed action. `wig-error-exit.png`.
+  2. **Loading buttons / Submission rule.** There was no in-flight state at all:
+     no indicator, and a control that stayed live during its own request, so a
+     second click submitted the same action twice. Fixed in the same function —
+     `data-busy` and `aria-busy` on `body`, an animated bar on the state banner,
+     controls non-interactive, **labels unchanged**, and an `inFlight` guard.
+     Measured by holding the response open 1.2 s and reading the DOM mid-flight.
+     `wig-loading-state.png`.
+  3. **Match visual & hit targets.** The mobile Approve and Reject — the two
+     controls a decision is actually made with — were 42 px high against the
+     44 px mobile minimum. Now 74.6x44 and 60.1x44 at 375x812.
+- **Minor findings, both fixed rather than carried:** no `touch-action:
+  manipulation` or `-webkit-tap-highlight-color` on any control (the tap
+  highlight was Chrome's default blue, off-system), and a `<title>` that read
+  `Audit App | Guided case` in every state of the run, so a tab or a shared link
+  could not say where the run had got to. The title now leads with the stage.
+- **Result:** 21 checked, **0 major and 0 minor unresolved**.
+- **Scope, stated so the row is not overread:** rules that cannot be mechanically
+  measured — optical alignment, easing choice, copywriting tone — were not
+  reviewed. This is a review of the 21 rules named in the artifact, not of all
+  ~120 bullets in the guidelines.
+- **Producer:** `scripts/capture-wig-review.mjs`, wired as
+  `npm run promotion:wig-review`. Exits 1 on any unresolved major.
+
+#### Two rows that were PASS and should not have been
+
+Recorded here rather than quietly corrected in the table, because the list of
+things that turned out to be wrong is the useful part:
+
+- **Condition 6** read PASS on "axe-core reports 0 violations at 1280 and 375".
+  True, and measured — in light mode only. In dark mode the same tree had a
+  serious violation on the first screen. The row is now backed by a sweep that
+  includes both schemes.
+- **Condition 9** read PASS on "zero console errors ... across the full journey".
+  The journey capture was clean, but every page load logged a 404 for a favicon
+  the app never served, which that capture did not look for and Lighthouse found
+  immediately.
+
+Neither row was dishonest; both were under-evidenced, and the shape of the gap
+was the same each time — the measurement did not cover the condition under which
+the thing failed.
+
+- **Tests:** `npm test` exit 0 — **849/849** repository tests, 8/8 component, 0
+  failed, 0 skipped. `npm run build:component` exit 0, `npm run typecheck:public`
+  exit 0, `npm run audit:prod` 0 vulnerabilities. Iterations 1 and 2's producers
+  were re-run against this tree and both still pass (`promotion:reject-steering`
+  exit 0, `promotion:decide-outcome` exit 0), regenerating their evidence here.
+  `repo-map.json` went stale on the two new npm targets and was regenerated with
+  `npm run repo:map`, not hand-edited; the suite refuses to pass while it is
+  stale, which is how it was caught.
+- **Regression check, confirmed failing before the fix.** Three tests added to
+  `test/generated-project-gates.test.mjs`, which binds template source and runs
+  in milliseconds. They assert the *rule*, not the callsite: every
+  `background:var(--lime)` rule carries `color:var(--on-lime)`; `api()` replaces
+  the transport rejection and marks it retryable, with no error text written
+  outside `showError()`; and an in-flight action publishes its state, paints an
+  indicator and clears the flag in a `finally`. Stashing only the three template
+  files produced `not ok 6`, `not ok 7`, `not ok 8` (5 pass / 3 fail); restoring
+  them gave 8/8. Both new browser producers were confirmed the same way — each
+  exits 1 on the pre-fix tree and 0 after.
+- **Conditions newly PASS:** **2, 5, 7, 8** — and 3, 6, 9, 10 and 11 were
+  re-evidenced with measurements that cover more than they did before. The
+  scorecard is now 12/12.
+- **Not done, recorded rather than silently skipped:**
+  - `scripts/run-protected-browser-lane.mjs` is **still unwired**. This iteration
+    proved by measurement that it would have caught the defect it did not catch,
+    but wiring it means giving an evaluator contract with `wx` writes a runner and
+    a CI budget, which is a larger change than one iteration should carry. It is
+    now the single highest-value thing left in this repository, and the case for
+    it is no longer an argument — it is 28 violating cells.
+  - **D3** (`npm run dev` dies on an unhandled `EADDRINUSE` with a raw Node stack
+    trace and no hint to set `PORT`) is still open and was reproduced again this
+    iteration, on port 4917, while running these very audits. Still minor by the
+    ledger's classification, still a three-line fix in
+    `templates/base/apps/web/server.mjs`, still not this iteration's mandate.
+  - **D4** (the README's 40-second claim is environment-bound) is unchanged.
+  - During a transport failure the stage banner still shows the pre-action state.
+    The alert is `role=alert` directly above it and the exit works, so the screen
+    is not a dead end, but the banner does not itself report the failure.
 
 _Wave 1 was the baseline: measurement only, nothing fixed, by design._

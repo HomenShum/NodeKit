@@ -1,7 +1,7 @@
 {
   "schemaVersion": "nodekit.decide-outcome-proof/v1",
   "defect": "D5 — /api/decide presented the decision requested, not the outcome achieved",
-  "generatedAt": "2026-08-13T13:14:07.167Z",
+  "generatedAt": "2026-08-14T02:48:55.539Z",
   "producer": "scripts/capture-decide-outcome.mjs",
   "viewport": {
     "width": 1280,

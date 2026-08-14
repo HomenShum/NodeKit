@@ -1,0 +1,362 @@
+[
+  {
+    "scheme": "light",
+    "state": "first_arrival",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "orientation",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "input",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "validation_error",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "running",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "partial_result",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "external_wait",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "proposal_pending",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "approval",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "conflict",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "recoverable_failure",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "reload_resume",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "completed_receipt",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "receipt_inspection",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "export_share",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "light",
+    "state": "first_arrival",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "orientation",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "input",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "validation_error",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "running",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "partial_result",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "external_wait",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "proposal_pending",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "approval",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "conflict",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "recoverable_failure",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "reload_resume",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "completed_receipt",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "receipt_inspection",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "light",
+    "state": "export_share",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "first_arrival",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "orientation",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "input",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "validation_error",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "running",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "partial_result",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "external_wait",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "proposal_pending",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "approval",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "conflict",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "recoverable_failure",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "reload_resume",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "completed_receipt",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "receipt_inspection",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "export_share",
+    "violations": [],
+    "width": "desktop"
+  },
+  {
+    "scheme": "dark",
+    "state": "first_arrival",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "orientation",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "input",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "validation_error",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "running",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "partial_result",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "external_wait",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "proposal_pending",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "approval",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "conflict",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "recoverable_failure",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "reload_resume",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "completed_receipt",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "receipt_inspection",
+    "violations": [],
+    "width": "mobile"
+  },
+  {
+    "scheme": "dark",
+    "state": "export_share",
+    "violations": [],
+    "width": "mobile"
+  }
+]

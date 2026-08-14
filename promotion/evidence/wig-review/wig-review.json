@@ -1,0 +1,373 @@
+{
+  "checked": 21,
+  "findings": [
+    {
+      "guideline": "Interactions › Clear focus — every focusable element shows visible focus ring",
+      "id": "W-FOCUS",
+      "measurement": {
+        "outlineStyle": "solid",
+        "outlineWidth": "3px",
+        "first": true
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Interactions › Match visual & hit targets — expand hit targets <24px to ≥24px; minimum 44px on mobile",
+      "id": "W-HIT",
+      "measurement": {
+        "controls": [
+          {
+            "height": 45,
+            "id": "skip-link",
+            "touchAction": "manipulation",
+            "width": 192.7
+          },
+          {
+            "height": 21,
+            "id": "brand",
+            "touchAction": "manipulation",
+            "width": 105.5
+          },
+          {
+            "height": 45.4,
+            "id": "reset",
+            "touchAction": "manipulation",
+            "width": 190.2
+          },
+          {
+            "height": 44,
+            "id": "mobile-approve",
+            "touchAction": "manipulation",
+            "width": 74.6
+          },
+          {
+            "height": 44,
+            "id": "mobile-reject",
+            "touchAction": "manipulation",
+            "width": 60.1
+          },
+          {
+            "height": 50.4,
+            "id": "active",
+            "touchAction": "manipulation",
+            "width": 99.3
+          },
+          {
+            "height": 50.4,
+            "id": "",
+            "touchAction": "manipulation",
+            "width": 99.3
+          },
+          {
+            "height": 50.4,
+            "id": "",
+            "touchAction": "manipulation",
+            "width": 99.3
+          },
+          {
+            "height": 45.4,
+            "id": "review-tab",
+            "touchAction": "manipulation",
+            "width": 75.7
+          },
+          {
+            "height": 45.4,
+            "id": "activity-tab",
+            "touchAction": "manipulation",
+            "width": 127.6
+          }
+        ],
+        "undersizedControls": []
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Interactions › Prevent double-tap zoom on controls — set touch-action: manipulation",
+      "id": "W-DBLTAP",
+      "measurement": [
+        {
+          "id": "skip-link",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "brand",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "reset",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "mobile-approve",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "mobile-reject",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "active",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "review-tab",
+          "touchAction": "manipulation"
+        },
+        {
+          "id": "activity-tab",
+          "touchAction": "manipulation"
+        }
+      ],
+      "passed": true,
+      "severity": "minor"
+    },
+    {
+      "guideline": "Interactions › Mobile input size — <input> font ≥16px on mobile to prevent iOS Safari auto-zoom",
+      "id": "W-INPUT16",
+      "measurement": [
+        {
+          "fontSizePx": 16,
+          "id": "outcome",
+          "labelled": true
+        }
+      ],
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Forms › Labels everywhere — every control has <label> or associated label",
+      "id": "W-LABEL",
+      "measurement": [
+        {
+          "fontSizePx": 16,
+          "id": "outcome",
+          "labelled": true
+        }
+      ],
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Interactions › Respect zoom — never disable browser zoom",
+      "id": "W-ZOOM",
+      "measurement": {
+        "viewportMeta": "width=device-width, initial-scale=1.0"
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Interactions › Deep-link everything — filters, tabs, pagination, expanded panels",
+      "id": "W-URLSTATE",
+      "measurement": {
+        "renderedScenarioAttribute": "proposal_pending",
+        "scenarioRoute": {
+          "ok": true,
+          "status": 200
+        }
+      },
+      "passed": true,
+      "severity": "minor"
+    },
+    {
+      "guideline": "Interactions › Announce async updates — use polite aria-live for toasts & inline validation",
+      "id": "W-LIVE",
+      "measurement": [
+        {
+          "id": "error",
+          "live": null,
+          "role": "alert"
+        },
+        {
+          "id": "state-banner",
+          "live": "polite",
+          "role": null
+        },
+        {
+          "id": "copy-status",
+          "live": "polite",
+          "role": "status"
+        }
+      ],
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Interactions › Loading buttons — show loading indicator & keep original label; Forms › Submission rule — disable during in-flight request",
+      "id": "W-LOADING",
+      "measurement": {
+        "ariaBusy": "true",
+        "busyAttribute": "true",
+        "indicatorPainted": "nk-busy",
+        "proposeLabel": "Prepare proposal",
+        "pointerEvents": "none",
+        "proposeLabelBefore": "Prepare proposal"
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Vercel Copywriting › Error messages guide exit — tell user how to fix, not just what went wrong; Content › No dead ends — every screen offers next step or recovery path",
+      "id": "W-ERREXIT",
+      "measurement": {
+        "retryVisible": true,
+        "role": "alert",
+        "text": "Could not reach the server. Check that it is still running, then retry."
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Content › No dead ends — every screen offers next step or recovery path (the offered path works)",
+      "id": "W-RETRY",
+      "measurement": {
+        "errorHidden": true,
+        "stageKind": "review"
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Forms › Don't pre-disable submit — allow submitting incomplete forms to surface validation feedback",
+      "id": "W-NODISABLE",
+      "measurement": {
+        "disabled": false,
+        "label": "Confirm outcome"
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Forms › Enter submits — when text input focused, Enter submits if only control; Error placement — show errors next to fields",
+      "id": "W-ENTER",
+      "measurement": {
+        "ariaInvalid": "true",
+        "message": "Add a concrete outcome before continuing.",
+        "visible": true
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Content › Headings & skip link — hierarchical <h1–h6> & \"Skip to content\" link",
+      "id": "W-HEADINGS",
+      "measurement": {
+        "headings": [
+          "H1",
+          "H2",
+          "H2"
+        ],
+        "skipLink": true,
+        "title": "Describe the outcome | Audit App | Guided case",
+        "unnamedControls": []
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Content › Icon-only buttons are named — provide descriptive aria-label",
+      "id": "W-NAMES",
+      "measurement": {
+        "unnamedControls": []
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Content › Accurate page titles — <title> reflects current context",
+      "id": "W-TITLE",
+      "measurement": [
+        {
+          "scenario": "orientation",
+          "title": "One clear job | Audit App | Guided case"
+        },
+        {
+          "scenario": "running",
+          "title": "Work is in progress | Audit App | Guided case"
+        },
+        {
+          "scenario": "proposal_pending",
+          "title": "Proposal ready for review | Audit App | Guided case"
+        },
+        {
+          "scenario": "completed_receipt",
+          "title": "Completion verified | Audit App | Guided case"
+        }
+      ],
+      "passed": true,
+      "severity": "minor"
+    },
+    {
+      "guideline": "Design › Browser UI matches background — set <meta name=\"theme-color\"> to align browser theme",
+      "id": "W-THEMECOLOR",
+      "measurement": [
+        {
+          "content": "#f3f0e8",
+          "media": "(prefers-color-scheme: light)"
+        },
+        {
+          "content": "#111310",
+          "media": "(prefers-color-scheme: dark)"
+        }
+      ],
+      "passed": true,
+      "severity": "minor"
+    },
+    {
+      "guideline": "Design › Set appropriate color-scheme — style <html> with color-scheme: dark in dark themes",
+      "id": "W-COLORSCHEME",
+      "measurement": {
+        "colorScheme": "dark"
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Interactions › Tap highlight follows design — set webkit-tap-highlight-color",
+      "id": "W-TAPHL",
+      "measurement": {
+        "tapHighlight": "rgba(102, 86, 232, 0.18)"
+      },
+      "passed": true,
+      "severity": "minor"
+    },
+    {
+      "guideline": "Animations › Honor prefers-reduced-motion — provide reduced-motion variant",
+      "id": "W-REDUCEDMOTION",
+      "measurement": {
+        "hasQuery": true
+      },
+      "passed": true,
+      "severity": "major"
+    },
+    {
+      "guideline": "Animations › Never transition: all — explicitly list only intended properties",
+      "id": "W-TRANSITIONALL",
+      "measurement": {
+        "occurrences": 0
+      },
+      "passed": true,
+      "severity": "minor"
+    }
+  ],
+  "guidelines": {
+    "retrieved": "2026-08-13",
+    "url": "https://vercel.com/design/guidelines"
+  },
+  "majorUnresolved": [],
+  "minorUnresolved": [],
+  "note": "A Lighthouse or axe score is NOT evidence for this condition. Every row here is a WIG rule measured on the rendered surface; condition 8's audit is a separate instrument with no shared rule.",
+  "passed": true,
+  "reviewedAt": "2026-08-14T02:15:36.447Z",
+  "surface": "http://127.0.0.1:4919/ (application produced by `nodekit create`)"
+}

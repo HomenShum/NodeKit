@@ -238,6 +238,8 @@
     "gate:trust-surface": "node scripts/ui-gates/trust-surface-selftest.mjs",
     "promotion:decide-outcome": "node scripts/capture-decide-outcome.mjs",
     "promotion:reject-steering": "node scripts/capture-reject-steering.mjs",
+    "promotion:web-quality": "node scripts/capture-web-quality.mjs",
+    "promotion:wig-review": "node scripts/capture-wig-review.mjs",
     "production-agent:check": "node src/cli.mjs production-agent check --contract production-agent.json"
   },
   "engines": {

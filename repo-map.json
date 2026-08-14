@@ -132,6 +132,8 @@
       "production-agent:check",
       "promotion:decide-outcome",
       "promotion:reject-steering",
+      "promotion:web-quality",
+      "promotion:wig-review",
       "proof:package-install",
       "recall",
       "reference:schemas",

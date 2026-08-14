@@ -1,0 +1,47 @@
+{
+  "axe": {
+    "cliEngineVersion": "4.13.0",
+    "cliPackage": "@axe-core/cli@4.13.0",
+    "cliViolations": 0,
+    "majorFindings": [],
+    "sweepCells": 60,
+    "sweepEngineVersion": "4.12.1",
+    "sweepViolations": 0
+  },
+  "commands": [
+    "npx --yes lighthouse@13.4.1 http://127.0.0.1:4916/ --output=json --output-path=promotion/evidence/web-quality/lighthouse-app.json --chrome-flags=\"--headless\"",
+    "npx --yes @axe-core/cli@4.13.0 http://127.0.0.1:4916/ --save promotion/evidence/web-quality/axe-app.json",
+    "node scripts/capture-web-quality.mjs"
+  ],
+  "consoleErrors": [],
+  "lighthouse": {
+    "categories": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1,
+      "agentic-browsing": 0.99
+    },
+    "lighthouseVersion": "13.4.1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+    "vitals": {
+      "cls": 0.05362264114324445,
+      "fcpMs": 1103,
+      "lcpMs": 1258,
+      "tbtMs": 0
+    }
+  },
+  "measuredAt": "2026-08-14T02:18:59.636Z",
+  "passed": true,
+  "failures": [],
+  "surface": "http://127.0.0.1:4916/ (application produced by `nodekit create`)",
+  "thresholds": {
+    "accessibility": 1,
+    "best-practices": 1,
+    "performance": 0.9,
+    "seo": 0.9,
+    "cls": 0.1,
+    "lcpMs": 2500,
+    "tbtMs": 200
+  }
+}

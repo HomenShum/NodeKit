@@ -171,3 +171,45 @@ test("the generated server presents the outcome achieved, not the decision reque
     app.close();
   }
 });
+
+// The three defects below were all found by an audit, not by a test, and all three had the same
+// shape: a rule enforced per-callsite instead of once, so one callsite drifted. These bind the
+// rule itself, so a fourth callsite cannot reintroduce it. The full evidence is
+// promotion/evidence/web-quality/ and promotion/evidence/wig-review/.
+
+test("every lime surface pins its own foreground, because --lime does not flip in dark", () => {
+  const css = read("templates/base/apps/web/public/styles.css");
+  // --lime stays light in both themes while --ink flips to near-white, so text on lime that
+  // inherits --ink measured 1.26:1 against a required 4.5:1 (axe color-contrast, serious).
+  // The dark block used to patch three of the four lime surfaces by hand and missed .step.active.
+  assert.match(css, /--on-lime:#171817/, "the pinned on-lime ink token is missing");
+  const limeRules = css.match(/[^{}]*\{[^}]*background:var\(--lime\)[^}]*\}/g) ?? [];
+  assert.ok(limeRules.length >= 4, `expected the lime surfaces to still exist, found ${limeRules.length}`);
+  for (const rule of limeRules) {
+    assert.match(rule, /color:var\(--on-lime\)/, `a lime background with no pinned foreground: ${rule.slice(0, 90)}`);
+  }
+  // The hand-patched dark overrides the token replaced must not come back.
+  assert.doesNotMatch(css, /\.primary,\.approve\{color:#111313\}/, "the per-callsite dark patch is back");
+});
+
+test("a transport failure never reaches the user in the browser's own words", () => {
+  const client = read("templates/base/apps/web/public/app.js");
+  // The fetch used to reject straight through act(), so the page rendered the literal string
+  // "Failed to fetch" with no retry and no sign on the stage banner that anything had happened.
+  assert.match(client, /catch\s*\{[\s\S]{0,400}?Could not reach the server/, "api() does not replace the transport rejection");
+  assert.match(client, /error\.retryable = true/, "the transport failure is not marked retryable");
+  assert.match(client, /elements\.retry\.hidden = !retryable/, "the error region does not offer its exit");
+  // One writer for the error region: a second one is how the retry control gets wiped.
+  const directWrites = client.match(/elements\.error\.textContent/g) ?? [];
+  assert.equal(directWrites.length, 0, "an error message is written outside showError()");
+});
+
+test("an action in flight shows itself and cannot be submitted twice", () => {
+  const client = read("templates/base/apps/web/public/app.js");
+  const css = read("templates/base/apps/web/public/styles.css");
+  assert.match(client, /if \(inFlight\) return;/, "a second submit during a request is not guarded");
+  assert.match(client, /document\.body\.dataset\.busy = "true"/, "no in-flight state is published to the DOM");
+  assert.match(client, /aria-busy/, "the in-flight state is not exposed to assistive technology");
+  assert.match(client, /finally\s*\{[\s\S]{0,200}?inFlight = false/, "the in-flight flag is not cleared on the failure path");
+  assert.match(css, /body\[data-busy\][^{]*\{[^}]*animation:nk-busy/, "the in-flight indicator is not painted");
+});

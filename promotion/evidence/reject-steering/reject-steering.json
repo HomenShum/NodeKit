@@ -1,7 +1,7 @@
 {
   "schemaVersion": "nodekit.reject-steering-proof/v1",
   "journey": "J3 — reject the proposal and see unambiguously that it was not applied",
-  "generatedAt": "2026-08-13T13:20:15.168Z",
+  "generatedAt": "2026-08-14T02:48:40.835Z",
   "producer": "scripts/capture-reject-steering.mjs",
   "viewport": {
     "width": 1280,
@@ -51,7 +51,7 @@
   "offersPrepareRevisedProposal": true,
   "revisedProposalApproved": {
     "artifactVersion": "v2",
-    "receipt": "Receipt 7717d4151d3e9ab1",
+    "receipt": "Receipt fffc237232ac0f03",
     "stageBannerTitle": "Completion verified",
     "completed": true
   },
