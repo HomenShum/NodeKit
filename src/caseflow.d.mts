@@ -253,7 +253,14 @@ export function normalizeReceiptBindings<
   proposalBindings: TProposal[];
   proposalIds: string[];
 };
-export function createMemoryCaseflow(options?: { clock?: () => string; ownerId?: string }): CaseflowRuntime;
+export interface MemoryCaseflowCheckpoint {
+  schemaVersion: "nodekit.memory-checkpoint/v1";
+  ownerId: string;
+  state: NodeKitCaseflowSnapshot;
+  idempotencyJournal: Array<[string, { requestHash: string; result: unknown }]>;
+  checkpointHash: string;
+}
+export function createMemoryCaseflow(options?: { clock?: () => string; ownerId?: string; checkpoint?: MemoryCaseflowCheckpoint }): CaseflowRuntime & { checkpoint(): MemoryCaseflowCheckpoint };
 export function runCaseflowConformance(
   createRuntime: () => MaybePromise<CaseflowRuntime>,
   options?: {
