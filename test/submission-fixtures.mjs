@@ -77,8 +77,11 @@ const protectedEvaluationChecks = Object.freeze(Object.fromEntries([
 ].map((name) => [name, true])));
 const lowerCostPricingSnapshot = Object.freeze({
   schemaVersion: "nodekit.external-source-snapshot/v1",
-  retrievedAt: "2026-07-22T00:00:00.000Z",
-  retrievalMethod: "OpenAI Developer Docs official pricing snapshot",
+  // Synthetic test evidence must exercise the fresh path regardless of today's
+  // date. Production snapshots remain immutable; age/future rejection is tested
+  // separately with explicit reference times in agent-ease-campaign.test.mjs.
+  retrievedAt: new Date().toISOString(),
+  retrievalMethod: "Synthetic test snapshot, not a pricing observation",
   source: "https://developers.openai.com/api/docs/pricing",
   section: "Flagship models / Standard",
   unit: "USD per 1M tokens",
@@ -90,7 +93,7 @@ const lowerCostPricingSnapshot = Object.freeze({
   ],
   scope: "Fixture snapshot preserving the official-source pricing fields required to replay the lower-cost lane decision.",
 });
-const lowerCostPricingSnapshotBytes = Buffer.from(`${JSON.stringify(lowerCostPricingSnapshot, null, 2)}\n`);
+export const lowerCostPricingSnapshotBytes = Buffer.from(`${JSON.stringify(lowerCostPricingSnapshot, null, 2)}\n`);
 const lowerCostModelEvidence = Object.freeze({
   schemaVersion: "nodekit.lower-cost-model-evidence/v1",
   agentDriver: "codex",
@@ -105,7 +108,7 @@ const lowerCostModelEvidence = Object.freeze({
     snapshotSha256: createHash("sha256").update(lowerCostPricingSnapshotBytes).digest("hex"),
   },
 });
-const lowerCostModelEvidenceBytes = Buffer.from(`${JSON.stringify(lowerCostModelEvidence, null, 2)}\n`);
+export const lowerCostModelEvidenceBytes = Buffer.from(`${JSON.stringify(lowerCostModelEvidence, null, 2)}\n`);
 const browserStates = [
   "first_arrival", "orientation", "input", "validation_error", "running", "partial_result",
   "external_wait", "proposal_pending", "approval", "conflict", "recoverable_failure",

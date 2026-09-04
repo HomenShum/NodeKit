@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 120,
     "modules": 96,
-    "tests": 107
+    "tests": 108
   },
   "architecture": [
     {
@@ -388,6 +388,7 @@
     "builder-gym.test.mjs",
     "builder-journey.test.mjs",
     "capability-contract.test.mjs",
+    "caseflow-checkpoint.test.mjs",
     "caseflow.test.mjs",
     "change-story.test.mjs",
     "ci-workflows.test.mjs",
