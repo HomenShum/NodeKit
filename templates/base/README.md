@@ -24,6 +24,8 @@ Open `http://127.0.0.1:4173`. The deterministic demonstration requires no accoun
 
 ## Specialize the application
 
+Use [the coding sequence](docs/CODING_SEQUENCE.md) to pin the task's target, baseline, candidate, required cases and evidence. `npm run outcome -- init outcome.json`, `append case.json` and `report` maintain one append-only record with matching HTML and ASCII reports. Missing or failed required cases prevent local completion; review and deployment remain separate.
+
 Start with `docs/FIGURED_OUT.md` and the files in `product/`. Replace the neutral copy, artifact renderer, guided stages, domain tools, validators, and fixtures only after researching the real user journey. Do not replace the proposal, approval, version-conflict, safe-failure, or receipt semantics.
 
 Convex is the preferred first managed backend. The browser consumes NodeKit view models, not Convex documents, so another conforming backend can implement the same observable lifecycle later.
