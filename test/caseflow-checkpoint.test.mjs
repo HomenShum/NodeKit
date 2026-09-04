@@ -2,6 +2,39 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createMemoryCaseflow, contentHash } from "../src/caseflow.mjs";
 
+test("a maker repeatedly reopens valid nested requirements and retries creation without losing its saved identity", () => {
+  let content = { value: "Retain the supplier's nested requirement" };
+  for (let i = 1; i < 10; i++) content = { nested: content };
+  let runtime = createMemoryCaseflow({ ownerId: "nested-maker" });
+  for (let i = 0; i < 20; i++) {
+    const work = runtime.createCase({ title: `Nested sample ${i}`, primaryJob: "Preserve structured supplier requirements" });
+    const run = runtime.startRun({ caseId: work.caseId, stages: [{ id: "review", label: "Review", owner: "user" }] });
+    const request = { caseId: work.caseId, runId: run.runId, content, idempotencyKey: `nested-${i}` };
+    const artifact = runtime.createArtifact(request);
+    const before = runtime.snapshot();
+    const saved = JSON.parse(JSON.stringify(runtime.checkpoint()));
+    runtime = createMemoryCaseflow({ ownerId: "nested-maker", checkpoint: saved });
+    assert.deepEqual(runtime.snapshot(), before);
+    assert.equal(runtime.createArtifact(request).artifactId, artifact.artifactId);
+    assert.throws(() => createMemoryCaseflow({ ownerId: "other", checkpoint: saved }), /identity/);
+    saved.state.cases[0].title = "Changed after export";
+    assert.throws(() => createMemoryCaseflow({ ownerId: "nested-maker", checkpoint: saved }), /hash/);
+  }
+  const accessor = runtime.checkpoint();
+  let invoked = false;
+  Object.defineProperty(accessor, "state", { enumerable: true, get() { invoked = true; return {}; } });
+  assert.throws(() => createMemoryCaseflow({ ownerId: "nested-maker", checkpoint: accessor }), /accessor|enumerable|portable/);
+  assert.equal(invoked, false);
+  const oversized = runtime.checkpoint();
+  oversized.extra = "x".repeat(768 * 1024 - 4096);
+  assert.throws(() => createMemoryCaseflow({ ownerId: "nested-maker", checkpoint: oversized }), /byte limit|encoded bytes/);
+  const journalAccessor = runtime.checkpoint();
+  Object.defineProperty(journalAccessor.idempotencyJournal[0][1], "result", { enumerable: true, get() { invoked = true; return {}; } });
+  assert.throws(() => createMemoryCaseflow({ ownerId: "nested-maker", checkpoint: journalAccessor }), /accessor|enumerable|portable/);
+  assert.equal(invoked, false);
+  assert.equal(runtime.snapshot().artifacts.length, 20);
+});
+
 test("maker returns after restart to the same pending proposal, then duplicate approval and stale tab preserve the receipt", () => {
   let runtime = createMemoryCaseflow({ ownerId: "maker" });
   const work = runtime.createCase({ title: "Backpack sample", primaryJob: "Preserve programmable LED requirements" });

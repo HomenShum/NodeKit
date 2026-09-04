@@ -199,10 +199,10 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
   // IDs, receipts or retry results from a presentation snapshot. This checkpoint
   // is local state, not a portable approval or a claim of independent proof.
   if (savedCheckpoint !== undefined) {
-    const checkpoint = clone(savedCheckpoint);
+    const checkpoint = normalizeMemoryCheckpoint(savedCheckpoint);
     const { checkpointHash, ...body } = checkpoint;
     if (body.schemaVersion !== "nodekit.memory-checkpoint/v1" || body.ownerId !== owner
-      || checkpointHash !== contentHash(body)) throw new Error("checkpoint identity or hash mismatch");
+      || checkpointHash !== memoryCheckpointHash(body)) throw new Error("checkpoint identity or hash mismatch");
     const idFields = { approvals: "approvalId", artifacts: "artifactId", cases: "caseId", exceptions: "exceptionId", proposals: "proposalId", receipts: "receiptId", runs: "runId" };
     if (!body.state || Object.keys(body.state).sort().join() !== Object.keys(state).sort().join()) throw new Error("invalid checkpoint collections");
     for (const [name, collection] of Object.entries(state)) {
@@ -675,8 +675,8 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
   function exportCheckpoint() {
     if (Object.values(state).some((collection) => (collection.size ?? collection.length) > 4096)
       || idempotencyJournal.size > 4096) throw new Error("checkpoint capacity reached; archive this case before continuing");
-    const body = { schemaVersion: "nodekit.memory-checkpoint/v1", ownerId: owner, state: snapshot(), idempotencyJournal: [...idempotencyJournal.entries()] };
-    return clone({ ...body, checkpointHash: contentHash(body) });
+    const body = normalizeMemoryCheckpoint({ schemaVersion: "nodekit.memory-checkpoint/v1", ownerId: owner, state: snapshot(), idempotencyJournal: [...idempotencyJournal.entries()] });
+    return checkMemoryCheckpointBytes({ ...body, checkpointHash: memoryCheckpointHash(body) });
   }
 
   function getCase(caseId) {
@@ -746,4 +746,47 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     startRun,
     updateCaseInput,
   };
+}
+
+// A local checkpoint wraps multiple already-portable records. Its bookkeeping
+// must not spend the provider document's nesting budget. Normalize those owned
+// subtrees separately, retaining descriptor/prototype checks on every container.
+function normalizeCheckpointContainer(value, children) {
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const deferred = [];
+  for (const [key, normalize] of Object.entries(children)) {
+    const descriptor = descriptors[key];
+    if (descriptor && Object.hasOwn(descriptor, "value")) {
+      deferred.push([key, normalize, descriptor.value]);
+      descriptors[key] = { ...descriptor, value: null };
+    }
+  }
+  const shell = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value));
+  if (Array.isArray(value)) Object.setPrototypeOf(shell, Object.getPrototypeOf(value));
+  Object.defineProperties(shell, descriptors);
+  const normalized = clone(shell);
+  for (const [key, normalize, child] of deferred) normalized[key] = normalize(child);
+  return normalized;
+}
+
+function normalizeMemoryCheckpoint(value) {
+  return checkMemoryCheckpointBytes(normalizeCheckpointContainer(value, {
+    state: clone,
+    idempotencyJournal: (entries) => {
+      if (!Array.isArray(entries) || entries.length > 4096) throw new TypeError("invalid checkpoint retry journal or limit");
+      const children = Object.fromEntries(Object.keys(entries).map((key) => [key, clone]));
+      return normalizeCheckpointContainer(entries, children);
+    },
+  }));
+}
+
+function checkMemoryCheckpointBytes(value) {
+  if (Buffer.byteLength(canonical(value), "utf8") > PORTABLE_VALUE_LIMITS.maxEncodedBytes) {
+    throw new RangeError("checkpoint exceeds portable encoded byte limit");
+  }
+  return value;
+}
+
+function memoryCheckpointHash(normalizedBody) {
+  return createHash("sha256").update(canonical(normalizedBody)).digest("hex");
 }
