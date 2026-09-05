@@ -1,0 +1,15 @@
+# NodeKit developer handoff
+
+A developer can turn a brief into a generated application, review a proposed result and download the exact approved artifact with its receipt. Start with README and START_HERE.md for setup, then docs/START_HERE.md for implementation ownership. Coding agents follow AGENTS.md and its canonical skill.
+
+The reviewed consumer repair is commit e7e4b10f02d25c4e63e4bc1ae23e283693d9fdd5, tree f15e2a2b2d35110a9dff8c5a9932e2c267ae5ae1. It preserves the exact submitted outcome, exposes canonical identity in the DOM, makes the completed result downloadable and respects hidden error feedback. A rejected or stale proposal preserves the accepted result. The generic demonstration still uses a single in-memory server; this is not a persistence or multiuser production claim.
+
+Run npm ci and npm test for the repository. Run npm run acceptance:factory from a clean distributable candidate for the real generated-consumer check. Set NODEKIT_KEEP_ACCEPTANCE=1 to retain the actual launcher, consumer and release proof. The factory replaces proof/ease/latest; preserve previous evidence before another run. Do not treat passing application behavior as permission to skip release gates.
+
+Independent review reproduced 855 repository tests, ten consumer tests, 180 browser captures and 14 additional deliberate contract failures. The subsequent ordinary factory passed all 13 base checks in 180676ms on Windows/npm with warm-or-unknown cache. Its package SHA256 is 5964b7b265d3e9f79f49e825abd9682caf3440cc5125ceec1331569b9599b83b. All 421 package files match source and both actual installations. The source-bound browser certificate is BROWSER_CERTIFIED; it covers the recorded six widths and two themes.
+
+Read proof/consumer-contract-20260905/review/README.md for current independent reports and actual consumer certificates. The raw earlier uncommitted certificate remains unchanged in its historical directory. proof/factory-acceptance.json and proof/ease/latest retain the committed replay, including the candidate archive, screenshots and sidecars. Original launcher/consumer bodies were retained and independently compared, with a second durable operator copy.
+
+Shared integration remains in draft PR39. The current local release still reports releaseReady=false; factory status is EASE_NOT_CERTIFIED and submissionReady=false. Ledger/authority, production/deployment, fresh-agent heldout, human usability, further Convex consumers, aggregate timing and whole-product grades remain separate open gates. This handoff does not manufacture their approvals.
+
+**Re your request:** make each repository usable for developer/user handoff, including visual and interaction proof. The consumer contract and bound local factory are verified; the remaining shared release gates are explicit. Portfolio parent proof PORTFOLIO-READY-01 remains OPEN.

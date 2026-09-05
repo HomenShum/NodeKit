@@ -1,0 +1,98 @@
+{
+  "application": "factory-domain-blank-base",
+  "events": [
+    {
+      "at": "2026-09-05T04:28:29.469Z",
+      "name": "launch_started"
+    },
+    {
+      "at": "2026-09-05T04:28:29.469Z",
+      "name": "scaffold_started"
+    },
+    {
+      "at": "2026-09-05T04:28:30.271Z",
+      "name": "files_generated"
+    },
+    {
+      "at": "2026-09-05T04:28:30.271Z",
+      "detail": {
+        "mode": "generated-vertical-slice"
+      },
+      "durationMs": 802,
+      "name": "implementation_completed"
+    },
+    {
+      "at": "2026-09-05T04:28:30.271Z",
+      "durationMs": 802,
+      "name": "scaffold_completed"
+    },
+    {
+      "at": "2026-09-05T04:28:36.107Z",
+      "detail": {
+        "configHash": "63d709816d58ca173f635af053e3e38817e5f43d60c4beab79b00c3b72f1b257"
+      },
+      "durationMs": 4933,
+      "name": "compile_completed"
+    },
+    {
+      "at": "2026-09-05T04:29:07.224Z",
+      "detail": {
+        "compileHashCurrent": true
+      },
+      "durationMs": 7000,
+      "name": "tests_passed"
+    },
+    {
+      "at": "2026-09-05T04:29:07.815Z",
+      "detail": {
+        "canonicalVersionAdvanced": true,
+        "explicitNextAction": true,
+        "proposalAccepted": true,
+        "receiptCreated": true
+      },
+      "durationMs": 6,
+      "name": "deterministic_demo_passed"
+    },
+    {
+      "at": "2026-09-05T04:29:08.373Z",
+      "detail": {
+        "canonicalStatePreserved": true,
+        "exceptionPreservedState": true,
+        "recoveryOwnerExplicit": true,
+        "staleProposalConflicted": true
+      },
+      "durationMs": 7,
+      "name": "eval_passed"
+    },
+    {
+      "at": "2026-09-05T04:29:09.100Z",
+      "detail": {
+        "artifactPrimary": true,
+        "currentActionVisible": true,
+        "mobileContractPresent": true,
+        "proposalBoundaryVisible": true,
+        "semanticLandmarks": true
+      },
+      "name": "browser_contract_completed"
+    },
+    {
+      "at": "2026-09-05T04:31:23.784Z",
+      "detail": {
+        "browserContractPassed": true,
+        "browserJourneyPassed": true,
+        "browserCertified": true,
+        "deterministicDemo": true,
+        "deterministicEvaluation": true,
+        "productionReadinessSatisfied": false,
+        "identityBound": true,
+        "secretFree": true
+      },
+      "name": "proof_passed"
+    }
+  ],
+  "nodekitVersion": "0.2.1",
+  "packageManager": "npm",
+  "foundation": "domain-blank-base",
+  "repairLoops": 0,
+  "schemaVersion": "nodekit.build-friction/v1"
+}

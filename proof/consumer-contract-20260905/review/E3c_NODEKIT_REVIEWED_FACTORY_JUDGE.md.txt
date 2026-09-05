@@ -1,0 +1,20 @@
+# NodeKit reviewed factory judge
+
+**Builder · VERIFIED_WITH_CAVEATS.** A developer can install the exact reviewed NodeKit package and receive a generated consumer whose local browser certificate is bound to real source, package, application, and screenshot identities. Production and broader ease certification remain held.
+
+**Re your request:** make each repository ready for usage and handoff, including visual UI, responsiveness, and interaction standards. This bounded judge verifies the post-commit NodeKit factory evidence without repeating the already-reproduced repository/browser matrix.
+
+- Source commit: `e7e4b10f02d25c4e63e4bc1ae23e283693d9fdd5`; exact reviewed tree `f15e2a2b2d35110a9dff8c5a9932e2c267ae5ae1`.
+- Source hash: `35c81da5838699b3177a1169121526a3b86e5b286b51b9e9400da595fb2ad56d`.
+- Actual tarball: `5964b7b265d3e9f79f49e825abd9682caf3440cc5125ceec1331569b9599b83b` (832769 bytes).
+- All **421** packed files equal source and both actual installed packages. All **1,675** retained artifacts equal their original files. The **77-file** generated archive equals its actual Git commit `2926ee9cb5b8c848632a07a332c9ddbb7b081366`.
+- All **180 PNGs and sidecars**, six browser evidence artifacts, and application identity files match their recorded bytes/hashes. Factory/browser/release digests were independently recomputed. All **368** pre-factory generated outputs remain exact in preservation storage.
+- The unchanged factory passed all **13** base checks in **180,676 ms**. This is one local run with warm-or-unknown cache, not a cold-install timing guarantee.
+
+The actual browser certificate is **BROWSER_CERTIFIED**, with real source and tarball binding, eighteen passing journey assertions, and no missing states. Four actual factory screenshots were inspected: the phone receipt/download view, desktop export, phone approval, and desktop validation error. The receipt and controls are readable and contained. This check reuses prior independent behavioral verification; it does not claim a new full visual audit.
+
+The consumer still reports **releaseReady=false** and five missing gates: production readiness, deployment, fresh-agent heldout, fresh-human usability, and three Convex consumers. The factory still reports **EASE_NOT_CERTIFIED**, **submissionReady=false**, and twelve submission blockers. Earlier ledger/authority holds and in-memory runtime limits remain separate. No production or whole-app grade is asserted.
+
+The earlier staged-source factory refusal is retained. A judge diagnostic that incorrectly hashed the identity object alone is also retained; the actual contract includes canonical identity, manifest, and resolved contracts, and recomputation passes. No original source/index/ref/environment bytes were changed; source and consumer HEAD/index guards remain equal. Reviewer context was reused, with no implementation authorship.
+
+The 35 bounded checks and exact evidence bindings are in [E3c_NODEKIT_REVIEWED_FACTORY_JUDGE.json](C:/Users/hshum/.codex/worktrees/5dba/nodebench-ai/docs/plans/portfolio-recovery-20260904/E3c_NODEKIT_REVIEWED_FACTORY_JUDGE.json); detailed byte comparisons are in [custody.json](C:/Users/hshum/.codex/worktrees/5dba/nodebench-ai/docs/plans/portfolio-recovery-20260904/E3c-nodekit-reviewed-factory-judge/custody.json).
