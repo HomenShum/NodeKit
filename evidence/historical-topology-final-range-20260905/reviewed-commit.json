@@ -1,0 +1,21 @@
+{
+  "at": "2026-09-05T06:30:58.533117+00:00",
+  "status": "LOCAL_REVIEWED_COMMIT_FINAL_RANGE_RECEIPT_PENDING",
+  "head": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+  "tree": "55a197953e1fcdc6b05c5d0c62e1f1a97e16f888",
+  "parent": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "changedPaths": 32,
+  "workingAndIndexDigest": "40f37cea48b1b895c6c430f9c1de6a0743e967c7e312e003ef79ab8f2965cead",
+  "allIndexBlobsExact": true,
+  "clean": true,
+  "judge": "E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json",
+  "judgeSha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+  "formatting": {
+    "allAuthoredCodeAndMetadataPassed": true,
+    "fullStagedDiffCheckExitCode": 2,
+    "rawWhitespaceLog": "E3e-nodekit-staged-raw-whitespace.log",
+    "retainedTerminalBytesUnmodified": true,
+    "noRepositoryGateChange": true
+  },
+  "noPushOrCanonicalPromotion": true
+}

@@ -1,0 +1,49 @@
+{
+  "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "rollbackTarget": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "authorityDirectiveRef": "evidence/historical-topology-ack-20260905/operator-directive.md",
+  "uiChanged": false,
+  "uiReason": "This patch changes the local Git ledger verifier and evidence admission, with no rendered UI.",
+  "before": [
+    {
+      "ref": "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+      "kind": "live-io"
+    },
+    {
+      "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+      "kind": "operator-directive"
+    }
+  ],
+  "after": [
+    {
+      "ref": "evidence/historical-topology-final-range-20260905/committed-verifier.json",
+      "kind": "live-io"
+    },
+    {
+      "ref": "evidence/historical-topology-final-range-20260905/journey.md",
+      "kind": "journey-card"
+    },
+    {
+      "ref": "evidence/historical-topology-ack-20260905/logs/full-tests.log",
+      "kind": "test-log"
+    },
+    {
+      "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+      "kind": "runtime-trace"
+    },
+    {
+      "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+      "kind": "runtime-trace"
+    },
+    {
+      "ref": "evidence/historical-topology-final-range-20260905/source-judge.json",
+      "kind": "test-log"
+    }
+  ],
+  "to": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+  "draftRef": "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+  "rollbackVerificationRefs": [
+    "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+    "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json"
+  ]
+}

@@ -1,0 +1,16 @@
+evidence/historical-topology-ack-20260905/logs/build-component.log:4: new blank line at EOF.
+evidence/historical-topology-ack-20260905/logs/full-tests.log:5650: new blank line at EOF.
+evidence/historical-topology-ack-20260905/logs/initial-scenario-failure.log:17: trailing whitespace.
++    
+evidence/historical-topology-ack-20260905/logs/initial-scenario-failure.log:19: trailing whitespace.
++    
+evidence/historical-topology-ack-20260905/logs/rehashed-directive-failure.log:22: trailing whitespace.
++    
+evidence/historical-topology-ack-20260905/logs/rehashed-directive-failure.log:24: trailing whitespace.
++    
+evidence/historical-topology-ack-20260905/logs/stale-behavior-index-failure.log:333: trailing whitespace.
++    
+evidence/historical-topology-ack-20260905/logs/stale-behavior-index-failure.log:348: trailing whitespace.
++    
+evidence/historical-topology-ack-20260905/logs/typecheck-component.log:4: new blank line at EOF.
+evidence/historical-topology-ack-20260905/logs/typecheck-public.log:4: new blank line at EOF.

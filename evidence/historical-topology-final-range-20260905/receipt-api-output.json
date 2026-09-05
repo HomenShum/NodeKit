@@ -1,0 +1,219 @@
+{
+  "created": {
+    "output": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904\\evolution\\deferred-reviews\\deferred-review-sha256-7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7.json",
+    "receipt": {
+      "schemaVersion": "nodekit.evolution-deferred-review/v1",
+      "id": "deferred-review:sha256:7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7",
+      "events": [
+        {
+          "eventId": "evt:historical-topology-reviewed-range-20260905",
+          "draftRef": "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+          "draftDigest": "e19987c28f46b83f551b031da29346236caf775c2d8c74cf91e7f0bbf95e11ff",
+          "sourceCommit": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+        }
+      ],
+      "range": {
+        "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+        "reviewedTo": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+      },
+      "risk": {
+        "classification": "reversible",
+        "effects": {
+          "destructiveWrite": false,
+          "credentialOrAuthorityChange": true,
+          "irreversibleMigration": false,
+          "materialSpend": false,
+          "externalCommunication": false,
+          "legalOrComplianceCommitment": false,
+          "unverifiedRollback": false
+        },
+        "authorityDirective": {
+          "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+          "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+          "assurance": "operator-directed-in-session"
+        }
+      },
+      "coverage": {
+        "materialFiles": [
+          "schemas/nodekit.evolution-evidence.v1.schema.json",
+          "src/lib/evolution-immutability.mjs",
+          "src/lib/evolution-ledger.mjs"
+        ]
+      },
+      "evidence": {
+        "before": [
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+            "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+            "kind": "live-io"
+          },
+          {
+            "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+            "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+            "kind": "operator-directive"
+          }
+        ],
+        "after": [
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/committed-verifier.json",
+            "sha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941",
+            "kind": "live-io"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/journey.md",
+            "sha256": "c9a2592be53b818f84aa5c127c0778140ea75c85e4cb962d7a97576adc980af9",
+            "kind": "journey-card"
+          },
+          {
+            "ref": "evidence/historical-topology-ack-20260905/logs/full-tests.log",
+            "sha256": "2feeee203dd10880abf1302b0789b2ac3d24f16eddc8806b661b61781ce12d6e",
+            "kind": "test-log"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+            "sha256": "71c385a170c8218dd1aa00ff5fd1534b41116d6190c90683f1407549f80be4bf",
+            "kind": "runtime-trace"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+            "sha256": "131bd561967e05fcc112d473089bd9dbbfae7a63ec23854d3be10bbd0c081294",
+            "kind": "runtime-trace"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/source-judge.json",
+            "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+            "kind": "test-log"
+          }
+        ]
+      },
+      "uiSurface": {
+        "changed": false,
+        "mediaRequired": false,
+        "reason": "This patch changes the local Git ledger verifier and evidence admission, with no rendered UI.",
+        "mediaRefs": []
+      },
+      "rollback": {
+        "targetCommit": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+        "strategy": "git-revert-range",
+        "verificationRefs": [
+          "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+          "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json"
+        ]
+      },
+      "review": {
+        "status": "deferred-human-review",
+        "feedbackChannel": "pull-request"
+      },
+      "receiptDigest": "6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370"
+    }
+  },
+  "verification": {
+    "passed": true,
+    "findings": [],
+    "receipt": {
+      "schemaVersion": "nodekit.evolution-deferred-review/v1",
+      "id": "deferred-review:sha256:7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7",
+      "events": [
+        {
+          "eventId": "evt:historical-topology-reviewed-range-20260905",
+          "draftRef": "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+          "draftDigest": "e19987c28f46b83f551b031da29346236caf775c2d8c74cf91e7f0bbf95e11ff",
+          "sourceCommit": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+        }
+      ],
+      "range": {
+        "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+        "reviewedTo": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+      },
+      "risk": {
+        "classification": "reversible",
+        "effects": {
+          "destructiveWrite": false,
+          "credentialOrAuthorityChange": true,
+          "irreversibleMigration": false,
+          "materialSpend": false,
+          "externalCommunication": false,
+          "legalOrComplianceCommitment": false,
+          "unverifiedRollback": false
+        },
+        "authorityDirective": {
+          "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+          "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+          "assurance": "operator-directed-in-session"
+        }
+      },
+      "coverage": {
+        "materialFiles": [
+          "schemas/nodekit.evolution-evidence.v1.schema.json",
+          "src/lib/evolution-immutability.mjs",
+          "src/lib/evolution-ledger.mjs"
+        ]
+      },
+      "evidence": {
+        "before": [
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+            "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+            "kind": "live-io"
+          },
+          {
+            "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+            "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+            "kind": "operator-directive"
+          }
+        ],
+        "after": [
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/committed-verifier.json",
+            "sha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941",
+            "kind": "live-io"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/journey.md",
+            "sha256": "c9a2592be53b818f84aa5c127c0778140ea75c85e4cb962d7a97576adc980af9",
+            "kind": "journey-card"
+          },
+          {
+            "ref": "evidence/historical-topology-ack-20260905/logs/full-tests.log",
+            "sha256": "2feeee203dd10880abf1302b0789b2ac3d24f16eddc8806b661b61781ce12d6e",
+            "kind": "test-log"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+            "sha256": "71c385a170c8218dd1aa00ff5fd1534b41116d6190c90683f1407549f80be4bf",
+            "kind": "runtime-trace"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+            "sha256": "131bd561967e05fcc112d473089bd9dbbfae7a63ec23854d3be10bbd0c081294",
+            "kind": "runtime-trace"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/source-judge.json",
+            "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+            "kind": "test-log"
+          }
+        ]
+      },
+      "uiSurface": {
+        "changed": false,
+        "mediaRequired": false,
+        "reason": "This patch changes the local Git ledger verifier and evidence admission, with no rendered UI.",
+        "mediaRefs": []
+      },
+      "rollback": {
+        "targetCommit": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+        "strategy": "git-revert-range",
+        "verificationRefs": [
+          "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+          "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json"
+        ]
+      },
+      "review": {
+        "status": "deferred-human-review",
+        "feedbackChannel": "pull-request"
+      },
+      "receiptDigest": "6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370"
+    }
+  }
+}

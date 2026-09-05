@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:historical-topology-reviewed-range-20260905",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+    "occurredAt": "2026-09-04T23:30:58-07:00"
+  },
+  "track": "architecture",
+  "category": "security",
+  "challenge": "The baseline has one old dimensions metadata mutation and incomplete review-range verification",
+  "observedFailure": "The committed baseline rejects the historical dimensions addition; a relabeled receipt could previously bypass actual material review",
+  "resolution": "The independently reviewed commit preserves the historical record, binds one informational acknowledgment and rejects incomplete or stale material review receipts.",
+  "assumptionIds": [
+    "asm:strong-model-infers-topology"
+  ],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:historical-topology-dimensions-acknowledgment"
+  ],
+  "knownLimitations": [
+    "This agent-proposed draft covers only bf6ff6c..0c33b8a. The older baseline-bound draft is preserved unchanged.",
+    "The exact committed range was reverted in a retained independent checkout; all 2695 tracked files match the baseline Git blobs. The original historical mutation reappears as the expected baseline failure.",
+    "Operator-directed-in-session is not a detached signature, human review or canonical promotion. Earlier workflow changes in the whole PR retain separate pre-action authority requirements.",
+    "The prior e7e4b10 factory certificate identifies an older package source. Current source identity changed; its certificate is not relabeled."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}
