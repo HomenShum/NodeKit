@@ -1,0 +1,512 @@
+{
+  "proof": "NODEKIT-ACTUAL-METADATA-HEAD-INDEPENDENT-RECHECK-01",
+  "at": "2026-09-05T07:01:42.138Z",
+  "verdict": "PASS_ACTUAL_COMMITTED_HEAD_DEFERRED_REVIEW",
+  "head": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "tree": "791b6fe0dc7971659f7a3194fda2d120432d2183",
+  "parent": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+  "baseline": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "checks": [
+    {
+      "name": "actual clean metadata commit",
+      "passed": true
+    },
+    {
+      "name": "exact metadata tree and material parent",
+      "passed": true
+    },
+    {
+      "name": "commit changes exactly18 reviewed metadata paths",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes HANDOFF.md",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/.gitattributes",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/README.md",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/committed-verifier.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/journey.md",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/manifest.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/receipt-api-output.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/receipt-api-stderr.log",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/receipt-input.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/retained-raw-whitespace.log",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/reviewed-commit.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/source-judge.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evidence/historical-topology-final-range-20260905/source-judge.md.txt",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evolution/deferred-reviews/deferred-review-sha256-7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7.json",
+      "passed": true
+    },
+    {
+      "name": "exact committed and working bytes evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+      "passed": true
+    },
+    {
+      "name": "committed18file digest exact",
+      "passed": true
+    },
+    {
+      "name": "receipt digest remains exact",
+      "passed": true
+    },
+    {
+      "name": "actualhead receipt verification passes",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "actualhead materiality passes via deferred receipt only",
+      "passed": true
+    },
+    {
+      "name": "actualhead still has exact3 material paths",
+      "passed": true
+    },
+    {
+      "name": "actualhead ledger passes without hiding raw mutation",
+      "passed": true
+    },
+    {
+      "name": "canonical authority unchanged",
+      "passed": true
+    },
+    {
+      "name": "actualhead source equals reviewed material source",
+      "passed": true
+    },
+    {
+      "name": "HEAD clean indexobjects and refs unchanged",
+      "passed": true
+    }
+  ],
+  "committed18FileDigest": "af49872b50ffc90686d5323289dda02345aef5d58f63048a1f13d60b1c5302f2",
+  "committedFiles": [
+    {
+      "path": "HANDOFF.md",
+      "sha256": "924bded5fd085845510ef75f6925287cab82335a2e31b2e639fb4c6c91dbd0f0",
+      "bytes": 4763
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/.gitattributes",
+      "sha256": "90ccbe35e923855fb1802811b0622b2d026a003fb6b890b2893bf5e2fb661c83",
+      "bytes": 127
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/README.md",
+      "sha256": "78bfbfa9cc8975c0156e4b8f8b163ab724fd63edd4f3dd756df93354778d1c4b",
+      "bytes": 1599
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+      "sha256": "131bd561967e05fcc112d473089bd9dbbfae7a63ec23854d3be10bbd0c081294",
+      "bytes": 245436
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+      "sha256": "71c385a170c8218dd1aa00ff5fd1534b41116d6190c90683f1407549f80be4bf",
+      "bytes": 584392
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/committed-verifier.json",
+      "sha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941",
+      "bytes": 3095
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/journey.md",
+      "sha256": "c9a2592be53b818f84aa5c127c0778140ea75c85e4cb962d7a97576adc980af9",
+      "bytes": 1200
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/manifest.json",
+      "sha256": "300d3845e4d9a2ae4fedde2a50e786a1dd5e627e2b77d42f0b9ff40492cf1cb4",
+      "bytes": 2860
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/receipt-api-output.json",
+      "sha256": "b3ef6890f0d028eed5f4c088e5e41266771829560901cc1b7c3e663a4ad4468c",
+      "bytes": 9123
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/receipt-api-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/receipt-input.json",
+      "sha256": "2d72aeb7b07f33209ba5d7145de02dc5800dfd7bba28136fcd220f0fc08f562c",
+      "bytes": 1763
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+      "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+      "bytes": 3066
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/retained-raw-whitespace.log",
+      "sha256": "ba75ebc67e47330419e3e84d101a7facf2080222263905743c4b326302549315",
+      "bytes": 1031
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/reviewed-commit.json",
+      "sha256": "9ac7170ae3405e557254c9a8fe6d00288e3e58bab02c02467f8337e144381289",
+      "bytes": 868
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/source-judge.json",
+      "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+      "bytes": 22361
+    },
+    {
+      "path": "evidence/historical-topology-final-range-20260905/source-judge.md.txt",
+      "sha256": "b8d5faa9dc7acaf4cb6b511cb6fa83a48688b180f02e51c7e54603cffa6774be",
+      "bytes": 6508
+    },
+    {
+      "path": "evolution/deferred-reviews/deferred-review-sha256-7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7.json",
+      "sha256": "82c0ba8ac96826bf59742921818f10b2be8fa1a174b40d8ac0a3ce01c7f123a6",
+      "bytes": 3977
+    },
+    {
+      "path": "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+      "sha256": "e19987c28f46b83f551b031da29346236caf775c2d8c74cf91e7f0bbf95e11ff",
+      "bytes": 1738
+    }
+  ],
+  "receiptDigest": "6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370",
+  "receiptVerification": {
+    "passed": true,
+    "findings": [],
+    "receipt": {
+      "schemaVersion": "nodekit.evolution-deferred-review/v1",
+      "id": "deferred-review:sha256:7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7",
+      "events": [
+        {
+          "eventId": "evt:historical-topology-reviewed-range-20260905",
+          "draftRef": "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+          "draftDigest": "e19987c28f46b83f551b031da29346236caf775c2d8c74cf91e7f0bbf95e11ff",
+          "sourceCommit": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+        }
+      ],
+      "range": {
+        "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+        "reviewedTo": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+      },
+      "risk": {
+        "classification": "reversible",
+        "effects": {
+          "destructiveWrite": false,
+          "credentialOrAuthorityChange": true,
+          "irreversibleMigration": false,
+          "materialSpend": false,
+          "externalCommunication": false,
+          "legalOrComplianceCommitment": false,
+          "unverifiedRollback": false
+        },
+        "authorityDirective": {
+          "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+          "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+          "assurance": "operator-directed-in-session"
+        }
+      },
+      "coverage": {
+        "materialFiles": [
+          "schemas/nodekit.evolution-evidence.v1.schema.json",
+          "src/lib/evolution-immutability.mjs",
+          "src/lib/evolution-ledger.mjs"
+        ]
+      },
+      "evidence": {
+        "before": [
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+            "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+            "kind": "live-io"
+          },
+          {
+            "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+            "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+            "kind": "operator-directive"
+          }
+        ],
+        "after": [
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/committed-verifier.json",
+            "sha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941",
+            "kind": "live-io"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/journey.md",
+            "sha256": "c9a2592be53b818f84aa5c127c0778140ea75c85e4cb962d7a97576adc980af9",
+            "kind": "journey-card"
+          },
+          {
+            "ref": "evidence/historical-topology-ack-20260905/logs/full-tests.log",
+            "sha256": "2feeee203dd10880abf1302b0789b2ac3d24f16eddc8806b661b61781ce12d6e",
+            "kind": "test-log"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+            "sha256": "71c385a170c8218dd1aa00ff5fd1534b41116d6190c90683f1407549f80be4bf",
+            "kind": "runtime-trace"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+            "sha256": "131bd561967e05fcc112d473089bd9dbbfae7a63ec23854d3be10bbd0c081294",
+            "kind": "runtime-trace"
+          },
+          {
+            "ref": "evidence/historical-topology-final-range-20260905/source-judge.json",
+            "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+            "kind": "test-log"
+          }
+        ]
+      },
+      "uiSurface": {
+        "changed": false,
+        "mediaRequired": false,
+        "reason": "This patch changes the local Git ledger verifier and evidence admission, with no rendered UI.",
+        "mediaRefs": []
+      },
+      "rollback": {
+        "targetCommit": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+        "strategy": "git-revert-range",
+        "verificationRefs": [
+          "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+          "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json"
+        ]
+      },
+      "review": {
+        "status": "deferred-human-review",
+        "feedbackChannel": "pull-request"
+      },
+      "receiptDigest": "6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370"
+    }
+  },
+  "materiality": {
+    "schemaVersion": "nodekit.evolution-materiality-verdict/v1",
+    "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "to": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+    "changedFiles": [
+      "HANDOFF.md",
+      "behavior-index.json",
+      "evidence/historical-topology-ack-20260905/README.md",
+      "evidence/historical-topology-ack-20260905/acknowledged-record.json",
+      "evidence/historical-topology-ack-20260905/after-verifier.json",
+      "evidence/historical-topology-ack-20260905/before-verifier.json",
+      "evidence/historical-topology-ack-20260905/deferred-review-preparation.json",
+      "evidence/historical-topology-ack-20260905/historical-records.json",
+      "evidence/historical-topology-ack-20260905/journey.md",
+      "evidence/historical-topology-ack-20260905/logs/build-component.log",
+      "evidence/historical-topology-ack-20260905/logs/evolution-verify.log",
+      "evidence/historical-topology-ack-20260905/logs/full-tests.log",
+      "evidence/historical-topology-ack-20260905/logs/incorrect-build-command.log",
+      "evidence/historical-topology-ack-20260905/logs/initial-scenario-failure.log",
+      "evidence/historical-topology-ack-20260905/logs/rehashed-directive-failure.log",
+      "evidence/historical-topology-ack-20260905/logs/relevant-tests.log",
+      "evidence/historical-topology-ack-20260905/logs/stale-behavior-index-failure.log",
+      "evidence/historical-topology-ack-20260905/logs/typecheck-component.log",
+      "evidence/historical-topology-ack-20260905/logs/typecheck-public.log",
+      "evidence/historical-topology-ack-20260905/manifest.json",
+      "evidence/historical-topology-ack-20260905/operator-directive.md",
+      "evidence/historical-topology-ack-20260905/original-record.json",
+      "evidence/historical-topology-ack-20260905/proposed-evidence.json",
+      "evidence/historical-topology-ack-20260905/rollback-summary.json",
+      "evidence/historical-topology-ack-20260905/rollback-verifier.json",
+      "evidence/historical-topology-ack-20260905/source-bindings.json",
+      "evidence/historical-topology-final-range-20260905/.gitattributes",
+      "evidence/historical-topology-final-range-20260905/README.md",
+      "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json",
+      "evidence/historical-topology-final-range-20260905/actual-range-rollback.json",
+      "evidence/historical-topology-final-range-20260905/committed-verifier.json",
+      "evidence/historical-topology-final-range-20260905/journey.md",
+      "evidence/historical-topology-final-range-20260905/manifest.json",
+      "evidence/historical-topology-final-range-20260905/receipt-api-output.json",
+      "evidence/historical-topology-final-range-20260905/receipt-api-stderr.log",
+      "evidence/historical-topology-final-range-20260905/receipt-input.json",
+      "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json",
+      "evidence/historical-topology-final-range-20260905/retained-raw-whitespace.log",
+      "evidence/historical-topology-final-range-20260905/reviewed-commit.json",
+      "evidence/historical-topology-final-range-20260905/source-judge.json",
+      "evidence/historical-topology-final-range-20260905/source-judge.md.txt",
+      "evolution/deferred-reviews/deferred-review-sha256-7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7.json",
+      "evolution/drafts/evt-historical-topology-acknowledgment-proposal-20260905.json",
+      "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json",
+      "evolution/evidence/evd-historical-topology-dimensions-acknowledgment.json",
+      "schemas/nodekit.evolution-evidence.v1.schema.json",
+      "src/lib/evolution-immutability.mjs",
+      "src/lib/evolution-ledger.mjs",
+      "test/evolution-ledger.test.mjs"
+    ],
+    "materialFiles": [
+      "schemas/nodekit.evolution-evidence.v1.schema.json",
+      "src/lib/evolution-immutability.mjs",
+      "src/lib/evolution-ledger.mjs"
+    ],
+    "events": [],
+    "deferredReviews": [
+      {
+        "id": "deferred-review:sha256:7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7",
+        "receiptDigest": "6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370",
+        "reviewedTo": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+        "reviewStatus": "deferred-human-review"
+      }
+    ],
+    "rejectedDeferredReviews": [],
+    "historicalDeferredReviews": [
+      {
+        "id": "deferred-review:sha256:13371d82c9abb7b24eee20df2a1cb8feeb4450328bf2e741c4a92c2f165e48f1",
+        "from": "d6ed7f085396e8d79a326e63a6f72f523c531caf",
+        "reviewedTo": "474f374d7b6dc08f73da96b29c4294b70d3228fb"
+      },
+      {
+        "id": "deferred-review:sha256:7fbfeb39a50ffa2f5f444f84a625c475df0ac5ef5f277a98dfabed398028ce54",
+        "from": "ab7c9e69e53e2eb1838f0d854dafb490f960537c",
+        "reviewedTo": "fc47e3a500e9f78cb6e26197068e6366342cfd69"
+      },
+      {
+        "id": "deferred-review:sha256:a7d87ef419dd3de4a8c98a27b972ce578679a31ac7fbabed5f823261ed927fc7",
+        "from": "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+        "reviewedTo": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0"
+      },
+      {
+        "id": "deferred-review:sha256:ade2ee4384d18108c81f34b24d83d2710f96ee3512ba51ca84cf27c147a5c11d",
+        "from": "87b8a44d02d1f1b087932814c4e1827713c0c6d0",
+        "reviewedTo": "3d8bbfde8920db706139fafbeb52837ec08567c0"
+      },
+      {
+        "id": "deferred-review:sha256:f4479a0e15a771d3220323f16f82a5cc6d6aa7c947a46ed9fb7db572523a6910",
+        "from": "391f1be3c418eb0984338cba81f3f88b544a5560",
+        "reviewedTo": "71ea40f1d1ddfcfe32bff0a61ce030def0690563"
+      }
+    ],
+    "passed": true,
+    "reason": "Material changes have exact proof-backed reversible evidence and remain pending deferred human review."
+  },
+  "ledger": {
+    "schemaVersion": "nodekit.evolution-verdict/v1",
+    "counts": {
+      "events": 25,
+      "assumptions": 6,
+      "invariants": 24,
+      "evidence": 36,
+      "adoptions": 3
+    },
+    "immutability": {
+      "checked": 94,
+      "gitAvailable": true,
+      "claimMutations": 1,
+      "acknowledged": 1,
+      "unresolved": 0,
+      "bindingRepairs": 3
+    },
+    "authority": {
+      "canonicalEvents": 25,
+      "attested": 3,
+      "unattested": 22,
+      "unattestedIds": [
+        "evt:caseflow-idempotent-retries",
+        "evt:convex-caseflow-receipt-retry-contract",
+        "evt:exact-candidate-contract",
+        "evt:postgres-caseflow-adapter",
+        "evt:rendered-browser-certification",
+        "evt:source-bound-submission-gates",
+        "evt:studio-boundary",
+        "evt:behavior-index-and-friction-loop",
+        "evt:copy-as-proof-surface",
+        "evt:frontend-decisive-evidence",
+        "evt:gym-proven-friction-loop",
+        "evt:invariant-proof-binding",
+        "evt:journey-harness-and-tour",
+        "evt:nodevideo-topology-contract",
+        "evt:repository-wide-behavior-ownership",
+        "evt:signed-repair-promotion",
+        "evt:builder-journey-j0",
+        "evt:builder-journey-j1-decide-build",
+        "evt:builder-journey-j1-finish",
+        "evt:domain-blank-factory",
+        "evt:guided-intake-mobile-decisions",
+        "evt:submission-cli-named-options"
+      ]
+    },
+    "issues": [],
+    "warnings": [
+      "inv:caseflow-idempotent-retries scope names more applications than verified adoptions",
+      "inv:exact-candidate-evidence scope names more applications than verified adoptions",
+      "inv:postgres-caseflow-conformance scope names more applications than verified adoptions",
+      "inv:stable-caseflow-package-entrypoint scope names more applications than verified adoptions",
+      "inv:submission-cli-explicit-options scope names more applications than verified adoptions",
+      "22 canonical event(s) claim human-reviewed with no verified approval, promoted before approval enforcement landed on 2026-07-26. Their status is a string a command wrote, not an attestation. They are reported rather than back-filled, because inventing an approval for a review that was never signed is fabrication: evt:caseflow-idempotent-retries, evt:convex-caseflow-receipt-retry-contract, evt:exact-candidate-contract, and 19 more",
+      "evd:convex-caseflow-receipt-retry-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+      "evd:guided-intake-mobile-decisions-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+      "evd:source-bound-submission-gates-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+      "asm:strong-model-infers-topology historical dimensions metadata mutation is acknowledged by evd:historical-topology-dimensions-acknowledgment; the raw claim mutation remains recorded, with operator-directed-in-session assurance, not human review or a signature"
+    ],
+    "passed": true
+  },
+  "sourceEdits": 0,
+  "indexOrRefWrites": 0,
+  "providerCalls": 0,
+  "canonicalPromotions": 0,
+  "scope": "Only actual-head18blob and existing receipt/materiality/ledger recheck; no broader tests, rollback repeat or factory run.",
+  "remaining": "Fresh normal current-package factory is a separate next step. Whole-PR workflow authority, human review and full product grades remain unchanged.",
+  "evidence": {
+    "metadataCommit": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-metadata-commit.json",
+      "sha256": "3d11c63fd60d3d269c2604a676674df859348ba20ad5b5c6b2506995161f690a"
+    },
+    "priorStageJudgment": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_RAW_STAGE_JUDGE.json",
+      "sha256": "bd102cb3d98ee589ac4adf304b598cb557ae60be4dbef073896413dbadcc7d65"
+    }
+  }
+}

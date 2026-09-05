@@ -1,0 +1,19 @@
+# Preserve exact original CRLF evidence bytes; authored metadata remains LF.
+"E3e-nodekit-factory-independent-browser-02/accepted-390.png" -text
+"E3e-nodekit-factory-independent-browser-02/arrival-390.png" -text
+"E3e-nodekit-factory-independent-browser-02/fresh-context-390.png" -text
+"E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.png" -text
+"E3e-nodekit-factory-independent-browser/arrival-390.png" -text
+"E3e-nodekit-factory-judge-browser-02.mjs" -text
+"E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json" -text
+"E3e_NODEKIT_COMMITTED_RANGE_JUDGE.md.txt" -text
+"E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json" -text
+"E3e_NODEKIT_CURRENT_FACTORY_JUDGE.md.txt" -text
+"E3e_NODEKIT_FACTORY_JUDGE_BINDINGS.json" -text
+"E3e_NODEKIT_RAW_STAGE_JUDGE.json" -text
+"E3e_NODEKIT_RAW_STAGE_JUDGE.md.txt" -text
+"original/candidate-package/homenshum-nodekit-0.2.1.tgz" -text
+"source/proof/ease/latest/browser/screenshots/conflict--desktop--dark.png" -text
+"source/proof/ease/latest/browser/screenshots/export_share--desktop--light.png" -text
+"source/proof/ease/latest/browser/screenshots/proposal_pending--mobile-portrait--dark.png" -text
+"source/proof/ease/latest/candidate.tar.gz" -text

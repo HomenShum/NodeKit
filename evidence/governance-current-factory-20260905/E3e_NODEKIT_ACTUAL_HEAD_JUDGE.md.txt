@@ -1,0 +1,11 @@
+# NodeKit actual committed-head recheck
+
+**PASS_ACTUAL_COMMITTED_HEAD_DEFERRED_REVIEW.** Commit 0d2223815ef73b80eeed8ce3dc6b96d16b3a2825 contains exactly the18 approved metadata files, each committed blob and working file matching the reviewed digest af49872b50ffc90686d5323289dda02345aef5d58f63048a1f13d60b1c5302f2. Its tree is791b6fe0dc7971659f7a3194fda2d120432d2183 and its parent is the reviewed material commit0c33b8a.
+
+**Re your request:** make repository handoff reliable through planner-worker-judge verification — the final metadata is now checked on the actual committed head, closing the earlier future-commit limitation.
+
+Receipt, materiality and ledger APIs all pass against this head. The receipt still covers the actual three material paths and keeps review deferred; metadata continuation changes no material source. Raw mutation remains1, acknowledged1, unresolved0; canonical events remain25, with3 attested and22 unattested. No new canonical event or approval is created.
+
+The worktree stays clean, and HEAD/index objects/refs remain unchanged. No broad tests, rollback rerun, source edit, provider call or factory operation was performed. Root may now run the separate fresh normal factory; whole-PR workflow authority and full product grades remain unresolved.
+
+[Structured actual-head judgment](E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json).

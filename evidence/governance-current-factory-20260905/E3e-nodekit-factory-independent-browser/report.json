@@ -1,0 +1,56 @@
+{
+  "proof": "NODEKIT-GOVERNANCE-CURRENT-PACKAGE-INDEPENDENT-DOWNLOAD",
+  "startedAt": "2026-09-05T07:21:48.185Z",
+  "checks": [
+    {
+      "name": "actual current package source hash recomputed",
+      "passed": true
+    },
+    {
+      "name": "own installed consumer server ready",
+      "passed": true
+    },
+    {
+      "name": "arrival-390 has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "arrival-390 capture DOM preserved",
+      "passed": true
+    }
+  ],
+  "captures": [
+    {
+      "name": "arrival-390",
+      "state": {
+        "url": "http://127.0.0.1:4977/",
+        "scenario": "first_arrival",
+        "width": 390,
+        "height": 844,
+        "overflow": 0,
+        "focused": ""
+      },
+      "pngSha256": "ec777476b2719441f775a425db936fbbbf6de26016defb5ce9bbc844dc690cc4"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "blocked": [],
+  "before": {
+    "sourceHead": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+    "sourceIndex": "dba5385ca439cd14f9c533c50b53b60319d81840a098d502db703490ac8282e9",
+    "sourceStatus": "9d886232e0ff1b52b1cff1f63c45d7c2157710bf51a496f06040d425b0489db0",
+    "consumerHead": "ff2aad17fd55ae994af82d6792d3fc29e074df03",
+    "consumerIndex": "e53bbedb3eca03bcdd468483eea622fb85077359c620c84f6274562cc12465e7",
+    "consumerStatus": "686bca7480fcf0920d008da4bacff4d141a23040a51e9a6377982e527378a69b"
+  },
+  "passed": false,
+  "nodekitSourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "browser": "149.0.7827.55",
+  "failure": {
+    "message": "locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#propose')\u001b[22m\n\u001b[2m    - locator resolved to <button id=\"propose\" class=\"button primary\">Prepare proposal</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    19 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+    "stack": "locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#propose')\u001b[22m\n\u001b[2m    - locator resolved to <button id=\"propose\" class=\"button primary\">Prepare proposal</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    19 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-judge-browser.mjs:41:93"
+  },
+  "finishedAt": "2026-09-05T07:21:59.417Z"
+}

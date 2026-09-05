@@ -1,0 +1,23 @@
+# NodeKit actual committed-range finalization judgment
+
+**PASS_SCOPED_COMMITTED_RANGE_AND_METADATA_FOR_LOCAL_COMMIT.** A developer can now connect the reviewed governance repair to its real commit, exact rollback and deferred-review receipt. The final17 metadata files are suitable for a normal local commit; whole-PR authority and current-package acceptance remain separate.
+
+**Re your request:** execute planner-worker-judge recovery so every repo is ready for use and handoff — this independently verifies the actual committed bytes and the review evidence the next developer will receive.
+
+Material commit `0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c` has parent `bf6ff6c70f9f307c792d494b44fc8325c69db286` and tree `55a197953e1fcdc6b05c5d0c62e1f1a97e16f888`. Its32 actual blobs exactly reproduce the prior judge's `40f37c` digest. [Commit binding](E3e_NODEKIT_FINALIZATION_JUDGE_COMMIT_BINDINGS.json)
+
+The retained actual `git revert --no-commit` checkout matches all2,695 baseline index paths/modes/blobs and all working bytes. My fresh baseline verifier response is byte-exact to the retained proof and correctly returns its single original topology-mutation failure. The rollback's HEAD, index-file bytes, refs and working files remain unchanged. [Independent rollback](E3e_NODEKIT_FINALIZATION_JUDGE_ROLLBACK.json)
+
+The final17 changed paths consist only of HANDOFF,14 portable evidence files, a new agent-proposed draft and its generated receipt. All2,720 other committed files, including the old draft and signed records, remain byte-exact. All13 payload hashes, eight copied historical artifacts, eight receipt evidence references and current Markdown links verify. The metadata digest is `441e6f5d919769a213f5a2ef77833d5ac7e16929061c01d7821cc7b455bb9c96`. [Metadata binding](E3e_NODEKIT_FINALIZATION_JUDGE_BINDINGS.json)
+
+Receipt `6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370` independently canonical-hashes correctly. The draft names the actual material commit; the receipt covers exactly the evidence schema and two verifier owners derived from Git. Authority-sensitive classification is true, the current directive is content-bound, and actual rollback traces are bound in after evidence.
+
+Fresh `verifyDeferredEvolutionReview`, `checkEvolutionMateriality` and `verifyEvolutionLedger` all pass. The current ledger remains checked94/raw1/acknowledged1/unresolved0, with25 canonical events (3 attested,22 unattested). The new materiality result uses the deferred receipt and contains no canonical event for this range. Two read-only, in-memory attacks are rejected: a rehashed missing material path, and a rehashed event source moved back to the baseline. [Actual API replay](E3e_NODEKIT_FINALIZATION_JUDGE_API.json)
+
+No blocking finding remains in this bounded finalization. Review is still deferred, the event is still agent-proposed, and the directive is only operator-directed-in-session. PR39's separate quality.yml workflow path still requires its genuine authority resolution; this three-material-path receipt cannot grant it. No approval signature, canonical promotion or credential use occurred.
+
+Next: commit exactly the17 approved metadata files, then verify the resulting actual HEAD through the existing receipt/materiality APIs with unchanged source hashes. This judgment does not pretend that future commit has already been tested. Any fresh current-package factory proof remains a separate task; the earlier e7e4b10 certificate is historical and is not relabeled.
+
+The reviewer did not author the repair or create its commit/draft/receipt; reviewer context was reused. There were no source/index/ref/env edits, provider calls, signing, commits, pushes or deployments by this judge. No UI or full-product grades are increased. Raw historical whitespace and intentional baseline/negative failures remain preserved.
+
+[Structured final judgment and evidence hashes](E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json).

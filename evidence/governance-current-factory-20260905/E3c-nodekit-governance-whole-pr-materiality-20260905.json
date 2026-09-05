@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "node",
+    "src/cli.mjs",
+    "evolution",
+    "materiality",
+    "--from",
+    "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+    "--to",
+    "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825"
+  ],
+  "cwd": "D:/VSCode Projects/node-platform/.worktrees/project-consolidation-20260904",
+  "startedAt": "2026-09-05T07:11:51.639493+00:00",
+  "timeoutSeconds": 120,
+  "log": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-whole-pr-materiality-20260905.log",
+  "environment": "OS/runtime allowlist; no provider keys forwarded; lifecycle behavior follows explicit command flags",
+  "exit": 1,
+  "finishedAt": "2026-09-05T07:11:52.255738+00:00",
+  "durationSeconds": 0.609,
+  "logSha256": "34dbca5b51a3c13b3d7f0c8c47decbcb38274d4d557bb627a0a88a44aabff087",
+  "logBytes": 101
+}

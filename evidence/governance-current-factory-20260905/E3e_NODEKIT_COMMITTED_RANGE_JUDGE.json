@@ -1,0 +1,357 @@
+{
+  "proof": "NODEKIT-ACTUAL-COMMITTED-RANGE-FINALIZATION-JUDGE-01",
+  "at": "2026-09-05T06:52:11.964892+00:00",
+  "mode": "Builder",
+  "verdict": "PASS_SCOPED_COMMITTED_RANGE_AND_METADATA_FOR_LOCAL_COMMIT",
+  "requestTrace": "Execute planner-worker-judge repository recovery so each individual repo is ready for developer/user handoff, with honest evidence and authority boundaries.",
+  "reviewer": {
+    "agent": "nodemem_mobile_judge",
+    "implementationAuthorship": false,
+    "freshContext": false,
+    "disclosure": "Independent nonauthor reviewer; context reused after earlier unrelated portfolio judgments. This judge did not implement the governed repair, create the draft/receipt, commit or revert source."
+  },
+  "candidate": {
+    "root": "D:/VSCode Projects/node-platform/.worktrees/project-consolidation-20260904",
+    "materialCommit": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+    "materialCommitTree": "55a197953e1fcdc6b05c5d0c62e1f1a97e16f888",
+    "baseline": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "reviewed32FileDigest": "40f37cea48b1b895c6c430f9c1de6a0743e967c7e312e003ef79ab8f2965cead",
+    "metadataFiles": 17,
+    "metadataOrderedDigest": "441e6f5d919769a213f5a2ef77833d5ac7e16929061c01d7821cc7b455bb9c96",
+    "metadataDigestSerialization": "SHA256 UTF-8 compact JSON array sorted by path, each object ordered path,sha256,bytes; ensure_ascii=false; no final newline",
+    "metadataBindings": {
+      "HANDOFF.md": {
+        "sha256": "924bded5fd085845510ef75f6925287cab82335a2e31b2e639fb4c6c91dbd0f0",
+        "bytes": 4763
+      },
+      "evidence/historical-topology-final-range-20260905/README.md": {
+        "sha256": "78bfbfa9cc8975c0156e4b8f8b163ab724fd63edd4f3dd756df93354778d1c4b",
+        "bytes": 1599
+      },
+      "evidence/historical-topology-final-range-20260905/actual-range-rollback-commands.json": {
+        "sha256": "131bd561967e05fcc112d473089bd9dbbfae7a63ec23854d3be10bbd0c081294",
+        "bytes": 245436
+      },
+      "evidence/historical-topology-final-range-20260905/actual-range-rollback.json": {
+        "sha256": "71c385a170c8218dd1aa00ff5fd1534b41116d6190c90683f1407549f80be4bf",
+        "bytes": 584392
+      },
+      "evidence/historical-topology-final-range-20260905/committed-verifier.json": {
+        "sha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941",
+        "bytes": 3095
+      },
+      "evidence/historical-topology-final-range-20260905/journey.md": {
+        "sha256": "c9a2592be53b818f84aa5c127c0778140ea75c85e4cb962d7a97576adc980af9",
+        "bytes": 1200
+      },
+      "evidence/historical-topology-final-range-20260905/manifest.json": {
+        "sha256": "982f21fb80092b787cc8ec51f5b469cfed5c8adf353bd5a4257c5ded8ea08a32",
+        "bytes": 2712
+      },
+      "evidence/historical-topology-final-range-20260905/receipt-api-output.json": {
+        "sha256": "b3ef6890f0d028eed5f4c088e5e41266771829560901cc1b7c3e663a4ad4468c",
+        "bytes": 9123
+      },
+      "evidence/historical-topology-final-range-20260905/receipt-api-stderr.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "evidence/historical-topology-final-range-20260905/receipt-input.json": {
+        "sha256": "2d72aeb7b07f33209ba5d7145de02dc5800dfd7bba28136fcd220f0fc08f562c",
+        "bytes": 1763
+      },
+      "evidence/historical-topology-final-range-20260905/restored-baseline-verifier.json": {
+        "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+        "bytes": 3066
+      },
+      "evidence/historical-topology-final-range-20260905/retained-raw-whitespace.log": {
+        "sha256": "ba75ebc67e47330419e3e84d101a7facf2080222263905743c4b326302549315",
+        "bytes": 1031
+      },
+      "evidence/historical-topology-final-range-20260905/reviewed-commit.json": {
+        "sha256": "9ac7170ae3405e557254c9a8fe6d00288e3e58bab02c02467f8337e144381289",
+        "bytes": 868
+      },
+      "evidence/historical-topology-final-range-20260905/source-judge.json": {
+        "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+        "bytes": 22361
+      },
+      "evidence/historical-topology-final-range-20260905/source-judge.md.txt": {
+        "sha256": "b8d5faa9dc7acaf4cb6b511cb6fa83a48688b180f02e51c7e54603cffa6774be",
+        "bytes": 6508
+      },
+      "evolution/deferred-reviews/deferred-review-sha256-7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7.json": {
+        "sha256": "82c0ba8ac96826bf59742921818f10b2be8fa1a174b40d8ac0a3ce01c7f123a6",
+        "bytes": 3977
+      },
+      "evolution/drafts/evt-historical-topology-reviewed-range-20260905.json": {
+        "sha256": "e19987c28f46b83f551b031da29346236caf775c2d8c74cf91e7f0bbf95e11ff",
+        "bytes": 1738
+      }
+    },
+    "sourceState": "Only HANDOFF plus14 new portable files, one new agent-proposed draft and its API-created receipt are changed after the real material commit. Metadata is not yet committed at this judgment."
+  },
+  "findings": [],
+  "verification": {
+    "actualMaterialCommit": "All32 actual commit blobs equal the independent source judge snapshot, digest40f37c. Parent and tree independently resolve.",
+    "rollback": {
+      "checks": 12,
+      "actualCommand": [
+        "git",
+        "revert",
+        "--no-commit",
+        "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+      ],
+      "retainedCheckout": "D:/ProjectRecovery/nodekit-reviewed-range-rollback-20260905",
+      "indexTree": "6f95a3a4a973e05a22c78b0793f623faf9c265ba",
+      "all2695IndexModesAndBlobsExact": true,
+      "all2695WorkingBytesEqualActualBaselineGit": true,
+      "rawApiExactlyMatchesRoot": true,
+      "expectedBaselineApiPassed": false,
+      "originalFailure": [
+        "asm:strong-model-infers-topology was edited after it was committed in 5b9c4d73; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"single open-ended frontend request with no protected product contract\"]]"
+      ],
+      "headIndexFileAndRefsUnchanged": true
+    },
+    "finalMetadata": {
+      "checks": 25,
+      "portableFiles": 14,
+      "payloadFiles": 13,
+      "historicalExactCopies": 8,
+      "otherCommittedFilesUnchanged": 2720,
+      "actualMaterialPaths": [
+        "schemas/nodekit.evolution-evidence.v1.schema.json",
+        "src/lib/evolution-immutability.mjs",
+        "src/lib/evolution-ledger.mjs"
+      ],
+      "all8ReceiptEvidenceRefsExact": true,
+      "newDraftSourceEqualsActualCommit": true,
+      "oldBaselineDraftAndAllCanonicalSignedRecordsUnchanged": true,
+      "metadataDiffReviewed": "HANDOFF.md updates only current committed-range/rollback/receipt status and preserves pending factory and whole-PR authority limitations."
+    },
+    "api": {
+      "verifyDeferredEvolutionReview": true,
+      "checkEvolutionMateriality": true,
+      "verifyEvolutionLedger": true,
+      "newCanonicalEventsInRange": 0,
+      "ledger": {
+        "passed": true,
+        "counts": {
+          "events": 25,
+          "assumptions": 6,
+          "invariants": 24,
+          "evidence": 36,
+          "adoptions": 3
+        },
+        "immutability": {
+          "checked": 94,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 1,
+          "unresolved": 0,
+          "bindingRepairs": 3
+        },
+        "authority": {
+          "canonicalEvents": 25,
+          "attested": 3,
+          "unattested": 22,
+          "unattestedIds": [
+            "evt:caseflow-idempotent-retries",
+            "evt:convex-caseflow-receipt-retry-contract",
+            "evt:exact-candidate-contract",
+            "evt:postgres-caseflow-adapter",
+            "evt:rendered-browser-certification",
+            "evt:source-bound-submission-gates",
+            "evt:studio-boundary",
+            "evt:behavior-index-and-friction-loop",
+            "evt:copy-as-proof-surface",
+            "evt:frontend-decisive-evidence",
+            "evt:gym-proven-friction-loop",
+            "evt:invariant-proof-binding",
+            "evt:journey-harness-and-tour",
+            "evt:nodevideo-topology-contract",
+            "evt:repository-wide-behavior-ownership",
+            "evt:signed-repair-promotion",
+            "evt:builder-journey-j0",
+            "evt:builder-journey-j1-decide-build",
+            "evt:builder-journey-j1-finish",
+            "evt:domain-blank-factory",
+            "evt:guided-intake-mobile-decisions",
+            "evt:submission-cli-named-options"
+          ]
+        },
+        "rawSha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941"
+      },
+      "inMemoryAdversarialChecks": [
+        {
+          "name": "rehashed incomplete material coverage",
+          "passed": false,
+          "findings": [
+            "material file coverage does not match the tested range"
+          ],
+          "inMemoryOnly": true
+        },
+        {
+          "name": "rehashed event source moved to baseline",
+          "passed": false,
+          "findings": [
+            "event source commit mismatch: evt:historical-topology-reviewed-range-20260905",
+            "event source commit is outside the reviewed range: evt:historical-topology-reviewed-range-20260905"
+          ],
+          "inMemoryOnly": true
+        }
+      ],
+      "negativeChecksWriteAnyReceiptOrSource": false
+    }
+  },
+  "receipt": {
+    "ref": "evolution/deferred-reviews/deferred-review-sha256-7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7.json",
+    "id": "deferred-review:sha256:7ead8e65b049e09e409f8e195817e0772b8d916d58be72c0108001b251ee27f7",
+    "receiptDigest": "6639dfd10957893d8de96e459f9701aa00e1b70022e07317b31620d0facb8370",
+    "digestIndependentlyCanonicalized": true,
+    "range": {
+      "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+      "reviewedTo": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c"
+    },
+    "reviewStatus": "deferred-human-review",
+    "draftStatus": "agent-proposed",
+    "authorityClassification": true,
+    "directiveAssurance": "operator-directed-in-session",
+    "rollbackTarget": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "coverage": "Exactly the three material paths derived from actual Git. Current receipt supplies deferred materiality without promoting a canonical event."
+  },
+  "authorityDisposition": {
+    "currentUserAuthorization": "The actual current recovery and now execute instructions authorize this reversible local repair, proof and unpromoted review preparation. The directive truthfully labels specific code choices as agent choices.",
+    "notGranted": "No detached signature, human code review, canonical promotion, nonce consumption, credential use, workflow exception or production action.",
+    "wholePr": "PR39 includes separate quality.yml workflow changes outside this slice. That pre-action/canonical authority hold remains unresolved; this scoped receipt does not authorize the whole PR.",
+    "canonicalCounts": "Unchanged25 canonical events:3 attested and22 unattested; no new canonical event covers this slice.",
+    "futureMetadataCommit": "This approves the exact17 frozen metadata files for a normal local commit. A future committed metadata HEAD was not yet replayed; after commit, verify that source bytes remain exact and the existing verifier accepts metadata-only continuation before claiming that head."
+  },
+  "scopeAndLimits": [
+    "No current package/factory recertification. Prior e7e4b10 package/consumer/factory receipts remain historical for their original source identity.",
+    "No UI, visual, responsive, accessibility, performance, human-usability or whole-product grade is increased.",
+    "The restored baseline is correctly failing on its original historical mutation; API execution exit0 is not reported as a passing ledger.",
+    "The retained rollback clone shares Git objects and a dependency junction; exact baseline custody is proven, not a fresh independent installation or production rollback capability.",
+    "All raw historical terminal whitespace remains retained; authored metadata is reviewed without trimming evidence to force a formatting pass.",
+    "The existing2MiB evidence check occurs after local read; no new streaming bound or performance claim is made."
+  ],
+  "preservation": {
+    "metadataAnd2720ProtectedFilesUnchangedDuringReplay": true,
+    "headIndexObjectsRefsAndRawWorkingDiffUnchanged": true,
+    "sourceEdits": 0,
+    "indexOrRefWrites": 0,
+    "createdDraftsOrReceipts": 0,
+    "providerCalls": 0,
+    "credentialAccesses": 0,
+    "canonicalPromotions": 0,
+    "commitsPushesDeploys": 0
+  },
+  "fullGrades": {
+    "visualScore": null,
+    "designScore": null,
+    "responsiveScore": null,
+    "interactionScore": null,
+    "accessibilityScore": null,
+    "performanceScore": null,
+    "usageScore": null,
+    "alignmentScore": null,
+    "overallScore": null
+  },
+  "evidence": {
+    "E3e_NODEKIT_FINALIZATION_JUDGE_COMMIT_BINDINGS.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_FINALIZATION_JUDGE_COMMIT_BINDINGS.json",
+      "sha256": "c10d5064c601762cc80b154ab48650f8237828de8c205ba0992b5f167a69c747",
+      "bytes": 9057
+    },
+    "E3e_NODEKIT_FINALIZATION_JUDGE_BINDINGS.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_FINALIZATION_JUDGE_BINDINGS.json",
+      "sha256": "bc1ce864748fe5904dfe5374fcde7d3236c241192fdd61b54ef1a840c8c0b0fb",
+      "bytes": 711685
+    },
+    "E3e_NODEKIT_FINALIZATION_JUDGE_ROLLBACK.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_FINALIZATION_JUDGE_ROLLBACK.json",
+      "sha256": "ab14d57e9da02f9a584d705908b4fd4da7401ef9d2e44b808d643c035d374b81",
+      "bytes": 827256
+    },
+    "E3e_NODEKIT_FINALIZATION_JUDGE_API.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_FINALIZATION_JUDGE_API.json",
+      "sha256": "e31f940b4ce0487283024c3cb4b4244552642d3d725dadc746e9723ced554a20",
+      "bytes": 11410
+    },
+    "E3e-nodekit-finalization-judge-ledger.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-finalization-judge-ledger.json",
+      "sha256": "d61fe851ed1a3d682d28a0e00aea2ee6b80d2e9ae37c0e83ac758c126531f941",
+      "bytes": 3095
+    },
+    "E3e-nodekit-rollback-judge-api.stdout.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-rollback-judge-api.stdout.json",
+      "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+      "bytes": 3066
+    },
+    "E3e-nodekit-rollback-judge-api.stderr.log": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-rollback-judge-api.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "E3e-nodekit-finalization-judge-api.stdout.log": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-finalization-judge-api.stdout.log",
+      "sha256": "9c86a5d623e69c9c0154d2f16f9a918550dd25625856a1a2c58b3f9e3eebbad0",
+      "bytes": 735
+    },
+    "E3e-nodekit-finalization-judge-api.stderr.log": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-finalization-judge-api.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "E3e-nodekit-finalization-metadata-reviewed.diff": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-finalization-metadata-reviewed.diff",
+      "sha256": "8a216ccb59a0935384939c4117fae67809b93b103fa05a91559cf0ccc0503975",
+      "bytes": 2142
+    },
+    "E3e-nodekit-rollback-judge.py": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-rollback-judge.py",
+      "sha256": "3e726504dd6ed802b5f6007e3bebd2ce899e57a357be9584b44e837526a8ead9",
+      "bytes": 6078
+    },
+    "E3e-nodekit-finalization-judge-bind.py": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-finalization-judge-bind.py",
+      "sha256": "9c1a4c951f0dfe21d1720c031f4247f3ddc2afcdc898fb972b30bf2c20d6807b",
+      "bytes": 8429
+    },
+    "E3e-nodekit-finalization-judge-api.mjs": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-finalization-judge-api.mjs",
+      "sha256": "e6c860d027e6c3ea583ef1fd2c508e8faccc13fa62d4269673963dba73540e24",
+      "bytes": 2928
+    },
+    "E3e-nodekit-approved-commit.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-approved-commit.json",
+      "sha256": "9ac7170ae3405e557254c9a8fe6d00288e3e58bab02c02467f8337e144381289",
+      "bytes": 868
+    },
+    "E3e-nodekit-committed-receipt-creation.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-committed-receipt-creation.json",
+      "sha256": "e3a2e4d1a37413ccbf1a0b556f27e4f954bea57253a523b2d7cf20a25c650ece",
+      "bytes": 667
+    },
+    "E3e-nodekit-actual-range-rollback.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-actual-range-rollback.json",
+      "sha256": "71c385a170c8218dd1aa00ff5fd1534b41116d6190c90683f1407549f80be4bf",
+      "bytes": 584392
+    },
+    "E3e-nodekit-actual-range-rollback-commands.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-actual-range-rollback-commands.json",
+      "sha256": "131bd561967e05fcc112d473089bd9dbbfae7a63ec23854d3be10bbd0c081294",
+      "bytes": 245436
+    },
+    "E3e-nodekit-range-rollback.py": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-range-rollback.py",
+      "sha256": "ebff1e7b601d4bae4e9e46b31ec96b488fcef1bd48324e55331ddfe3197d06c0",
+      "bytes": 4241
+    },
+    "E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json": {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json",
+      "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+      "bytes": 22361
+    }
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "proof": "NODEKIT-GOVERNANCE-CURRENT-PACKAGE-INDEPENDENT-DOWNLOAD",
+  "startedAt": "2026-09-05T07:23:16.332Z",
+  "checks": [
+    {
+      "name": "actual current package source hash recomputed",
+      "passed": true
+    },
+    {
+      "name": "own installed consumer server ready",
+      "passed": true
+    },
+    {
+      "name": "arrival-390 has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "arrival-390 capture DOM preserved",
+      "passed": true
+    },
+    {
+      "name": "running-mobile-controls-390 has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "running-mobile-controls-390 capture DOM preserved",
+      "passed": true
+    },
+    {
+      "name": "real reject preserves accepted artifact and creates no receipt",
+      "passed": true
+    },
+    {
+      "name": "accepted-390 has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted-390 capture DOM preserved",
+      "passed": true
+    },
+    {
+      "name": "actual browser download uses portable proof filename",
+      "passed": true
+    },
+    {
+      "name": "download uses current portable receipt schemas",
+      "passed": true
+    },
+    {
+      "name": "case/run/receipt IDs agree",
+      "passed": true
+    },
+    {
+      "name": "actual downloaded canonical content hash and exact entered outcome agree",
+      "passed": true
+    },
+    {
+      "name": "receipt binds actual canonical version and hash",
+      "passed": true
+    },
+    {
+      "name": "independent receipt/case/run hashes agree",
+      "passed": true
+    },
+    {
+      "name": "rendered artifact identity equals downloaded actual owner",
+      "passed": true
+    },
+    {
+      "name": "rendered confirmed outcome equals downloaded raw text",
+      "passed": true
+    },
+    {
+      "name": "download uses current portable receipt schemas",
+      "passed": true
+    },
+    {
+      "name": "case/run/receipt IDs agree",
+      "passed": true
+    },
+    {
+      "name": "actual downloaded canonical content hash and exact entered outcome agree",
+      "passed": true
+    },
+    {
+      "name": "receipt binds actual canonical version and hash",
+      "passed": true
+    },
+    {
+      "name": "independent receipt/case/run hashes agree",
+      "passed": true
+    },
+    {
+      "name": "rendered artifact identity equals downloaded actual owner",
+      "passed": true
+    },
+    {
+      "name": "rendered confirmed outcome equals downloaded raw text",
+      "passed": true
+    },
+    {
+      "name": "download uses current portable receipt schemas",
+      "passed": true
+    },
+    {
+      "name": "case/run/receipt IDs agree",
+      "passed": true
+    },
+    {
+      "name": "actual downloaded canonical content hash and exact entered outcome agree",
+      "passed": true
+    },
+    {
+      "name": "receipt binds actual canonical version and hash",
+      "passed": true
+    },
+    {
+      "name": "independent receipt/case/run hashes agree",
+      "passed": true
+    },
+    {
+      "name": "rendered artifact identity equals downloaded actual owner",
+      "passed": true
+    },
+    {
+      "name": "rendered confirmed outcome equals downloaded raw text",
+      "passed": true
+    },
+    {
+      "name": "fresh-context-390 has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "fresh-context-390 capture DOM preserved",
+      "passed": true
+    },
+    {
+      "name": "no console/page/network errors or external requests",
+      "passed": true
+    },
+    {
+      "name": "source and actual consumer Git/index/status preserved",
+      "passed": true
+    },
+    {
+      "name": "current package source hash unchanged after browser proof",
+      "passed": true
+    }
+  ],
+  "captures": [
+    {
+      "name": "arrival-390",
+      "state": {
+        "url": "http://127.0.0.1:4977/",
+        "scenario": "first_arrival",
+        "width": 390,
+        "height": 844,
+        "overflow": 0,
+        "focused": ""
+      },
+      "pngSha256": "ec777476b2719441f775a425db936fbbbf6de26016defb5ce9bbc844dc690cc4"
+    },
+    {
+      "name": "running-mobile-controls-390",
+      "state": {
+        "url": "http://127.0.0.1:4977/",
+        "scenario": "running",
+        "width": 390,
+        "height": 844,
+        "overflow": 0,
+        "focused": ""
+      },
+      "pngSha256": "e9bbeaee4525d9a342d59b3b3997c3627a49b6a5ccfbf5a8d0dfbd847a387034"
+    },
+    {
+      "name": "accepted-390",
+      "state": {
+        "url": "http://127.0.0.1:4977/",
+        "scenario": "completed_receipt",
+        "width": 390,
+        "height": 844,
+        "overflow": 0,
+        "focused": ""
+      },
+      "pngSha256": "6bf6ef093f3f43225a4da652b764edb28a01efa400caf2cd4095e93072633a26"
+    },
+    {
+      "name": "fresh-context-390",
+      "state": {
+        "url": "http://127.0.0.1:4977/",
+        "scenario": "completed_receipt",
+        "width": 390,
+        "height": 844,
+        "overflow": 0,
+        "focused": ""
+      },
+      "pngSha256": "6bf6ef093f3f43225a4da652b764edb28a01efa400caf2cd4095e93072633a26"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": [],
+  "blocked": [],
+  "before": {
+    "sourceHead": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+    "sourceIndex": "dba5385ca439cd14f9c533c50b53b60319d81840a098d502db703490ac8282e9",
+    "sourceStatus": "9d886232e0ff1b52b1cff1f63c45d7c2157710bf51a496f06040d425b0489db0",
+    "consumerHead": "ff2aad17fd55ae994af82d6792d3fc29e074df03",
+    "consumerIndex": "e53bbedb3eca03bcdd468483eea622fb85077359c620c84f6274562cc12465e7",
+    "consumerStatus": "686bca7480fcf0920d008da4bacff4d141a23040a51e9a6377982e527378a69b"
+  },
+  "passed": true,
+  "nodekitSourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "browser": "149.0.7827.55",
+  "after": {
+    "sourceHead": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+    "sourceIndex": "dba5385ca439cd14f9c533c50b53b60319d81840a098d502db703490ac8282e9",
+    "sourceStatus": "9d886232e0ff1b52b1cff1f63c45d7c2157710bf51a496f06040d425b0489db0",
+    "consumerHead": "ff2aad17fd55ae994af82d6792d3fc29e074df03",
+    "consumerIndex": "e53bbedb3eca03bcdd468483eea622fb85077359c620c84f6274562cc12465e7",
+    "consumerStatus": "686bca7480fcf0920d008da4bacff4d141a23040a51e9a6377982e527378a69b"
+  },
+  "finishedAt": "2026-09-05T07:23:18.647Z"
+}

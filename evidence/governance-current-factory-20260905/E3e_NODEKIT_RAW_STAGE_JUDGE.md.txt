@@ -1,0 +1,13 @@
+# NodeKit exact raw-evidence staging judgment
+
+**PASS_EXACT18_STAGED_METADATA_FOR_LOCAL_COMMIT.** The proof-local attribute file disables newline conversion for exactly the two historical source-judge copies. Its manifest entry is the only other change from the17-file reviewed snapshot.
+
+**Re your request:** make repository handoff reliable and traceable — the committed evidence must retain the exact bytes independently reviewed, including original CRLF.
+
+All18 raw staged blobs equal working bytes and the independently recomputed digest `af49872b50ffc90686d5323289dda02345aef5d58f63048a1f13d60b1c5302f2`. Cached attributes resolve text unset for exactly those two paths; root attributes remain unchanged. The original421/28 CRLF sequences and normalized failure hashes independently reproduce the commit guard's finding. No evidence was sanitized.
+
+The prior16 unaffected metadata files, five implementation bindings and93 old canonical records remain exact. The current15-file portable directory has14 correct payload hashes. Reading the receipt directly from the Git index, the existing receipt, materiality and ledger APIs pass. HEAD, full index object set, refs and all18 working files remain unchanged during review.
+
+The earlier17-file judgment stays historical. Commit these exact18 bytes, then perform the promised actual-head API recheck. No whole-PR workflow authority, canonical promotion, new factory certification or full-product grade is granted.
+
+[Structured judgment](E3e_NODEKIT_RAW_STAGE_JUDGE.json) · [raw staged API replay](E3e_NODEKIT_RAW_STAGE_JUDGE_API.json).

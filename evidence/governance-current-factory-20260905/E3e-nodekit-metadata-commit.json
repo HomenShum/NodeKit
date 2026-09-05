@@ -1,0 +1,16 @@
+{
+  "at": "2026-09-05T07:00:02.625469+00:00",
+  "status": "LOCAL_REVIEWED_METADATA_COMMITTED",
+  "head": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "tree": "791b6fe0dc7971659f7a3194fda2d120432d2183",
+  "parent": "0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c",
+  "changedPaths": 18,
+  "workingAndIndexDigest": "af49872b50ffc90686d5323289dda02345aef5d58f63048a1f13d60b1c5302f2",
+  "allIndexBlobsExact": true,
+  "clean": true,
+  "judgeSha256": "bd102cb3d98ee589ac4adf304b598cb557ae60be4dbef073896413dbadcc7d65",
+  "fullStagedWhitespaceExit": 2,
+  "authoredMetadataWhitespacePass": true,
+  "rawEvidenceUnmodified": true,
+  "noPushOrCanonicalPromotion": true
+}
