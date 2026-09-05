@@ -32,14 +32,16 @@ const DEFERRED_REVIEW_SCHEMA = "nodekit.evolution-deferred-review.v1.schema.json
 const DEFERRED_REVIEW_ROOT = path.join("evolution", "deferred-reviews");
 const MAX_DEFERRED_EVIDENCE_BYTES = 2 * 1024 * 1024;
 const AUTHORITY_PATHS = Object.freeze([
-  /^src\/lib\/evolution-(?:approval|ledger|trust)\.mjs$/u,
-  /^schemas\/nodekit\.evolution-(?:approval|deferred-review|trust-policy)\./u,
+  /^src\/lib\/evolution-(?:approval|ledger|trust|immutability)\.mjs$/u,
+  /^schemas\/nodekit\.evolution-(?:approval|deferred-review|trust-policy|evidence)\./u,
   /^evolution\/trust-policy\.json$/u,
 ]);
 const PRE_ACTION_REVIEW_PATHS = Object.freeze([
   /^\.github\/workflows\//u,
   /(?:^|\/)(?:credentials?|secrets?|migrations?|billing|payments?|deploy|publishing?)(?:\/|\.|$)/iu,
 ]);
+const preActionReviewFiles = (files) => files.filter((file) =>
+  PRE_ACTION_REVIEW_PATHS.some((pattern) => pattern.test(file)));
 
 async function evidenceRef(root, ref, kind) {
   const absolute = resolveInside(root, ref, "deferred-review evidence");
@@ -126,11 +128,10 @@ export async function createDeferredEvolutionReview(repoRoot, input) {
     .filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file)))
     .sort();
   if (materialFiles.length === 0) throw new Error("deferred review requires at least one material file");
-  const preActionReviewFiles = changedFiles.filter((file) =>
-    PRE_ACTION_REVIEW_PATHS.some((pattern) => pattern.test(file)));
-  if (preActionReviewFiles.length > 0) {
+  const forbiddenFiles = preActionReviewFiles(changedFiles);
+  if (forbiddenFiles.length > 0) {
     throw new EvolutionAuthorityError(
-      `deferred review is forbidden for pre-action-review paths: ${preActionReviewFiles.join(", ")}`,
+      `deferred review is forbidden for pre-action-review paths: ${forbiddenFiles.join(", ")}`,
     );
   }
   const authorityChanged = changedFiles.some((file) =>
@@ -247,8 +248,24 @@ export async function verifyDeferredEvolutionReview(repoRoot, receipt, from, to,
   if (!isAncestor(root, receipt.range.reviewedTo, to)) findings.push("reviewed candidate is not an ancestor of the tested head");
   if (!isAncestor(root, from, receipt.range.reviewedTo)) findings.push("reviewed candidate is outside the baseline range");
   if (receipt.rollback.targetCommit !== from) findings.push("rollback target is not the exact baseline");
-  if (canonical(receipt.coverage.materialFiles) !== canonical([...materialFiles].sort())) {
+  const testedFiles = git(root, ["diff", "--name-only", `${from}..${to}`]).split(/\r?\n/).filter(Boolean);
+  const testedMaterialFiles = testedFiles.filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file))).sort();
+  if (canonical([...materialFiles].sort()) !== canonical(testedMaterialFiles)) {
+    findings.push("caller material file list does not match the actual Git range");
+  }
+  if (canonical(receipt.coverage.materialFiles) !== canonical(testedMaterialFiles)) {
     findings.push("material file coverage does not match the tested range");
+  }
+  // Verification is an independent entrypoint: a recomputed receipt digest is
+  // not authority, and unchanged path names do not prove unchanged reviewed bytes.
+  const forbiddenFiles = preActionReviewFiles(testedFiles);
+  if (forbiddenFiles.length > 0) {
+    findings.push(`deferred review is forbidden for pre-action-review paths: ${forbiddenFiles.join(", ")}`);
+  }
+  const unreviewedFiles = git(root, ["diff", "--name-only", `${receipt.range.reviewedTo}..${to}`])
+    .split(/\r?\n/).filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file)));
+  if (unreviewedFiles.length > 0) {
+    findings.push(`material bytes changed after review: ${unreviewedFiles.join(", ")}`);
   }
   const rangeCommits = commitsInRange(root, from, receipt.range.reviewedTo);
   for (const eventRef of receipt.events) {
@@ -275,7 +292,7 @@ export async function verifyDeferredEvolutionReview(repoRoot, receipt, from, to,
       findings.push(error.message);
     }
   }
-  const authorityChanged = materialFiles.some((file) =>
+  const authorityChanged = testedFiles.some((file) =>
     AUTHORITY_PATHS.some((pattern) => pattern.test(file)));
   if (receipt.risk.effects.credentialOrAuthorityChange !== authorityChanged) {
     findings.push("authority-sensitive file classification does not match the tested range");
@@ -533,7 +550,8 @@ export async function recordEvolutionRecord(repoRoot, recordFile, approvalFile =
   }
 
   await mkdir(path.dirname(output), { recursive: true });
-  await writeFile(output, `${JSON.stringify(record, null, 2)}\n`);
+  await writeFile(output, `${JSON.stringify(record, null, 2)}\n`,
+    record.historicalResolution ? { flag: "wx" } : undefined);
   return { duplicate: false, output, record, promotion };
 }
 
@@ -563,6 +581,69 @@ async function evidenceBytes(repoRoot, artifactRef) {
   }
   const relative = artifactRef.startsWith("file:") ? artifactRef.slice(5) : artifactRef;
   return readFile(resolveInside(repoRoot, relative, "evolution evidence"));
+}
+
+
+/** Resolve only a content-bound acknowledgment of the one observed metadata transition. */
+async function acknowledgeHistoricalMutations(root, loaded, mutationResult) {
+  const candidates = loaded.filter(({ record }) => record.historicalResolution);
+  const acknowledged = [];
+  const issues = [];
+  if (candidates.length > 1) {
+    return { acknowledged, issues: ["conflicting historical acknowledgments; only one exact resolution is permitted"] };
+  }
+  for (const candidate of candidates) {
+    const evidence = candidate.record;
+    const resolution = evidence.historicalResolution;
+    try {
+      const mutation = mutationResult.mutations.find((entry) => entry.file === resolution.recordPath && entry.id === resolution.recordId);
+      if (!mutation || mutation.introducedCommit !== resolution.introducedCommit) {
+        throw new Error("historical acknowledgment does not match the actual introducing commit and current mutation");
+      }
+      if (mutationResult.mutations.some((entry) => entry.file === candidate.file)) {
+        throw new Error("the historical acknowledgment itself was later changed");
+      }
+      if (!isAncestor(root, resolution.introducedCommit, resolution.editedCommit)
+          || !isAncestor(root, resolution.editedCommit, "HEAD")) {
+        throw new Error("historical acknowledgment commits are outside the current history");
+      }
+      const at = (commit) => JSON.parse(git(root, ["show", `${commit}:${resolution.recordPath}`]));
+      const original = at(resolution.introducedCommit);
+      const edited = at(resolution.editedCommit);
+      const preceding = at(`${resolution.editedCommit}^`);
+      const current = loaded.find(({ file }) => file === resolution.recordPath)?.record;
+      const { dimensionsTested, ...unchanged } = edited;
+      if (original.schemaVersion !== "nodekit.assumption/v1" || original.id !== resolution.recordId
+          || Object.hasOwn(original, "dimensionsTested") || !Array.isArray(dimensionsTested) || !dimensionsTested.length
+          || canonical(unchanged) !== canonical(original) || canonical(preceding) !== canonical(original)
+          || canonical(current) !== canonical(edited)) {
+        throw new Error("historical acknowledgment requires only the actual dimensionsTested addition and unchanged current claim");
+      }
+      if (digest(canonical(original)) !== resolution.originalRecordDigest
+          || digest(canonical(current)) !== resolution.acknowledgedRecordDigest) {
+        throw new Error("historical original or acknowledged record digest mismatch");
+      }
+      const artifactBytes = await evidenceBytes(root, evidence.artifactRef);
+      if (artifactBytes.byteLength > MAX_DEFERRED_EVIDENCE_BYTES || digest(artifactBytes) !== evidence.sha256) {
+        throw new Error("historical artifact size or digest mismatch");
+      }
+      const artifact = JSON.parse(artifactBytes.toString("utf8"));
+      if (canonical(artifact.historicalResolution) !== canonical(resolution)
+          || canonical(artifact.originalRecord) !== canonical(original)
+          || canonical(artifact.acknowledgedRecord) !== canonical(current)
+          || !String(artifact.explanation ?? "").trim()) {
+        throw new Error("historical artifact does not preserve the exact original/current records and acknowledgment");
+      }
+      const directive = await evidenceRef(root, resolution.authorityDirective.ref, "operator-directive");
+      if (directive.sha256 !== resolution.authorityDirective.sha256) {
+        throw new Error("historical operator directive digest mismatch");
+      }
+      acknowledged.push({ id: mutation.id, file: mutation.file, evidenceId: evidence.id });
+    } catch (error) {
+      issues.push(`${evidence.id} historical acknowledgment is invalid: ${error.message}`);
+    }
+  }
+  return { acknowledged, issues };
 }
 
 export async function verifyEvolutionLedger(repoRoot) {
@@ -680,8 +761,13 @@ export async function verifyEvolutionLedger(repoRoot) {
   }
 
   const mutationResult = await detectLedgerMutations(root, loadedRecords);
-  const mutationReport = describeMutations(mutationResult);
-  issues.push(...mutationReport.issues);
+  // Normal schema, reference and artifact validation must succeed before this
+  // narrow acknowledgment can affect admission. Raw mutation detection stays intact.
+  const historical = issues.length === 0
+    ? await acknowledgeHistoricalMutations(root, loadedRecords, mutationResult)
+    : { acknowledged: [], issues: [] };
+  const mutationReport = describeMutations(mutationResult, historical.acknowledged);
+  issues.push(...historical.issues, ...mutationReport.issues);
   warnings.push(...mutationReport.warnings);
 
   return {
@@ -691,6 +777,8 @@ export async function verifyEvolutionLedger(repoRoot) {
       checked: mutationResult.checked,
       gitAvailable: mutationResult.gitAvailable,
       claimMutations: mutationResult.mutations.length,
+      acknowledged: historical.acknowledged.length,
+      unresolved: mutationResult.mutations.length - historical.acknowledged.length,
       bindingRepairs: mutationResult.bindingRepairs.length,
     },
     authority: {

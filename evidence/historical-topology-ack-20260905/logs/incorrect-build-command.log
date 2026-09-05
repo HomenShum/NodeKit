@@ -1,0 +1,5 @@
+npm error Missing script: "build"
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: D:\ai-agent-hosts\npm-cache\_logs\2026-09-05T06_05_48_963Z-debug-0.log

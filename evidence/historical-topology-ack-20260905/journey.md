@@ -1,0 +1,14 @@
+# Maintainer journey: retain history while preparing a handoff
+
+A maintainer needs to hand a repository to another developer without erasing an old mistake or pretending the user reviewed code they have never seen. The historical assumption gained one description of its measured dimension after its original commit. The normal verifier therefore rejected it, although the claim, scope, status and evidence references were unchanged.
+
+1. Run the normal ledger verifier on the preserved starting checkout. The actual response in before-verifier.json rejects the old dimensions mutation: 93 checked, one raw mutation, three binding repairs.
+2. Preserve the exact original and current record bytes, their canonical hashes, introducing and editing commits, current index/refs, and existing review-guard edits. Read operator-directive.md to distinguish the user's recovery instruction from the agent's chosen implementation.
+3. Record the informational evidence through recordEvolutionRecord. The artifact binds both complete records and the present directive. It verifies no invariant, creates no canonical event and carries no human signature.
+4. Run the actual verifier. after-verifier.json keeps claimMutations=1 while reporting acknowledged=1 and unresolved=0 with an explicit warning. Canonical events remain 25, attested 3 and unattested 22.
+5. Try a wrong original/current digest, introducing/editing commit, target, extra field, changed claim/status/scope/dimension, missing or changed directive, changed or rehashed artifact, and conflicting acknowledgment. The real Git scenario rejects each. Twelve repeated verifications remain stable; repeated registration is idempotent and concurrent same-ID creation cannot overwrite the record.
+6. Commit the valid acknowledgment inside the test fixture, then change its directive and recompute the hashes. The original nested binding classification accepted that attack; its raw failure is preserved. The repair treats every later acknowledgment edit as an immutable claim and rejects the altered receipt. Existing ordinary binding repairs retain their old behavior.
+7. Restore the actual baseline in a retained scratch checkout. All 458 runtime/schema/canonical bytes match the baseline Git commit. After restoring the one separately stored, hash-bound Postgres artifact, the old dimensions mutation is again the sole failure. Read rollback-summary.json; no future committed-range revert result is fabricated.
+8. Freeze the candidate for independent review. A real reviewed commit and fresh range receipt remain future operations. The existing workflow rule, H1 credential control and canonical promotion requirements still govern the whole pull request.
+
+The handoff succeeds when the next maintainer can reproduce the warning, inspect the unchanged claim and its present acknowledgment, and identify exactly which review and release gates remain open.

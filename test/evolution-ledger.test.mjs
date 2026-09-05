@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -14,6 +14,7 @@ import {
   proposeEvolutionKnowledgePatch,
   queryEvolutionLedger,
   recordEvolutionRecord,
+  verifyDeferredEvolutionReview,
   verifyEvolutionLedger,
 } from "../src/lib/evolution-ledger.mjs";
 import { grantApproval, proposed } from "./helpers/evolution-approval-fixture.mjs";
@@ -196,11 +197,65 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   assert.equal(passed.events.length, 0, "deferred review must not forge a canonical event");
   assert.equal(passed.deferredReviews.length, 1);
 
+  const afterEvidenceBytes = await readFile(path.join(evidenceRoot, "after-live.json"));
   await writeFile(path.join(evidenceRoot, "after-live.json"), "{\"tampered\":true}\n");
   const tampered = await checkEvolutionMateriality(root, before, after);
   assert.equal(tampered.passed, false);
   assert.equal(tampered.deferredReviews.length, 0);
   assert.match(tampered.rejectedDeferredReviews[0].findings.join("\n"), /evidence digest mismatch/);
+
+  await writeFile(path.join(evidenceRoot, "after-live.json"), afterEvidenceBytes);
+  await writeFile(path.join(root, "README.md"), "Maintainer handoff note; package bytes are unchanged.\n");
+  git(root, ["add", "README.md"]);
+  git(root, ["commit", "-m", "publish review handoff"]);
+  const metadataHead = git(root, ["rev-parse", "HEAD"]);
+  assert.equal((await verifyDeferredEvolutionReview(root, created.receipt, before, metadataHead, ["src/session-resume.mjs"])).passed, true,
+    "publishing nonmaterial handoff evidence must not invalidate unchanged reviewed source");
+
+  await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = () => ({ sessionId: 'wrong-session', resumed: true });\n");
+  git(root, ["add", "src/session-resume.mjs"]);
+  git(root, ["commit", "-m", "later maintainer changes already reviewed runtime"]);
+  const changedHead = git(root, ["rev-parse", "HEAD"]);
+  const stale = await verifyDeferredEvolutionReview(root, created.receipt, before, changedHead, ["src/session-resume.mjs"]);
+  assert.equal(stale.passed, false, "same filenames do not certify later changed source bytes");
+  assert.match(stale.findings.join("\n"), /material bytes changed after review: src\/session-resume.mjs/);
+
+  const sorted = value => Array.isArray(value) ? value.map(sorted) : value && typeof value === "object"
+    ? Object.fromEntries(Object.keys(value).sort().map(key => [key, sorted(value[key])])) : value;
+  const recomputeDigest = receipt => {
+    const { receiptDigest: ignored, ...subject } = receipt;
+    receipt.receiptDigest = createHash("sha256").update(JSON.stringify(sorted(subject))).digest("hex");
+  };
+  await mkdir(path.join(root, "src", "lib"), { recursive: true });
+  await writeFile(path.join(root, "src", "lib", "evolution-trust.mjs"), "export const authorityChanged = true;\n");
+  git(root, ["add", "src/lib/evolution-trust.mjs"]);
+  git(root, ["commit", "-m", "contributor changes authority owner but omits it from review coverage"]);
+  const authorityHead = git(root, ["rev-parse", "HEAD"]);
+  const omitted = structuredClone(created.receipt);
+  omitted.range.reviewedTo = authorityHead;
+  recomputeDigest(omitted);
+  const missingAuthority = await verifyDeferredEvolutionReview(root, omitted, before, authorityHead, ["src/session-resume.mjs"]);
+  assert.equal(missingAuthority.passed, false, "caller-supplied paths cannot hide an actual authority change");
+  assert.match(missingAuthority.findings.join("\n"), /material file coverage does not match/);
+  assert.match(missingAuthority.findings.join("\n"), /authority-sensitive file classification does not match/);
+  assert.match(missingAuthority.findings.join("\n"), /operator authority directive is not content-bound/);
+
+  await mkdir(path.join(root, ".github", "workflows"), { recursive: true });
+  await writeFile(path.join(root, ".github", "workflows", "quality.yml"), "name: changed quality gate\non: push\n");
+  git(root, ["add", ".github/workflows/quality.yml"]);
+  git(root, ["commit", "-m", "later contributor changes workflow authority"]);
+  const workflowHead = git(root, ["rev-parse", "HEAD"]);
+  const relabeled = structuredClone(created.receipt);
+  relabeled.range.reviewedTo = workflowHead;
+  relabeled.coverage.materialFiles = [".github/workflows/quality.yml", "src/lib/evolution-trust.mjs", "src/session-resume.mjs"];
+  recomputeDigest(relabeled);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const callerPaths = attempt === 1 ? ["src/session-resume.mjs"] : relabeled.coverage.materialFiles;
+    const forbidden = await verifyDeferredEvolutionReview(root, relabeled, before, workflowHead, callerPaths);
+    assert.equal(forbidden.passed, false, "recomputed receipt metadata is not pre-action authority, including repeated submission");
+    assert.match(forbidden.findings.join("\n"), /deferred review is forbidden for pre-action-review paths: \.github\/workflows\/quality.yml/);
+  }
+  assert.deepEqual(JSON.parse(await readFile(created.output, "utf8")), created.receipt, "verification never rewrites the original review receipt");
 
   await writeFile(path.join(root, "src", "next-runtime.mjs"), "export const next = true;\n");
   git(root, ["add", "src/next-runtime.mjs"]);
@@ -445,4 +500,157 @@ test("every assumption shipped in this repository names its measured dimension",
     assert.ok(doc.dimensionsTested?.length > 0, `${doc.id} generalises without naming what was measured`);
   }
   assert.ok(generalising > 0, "no generalising assumption was checked, so this asserts nothing");
+});
+
+
+// A maintainer acknowledges one historical metadata migration without rewriting its claim.
+test("historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-historical-ack-"));
+  git(root, ["init", "-q"]);
+  git(root, ["config", "user.email", "nodekit@example.com"]);
+  git(root, ["config", "user.name", "NodeKit Test"]);
+  const sorted = (value) => Array.isArray(value) ? value.map(sorted) : value && typeof value === "object"
+    ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, sorted(value[key])])) : value;
+  const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+  const recordHash = (value) => hash(JSON.stringify(sorted(value)));
+  const writeJson = async (ref, value) => {
+    await mkdir(path.dirname(path.join(root, ref)), { recursive: true });
+    await writeFile(path.join(root, ref), `${JSON.stringify(value, null, 2)}\n`);
+  };
+  await writeFile(path.join(root, "observation.txt"), "An open-ended request did not protect the intended topology.\n");
+  git(root, ["add", "observation.txt"]); git(root, ["commit", "-qm", "retain observation"]);
+  const base = git(root, ["rev-parse", "HEAD"]);
+  await initializeEvolutionLedger(root);
+  const file = "evolution/assumptions/asm-strong-model-infers-topology.json";
+  const original = { schemaVersion: "nodekit.assumption/v1", id: "asm:strong-model-infers-topology",
+    statement: "An open-ended request can infer the intended topology", scope: { applications: ["fixture"] },
+    status: "scope-limited", supportingEvidenceIds: [], contradictingEvidenceIds: ["evd:observed-topology"] };
+  await writeJson(file, original);
+  await writeJson("evolution/evidence/evd-observed-topology.json", { schemaVersion: "nodekit.evolution-evidence/v1",
+    id: "evd:observed-topology", kind: "artifact", artifactRef: "file:observation.txt",
+    sha256: hash(await readFile(path.join(root, "observation.txt"))), sourceCommit: base,
+    generatedAt: "2026-09-05T00:00:00Z", verifiesInvariantIds: [], result: "informational" });
+  git(root, ["add", "evolution"]); git(root, ["commit", "-qm", "introduce original assumption"]);
+  const introducedCommit = git(root, ["rev-parse", "HEAD"]);
+  const current = { ...original, dimensionsTested: ["one open-ended request without a protected topology"] };
+  await writeJson(file, current); git(root, ["add", file]); git(root, ["commit", "-qm", "add measured dimension metadata"]);
+  const editedCommit = git(root, ["rev-parse", "HEAD"]);
+  const before = await verifyEvolutionLedger(root);
+  assert.equal(before.passed, false);
+  assert.equal(before.immutability.claimMutations, 1);
+  const directiveRef = "evidence/current-recovery/operator-directive.md";
+  const directive = "The operator asked to execute repository recovery and handoff. The agent selected this bounded historical acknowledgment. This is operator-directed-in-session, not code review or a signature.\n";
+  await mkdir(path.dirname(path.join(root, directiveRef)), { recursive: true });
+  await writeFile(path.join(root, directiveRef), directive);
+  const resolution = { kind: "historical-assumption-dimensions-added", recordId: original.id, recordPath: file,
+    introducedCommit, editedCommit, originalRecordDigest: recordHash(original), acknowledgedRecordDigest: recordHash(current),
+    changedFields: ["dimensionsTested"], authorityDirective: { ref: directiveRef, sha256: hash(directive), assurance: "operator-directed-in-session" } };
+  const evidenceFile = "evolution/evidence/evd-historical-ack.json";
+  const artifactRef = "evidence/current-recovery/historical-records.json";
+  const make = async (payload = resolution, target = current, patch = {}) => {
+    await writeJson(file, target);
+    await writeFile(path.join(root, directiveRef), directive);
+    const artifact = { historicalResolution: payload, originalRecord: original, acknowledgedRecord: current,
+      explanation: "The original claim remains unchanged; only the later dimensions metadata addition is acknowledged." };
+    await writeJson(artifactRef, artifact);
+    const record = { schemaVersion: "nodekit.evolution-evidence/v1", id: "evd:historical-ack", kind: "artifact",
+      artifactRef: `file:${artifactRef}`, sha256: hash(await readFile(path.join(root, artifactRef))), sourceCommit: editedCommit,
+      generatedAt: "2026-09-05T00:00:00Z", verifiesInvariantIds: [], result: "informational", historicalResolution: payload, ...patch };
+    await writeJson(evidenceFile, record);
+    return record;
+  };
+  await make();
+  const accepted = await verifyEvolutionLedger(root);
+  assert.equal(accepted.passed, true, accepted.issues.join("\n"));
+  assert.deepEqual({ raw: accepted.immutability.claimMutations, acknowledged: accepted.immutability.acknowledged,
+    unresolved: accepted.immutability.unresolved }, { raw: 1, acknowledged: 1, unresolved: 0 });
+  assert.match(accepted.warnings.join("\n"), /historical.*acknowledged.*operator-directed-in-session/i);
+  assert.equal(accepted.counts.events, 0, "informational evidence must not manufacture a canonical event");
+  const rejects = async (label) => {
+    const result = await verifyEvolutionLedger(root);
+    assert.equal(result.passed, false, label);
+    assert.equal(result.immutability.acknowledged, 0, label);
+    assert.ok(result.immutability.unresolved >= 1, label);
+  };
+  for (const [label, patch] of [
+    ["wrong original digest", { originalRecordDigest: "a".repeat(64) }],
+    ["wrong current digest", { acknowledgedRecordDigest: "b".repeat(64) }],
+    ["wrong introduction", { introducedCommit: base }], ["wrong edit", { editedCommit: introducedCommit }],
+    ["wrong target", { recordId: "asm:other" }], ["wrong path", { recordPath: "evolution/assumptions/other.json" }],
+    ["extra acknowledged field", { changedFields: ["dimensionsTested", "status"] }],
+  ]) { await make({ ...resolution, ...patch }); await rejects(label); }
+  for (const [label, patch] of [["status", { status: "supported" }], ["scope", { scope: { applications: ["other"] } }],
+    ["claim", { statement: "A different claim" }], ["later dimensions", { dimensionsTested: ["all concurrent inputs"] }]]) {
+    const target = { ...current, ...patch };
+    await make({ ...resolution, acknowledgedRecordDigest: recordHash(target) }, target);
+    await rejects(`uncommitted changed ${label}, even with a recomputed current digest`);
+  }
+  await make(); await unlink(path.join(root, directiveRef)); await rejects("missing directive");
+  await make(); await writeFile(path.join(root, directiveRef), "Changed operator instruction\n"); await rejects("changed directive");
+  await make(); await writeJson(artifactRef, { historicalResolution: resolution, originalRecord: { ...original, status: "supported" }, acknowledgedRecord: current });
+  await rejects("changed evidence bytes");
+  const malformedArtifact = await make();
+  await writeJson(artifactRef, { historicalResolution: resolution, originalRecord: { ...original, statement: "rewritten" }, acknowledgedRecord: current, explanation: "Different claim" });
+  await writeJson(evidenceFile, { ...malformedArtifact, sha256: hash(await readFile(path.join(root, artifactRef))) });
+  await rejects("rehashed evidence cannot misstate the original record");
+  const repeated = await make();
+  for (let i = 0; i < 12; i += 1) {
+    const result = await verifyEvolutionLedger(root);
+    assert.equal(result.passed, true); assert.equal(result.immutability.claimMutations, 1); assert.equal(result.immutability.acknowledged, 1);
+  }
+  await writeJson("inputs/historical.json", repeated);
+  for (let i = 0; i < 4; i += 1) assert.equal((await recordEvolutionRecord(root, "inputs/historical.json")).duplicate, true);
+  await unlink(path.join(root, evidenceFile));
+  const concurrent = await Promise.allSettled([recordEvolutionRecord(root, "inputs/historical.json"), recordEvolutionRecord(root, "inputs/historical.json")]);
+  assert.equal(concurrent.filter((r) => r.status === "fulfilled" && !r.value.duplicate).length, 1, "one writer creates the historical record");
+  assert.equal(concurrent.filter((r) => r.status === "rejected" ? r.reason.code === "EEXIST" : r.value.duplicate).length, 1,
+    "the other caller either observes the completed duplicate or loses exclusive creation, without overwriting");
+  const conflicting = { ...repeated, id: "evd:conflicting-ack" };
+  await writeJson("inputs/conflicting.json", conflicting);
+  await recordEvolutionRecord(root, "inputs/conflicting.json");
+  await rejects("concurrent distinct IDs cannot choose whichever acknowledgment clears the gate");
+  await unlink(path.join(root, "evolution/evidence/evd-conflicting-ack.json"));
+  git(root, ["add", "evolution", "evidence"]); git(root, ["commit", "-qm", "record informational historical acknowledgment"]);
+  assert.equal((await verifyEvolutionLedger(root)).passed, true);
+  const changedDirective = "A different instruction after acknowledgment\n";
+  await make({ ...resolution, authorityDirective: { ...resolution.authorityDirective, sha256: hash(changedDirective) } });
+  await writeFile(path.join(root, directiveRef), changedDirective);
+  await rejects("rehashed changed directive cannot become an ordinary binding repair");
+  await make(resolution, current, { sourceCommit: base });
+  await rejects("a committed historical acknowledgment cannot be rebound to another source commit");
+  await make({ ...resolution, acknowledgedRecordDigest: "f".repeat(64) }); await rejects("later mutation of the acknowledgment itself");
+});
+
+
+test("a maintainer changing either historical admission owner must bind the actual operator directive", async () => {
+  for (const authorityPath of ["src/lib/evolution-immutability.mjs", "schemas/nodekit.evolution-evidence.v1.schema.json"]) {
+    const { root } = await fixture();
+    git(root, ["add", "evolution"]); git(root, ["commit", "-qm", "retain fixture ledger"]);
+    const from = git(root, ["rev-parse", "HEAD"]);
+    await mkdir(path.dirname(path.join(root, authorityPath)), { recursive: true });
+    await writeFile(path.join(root, authorityPath), authorityPath.endsWith(".json") ? "{}\n" : "export const governed = true;\n");
+    git(root, ["add", authorityPath]); git(root, ["commit", "-qm", "change historical admission owner"]);
+    const to = git(root, ["rev-parse", "HEAD"]);
+    const draft = await draftEvolutionEvent(root, { id: "evt:historical-admission-owner", commitSha: to, evidenceIds: ["evd:test"],
+      challenge: "Historical admission changes who may resolve an old claim mutation", resolution: "Keep the reversible change tied to the operator's directive",
+      knownLimitations: ["No canonical promotion or detached signature"] });
+    await mkdir(path.join(root, "evidence"), { recursive: true });
+    const live = await verifyEvolutionLedger(root);
+    await writeFile(path.join(root, "evidence/io.json"), JSON.stringify({ request: "verifyEvolutionLedger", result: live }));
+    await writeFile(path.join(root, "evidence/journey.md"), "Maintainer verifies the original claim remains unchanged.\n");
+    await writeFile(path.join(root, "evidence/rollback.json"), JSON.stringify({ from, to, added: git(root, ["diff", "--name-only", `${from}..${to}`]) }));
+    await writeFile(path.join(root, "evidence/directive.md"), "Operator requested reversible repository recovery and handoff; implementation choice belongs to the agent.\n");
+    const input = { from, to, rollbackTarget: from, draftRefs: [path.relative(root, draft.output)],
+      before: [{ ref: "evidence/io.json", kind: "live-io" }],
+      after: [{ ref: "evidence/io.json", kind: "live-io" }, { ref: "evidence/journey.md", kind: "journey-card" }, { ref: "evidence/rollback.json", kind: "test-log" }],
+      rollbackVerificationRefs: ["evidence/rollback.json"], uiChanged: false, uiReason: "Ledger verification has no rendered product UI." };
+    await assert.rejects(() => createDeferredEvolutionReview(root, input), /requires the operator directive/, authorityPath);
+    const created = await createDeferredEvolutionReview(root, { ...input, authorityDirectiveRef: "evidence/directive.md",
+      before: [...input.before, { ref: "evidence/directive.md", kind: "operator-directive" }] });
+    assert.equal(created.receipt.risk.effects.credentialOrAuthorityChange, true, authorityPath);
+    assert.equal((await verifyDeferredEvolutionReview(root, created.receipt, from, to, [authorityPath])).passed, true);
+    await writeFile(path.join(root, "evidence/directive.md"), "Changed after the receipt\n");
+    const changed = await verifyDeferredEvolutionReview(root, created.receipt, from, to, [authorityPath]);
+    assert.equal(changed.passed, false); assert.match(changed.findings.join("\n"), /evidence digest mismatch/);
+  }
 });

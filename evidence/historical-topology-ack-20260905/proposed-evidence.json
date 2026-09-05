@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:historical-topology-dimensions-acknowledgment",
+  "kind": "artifact",
+  "artifactRef": "file:evidence/historical-topology-ack-20260905/historical-records.json",
+  "sha256": "567f7e90b5bb9d2b313b9b2dd1764b9673edbe30747abe47fcee8651a08ec432",
+  "sourceCommit": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "generatedAt": "2026-09-05T05:55:32.268898+00:00",
+  "verifiesInvariantIds": [],
+  "result": "informational",
+  "environment": {
+    "assurance": "operator-directed-in-session",
+    "sourceBoundary": "sourceCommit identifies the committed baseline containing the exact historical target record. The governance implementation is presently an uncommitted candidate with separately captured source hashes; the prior factory receipt remains historical."
+  },
+  "historicalResolution": {
+    "kind": "historical-assumption-dimensions-added",
+    "recordId": "asm:strong-model-infers-topology",
+    "recordPath": "evolution/assumptions/asm-strong-model-infers-topology.json",
+    "introducedCommit": "5b9c4d73c286020fe7b7c52d208d7e0cbfeef626",
+    "editedCommit": "9c321f94861000a45a9eddb50e50c8e77ada8c70",
+    "originalRecordDigest": "06fb9cbdcaa83e04c870a0c34e317350f565a9209446aa8a32baf78656c616cd",
+    "acknowledgedRecordDigest": "972feab745d415136a95e0f060c95e22b6c8387565d988911c3e7ac63360312c",
+    "changedFields": [
+      "dimensionsTested"
+    ],
+    "authorityDirective": {
+      "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+      "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+      "assurance": "operator-directed-in-session"
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "historicalResolution": {
+    "kind": "historical-assumption-dimensions-added",
+    "recordId": "asm:strong-model-infers-topology",
+    "recordPath": "evolution/assumptions/asm-strong-model-infers-topology.json",
+    "introducedCommit": "5b9c4d73c286020fe7b7c52d208d7e0cbfeef626",
+    "editedCommit": "9c321f94861000a45a9eddb50e50c8e77ada8c70",
+    "originalRecordDigest": "06fb9cbdcaa83e04c870a0c34e317350f565a9209446aa8a32baf78656c616cd",
+    "acknowledgedRecordDigest": "972feab745d415136a95e0f060c95e22b6c8387565d988911c3e7ac63360312c",
+    "changedFields": [
+      "dimensionsTested"
+    ],
+    "authorityDirective": {
+      "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+      "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+      "assurance": "operator-directed-in-session"
+    }
+  },
+  "originalRecord": {
+    "schemaVersion": "nodekit.assumption/v1",
+    "id": "asm:strong-model-infers-topology",
+    "statement": "A strong general model can infer the intended product topology from an open-ended frontend request without a protected product contract or rendered direction comparison.",
+    "scope": {
+      "applications": [
+        "NodeVideo"
+      ],
+      "taskFamilies": [
+        "major-frontend-generation"
+      ]
+    },
+    "status": "scope-limited",
+    "introducedByEventId": "evt:nodevideo-topology-contract",
+    "supportingEvidenceIds": [],
+    "contradictingEvidenceIds": [
+      "evd:nodevideo-topology-failure"
+    ]
+  },
+  "acknowledgedRecord": {
+    "schemaVersion": "nodekit.assumption/v1",
+    "id": "asm:strong-model-infers-topology",
+    "statement": "A strong general model can infer the intended product topology from an open-ended frontend request without a protected product contract or rendered direction comparison.",
+    "scope": {
+      "applications": [
+        "NodeVideo"
+      ],
+      "taskFamilies": [
+        "major-frontend-generation"
+      ]
+    },
+    "status": "scope-limited",
+    "dimensionsTested": [
+      "single open-ended frontend request with no protected product contract"
+    ],
+    "introducedByEventId": "evt:nodevideo-topology-contract",
+    "supportingEvidenceIds": [],
+    "contradictingEvidenceIds": [
+      "evd:nodevideo-topology-failure"
+    ]
+  },
+  "explanation": "The current record gained only dimensionsTested in the named historical edit. This acknowledgment records that migration without changing the claim, erasing the mutation, adding human review or granting canonical authority.",
+  "rawBlobBindings": {
+    "original-record.json": "789f63d57314dae5d9ceca16b806fbb05f15fdfd24b327f79842851573c5e97a",
+    "acknowledged-record.json": "c48813331219bbb0ff6f4a27910695ab5bf48a86384ba0c25e847128876231d3"
+  }
+}

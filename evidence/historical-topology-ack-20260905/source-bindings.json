@@ -1,0 +1,16 @@
+{
+  "baselineHead": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "state": "uncommitted candidate; index unchanged; not a released package",
+  "packageSourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "packageHashOwner": "src/lib/source-hash.mjs:computeNodeKitSourceHash",
+  "files": {
+    "schemas/nodekit.evolution-evidence.v1.schema.json": "6e77493f6be59b35bcd196f72212180f54f6760cef87d077219ba355cc2cb5b7",
+    "src/lib/evolution-immutability.mjs": "59a8748d3cc336d39f6991a1dabacba9142805841d55f9fc8a66ed5f3160d69b",
+    "src/lib/evolution-ledger.mjs": "4c74f5d219b34a5d5a1a7474ca38e092e2c4f9ade01034fe399e01860b65e3b5",
+    "test/evolution-ledger.test.mjs": "4a2ecc3a6e2fb47b7e034b9ecdc0bdaa6c636c87ef9af66c388864c4cbc89cdb",
+    "behavior-index.json": "438fd3ae030e358e11e1461af5289b0e6d3fd523a3f5970b0376e99a0ee3d48b"
+  },
+  "fullTestLog": "logs/full-tests.log",
+  "relevantTestLog": "logs/relevant-tests.log",
+  "factoryDisclosure": "The e7e4b10 factory/consumer receipt remains historical. No new package, sourceCommit, certificate or final range approval is claimed."
+}
