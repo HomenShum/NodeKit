@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:pr39-portable-factory-and-governance-20260905",
+  "projectId": "nodekit",
+  "repository": "HomenShum/NodeKit",
+  "source": {
+    "commitSha": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+    "occurredAt": "2026-09-05T00:00:02-07:00",
+    "pullRequest": 39
+  },
+  "track": "harness",
+  "category": "release",
+  "challenge": "A maintainer handing a new project to another developer needs the generated application to retain the actual requested result, export verifiable proof and preserve truthful recovery and governance records.",
+  "observedFailure": "The PR includes local checkpoint/outcome, consumer identity, browser CI and governance changes, but the actual complete range has 21 material files with zero canonical events and zero applicable deferred receipts. The workflow is excluded from reversible deferred review.",
+  "resolution": "Review and, only after actual trusted-credential approval, adopt the complete 21-path material range a2d2e8ce36cc3e87a6a8133469dd55d8b7580588..0d2223815ef73b80eeed8ce3dc6b96d16b3a2825: bounded checkpoint/failed-spawn recovery, generated coding outcome records, exact outcome-to-canonical-download contract, retained browser CI gates with Chromium installation, and precise forward historical acknowledgment with actual-Git receipt guards. The exact reviewed claim/path/evidence manifest SHA256 is 217c082e006db86d12aed23cc00f0ecfbaf45185547cbc32077de87eb9f0550c. No policy or historical signature is replaced.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:pr39-whole-range-review-20260905"
+  ],
+  "predecessorIds": [],
+  "supersedesIds": [],
+  "knownLimitations": [
+    "This is an unsigned review proposal. The whole-PR gate remains blocked until a valid canonical promotion is actually recorded.",
+    "The existing H1 exportable software credential attests control of that credential, not human presence or human usability acceptance.",
+    "The current factory passed 13 base checks in 178511 ms; warm-or-unknown caches, Windows/Node 22.22.2/npm 10.9.7. It is not a cold-install latency claim.",
+    "Browser certification binds the actual current package; the release verdict remains EASE_NOT_CERTIFIED with submissionReady false and 12 existing blockers. Full readiness dimensions remain null.",
+    "The consumer archive has 77 exact committed files. Current working proof/build-friction.json has five normal post-commit check events; the other 76 tracked files match. Do not call the whole consumer clean.",
+    "Historical raw failures and earlier reports remain historical; source hashes and reviewed commit boundaries decide which claims apply.",
+    "No production, managed-backend durability, host activation, live-model or human acceptance is claimed.",
+    "A signature obtained now would be current review before further governed integration. It cannot retroactively prove review before earlier local commits or pushes."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

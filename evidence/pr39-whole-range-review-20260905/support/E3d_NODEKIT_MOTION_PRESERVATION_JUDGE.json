@@ -1,0 +1,11 @@
+{
+  "durableRef": "refs/tags/codex/recovery-motion-source-20260905",
+  "freshFetchRef": "7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+  "sourceCommit": "7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+  "remoteObserved": "7a59bfb39d2d63f3330647a459e7cc029b9ed0c1\trefs/tags/codex/recovery-motion-source-20260905",
+  "artifactBytes": 3974,
+  "artifactSha256": "32db6935b6f537806b0fb5f892df7c88196040348ff78d495a1d9ce11d4d044e",
+  "changedEvolutionPathsSinceReviewedHead": [],
+  "noFetchRefSourceOrApprovalWrites": true,
+  "passed": true
+}

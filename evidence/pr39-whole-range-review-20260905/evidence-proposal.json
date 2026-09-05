@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:pr39-whole-range-review-20260905",
+  "kind": "artifact",
+  "artifactRef": "file:evidence/pr39-whole-range-review-20260905/material-review-manifest.json",
+  "sha256": "217c082e006db86d12aed23cc00f0ecfbaf45185547cbc32077de87eb9f0550c",
+  "sourceCommit": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "generatedAt": "2026-09-05T07:49:46.872543Z",
+  "command": "node src/cli.mjs evolution materiality --from a2d2e8ce36cc3e87a6a8133469dd55d8b7580588 --to 0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "environment": {
+    "scope": "Read-only independent technical review and unsigned operator packet; no key lookup or signing",
+    "result": "The above actual whole-PR materiality command returns BLOCKED; scoped technical checks are identified in the manifest"
+  },
+  "verifiesInvariantIds": [],
+  "result": "informational"
+}

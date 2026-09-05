@@ -1,0 +1,16 @@
+# Preserve exact unsigned review evidence bytes.
+"event-proposal.json" -text
+"evidence-proposal.json" -text
+"material-review-manifest.json" -text
+"OPERATOR_STEPS.md.txt" -text
+"README.md.txt" -text
+"support/E3_DEFERRED_REVIEW_JUDGE.json" -text
+"support/E3_FINAL_PACKAGE_JUDGE.json" -text
+"support/E3_JUDGE.json" -text
+"support/E3c_NODEKIT_CONSUMER_CONTRACT_JUDGE.json" -text
+"support/E3c_NODEKIT_REVIEWED_FACTORY_JUDGE.json" -text
+"support/E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json" -text
+"support/E3d_NODEKIT_MOTION_PRESERVATION_JUDGE.json" -text
+"support/E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json" -text
+"support/E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json" -text
+"support/E3e_NODEKIT_RAW_STAGE_JUDGE.json" -text

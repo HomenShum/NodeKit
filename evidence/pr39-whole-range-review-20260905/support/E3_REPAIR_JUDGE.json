@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "portfolio.repair-judge/v1",
+  "slice": "E3 checkpoint repair",
+  "verdict": "VERIFIED_WITH_CAVEATS",
+  "commit": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+  "priorRefutedCommit": "a9bbcb130a7ffbb755859c4242f1142d98b67958",
+  "resolvedFinding": "E3-D1",
+  "boundedReviewablePRMayProceed": true,
+  "productionApproved": false,
+  "publicationApproved": false,
+  "fullProductCertified": false,
+  "independentChecks": {
+    "originalDepthTenKnockout": true,
+    "adversarialAndCompatibilityChecks": {"passed": 24, "failed": 0, "log": "E3-repair-judge-adversarial.log"},
+    "checkpointCoreConformance": {"passed": 29, "failed": 0, "skipped": 0, "log": "E3-repair-judge-focused.log"},
+    "outcomeScenarios": {"passed": 8, "failed": 0, "skipped": 0, "log": "E3-repair-judge-outcome.log"},
+    "publicAndComponentTypechecks": {"passed": true, "sequential": true, "log": "E3-repair-judge-types.log"},
+    "packageArtifactBindings": {"passed": true, "screenshotSidecarPairs": 180, "log": "E3-repair-judge-package.log"}
+  },
+  "package": {
+    "sourceSha256": "749e2cadca2f04ae000dc00c7777daf36672eba2ce8797e5a2f9a82741543b62",
+    "tarballSha256": "fb4ec0dfa433938fe5f34e3c1a94b66d74f45b0af01712e60c364322b930751d",
+    "tarballBytes": 829739,
+    "consumerArchiveSha256": "3f4310ddcb098a2fa586f1d93a5e6d85631dd14969d674adba851a7087da65e0",
+    "consumerArchiveBytes": 906895,
+    "factoryReceiptDigest": "65e06e43e133de63f93b3466a80d932a78b825bca7bcc099f373c7fe01e405b8",
+    "factoryWorkspace": "C:/Users/hshum/AppData/Local/Temp/nodekit-factory-acceptance-NMYmFH",
+    "verdict": "EASE_NOT_CERTIFIED",
+    "submissionReady": false,
+    "broaderBlockerCount": 12
+  },
+  "repairDiff": {"files": ["src/lib/caseflow.mjs", "test/caseflow-checkpoint.test.mjs"], "insertions": 80, "deletions": 4, "weakenedTests": false},
+  "remainingFindings": [],
+  "caveats": ["Factory run and build inspected from raw acceptance evidence, not rerun by this judge.", "Full repository suite and unchanged onboarding slice not rerun for the two-file repair.", "Pre-existing snapshot depth and memory growth behavior unchanged.", "Checkpoint hashes do not authenticate producers.", "No production or full visual/usability approval.", "Generated proof outputs dirty at inspection; root must preserve exact proof before restoring historical outputs."],
+  "judgeApplicationEdits": false,
+  "judgeExternalActions": false
+}

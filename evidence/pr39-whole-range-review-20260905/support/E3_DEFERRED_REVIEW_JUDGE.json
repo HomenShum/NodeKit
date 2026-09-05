@@ -1,0 +1,128 @@
+{
+  "verdict": "REFUTED",
+  "technicalReceiptVerdict": "VERIFIED WITH CAVEATS",
+  "reason": "Public artifact hygiene and public reviewability need cleanup; receipt semantics and local replay pass.",
+  "head": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+  "materiality": {
+    "passed": true,
+    "materialFiles": [
+      "src/caseflow.d.mts",
+      "src/lib/caseflow.mjs",
+      "templates/base/.gitattributes",
+      "templates/base/AGENTS.md",
+      "templates/base/README.md",
+      "templates/base/docs/CODING_SEQUENCE.md",
+      "templates/base/package.json",
+      "templates/base/schemas/outcome-contract.schema.json",
+      "templates/base/scripts/outcome.mjs",
+      "templates/base/test/outcome.test.mjs"
+    ],
+    "receipt": [
+      {
+        "id": "deferred-review:sha256:a7d87ef419dd3de4a8c98a27b972ce578679a31ac7fbabed5f823261ed927fc7",
+        "receiptDigest": "74343072b2524d2c601db4baf82327d2b0c45bfd0ebd16684f4908b023f8c1b1",
+        "reviewedTo": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+        "reviewStatus": "deferred-human-review"
+      }
+    ]
+  },
+  "boundEvidence": [
+    {
+      "ref": "evolution/artifacts/checkpoint-outcome-20260904/before-live-io.json",
+      "expected": "70e8e77340e34541bdc2450f0243bdfed6927bbf4ffa74330c6108773eef137f",
+      "actual": "70e8e77340e34541bdc2450f0243bdfed6927bbf4ffa74330c6108773eef137f"
+    },
+    {
+      "ref": "evolution/artifacts/checkpoint-outcome-20260904/after-live-io.json",
+      "expected": "935cf13c335645c48712aed9f29bd4681915742b1ca865f52c0973790363a5bc",
+      "actual": "935cf13c335645c48712aed9f29bd4681915742b1ca865f52c0973790363a5bc"
+    },
+    {
+      "ref": "evolution/artifacts/checkpoint-outcome-20260904/journey.md",
+      "expected": "dc4d1f390e3d974ee5cbf5b6fd474d7610a2a3628711fa702a3d1f1581f7540b",
+      "actual": "dc4d1f390e3d974ee5cbf5b6fd474d7610a2a3628711fa702a3d1f1581f7540b"
+    },
+    {
+      "ref": "evolution/artifacts/checkpoint-outcome-20260904/rollback-verification.json",
+      "expected": "0f39e51c2505bd8017896e9bdc56b24f9230beb52ea5bf5abb0f7b2d43dbd801",
+      "actual": "0f39e51c2505bd8017896e9bdc56b24f9230beb52ea5bf5abb0f7b2d43dbd801"
+    },
+    {
+      "ref": "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-390.png",
+      "expected": "f4351ec3499880db5eae37095c4e34dce923cfcd9b21eb8a25ef90cfed8f28f3",
+      "actual": "f4351ec3499880db5eae37095c4e34dce923cfcd9b21eb8a25ef90cfed8f28f3"
+    },
+    {
+      "ref": "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-1440.png",
+      "expected": "d37684b3cc7b70364e7f6601678bd904fd08aaebe02ffb6cde04838039e4786d",
+      "actual": "d37684b3cc7b70364e7f6601678bd904fd08aaebe02ffb6cde04838039e4786d"
+    }
+  ],
+  "artifactHashesAtReview": {
+    "evolution/artifacts/checkpoint-outcome-20260904/after-live-io.json": "935cf13c335645c48712aed9f29bd4681915742b1ca865f52c0973790363a5bc",
+    "evolution/artifacts/checkpoint-outcome-20260904/before-live-io.json": "70e8e77340e34541bdc2450f0243bdfed6927bbf4ffa74330c6108773eef137f",
+    "evolution/artifacts/checkpoint-outcome-20260904/independent-checkpoint-review.md": "3da905354d0b10129d4b61f53d9d9c8de8a27139b938554ee2ebc40c0e4e1e21",
+    "evolution/artifacts/checkpoint-outcome-20260904/journey.md": "dc4d1f390e3d974ee5cbf5b6fd474d7610a2a3628711fa702a3d1f1581f7540b",
+    "evolution/artifacts/checkpoint-outcome-20260904/outcome-rendered.json": "d6f08810d23bd2011d617afaa8112e0abd21802cd70b69ffe053a344a7631e42",
+    "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-1440.png": "d37684b3cc7b70364e7f6601678bd904fd08aaebe02ffb6cde04838039e4786d",
+    "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-390.png": "f4351ec3499880db5eae37095c4e34dce923cfcd9b21eb8a25ef90cfed8f28f3",
+    "evolution/artifacts/checkpoint-outcome-20260904/outcome-report.html": "e5be040ba714a89fad02f676ea60de3901f7b4e935f803b39534b4a92dd9b367",
+    "evolution/artifacts/checkpoint-outcome-20260904/rollback-verification.json": "0f39e51c2505bd8017896e9bdc56b24f9230beb52ea5bf5abb0f7b2d43dbd801",
+    "evolution/deferred-reviews/deferred-review-sha256-a7d87ef419dd3de4a8c98a27b972ce578679a31ac7fbabed5f823261ed927fc7.json": "5329e859a4089a26a436f21fa841081b29c193ecfc7a6a1c4a49dc59e0c5a553",
+    "evolution/drafts/evt-local-checkpoint-and-coding-outcomes.json": "b7ff32411c6719480c96f0f3c563781b87bd9e198d0883a1ca5218d14d1e1a7f"
+  },
+  "independentReplay": "E3-deferred-review-judge-independent.json",
+  "rawRun": "E3-deferred-review-judge-2026-09-04T23-55-42.552Z",
+  "checks": 15,
+  "passingChecks": 14,
+  "sourceUnchanged": true,
+  "artifactBytesUnchanged": true,
+  "rollback": {
+    "head": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+    "indexTree": "f39315a1410c2b8dad96b6ff66515972137554e7",
+    "baselineTree": "f39315a1410c2b8dad96b6ff66515972137554e7",
+    "workingVsIndex": "",
+    "commitCount": 6,
+    "reverseDiff": " .tours/02-agent-execution.tour                     |  10 +-\n .tours/03-debug-and-recovery.tour                  |   2 +-\n START_HERE.md                                      |   2 +-\n docs/START_HERE.md                                 |   4 +-\n package-lock.json                                  |   6 +-\n repo-map.json                                      |   3 +-\n src/caseflow.d.mts                                 |   9 +-\n src/lib/caseflow.mjs                               | 198 +---------------\n templates/base/.gitattributes                      |   3 -\n templates/base/AGENTS.md                           |   3 -\n templates/base/README.md                           |   2 -\n templates/base/docs/CODING_SEQUENCE.md             |  73 ------\n templates/base/package.json                        |   1 -\n .../base/schemas/outcome-contract.schema.json      |  72 ------\n templates/base/scripts/outcome.mjs                 | 255 ---------------------\n templates/base/test/outcome.test.mjs               | 186 ---------------\n test/agent-ease-matrix.test.mjs                    |   4 +-\n test/caseflow-checkpoint.test.mjs                  | 147 ------------\n test/submission-fixtures.mjs                       |  11 +-\n 19 files changed, 21 insertions(+), 970 deletions(-)\n"
+  },
+  "rendered": [
+    {
+      "width": 390,
+      "height": 844,
+      "browser": "149.0.7827.55",
+      "overflow": false,
+      "localOnly": true
+    },
+    {
+      "width": 1440,
+      "height": 960,
+      "browser": "149.0.7827.55",
+      "overflow": false,
+      "localOnly": true
+    }
+  ],
+  "inheritedLedgerIssues": [
+    "evt:motion-portability-static-receipt source commit does not exist: 7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+    "evd:motion-portability-static-receipt source commit does not exist: 7a59bfb39d2d63f3330647a459e7cc029b9ed0c1",
+    "evd:motion-portability-static-receipt evidence cannot be read: Command failed: git show 7a59bfb39d2d63f3330647a459e7cc029b9ed0c1:docs/BEHAVIOR_PORTABILITY_SHOWCASE.md\nfatal: path 'docs/BEHAVIOR_PORTABILITY_SHOWCASE.md' exists on disk, but not in '7a59bfb39d2d63f3330647a459e7cc029b9ed0c1'\n",
+    "asm:strong-model-infers-topology was edited after it was committed in 5b9c4d73; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"single open-ended frontend request with no protected product contract\"]]"
+  ],
+  "findings": [
+    {
+      "id": "E3-PUBLIC-01",
+      "file": "evolution/artifacts/checkpoint-outcome-20260904/independent-checkpoint-review.md",
+      "line": 31,
+      "severity": "blocking-public-handoff",
+      "description": "Copied internal review exposes an unnecessary personal-profile Temp path and refers to packet-only evidence absent from this repository.",
+      "smallestFix": "Replace with a standalone public summary referencing only shipped evidence; retain raw internal report separately."
+    },
+    {
+      "id": "E3-DRAFT-01",
+      "severity": "promotion-caveat",
+      "description": "Draft evidenceIds names evd:local-checkpoint-and-coding-outcomes, absent as an evidence record. Deferred receipt separately binds six evidence files. Resolve the event evidence reference before canonical promotion."
+    }
+  ],
+  "approval": "agent-proposed; deferred-human-review; no approval or ledger bypass authorized",
+  "sourceFreezeReleasedForParentArtifactRepair": true,
+  "at": "2026-09-04T23:59:24.774060+00:00"
+}

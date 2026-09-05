@@ -1,0 +1,375 @@
+{
+  "status": "IMPLEMENTED_UNSTAGED_AWAITING_INDEPENDENT_JUDGE",
+  "proof": "NODEKIT-CURRENT-REVIEW-INTEGRITY-01 / NODEKIT-HISTORICAL-ACKNOWLEDGMENT-01",
+  "capturedAt": "2026-09-05T06:19:03.607274+00:00",
+  "root": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904",
+  "head": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "branch": "codex/project-consolidation-20260904",
+  "indexTree": "6f95a3a4a973e05a22c78b0793f623faf9c265ba",
+  "indexAudit": {
+    "path": "E3d-nodekit-historical-ack-index-audit.json",
+    "sha256": "ab6fe44be6ad0c2b8ec8d89521c5e7337b104b2536d56f9beb9cc9ada737f669"
+  },
+  "refsSha256": "e8367e14a8a58144e1e81a5d4735ed52f3876b1e4cc6605fb06a78cddac304d8",
+  "refsUnchanged": true,
+  "changedPathCount": 32,
+  "trackedModifiedCount": 6,
+  "newFileCount": 26,
+  "workingFiles": {
+    "HANDOFF.md": {
+      "sha256": "09a2a7e02ebaea152ee517eca0147719ce862375cfecc2619773f4d69138e67f",
+      "bytes": 4497
+    },
+    "behavior-index.json": {
+      "sha256": "438fd3ae030e358e11e1461af5289b0e6d3fd523a3f5970b0376e99a0ee3d48b",
+      "bytes": 36946
+    },
+    "evidence/historical-topology-ack-20260905/README.md": {
+      "sha256": "5db2fdcea49f020f28a859c7a6691645960cb2c18c043d6db13f59fe99126bbe",
+      "bytes": 3432
+    },
+    "evidence/historical-topology-ack-20260905/acknowledged-record.json": {
+      "sha256": "c48813331219bbb0ff6f4a27910695ab5bf48a86384ba0c25e847128876231d3",
+      "bytes": 705
+    },
+    "evidence/historical-topology-ack-20260905/after-verifier.json": {
+      "sha256": "783a201d62e18c3cb91050a5b49db655d9578c25550da378964ec1f0de8484e3",
+      "bytes": 3095
+    },
+    "evidence/historical-topology-ack-20260905/before-verifier.json": {
+      "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+      "bytes": 3066
+    },
+    "evidence/historical-topology-ack-20260905/deferred-review-preparation.json": {
+      "sha256": "3ce4a06407be1fe03cac0c7eeef5fb3b85750ad1ba34e9f718ac0454686cd5d8",
+      "bytes": 1928
+    },
+    "evidence/historical-topology-ack-20260905/historical-records.json": {
+      "sha256": "567f7e90b5bb9d2b313b9b2dd1764b9673edbe30747abe47fcee8651a08ec432",
+      "bytes": 2750
+    },
+    "evidence/historical-topology-ack-20260905/journey.md": {
+      "sha256": "6a85d87bb0d5dbf6b49606f216bc58214eee0679868d8f67b70e7a9f46425d66",
+      "bytes": 2902
+    },
+    "evidence/historical-topology-ack-20260905/logs/build-component.log": {
+      "sha256": "040adfe957f91f0711122386f7d7a866c726afa3d8eb49fbda9aa42a0b3c6074",
+      "bytes": 204
+    },
+    "evidence/historical-topology-ack-20260905/logs/evolution-verify.log": {
+      "sha256": "04b2563c6a3517a60c617ced7c35b6a3e72b27d00fb2bd7956197ef43120ff6e",
+      "bytes": 150
+    },
+    "evidence/historical-topology-ack-20260905/logs/full-tests.log": {
+      "sha256": "2feeee203dd10880abf1302b0789b2ac3d24f16eddc8806b661b61781ce12d6e",
+      "bytes": 227398
+    },
+    "evidence/historical-topology-ack-20260905/logs/incorrect-build-command.log": {
+      "sha256": "6bb67c33228fd23fb117a9ddda4946b3a20ce84c4f6a452aaf73dc2fa7545056",
+      "bytes": 230
+    },
+    "evidence/historical-topology-ack-20260905/logs/initial-scenario-failure.log": {
+      "sha256": "7901c3f18043650357b90d4037bf27a8ec9711b38dc33d7301fdcfa1960a79f3",
+      "bytes": 2076
+    },
+    "evidence/historical-topology-ack-20260905/logs/rehashed-directive-failure.log": {
+      "sha256": "ec9c6a3c70f5068d140faadc92370dd1f4f5af0dbb95e74374a599f6d22487e4",
+      "bytes": 2727
+    },
+    "evidence/historical-topology-ack-20260905/logs/relevant-tests.log": {
+      "sha256": "098248366e4bd5028da793d6720999e853770c74b20aa98667832e74e6882353",
+      "bytes": 13357
+    },
+    "evidence/historical-topology-ack-20260905/logs/stale-behavior-index-failure.log": {
+      "sha256": "f2afe619398f3ed63a3ad74e4790ae10e7f459883666969168850f2d3fa32eaf",
+      "bytes": 296565
+    },
+    "evidence/historical-topology-ack-20260905/logs/typecheck-component.log": {
+      "sha256": "ca4c92379f83d4af6b446810516905860da0e6f732bf822501c7fd0bcb5a45b3",
+      "bytes": 140
+    },
+    "evidence/historical-topology-ack-20260905/logs/typecheck-public.log": {
+      "sha256": "a3f83f5f3d7c1f7bbc53a6ea80551f9f28676410691f19e99f0ffc65d2426302",
+      "bytes": 111
+    },
+    "evidence/historical-topology-ack-20260905/manifest.json": {
+      "sha256": "51b8fb6fe9f5af18b5bd303c6457399546a7010fd4b323aef924414f5b7a98c8",
+      "bytes": 3548
+    },
+    "evidence/historical-topology-ack-20260905/operator-directive.md": {
+      "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+      "bytes": 1239
+    },
+    "evidence/historical-topology-ack-20260905/original-record.json": {
+      "sha256": "789f63d57314dae5d9ceca16b806fbb05f15fdfd24b327f79842851573c5e97a",
+      "bytes": 600
+    },
+    "evidence/historical-topology-ack-20260905/proposed-evidence.json": {
+      "sha256": "850f442103e032358c94bc4103df206ddd58dd3074717ea31ee09c5142a23348",
+      "bytes": 1679
+    },
+    "evidence/historical-topology-ack-20260905/rollback-summary.json": {
+      "sha256": "418e6955edb375f51eae205a46ad87d3d24fbf036fb06c3728cdb928f6a597b0",
+      "bytes": 1831
+    },
+    "evidence/historical-topology-ack-20260905/rollback-verifier.json": {
+      "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+      "bytes": 3066
+    },
+    "evidence/historical-topology-ack-20260905/source-bindings.json": {
+      "sha256": "139b3658cc2d8ccd747ca142e988daa031811f4555a2c75eb3323e7cac953e6e",
+      "bytes": 1113
+    },
+    "evolution/drafts/evt-historical-topology-acknowledgment-proposal-20260905.json": {
+      "sha256": "af0cc98f4dd1ebe9fbec5817391a41a5295f030a4f7f300fa44437ce2e639188",
+      "bytes": 1474
+    },
+    "evolution/evidence/evd-historical-topology-dimensions-acknowledgment.json": {
+      "sha256": "850f442103e032358c94bc4103df206ddd58dd3074717ea31ee09c5142a23348",
+      "bytes": 1679
+    },
+    "schemas/nodekit.evolution-evidence.v1.schema.json": {
+      "sha256": "6e77493f6be59b35bcd196f72212180f54f6760cef87d077219ba355cc2cb5b7",
+      "bytes": 4431
+    },
+    "src/lib/evolution-immutability.mjs": {
+      "sha256": "59a8748d3cc336d39f6991a1dabacba9142805841d55f9fc8a66ed5f3160d69b",
+      "bytes": 7244
+    },
+    "src/lib/evolution-ledger.mjs": {
+      "sha256": "4c74f5d219b34a5d5a1a7474ca38e092e2c4f9ade01034fe399e01860b65e3b5",
+      "bytes": 52909
+    },
+    "test/evolution-ledger.test.mjs": {
+      "sha256": "4a2ecc3a6e2fb47b7e034b9ecdc0bdaa6c636c87ef9af66c388864c4cbc89cdb",
+      "bytes": 39366
+    }
+  },
+  "workingFilesDigest": "40f37cea48b1b895c6c430f9c1de6a0743e967c7e312e003ef79ab8f2965cead",
+  "workingFilesDigestSerialization": "SHA256 of UTF-8 JSON array sorted by path; each object insertion order path,sha256,bytes; compact separators comma/colon; ensure_ascii=false; no terminal newline",
+  "diff": {
+    "path": "E3d-nodekit-historical-ack-final.diff",
+    "sha256": "5189792ee2f6bb846dcbbed64bcaf0a56fd5e23545793ef9852c908ed7b77494",
+    "includes": "tracked changes from HEAD, including preserved root guard; new files are bound by workingFiles"
+  },
+  "protectedRecovery": {
+    "root": "D:\\ProjectRecovery\\nodekit-historical-ack-20260905",
+    "receiptSha256": "52f207de7f1342e0c832c5ed8b0b59c00a46871c0abe95f2da0e23d3051ded17",
+    "canonicalRecordCount": 93,
+    "canonicalRecordHashes": {
+      "evolution/adoptions/adp-nodekit-browser-certification.json": "53b2c865973b0537db2edf4fb5628b3063f8781137912ecab5b1f20e3f4da45c",
+      "evolution/adoptions/adp-nodekit-domain-blank.json": "3cbeb519d49acc1cf97f1f97d75758eaa32ebd87a9ac6d13aa7e5d1f8426df8f",
+      "evolution/adoptions/adp-nodekit-frontend-tournament.json": "67bb3342fec4e80ffd6194e0878468f293261afe4583d1ed264152695e92bd5b",
+      "evolution/assumptions/asm-caseflow-idempotency-can-be-inferred.json": "2b11b96323d9bcb818f1c6e0d7e86a7886021ded39bbad6399b54be75911a861",
+      "evolution/assumptions/asm-domain-preset-harmless.json": "1dce4ca2731f165a8ba8a1445ef7689902bdd88b5de256539703a170b30605b9",
+      "evolution/assumptions/asm-evidence-filename-sufficient.json": "bdb4eff59b838562f1b8fd6dd9ea2c7c2f1f7b9170ae05e7354179136e253387",
+      "evolution/assumptions/asm-postgres-ddl-is-adapter.json": "df544cd50f53de18c360d9e1493ebf0d90d48adfd432c316e39d32b496cc3a57",
+      "evolution/assumptions/asm-strong-model-infers-topology.json": "c48813331219bbb0ff6f4a27910695ab5bf48a86384ba0c25e847128876231d3",
+      "evolution/assumptions/asm-structural-browser-proof-sufficient.json": "256171c2660c19e57bbabd4f12af84c8c9101608ed77caebd0b1a6b37732a12e",
+      "evolution/events/architecture/evt-builder-gym-atomic-cas-publication.json": "226ecb537d94ac1f391a3c456be4b0aedec25419ec4cdc8032e1663abee5f8e4",
+      "evolution/events/architecture/evt-caseflow-idempotent-retries.json": "2df68b1a69a99d5a31cf88c98e0dda4403e4bb4f3bc3e9ae59e11b659dfd61cd",
+      "evolution/events/architecture/evt-consumer-package-verification-lifecycle-free.json": "09fe4be03a44c188a7afaf7f9caf94601588a2921e62340cbc5d485070a3d299",
+      "evolution/events/architecture/evt-convex-caseflow-receipt-retry-contract.json": "21fb220a647dceea95e80acb0b83be39735e3558aa07aae1eef9d597f9dc2570",
+      "evolution/events/architecture/evt-exact-candidate-contract.json": "251ca559cd2b4ed12e3f4e2f65c473b300e35194bae46e28cb8807fc80e24d97",
+      "evolution/events/architecture/evt-motion-portability-static-receipt.json": "eac9fae68e60cd9598a00a08c15812c823a605c765c3eb7ce1aef9b41eb76f97",
+      "evolution/events/architecture/evt-postgres-caseflow-adapter.json": "a17e0ae1549140affaaa4aeb3336d0abce7f86e4fe886af7c1a8504ab3998bef",
+      "evolution/events/architecture/evt-rendered-browser-certification.json": "ee95c048470f43d74ab1425719ff3fd04ecd88c9892355d03d717426b5b5e9eb",
+      "evolution/events/architecture/evt-source-bound-submission-gates.json": "2e9b37a68f85db4df7c713a7fc03b82396291cdc72514b20e5fcb133c28e2f15",
+      "evolution/events/architecture/evt-studio-boundary.json": "042914920007c9f79bd1fd263ddd9caf8ac1d87685f75f91f47f6ca83ca77066",
+      "evolution/events/harness/evt-behavior-index-and-friction-loop.json": "8898c351a5e059f1f59b2ecba3bb26fe2cca65c2ac327260d7ee425c6005b2d6",
+      "evolution/events/harness/evt-copy-as-proof-surface.json": "a3bc41ba7550ef67ddf43200eadab96cf7b4336d0f6544ae1ec6388aeca199e4",
+      "evolution/events/harness/evt-frontend-decisive-evidence.json": "ea7d116ed74854587d54a65e9f92555cf84ed808578fd68ca9250fdee93d83bd",
+      "evolution/events/harness/evt-gym-proven-friction-loop.json": "ffddac00a52c9cebc4cd23e59a6cef7efc611aecdadaa6496c38bf375d4f5353",
+      "evolution/events/harness/evt-invariant-proof-binding.json": "786c23fc2e1a24dd17a809605bf86c826673afe3e2ee678fae511b24fec550de",
+      "evolution/events/harness/evt-journey-harness-and-tour.json": "86d30657d6b6616c37b8655db3a4fd83d0cb9ccd2b6dfab18dc27c874cbe8da2",
+      "evolution/events/harness/evt-nodevideo-topology-contract.json": "64b1c6405c2d41637d6dab63497539874d9e38fe35809212839338a9b4a70d4a",
+      "evolution/events/harness/evt-repository-wide-behavior-ownership.json": "5e54a39ebf4198616ec1fb0bfa7ef65f5131cb597854fbb891d1df06a4a574e3",
+      "evolution/events/harness/evt-signed-repair-promotion.json": "ebc6052820877a8e4b768b72e01c92fd2ad8e4a478a9256521a9149900963c00",
+      "evolution/events/product/evt-builder-journey-j0.json": "fba2eac2c759e3b896879be27e83264a4541bb53e5a86064d05f4cdd7d896c18",
+      "evolution/events/product/evt-builder-journey-j1-decide-build.json": "345c4db6eee1f03919dfd0fcd30666e1c0ccc58c8ececfaf503ed7c4e535b723",
+      "evolution/events/product/evt-builder-journey-j1-finish.json": "0d3c089cf94f7f9efe38312e982f193c40bc4587b3e761cb376c861d0b2e6f1c",
+      "evolution/events/product/evt-domain-blank-factory.json": "d1511b7f36756d3a9510570d2df58ccf690d681fcea3fef2626ff5c1f64e3a6b",
+      "evolution/events/product/evt-guided-intake-mobile-decisions.json": "4c978c9885aa5bebd2645873293e79713cda38c66e457585f4614502bf99b606",
+      "evolution/events/product/evt-submission-cli-named-options.json": "c09a6f498bcb9e66b02c23240435a7c5afd7be8e283303ec72e5ba38c8e0e655",
+      "evolution/evidence/evd-behavior-index-and-friction-loop.json": "d234df6756960b3f8c7479b31aab73aa8ee7dcd67daae0efae4132471b031f3f",
+      "evolution/evidence/evd-builder-gym-atomic-cas-publication.json": "1d2a5151049e8c6b18a66b04cd3cbc2bee74857e641725f4c8513b3c4a75287d",
+      "evolution/evidence/evd-builder-journey-j0.json": "fb60abef239757dded5d7039b33ad6b456ea155aa32a6ec5a373581807c88188",
+      "evolution/evidence/evd-builder-journey-j1-decide-build.json": "50cf83672addd0f6a964b6bfec55cfca26cd0cc153972349265d6c432bc792a5",
+      "evolution/evidence/evd-builder-journey-j1-finish.json": "02eb976d8666e3a5a57207da6798a708b238e466ad8b36fd4d019644fef111a2",
+      "evolution/evidence/evd-caseflow-idempotent-retries.json": "e3c7c275d2f90b01ac0402ea9440ba5d777f81e37bfa5b1bc5986fa560098f00",
+      "evolution/evidence/evd-caseflow-public-api.json": "eb41394f68370bf7c4c1ba9cbf122627817f62bede8e6108abf36d45a3922b0c",
+      "evolution/evidence/evd-cli-authority-bypass-and-repair.json": "e8827091e1368fd89636e9b3c23bb8ceecde42a4e5a78652a6b0d52a4f8d3930",
+      "evolution/evidence/evd-consumer-package-verification-lifecycle-free.json": "b061ac16375a8f7d380edcd67e33f2d7739e59fb664b7606091fb0db7e933c4f",
+      "evolution/evidence/evd-convex-caseflow-receipt-retry-materiality.json": "09245f11ee44533bcd928a4b72425bbdeb882a79ea60ef1c7c6c07c2d2c7d776",
+      "evolution/evidence/evd-copy-as-proof-surface.json": "89a414f7ab6b71d80be73f423cc42fb7958ef82c4e126078cc70caf803ecd6bd",
+      "evolution/evidence/evd-domain-blank-factory.json": "271cfba5c7657b51cff8c5bfec6fb5ef35096abd9b5945b078c3347b66ae988b",
+      "evolution/evidence/evd-exact-candidate-gate.json": "0052dfe9247768f4d503f8d95120122c90b1f6bce97fce3da66c4fa4b5cc5cb9",
+      "evolution/evidence/evd-frontend-decisive-evidence.json": "e4792b6a36b30dd7f3d2e940e800dd142638a516b5e0bc101fd8e53eff243daa",
+      "evolution/evidence/evd-guided-intake-mobile-decisions-materiality.json": "827c4f308744257671dda7151909431cd2a9f3d602b32443d9d1d449f62f529c",
+      "evolution/evidence/evd-gym-proven-friction-loop.json": "aded5ddb0ed41a33b6ba0436ed774334308f8c2e8479aa4a983cff23a3e5f929",
+      "evolution/evidence/evd-invariant-proof-binding.json": "d5019e521de9b3f70e2e99efa638d539e4853e3f68e5cdfafbe4a5e3183dadd6",
+      "evolution/evidence/evd-journey-harness-and-tour.json": "a66f73ab5573bdbe199ba58c3e9177ea60ac17407cf23c34d4568ca74787939a",
+      "evolution/evidence/evd-local-checkpoint-and-coding-outcomes.json": "ddeb4f676edc1b4ebae68520cc627082eb9127919a10b1152a7996c7b78d0b97",
+      "evolution/evidence/evd-motion-portability-static-receipt.json": "d5df2327b3b0fc33e4903a37cd7a03f2b9254cbe5dae7d2ad1c5b5cd68183cd6",
+      "evolution/evidence/evd-nodevideo-topology-failure.json": "985dc33bb458101e88e0214834455039ba9d22269cac4d00a1b254708e893b34",
+      "evolution/evidence/evd-personal-action-store.json": "b94f6fcefda91cc5f30d126775547e18b91e21e91507f32d9ff4f2d5a82a747f",
+      "evolution/evidence/evd-postgres-caseflow-conformance.json": "9bfb471de108299c19bac54166389c8ab3cc55f910ee88df5d0623943cc99d15",
+      "evolution/evidence/evd-propose-evolution-guards-reached.json": "1d3ebcf3d456c80e5219378ace8eec6e76d823f533eb0a202655a9dc546685ba",
+      "evolution/evidence/evd-propose-evolution-guards-v2.json": "0461b2fa5c34ac3645a873c038133a1d38a189949d1d63ac67460f15295934a8",
+      "evolution/evidence/evd-propose-evolution-guards.json": "021032fc05bd34e80272237a380957b2022e2d4530453f590f283d0808fd60ce",
+      "evolution/evidence/evd-recall-before-claim-v2.json": "01a00b00fc5f86f575e8d3e972f42e1d3a0c4e2f9e119f50e8373e601402687b",
+      "evolution/evidence/evd-recall-before-claim.json": "be136e22c88d245484e736d54f06915c50ed99663ed400a5935891fc96af3692",
+      "evolution/evidence/evd-rendered-browser-certification.json": "af480a539fd283a74c1cd5740e1434fb2c74662606fe4a2f14b2dd1d6d7a27ba",
+      "evolution/evidence/evd-repository-wide-behavior-ownership.json": "0c26edb6fbcd533532f45fa6c2671735333cacb036ffc9368ed3ebf67320d19b",
+      "evolution/evidence/evd-runnable-adoption-and-differentiated-certification.json": "adb061193d2c0b323bca1e85f1df9674a8197036bcfca400089b96367a2624a6",
+      "evolution/evidence/evd-signed-repair-promotion.json": "c9e5ada700eb05e61df81138e1654fa2f260e61f669e87831259e019e3cb3232",
+      "evolution/evidence/evd-source-bound-submission-gates-materiality.json": "a48ce273bd5aa1d946e88851f645dbd1268536752a8d777bd69a500abb481bcf",
+      "evolution/evidence/evd-studio-boundary.json": "ab8215540557204f1be7a4b28e782e6a67d9d7562a7f7aa0accfb475e74eed6b",
+      "evolution/evidence/evd-submission-cli-explicit-options.json": "6998550a2d523b8341f0012582ad5257c5a711db0f6dc6305829c39da2151cbf",
+      "evolution/invariants/inv-build-packet-carries-opportunity.json": "42c45a21436355a2aecb6c65c3dbe7f76bcb8179531ab6914f5229c61329dbb0",
+      "evolution/invariants/inv-builder-gym-cas-publishes-complete-bytes.json": "6eeea73ca1a13a4407262a37097dc922ad88d8d051dad5587b63e65f77092067",
+      "evolution/invariants/inv-builder-journey-stage-handoff.json": "f69630bdf9eb839a5f35dddc5f2d71c2bb8a6bec8f9d2129e6e88b373d79fa81",
+      "evolution/invariants/inv-caseflow-idempotent-retries.json": "a2b25ef6592a5076bd9808516c4ff71fb5dd3ce48a8c0371863558b7c6c615e4",
+      "evolution/invariants/inv-caseflow-receipt-retry-containment.json": "63f3eb3ee9a583741145fed80dbe0f14a4d6f94bc02e7879c8f7057622f1fc65",
+      "evolution/invariants/inv-consumer-package-verification-lifecycle-free.json": "1c50445d14544103c7629d345c136e6dd2bbe73c6a48badb2ee3f7c392399bfa",
+      "evolution/invariants/inv-copy-claims-gate-lies-not-taste.json": "91b908a3b02ecdd58f98bae4edd3569f145c7dacbbebbd4616876ce500ecc7ea",
+      "evolution/invariants/inv-domain-blank-create.json": "1acb4696104f6f58546722c55abeefa44feda007bc846240442b018ca85391d4",
+      "evolution/invariants/inv-exact-candidate-evidence.json": "c3a6b032d895c6355ede79c7dba33ade08eeb6db18ae9067c305aedb8b5b918f",
+      "evolution/invariants/inv-guided-intake-mobile-decisions.json": "0e87a275fefd1264a33c6e1f071f9abec0f809a01bc106d7a39debe99f20e04f",
+      "evolution/invariants/inv-invariant-proof-is-bound.json": "7bf1ccbf77117aabc1758d26db5ba03bc2c1777eed97216939c46b3e9169dad4",
+      "evolution/invariants/inv-major-frontend-direction-tournament.json": "04a54798f0eba434f5bbf08a7e4fb363d37e72ab55557fbc8488364b1970083d",
+      "evolution/invariants/inv-measurement-is-not-permission.json": "3cf13eae7830520fb2928aea5ad4e581d95e7708d15ef02edb465adf605e07fe",
+      "evolution/invariants/inv-opportunity-carries-to-build.json": "fd0db0fc185ed4ce1f4865a045b50a89ea726af0475965da6e74d3da3884c089",
+      "evolution/invariants/inv-ownership-resolves-to-symbol.json": "fa2d25b0ce9e3d46f094164e18849f0b6f747ec397b21c744256d10bee935014",
+      "evolution/invariants/inv-postgres-caseflow-conformance.json": "c1ed161d2d8d99b97ab2d2391105cbe6efcc998e334cb65f1032201bd84a67f1",
+      "evolution/invariants/inv-rendered-browser-evidence.json": "842ec2cfc59d86b0209b3c37ccb4b41dfb605702226ec05293b2d05286b4ba30",
+      "evolution/invariants/inv-repair-approval-is-signed.json": "4d1e5e6949f7d19b388fc1a66aa1c093566042632004c481a3a85ab04c453e5a",
+      "evolution/invariants/inv-repair-cannot-self-approve.json": "f2eab4f2aad2d4aba184634549af0c5709ebb37652295f7ae22babdda00c44e8",
+      "evolution/invariants/inv-source-bound-decisive-verdicts.json": "c144a87d1f0b4bc8bb31bd43973f75cf13efd1f7bda94daf7693ed37b4b6badb",
+      "evolution/invariants/inv-stable-caseflow-package-entrypoint.json": "52a233bfe9f4b61973c0851f61127d11b4d6785aaf963342342e8d4c0aa16b12",
+      "evolution/invariants/inv-studio-boundary-declares-gaps.json": "8ca0fa6f622ff5acd9616495d44cfa75659dffa1a26fb0b259da1d4540218c4a",
+      "evolution/invariants/inv-submission-cli-explicit-options.json": "70779625de3912cad9877e3be7e56e804d19dd17ac31143d84e090c3b53f916a",
+      "evolution/invariants/inv-tour-verifies-what-it-claims.json": "311c6e4d7f836b457a62353e160f40fcaacbf01241de9d3208bed0117f134107"
+    },
+    "allCanonicalRecordsUnchanged": true,
+    "rootGuardFunctionsUnchanged": {
+      "export async function createDeferredEvolutionReview": "194186de5d23c450481b1a4dfa2d9a6ad71c6fd0e6ff6d09ebc6c916632d0cc1",
+      "export async function verifyDeferredEvolutionReview": "1555f1229971a1538122da26eb225142be942c0fe6a5fee63a025f6220ea6690"
+    },
+    "rootPriorTestsUnchangedExceptUnlinkImport": true,
+    "originalRawIndexPreserved": true
+  },
+  "packageSourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "portableManifest": {
+    "path": "evidence/historical-topology-ack-20260905/manifest.json",
+    "sha256": "51b8fb6fe9f5af18b5bd303c6457399546a7010fd4b323aef924414f5b7a98c8",
+    "artifactCount": 23
+  },
+  "actualVerdict": {
+    "schemaVersion": "nodekit.evolution-verdict/v1",
+    "counts": {
+      "events": 25,
+      "assumptions": 6,
+      "invariants": 24,
+      "evidence": 36,
+      "adoptions": 3
+    },
+    "immutability": {
+      "checked": 93,
+      "gitAvailable": true,
+      "claimMutations": 1,
+      "acknowledged": 1,
+      "unresolved": 0,
+      "bindingRepairs": 3
+    },
+    "authority": {
+      "canonicalEvents": 25,
+      "attested": 3,
+      "unattested": 22,
+      "unattestedIds": [
+        "evt:caseflow-idempotent-retries",
+        "evt:convex-caseflow-receipt-retry-contract",
+        "evt:exact-candidate-contract",
+        "evt:postgres-caseflow-adapter",
+        "evt:rendered-browser-certification",
+        "evt:source-bound-submission-gates",
+        "evt:studio-boundary",
+        "evt:behavior-index-and-friction-loop",
+        "evt:copy-as-proof-surface",
+        "evt:frontend-decisive-evidence",
+        "evt:gym-proven-friction-loop",
+        "evt:invariant-proof-binding",
+        "evt:journey-harness-and-tour",
+        "evt:nodevideo-topology-contract",
+        "evt:repository-wide-behavior-ownership",
+        "evt:signed-repair-promotion",
+        "evt:builder-journey-j0",
+        "evt:builder-journey-j1-decide-build",
+        "evt:builder-journey-j1-finish",
+        "evt:domain-blank-factory",
+        "evt:guided-intake-mobile-decisions",
+        "evt:submission-cli-named-options"
+      ]
+    },
+    "issues": [],
+    "warnings": [
+      "inv:caseflow-idempotent-retries scope names more applications than verified adoptions",
+      "inv:exact-candidate-evidence scope names more applications than verified adoptions",
+      "inv:postgres-caseflow-conformance scope names more applications than verified adoptions",
+      "inv:stable-caseflow-package-entrypoint scope names more applications than verified adoptions",
+      "inv:submission-cli-explicit-options scope names more applications than verified adoptions",
+      "22 canonical event(s) claim human-reviewed with no verified approval, promoted before approval enforcement landed on 2026-07-26. Their status is a string a command wrote, not an attestation. They are reported rather than back-filled, because inventing an approval for a review that was never signed is fabrication: evt:caseflow-idempotent-retries, evt:convex-caseflow-receipt-retry-contract, evt:exact-candidate-contract, and 19 more",
+      "evd:convex-caseflow-receipt-retry-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+      "evd:guided-intake-mobile-decisions-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+      "evd:source-bound-submission-gates-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+      "asm:strong-model-infers-topology historical dimensions metadata mutation is acknowledged by evd:historical-topology-dimensions-acknowledgment; the raw claim mutation remains recorded, with operator-directed-in-session assurance, not human review or a signature"
+    ],
+    "passed": true
+  },
+  "commandReceipts": {
+    "E3d-nodekit-historical-ack-relevant-final.json": "243cceb7a1e57e8e1ef810f477f1d8a4ed5ab574fe55d4b0772423db1470aafa",
+    "E3d-nodekit-historical-ack-final-checks.json": "291a532fa5b4de7c2305c203f8a5616a8414bf3c71ac2584edd038708f038ec0",
+    "E3d-nodekit-historical-ack-final-corrected.json": "613040db4c5fd32446300f605e747a5291aaac83d932801c0f7438dcd6f444b3",
+    "E3d-nodekit-historical-ack-rollback-complete.json": "bc6f51433bc677245134d2d7bae98720211e9e7a9bda7fcabbe275ae307d9da9"
+  },
+  "verification": {
+    "relevantTests": 32,
+    "repositoryTests": 857,
+    "componentTests": 8,
+    "publicTypecheck": "PASS",
+    "componentTypecheck": "PASS",
+    "componentBuild": "PASS",
+    "normalEvolutionVerify": "PASS",
+    "generatedComponentFiles": 45,
+    "generatedComponentChanged": 0,
+    "rollbackExactBaselineFiles": 458,
+    "rollbackFinalSoleIssue": "original dimensionsTested mutation",
+    "diffCheck": "PASS"
+  },
+  "retainedFailures": [
+    "Initial historical schema/scenario rejection",
+    "Original nested binding classifier admitted rehashed changed directive",
+    "First full test rejected stale behavior-index owner line, corrected with normal generator",
+    "Incorrect npm run build command: no such script; documented build:component passed",
+    "Initial rollback minimal export omitted one referenced artifact; after exact hash-bound copy, baseline sole failure reproduced",
+    "Earlier intermediate test fixture omitted draft evidenceIds, then corrected; earlier race assertion was too strict about EEXIST versus observing a completed duplicate"
+  ],
+  "runtimeReview": {
+    "BOUND": "New acknowledgment processing admits at most one candidate and keeps no persistent in-memory collection; existing finite repository loader remains its owner.",
+    "HONEST_STATUS": "Actual failed baseline and tamper verdicts remain false; normal after CLI exits zero only for a true scoped verdict.",
+    "HONEST_SCORES": "No score or grade is created; raw claimMutations remains one.",
+    "TIMEOUT": "No external request added; command proofs used bounded subprocess deadlines. Existing local verifier Git execution is unchanged.",
+    "SSRF": "No network URL or fetch introduced; existing local evidence resolver reused.",
+    "BOUND_READ": "Historical artifact and directive processing enforce existing 2 MiB evidence limit after local read; no external body read or new streaming-read claim.",
+    "ERROR_BOUNDARY": "Validation/read/parse/Git failures become issues; exclusive record-creation race preserves an honest rejection or completed duplicate.",
+    "DETERMINISTIC": "Sorted-key canonical whole-record hashes and exact Git/object/byte identities."
+  },
+  "limits": [
+    "No staging, commit, push, canonical promotion, detached signature, model call, hook activation or deployment.",
+    "Operator-directed-in-session records current user recovery authorization and the agent-selected implementation, not user code review.",
+    "Existing agent-proposed draft source is the observed baseline; final material commit, fresh draft and real committed-range rollback/review receipt remain parent-owned after independent judgment.",
+    "H1 credential control and canonical workflow authority for the whole PR remain open; forbidden workflow paths are not exempted.",
+    "Current package identity changed; e7 factory/consumer evidence stays historical and no factory was regenerated.",
+    "UI N/A for this local governance patch; whole-product visual, responsiveness, interaction and usability grades remain separate."
+  ]
+}
