@@ -5,7 +5,7 @@
     {
       "eventId": "evt:local-checkpoint-and-coding-outcomes",
       "draftRef": "evolution/drafts/evt-local-checkpoint-and-coding-outcomes.json",
-      "draftDigest": "b7ff32411c6719480c96f0f3c563781b87bd9e198d0883a1ca5218d14d1e1a7f",
+      "draftDigest": "75e55839c5c7f3df24e3bd2a1a3a25eea2ff0b14e44d97aa18131b7a1dfeb581",
       "sourceCommit": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0"
     }
   ],
@@ -55,12 +55,12 @@
       },
       {
         "ref": "evolution/artifacts/checkpoint-outcome-20260904/journey.md",
-        "sha256": "dc4d1f390e3d974ee5cbf5b6fd474d7610a2a3628711fa702a3d1f1581f7540b",
+        "sha256": "d52692e9684c0ffe41efe2ab2769d1794546616d06dc909f2827578bfa8221ba",
         "kind": "journey-card"
       },
       {
         "ref": "evolution/artifacts/checkpoint-outcome-20260904/rollback-verification.json",
-        "sha256": "2fb5f2eda88f88e211961cff2865624d10b503079b6f2b44025d1426b919a127",
+        "sha256": "a262d62114d6b1c33677e847dbc57a9a9e53fc9f510f8f3f9dea759b9fa4d5d9",
         "kind": "test-log"
       },
       {
@@ -94,5 +94,5 @@
     "status": "deferred-human-review",
     "feedbackChannel": "pull-request"
   },
-  "receiptDigest": "775730bee8d89b56c1c0a326eaaa84febca92bcd18f7931af0c11697679574e0"
+  "receiptDigest": "0e8f0b56d8f2c46a8330deb0058778c781a8f29291aa846df88265714f302ed9"
 }
