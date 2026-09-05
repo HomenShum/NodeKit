@@ -1,0 +1,9 @@
+{
+  "method": "git revert --no-commit full six-commit PR range in independent clone",
+  "candidate": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+  "target": "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+  "restoredTree": "f39315a1410c2b8dad96b6ff66515972137554e7",
+  "baselineTree": "f39315a1410c2b8dad96b6ff66515972137554e7",
+  "passed": true,
+  "fixtureKind": "independent local Git clone"
+}

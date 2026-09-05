@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "nodekit.evolution-deferred-review/v1",
+  "id": "deferred-review:sha256:a7d87ef419dd3de4a8c98a27b972ce578679a31ac7fbabed5f823261ed927fc7",
+  "events": [
+    {
+      "eventId": "evt:local-checkpoint-and-coding-outcomes",
+      "draftRef": "evolution/drafts/evt-local-checkpoint-and-coding-outcomes.json",
+      "draftDigest": "b7ff32411c6719480c96f0f3c563781b87bd9e198d0883a1ca5218d14d1e1a7f",
+      "sourceCommit": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0"
+    }
+  ],
+  "range": {
+    "from": "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+    "reviewedTo": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0"
+  },
+  "risk": {
+    "classification": "reversible",
+    "effects": {
+      "destructiveWrite": false,
+      "credentialOrAuthorityChange": false,
+      "irreversibleMigration": false,
+      "materialSpend": false,
+      "externalCommunication": false,
+      "legalOrComplianceCommitment": false,
+      "unverifiedRollback": false
+    }
+  },
+  "coverage": {
+    "materialFiles": [
+      "src/caseflow.d.mts",
+      "src/lib/caseflow.mjs",
+      "templates/base/.gitattributes",
+      "templates/base/AGENTS.md",
+      "templates/base/README.md",
+      "templates/base/docs/CODING_SEQUENCE.md",
+      "templates/base/package.json",
+      "templates/base/schemas/outcome-contract.schema.json",
+      "templates/base/scripts/outcome.mjs",
+      "templates/base/test/outcome.test.mjs"
+    ]
+  },
+  "evidence": {
+    "before": [
+      {
+        "ref": "evolution/artifacts/checkpoint-outcome-20260904/before-live-io.json",
+        "sha256": "70e8e77340e34541bdc2450f0243bdfed6927bbf4ffa74330c6108773eef137f",
+        "kind": "live-io"
+      }
+    ],
+    "after": [
+      {
+        "ref": "evolution/artifacts/checkpoint-outcome-20260904/after-live-io.json",
+        "sha256": "935cf13c335645c48712aed9f29bd4681915742b1ca865f52c0973790363a5bc",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evolution/artifacts/checkpoint-outcome-20260904/journey.md",
+        "sha256": "dc4d1f390e3d974ee5cbf5b6fd474d7610a2a3628711fa702a3d1f1581f7540b",
+        "kind": "journey-card"
+      },
+      {
+        "ref": "evolution/artifacts/checkpoint-outcome-20260904/rollback-verification.json",
+        "sha256": "2fb5f2eda88f88e211961cff2865624d10b503079b6f2b44025d1426b919a127",
+        "kind": "test-log"
+      },
+      {
+        "ref": "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-390.png",
+        "sha256": "f4351ec3499880db5eae37095c4e34dce923cfcd9b21eb8a25ef90cfed8f28f3",
+        "kind": "ui-screenshot"
+      },
+      {
+        "ref": "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-1440.png",
+        "sha256": "d37684b3cc7b70364e7f6601678bd904fd08aaebe02ffb6cde04838039e4786d",
+        "kind": "ui-screenshot"
+      }
+    ]
+  },
+  "uiSurface": {
+    "changed": true,
+    "mediaRequired": true,
+    "mediaRefs": [
+      "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-390.png",
+      "evolution/artifacts/checkpoint-outcome-20260904/outcome-report-1440.png"
+    ]
+  },
+  "rollback": {
+    "targetCommit": "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+    "strategy": "git-revert-range",
+    "verificationRefs": [
+      "evolution/artifacts/checkpoint-outcome-20260904/rollback-verification.json"
+    ]
+  },
+  "review": {
+    "status": "deferred-human-review",
+    "feedbackChannel": "pull-request"
+  },
+  "receiptDigest": "775730bee8d89b56c1c0a326eaaa84febca92bcd18f7931af0c11697679574e0"
+}

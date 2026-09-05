@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "nodekit.evolution-evidence/v1",
+  "id": "evd:local-checkpoint-and-coding-outcomes",
+  "kind": "test",
+  "artifactRef": "file:evolution/artifacts/checkpoint-outcome-20260904/after-live-io.json",
+  "sha256": "935cf13c335645c48712aed9f29bd4681915742b1ca865f52c0973790363a5bc",
+  "sourceCommit": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+  "generatedAt": "2026-09-04T23:43:24.411Z",
+  "environment": {
+    "runtime": "v22.22.2",
+    "platform": "Windows",
+    "scope": "Local library checkpoint and separate-process restart; no provider or production claim"
+  },
+  "verifiesInvariantIds": [],
+  "result": "pass"
+}

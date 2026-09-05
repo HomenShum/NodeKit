@@ -1,0 +1,517 @@
+{
+  "schemaVersion": "nodekit.local-runtime-io/v1",
+  "observedAt": "2026-09-04T23:43:24.411Z",
+  "environment": {
+    "node": "v22.22.2",
+    "platform": "win32",
+    "mode": "local-library-no-provider"
+  },
+  "sourceCommit": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+  "requests": [
+    {
+      "operation": "createCase",
+      "input": {
+        "title": "Supplier sample",
+        "primaryJob": "Keep the exact nested supplier requirement after restarting"
+      }
+    },
+    {
+      "operation": "startRun",
+      "input": {
+        "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+        "stages": [
+          {
+            "id": "review",
+            "label": "Review sample",
+            "owner": "user"
+          }
+        ]
+      }
+    },
+    {
+      "operation": "createArtifact",
+      "input": {
+        "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+        "runId": "run_0a7d1ee0b12643ce86184ad502",
+        "content": {
+          "nested": {
+            "nested": {
+              "nested": {
+                "nested": {
+                  "nested": {
+                    "nested": {
+                      "nested": {
+                        "nested": {
+                          "nested": {
+                            "value": "Unverified supplier requirement, retain exact text"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "idempotencyKey": "supplier-requirement"
+      }
+    }
+  ],
+  "responses": {
+    "work": {
+      "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+      "createdAt": "2026-09-04T23:43:24.410Z",
+      "currentRunId": null,
+      "primaryJob": "Keep the exact nested supplier requirement after restarting",
+      "schemaVersion": "nodekit.case/v1",
+      "status": "ready",
+      "title": "Supplier sample",
+      "updatedAt": "2026-09-04T23:43:24.410Z"
+    },
+    "run": {
+      "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+      "createdAt": "2026-09-04T23:43:24.410Z",
+      "currentStageId": "review",
+      "nextAction": "Review sample",
+      "nextActionOwner": "user",
+      "runId": "run_0a7d1ee0b12643ce86184ad502",
+      "schemaVersion": "nodekit.run/v1",
+      "stages": [
+        {
+          "id": "review",
+          "label": "Review sample",
+          "owner": "user",
+          "status": "active"
+        }
+      ],
+      "status": "active",
+      "updatedAt": "2026-09-04T23:43:24.410Z"
+    },
+    "artifact": {
+      "artifactId": "artifact_dfb4861e06e64dca9bfebeef8c",
+      "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+      "canonicalVersion": 1,
+      "createdAt": "2026-09-04T23:43:24.410Z",
+      "kind": "generic",
+      "runId": "run_0a7d1ee0b12643ce86184ad502",
+      "schemaVersion": "nodekit.artifact/v1",
+      "title": "Artifact",
+      "updatedAt": "2026-09-04T23:43:24.410Z",
+      "versions": [
+        {
+          "content": {
+            "nested": {
+              "nested": {
+                "nested": {
+                  "nested": {
+                    "nested": {
+                      "nested": {
+                        "nested": {
+                          "nested": {
+                            "nested": {
+                              "value": "Unverified supplier requirement, retain exact text"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "contentHash": "ae5603ec698e6f0b2f8be4ec30e7a34cbeaa7cd43688f6c1658a0f8e6c239bb7",
+          "createdAt": "2026-09-04T23:43:24.410Z",
+          "version": 1
+        }
+      ]
+    },
+    "snapshot": {
+      "approvals": [],
+      "artifacts": [
+        {
+          "artifactId": "artifact_dfb4861e06e64dca9bfebeef8c",
+          "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+          "canonicalVersion": 1,
+          "createdAt": "2026-09-04T23:43:24.410Z",
+          "kind": "generic",
+          "runId": "run_0a7d1ee0b12643ce86184ad502",
+          "schemaVersion": "nodekit.artifact/v1",
+          "title": "Artifact",
+          "updatedAt": "2026-09-04T23:43:24.410Z",
+          "versions": [
+            {
+              "content": {
+                "nested": {
+                  "nested": {
+                    "nested": {
+                      "nested": {
+                        "nested": {
+                          "nested": {
+                            "nested": {
+                              "nested": {
+                                "nested": {
+                                  "value": "Unverified supplier requirement, retain exact text"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "contentHash": "ae5603ec698e6f0b2f8be4ec30e7a34cbeaa7cd43688f6c1658a0f8e6c239bb7",
+              "createdAt": "2026-09-04T23:43:24.410Z",
+              "version": 1
+            }
+          ]
+        }
+      ],
+      "cases": [
+        {
+          "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+          "createdAt": "2026-09-04T23:43:24.410Z",
+          "currentRunId": "run_0a7d1ee0b12643ce86184ad502",
+          "primaryJob": "Keep the exact nested supplier requirement after restarting",
+          "schemaVersion": "nodekit.case/v1",
+          "status": "in_progress",
+          "title": "Supplier sample",
+          "updatedAt": "2026-09-04T23:43:24.410Z"
+        }
+      ],
+      "events": [
+        {
+          "actor": {
+            "id": "nodekit",
+            "type": "system"
+          },
+          "aggregateId": "case_8ea5e30658c444bc8e3a2aeec9",
+          "aggregateType": "case",
+          "eventId": "event_c1f9af9d09a34f2fb5a66bbf88",
+          "eventType": "case.created",
+          "occurredAt": "2026-09-04T23:43:24.410Z",
+          "payload": {
+            "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+            "createdAt": "2026-09-04T23:43:24.410Z",
+            "currentRunId": null,
+            "primaryJob": "Keep the exact nested supplier requirement after restarting",
+            "schemaVersion": "nodekit.case/v1",
+            "status": "ready",
+            "title": "Supplier sample",
+            "updatedAt": "2026-09-04T23:43:24.410Z"
+          },
+          "schemaVersion": "nodekit.caseflow-event/v1",
+          "sequence": 1
+        },
+        {
+          "actor": {
+            "id": "nodekit",
+            "type": "system"
+          },
+          "aggregateId": "run_0a7d1ee0b12643ce86184ad502",
+          "aggregateType": "run",
+          "eventId": "event_8f961431ab90497e825cbc37ba",
+          "eventType": "run.started",
+          "occurredAt": "2026-09-04T23:43:24.410Z",
+          "payload": {
+            "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+            "createdAt": "2026-09-04T23:43:24.410Z",
+            "currentStageId": "review",
+            "nextAction": "Review sample",
+            "nextActionOwner": "user",
+            "runId": "run_0a7d1ee0b12643ce86184ad502",
+            "schemaVersion": "nodekit.run/v1",
+            "stages": [
+              {
+                "id": "review",
+                "label": "Review sample",
+                "owner": "user",
+                "status": "active"
+              }
+            ],
+            "status": "active",
+            "updatedAt": "2026-09-04T23:43:24.410Z"
+          },
+          "schemaVersion": "nodekit.caseflow-event/v1",
+          "sequence": 1
+        },
+        {
+          "actor": {
+            "id": "nodekit",
+            "type": "system"
+          },
+          "aggregateId": "run_0a7d1ee0b12643ce86184ad502",
+          "aggregateType": "run",
+          "eventId": "event_dc368f092b8f4126bceca214aa",
+          "eventType": "stage.entered",
+          "occurredAt": "2026-09-04T23:43:24.410Z",
+          "payload": {
+            "stageId": "review"
+          },
+          "schemaVersion": "nodekit.caseflow-event/v1",
+          "sequence": 2
+        },
+        {
+          "actor": {
+            "id": "nodekit",
+            "type": "system"
+          },
+          "aggregateId": "artifact_dfb4861e06e64dca9bfebeef8c",
+          "aggregateType": "artifact",
+          "eventId": "event_4511bbd6903d42799442a7b135",
+          "eventType": "artifact.created",
+          "occurredAt": "2026-09-04T23:43:24.410Z",
+          "payload": {
+            "artifactId": "artifact_dfb4861e06e64dca9bfebeef8c",
+            "version": 1
+          },
+          "schemaVersion": "nodekit.caseflow-event/v1",
+          "sequence": 1
+        }
+      ],
+      "exceptions": [],
+      "proposals": [],
+      "receipts": [],
+      "runs": [
+        {
+          "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+          "createdAt": "2026-09-04T23:43:24.410Z",
+          "currentStageId": "review",
+          "nextAction": "Review sample",
+          "nextActionOwner": "user",
+          "runId": "run_0a7d1ee0b12643ce86184ad502",
+          "schemaVersion": "nodekit.run/v1",
+          "stages": [
+            {
+              "id": "review",
+              "label": "Review sample",
+              "owner": "user",
+              "status": "active"
+            }
+          ],
+          "status": "active",
+          "updatedAt": "2026-09-04T23:43:24.410Z"
+        }
+      ]
+    },
+    "checkpointAvailable": true,
+    "resume": {
+      "processId": 38892,
+      "resumed": {
+        "approvals": [],
+        "artifacts": [
+          {
+            "artifactId": "artifact_dfb4861e06e64dca9bfebeef8c",
+            "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+            "canonicalVersion": 1,
+            "createdAt": "2026-09-04T23:43:24.410Z",
+            "kind": "generic",
+            "runId": "run_0a7d1ee0b12643ce86184ad502",
+            "schemaVersion": "nodekit.artifact/v1",
+            "title": "Artifact",
+            "updatedAt": "2026-09-04T23:43:24.410Z",
+            "versions": [
+              {
+                "content": {
+                  "nested": {
+                    "nested": {
+                      "nested": {
+                        "nested": {
+                          "nested": {
+                            "nested": {
+                              "nested": {
+                                "nested": {
+                                  "nested": {
+                                    "value": "Unverified supplier requirement, retain exact text"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "contentHash": "ae5603ec698e6f0b2f8be4ec30e7a34cbeaa7cd43688f6c1658a0f8e6c239bb7",
+                "createdAt": "2026-09-04T23:43:24.410Z",
+                "version": 1
+              }
+            ]
+          }
+        ],
+        "cases": [
+          {
+            "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+            "createdAt": "2026-09-04T23:43:24.410Z",
+            "currentRunId": "run_0a7d1ee0b12643ce86184ad502",
+            "primaryJob": "Keep the exact nested supplier requirement after restarting",
+            "schemaVersion": "nodekit.case/v1",
+            "status": "in_progress",
+            "title": "Supplier sample",
+            "updatedAt": "2026-09-04T23:43:24.410Z"
+          }
+        ],
+        "events": [
+          {
+            "actor": {
+              "id": "nodekit",
+              "type": "system"
+            },
+            "aggregateId": "case_8ea5e30658c444bc8e3a2aeec9",
+            "aggregateType": "case",
+            "eventId": "event_c1f9af9d09a34f2fb5a66bbf88",
+            "eventType": "case.created",
+            "occurredAt": "2026-09-04T23:43:24.410Z",
+            "payload": {
+              "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+              "createdAt": "2026-09-04T23:43:24.410Z",
+              "currentRunId": null,
+              "primaryJob": "Keep the exact nested supplier requirement after restarting",
+              "schemaVersion": "nodekit.case/v1",
+              "status": "ready",
+              "title": "Supplier sample",
+              "updatedAt": "2026-09-04T23:43:24.410Z"
+            },
+            "schemaVersion": "nodekit.caseflow-event/v1",
+            "sequence": 1
+          },
+          {
+            "actor": {
+              "id": "nodekit",
+              "type": "system"
+            },
+            "aggregateId": "run_0a7d1ee0b12643ce86184ad502",
+            "aggregateType": "run",
+            "eventId": "event_8f961431ab90497e825cbc37ba",
+            "eventType": "run.started",
+            "occurredAt": "2026-09-04T23:43:24.410Z",
+            "payload": {
+              "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+              "createdAt": "2026-09-04T23:43:24.410Z",
+              "currentStageId": "review",
+              "nextAction": "Review sample",
+              "nextActionOwner": "user",
+              "runId": "run_0a7d1ee0b12643ce86184ad502",
+              "schemaVersion": "nodekit.run/v1",
+              "stages": [
+                {
+                  "id": "review",
+                  "label": "Review sample",
+                  "owner": "user",
+                  "status": "active"
+                }
+              ],
+              "status": "active",
+              "updatedAt": "2026-09-04T23:43:24.410Z"
+            },
+            "schemaVersion": "nodekit.caseflow-event/v1",
+            "sequence": 1
+          },
+          {
+            "actor": {
+              "id": "nodekit",
+              "type": "system"
+            },
+            "aggregateId": "run_0a7d1ee0b12643ce86184ad502",
+            "aggregateType": "run",
+            "eventId": "event_dc368f092b8f4126bceca214aa",
+            "eventType": "stage.entered",
+            "occurredAt": "2026-09-04T23:43:24.410Z",
+            "payload": {
+              "stageId": "review"
+            },
+            "schemaVersion": "nodekit.caseflow-event/v1",
+            "sequence": 2
+          },
+          {
+            "actor": {
+              "id": "nodekit",
+              "type": "system"
+            },
+            "aggregateId": "artifact_dfb4861e06e64dca9bfebeef8c",
+            "aggregateType": "artifact",
+            "eventId": "event_4511bbd6903d42799442a7b135",
+            "eventType": "artifact.created",
+            "occurredAt": "2026-09-04T23:43:24.410Z",
+            "payload": {
+              "artifactId": "artifact_dfb4861e06e64dca9bfebeef8c",
+              "version": 1
+            },
+            "schemaVersion": "nodekit.caseflow-event/v1",
+            "sequence": 1
+          }
+        ],
+        "exceptions": [],
+        "proposals": [],
+        "receipts": [],
+        "runs": [
+          {
+            "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+            "createdAt": "2026-09-04T23:43:24.410Z",
+            "currentStageId": "review",
+            "nextAction": "Review sample",
+            "nextActionOwner": "user",
+            "runId": "run_0a7d1ee0b12643ce86184ad502",
+            "schemaVersion": "nodekit.run/v1",
+            "stages": [
+              {
+                "id": "review",
+                "label": "Review sample",
+                "owner": "user",
+                "status": "active"
+              }
+            ],
+            "status": "active",
+            "updatedAt": "2026-09-04T23:43:24.410Z"
+          }
+        ]
+      },
+      "retry": {
+        "artifactId": "artifact_dfb4861e06e64dca9bfebeef8c",
+        "caseId": "case_8ea5e30658c444bc8e3a2aeec9",
+        "canonicalVersion": 1,
+        "createdAt": "2026-09-04T23:43:24.410Z",
+        "kind": "generic",
+        "runId": "run_0a7d1ee0b12643ce86184ad502",
+        "schemaVersion": "nodekit.artifact/v1",
+        "title": "Artifact",
+        "updatedAt": "2026-09-04T23:43:24.410Z",
+        "versions": [
+          {
+            "content": {
+              "nested": {
+                "nested": {
+                  "nested": {
+                    "nested": {
+                      "nested": {
+                        "nested": {
+                          "nested": {
+                            "nested": {
+                              "nested": {
+                                "value": "Unverified supplier requirement, retain exact text"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "contentHash": "ae5603ec698e6f0b2f8be4ec30e7a34cbeaa7cd43688f6c1658a0f8e6c239bb7",
+            "createdAt": "2026-09-04T23:43:24.410Z",
+            "version": 1
+          }
+        ]
+      },
+      "exactSnapshot": true,
+      "sameRetryIdentity": true
+    },
+    "separateProcessVerified": true
+  }
+}
