@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A domain-blank, behaviorally figured-out NodeKit application.">
+    <title>Completion verified | Nodekit Contract Consumer | Guided case</title>
+    <!-- WIG Design "Browser UI matches background": one value per scheme, matching --paper. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f0e8">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111310">
+    <!-- Inline so the page requests no favicon it does not serve. Without this the browser asks
+         for /favicon.ico, gets 404, and logs a console error on every single load. -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23d8ff72'/%3E%3Ctext x='16' y='24' font-size='21' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%23171817'%3EN%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/responsive-refinements.css">
+  </head>
+  <body data-scenario="completed_receipt" data-action-state="none">
+    <a class="skip-link" href="#artifact">Skip to primary artifact</a>
+    <header>
+      <a class="brand" href="/">N/ <span>Nodekit Contract Consumer</span></a>
+      <div class="status" data-status="completed"><i></i><span id="status-label">completed</span></div>
+    </header>
+    <main>
+      <section class="orientation" aria-labelledby="case-title">
+        <div>
+          <p class="eyebrow">GUIDED CASE</p>
+          <h1 id="case-title">One clear job.<br><em>Carried all the way through.</em></h1>
+          <p class="lede">Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.</p>
+        </div>
+        <button class="button secondary" id="reset">Reset demonstration</button>
+      </section>
+
+      <div class="progress" aria-label="Case progress" id="progress"><div class="step completed"><i></i><span>Confirm the intended outcome</span></div><div class="step completed"><i></i><span>Prepare a proposal</span></div><div class="step completed"><i></i><span>Review the proposed change</span></div><div class="step completed"><i></i><span>Verify and export</span></div></div>
+      <div class="error" id="error" role="alert" hidden=""><span id="error-message"></span><button class="button" id="retry" type="button" hidden="">Retry</button></div>
+      <section class="state-banner" id="state-banner" aria-live="polite" data-kind="complete">
+        <span class="state-kind" id="state-kind">complete</span>
+        <div><strong id="state-title">Completion verified</strong><p id="state-message">The canonical artifact and content-addressed receipt are ready.</p></div>
+      </section>
+      <section class="mobile-action" id="mobile-action" aria-label="Current decision" hidden="">
+        <div><span>YOUR NEXT ACTION</span><strong id="mobile-action-title">Completion evidence</strong></div>
+        <div>
+          <button class="button primary" id="mobile-propose" hidden="">Prepare proposal</button>
+          <button class="button approve" id="mobile-approve" hidden="">Approve</button>
+          <button class="button secondary" id="mobile-reject" hidden="">Reject</button>
+          <button class="button primary" id="mobile-resume" hidden="">Resume safely</button>
+          <button class="button primary" id="mobile-resolve-conflict" hidden="">Keep canonical version</button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <nav aria-label="Case navigation">
+          <p class="eyebrow">CASE</p>
+          <strong id="case-name">Nodekit Contract Consumer case</strong>
+          <a class="active" href="#artifact">Primary artifact</a>
+          <a href="#review">Review</a>
+          <a href="#activity">Activity</a>
+          <div class="case-meta"><span>Next owner</span><strong id="next-owner">user</strong></div>
+        </nav>
+
+        <article class="artifact" id="artifact" tabindex="-1">
+          <form class="primary-input" id="primary-input" novalidate="" hidden="">
+            <label for="outcome">Outcome for this case</label>
+            <div><input id="outcome" name="outcome" value="Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result." required="" aria-invalid="false"><button class="button secondary" type="submit">Confirm outcome</button></div>
+            <small id="input-help">Saved locally in this deterministic demonstration.</small>
+          </form>
+          <div class="section-title"><div><p class="eyebrow">PRIMARY ARTIFACT</p><h2>Primary artifact</h2></div><span class="version" id="artifact-version">v2</span></div>
+          <div class="current-action"><span>Current action</span><strong id="current-action">Review receipt</strong></div>
+          <div class="artifact-body" id="artifact-body"><p>A bounded, reviewable result is ready. Replace this with the researched domain artifact.</p><small>Canonical hash 5cbf8cdb4ab5ba5d</small></div>
+          <div class="completion" id="completion"><strong>Completion verified</strong><p>The canonical artifact and content-addressed receipt are ready.</p></div>
+        </article>
+
+        <aside id="review" data-nodekit-review-boundary="proposal">
+          <div class="tabs" aria-label="Review panel mode"><button class="tab active" id="review-tab" aria-pressed="true">Review</button><button class="tab" id="activity-tab" aria-pressed="false">Agent activity</button></div>
+          <p class="eyebrow" id="review-eyebrow">VERIFIED RESULT</p>
+          <h2 id="review-title" tabindex="-1">Completion evidence</h2>
+          <p id="review-copy">The accepted artifact and its content-addressed receipt are canonical and ready to inspect.</p>
+          <div class="proposal" id="proposal"><span>Proposal accepted.</span></div>
+          <div class="exception" id="exception" hidden=""></div>
+          <div class="receipt-detail" id="receipt-detail" hidden=""></div>
+          <div class="receipt-actions" id="receipt-actions" hidden="">
+            <a class="button primary" id="download-proof" href="/api/export" download="nodekit-proof.json">Download proof</a>
+            <button class="button secondary" id="copy-share" type="button">Copy share summary</button>
+            <span id="copy-status" role="status" aria-live="polite"></span>
+          </div>
+          <div class="actions">
+            <button class="button primary" id="propose" hidden="" disabled="">Prepare proposal</button>
+            <button class="button approve" id="approve" hidden="" disabled="">Approve</button>
+            <button class="button secondary" id="reject" hidden="" disabled="">Reject</button>
+            <button class="button primary" id="resume" hidden="">Resume from preserved state</button>
+            <button class="button primary" id="resolve-conflict" hidden="">Continue from canonical version</button>
+          </div>
+          <details id="activity"><summary>Advanced trace</summary><ol id="events"><li><strong>receipt.created</strong><span>2026-09-05T03:35:06.013Z</span></li><li><strong>run.completed</strong><span>2026-09-05T03:35:06.013Z</span></li><li><strong>stage.entered</strong><span>2026-09-05T03:35:06.013Z</span></li><li><strong>proposal.accepted</strong><span>2026-09-05T03:35:06.013Z</span></li><li><strong>artifact.version_created</strong><span>2026-09-05T03:35:06.013Z</span></li><li><strong>stage.entered</strong><span>2026-09-05T03:35:05.945Z</span></li><li><strong>proposal.created</strong><span>2026-09-05T03:35:05.945Z</span></li><li><strong>stage.entered</strong><span>2026-09-05T03:35:05.945Z</span></li></ol></details>
+        </aside>
+      </section>
+    </main>
+    <footer><span>Blank in domain. Figured out in behavior.</span><span id="receipt-id">Receipt 85f996c06501753c</span></footer>
+    <script type="module" src="/app.js"></script>
+  
+
+</body></html>

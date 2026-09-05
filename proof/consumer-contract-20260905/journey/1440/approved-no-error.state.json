@@ -1,0 +1,707 @@
+{
+  "artifact": {
+    "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+    "caseId": "case_5e833f20ba8c4a48b99a7cc32e",
+    "canonicalVersion": 2,
+    "createdAt": "2026-09-05T03:56:04.968Z",
+    "kind": "structured-document",
+    "runId": "run_ac20951c080346b7a7b04bbf91",
+    "schemaVersion": "nodekit.artifact/v1",
+    "title": "Primary artifact",
+    "updatedAt": "2026-09-05T03:56:06.595Z",
+    "versions": [
+      {
+        "content": {
+          "summary": "The last approved result remains here.",
+          "status": "baseline"
+        },
+        "contentHash": "1077e34cc8ffae57d4f0bcd7a40d9e5f152b05da45ab643d36195773c10a7de8",
+        "createdAt": "2026-09-05T03:56:04.968Z",
+        "version": 1
+      },
+      {
+        "content": {
+          "outcome": "  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ",
+          "summary": "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
+          "status": "proposed"
+        },
+        "contentHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "createdAt": "2026-09-05T03:56:06.595Z",
+        "proposalId": "proposal_d3ad7227b0334afeac72f98f6c",
+        "version": 2
+      }
+    ]
+  },
+  "approvals": [
+    {
+      "approvalId": "approval_94243193f63e41d7a59e4a87b6",
+      "comment": "",
+      "decidedAt": "2026-09-05T03:56:06.412Z",
+      "decision": "rejected",
+      "proposalId": "proposal_7f8457224aaf4492ab0114fecd",
+      "schemaVersion": "nodekit.approval/v1"
+    },
+    {
+      "approvalId": "approval_19c109d10727421b820682cfd8",
+      "comment": "",
+      "decidedAt": "2026-09-05T03:56:06.595Z",
+      "decision": "accepted",
+      "proposalId": "proposal_d3ad7227b0334afeac72f98f6c",
+      "schemaVersion": "nodekit.approval/v1"
+    }
+  ],
+  "case": {
+    "caseId": "case_5e833f20ba8c4a48b99a7cc32e",
+    "createdAt": "2026-09-05T03:56:04.967Z",
+    "currentRunId": "run_ac20951c080346b7a7b04bbf91",
+    "primaryJob": "Verify supplier “茶” <receipt> & preserve €42.50 exactly.",
+    "schemaVersion": "nodekit.case/v1",
+    "status": "completed",
+    "title": "Nodekit Contract Consumer case",
+    "updatedAt": "2026-09-05T03:56:06.595Z"
+  },
+  "events": [
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "case_5e833f20ba8c4a48b99a7cc32e",
+      "aggregateType": "case",
+      "eventId": "event_8ebd978186764ccbb69d230e4c",
+      "eventType": "case.created",
+      "occurredAt": "2026-09-05T03:56:04.968Z",
+      "payload": {
+        "caseId": "case_5e833f20ba8c4a48b99a7cc32e",
+        "createdAt": "2026-09-05T03:56:04.967Z",
+        "currentRunId": null,
+        "primaryJob": "Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.",
+        "schemaVersion": "nodekit.case/v1",
+        "status": "ready",
+        "title": "Nodekit Contract Consumer case",
+        "updatedAt": "2026-09-05T03:56:04.967Z"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_c1bf33cbd60949bdbb4335656b",
+      "eventType": "run.started",
+      "occurredAt": "2026-09-05T03:56:04.968Z",
+      "payload": {
+        "caseId": "case_5e833f20ba8c4a48b99a7cc32e",
+        "createdAt": "2026-09-05T03:56:04.968Z",
+        "currentStageId": "intake",
+        "nextAction": "Confirm the intended outcome",
+        "nextActionOwner": "user",
+        "runId": "run_ac20951c080346b7a7b04bbf91",
+        "schemaVersion": "nodekit.run/v1",
+        "stages": [
+          {
+            "id": "intake",
+            "label": "Confirm the intended outcome",
+            "owner": "user",
+            "status": "active"
+          },
+          {
+            "id": "working",
+            "label": "Prepare a proposal",
+            "owner": "agent",
+            "status": "pending"
+          },
+          {
+            "id": "review",
+            "label": "Review the proposed change",
+            "owner": "user",
+            "status": "pending"
+          },
+          {
+            "id": "complete",
+            "label": "Verify and export",
+            "owner": "system",
+            "status": "pending"
+          }
+        ],
+        "status": "active",
+        "updatedAt": "2026-09-05T03:56:04.968Z"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_4dc5b12228cf48858c02b7bd6a",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:04.968Z",
+      "payload": {
+        "stageId": "intake"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 2
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "artifact_286084cd7207499e81dda8b1f7",
+      "aggregateType": "artifact",
+      "eventId": "event_d6acdbe3be214ce59c2fa66ccb",
+      "eventType": "artifact.created",
+      "occurredAt": "2026-09-05T03:56:04.968Z",
+      "payload": {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "version": 1
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "case_5e833f20ba8c4a48b99a7cc32e",
+      "aggregateType": "case",
+      "eventId": "event_1f7658d350754e03bc5e5e9040",
+      "eventType": "case.updated",
+      "occurredAt": "2026-09-05T03:56:05.914Z",
+      "payload": {
+        "primaryJob": "Verify supplier “茶” <receipt> & preserve €42.50 exactly.",
+        "title": "Nodekit Contract Consumer case"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 2
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_6be0e43c4d7d45fea9f830cadf",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:05.914Z",
+      "payload": {
+        "nextAction": "Prepare the bounded proposal",
+        "nextActionOwner": "agent",
+        "stageId": "working"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 3
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_a98ade773fb5424ca19c487070",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:06.263Z",
+      "payload": {
+        "nextAction": "Prepare a proposal",
+        "nextActionOwner": "agent",
+        "stageId": "working"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 4
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "proposal_7f8457224aaf4492ab0114fecd",
+      "aggregateType": "proposal",
+      "eventId": "event_67ce2862efaa4f208aedf5f040",
+      "eventType": "proposal.created",
+      "occurredAt": "2026-09-05T03:56:06.263Z",
+      "payload": {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "baseVersion": 1,
+        "proposalId": "proposal_7f8457224aaf4492ab0114fecd"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_94ce11c2f2a449f8bf59bd6e21",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:06.263Z",
+      "payload": {
+        "nextAction": "Approve or reject the proposed change",
+        "nextActionOwner": "user",
+        "stageId": "review"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 5
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "proposal_7f8457224aaf4492ab0114fecd",
+      "aggregateType": "proposal",
+      "eventId": "event_4cccdfc668584b9db434acbd9a",
+      "eventType": "proposal.rejected",
+      "occurredAt": "2026-09-05T03:56:06.412Z",
+      "payload": {
+        "approvalId": "approval_94243193f63e41d7a59e4a87b6"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 2
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_95323568bd074317a8b36149df",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:06.412Z",
+      "payload": {
+        "nextAction": "Prepare a revised proposal",
+        "nextActionOwner": "agent",
+        "stageId": "working"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 6
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_3ae114af95dc4f6b8bd10e2383",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:06.563Z",
+      "payload": {
+        "nextAction": "Prepare a proposal",
+        "nextActionOwner": "agent",
+        "stageId": "working"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 7
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "proposal_d3ad7227b0334afeac72f98f6c",
+      "aggregateType": "proposal",
+      "eventId": "event_0f2b845099c54435ac708a63c1",
+      "eventType": "proposal.created",
+      "occurredAt": "2026-09-05T03:56:06.563Z",
+      "payload": {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "baseVersion": 1,
+        "proposalId": "proposal_d3ad7227b0334afeac72f98f6c"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_1a0e1efcfded4e64906851ac66",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:06.564Z",
+      "payload": {
+        "nextAction": "Approve or reject the proposed change",
+        "nextActionOwner": "user",
+        "stageId": "review"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 8
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "artifact_286084cd7207499e81dda8b1f7",
+      "aggregateType": "artifact",
+      "eventId": "event_6e82043a87094fad95f129c606",
+      "eventType": "artifact.version_created",
+      "occurredAt": "2026-09-05T03:56:06.595Z",
+      "payload": {
+        "proposalId": "proposal_d3ad7227b0334afeac72f98f6c",
+        "version": 2
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 2
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "proposal_d3ad7227b0334afeac72f98f6c",
+      "aggregateType": "proposal",
+      "eventId": "event_d6d031224ca24aa59e34deee0a",
+      "eventType": "proposal.accepted",
+      "occurredAt": "2026-09-05T03:56:06.595Z",
+      "payload": {
+        "approvalId": "approval_19c109d10727421b820682cfd8"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 2
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_eb975b6f384b4ff4b80490a451",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:56:06.595Z",
+      "payload": {
+        "nextAction": "Verify and export",
+        "nextActionOwner": "system",
+        "stageId": "complete"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 9
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_cde32d19fb6c4643bd18fba9f4",
+      "eventType": "run.completed",
+      "occurredAt": "2026-09-05T03:56:06.595Z",
+      "payload": {},
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 10
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+      "aggregateType": "run",
+      "eventId": "event_cb6c87bc56c549308ac8115651",
+      "eventType": "receipt.created",
+      "occurredAt": "2026-09-05T03:56:06.596Z",
+      "payload": {
+        "receiptHash": "fba0cd1c4afc52443388149c59e0a6db29ee9ed95885a302fa1b47e710b3ce8c",
+        "receiptId": "receipt_6264675e87e543ca95b1d7b42a"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 11
+    }
+  ],
+  "exceptions": [],
+  "presentation": {
+    "id": "completed_receipt",
+    "kind": "complete",
+    "message": "The canonical artifact and content-addressed receipt are ready.",
+    "title": "Completion verified"
+  },
+  "proposal": {
+    "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+    "baseVersion": 1,
+    "createdAt": "2026-09-05T03:56:06.563Z",
+    "patch": {
+      "outcome": "  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ",
+      "summary": "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
+      "status": "proposed"
+    },
+    "proposalId": "proposal_d3ad7227b0334afeac72f98f6c",
+    "rationale": "Demonstrate proposal-before-mutation without assuming a domain.",
+    "schemaVersion": "nodekit.proposal/v1",
+    "status": "accepted"
+  },
+  "receipt": {
+    "approvalBindings": [
+      {
+        "approvalId": "approval_19c109d10727421b820682cfd8",
+        "commentHash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+        "decision": "accepted",
+        "proposalId": "proposal_d3ad7227b0334afeac72f98f6c"
+      },
+      {
+        "approvalId": "approval_94243193f63e41d7a59e4a87b6",
+        "commentHash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+        "decision": "rejected",
+        "proposalId": "proposal_7f8457224aaf4492ab0114fecd"
+      }
+    ],
+    "artifactBindings": [
+      {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "canonicalVersion": 2,
+        "contentHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537"
+      }
+    ],
+    "artifactIds": [
+      "artifact_286084cd7207499e81dda8b1f7"
+    ],
+    "caseHash": "38d14ef7dcbfe121ba657bb42e789d9149171f3b1087960738525e5339a6985a",
+    "caseId": "case_5e833f20ba8c4a48b99a7cc32e",
+    "eventBindings": [
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "artifact_286084cd7207499e81dda8b1f7",
+        "aggregateType": "artifact",
+        "eventId": "event_d6acdbe3be214ce59c2fa66ccb",
+        "eventType": "artifact.created",
+        "payloadHash": "72deed92ee5a28d0bb3014563e30cdaf52c04be9ebaf0000c95b958c116cc613",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "artifact_286084cd7207499e81dda8b1f7",
+        "aggregateType": "artifact",
+        "eventId": "event_6e82043a87094fad95f129c606",
+        "eventType": "artifact.version_created",
+        "payloadHash": "38629ddd8c2f3bf3201576b27fd1141fdac3b60fce54c048be9304e7c3115cfb",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_7f8457224aaf4492ab0114fecd",
+        "aggregateType": "proposal",
+        "eventId": "event_67ce2862efaa4f208aedf5f040",
+        "eventType": "proposal.created",
+        "payloadHash": "9c61181b0acdc1d77e444c4807852ee6657d26e04eda95d4c99aeaf593be5a6b",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_7f8457224aaf4492ab0114fecd",
+        "aggregateType": "proposal",
+        "eventId": "event_4cccdfc668584b9db434acbd9a",
+        "eventType": "proposal.rejected",
+        "payloadHash": "7d520a5fc82c3ac99fc2c9e840793f6c81737a0f451ec04c2c28e972ef6c940c",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_d3ad7227b0334afeac72f98f6c",
+        "aggregateType": "proposal",
+        "eventId": "event_0f2b845099c54435ac708a63c1",
+        "eventType": "proposal.created",
+        "payloadHash": "cc04596398c23687f68c6029e0705d2eaf28f86e91aef1092ffa2a8c138a2003",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_d3ad7227b0334afeac72f98f6c",
+        "aggregateType": "proposal",
+        "eventId": "event_d6d031224ca24aa59e34deee0a",
+        "eventType": "proposal.accepted",
+        "payloadHash": "1d2c354bbcb96bd44f7666f2b74b6b3d3eabc4bc79df1ea612879d0cbfb27a9e",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_c1bf33cbd60949bdbb4335656b",
+        "eventType": "run.started",
+        "payloadHash": "dbbbf62e0f3c28a3218dd932fe610813ebc8446cf433e71ecf27a00afdb44350",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_4dc5b12228cf48858c02b7bd6a",
+        "eventType": "stage.entered",
+        "payloadHash": "054ab9efc9e6af11985b041b70762b5109be97b629c903b84487e8bd1cd54dca",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_6be0e43c4d7d45fea9f830cadf",
+        "eventType": "stage.entered",
+        "payloadHash": "bf448bc810d3035ffc0e248412ded32200b0a4307cb4431dc12c5df5261f1eb1",
+        "sequence": 3
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_a98ade773fb5424ca19c487070",
+        "eventType": "stage.entered",
+        "payloadHash": "9dae3bf9ae8a69a2556a0b8f92b8b6baf6c09fa44f2372719f8e3704c40c7fbd",
+        "sequence": 4
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_94ce11c2f2a449f8bf59bd6e21",
+        "eventType": "stage.entered",
+        "payloadHash": "be0cae85457ed787db684d5327249976584f68fbb9e7ad1782c2620ce85211e2",
+        "sequence": 5
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_95323568bd074317a8b36149df",
+        "eventType": "stage.entered",
+        "payloadHash": "9a63c0b753a3de5118b8c108083f9cc25ca3b51f73139e2ef83bd89498f7f02e",
+        "sequence": 6
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_3ae114af95dc4f6b8bd10e2383",
+        "eventType": "stage.entered",
+        "payloadHash": "9dae3bf9ae8a69a2556a0b8f92b8b6baf6c09fa44f2372719f8e3704c40c7fbd",
+        "sequence": 7
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_1a0e1efcfded4e64906851ac66",
+        "eventType": "stage.entered",
+        "payloadHash": "be0cae85457ed787db684d5327249976584f68fbb9e7ad1782c2620ce85211e2",
+        "sequence": 8
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_eb975b6f384b4ff4b80490a451",
+        "eventType": "stage.entered",
+        "payloadHash": "85aa663576051eb0e18426b611ddde70f5f330ad78b1a7037a9de7954466eb54",
+        "sequence": 9
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_ac20951c080346b7a7b04bbf91",
+        "aggregateType": "run",
+        "eventId": "event_cde32d19fb6c4643bd18fba9f4",
+        "eventType": "run.completed",
+        "payloadHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "sequence": 10
+      }
+    ],
+    "eventIds": [
+      "event_d6acdbe3be214ce59c2fa66ccb",
+      "event_6e82043a87094fad95f129c606",
+      "event_67ce2862efaa4f208aedf5f040",
+      "event_4cccdfc668584b9db434acbd9a",
+      "event_0f2b845099c54435ac708a63c1",
+      "event_d6d031224ca24aa59e34deee0a",
+      "event_c1bf33cbd60949bdbb4335656b",
+      "event_4dc5b12228cf48858c02b7bd6a",
+      "event_6be0e43c4d7d45fea9f830cadf",
+      "event_a98ade773fb5424ca19c487070",
+      "event_94ce11c2f2a449f8bf59bd6e21",
+      "event_95323568bd074317a8b36149df",
+      "event_3ae114af95dc4f6b8bd10e2383",
+      "event_1a0e1efcfded4e64906851ac66",
+      "event_eb975b6f384b4ff4b80490a451",
+      "event_cde32d19fb6c4643bd18fba9f4"
+    ],
+    "generatedAt": "2026-09-05T03:56:06.595Z",
+    "proposalBindings": [
+      {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "baseVersion": 1,
+        "patchHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "proposalId": "proposal_7f8457224aaf4492ab0114fecd",
+        "status": "rejected"
+      },
+      {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "baseVersion": 1,
+        "patchHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "proposalId": "proposal_d3ad7227b0334afeac72f98f6c",
+        "status": "accepted"
+      }
+    ],
+    "proposalIds": [
+      "proposal_7f8457224aaf4492ab0114fecd",
+      "proposal_d3ad7227b0334afeac72f98f6c"
+    ],
+    "runHash": "452a6c25a899ffbdd11fd8405b67ab2a8428c600ebfa40db9e950fd33864b1d4",
+    "runId": "run_ac20951c080346b7a7b04bbf91",
+    "schemaVersion": "nodekit.receipt/v2",
+    "status": "completed",
+    "receiptId": "receipt_6264675e87e543ca95b1d7b42a",
+    "receiptHash": "fba0cd1c4afc52443388149c59e0a6db29ee9ed95885a302fa1b47e710b3ce8c"
+  },
+  "run": {
+    "caseId": "case_5e833f20ba8c4a48b99a7cc32e",
+    "createdAt": "2026-09-05T03:56:04.968Z",
+    "currentStageId": "complete",
+    "nextAction": "Review receipt",
+    "nextActionOwner": "user",
+    "runId": "run_ac20951c080346b7a7b04bbf91",
+    "schemaVersion": "nodekit.run/v1",
+    "stages": [
+      {
+        "id": "intake",
+        "label": "Confirm the intended outcome",
+        "owner": "user",
+        "status": "completed"
+      },
+      {
+        "id": "working",
+        "label": "Prepare a proposal",
+        "owner": "agent",
+        "status": "completed"
+      },
+      {
+        "id": "review",
+        "label": "Review the proposed change",
+        "owner": "user",
+        "status": "completed"
+      },
+      {
+        "id": "complete",
+        "label": "Verify and export",
+        "owner": "system",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-09-05T03:56:06.595Z"
+  }
+}

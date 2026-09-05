@@ -606,7 +606,7 @@
           {
             "file": "templates/base/scripts/browser-certify.mjs",
             "symbol": "verifyExportedProof",
-            "line": 92
+            "line": 109
           }
         ],
         "namedSourceFiles": [
@@ -838,7 +838,7 @@
           {
             "file": "templates/base/scripts/browser-certify.mjs",
             "symbol": "verifyExportedProof",
-            "line": 91
+            "line": 108
           }
         ],
         "namedSourceFiles": [

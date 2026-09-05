@@ -85,7 +85,7 @@ body[data-busy] .state-banner{position:relative;overflow:hidden}
 body[data-busy] .state-banner::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:3px;background:var(--violet);transform-origin:left;animation:nk-busy 900ms var(--motion-ease-standard) infinite}
 @keyframes nk-busy{0%{transform:scaleX(0)}50%{transform:scaleX(1)}100%{transform:scaleX(0);transform-origin:right}}
 /* WIG Content 'No dead ends': the error region carries its own way out. */
-.error{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.error:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .error .button{flex:none;border-color:currentColor;color:inherit;background:transparent}
 /* WIG Interactions 'Prevent double-tap zoom on controls' + 'Tap highlight follows design'. */
 button,a,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:rgba(102,86,232,.18)}

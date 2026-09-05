@@ -57,6 +57,11 @@ const evidenceArtifacts = [];
 const journeyAssertions = {
   activityModeOperable: false,
   approvalApplied: false,
+  canonicalInterchangeVerified: false,
+  contractKnockoutsRejected: false,
+  freshContextPreserved: false,
+  rejectedProposalPreserved: false,
+  staleProposalPreserved: false,
   conflictRecovered: false,
   exceptionRecovered: false,
   exportBlockedBeforeCompletion: false,
@@ -88,9 +93,21 @@ async function recordArtifact(id, absolutePath) {
   evidenceArtifacts.push({ byteSize: (await stat(absolutePath)).size, id, path: path.relative(evidenceRoot, absolutePath).replaceAll("\\", "/"), sha256: sha256(bytes) });
 }
 
+// JSON already crossed the portable export boundary. Hash it independently of the producer.
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  return JSON.stringify(value);
+}
+
+const artifactAttributes = ["type", "id", "version", "content-sha256"].map((name) => `data-nodekit-artifact-${name}`);
+async function readArtifactIdentity(page) {
+  return page.locator("#artifact").evaluate((element, names) => names.map((name) => element.getAttribute(name)), artifactAttributes);
+}
+
 // @nodekit-behavior inv:rendered-browser-evidence owner
 // @nodekit-behavior inv:guided-intake-mobile-decisions owner
-async function verifyExportedProof(absolutePath) {
+async function verifyExportedProof(absolutePath, page, expectedOutcome) {
   const bundle = JSON.parse(await readFile(absolutePath, "utf8"));
   if (bundle.schemaVersion !== "nodekit.portable-proof-bundle/v1") throw new Error("exported proof bundle schema is invalid");
   if (bundle.receipt?.schemaVersion !== "nodekit.receipt/v2") throw new Error("exported receipt schema is invalid");
@@ -102,12 +119,20 @@ async function verifyExportedProof(absolutePath) {
   if (!canonicalVersion || canonicalVersion.contentHash !== contentHash(canonicalVersion.content)) {
     throw new Error("exported canonical artifact content hash is invalid");
   }
+  if (canonicalVersion.contentHash !== sha256(canonicalJson(canonicalVersion.content))) throw new Error("independent artifact hash is invalid");
+  if (canonicalVersion.content.outcome !== (expectedOutcome ?? bundle.case.primaryJob)) throw new Error("exported artifact lost the exact confirmed outcome");
+  const expectedIdentity = [artifact.kind, artifact.artifactId, String(artifact.canonicalVersion), canonicalVersion.contentHash];
+  if (JSON.stringify(await readArtifactIdentity(page)) !== JSON.stringify(expectedIdentity)) throw new Error("rendered artifact identity does not match the exported canonical artifact");
+  if (await page.locator("[data-nodekit-confirmed-outcome]").textContent() !== canonicalVersion.content.outcome) throw new Error("rendered outcome does not match the exported canonical content");
   const binding = bundle.receipt.artifactBindings?.find((entry) => entry.artifactId === artifact.artifactId);
   if (!binding || binding.canonicalVersion !== artifact.canonicalVersion || binding.contentHash !== canonicalVersion.contentHash) {
     throw new Error("exported receipt is not bound to the canonical artifact version");
   }
   const { receiptHash, receiptId, ...receiptBody } = bundle.receipt;
   if (!receiptId || receiptHash !== contentHash(receiptBody)) throw new Error("exported receipt hash is invalid");
+  if (receiptHash !== sha256(canonicalJson(receiptBody))
+    || bundle.receipt.caseHash !== sha256(canonicalJson(bundle.case))
+    || bundle.receipt.runHash !== sha256(canonicalJson(bundle.run))) throw new Error("independent receipt or case/run binding hash is invalid");
   return bundle;
 }
 
@@ -277,11 +302,23 @@ try {
         const prematureProposal = await page.request.post(`${baseUrl}/api/propose`, { data: {} });
         journeyAssertions.proposalBlockedBeforeConfirmation = !prematureProposal.ok();
         if (prematureProposal.ok()) throw new Error("server accepted a proposal before the outcome was confirmed");
-        await page.locator("#outcome").fill("Produce one bounded, reviewable, and verifiable result.");
+        const submittedOutcome = '  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ';
+        await page.locator("#outcome").fill(submittedOutcome);
         await page.locator("#primary-input button").click();
         await page.locator('body[data-scenario="running"]').waitFor();
         journeyAssertions.outcomeConfirmed = (await page.locator("#current-action").innerText()).includes("Prepare the bounded proposal");
         milestone("outcome_confirmed");
+        const baselineArtifact = (await (await page.request.get(`${baseUrl}/api/state`)).json()).artifact;
+        const baselineIdentity = await readArtifactIdentity(page);
+        await page.locator("#propose").click();
+        await page.locator('body[data-scenario="proposal_pending"]').waitFor();
+        await page.locator("#reject").click();
+        await page.locator('body[data-scenario="proposal_rejected"]').waitFor();
+        const rejectedState = await (await page.request.get(`${baseUrl}/api/state`)).json();
+        if (JSON.stringify(rejectedState.artifact) !== JSON.stringify(baselineArtifact)
+          || JSON.stringify(await readArtifactIdentity(page)) !== JSON.stringify(baselineIdentity)
+          || rejectedState.receipt !== null) throw new Error("rejection changed the canonical artifact or created a receipt");
+        journeyAssertions.rejectedProposalPreserved = true;
         await page.locator("#propose").click();
         await page.locator("#proposal strong").waitFor();
         journeyAssertions.proposalVisible = true;
@@ -292,8 +329,51 @@ try {
         journeyAssertions.receiptVisible = (await page.locator("#receipt-id").innerText()).startsWith("Receipt ");
         milestone("approval_applied");
         milestone("receipt_visible");
+        const acceptedExportPath = path.join(browserRoot, "nodekit-accepted-proof.json");
+        const acceptedDownloadPromise = page.waitForEvent("download");
+        await page.locator("#download-proof").click();
+        await (await acceptedDownloadPromise).saveAs(acceptedExportPath);
+        const acceptedBundle = await verifyExportedProof(acceptedExportPath, page, submittedOutcome);
+        await recordArtifact("accepted-portable-proof-bundle", acceptedExportPath);
+        journeyAssertions.canonicalInterchangeVerified = true;
+        // Knock out the actual rendered contract, not a parallel validator fixture.
+        for (const attribute of artifactAttributes) {
+          const saved = await page.locator("#artifact").getAttribute(attribute);
+          await page.locator("#artifact").evaluate((element, name) => element.removeAttribute(name), attribute);
+          let rejected = false;
+          try { await verifyExportedProof(acceptedExportPath, page, submittedOutcome); }
+          catch (failure) { if (!failure.message.includes("rendered artifact identity")) throw failure; rejected = true; }
+          finally { await page.locator("#artifact").evaluate((element, [name, value]) => element.setAttribute(name, value), [attribute, saved]); }
+          if (!rejected) throw new Error(`missing ${attribute} passed the interchange guard`);
+        }
+        const changedExportPath = path.join(browserRoot, "nodekit-altered-proof.json");
+        const altered = structuredClone(acceptedBundle);
+        altered.artifact.versions.find((entry) => entry.version === altered.artifact.canonicalVersion).content.outcome = "Substituted outcome";
+        await writeFile(changedExportPath, `${JSON.stringify(altered, null, 2)}\n`);
+        let alteredRejected = false;
+        try { await verifyExportedProof(changedExportPath, page, submittedOutcome); }
+        catch (failure) { if (!failure.message.includes("content hash is invalid")) throw failure; alteredRejected = true; }
+        if (!alteredRejected) throw new Error("altered exported content passed the interchange guard");
+        const alteredBinding = structuredClone(acceptedBundle);
+        alteredBinding.receipt.artifactBindings[0].canonicalVersion += 1;
+        const alteredBindingPath = path.join(browserRoot, "nodekit-altered-binding.json");
+        await writeFile(alteredBindingPath, `${JSON.stringify(alteredBinding, null, 2)}\n`);
+        let bindingRejected = false;
+        try { await verifyExportedProof(alteredBindingPath, page, submittedOutcome); }
+        catch (failure) { if (!failure.message.includes("not bound to the canonical artifact")) throw failure; bindingRejected = true; }
+        if (!bindingRejected) throw new Error("altered receipt binding passed the interchange guard");
+        await verifyExportedProof(acceptedExportPath, page, submittedOutcome);
+        journeyAssertions.contractKnockoutsRejected = true;
         const receiptBeforeReload = await page.locator("#receipt-id").innerText();
         await page.reload({ waitUntil: "networkidle" });
+        await verifyExportedProof(acceptedExportPath, page, submittedOutcome);
+        const reopenedContext = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
+        try {
+          const reopened = await reopenedContext.newPage();
+          await reopened.goto(baseUrl, { waitUntil: "networkidle" });
+          await verifyExportedProof(acceptedExportPath, reopened, submittedOutcome);
+          journeyAssertions.freshContextPreserved = (await reopened.locator("#receipt-id").innerText()) === receiptBeforeReload;
+        } finally { await reopenedContext.close(); }
         journeyAssertions.receiptSurvivedReload = (await page.locator("#receipt-id").innerText()) === receiptBeforeReload;
         milestone("receipt_reload_confirmed");
       }
@@ -320,6 +400,7 @@ try {
           await page.locator("#primary-input button").click();
           await page.locator("#error").waitFor({ state: "visible" });
         }
+        if (state !== "validation_error" && !(await page.locator("#error").isHidden())) throw new Error(`empty error region is visible for ${state}/${viewport.id}/${theme}`);
         if (state === "approval") await page.locator("#approve").focus();
         if (state === "receipt_inspection" || state === "export_share") {
           await page.locator("#receipt-detail").waitFor({ state: "visible" });
@@ -337,7 +418,7 @@ try {
             await page.locator("#download-proof").click();
             const download = await downloadPromise;
             await download.saveAs(exportPath);
-            await verifyExportedProof(exportPath);
+            await verifyExportedProof(exportPath, page);
             await recordArtifact("portable-proof-bundle", exportPath);
             journeyAssertions.exportDownloadedAndVerified = true;
             milestone("export_downloaded_and_reopened");
@@ -345,6 +426,8 @@ try {
             await page.waitForFunction(() => document.querySelector("#copy-status")?.textContent?.trim().length > 0);
             journeyAssertions.shareSummaryProduced = (await page.locator("#copy-status").innerText()).trim().length > 0;
           }
+        } else if (completedReviewStates.has(state)) {
+          if (!(await page.locator("#download-proof").isVisible())) throw new Error(`completed case has no download action for ${state}/${viewport.id}/${theme}`);
         } else if (!(await page.locator("#receipt-actions").isHidden())) {
           throw new Error(`export actions leaked into ${state}/${viewport.id}/${theme}`);
         }
@@ -367,10 +450,18 @@ try {
         }
         await capture(page, state, viewport, theme, observations);
         if (canonicalJourney && state === "conflict") {
+          const conflictedState = await (await page.request.get(`${baseUrl}/api/state`)).json();
+          const canonicalBeforeRecovery = await readArtifactIdentity(page);
+          const winner = conflictedState.artifact.versions.find((entry) => entry.version === conflictedState.artifact.canonicalVersion);
+          if (conflictedState.proposal.status !== "conflicted" || conflictedState.receipt !== null
+            || winner.contentHash === contentHash(conflictedState.proposal.patch)) throw new Error("stale proposal replaced canonical content or falsely completed the run");
           await page.locator("#resolve-conflict").click();
           await page.locator('body[data-scenario="completed_receipt"]').waitFor();
           await page.locator("#completion").waitFor({ state: "visible" });
           journeyAssertions.conflictRecovered = (await page.locator("#receipt-id").innerText()).startsWith("Receipt ");
+          const recoveredState = await (await page.request.get(`${baseUrl}/api/state`)).json();
+          journeyAssertions.staleProposalPreserved = JSON.stringify(recoveredState.artifact) === JSON.stringify(conflictedState.artifact)
+            && JSON.stringify(await readArtifactIdentity(page)) === JSON.stringify(canonicalBeforeRecovery);
         }
         if (canonicalJourney && state === "recoverable_failure") {
           await page.locator("#resume").click();
@@ -417,7 +508,7 @@ try {
   journeyAssertions.stateActionsCoherent = true;
   passed = screenshots.length === viewports.length * 2 * requiredStates.length
     && accessibilityViolations.length === 0
-    && evidenceArtifacts.length === 5
+    && evidenceArtifacts.length === 6
     && Object.values(journeyAssertions).every(Boolean)
     && screenshots.every((entry) => entry.consoleErrors === 0 && entry.failedRequests === 0 && entry.horizontalOverflowPx === 0 && entry.mojibakeDetected === false);
 } catch (caught) {

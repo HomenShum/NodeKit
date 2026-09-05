@@ -1,0 +1,51 @@
+- link "Skip to primary artifact":
+  - /url: "#artifact"
+- banner:
+  - link "N/ Nodekit Contract Consumer":
+    - /url: /
+  - text: completed
+- main:
+  - region "One clear job. Carried all the way through.":
+    - paragraph: GUIDED CASE
+    - heading "One clear job. Carried all the way through." [level=1]:
+      - text: One clear job.
+      - emphasis: Carried all the way through.
+    - paragraph: Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.
+    - button "Reset demonstration"
+  - text: Confirm the intended outcome Prepare a proposal Review the proposed change Verify and export complete
+  - strong: Completion verified
+  - paragraph: The canonical artifact and content-addressed receipt are ready.
+  - navigation "Case navigation":
+    - paragraph: CASE
+    - strong: Nodekit Contract Consumer case
+    - link "Primary artifact":
+      - /url: "#artifact"
+    - link "Review":
+      - /url: "#review"
+    - link "Activity":
+      - /url: "#activity"
+    - text: Next owner
+    - strong: user
+  - article:
+    - paragraph: PRIMARY ARTIFACT
+    - heading "Primary artifact" [level=2]
+    - text: v2 Current action
+    - strong: Review receipt
+    - paragraph: A bounded, reviewable result is ready. Replace this with the researched domain artifact.
+    - paragraph: "Confirmed outcome: Verify supplier “茶” <receipt> & preserve €42.50 exactly."
+    - text: Canonical hash a8a8f825c362acf8
+    - strong: Completion verified
+    - paragraph: The canonical artifact and content-addressed receipt are ready.
+  - complementary:
+    - button "Review" [pressed]
+    - button "Agent activity"
+    - paragraph: VERIFIED RESULT
+    - heading "Completion evidence" [level=2]
+    - paragraph: The accepted artifact and its content-addressed receipt are canonical and ready to inspect.
+    - text: Proposal accepted.
+    - link "Download proof":
+      - /url: /api/export
+    - button "Copy share summary"
+    - status
+    - group: Advanced trace
+- contentinfo: Blank in domain. Figured out in behavior. Receipt fba0cd1c4afc5244

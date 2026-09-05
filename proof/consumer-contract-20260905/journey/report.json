@@ -1,0 +1,77 @@
+{
+  "at": "2026-09-05T03:55:29.530Z",
+  "fixture": "  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ",
+  "sourceBefore": {
+    "apps/web/public/index.html": "9c8c901e03c5b9dfd0d905537e5d29348b3b674916c3d5f162d165460fe4f5cd",
+    "apps/web/public/app.js": "572cca9f9cb2fb172ca7306eb099bbb66be800fa619c96cc8dae21e3f4db247b",
+    "apps/web/public/styles.css": "63dcf76ecbb231daa4a668036713167271e669356eb68fee047938febfc4b88e",
+    "apps/web/server.mjs": "dca8683a455ecf0091b9ac7c849e250b5e92b9e89c8c4d2bea81d02051fcc6dc",
+    "agent/workflow.mjs": "57119b664a07e0419d4de327815c97c2f188d6bdb475df21e309d7acf659b1bb",
+    "scripts/browser-certify.mjs": "a094c4886491528ad37059b413306ab1e47d9f4a7f8297301d11cfd3ec5bc393"
+  },
+  "cases": [
+    {
+      "width": 390,
+      "height": 960,
+      "identity": {
+        "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "version": 2,
+        "contentHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "receiptId": "receipt_30338db19f834bc08c1098a9ff",
+        "receiptHash": "5b80d1d30f39d6ab2e9e0c53101a9ccdf1809a37783b9a591a578838bc2a68e4"
+      },
+      "downloadSha256": "b1de2fb015ea4753d8211061d25680d36cd3117b8de7fbfd4716eab2e16decd8",
+      "approveRequests": 1,
+      "sustained": {
+        "seconds": 31.006645799999998,
+        "reads": 20,
+        "eventCount": 19,
+        "unchanged": true
+      },
+      "passed": true
+    },
+    {
+      "width": 1440,
+      "height": 960,
+      "identity": {
+        "artifactId": "artifact_286084cd7207499e81dda8b1f7",
+        "version": 2,
+        "contentHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "receiptId": "receipt_6264675e87e543ca95b1d7b42a",
+        "receiptHash": "fba0cd1c4afc52443388149c59e0a6db29ee9ed95885a302fa1b47e710b3ce8c"
+      },
+      "downloadSha256": "2ecb972bc54e27cf1ce6eda42087c1949c090edcd30a695dc3dea96e4f7f8abc",
+      "approveRequests": 1,
+      "sustained": null,
+      "passed": true
+    }
+  ],
+  "console": [
+    {
+      "width": 390,
+      "expectedTransportDegradation": true,
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "width": 1440,
+      "expectedTransportDegradation": true,
+      "text": "Failed to load resource: net::ERR_FAILED"
+    }
+  ],
+  "limits": [
+    "Controlled transport abort is a deliberate degradation, not a provider outage.",
+    "Fresh context and reload use the same retained server process; no server-restart persistence.",
+    "Conflict route uses the existing deterministic competing-proposal fixture.",
+    "No overall UI grade or production/host/authority certification."
+  ],
+  "browser": "149.0.7827.55",
+  "sourceAfter": {
+    "apps/web/public/index.html": "9c8c901e03c5b9dfd0d905537e5d29348b3b674916c3d5f162d165460fe4f5cd",
+    "apps/web/public/app.js": "572cca9f9cb2fb172ca7306eb099bbb66be800fa619c96cc8dae21e3f4db247b",
+    "apps/web/public/styles.css": "63dcf76ecbb231daa4a668036713167271e669356eb68fee047938febfc4b88e",
+    "apps/web/server.mjs": "dca8683a455ecf0091b9ac7c849e250b5e92b9e89c8c4d2bea81d02051fcc6dc",
+    "agent/workflow.mjs": "57119b664a07e0419d4de327815c97c2f188d6bdb475df21e309d7acf659b1bb",
+    "scripts/browser-certify.mjs": "a094c4886491528ad37059b413306ab1e47d9f4a7f8297301d11cfd3ec5bc393"
+  },
+  "passed": true
+}

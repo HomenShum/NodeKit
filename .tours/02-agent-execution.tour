@@ -13,7 +13,7 @@
     {
       "file": "templates/base/agent/workflow.mjs",
       "line": 29,
-      "pattern": "^  function propose\\(\\{ artifactId, runId \\}\\)",
+      "pattern": "^  function propose\\(\\{ artifactId, runId, outcome \\}\\)",
       "title": "The agent proposes against a specific version",
       "description": "`baseVersion` is read from the artifact at the moment the proposal is made. That single number is what makes a stale proposal detectable minutes later — without it, a slow agent silently overwrites newer work."
     },

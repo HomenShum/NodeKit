@@ -184,7 +184,7 @@ application; the recovery is to delete the directory and re-run.
 
 **File:** `templates/base/agent/workflow.mjs` (becomes `agent/workflow.mjs` in the
 generated application)
-**Symbol:** `createGuidedDemo` (line 10), `propose` (line 29), `decide` (line 44)
+**Symbol:** `createGuidedDemo` (line 10), `propose` (line 29), `decide` (line 47)
 **Called by:** the generated `scripts/demo.mjs` and `apps/web/server.mjs`
 **Calls next:** `createMemoryCaseflow` in `src/lib/caseflow.mjs`
 

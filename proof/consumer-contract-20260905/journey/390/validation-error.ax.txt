@@ -1,0 +1,48 @@
+- link "Skip to primary artifact":
+  - /url: "#artifact"
+- banner:
+  - link "N/ Nodekit Contract Consumer":
+    - /url: /
+  - text: active
+- main:
+  - region "One clear job. Carried all the way through.":
+    - paragraph: GUIDED CASE
+    - heading "One clear job. Carried all the way through." [level=1]:
+      - text: One clear job.
+      - emphasis: Carried all the way through.
+    - paragraph: Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.
+  - text: Confirm the intended outcome Prepare a proposal Review the proposed change Verify and export
+  - alert: Add a concrete outcome before continuing.
+  - text: orientation
+  - strong: Ready for your direction
+  - paragraph: Confirm the outcome before the run begins.
+  - navigation "Case navigation":
+    - paragraph: CASE
+    - strong: Nodekit Contract Consumer case
+    - link "Primary artifact":
+      - /url: "#artifact"
+    - link "Review":
+      - /url: "#review"
+    - link "Activity":
+      - /url: "#activity"
+    - text: Next owner
+    - strong: user
+  - article:
+    - text: Outcome for this case
+    - textbox "Outcome for this case" [invalid]
+    - button "Confirm outcome"
+    - text: Saved locally in this deterministic demonstration.
+    - paragraph: PRIMARY ARTIFACT
+    - heading "Primary artifact" [level=2]
+    - text: v1 Current action
+    - strong: Confirm the intended outcome
+    - paragraph: The last approved result remains here.
+    - text: Canonical hash 1077e34cc8ffae57
+  - complementary:
+    - button "Review" [pressed]
+    - button "Agent activity"
+    - paragraph: NEXT STEP
+    - heading "Confirm the intended outcome" [level=2]
+    - paragraph: Use the primary input to confirm the job before any agent work begins.
+    - group: Advanced trace
+- contentinfo: Blank in domain. Figured out in behavior. No receipt yet

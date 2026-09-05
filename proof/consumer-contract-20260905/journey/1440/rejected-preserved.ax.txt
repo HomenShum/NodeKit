@@ -1,0 +1,45 @@
+- link "Skip to primary artifact":
+  - /url: "#artifact"
+- banner:
+  - link "N/ Nodekit Contract Consumer":
+    - /url: /
+  - text: active
+- main:
+  - region "One clear job. Carried all the way through.":
+    - paragraph: GUIDED CASE
+    - heading "One clear job. Carried all the way through." [level=1]:
+      - text: One clear job.
+      - emphasis: Carried all the way through.
+    - paragraph: Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.
+    - button "Reset demonstration"
+  - text: Confirm the intended outcome Prepare a proposal Review the proposed change Verify and export decision
+  - strong: Proposal rejected
+  - paragraph: The rejected change was not applied and the canonical artifact is unchanged. Prepare a revised proposal when you are ready.
+  - navigation "Case navigation":
+    - paragraph: CASE
+    - strong: Nodekit Contract Consumer case
+    - link "Primary artifact":
+      - /url: "#artifact"
+    - link "Review":
+      - /url: "#review"
+    - link "Activity":
+      - /url: "#activity"
+    - text: Next owner
+    - strong: agent
+  - article:
+    - paragraph: PRIMARY ARTIFACT
+    - heading "Primary artifact" [level=2]
+    - text: v1 Current action
+    - strong: Prepare a revised proposal
+    - paragraph: The last approved result remains here.
+    - text: Canonical hash 1077e34cc8ffae57
+  - complementary:
+    - button "Review" [pressed]
+    - button "Agent activity"
+    - paragraph: DECISION RECORDED
+    - heading "Prepare a revised proposal" [level=2]
+    - paragraph: The rejected change was not applied. The canonical artifact remains intact.
+    - text: Proposal rejected.
+    - button "Prepare proposal"
+    - group: Advanced trace
+- contentinfo: Blank in domain. Figured out in behavior. No receipt yet

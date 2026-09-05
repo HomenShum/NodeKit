@@ -25,7 +25,7 @@ function render() {
   const rejected = state.proposal?.status === "rejected";
   const completed = state.run.status === "completed";
   const openException = state.exceptions?.find((entry) => entry.status === "open");
-  const latest = state.artifact.versions.at(-1);
+  const latest = state.artifact.versions.find((entry) => entry.version === state.artifact.canonicalVersion);
   const scenario = state.presentation?.id ?? "first_arrival";
   const intake = ["first_arrival", "orientation", "input", "validation_error"].includes(scenario);
   document.body.dataset.scenario = scenario;
@@ -41,8 +41,12 @@ function render() {
   elements["status-label"].textContent = state.run.status.replaceAll("_", " ");
   elements["next-owner"].textContent = state.run.nextActionOwner;
   elements["current-action"].textContent = state.run.nextAction;
+  elements.artifact.dataset.nodekitArtifactType = state.artifact.kind;
+  elements.artifact.dataset.nodekitArtifactId = state.artifact.artifactId;
+  elements.artifact.dataset.nodekitArtifactVersion = String(state.artifact.canonicalVersion);
+  elements.artifact.dataset.nodekitArtifactContentSha256 = latest.contentHash;
   elements["artifact-version"].textContent = `v${state.artifact.canonicalVersion}`;
-  elements["artifact-body"].innerHTML = `<p>${escapeText(latest.content.summary ?? JSON.stringify(latest.content))}</p><small>Canonical hash ${latest.contentHash.slice(0, 16)}</small>`;
+  elements["artifact-body"].innerHTML = `<p>${escapeText(latest.content.summary ?? JSON.stringify(latest.content))}</p>${latest.content.outcome === undefined ? "" : `<p>Confirmed outcome: <span data-nodekit-confirmed-outcome>${escapeText(latest.content.outcome)}</span></p>`}<small>Canonical hash ${latest.contentHash.slice(0, 16)}</small>`;
   elements.progress.innerHTML = state.run.stages.map((stage) => `<div class="step ${stage.status}"><i></i><span>${escapeText(stage.label)}</span></div>`).join("");
   elements.proposal.innerHTML = pending
     ? `<strong>Proposed change</strong><p>${escapeText(state.proposal.patch.summary)}</p><small>Based on artifact v${state.proposal.baseVersion} · ${escapeText(state.proposal.rationale)}</small>`
@@ -53,7 +57,7 @@ function render() {
   const inspectingReceipt = ["receipt_inspection", "export_share"].includes(scenario) && state.receipt;
   elements["receipt-detail"].hidden = !inspectingReceipt;
   elements["receipt-detail"].innerHTML = inspectingReceipt ? `<strong>${scenario === "export_share" ? "Portable proof bundle" : "Receipt contents"}</strong><dl><dt>Receipt</dt><dd>${escapeText(state.receipt.receiptHash)}</dd><dt>Artifacts</dt><dd>${state.receipt.artifactIds.length}</dd><dt>Proposals</dt><dd>${state.receipt.proposalIds.length}</dd><dt>Events</dt><dd>${state.receipt.eventIds.length}</dd></dl>` : "";
-  elements["receipt-actions"].hidden = scenario !== "export_share" || !state.receipt;
+  elements["receipt-actions"].hidden = !completed || !state.receipt;
   elements["primary-input"].hidden = !intake;
   elements.reset.hidden = intake;
   elements.outcome.setAttribute("aria-invalid", scenario === "validation_error" ? "true" : "false");
@@ -166,7 +170,7 @@ elements["copy-share"].addEventListener("click", async () => {
     elements["copy-status"].textContent = summary;
   }
 });
-elements["primary-input"].addEventListener("submit", (event) => { event.preventDefault(); const outcome = elements.outcome.value.trim(); if (!outcome) { showError("Add a concrete outcome before continuing."); elements.outcome.setAttribute("aria-invalid", "true"); } else { elements.outcome.setAttribute("aria-invalid", "false"); act("/api/confirm", { outcome }); } });
+elements["primary-input"].addEventListener("submit", (event) => { event.preventDefault(); const outcome = elements.outcome.value; if (!outcome.trim()) { showError("Add a concrete outcome before continuing."); elements.outcome.setAttribute("aria-invalid", "true"); } else { elements.outcome.setAttribute("aria-invalid", "false"); act("/api/confirm", { outcome }); } });
 const requestedScenario = new URL(window.location.href).searchParams.get("scenario");
 const existingState = await api("/api/state");
 state = requestedScenario && existingState.presentation?.id !== requestedScenario
