@@ -1,0 +1,64 @@
+{
+  "$schema": "nodekit.story-pack/notion-cases@0",
+  "wave": "0A",
+  "plan": "docs/MEW_MIGRATION_E2E_PLAN.md",
+  "outcome": "NOT_RUN",
+  "outcomeReason": "No test-case notebook for the mew/Ideaflow migration was found in the owner's Notion workspace after 10 distinct searches. Per the plan's fail-closed doctrine, no cases are invented and no adjacent prose is paraphrased into testability. Owner input #3 of the plan anticipated this: the owner supplies the notebook's name/link when agent search cannot locate it.",
+  "extractedAt": "2026-07-29T09:30:00Z",
+  "extractedBy": "wave-0A recon agent (Notion MCP workspace search)",
+  "searchReceipt": {
+    "tool": "Notion MCP notion-search (workspace_search backend)",
+    "workspaceUser": "hshum2018@gmail.com",
+    "queries": [
+      { "query": "mew notebook test cases", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "ideaflow migration test cases", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "mew migration acceptance criteria", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "mew notebook migration convex", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "test case notebook given when then", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "mew test cases", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "notebook evaluation questions agent answers notes", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "ideaflow notebook export notes tags links", "resultCount": 10, "testCaseNotebookFound": false },
+      { "query": "test cases (filter: created >= 2026-01-01)", "resultCount": 15, "testCaseNotebookFound": false },
+      { "query": "mew notebook migration test case checklist what should the migrated notebook answer", "resultCount": 10, "testCaseNotebookFound": false }
+    ],
+    "pagesFetchedAndRuledOut": [
+      {
+        "sourcePageId": "2709539b-8f9a-80cd-bc99-cb301d0beddc",
+        "title": "@September 16, 2025 12:00 PM (PDT)",
+        "why": "Meeting note (job interview). Mentions the phrase 'test cases' in transcript summary; contains no migration test cases."
+      },
+      {
+        "sourcePageId": "25d9539b-8f9a-8055-9ab0-e3a4445242e3",
+        "title": "Mew AI Chat Interface",
+        "why": "Design-feedback notes on the Mew chat UI (Sept 2025). Prose requirements, no falsifiable migration cases; predates and does not reference the Ideaflow-to-Convex migration."
+      },
+      {
+        "sourcePageId": "21b9539b-8f9a-8026-a57b-d8f4042c7c78",
+        "title": "Notepad CRUD Agent Key Takes",
+        "why": "June 2025 PR/design doc for the old MewAgent codebase. Contains '/mewagent' commands with expected output trees, but these are acceptance examples for a different system, not the owner's test cases for the notebook migration. Extracting them would be case invention."
+      },
+      {
+        "sourcePageId": "3a39539b-8f9a-81cb-b04e-eb339f0da923",
+        "title": "Tests Assured network — Agent evaluation / workflow contract",
+        "why": "Career Pipeline database row; page body is blank."
+      }
+    ],
+    "unobserved": [
+      "Pages not shared with the Notion integration are invisible to workspace search; the notebook may exist in a private or unshared section.",
+      "Connected sources (Slack, Drive, GitHub) beyond Notion pages were not exhaustively enumerated; workspace_search backend was used (no AI-search synthesis).",
+      "Content inside images/screenshots on candidate pages was not OCR'd."
+    ]
+  },
+  "killCondition": {
+    "rule": ">20% of cases unresolved fires the plan's kill condition",
+    "fired": false,
+    "note": "Not applicable: zero cases were found, so the unresolved ratio is undefined. The governing outcome is NOT_RUN, which the plan treats as a fail-closed success (report, do not invent)."
+  },
+  "counts": {
+    "cases": 0,
+    "falsifiable": 0,
+    "unresolved": 0
+  },
+  "cases": [],
+  "nextAction": "Owner supplies the Notion notebook name/link (plan: Owner inputs, item 3). Re-run Wave 0A extraction against that page id."
+}
