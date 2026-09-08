@@ -132,3 +132,47 @@ test("a contract describing no sessions is refused rather than passing vacuously
     (error) => /constrains nothing/.test(error.message),
   );
 });
+
+// --- what the adversarial review reproduced ------------------------------------------------------
+
+test("a one-level glob does not claim a nested manifest", async () => {
+  // `app/*` was treated as a recursive prefix, so a session owning a directory's files silently
+  // acquired every manifest beneath it and the gate passed. Codex reproduced it through the CLI.
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["app/*"] }] },
+    ["app/cli.py", "app/nested/package.json"],
+  );
+
+  assert.equal(verdict.passed, false);
+  assert.deepEqual(verdict.unclassified, ["app/nested/package.json"]);
+});
+
+test("a recursive glob still claims what is beneath it", async () => {
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["app/**"] }] },
+    ["app/cli.py", "app/nested/package.json"],
+  );
+
+  assert.equal(verdict.passed, true);
+});
+
+test("a Windows-shaped path cannot slip past a POSIX-shaped rule", async () => {
+  const verdict = evaluateSessionContract(
+    { ...REAL_PLAN(), sessions: [{ id: "A", owns: ["app/**"] }] },
+    // String.raw so the backslashes are unambiguously backslashes; a plain literal here silently
+    // becomes a newline and an escaped p, and the test then measures nothing it claims to.
+    [String.raw`app\nested\package.json`],
+  );
+
+  // Discovered as a manifest, and covered by the rule — neither step may depend on the separator.
+  assert.equal(verdict.contendedManifestsPresent, 1);
+  assert.equal(verdict.passed, true);
+});
+
+test("an empty file list is insufficient, not a pass — the coverage check did not run", async () => {
+  const verdict = evaluateSessionContract(REAL_PLAN(), []);
+
+  assert.equal(verdict.passed, false);
+  assert.equal(verdict.insufficient, true);
+  assert.match(formatSessionContract(verdict), /an unrun check is not a passed one/);
+});

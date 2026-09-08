@@ -166,3 +166,61 @@ test("killed outranks decorative — a failed threshold is not first a staffing 
 
   assert.equal(verdict.verdict, "killed");
 });
+
+// --- what the adversarial review reproduced ------------------------------------------------------
+
+test("a timezone offset cannot smuggle a measurement in before the contract", async () => {
+  // The bypass Codex found, and it defeated the whole mechanism. Comparing ISO strings
+  // lexicographically, "2026-08-03T11:00:00+02:00" sorts AFTER "2026-08-03T10:00:00.000Z" while
+  // being an hour earlier as an instant — so a contract authored after its own evidence settled
+  // clean. The one comparison the design turns on, beaten by a suffix.
+  assert.throws(
+    () => evaluateCapability(
+      { ...GRAPH(), declaredAt: "2026-08-03T10:00:00.000Z" },
+      { observedAt: "2026-08-03T11:00:00+02:00", metrics: { "entities-surfaced-delta": 9, "latency-cost-percent": 2 } },
+    ),
+    (error) => error instanceof CapabilityContractRefusal && /could have failed/.test(error.message),
+  );
+});
+
+test("an offset measurement that is genuinely later still settles", () => {
+  // The fix must not reject all offsets — only ones that are earlier as instants.
+  const verdict = evaluateCapability(
+    { ...GRAPH(), declaredAt: "2026-08-03T10:00:00.000Z" },
+    { observedAt: "2026-08-03T14:00:00+02:00", metrics: { "entities-surfaced-delta": 9, "latency-cost-percent": 2 } },
+  );
+
+  assert.equal(verdict.verdict, "load-bearing");
+});
+
+test("an unparseable observedAt is refused rather than compared", () => {
+  assert.throws(
+    () => evaluateCapability(GRAPH(), { observedAt: "last Tuesday", metrics: { "entities-surfaced-delta": 9 } }),
+    (error) => /not a parseable timestamp/.test(error.message),
+  );
+});
+
+test("a declared consumer measured unreachable does not make a capability load-bearing", () => {
+  // Reachability was computed and then ignored: consumersReachable: [] returned load-bearing with
+  // reachable 0, over a reason string asserting a consumer "can reach it". A consumer that cannot
+  // be reached is a plan, not a caller.
+  const verdict = evaluateCapability(GRAPH(), {
+    observedAt: LATER,
+    metrics: { "entities-surfaced-delta": 9, "latency-cost-percent": 2 },
+    consumersReachable: [],
+  });
+
+  assert.equal(verdict.verdict, "decorative");
+  assert.match(verdict.reason, /a plan, not a caller/);
+});
+
+test("a consumer measured reachable does settle load-bearing", () => {
+  const verdict = evaluateCapability(GRAPH(), {
+    observedAt: LATER,
+    metrics: { "entities-surfaced-delta": 9, "latency-cost-percent": 2 },
+    consumersReachable: ["peer_sponsors"],
+  });
+
+  assert.equal(verdict.verdict, "load-bearing");
+  assert.equal(verdict.consumers.reachableUserFacing, 1);
+});

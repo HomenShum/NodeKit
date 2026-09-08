@@ -108,10 +108,36 @@ test("an unreadable installed version does not fabricate a skew verdict", async 
   const root = await project({ record: await recordFor(source) });
   const verdict = await evaluateSkillFreshness(root, null);
 
-  // Not knowing the installed version means the skew question was not answered, and it must not be
-  // answered "no" by default.
+  // Not knowing the installed version means the skew question was not answered. This used to assert
+  // "current", which answers it "no" — the comment claimed one thing and the assertion pinned the
+  // opposite, so the test was weakening the check it was meant to protect. Codex caught it.
   assert.equal(verdict.versionSkew, null);
-  assert.equal(verdict.status, "current");
+  assert.equal(verdict.status, "unknown-version");
+  assert.match(formatSkillFreshness(verdict), /unknown rather than answered no/);
+});
+
+test("a recorded skill that has been deleted is caught, not skipped for being absent", async () => {
+  // Iterating only the present directories meant a deleted skill was invisible and the pack read
+  // current. An agent cannot load an instruction file that is not there.
+  const source = await project();
+  const record = await recordFor(source);
+  const root = await project({ skills: { "nodekit-qa": "# other\n" }, record });
+  const verdict = await evaluateSkillFreshness(root, "0.2.1");
+
+  assert.equal(verdict.status, "missing");
+  assert.deepEqual(verdict.missing, ["nodekit-launch"]);
+});
+
+test("a skill directory with no readable SKILL.md is missing, not current", async () => {
+  const source = await project();
+  const record = await recordFor(source);
+  const root = await mkdtemp(path.join(tmpdir(), "skillfresh-empty-dir-"));
+  await mkdir(path.join(root, ".claude", "skills", "nodekit-launch"), { recursive: true });
+  await writeFile(path.join(root, ".claude", "skills", SKILL_PROVENANCE_FILE), JSON.stringify(record), "utf8");
+  const verdict = await evaluateSkillFreshness(root, "0.2.1");
+
+  assert.equal(verdict.status, "missing");
+  assert.match(formatSkillFreshness(verdict), /cannot load an instruction file that is not there/);
 });
 
 // The remedy needs its own check, because the first remedy shipped here was wrong: the message said
