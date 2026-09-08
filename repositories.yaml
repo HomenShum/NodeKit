@@ -71,6 +71,13 @@ repositories:
     role: qa-protocol
     commandProfile: protocol
 
+  - name: BetterPRHandoff
+    github: HomenShum/BetterPRHandoff
+    lifecycle: production
+    support: active
+    role: handoff-protocol
+    commandProfile: protocol
+
   - name: NodeAgentSpec
     github: HomenShum/NodeAgentSpec
     lifecycle: reference

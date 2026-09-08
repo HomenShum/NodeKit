@@ -7,8 +7,10 @@ commandProfile: platform
 
 canonicalFor:
   - nodeplatform.repo-contract
+  - nodeplatform.change-story
 
-consumes: []
+consumes:
+  - betterprhandoff.handoff
 
 commands:
   doctor:

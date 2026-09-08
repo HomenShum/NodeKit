@@ -17,6 +17,25 @@ concepts:
       - NodeMem
       - NodeProof
       - agentic-ui-qa
+      - BetterPRHandoff
+
+  nodeplatform.change-story:
+    owner: node-platform
+    package: "@homenshum/nodekit"
+    targetPackage: "@homenshum/nodekit"
+    status: canonical
+    contractVersion: nodekit.change-story/v1
+    consumers:
+      - BetterPRHandoff
+
+  betterprhandoff.handoff:
+    owner: BetterPRHandoff
+    package: "@homenshum/easier-to-read-submissions"
+    targetPackage: "@homenshum/easier-to-read-submissions"
+    status: canonical
+    contractVersion: betterprhandoff.handoff/v1
+    consumers:
+      - node-platform
 
   nodeplatform.environment:
     owner: node-platform
