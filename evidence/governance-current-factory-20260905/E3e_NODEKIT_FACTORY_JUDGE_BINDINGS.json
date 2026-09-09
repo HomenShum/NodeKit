@@ -1,0 +1,2243 @@
+{
+  "status": "PASS",
+  "at": "2026-09-05T07:20:41.676424+00:00",
+  "sourceCommit": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "sourceHashClaim": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "checks": [
+    {
+      "name": "source HEAD exact",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "current and durable receipt exact raw bytes",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "1675 durable files exact hash and length",
+      "passed": true,
+      "details": 78042063
+    },
+    {
+      "name": "1675 originals still equal retained snapshot",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "current tarball exact identity and size",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/.dockerignore",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/.gitattributes",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/Dockerfile",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/LICENSE",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/reference-schema-validators.cjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/apps/web/public/responsive-refinements.css",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/apps/web/public/styles.css",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/.env.example",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/apps/web/public/index.html",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/api.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/_generated/api.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/apps/web/public/app.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/caseflow.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/convex-test.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/convex.config.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/hash.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/client/index.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/schema.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/server.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/_generated/server.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/validators.js",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/evals/figured-out-journey.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodeagent.application.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodeagent.event.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodeagent.pack.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.adversarial-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.agent-ease-trial.v2.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.assumption.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.attestation-signing-key-policy.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.audience-research.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.build-evidence-pack.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.builder-case.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.builder-change-set.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.builder-gym-lock.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.builder-gym-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.builder-gym.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.canary-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.capability-contract.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.change-evidence-pack.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.convex-consumers-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.design-decision.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.design-rule.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.developer-timing-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.engineering-check-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.engineering-health-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.engineering-issue-inventory.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.evidence-snapshot.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.evolution-adoption.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.evolution-deferred-review.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.evolution-event.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.evolution-evidence.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.execution-graph.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.execution-nodeproof.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.execution-strategy-experiment.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.execution-trace.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.experience-asset.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.experience-build.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.experience-recipe.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.external-reference-run.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.fresh-agent-verdict.v2.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.fresh-user-study.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.fresh-user-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.frontend-benchmark.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.frontend-direction-set.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.frontend-render-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.frontend-review-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.frontend-route.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.governance-risk-assessment.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.graph-patch.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.harness.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.human-feedback-event.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.human-study-event.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.human-study-session-log.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.human-study-session-meta.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.interaction-flow.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.invariant-claim.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-action-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-comparison-execution.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-context-pack.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-evolution-adoption-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-graph.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-retrieval-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.knowledge-state.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.launch-manifest.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.launch-video.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.managed-evidence-campaign.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.managed-supabase-portability-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.measurement-log.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.model-capability-card.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.model-intelligence-harness-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.model-observation.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.motion-portability-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.native-agent-session.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.native-session-checkpoint.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.native-workspace.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.nodetrace-trajectory.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.observation-pack.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.opportunity-contract.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.package-install-proof.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.postgres-conformance.v2.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.preview-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.product-design-contract.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.production-agent.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.promotion-readiness-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.promotion-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.proofloop-ease-verification.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-agent-evaluation.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-agent-evaluation.v2.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-browser-screenshot-manifest.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-evaluator.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-knowledge-comparison-definition.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-knowledge-comparison-result.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.protected-screenshot-proof.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.publication-approval.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.reference-loop-design-rule.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.reference-loop-observation.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.reference-observation.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.reference-profile-manifest.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.reference-score-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.replay-packet.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.research-collection.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.rollback-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.routing-policy.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.runtime-capabilities.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.score-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-benchmark-input.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-benchmark-verdict.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-candidate.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-comparison.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-evaluator-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-integrity-receipt.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-promotion-approval-consumption.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill-promotion-approval.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.skill.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.story-pack.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.submission-candidate.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.submission-manifest.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.tournament.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.visual-review-inventory.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.workspace-reference-index.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/schemas/nodekit.workspace.v1.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/schemas/outcome-contract.schema.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/package.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/package.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/.claude-plugin/plugin.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/.codex-plugin/plugin.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/production-readiness.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/evals/stale-proposal-conflict.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/api.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/api.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/caseflow.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/caseflow.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/convex-test.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/convex-test.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/convex.config.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/convex.config.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/hash.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/hash.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/client/index.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/client/index.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/portable-value.d.mts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/portable-value.mjs.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/receipt-bindings.d.mts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/receipt-bindings.mjs.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/schema.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/schema.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/server.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/server.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/validators.d.ts.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/validators.js.map",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/AGENTS.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/AUDIENCE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/BRIEF.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-present/references/change-story-contract.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/CLAUDE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/docs/CODING_SEQUENCE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/DESIGN.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/docs/EVOLUTION.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/docs/EXECUTION_GRAPH_OF_LOOPS.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/docs/FIGURED_OUT.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/promotion/GATE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/GLOSSARY.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/docs/GOVERNANCE_GRAPH.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/docs/GOVERNANCE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/promotion/HUMAN_READY.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/docs/IDEA_TO_REALITY_PRINCIPLES.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/agent/instructions.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/docs/KNOWLEDGE_EVOLUTION.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-launch/references/launch-contract.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/promotion/PRODUCT_GOAL.template.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/promotion/PRODUCT_JOURNEYS.template.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/promotion/PROMOTION_LOG.template.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-qa/references/qa-contract.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/adapters/postgres/README.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/adapters/supabase/README.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/README.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/integrations/convex/README.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/proof/README.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/README.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/docs/RESPONSE_DISCIPLINE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/SERVICE_BLUEPRINT.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-launch/SKILL.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-present/SKILL.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-product-evidence/SKILL.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-qa/SKILL.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/promotion/SKILLS.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/docs/START_HERE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/START_HERE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/TASTE.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/USER_JOURNEY.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/docs/WORKSPACE_REFERENCE_INDEX.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/agent-definition.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/agent-ease-campaign.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/agent-ease-report.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/agent-run.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/agent-run.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/atlas-mcp.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/atlas-rank.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/atlas-retrieval.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/atlas.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/audience-contract.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/audit-prod.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/behavior-index.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/browser-certify.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/browser-proof.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/build-evidence-producer.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/builder-gym.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/builder-gym.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/builder-journey.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/capability-contract.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/caseflow-conformance.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/caseflow.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/caseflow.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/check.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/cli-main.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/cli.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/code-graph-freshness.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/consumer-package-preparation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/consumer-package-preparation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/contracts.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/copy-audit.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/copy-claims.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/dashboard.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/deferrals.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/delivery-brief.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/demo.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/developer-timing-aggregation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/distributable-candidate.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/ease-evidence.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/eval.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/evidence-snapshots.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/evidence-snapshots.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/evolution-approval.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/evolution-immutability.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/evolution-ledger.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/evolution-trust.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/execution-graph.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/execution-graph.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/factory-acceptance.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/files.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/frame-evidence.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/friction-loop.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/lib/friction.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/frontend-render-contract.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/frontend-specialist.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/governance.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/governance.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/harness-gym.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/harness-knowledge.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/human-study-capture.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/immutable-package-snapshot.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/index.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/scripts/install-promotion-kit.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/journey-chain-gate.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/journey-contract-verify.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/knockout.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/knowledge-comparison.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/knowledge-context.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/knowledge-evolution.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/knowledge-runtime.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/knowledge-runtime.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/launch-video.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/managed-evidence-capture.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/managed-evidence-capture.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/model-intelligence.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/motion-portability.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/native-agent-identity.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/native-agent-identity.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/native-agent-migration.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/nodekit-surfaces.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/npm-cli-invocation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/npm-package-archive.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/opportunity-compiler.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/outcome.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/test/outcome.test.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/portable-value.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/portable-value.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/adapters/postgres-caseflow.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/adapters/postgres-knowledge-runtime.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/adapters/postgres-knowledge.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/adapters/postgres.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/preflight.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/presentation-pipeline.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/principal-identity.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/production-agent.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/production-gate.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/scripts/proof.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/protected-browser-evidence.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/receipt-bindings.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/receipt-bindings.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/scripts/record-readme-first-win.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/reference-cli.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/reference-loop.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/reference-loop.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/registry.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/regression-proof.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/repair-approval.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/replay-book.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/replay-packet-producer.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/replay-packet.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/repo-check.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/repo-map.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/research-collector.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/research-collector.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/research-verdict-benchmark.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/review-context.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/scripts/run-knowledge-runtime-comparison.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/runtime-capabilities.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/scaffold.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/schema-validation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/apps/web/server.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/session-contract.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/skill-evaluation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/skill-freshness.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/source-hash.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/story-pack-producer.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/studio.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/submission-attestation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/submission-attestation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/submission-evidence-finalizer.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/submission-evidence-finalizer.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/submission-gate.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/submission-preparation.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/ui-lexicon.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/understand-anything.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/agent/workflow.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/test/workflow.test.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/working-state.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/workspace-index.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/workspace-reference-index.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/workspace-reference-index.mjs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/agent-run.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/builder-gym.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/builder-journey.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/caseflow.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/consumer-package-preparation.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/evidence-snapshots.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/execution-graph.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/governance.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/index.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/knowledge-runtime.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/managed-evidence-capture.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/native-agent-identity.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/opportunity-compiler.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/portable-value.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/portable-value.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/adapters/postgres-knowledge.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/adapters/postgres.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/lib/receipt-bindings.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/lib/receipt-bindings.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/reference-loop.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/research-collector.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/skill-evaluation.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/submission-attestation.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/submission-evidence-finalizer.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/workspace-reference-index.d.mts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/adapters/postgres/001_caseflow.sql",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/adapters/supabase/001_profile.sql",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/adapters/postgres/002_knowledge_runtime.sql",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/adapters/supabase/002_workers.sql",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/gitignore.template",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/api.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/_generated/api.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/caseflow.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/caseflow.test.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/caseflow.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/component.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/_generated/component.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/convex-test.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/convex-test.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/convex.config.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/convex.config.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/_generated/dataModel.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/hash.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/hash.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/client/index.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/client/index.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/schema.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/schema.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/_generated/server.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/_generated/server.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/setup.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/dist/component/validators.d.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/src/component/validators.ts",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/fixtures/corpus/validation.txt",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/architecture.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/integrations/convex/capability-plan.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/deferred.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/product/EXPERIENCE.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/hackathon.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/adw/workflows/launch.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/nodeagent.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/nodekit.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-launch/agents/openai.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-present/agents/openai.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/plugins/nodekit/skills/nodekit-qa/agents/openai.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/ownership.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/packs/primary/pack.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/templates/base/render.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "archive member regular owned path package/repositories.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "421 package files match current committed source and both original/durable installations",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "factory receipt canonical insertion-order digest independently recomputed",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "factory raw receipt and copied manifest agree",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "13 base checks, ordinary run limits honest",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "all spawned measured phase exits and packaging pass",
+      "passed": true,
+      "details": 13
+    },
+    {
+      "name": "consumer actual Git commit bound",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "generated candidate archive exact hash and size",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "all 77 generated Git archive files exact to commit; 76 current bytes identical, one expected appended friction receipt",
+      "passed": true,
+      "details": [
+        {
+          "path": "proof/build-friction.json",
+          "archiveSha256": "ed2b857081261e5aef549527b448b89f50587a0e5bc42af0519f5f15eb3c8d55",
+          "workingSha256": "0b25d3f5948ddc346f914c35f6cbf945238e98a6e6c948f02b92f077a227eac1",
+          "archiveBytes": 1014,
+          "workingBytes": 2473
+        }
+      ]
+    },
+    {
+      "name": "consumer tracked delta only known normal generated friction receipt",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "browser certificate raw equals consumer run and primary/durable latest",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "browser manifest digest independently recomputed",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "release proof digest and current identity bound",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "certificate 15 states by six viewports by two themes",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "all 180 PNG/sidecar byte bindings, viewport dimensions and current identity exact",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "six browser artifacts hash and size exact",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "all 372 earlier factory artifacts preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "only expected primary generated factory outputs changed",
+      "passed": true,
+      "details": 195
+    }
+  ],
+  "counts": {
+    "durableFiles": 1675,
+    "bytes": 78042063,
+    "packedFiles": 421,
+    "screenshots": 180,
+    "priorPreserved": 372,
+    "consumerArchiveFiles": 77
+  },
+  "primaryStatusSha256": "9d886232e0ff1b52b1cff1f63c45d7c2157710bf51a496f06040d425b0489db0",
+  "primaryIndexSha256": "dba5385ca439cd14f9c533c50b53b60319d81840a098d502db703490ac8282e9",
+  "consumerStatusSha256": "686bca7480fcf0920d008da4bacff4d141a23040a51e9a6377982e527378a69b",
+  "consumerIndexSha256": "e53bbedb3eca03bcdd468483eea622fb85077359c620c84f6274562cc12465e7"
+}

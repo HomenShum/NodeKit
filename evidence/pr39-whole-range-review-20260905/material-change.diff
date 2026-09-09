@@ -1,0 +1,1680 @@
+diff --git a/.github/workflows/quality.yml b/.github/workflows/quality.yml
+index dc57cd5..08a91e3 100644
+--- a/.github/workflows/quality.yml
++++ b/.github/workflows/quality.yml
+@@ -18,6 +18,8 @@ jobs:
+           node-version: 22
+           cache: npm
+       - run: npm ci
++      - name: Install Chromium for the required browser gate
++        run: npx playwright install --with-deps chromium
+       - run: npm run typecheck:public
+       - run: npm run typecheck:component
+       # test:all, not test. `npm test` is the fast lane a developer runs on every change;
+diff --git a/schemas/nodekit.evolution-evidence.v1.schema.json b/schemas/nodekit.evolution-evidence.v1.schema.json
+index cb51a6b..b10d9e1 100644
+--- a/schemas/nodekit.evolution-evidence.v1.schema.json
++++ b/schemas/nodekit.evolution-evidence.v1.schema.json
+@@ -71,6 +71,69 @@
+         "partial",
+         "informational"
+       ]
++    },
++    "historicalResolution": {
++      "type": "object",
++      "additionalProperties": false,
++      "required": [
++        "kind",
++        "recordId",
++        "recordPath",
++        "introducedCommit",
++        "editedCommit",
++        "originalRecordDigest",
++        "acknowledgedRecordDigest",
++        "changedFields",
++        "authorityDirective"
++      ],
++      "properties": {
++        "kind": {
++          "const": "historical-assumption-dimensions-added"
++        },
++        "recordId": {
++          "const": "asm:strong-model-infers-topology"
++        },
++        "recordPath": {
++          "const": "evolution/assumptions/asm-strong-model-infers-topology.json"
++        },
++        "introducedCommit": {
++          "$ref": "#/$defs/sha"
++        },
++        "editedCommit": {
++          "$ref": "#/$defs/sha"
++        },
++        "originalRecordDigest": {
++          "$ref": "#/$defs/hash"
++        },
++        "acknowledgedRecordDigest": {
++          "$ref": "#/$defs/hash"
++        },
++        "changedFields": {
++          "const": [
++            "dimensionsTested"
++          ]
++        },
++        "authorityDirective": {
++          "type": "object",
++          "additionalProperties": false,
++          "required": [
++            "ref",
++            "sha256",
++            "assurance"
++          ],
++          "properties": {
++            "ref": {
++              "$ref": "#/$defs/text"
++            },
++            "sha256": {
++              "$ref": "#/$defs/hash"
++            },
++            "assurance": {
++              "const": "operator-directed-in-session"
++            }
++          }
++        }
++      }
+     }
+   },
+   "$defs": {
+@@ -102,5 +165,27 @@
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+     }
+   },
+-  "additionalProperties": false
++  "additionalProperties": false,
++  "allOf": [
++    {
++      "if": {
++        "required": [
++          "historicalResolution"
++        ]
++      },
++      "then": {
++        "properties": {
++          "kind": {
++            "const": "artifact"
++          },
++          "result": {
++            "const": "informational"
++          },
++          "verifiesInvariantIds": {
++            "maxItems": 0
++          }
++        }
++      }
++    }
++  ]
+ }
+diff --git a/src/caseflow.d.mts b/src/caseflow.d.mts
+index bcf5bd8..9021808 100644
+--- a/src/caseflow.d.mts
++++ b/src/caseflow.d.mts
+@@ -253,7 +253,14 @@ export function normalizeReceiptBindings<
+   proposalBindings: TProposal[];
+   proposalIds: string[];
+ };
+-export function createMemoryCaseflow(options?: { clock?: () => string; ownerId?: string }): CaseflowRuntime;
++export interface MemoryCaseflowCheckpoint {
++  schemaVersion: "nodekit.memory-checkpoint/v1";
++  ownerId: string;
++  state: NodeKitCaseflowSnapshot;
++  idempotencyJournal: Array<[string, { requestHash: string; result: unknown }]>;
++  checkpointHash: string;
++}
++export function createMemoryCaseflow(options?: { clock?: () => string; ownerId?: string; checkpoint?: MemoryCaseflowCheckpoint }): CaseflowRuntime & { checkpoint(): MemoryCaseflowCheckpoint };
+ export function runCaseflowConformance(
+   createRuntime: () => MaybePromise<CaseflowRuntime>,
+   options?: {
+diff --git a/src/lib/agent-run.mjs b/src/lib/agent-run.mjs
+index 78ab77a..0f2e4c8 100644
+--- a/src/lib/agent-run.mjs
++++ b/src/lib/agent-run.mjs
+@@ -427,33 +427,45 @@ async function execute(program, args, repoRoot, timeoutMs, events) {
+   });
+ 
+   const controller = new AbortController();
+-  const child = spawn(program, args, {
+-    cwd: repoRoot,
+-    shell: false,
+-    signal: controller.signal,
+-    stdio: ["ignore", "pipe", "pipe"],
+-    windowsHide: true,
+-  });
+-  child.stdout.on("data", (chunk) => stdout.append(chunk));
+-  child.stderr.on("data", (chunk) => stderr.append(chunk));
+-  child.on("error", (error) => {
++  let child;
++  let code = null;
++  let signal = null;
++  try {
++    child = spawn(program, args, {
++      cwd: repoRoot,
++      shell: false,
++      signal: controller.signal,
++      stdio: ["ignore", "pipe", "pipe"],
++      windowsHide: true,
++    });
++  } catch (error) {
++    // Some OS launch errors throw before there is a child to emit "error".
++    // They still need the same bounded, durable failed receipt below.
+     spawnError = error;
+-  });
++  }
+ 
+-  let forceTimer;
+-  const timeoutTimer = setTimeout(() => {
+-    timedOut = true;
+-    controller.abort();
+-    forceTimer = setTimeout(() => child.kill("SIGKILL"), 1_000);
+-    forceTimer.unref();
+-  }, timeoutMs);
+-  timeoutTimer.unref();
++  if (child) {
++    child.stdout.on("data", (chunk) => stdout.append(chunk));
++    child.stderr.on("data", (chunk) => stderr.append(chunk));
++    child.on("error", (error) => {
++      spawnError = error;
++    });
+ 
+-  const { code, signal } = await new Promise((resolve) => {
+-    child.once("close", (exitCode, exitSignal) => resolve({ code: exitCode, signal: exitSignal }));
+-  });
+-  clearTimeout(timeoutTimer);
+-  clearTimeout(forceTimer);
++    let forceTimer;
++    const timeoutTimer = setTimeout(() => {
++      timedOut = true;
++      controller.abort();
++      forceTimer = setTimeout(() => child.kill("SIGKILL"), 1_000);
++      forceTimer.unref();
++    }, timeoutMs);
++    timeoutTimer.unref();
++
++    ({ code, signal } = await new Promise((resolve) => {
++      child.once("close", (exitCode, exitSignal) => resolve({ code: exitCode, signal: exitSignal }));
++    }));
++    clearTimeout(timeoutTimer);
++    clearTimeout(forceTimer);
++  }
+   const endedAtMs = Date.now();
+   const status = timedOut ? "timeout" : !spawnError && code === 0 ? "completed" : "failed";
+   addEvent(events, {
+diff --git a/src/lib/caseflow.mjs b/src/lib/caseflow.mjs
+index 441cfc9..1d92d53 100644
+--- a/src/lib/caseflow.mjs
++++ b/src/lib/caseflow.mjs
+@@ -69,7 +69,119 @@ function optionalFields(required, optional) {
+   ]);
+ }
+ 
+-export function createMemoryCaseflow({ clock = () => new Date().toISOString(), ownerId = "local:memory" } = {}) {
++// Checkpoint hashes detect changed bytes; they do not establish authority or
++// guarantee that a producer saved usable lifecycle records. Validate that shape
++// once, before exposing a resumed runtime. No filesystem or schema engine needed.
++function validateCheckpointState(state) {
++  const check = (valid, label) => { if (!valid) throw new Error(`invalid checkpoint ${label}`); };
++  const present = (value, keys, label) => check(value && !Array.isArray(value) && keys.every((key) => Object.hasOwn(value, key)), `${label} fields`);
++  const strings = (value, keys, label) => keys.forEach((key) => requireTrimmedText(value[key], `checkpoint ${label}.${key}`));
++  const positive = (value) => Number.isSafeInteger(value) && value > 0;
++  const ref = (collection, id, label) => {
++    check(typeof id === "string" && collection.has(id), `${label} reference`);
++    return collection.get(id);
++  };
++  const definitions = {
++    cases: ["case", ["caseId", "createdAt", "primaryJob", "title", "updatedAt"], ["ready", "in_progress", "completed"]],
++    runs: ["run", ["runId", "caseId", "createdAt", "updatedAt", "currentStageId", "nextAction", "nextActionOwner"], ["active", "blocked", ...TERMINAL_RUN_STATUSES]],
++    artifacts: ["artifact", ["artifactId", "caseId", "runId", "createdAt", "updatedAt", "kind", "title"]],
++    proposals: ["proposal", ["proposalId", "artifactId", "createdAt"], ["pending", "accepted", "rejected", "conflicted"]],
++    approvals: ["approval", ["approvalId", "proposalId", "decidedAt"]],
++    exceptions: ["exception", ["exceptionId", "runId", "code", "message", "raisedAt"], ["open", "resolved"]],
++    receipts: ["receipt", ["receiptId", "runId", "caseId", "generatedAt", "receiptHash", "caseHash", "runHash"], TERMINAL_RUN_STATUSES],
++  };
++  for (const [name, [kind, fields, statuses]] of Object.entries(definitions)) {
++    for (const record of state[name].values()) {
++      present(record, fields, kind);
++      check(record.schemaVersion === CASEFLOW_SCHEMA_VERSIONS[kind], `${kind} schema`);
++      strings(record, fields, kind);
++      if (statuses) check(statuses.includes(record.status), `${kind} status`);
++    }
++  }
++  for (const work of state.cases.values()) {
++    check(work.currentRunId === null || typeof work.currentRunId === "string", "case current run");
++    if (work.currentRunId !== null) check(ref(state.runs, work.currentRunId, "case current run").caseId === work.caseId, "case/run ownership");
++  }
++  for (const run of state.runs.values()) {
++    ref(state.cases, run.caseId, "run case");
++    normalizeStageDefinitions(run.stages);
++    check(run.stages.every((stage) => ["active", "completed", "pending"].includes(stage.status)) && run.stages.some((stage) => stage.id === run.currentStageId), "run stages");
++  }
++  for (const artifact of state.artifacts.values()) {
++    check(ref(state.runs, artifact.runId, "artifact run").caseId === artifact.caseId, "artifact/run ownership");
++    check(Array.isArray(artifact.versions) && artifact.versions.length > 0 && artifact.versions.length <= 4096 && artifact.canonicalVersion === artifact.versions.length, "artifact versions");
++    for (const [index, version] of artifact.versions.entries()) {
++      present(version, ["content", "contentHash", "createdAt", "version"], "artifact version");
++      strings(version, ["createdAt"], "artifact version");
++      check(version.version === index + 1 && version.contentHash === contentHash(version.content), "artifact version hash or sequence");
++      if (index > 0) {
++        const proposal = ref(state.proposals, version.proposalId, "artifact version proposal");
++        check(proposal.artifactId === artifact.artifactId && proposal.status === "accepted" && proposal.baseVersion === index && contentHash(proposal.patch) === version.contentHash, "artifact/proposal binding");
++      }
++    }
++  }
++  const approvalsByProposal = new Map();
++  for (const approval of state.approvals.values()) {
++    const proposal = ref(state.proposals, approval.proposalId, "approval proposal");
++    check(typeof approval.comment === "string" && ["accepted", "rejected"].includes(approval.decision), "approval decision");
++    check(!approvalsByProposal.has(approval.proposalId) && (proposal.status === approval.decision || (proposal.status === "conflicted" && approval.decision === "accepted")), "approval/proposal decision");
++    approvalsByProposal.set(approval.proposalId, approval);
++  }
++  for (const proposal of state.proposals.values()) {
++    const artifact = ref(state.artifacts, proposal.artifactId, "proposal artifact");
++    check(positive(proposal.baseVersion) && proposal.baseVersion <= artifact.canonicalVersion && typeof proposal.rationale === "string" && Object.hasOwn(proposal, "patch"), "proposal fields");
++    check(proposal.status === "pending" ? !approvalsByProposal.has(proposal.proposalId) : approvalsByProposal.has(proposal.proposalId), "proposal decision reference");
++    if (proposal.status === "accepted") check(artifact.versions.some((version) => version.proposalId === proposal.proposalId), "accepted proposal version");
++  }
++  for (const exception of state.exceptions.values()) {
++    ref(state.runs, exception.runId, "exception run");
++    present(exception, ["preservedState", "resolution"], "exception");
++    check(exception.status === "open" ? exception.resolution === null : typeof exception.resolution === "string" && exception.resolution.trim() && typeof exception.resolvedAt === "string", "exception resolution");
++  }
++  const eventIndex = new Map(), sequences = new Map();
++  for (const event of state.events) {
++    present(event, ["actor", "aggregateId", "aggregateType", "eventId", "eventType", "occurredAt", "payload", "sequence"], "event");
++    strings(event, ["eventId", "eventType", "occurredAt"], "event");
++    check(event.schemaVersion === CASEFLOW_SCHEMA_VERSIONS.event, "event schema");
++    actorValue(event.actor);
++    const collection = { case: state.cases, run: state.runs, artifact: state.artifacts, proposal: state.proposals }[event.aggregateType];
++    check(collection instanceof Map, "event aggregate type");
++    ref(collection, event.aggregateId, "event aggregate");
++    const sequence = (sequences.get(event.aggregateId) ?? 0) + 1;
++    check(event.sequence === sequence, "event sequence");
++    sequences.set(event.aggregateId, sequence); eventIndex.set(event.eventId, event);
++  }
++  const receiptsByRun = new Set();
++  for (const receipt of state.receipts.values()) {
++    const run = ref(state.runs, receipt.runId, "receipt run");
++    check(receipt.caseId === run.caseId && receipt.status === run.status && !receiptsByRun.has(run.runId), "receipt/run binding");
++    receiptsByRun.add(run.runId);
++    const { receiptHash, receiptId, ...body } = receipt;
++    check(receiptHash === contentHash(body) && receipt.runHash === contentHash(run), "receipt hash");
++    for (const key of ["artifactBindings", "proposalBindings", "approvalBindings", "eventBindings", "artifactIds", "proposalIds", "eventIds"]) check(Array.isArray(receipt[key]) && receipt[key].length <= 4096, `receipt ${key}`);
++    const normalized = normalizeReceiptBindings(receipt);
++    for (const [key, value] of Object.entries(normalized)) check(contentHash(value) === contentHash(receipt[key]), `receipt ${key} order or identities`);
++    for (const binding of receipt.artifactBindings) {
++      const artifact = ref(state.artifacts, binding.artifactId, "receipt artifact");
++      check(artifact.runId === run.runId && artifact.canonicalVersion === binding.canonicalVersion && artifact.versions.at(-1).contentHash === binding.contentHash, "receipt artifact binding");
++    }
++    for (const binding of receipt.proposalBindings) {
++      const proposal = ref(state.proposals, binding.proposalId, "receipt proposal");
++      check(proposal.artifactId === binding.artifactId && proposal.baseVersion === binding.baseVersion && proposal.status === binding.status && contentHash(proposal.patch) === binding.patchHash, "receipt proposal binding");
++    }
++    for (const binding of receipt.approvalBindings) {
++      const approval = ref(state.approvals, binding.approvalId, "receipt approval");
++      check(approval.proposalId === binding.proposalId && approval.decision === binding.decision && contentHash(approval.comment) === binding.commentHash, "receipt approval binding");
++    }
++    for (const binding of receipt.eventBindings) {
++      const event = ref(eventIndex, binding.eventId, "receipt event");
++      check(["aggregateId", "aggregateType", "eventType", "sequence"].every((key) => event[key] === binding[key]) && contentHash(event.actor) === binding.actorHash && contentHash(event.payload) === binding.payloadHash, "receipt event binding");
++    }
++  }
++  for (const run of state.runs.values()) check(TERMINAL_RUN_STATUSES.includes(run.status) === receiptsByRun.has(run.runId), "terminal run receipt reference");
++}
++
++export function createMemoryCaseflow({ clock = () => new Date().toISOString(), ownerId = "local:memory", checkpoint: savedCheckpoint } = {}) {
+   const owner = requireTrimmedText(ownerId, "memory Caseflow ownerId");
+   const state = {
+     approvals: new Map(),
+@@ -83,6 +195,39 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
+   };
+   const idempotencyJournal = new Map();
+ 
++  // Storage adapters may reopen the same lifecycle; they must never reconstruct
++  // IDs, receipts or retry results from a presentation snapshot. This checkpoint
++  // is local state, not a portable approval or a claim of independent proof.
++  if (savedCheckpoint !== undefined) {
++    const checkpoint = normalizeMemoryCheckpoint(savedCheckpoint);
++    const { checkpointHash, ...body } = checkpoint;
++    if (body.schemaVersion !== "nodekit.memory-checkpoint/v1" || body.ownerId !== owner
++      || checkpointHash !== memoryCheckpointHash(body)) throw new Error("checkpoint identity or hash mismatch");
++    const idFields = { approvals: "approvalId", artifacts: "artifactId", cases: "caseId", exceptions: "exceptionId", proposals: "proposalId", receipts: "receiptId", runs: "runId" };
++    if (!body.state || Object.keys(body.state).sort().join() !== Object.keys(state).sort().join()) throw new Error("invalid checkpoint collections");
++    for (const [name, collection] of Object.entries(state)) {
++      const entries = body.state[name];
++      if (!Array.isArray(entries) || entries.length > 4096) throw new Error("checkpoint collection exceeds limit");
++      const identifiers = new Set();
++      for (const entry of entries) {
++        const id = requireTrimmedText(entry?.[name === "events" ? "eventId" : idFields[name]], "checkpoint record ID");
++        if (identifiers.has(id)) throw new Error("duplicate checkpoint record ID");
++        identifiers.add(id);
++        if (collection instanceof Map) collection.set(id, entry);
++        else collection.push(entry);
++      }
++    }
++    if (!Array.isArray(body.idempotencyJournal) || body.idempotencyJournal.length > 4096) throw new Error("checkpoint retry journal exceeds limit");
++    for (const entry of body.idempotencyJournal) {
++      if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== "string"
++        || !entry[0].trim() || !entry[1] || !/^[a-f0-9]{64}$/.test(entry[1].requestHash)
++        || !Object.hasOwn(entry[1], "result") || !entry[1].result || Array.isArray(entry[1].result)
++        || typeof entry[1].result !== "object" || idempotencyJournal.has(entry[0])) throw new Error("invalid checkpoint retry record");
++      idempotencyJournal.set(entry[0], entry[1]);
++    }
++    validateCheckpointState(state);
++  }
++
+   function idempotent(idempotencyKey, request, operation) {
+     if (idempotencyKey === undefined) return operation();
+     const key = requireTrimmedText(idempotencyKey, "idempotencyKey");
+@@ -527,6 +672,13 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
+     return clone(Object.fromEntries(Object.entries(state).map(([key, value]) => [key, value instanceof Map ? [...value.values()] : value])));
+   }
+ 
++  function exportCheckpoint() {
++    if (Object.values(state).some((collection) => (collection.size ?? collection.length) > 4096)
++      || idempotencyJournal.size > 4096) throw new Error("checkpoint capacity reached; archive this case before continuing");
++    const body = normalizeMemoryCheckpoint({ schemaVersion: "nodekit.memory-checkpoint/v1", ownerId: owner, state: snapshot(), idempotencyJournal: [...idempotencyJournal.entries()] });
++    return checkMemoryCheckpointBytes({ ...body, checkpointHash: memoryCheckpointHash(body) });
++  }
++
+   function getCase(caseId) {
+     return clone(requireRecord(state.cases, caseId, "case"));
+   }
+@@ -576,6 +728,7 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
+     capabilities: runtimeProfiles.memory,
+     ownerId: owner,
+     provider: "memory",
++    checkpoint: exportCheckpoint,
+     cancelRun,
+     completeRun,
+     createArtifact,
+@@ -594,3 +747,46 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
+     updateCaseInput,
+   };
+ }
++
++// A local checkpoint wraps multiple already-portable records. Its bookkeeping
++// must not spend the provider document's nesting budget. Normalize those owned
++// subtrees separately, retaining descriptor/prototype checks on every container.
++function normalizeCheckpointContainer(value, children) {
++  const descriptors = Object.getOwnPropertyDescriptors(value);
++  const deferred = [];
++  for (const [key, normalize] of Object.entries(children)) {
++    const descriptor = descriptors[key];
++    if (descriptor && Object.hasOwn(descriptor, "value")) {
++      deferred.push([key, normalize, descriptor.value]);
++      descriptors[key] = { ...descriptor, value: null };
++    }
++  }
++  const shell = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value));
++  if (Array.isArray(value)) Object.setPrototypeOf(shell, Object.getPrototypeOf(value));
++  Object.defineProperties(shell, descriptors);
++  const normalized = clone(shell);
++  for (const [key, normalize, child] of deferred) normalized[key] = normalize(child);
++  return normalized;
++}
++
++function normalizeMemoryCheckpoint(value) {
++  return checkMemoryCheckpointBytes(normalizeCheckpointContainer(value, {
++    state: clone,
++    idempotencyJournal: (entries) => {
++      if (!Array.isArray(entries) || entries.length > 4096) throw new TypeError("invalid checkpoint retry journal or limit");
++      const children = Object.fromEntries(Object.keys(entries).map((key) => [key, clone]));
++      return normalizeCheckpointContainer(entries, children);
++    },
++  }));
++}
++
++function checkMemoryCheckpointBytes(value) {
++  if (Buffer.byteLength(canonical(value), "utf8") > PORTABLE_VALUE_LIMITS.maxEncodedBytes) {
++    throw new RangeError("checkpoint exceeds portable encoded byte limit");
++  }
++  return value;
++}
++
++function memoryCheckpointHash(normalizedBody) {
++  return createHash("sha256").update(canonical(normalizedBody)).digest("hex");
++}
+diff --git a/src/lib/evolution-immutability.mjs b/src/lib/evolution-immutability.mjs
+index 926065c..1cf35b1 100644
+--- a/src/lib/evolution-immutability.mjs
++++ b/src/lib/evolution-immutability.mjs
+@@ -115,12 +115,19 @@ export async function detectLedgerMutations(repoRoot, loaded) {
+ 
+     checked += 1;
+     const changes = diffPaths(original, current);
++    // A historical acknowledgment already binds its known records and directive.
++    // Rebinding any part later would replace the acknowledgment itself, not fix
++    // a commit pointer that was unknowable when the old evidence was authored.
++    if (original.historicalResolution || current.historicalResolution) {
++      for (const change of changes) change.class = "claim";
++    }
+     if (changes.length === 0) continue;
+ 
+     const entry = {
+       id: current.id ?? file,
+       file,
+       introducedIn: introducedIn.slice(0, 8),
++      introducedCommit: introducedIn,
+       claimChanges: changes.filter((c) => c.class === "claim"),
+       bindingChanges: changes.filter((c) => c.class === "binding"),
+     };
+@@ -132,11 +139,11 @@ export async function detectLedgerMutations(repoRoot, loaded) {
+ }
+ 
+ /** Human-readable issue lines for the verify report. */
+-export function describeMutations(result) {
++export function describeMutations(result, acknowledged = []) {
+   if (!result.gitAvailable) {
+     return { issues: [], warnings: ["ledger immutability was NOT checked: not a git repository, so no record could be compared against the revision that introduced it"] };
+   }
+-  const issues = result.mutations.map((m) => {
++  const issues = result.mutations.filter((m) => !acknowledged.some((a) => a.file === m.file && a.id === m.id)).map((m) => {
+     const detail = m.claimChanges
+       .map((c) => `${c.path}: ${short(c.from)} -> ${short(c.to)}`)
+       .join("; ");
+@@ -144,5 +151,8 @@ export function describeMutations(result) {
+   });
+   const warnings = result.bindingRepairs.map((m) =>
+     `${m.id} had its binding repaired after ${m.introducedIn} (${m.bindingChanges.map((c) => c.path).join(", ")}); allowed, because a record cannot name the commit that will contain it`);
++  warnings.push(...acknowledged.map((entry) =>
++    `${entry.id} historical dimensions metadata mutation is acknowledged by ${entry.evidenceId}; ` +
++    "the raw claim mutation remains recorded, with operator-directed-in-session assurance, not human review or a signature"));
+   return { issues, warnings };
+ }
+diff --git a/src/lib/evolution-ledger.mjs b/src/lib/evolution-ledger.mjs
+index 0c0062b..822edbc 100644
+--- a/src/lib/evolution-ledger.mjs
++++ b/src/lib/evolution-ledger.mjs
+@@ -32,14 +32,16 @@ const DEFERRED_REVIEW_SCHEMA = "nodekit.evolution-deferred-review.v1.schema.json
+ const DEFERRED_REVIEW_ROOT = path.join("evolution", "deferred-reviews");
+ const MAX_DEFERRED_EVIDENCE_BYTES = 2 * 1024 * 1024;
+ const AUTHORITY_PATHS = Object.freeze([
+-  /^src\/lib\/evolution-(?:approval|ledger|trust)\.mjs$/u,
+-  /^schemas\/nodekit\.evolution-(?:approval|deferred-review|trust-policy)\./u,
++  /^src\/lib\/evolution-(?:approval|ledger|trust|immutability)\.mjs$/u,
++  /^schemas\/nodekit\.evolution-(?:approval|deferred-review|trust-policy|evidence)\./u,
+   /^evolution\/trust-policy\.json$/u,
+ ]);
+ const PRE_ACTION_REVIEW_PATHS = Object.freeze([
+   /^\.github\/workflows\//u,
+   /(?:^|\/)(?:credentials?|secrets?|migrations?|billing|payments?|deploy|publishing?)(?:\/|\.|$)/iu,
+ ]);
++const preActionReviewFiles = (files) => files.filter((file) =>
++  PRE_ACTION_REVIEW_PATHS.some((pattern) => pattern.test(file)));
+ 
+ async function evidenceRef(root, ref, kind) {
+   const absolute = resolveInside(root, ref, "deferred-review evidence");
+@@ -126,11 +128,10 @@ export async function createDeferredEvolutionReview(repoRoot, input) {
+     .filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file)))
+     .sort();
+   if (materialFiles.length === 0) throw new Error("deferred review requires at least one material file");
+-  const preActionReviewFiles = changedFiles.filter((file) =>
+-    PRE_ACTION_REVIEW_PATHS.some((pattern) => pattern.test(file)));
+-  if (preActionReviewFiles.length > 0) {
++  const forbiddenFiles = preActionReviewFiles(changedFiles);
++  if (forbiddenFiles.length > 0) {
+     throw new EvolutionAuthorityError(
+-      `deferred review is forbidden for pre-action-review paths: ${preActionReviewFiles.join(", ")}`,
++      `deferred review is forbidden for pre-action-review paths: ${forbiddenFiles.join(", ")}`,
+     );
+   }
+   const authorityChanged = changedFiles.some((file) =>
+@@ -247,9 +248,25 @@ export async function verifyDeferredEvolutionReview(repoRoot, receipt, from, to,
+   if (!isAncestor(root, receipt.range.reviewedTo, to)) findings.push("reviewed candidate is not an ancestor of the tested head");
+   if (!isAncestor(root, from, receipt.range.reviewedTo)) findings.push("reviewed candidate is outside the baseline range");
+   if (receipt.rollback.targetCommit !== from) findings.push("rollback target is not the exact baseline");
+-  if (canonical(receipt.coverage.materialFiles) !== canonical([...materialFiles].sort())) {
++  const testedFiles = git(root, ["diff", "--name-only", `${from}..${to}`]).split(/\r?\n/).filter(Boolean);
++  const testedMaterialFiles = testedFiles.filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file))).sort();
++  if (canonical([...materialFiles].sort()) !== canonical(testedMaterialFiles)) {
++    findings.push("caller material file list does not match the actual Git range");
++  }
++  if (canonical(receipt.coverage.materialFiles) !== canonical(testedMaterialFiles)) {
+     findings.push("material file coverage does not match the tested range");
+   }
++  // Verification is an independent entrypoint: a recomputed receipt digest is
++  // not authority, and unchanged path names do not prove unchanged reviewed bytes.
++  const forbiddenFiles = preActionReviewFiles(testedFiles);
++  if (forbiddenFiles.length > 0) {
++    findings.push(`deferred review is forbidden for pre-action-review paths: ${forbiddenFiles.join(", ")}`);
++  }
++  const unreviewedFiles = git(root, ["diff", "--name-only", `${receipt.range.reviewedTo}..${to}`])
++    .split(/\r?\n/).filter((file) => MATERIAL_PATHS.some((pattern) => pattern.test(file)));
++  if (unreviewedFiles.length > 0) {
++    findings.push(`material bytes changed after review: ${unreviewedFiles.join(", ")}`);
++  }
+   const rangeCommits = commitsInRange(root, from, receipt.range.reviewedTo);
+   for (const eventRef of receipt.events) {
+     const draftPath = resolveInside(root, eventRef.draftRef, "deferred-review draft");
+@@ -275,7 +292,7 @@ export async function verifyDeferredEvolutionReview(repoRoot, receipt, from, to,
+       findings.push(error.message);
+     }
+   }
+-  const authorityChanged = materialFiles.some((file) =>
++  const authorityChanged = testedFiles.some((file) =>
+     AUTHORITY_PATHS.some((pattern) => pattern.test(file)));
+   if (receipt.risk.effects.credentialOrAuthorityChange !== authorityChanged) {
+     findings.push("authority-sensitive file classification does not match the tested range");
+@@ -533,7 +550,8 @@ export async function recordEvolutionRecord(repoRoot, recordFile, approvalFile =
+   }
+ 
+   await mkdir(path.dirname(output), { recursive: true });
+-  await writeFile(output, `${JSON.stringify(record, null, 2)}\n`);
++  await writeFile(output, `${JSON.stringify(record, null, 2)}\n`,
++    record.historicalResolution ? { flag: "wx" } : undefined);
+   return { duplicate: false, output, record, promotion };
+ }
+ 
+@@ -565,6 +583,69 @@ async function evidenceBytes(repoRoot, artifactRef) {
+   return readFile(resolveInside(repoRoot, relative, "evolution evidence"));
+ }
+ 
++
++/** Resolve only a content-bound acknowledgment of the one observed metadata transition. */
++async function acknowledgeHistoricalMutations(root, loaded, mutationResult) {
++  const candidates = loaded.filter(({ record }) => record.historicalResolution);
++  const acknowledged = [];
++  const issues = [];
++  if (candidates.length > 1) {
++    return { acknowledged, issues: ["conflicting historical acknowledgments; only one exact resolution is permitted"] };
++  }
++  for (const candidate of candidates) {
++    const evidence = candidate.record;
++    const resolution = evidence.historicalResolution;
++    try {
++      const mutation = mutationResult.mutations.find((entry) => entry.file === resolution.recordPath && entry.id === resolution.recordId);
++      if (!mutation || mutation.introducedCommit !== resolution.introducedCommit) {
++        throw new Error("historical acknowledgment does not match the actual introducing commit and current mutation");
++      }
++      if (mutationResult.mutations.some((entry) => entry.file === candidate.file)) {
++        throw new Error("the historical acknowledgment itself was later changed");
++      }
++      if (!isAncestor(root, resolution.introducedCommit, resolution.editedCommit)
++          || !isAncestor(root, resolution.editedCommit, "HEAD")) {
++        throw new Error("historical acknowledgment commits are outside the current history");
++      }
++      const at = (commit) => JSON.parse(git(root, ["show", `${commit}:${resolution.recordPath}`]));
++      const original = at(resolution.introducedCommit);
++      const edited = at(resolution.editedCommit);
++      const preceding = at(`${resolution.editedCommit}^`);
++      const current = loaded.find(({ file }) => file === resolution.recordPath)?.record;
++      const { dimensionsTested, ...unchanged } = edited;
++      if (original.schemaVersion !== "nodekit.assumption/v1" || original.id !== resolution.recordId
++          || Object.hasOwn(original, "dimensionsTested") || !Array.isArray(dimensionsTested) || !dimensionsTested.length
++          || canonical(unchanged) !== canonical(original) || canonical(preceding) !== canonical(original)
++          || canonical(current) !== canonical(edited)) {
++        throw new Error("historical acknowledgment requires only the actual dimensionsTested addition and unchanged current claim");
++      }
++      if (digest(canonical(original)) !== resolution.originalRecordDigest
++          || digest(canonical(current)) !== resolution.acknowledgedRecordDigest) {
++        throw new Error("historical original or acknowledged record digest mismatch");
++      }
++      const artifactBytes = await evidenceBytes(root, evidence.artifactRef);
++      if (artifactBytes.byteLength > MAX_DEFERRED_EVIDENCE_BYTES || digest(artifactBytes) !== evidence.sha256) {
++        throw new Error("historical artifact size or digest mismatch");
++      }
++      const artifact = JSON.parse(artifactBytes.toString("utf8"));
++      if (canonical(artifact.historicalResolution) !== canonical(resolution)
++          || canonical(artifact.originalRecord) !== canonical(original)
++          || canonical(artifact.acknowledgedRecord) !== canonical(current)
++          || !String(artifact.explanation ?? "").trim()) {
++        throw new Error("historical artifact does not preserve the exact original/current records and acknowledgment");
++      }
++      const directive = await evidenceRef(root, resolution.authorityDirective.ref, "operator-directive");
++      if (directive.sha256 !== resolution.authorityDirective.sha256) {
++        throw new Error("historical operator directive digest mismatch");
++      }
++      acknowledged.push({ id: mutation.id, file: mutation.file, evidenceId: evidence.id });
++    } catch (error) {
++      issues.push(`${evidence.id} historical acknowledgment is invalid: ${error.message}`);
++    }
++  }
++  return { acknowledged, issues };
++}
++
+ export async function verifyEvolutionLedger(repoRoot) {
+   const root = path.resolve(repoRoot);
+   const ledger = await readLedger(root);
+@@ -680,8 +761,13 @@ export async function verifyEvolutionLedger(repoRoot) {
+   }
+ 
+   const mutationResult = await detectLedgerMutations(root, loadedRecords);
+-  const mutationReport = describeMutations(mutationResult);
+-  issues.push(...mutationReport.issues);
++  // Normal schema, reference and artifact validation must succeed before this
++  // narrow acknowledgment can affect admission. Raw mutation detection stays intact.
++  const historical = issues.length === 0
++    ? await acknowledgeHistoricalMutations(root, loadedRecords, mutationResult)
++    : { acknowledged: [], issues: [] };
++  const mutationReport = describeMutations(mutationResult, historical.acknowledged);
++  issues.push(...historical.issues, ...mutationReport.issues);
+   warnings.push(...mutationReport.warnings);
+ 
+   return {
+@@ -691,6 +777,8 @@ export async function verifyEvolutionLedger(repoRoot) {
+       checked: mutationResult.checked,
+       gitAvailable: mutationResult.gitAvailable,
+       claimMutations: mutationResult.mutations.length,
++      acknowledged: historical.acknowledged.length,
++      unresolved: mutationResult.mutations.length - historical.acknowledged.length,
+       bindingRepairs: mutationResult.bindingRepairs.length,
+     },
+     authority: {
+diff --git a/templates/base/.gitattributes b/templates/base/.gitattributes
+index 6313b56..8e3b539 100644
+--- a/templates/base/.gitattributes
++++ b/templates/base/.gitattributes
+@@ -1 +1,4 @@
+ * text=auto eol=lf
++# Evidence hashes bind exact bytes across platforms and fresh clones.
++/evidence/** -text
++/proof/outcome/** -text
+diff --git a/templates/base/AGENTS.md b/templates/base/AGENTS.md
+index 1672cab..4ca961a 100644
+--- a/templates/base/AGENTS.md
++++ b/templates/base/AGENTS.md
+@@ -11,6 +11,9 @@ Read these files in order before changing the product:
+ 7. `product/SERVICE_BLUEPRINT.md`
+ 8. `product/EXPERIENCE.yaml`
+ 9. `nodeagent.yaml`
++10. `docs/CODING_SEQUENCE.md`
++
++For a substantive coding task, freeze its outcome contract, exact candidate and required cases using `docs/CODING_SEQUENCE.md`. Record attempts with `npm run outcome`; its local evidence gate does not grant approval or release authority.
+ 
+ Keep the application blank in domain until the real user workflow is researched. Preserve the universal `Case -> Run -> Stage -> Artifact -> Proposal -> Approval -> Receipt` behavior and the in-memory deterministic demonstration.
+ 
+diff --git a/templates/base/README.md b/templates/base/README.md
+index 46a0d97..e92e217 100644
+--- a/templates/base/README.md
++++ b/templates/base/README.md
+@@ -24,6 +24,17 @@ Open `http://127.0.0.1:4173`. The deterministic demonstration requires no accoun
+ 
+ ## Specialize the application
+ 
++Use [the coding sequence](docs/CODING_SEQUENCE.md) to pin the task's target, baseline, candidate, required cases and evidence. `npm run outcome -- init outcome.json`, `append case.json` and `report` maintain one append-only record with matching HTML and ASCII reports. Missing or failed required cases prevent local completion; review and deployment remain separate.
++
+ Start with `docs/FIGURED_OUT.md` and the files in `product/`. Replace the neutral copy, artifact renderer, guided stages, domain tools, validators, and fixtures only after researching the real user journey. Do not replace the proposal, approval, version-conflict, safe-failure, or receipt semantics.
+ 
+ Convex is the preferred first managed backend. The browser consumes NodeKit view models, not Convex documents, so another conforming backend can implement the same observable lifecycle later.
++
++
++## Review and hand off an actual result
++
++Read `AGENTS.md` first for the canonical artifact contract. Confirm your exact outcome, prepare a proposal, and approve or reject it in the review panel. Rejection preserves the previous canonical artifact. Acceptance records the original submitted text in `content.outcome` and enables **Download proof** for that completed case. The four `data-nodekit-artifact-*` fields on `#artifact` identify the same canonical version and content hash carried by the downloaded `nodekit.portable-proof-bundle/v1` and its `nodekit.receipt/v2` binding.
++
++`npm run compile`, `npm run check`, `npm run demo`, `npm run eval`, `npm run proof:browser-contract`, `npm run proof:browser`, and `npm run proof` replay the local handoff. The browser journey checks the exact input, rejected proposals, contained stale decisions, missing-identity knockouts, download, independent content hashes and reopening in a fresh browser context. A supplied source commit/hash and exact tarball binding are also required for browser certification; an unbound local journey does not become a release approval.
++
++The demonstration stores one case in the local server process. Reload and a fresh browser context reconnect to that same running process. Restarting the server or **Reset demonstration** starts a new case; download the completed proof before either action. `?scenario=...` routes also reset the case to a deterministic fixture and are QA tools, not links to a saved user result. Durable multi-user storage, production, host activation and release authority require their separate gates.
+diff --git a/templates/base/agent/workflow.mjs b/templates/base/agent/workflow.mjs
+index 448d1a5..d6f3871 100644
+--- a/templates/base/agent/workflow.mjs
++++ b/templates/base/agent/workflow.mjs
+@@ -26,12 +26,15 @@ export function createGuidedDemo(options = {}) {
+     return { artifact, case: work, run };
+   }
+ 
+-  function propose({ artifactId, runId }) {
++  function propose({ artifactId, runId, outcome }) {
++    const artifact = runtime.snapshot().artifacts.find((entry) => entry.artifactId === artifactId);
++    const confirmedOutcome = outcome ?? runtime.getCase(artifact.caseId).primaryJob;
+     runtime.enterStage({ runId, stageId: "working" });
+     const proposal = runtime.createProposal({
+       artifactId,
+-      baseVersion: runtime.snapshot().artifacts.find((entry) => entry.artifactId === artifactId).canonicalVersion,
++      baseVersion: artifact.canonicalVersion,
+       patch: {
++        outcome: confirmedOutcome,
+         summary: "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
+         status: "proposed",
+       },
+diff --git a/templates/base/apps/web/public/app.js b/templates/base/apps/web/public/app.js
+index 8fd7fc8..7f170e8 100644
+--- a/templates/base/apps/web/public/app.js
++++ b/templates/base/apps/web/public/app.js
+@@ -25,7 +25,7 @@ function render() {
+   const rejected = state.proposal?.status === "rejected";
+   const completed = state.run.status === "completed";
+   const openException = state.exceptions?.find((entry) => entry.status === "open");
+-  const latest = state.artifact.versions.at(-1);
++  const latest = state.artifact.versions.find((entry) => entry.version === state.artifact.canonicalVersion);
+   const scenario = state.presentation?.id ?? "first_arrival";
+   const intake = ["first_arrival", "orientation", "input", "validation_error"].includes(scenario);
+   document.body.dataset.scenario = scenario;
+@@ -41,8 +41,12 @@ function render() {
+   elements["status-label"].textContent = state.run.status.replaceAll("_", " ");
+   elements["next-owner"].textContent = state.run.nextActionOwner;
+   elements["current-action"].textContent = state.run.nextAction;
++  elements.artifact.dataset.nodekitArtifactType = state.artifact.kind;
++  elements.artifact.dataset.nodekitArtifactId = state.artifact.artifactId;
++  elements.artifact.dataset.nodekitArtifactVersion = String(state.artifact.canonicalVersion);
++  elements.artifact.dataset.nodekitArtifactContentSha256 = latest.contentHash;
+   elements["artifact-version"].textContent = `v${state.artifact.canonicalVersion}`;
+-  elements["artifact-body"].innerHTML = `<p>${escapeText(latest.content.summary ?? JSON.stringify(latest.content))}</p><small>Canonical hash ${latest.contentHash.slice(0, 16)}</small>`;
++  elements["artifact-body"].innerHTML = `<p>${escapeText(latest.content.summary ?? JSON.stringify(latest.content))}</p>${latest.content.outcome === undefined ? "" : `<p>Confirmed outcome: <span data-nodekit-confirmed-outcome>${escapeText(latest.content.outcome)}</span></p>`}<small>Canonical hash ${latest.contentHash.slice(0, 16)}</small>`;
+   elements.progress.innerHTML = state.run.stages.map((stage) => `<div class="step ${stage.status}"><i></i><span>${escapeText(stage.label)}</span></div>`).join("");
+   elements.proposal.innerHTML = pending
+     ? `<strong>Proposed change</strong><p>${escapeText(state.proposal.patch.summary)}</p><small>Based on artifact v${state.proposal.baseVersion} · ${escapeText(state.proposal.rationale)}</small>`
+@@ -53,7 +57,7 @@ function render() {
+   const inspectingReceipt = ["receipt_inspection", "export_share"].includes(scenario) && state.receipt;
+   elements["receipt-detail"].hidden = !inspectingReceipt;
+   elements["receipt-detail"].innerHTML = inspectingReceipt ? `<strong>${scenario === "export_share" ? "Portable proof bundle" : "Receipt contents"}</strong><dl><dt>Receipt</dt><dd>${escapeText(state.receipt.receiptHash)}</dd><dt>Artifacts</dt><dd>${state.receipt.artifactIds.length}</dd><dt>Proposals</dt><dd>${state.receipt.proposalIds.length}</dd><dt>Events</dt><dd>${state.receipt.eventIds.length}</dd></dl>` : "";
+-  elements["receipt-actions"].hidden = scenario !== "export_share" || !state.receipt;
++  elements["receipt-actions"].hidden = !completed || !state.receipt;
+   elements["primary-input"].hidden = !intake;
+   elements.reset.hidden = intake;
+   elements.outcome.setAttribute("aria-invalid", scenario === "validation_error" ? "true" : "false");
+@@ -166,7 +170,7 @@ elements["copy-share"].addEventListener("click", async () => {
+     elements["copy-status"].textContent = summary;
+   }
+ });
+-elements["primary-input"].addEventListener("submit", (event) => { event.preventDefault(); const outcome = elements.outcome.value.trim(); if (!outcome) { showError("Add a concrete outcome before continuing."); elements.outcome.setAttribute("aria-invalid", "true"); } else { elements.outcome.setAttribute("aria-invalid", "false"); act("/api/confirm", { outcome }); } });
++elements["primary-input"].addEventListener("submit", (event) => { event.preventDefault(); const outcome = elements.outcome.value; if (!outcome.trim()) { showError("Add a concrete outcome before continuing."); elements.outcome.setAttribute("aria-invalid", "true"); } else { elements.outcome.setAttribute("aria-invalid", "false"); act("/api/confirm", { outcome }); } });
+ const requestedScenario = new URL(window.location.href).searchParams.get("scenario");
+ const existingState = await api("/api/state");
+ state = requestedScenario && existingState.presentation?.id !== requestedScenario
+diff --git a/templates/base/apps/web/public/styles.css b/templates/base/apps/web/public/styles.css
+index 9036455..614e723 100644
+--- a/templates/base/apps/web/public/styles.css
++++ b/templates/base/apps/web/public/styles.css
+@@ -85,7 +85,7 @@ body[data-busy] .state-banner{position:relative;overflow:hidden}
+ body[data-busy] .state-banner::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:3px;background:var(--violet);transform-origin:left;animation:nk-busy 900ms var(--motion-ease-standard) infinite}
+ @keyframes nk-busy{0%{transform:scaleX(0)}50%{transform:scaleX(1)}100%{transform:scaleX(0);transform-origin:right}}
+ /* WIG Content 'No dead ends': the error region carries its own way out. */
+-.error{display:flex;align-items:center;justify-content:space-between;gap:1rem}
++.error:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:1rem}
+ .error .button{flex:none;border-color:currentColor;color:inherit;background:transparent}
+ /* WIG Interactions 'Prevent double-tap zoom on controls' + 'Tap highlight follows design'. */
+ button,a,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:rgba(102,86,232,.18)}
+diff --git a/templates/base/apps/web/server.mjs b/templates/base/apps/web/server.mjs
+index 191aaa8..be3a834 100644
+--- a/templates/base/apps/web/server.mjs
++++ b/templates/base/apps/web/server.mjs
+@@ -43,7 +43,7 @@ function setPresentation(id, kind, title, message) {
+ }
+ 
+ function prepareProposal() {
+-  return demo.propose({ artifactId: current.artifact.artifactId, runId: current.run.runId });
++  return demo.propose({ artifactId: current.artifact.artifactId, runId: current.run.runId, outcome: current.outcome });
+ }
+ 
+ // Every decision routes through here, and the presentation is a function of the status the runtime
+@@ -149,9 +149,11 @@ async function api(request, response, url) {
+   if (request.method === "POST" && url.pathname === "/api/confirm") {
+     if (!["first_arrival", "orientation", "input", "validation_error"].includes(presentation.id)) throw new Error("the outcome is already confirmed");
+     const input = await body(request);
+-    const outcome = String(input.outcome ?? "").trim();
+-    if (!outcome) throw new Error("add a concrete outcome before continuing");
++    const outcome = String(input.outcome ?? "");
++    if (!outcome.trim()) throw new Error("add a concrete outcome before continuing");
+     demo.runtime.updateCaseInput({ caseId: current.case.caseId, primaryJob: outcome });
++    // Case labels normalize whitespace; the accepted artifact preserves the submitted text.
++    current.outcome = outcome;
+     demo.runtime.enterStage({ runId: current.run.runId, stageId: "working", nextAction: "Prepare the bounded proposal", nextActionOwner: "agent", idempotencyKey: "confirm-outcome" });
+     setPresentation("running", "running", "Outcome confirmed", "The agent can now prepare a bounded proposal while the canonical artifact remains unchanged.");
+     return send(response, 200, view());
+diff --git a/templates/base/docs/CODING_SEQUENCE.md b/templates/base/docs/CODING_SEQUENCE.md
+new file mode 100644
+index 0000000..668688a
+--- /dev/null
++++ b/templates/base/docs/CODING_SEQUENCE.md
+@@ -0,0 +1,73 @@
++# Coding work with an explicit outcome
++
++A builder gives a coding agent a product change and needs the next agent to know what was attempted and what remains unproved. For example, a sourcing packet may look correct until a second session loses the failed-sample record. Freeze that restart case before implementation and attach the resulting artifact when it is exercised (an outcome contract).
++
++The outcome log preserves the intended result, exact version references, case assertions and locally observed artifact hashes so another person can inspect the work without reconstructing the conversation.
++
++This document describes application bookkeeping. The canonical NodeKit launch skill still owns coding-agent behavior; Caseflow owns product transitions, NodeProof owns verification contracts, and the Evolution Ledger owns protected harness adoption. An outcome completion cannot approve a proposal, promote a harness, or authorize a release.
++
++1. Read the repository entrypoint and research the real user's job. Pin current and candidate application revisions, generator revision and environment identity. If the candidate is uncommitted, use its exact tree/content digest and retain that snapshot.
++2. Write an initialization JSON using the schema below. Name the smallest target, context sources, required cases, invariants and budgets. Include the motivating failure and restart/export cases. Map each invariant to at least one case; the utility does not infer that mapping.
++3. Run `node scripts/outcome.mjs init outcome.json`. It creates `proof/outcome/events.jsonl` exclusively; an existing log is never replaced. Keep a separate project worktree for each frozen outcome/candidate so later code changes do not inherit an earlier case result.
++4. Run the generated application's compile, check, demo, eval and relevant browser proof commands. Implement only the declared slice. Preserve authentic command output or exported artifacts inside the project.
++5. Run `node scripts/outcome.mjs append case.json` for each attempt. Repeating a case preserves earlier attempts and makes the latest attempt authoritative for the local completion gate. Record failed or blocked cases honestly; a later failure supersedes an earlier pass.
++6. Run `node scripts/outcome.mjs report` after a restart or handoff. It verifies the entire chain and renders `proof/outcome/report.txt` and `report.html` from the same in-memory log snapshot. Both contain the same terminal log hash.
++7. Append a `complete` record only after all required latest cases pass with observed local artifact evidence. The utility re-reads those artifacts and rejects changed or missing bytes. Run the parent's named end-to-end proof after every dependent slice; a subtask's completion cannot close the parent.
++8. Apply the existing independent review and authorized deployment policy separately. Record material harness lessons in the Evolution Ledger; do not reinterpret this local record as protected evaluation or promotion authority.
++
++Example `outcome.json` (replace every version reference with an exact observed identity):
++
++```json
++{
++  "schemaVersion": "app.coding-outcome/v1",
++  "runId": "sourcing-packet-01",
++  "userJob": "A maker compares attributed supplier terms and reopens the accepted packet.",
++  "target": "Keep unavailable shipping costs unknown and preserve failed samples after restart.",
++  "currentVersion": { "app": "BASELINE_COMMIT", "generator": "GENERATOR_COMMIT", "environment": "LOCKFILE_AND_RUNTIME_DIGEST" },
++  "candidateVersion": { "app": "CANDIDATE_TREE_DIGEST", "generator": "GENERATOR_COMMIT", "environment": "LOCKFILE_AND_RUNTIME_DIGEST" },
++  "context": { "scope": "Quote comparison and failed-sample revision", "sourceRefs": ["product/BRIEF.md@CONTENT_HASH"] },
++  "cases": [
++    { "id": "quote-terms", "description": "Missing shipping cost remains visibly unknown.", "required": true },
++    { "id": "restart", "description": "A fresh session reopens the packet and failed sample evidence.", "required": true }
++  ],
++  "invariants": ["Supplier claims remain attributed; no ordering authority is inferred."],
++  "budgets": { "timeMs": 3600000, "costUsd": 5, "attemptsPerCase": 3 }
++}
++```
++
++An observed case record reads a nonempty project-local artifact and pins its exact bytes; the caller still supplies the status and measurements:
++
++```json
++{
++  "type": "case",
++  "caseId": "restart",
++  "status": "passed",
++  "summary": "A new process reopened the exported packet with the earlier failed sample.",
++  "evidence": { "kind": "observed", "ref": "proof/restart-output.json" },
++  "measurements": [{ "name": "reopened_samples", "value": 1, "unit": "count" }]
++}
++```
++
++A claim without an artifact uses `"evidence": { "kind": "self-reported", "ref": "The agent believes the behavior works; not yet exercised." }`. It may be recorded, but cannot satisfy completion. `passed`, `failed`, and `blocked` are supported case statuses. Measurements are always labelled self-reported; the utility never invents measurements or claims to inspect the meaning of an artifact.
++
++Decisions capture intent only:
++
++```json
++{ "type": "decision", "decision": "propose", "summary": "Request an independent review of the candidate; retain the current release." }
++```
++
++Decisions may be `continue`, `stop`, `propose`, or `reject`. They do not execute actions. The completion record is:
++
++```json
++{ "type": "complete", "summary": "Required local cases have passing artifact evidence; independent review and deployment remain separate." }
++```
++
++Use `--root PROJECT` to operate on another project; JSON input filenames are resolved from the current shell directory. Reports can be regenerated at any time without changing the log.
++
++The log uses the existing `nodeagent.event/v1` envelope with application `outcome.*` event types. Its payload carries the previous content hash, record, optional artifact observation and deterministic sorted-key SHA-256. A single exclusive writer lock prevents concurrent agents from forking the chain. A busy writer returns an error; retry after it exits. After a crash, preserve the log and inspect the lock before an operator removes it. An incomplete line or damaged hash fails closed; the utility never repairs, truncates, or rewrites history.
++
++Bounds: 32 KiB input, 1 MiB per observed artifact, 256 events with a reserved completion slot, 4 MiB log/report limits, 64 cases and a frozen per-case attempt cap. Time and cost budgets are declarations for the runner; this recorder neither runs commands nor meters spend. Paths must resolve inside the project, common credential files are refused, and artifact content is not embedded in reports. Do not submit secrets as summaries, source references or evidence.
++
++The hash chain detects edits relative to retained history, not a malicious operator rewriting the entire chain or removing a valid tail. Preserve the reported terminal hash in a separately controlled review record when that threat matters. This tool supplies neither signatures nor independent verification. Reports describe what was recorded and observed at that time; they are not a claim that a source file or application is still unchanged later.
++
++Proof command: `node --test test/outcome.test.mjs`. In the generator checkout, use `node --test templates/base/test/outcome.test.mjs`. This checks the utility; the consuming project's named user proof remains OPEN until independently exercised.
+diff --git a/templates/base/package.json b/templates/base/package.json
+index 0139fb1..4153cf6 100644
+--- a/templates/base/package.json
++++ b/templates/base/package.json
+@@ -13,6 +13,7 @@
+     "eval": "node scripts/eval.mjs",
+     "check": "node scripts/check.mjs",
+     "proof": "node scripts/proof.mjs",
++    "outcome": "node scripts/outcome.mjs",
+     "proof:browser-contract": "node scripts/browser-proof.mjs",
+     "proof:browser": "node scripts/browser-certify.mjs",
+     "audit:prod": "node scripts/audit-prod.mjs"
+diff --git a/templates/base/schemas/outcome-contract.schema.json b/templates/base/schemas/outcome-contract.schema.json
+new file mode 100644
+index 0000000..d21b483
+--- /dev/null
++++ b/templates/base/schemas/outcome-contract.schema.json
+@@ -0,0 +1,72 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "title": "Generated application coding outcome contract (local evidence only)",
++  "type": "object",
++  "additionalProperties": false,
++  "required": ["schemaVersion", "runId", "userJob", "target", "currentVersion", "candidateVersion", "context", "cases", "invariants", "budgets"],
++  "properties": {
++    "schemaVersion": { "const": "app.coding-outcome/v1" },
++    "runId": { "$ref": "#/$defs/id" },
++    "userJob": { "$ref": "#/$defs/text" },
++    "target": { "$ref": "#/$defs/text" },
++    "currentVersion": { "$ref": "#/$defs/version" },
++    "candidateVersion": { "$ref": "#/$defs/version" },
++    "context": {
++      "type": "object", "additionalProperties": false, "required": ["scope", "sourceRefs"],
++      "properties": {
++        "scope": { "$ref": "#/$defs/text" },
++        "sourceRefs": { "type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
++      }
++    },
++    "cases": {
++      "type": "array", "minItems": 1, "maxItems": 64,
++      "items": {
++        "type": "object", "additionalProperties": false, "required": ["id", "description", "required"],
++        "properties": { "id": { "$ref": "#/$defs/id" }, "description": { "$ref": "#/$defs/text" }, "required": { "type": "boolean" } }
++      }
++    },
++    "invariants": { "type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
++    "budgets": {
++      "type": "object", "additionalProperties": false, "required": ["timeMs", "costUsd", "attemptsPerCase"],
++      "properties": {
++        "timeMs": { "type": "integer", "minimum": 1, "maximum": 604800000 },
++        "costUsd": { "type": "number", "minimum": 0, "maximum": 1000000 },
++        "attemptsPerCase": { "type": "integer", "minimum": 1, "maximum": 32 }
++      }
++    }
++  },
++  "$defs": {
++    "id": { "type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$" },
++    "text": { "type": "string", "minLength": 1, "maxLength": 2000 },
++    "version": {
++      "type": "object", "additionalProperties": false, "required": ["app", "generator", "environment"],
++      "properties": { "app": { "$ref": "#/$defs/text" }, "generator": { "$ref": "#/$defs/text" }, "environment": { "$ref": "#/$defs/text" } }
++    },
++    "caseRecord": {
++      "type": "object", "additionalProperties": false, "required": ["type", "caseId", "status", "summary", "evidence", "measurements"],
++      "properties": {
++        "type": { "const": "case" }, "caseId": { "$ref": "#/$defs/id" },
++        "status": { "enum": ["passed", "failed", "blocked"] }, "summary": { "$ref": "#/$defs/text" },
++        "evidence": {
++          "type": "object", "additionalProperties": false, "required": ["kind", "ref"],
++          "properties": { "kind": { "enum": ["observed", "self-reported"] }, "ref": { "$ref": "#/$defs/text" } }
++        },
++        "measurements": {
++          "type": "array", "maxItems": 16,
++          "items": {
++            "type": "object", "additionalProperties": false, "required": ["name", "value", "unit"],
++            "properties": { "name": { "$ref": "#/$defs/id" }, "value": { "type": "number" }, "unit": { "$ref": "#/$defs/id" } }
++          }
++        }
++      }
++    },
++    "decisionRecord": {
++      "type": "object", "additionalProperties": false, "required": ["type", "decision", "summary"],
++      "properties": { "type": { "const": "decision" }, "decision": { "enum": ["continue", "stop", "propose", "reject"] }, "summary": { "$ref": "#/$defs/text" } }
++    },
++    "completeRecord": {
++      "type": "object", "additionalProperties": false, "required": ["type", "summary"],
++      "properties": { "type": { "const": "complete" }, "summary": { "$ref": "#/$defs/text" } }
++    }
++  }
++}
+diff --git a/templates/base/scripts/browser-certify.mjs b/templates/base/scripts/browser-certify.mjs
+index cb686fe..b410525 100644
+--- a/templates/base/scripts/browser-certify.mjs
++++ b/templates/base/scripts/browser-certify.mjs
+@@ -57,6 +57,11 @@ const evidenceArtifacts = [];
+ const journeyAssertions = {
+   activityModeOperable: false,
+   approvalApplied: false,
++  canonicalInterchangeVerified: false,
++  contractKnockoutsRejected: false,
++  freshContextPreserved: false,
++  rejectedProposalPreserved: false,
++  staleProposalPreserved: false,
+   conflictRecovered: false,
+   exceptionRecovered: false,
+   exportBlockedBeforeCompletion: false,
+@@ -88,9 +93,21 @@ async function recordArtifact(id, absolutePath) {
+   evidenceArtifacts.push({ byteSize: (await stat(absolutePath)).size, id, path: path.relative(evidenceRoot, absolutePath).replaceAll("\\", "/"), sha256: sha256(bytes) });
+ }
+ 
++// JSON already crossed the portable export boundary. Hash it independently of the producer.
++function canonicalJson(value) {
++  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
++  if (value && typeof value === "object") return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
++  return JSON.stringify(value);
++}
++
++const artifactAttributes = ["type", "id", "version", "content-sha256"].map((name) => `data-nodekit-artifact-${name}`);
++async function readArtifactIdentity(page) {
++  return page.locator("#artifact").evaluate((element, names) => names.map((name) => element.getAttribute(name)), artifactAttributes);
++}
++
+ // @nodekit-behavior inv:rendered-browser-evidence owner
+ // @nodekit-behavior inv:guided-intake-mobile-decisions owner
+-async function verifyExportedProof(absolutePath) {
++async function verifyExportedProof(absolutePath, page, expectedOutcome) {
+   const bundle = JSON.parse(await readFile(absolutePath, "utf8"));
+   if (bundle.schemaVersion !== "nodekit.portable-proof-bundle/v1") throw new Error("exported proof bundle schema is invalid");
+   if (bundle.receipt?.schemaVersion !== "nodekit.receipt/v2") throw new Error("exported receipt schema is invalid");
+@@ -102,12 +119,20 @@ async function verifyExportedProof(absolutePath) {
+   if (!canonicalVersion || canonicalVersion.contentHash !== contentHash(canonicalVersion.content)) {
+     throw new Error("exported canonical artifact content hash is invalid");
+   }
++  if (canonicalVersion.contentHash !== sha256(canonicalJson(canonicalVersion.content))) throw new Error("independent artifact hash is invalid");
++  if (canonicalVersion.content.outcome !== (expectedOutcome ?? bundle.case.primaryJob)) throw new Error("exported artifact lost the exact confirmed outcome");
++  const expectedIdentity = [artifact.kind, artifact.artifactId, String(artifact.canonicalVersion), canonicalVersion.contentHash];
++  if (JSON.stringify(await readArtifactIdentity(page)) !== JSON.stringify(expectedIdentity)) throw new Error("rendered artifact identity does not match the exported canonical artifact");
++  if (await page.locator("[data-nodekit-confirmed-outcome]").textContent() !== canonicalVersion.content.outcome) throw new Error("rendered outcome does not match the exported canonical content");
+   const binding = bundle.receipt.artifactBindings?.find((entry) => entry.artifactId === artifact.artifactId);
+   if (!binding || binding.canonicalVersion !== artifact.canonicalVersion || binding.contentHash !== canonicalVersion.contentHash) {
+     throw new Error("exported receipt is not bound to the canonical artifact version");
+   }
+   const { receiptHash, receiptId, ...receiptBody } = bundle.receipt;
+   if (!receiptId || receiptHash !== contentHash(receiptBody)) throw new Error("exported receipt hash is invalid");
++  if (receiptHash !== sha256(canonicalJson(receiptBody))
++    || bundle.receipt.caseHash !== sha256(canonicalJson(bundle.case))
++    || bundle.receipt.runHash !== sha256(canonicalJson(bundle.run))) throw new Error("independent receipt or case/run binding hash is invalid");
+   return bundle;
+ }
+ 
+@@ -277,11 +302,23 @@ try {
+         const prematureProposal = await page.request.post(`${baseUrl}/api/propose`, { data: {} });
+         journeyAssertions.proposalBlockedBeforeConfirmation = !prematureProposal.ok();
+         if (prematureProposal.ok()) throw new Error("server accepted a proposal before the outcome was confirmed");
+-        await page.locator("#outcome").fill("Produce one bounded, reviewable, and verifiable result.");
++        const submittedOutcome = '  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ';
++        await page.locator("#outcome").fill(submittedOutcome);
+         await page.locator("#primary-input button").click();
+         await page.locator('body[data-scenario="running"]').waitFor();
+         journeyAssertions.outcomeConfirmed = (await page.locator("#current-action").innerText()).includes("Prepare the bounded proposal");
+         milestone("outcome_confirmed");
++        const baselineArtifact = (await (await page.request.get(`${baseUrl}/api/state`)).json()).artifact;
++        const baselineIdentity = await readArtifactIdentity(page);
++        await page.locator("#propose").click();
++        await page.locator('body[data-scenario="proposal_pending"]').waitFor();
++        await page.locator("#reject").click();
++        await page.locator('body[data-scenario="proposal_rejected"]').waitFor();
++        const rejectedState = await (await page.request.get(`${baseUrl}/api/state`)).json();
++        if (JSON.stringify(rejectedState.artifact) !== JSON.stringify(baselineArtifact)
++          || JSON.stringify(await readArtifactIdentity(page)) !== JSON.stringify(baselineIdentity)
++          || rejectedState.receipt !== null) throw new Error("rejection changed the canonical artifact or created a receipt");
++        journeyAssertions.rejectedProposalPreserved = true;
+         await page.locator("#propose").click();
+         await page.locator("#proposal strong").waitFor();
+         journeyAssertions.proposalVisible = true;
+@@ -292,8 +329,51 @@ try {
+         journeyAssertions.receiptVisible = (await page.locator("#receipt-id").innerText()).startsWith("Receipt ");
+         milestone("approval_applied");
+         milestone("receipt_visible");
++        const acceptedExportPath = path.join(browserRoot, "nodekit-accepted-proof.json");
++        const acceptedDownloadPromise = page.waitForEvent("download");
++        await page.locator("#download-proof").click();
++        await (await acceptedDownloadPromise).saveAs(acceptedExportPath);
++        const acceptedBundle = await verifyExportedProof(acceptedExportPath, page, submittedOutcome);
++        await recordArtifact("accepted-portable-proof-bundle", acceptedExportPath);
++        journeyAssertions.canonicalInterchangeVerified = true;
++        // Knock out the actual rendered contract, not a parallel validator fixture.
++        for (const attribute of artifactAttributes) {
++          const saved = await page.locator("#artifact").getAttribute(attribute);
++          await page.locator("#artifact").evaluate((element, name) => element.removeAttribute(name), attribute);
++          let rejected = false;
++          try { await verifyExportedProof(acceptedExportPath, page, submittedOutcome); }
++          catch (failure) { if (!failure.message.includes("rendered artifact identity")) throw failure; rejected = true; }
++          finally { await page.locator("#artifact").evaluate((element, [name, value]) => element.setAttribute(name, value), [attribute, saved]); }
++          if (!rejected) throw new Error(`missing ${attribute} passed the interchange guard`);
++        }
++        const changedExportPath = path.join(browserRoot, "nodekit-altered-proof.json");
++        const altered = structuredClone(acceptedBundle);
++        altered.artifact.versions.find((entry) => entry.version === altered.artifact.canonicalVersion).content.outcome = "Substituted outcome";
++        await writeFile(changedExportPath, `${JSON.stringify(altered, null, 2)}\n`);
++        let alteredRejected = false;
++        try { await verifyExportedProof(changedExportPath, page, submittedOutcome); }
++        catch (failure) { if (!failure.message.includes("content hash is invalid")) throw failure; alteredRejected = true; }
++        if (!alteredRejected) throw new Error("altered exported content passed the interchange guard");
++        const alteredBinding = structuredClone(acceptedBundle);
++        alteredBinding.receipt.artifactBindings[0].canonicalVersion += 1;
++        const alteredBindingPath = path.join(browserRoot, "nodekit-altered-binding.json");
++        await writeFile(alteredBindingPath, `${JSON.stringify(alteredBinding, null, 2)}\n`);
++        let bindingRejected = false;
++        try { await verifyExportedProof(alteredBindingPath, page, submittedOutcome); }
++        catch (failure) { if (!failure.message.includes("not bound to the canonical artifact")) throw failure; bindingRejected = true; }
++        if (!bindingRejected) throw new Error("altered receipt binding passed the interchange guard");
++        await verifyExportedProof(acceptedExportPath, page, submittedOutcome);
++        journeyAssertions.contractKnockoutsRejected = true;
+         const receiptBeforeReload = await page.locator("#receipt-id").innerText();
+         await page.reload({ waitUntil: "networkidle" });
++        await verifyExportedProof(acceptedExportPath, page, submittedOutcome);
++        const reopenedContext = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
++        try {
++          const reopened = await reopenedContext.newPage();
++          await reopened.goto(baseUrl, { waitUntil: "networkidle" });
++          await verifyExportedProof(acceptedExportPath, reopened, submittedOutcome);
++          journeyAssertions.freshContextPreserved = (await reopened.locator("#receipt-id").innerText()) === receiptBeforeReload;
++        } finally { await reopenedContext.close(); }
+         journeyAssertions.receiptSurvivedReload = (await page.locator("#receipt-id").innerText()) === receiptBeforeReload;
+         milestone("receipt_reload_confirmed");
+       }
+@@ -320,6 +400,7 @@ try {
+           await page.locator("#primary-input button").click();
+           await page.locator("#error").waitFor({ state: "visible" });
+         }
++        if (state !== "validation_error" && !(await page.locator("#error").isHidden())) throw new Error(`empty error region is visible for ${state}/${viewport.id}/${theme}`);
+         if (state === "approval") await page.locator("#approve").focus();
+         if (state === "receipt_inspection" || state === "export_share") {
+           await page.locator("#receipt-detail").waitFor({ state: "visible" });
+@@ -337,7 +418,7 @@ try {
+             await page.locator("#download-proof").click();
+             const download = await downloadPromise;
+             await download.saveAs(exportPath);
+-            await verifyExportedProof(exportPath);
++            await verifyExportedProof(exportPath, page);
+             await recordArtifact("portable-proof-bundle", exportPath);
+             journeyAssertions.exportDownloadedAndVerified = true;
+             milestone("export_downloaded_and_reopened");
+@@ -345,6 +426,8 @@ try {
+             await page.waitForFunction(() => document.querySelector("#copy-status")?.textContent?.trim().length > 0);
+             journeyAssertions.shareSummaryProduced = (await page.locator("#copy-status").innerText()).trim().length > 0;
+           }
++        } else if (completedReviewStates.has(state)) {
++          if (!(await page.locator("#download-proof").isVisible())) throw new Error(`completed case has no download action for ${state}/${viewport.id}/${theme}`);
+         } else if (!(await page.locator("#receipt-actions").isHidden())) {
+           throw new Error(`export actions leaked into ${state}/${viewport.id}/${theme}`);
+         }
+@@ -367,10 +450,18 @@ try {
+         }
+         await capture(page, state, viewport, theme, observations);
+         if (canonicalJourney && state === "conflict") {
++          const conflictedState = await (await page.request.get(`${baseUrl}/api/state`)).json();
++          const canonicalBeforeRecovery = await readArtifactIdentity(page);
++          const winner = conflictedState.artifact.versions.find((entry) => entry.version === conflictedState.artifact.canonicalVersion);
++          if (conflictedState.proposal.status !== "conflicted" || conflictedState.receipt !== null
++            || winner.contentHash === contentHash(conflictedState.proposal.patch)) throw new Error("stale proposal replaced canonical content or falsely completed the run");
+           await page.locator("#resolve-conflict").click();
+           await page.locator('body[data-scenario="completed_receipt"]').waitFor();
+           await page.locator("#completion").waitFor({ state: "visible" });
+           journeyAssertions.conflictRecovered = (await page.locator("#receipt-id").innerText()).startsWith("Receipt ");
++          const recoveredState = await (await page.request.get(`${baseUrl}/api/state`)).json();
++          journeyAssertions.staleProposalPreserved = JSON.stringify(recoveredState.artifact) === JSON.stringify(conflictedState.artifact)
++            && JSON.stringify(await readArtifactIdentity(page)) === JSON.stringify(canonicalBeforeRecovery);
+         }
+         if (canonicalJourney && state === "recoverable_failure") {
+           await page.locator("#resume").click();
+@@ -417,7 +508,7 @@ try {
+   journeyAssertions.stateActionsCoherent = true;
+   passed = screenshots.length === viewports.length * 2 * requiredStates.length
+     && accessibilityViolations.length === 0
+-    && evidenceArtifacts.length === 5
++    && evidenceArtifacts.length === 6
+     && Object.values(journeyAssertions).every(Boolean)
+     && screenshots.every((entry) => entry.consoleErrors === 0 && entry.failedRequests === 0 && entry.horizontalOverflowPx === 0 && entry.mojibakeDetected === false);
+ } catch (caught) {
+diff --git a/templates/base/scripts/outcome.mjs b/templates/base/scripts/outcome.mjs
+new file mode 100644
+index 0000000..dd15efb
+--- /dev/null
++++ b/templates/base/scripts/outcome.mjs
+@@ -0,0 +1,255 @@
++import { createHash } from "node:crypto";
++import { mkdir, open, readFile, realpath, unlink, writeFile } from "node:fs/promises";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++
++// Application bookkeeping uses the existing NodeAgent event envelope. This is
++// neither a Caseflow authority nor a NodeProof/Evolution approval mechanism.
++export const LIMITS = Object.freeze({ inputBytes: 32768, artifactBytes: 1048576, logBytes: 4194304, events: 256, reportBytes: 4194304 });
++const schema = JSON.parse(await readFile(new URL("../schemas/outcome-contract.schema.json", import.meta.url), "utf8"));
++const zeroHash = "0".repeat(64);
++const canonical = (value) => Array.isArray(value) ? `[${value.map(canonical).join(",")}]`
++  : value && typeof value === "object" ? `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(",")}}` : JSON.stringify(value);
++const digest = (value) => createHash("sha256").update(value).digest("hex");
++const fail = (message) => { throw new Error(message); };
++const location = (root, name) => path.join(path.resolve(root), "proof", "outcome", name);
++
++// Only the JSON Schema keywords used by the bundled application schema are
++// needed here; the schema remains the single input contract, with no dependency.
++function validate(value, rule, label = "input") {
++  if (rule.$ref) return validate(value, schema.$defs[rule.$ref.split("/").at(-1)], label);
++  if ("const" in rule && value !== rule.const) fail(`${label}: expected ${rule.const}`);
++  if (rule.enum && !rule.enum.includes(value)) fail(`${label}: invalid choice`);
++  if (rule.type === "object") {
++    if (!value || typeof value !== "object" || Array.isArray(value)) fail(`${label}: expected object`);
++    for (const key of rule.required ?? []) if (!Object.hasOwn(value, key)) fail(`${label}.${key}: required`);
++    for (const key of Object.keys(value)) {
++      if (!Object.hasOwn(rule.properties, key)) fail(`${label}.${key}: unknown field`);
++      validate(value[key], rule.properties[key], `${label}.${key}`);
++    }
++  } else if (rule.type === "array") {
++    if (!Array.isArray(value) || value.length < (rule.minItems ?? 0) || value.length > rule.maxItems) fail(`${label}: invalid array size`);
++    if (rule.uniqueItems && new Set(value.map(canonical)).size !== value.length) fail(`${label}: duplicate values`);
++    value.forEach((item, index) => validate(item, rule.items, `${label}[${index}]`));
++  } else if (rule.type === "string") {
++    if (typeof value !== "string" || !value.trim() || value.length < rule.minLength || value.length > rule.maxLength || (rule.pattern && !new RegExp(rule.pattern).test(value))) fail(`${label}: invalid text`);
++  } else if (["number", "integer"].includes(rule.type)) {
++    if (typeof value !== "number" || !Number.isFinite(value) || (rule.type === "integer" && !Number.isInteger(value)) || value < (rule.minimum ?? -Infinity) || value > (rule.maximum ?? Infinity)) fail(`${label}: invalid number`);
++  } else if (rule.type === "boolean" && typeof value !== "boolean") fail(`${label}: expected boolean`);
++}
++
++function validateContract(contract) {
++  validate(contract, schema, "contract");
++  if (new Set(contract.cases.map((item) => item.id)).size !== contract.cases.length) fail("contract: duplicate case IDs");
++  if (!contract.cases.some((item) => item.required)) fail("contract: at least one required case is needed");
++}
++
++function validateRecord(record) {
++  const definition = { case: "caseRecord", decision: "decisionRecord", complete: "completeRecord" }[record?.type];
++  if (!definition) fail("record: expected case, decision, or complete");
++  validate(record, schema.$defs[definition], "record");
++}
++
++async function boundedRead(file, limit) {
++  const handle = await open(file, "r");
++  try {
++    const stat = await handle.stat();
++    if (!stat.isFile() || stat.size > limit) fail(`file must be regular and at most ${limit} bytes`);
++    const buffer = Buffer.alloc(limit + 1);
++    let offset = 0;
++    while (offset < buffer.length) {
++      const { bytesRead } = await handle.read(buffer, offset, buffer.length - offset, null);
++      if (!bytesRead) break;
++      offset += bytesRead;
++    }
++    if (offset > limit) fail(`file exceeds ${limit} bytes`);
++    return buffer.subarray(0, offset);
++  } finally { await handle.close(); }
++}
++
++function boundedInput(value) {
++  const serialized = JSON.stringify(value);
++  if (!serialized || Buffer.byteLength(serialized) > LIMITS.inputBytes) fail("input exceeds byte limit");
++  return JSON.parse(serialized);
++}
++
++async function observe(root, ref) {
++  const project = await realpath(root);
++  const absolute = await realpath(path.resolve(project, ref));
++  const relative = path.relative(project, absolute);
++  if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) fail("evidence must stay inside the project");
++  if (/(^|[\\/])(?:\.env(?:\..*)?|[^\\/]*\.(?:pem|key))$/i.test(relative)) fail("credential files cannot be evidence");
++  if (absolute === location(project, "events.jsonl")) fail("the outcome log cannot be its own evidence");
++  const bytes = await boundedRead(absolute, LIMITS.artifactBytes);
++  if (!bytes.length) fail("observed evidence is empty");
++  return { ref: relative.split(path.sep).join("/"), sha256: digest(bytes), bytes: bytes.length };
++}
++
++function eventHash(event) {
++  const { contentHash, ...payload } = event.payload;
++  return digest(canonical({ ...event, payload }));
++}
++
++function makeEvent(contract, events, record, observation) {
++  const sequence = events.length;
++  const event = {
++    schemaVersion: "nodeagent.event/v1", eventId: `${contract.runId}:${sequence}`, runId: contract.runId,
++    sequence, type: `outcome.${record.type}`, occurredAt: new Date().toISOString(), actor: { type: "agent" },
++    payload: { previousHash: events.at(-1)?.payload.contentHash ?? zeroHash, record, ...(observation ? { observation } : {}) },
++  };
++  event.payload.contentHash = eventHash(event);
++  return event;
++}
++
++function latestCases(events) {
++  return new Map(events.filter((event) => event.type === "outcome.case").map((event) => [event.payload.record.caseId, event]));
++}
++
++function assertCanAppend(contract, events, record) {
++  if (events.at(-1)?.type === "outcome.complete") fail("outcome already complete; start a new run in a separate project proof directory");
++  if (events.length >= LIMITS.events - (record.type === "complete" ? 0 : 1)) fail("event limit reached; final slot is reserved for completion");
++  if (record.type === "case") {
++    if (!contract.cases.some((item) => item.id === record.caseId)) fail(`unknown case: ${record.caseId}`);
++    if (events.filter((event) => event.type === "outcome.case" && event.payload.record.caseId === record.caseId).length >= contract.budgets.attemptsPerCase) fail(`attempt budget exceeded: ${record.caseId}`);
++  }
++  if (record.type === "complete") {
++    const latest = latestCases(events);
++    const missing = contract.cases.filter((item) => item.required && (latest.get(item.id)?.payload.record.status !== "passed" || !latest.get(item.id)?.payload.observation));
++    if (missing.length) fail(`completion blocked; required cases need passing observed evidence: ${missing.map((item) => item.id).join(", ")}`);
++  }
++}
++
++export async function readOutcome(root = process.cwd()) {
++  const bytes = await boundedRead(location(root, "events.jsonl"), LIMITS.logBytes);
++  if (!bytes.length || bytes.at(-1) !== 10) fail("incomplete outcome log; preserve it and recover from a trusted backup");
++  const lines = bytes.toString("utf8").slice(0, -1).split("\n");
++  if (lines.length > LIMITS.events) fail("event limit exceeded");
++  const events = [];
++  let contract;
++  for (const line of lines) {
++    if (Buffer.byteLength(line) > LIMITS.inputBytes + 4096) fail("event exceeds byte limit");
++    const event = JSON.parse(line);
++    const { payload } = event;
++    if (!payload || event.schemaVersion !== "nodeagent.event/v1" || event.sequence !== events.length || payload.previousHash !== (events.at(-1)?.payload.contentHash ?? zeroHash) || payload.contentHash !== eventHash(event)) fail("outcome hash chain or sequence is invalid");
++    if (Object.keys(event).sort().join() !== "actor,eventId,occurredAt,payload,runId,schemaVersion,sequence,type" || event.actor?.type !== "agent" || Object.keys(event.actor).length !== 1 || !/^\d{4}-\d{2}-\d{2}T/.test(event.occurredAt) || new Date(event.occurredAt).toISOString() !== event.occurredAt) fail("invalid event envelope");
++    if (!events.length) {
++      if (event.type !== "outcome.initialized" || payload.record?.type !== "initialized") fail("initialization must be first");
++      contract = payload.record.contract;
++      validateContract(contract);
++    } else {
++      validateRecord(payload.record);
++      if (event.type !== `outcome.${payload.record.type}`) fail("event type mismatch");
++      assertCanAppend(contract, events, payload.record);
++    }
++    if (event.runId !== contract.runId || event.eventId !== `${contract.runId}:${events.length}`) fail("event run identity mismatch");
++    const observed = payload.record.type === "case" && payload.record.evidence.kind === "observed";
++    if (Object.keys(payload).sort().join() !== (observed ? "contentHash,observation,previousHash,record" : "contentHash,previousHash,record")) fail("invalid event payload");
++    if (observed && (!payload.observation || Object.keys(payload.observation).sort().join() !== "bytes,ref,sha256" || typeof payload.observation.ref !== "string" || payload.observation.ref.length > 2000 || !/^[a-f0-9]{64}$/.test(payload.observation.sha256) || !Number.isInteger(payload.observation.bytes) || payload.observation.bytes < 1 || payload.observation.bytes > LIMITS.artifactBytes)) fail("invalid observed evidence binding");
++    events.push(event);
++  }
++  return { contract, events, logHash: events.at(-1).payload.contentHash };
++}
++
++async function locked(root, callback) {
++  const directory = location(root, "");
++  await mkdir(directory, { recursive: true });
++  const lockPath = location(root, ".write-lock");
++  let lock;
++  try { lock = await open(lockPath, "wx"); }
++  catch (error) { if (error.code === "EEXIST") fail("outcome writer busy; a crashed writer's lock requires operator inspection"); throw error; }
++  try { return await callback(); }
++  finally { await lock.close(); await unlink(lockPath); }
++}
++
++async function persist(root, event, create = false) {
++  const line = `${canonical(event)}\n`;
++  const handle = await open(location(root, "events.jsonl"), create ? "wx" : "a");
++  try {
++    if ((await handle.stat()).size + Buffer.byteLength(line) > LIMITS.logBytes) fail("outcome log byte limit reached");
++    await handle.writeFile(line, "utf8");
++    await handle.sync();
++  } finally { await handle.close(); }
++  return event;
++}
++
++export async function initializeOutcome(root, input) {
++  const contract = boundedInput(input);
++  validateContract(contract);
++  return locked(root, () => persist(root, makeEvent(contract, [], { type: "initialized", contract }), true));
++}
++
++export async function appendOutcome(root, input) {
++  const record = boundedInput(input);
++  validateRecord(record);
++  return locked(root, async () => {
++    const { contract, events } = await readOutcome(root);
++    assertCanAppend(contract, events, record);
++    const observation = record.type === "case" && record.evidence.kind === "observed" ? await observe(root, record.evidence.ref) : undefined;
++    if (record.type === "complete") {
++      for (const item of contract.cases.filter((item) => item.required)) {
++        const pinned = latestCases(events).get(item.id).payload.observation;
++        const current = await observe(root, pinned.ref);
++        if (current.sha256 !== pinned.sha256) fail(`evidence changed since observation: ${item.id}`);
++      }
++    }
++    return persist(root, makeEvent(contract, events, record, observation));
++  });
++}
++
++const asciiText = (value) => String(value).replace(/[^\x20-\x7e]/gu, (character) => `\\u{${character.codePointAt(0).toString(16)}}`);
++const htmlEscape = (value) => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
++
++export async function renderOutcome(root = process.cwd()) {
++  const { contract, events, logHash } = await readOutcome(root);
++  const latest = latestCases(events);
++  const state = events.at(-1).type === "outcome.complete" ? "COMPLETE (local evidence gate only)" : "OPEN";
++  const lines = ["CODING OUTCOME RECORD", `Run: ${contract.runId}`, `State: ${state}`, `Log hash: ${logHash}`,
++    "Status assertions and measurements are self-reported. Observed means local artifact bytes were read and hashed.",
++    "This is not independent verification, approval, or deployment proof.", "", `User job: ${contract.userJob}`, `Target: ${contract.target}`,
++    `Current: ${canonical(contract.currentVersion)}`, `Candidate: ${canonical(contract.candidateVersion)}`, `Scope: ${contract.context.scope}`,
++    `Sources: ${contract.context.sourceRefs.join("; ")}`, `Budgets: ${canonical(contract.budgets)}`, "", "REQUIRED AND OPTIONAL CASES"];
++  for (const item of contract.cases) {
++    const event = latest.get(item.id);
++    lines.push(`${item.id} [${item.required ? "required" : "optional"}]: ${event?.payload.record.status ?? "not run"} - ${item.description}`);
++  }
++  lines.push("", "INVARIANTS", ...contract.invariants, "", "APPEND-ONLY HISTORY");
++  for (const event of events) {
++    const { record, observation } = event.payload;
++    lines.push(`${event.sequence} | ${event.occurredAt} | ${event.type} | ${record.summary ?? contract.target}`);
++    if (record.type === "case") {
++      lines.push(`  ${record.caseId}: ${record.status} (self-reported); evidence: ${record.evidence.kind}`,
++        `  ${observation ? `${observation.ref} | sha256=${observation.sha256} | bytes=${observation.bytes}` : record.evidence.ref}`,
++        `  Measurements (self-reported): ${canonical(record.measurements)}`);
++    }
++    if (record.type === "decision") lines.push(`  Decision: ${record.decision} (recorded intent; no authority granted)`);
++  }
++  const ascii = `${lines.map(asciiText).join("\n")}\n`;
++  const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>Coding outcome ${htmlEscape(contract.runId)}</title><style>body{max-width:72rem;margin:2rem auto;padding:0 1rem;font:16px/1.5 system-ui;color:#18212d;background:#f8fafc}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 ui-monospace,monospace}</style><body><pre>${htmlEscape(ascii)}</pre></body></html>\n`;
++  if (Buffer.byteLength(ascii) > LIMITS.reportBytes || Buffer.byteLength(html) > LIMITS.reportBytes) fail("report byte limit exceeded");
++  return { ascii, html, logHash };
++}
++
++async function main(args) {
++  const rootIndex = args.indexOf("--root");
++  let root = process.cwd();
++  if (rootIndex !== -1) {
++    if (!args[rootIndex + 1]) fail("--root requires a directory");
++    root = path.resolve(args[rootIndex + 1]);
++    args.splice(rootIndex, 2);
++  }
++  const [command, inputFile] = args;
++  if (["init", "append"].includes(command) && args.length === 2) {
++    const input = JSON.parse((await boundedRead(path.resolve(inputFile), LIMITS.inputBytes)).toString("utf8"));
++    const event = await (command === "init" ? initializeOutcome(root, input) : appendOutcome(root, input));
++    console.log(`${event.type}: ${event.payload.contentHash}`);
++  } else if (command === "report" && args.length === 1) {
++    const report = await renderOutcome(root);
++    await writeFile(location(root, "report.txt"), report.ascii);
++    await writeFile(location(root, "report.html"), report.html);
++    console.log(report.ascii);
++  } else fail("Usage: node scripts/outcome.mjs init CONTRACT.json | append RECORD.json | report [--root PROJECT]");
++}
++
++if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
++  main(process.argv.slice(2)).catch((error) => { console.error(`Outcome error: ${error.message}`); process.exitCode = 1; });
++}
+diff --git a/templates/base/test/outcome.test.mjs b/templates/base/test/outcome.test.mjs
+new file mode 100644
+index 0000000..a502048
+--- /dev/null
++++ b/templates/base/test/outcome.test.mjs
+@@ -0,0 +1,186 @@
++import assert from "node:assert/strict";
++import { spawn, spawnSync } from "node:child_process";
++import { mkdtemp, readFile, writeFile, mkdir } from "node:fs/promises";
++import os from "node:os";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++import test from "node:test";
++import { appendOutcome, initializeOutcome, LIMITS, readOutcome, renderOutcome } from "../scripts/outcome.mjs";
++
++const script = fileURLToPath(new URL("../scripts/outcome.mjs", import.meta.url));
++const contract = () => ({
++  schemaVersion: "app.coding-outcome/v1", runId: "sourcing-pilot-01",
++  userJob: "A maker compares supplier quotes and reopens the accepted sourcing packet.",
++  target: "Preserve source terms and revised sample evidence after restart.",
++  currentVersion: { app: "baseline-commit-a", generator: "generator-commit-a", environment: "node22-lockfile-a" },
++  candidateVersion: { app: "candidate-tree-b", generator: "generator-commit-a", environment: "node22-lockfile-a" },
++  context: { scope: "Quote comparison and failed-sample revision only", sourceRefs: ["product/BRIEF.md@sha256:example"] },
++  cases: [
++    { id: "quote-terms", description: "A maker sees unavailable shipping costs as unknown.", required: true },
++    { id: "restart", description: "A second agent reopens the exact accepted packet and failed sample.", required: true },
++  ],
++  invariants: ["Supplier claims remain attributed and cannot authorize a purchase."],
++  budgets: { timeMs: 3600000, costUsd: 1, attemptsPerCase: 4 },
++});
++const caseRecord = (caseId, status = "passed", ref = "proof/evidence.json") => ({
++  type: "case", caseId, status, summary: `${caseId} exercised with the maker's saved packet`,
++  evidence: { kind: "observed", ref }, measurements: [{ name: "reopened_packets", value: 1, unit: "count" }],
++});
++const complete = { type: "complete", summary: "All required local evidence is attached; release verification remains separate." };
++async function workspace() {
++  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-outcome-"));
++  await mkdir(path.join(root, "proof"));
++  await writeFile(path.join(root, "proof", "evidence.json"), JSON.stringify({ shippingCost: null, sample: "failed", revision: 2 }));
++  return root;
++}
++const logPath = (root) => path.join(root, "proof", "outcome", "events.jsonl");
++async function cli(root, command, value) {
++  const args = [script, command];
++  if (value) {
++    const file = path.join(root, `input-${command}.json`);
++    await writeFile(file, JSON.stringify(value));
++    args.push(file);
++  }
++  return spawnSync(process.execPath, [...args, "--root", root], { encoding: "utf8", timeout: 15000 });
++}
++
++test("a maker's packet survives new CLI processes; both reports reproduce the same log without rewriting it", async () => {
++  const root = await workspace();
++  assert.equal((await cli(root, "init", contract())).status, 0);
++  const first = await readFile(logPath(root), "utf8");
++  assert.equal((await cli(root, "append", caseRecord("quote-terms"))).status, 0);
++  assert.equal((await cli(root, "append", caseRecord("restart"))).status, 0);
++  assert.equal((await cli(root, "append", complete)).status, 0);
++  const beforeReport = await readFile(logPath(root), "utf8");
++  assert.ok(beforeReport.startsWith(first));
++  const output = await cli(root, "report");
++  assert.equal(output.status, 0, output.stderr);
++  assert.match(output.stdout, /COMPLETE \(local evidence gate only\)/);
++  const { events, logHash } = await readOutcome(root);
++  assert.equal(events.length, 4);
++  assert.equal(events[2].payload.previousHash, events[1].payload.contentHash);
++  const ascii = await readFile(path.join(root, "proof", "outcome", "report.txt"), "utf8");
++  const html = await readFile(path.join(root, "proof", "outcome", "report.html"), "utf8");
++  assert.ok(ascii.includes(logHash) && html.includes(logHash));
++  assert.match(ascii, /not independent verification, approval, or deployment proof/);
++  assert.match(ascii, /restart: passed \(self-reported\); evidence: observed/);
++  assert.equal(await readFile(logPath(root), "utf8"), beforeReport);
++  await assert.rejects(appendOutcome(root, caseRecord("restart")), /already complete/);
++  await assert.rejects(initializeOutcome(root, contract()), /EEXIST/);
++});
++
++test("an agent cannot close missing, failed, claim-only, or subsequently changed supplier evidence", async () => {
++  const root = await workspace();
++  await initializeOutcome(root, contract());
++  await assert.rejects(appendOutcome(root, complete), /quote-terms, restart/);
++  await appendOutcome(root, caseRecord("quote-terms", "failed"));
++  await appendOutcome(root, { ...caseRecord("restart"), evidence: { kind: "self-reported", ref: "I believe reload works" } });
++  await assert.rejects(appendOutcome(root, complete), /quote-terms, restart/);
++  await appendOutcome(root, caseRecord("quote-terms"));
++  await appendOutcome(root, caseRecord("restart"));
++  await writeFile(path.join(root, "proof", "evidence.json"), "changed supplier data");
++  await assert.rejects(appendOutcome(root, complete), /evidence changed/);
++  await appendOutcome(root, caseRecord("quote-terms"));
++  await appendOutcome(root, caseRecord("restart"));
++  await appendOutcome(root, complete);
++  assert.equal((await readOutcome(root)).events.filter((event) => event.payload.record.status === "failed").length, 1);
++});
++
++test("a later failed retest replaces an earlier passing case for completion without deleting either assessment", async () => {
++  const root = await workspace();
++  await initializeOutcome(root, contract());
++  await appendOutcome(root, caseRecord("quote-terms"));
++  await appendOutcome(root, caseRecord("restart"));
++  await appendOutcome(root, caseRecord("restart", "failed"));
++  await assert.rejects(appendOutcome(root, complete), /restart/);
++  const report = await renderOutcome(root);
++  assert.match(report.ascii, /restart \[required\]: failed/);
++  assert.match(report.ascii, /restart: passed/);
++  assert.match(report.ascii, /restart: failed/);
++});
++
++test("a reviewer detects edits, reordered history and interrupted writes before another append or report", async () => {
++  const root = await workspace();
++  await initializeOutcome(root, contract());
++  await appendOutcome(root, caseRecord("quote-terms", "failed"));
++  const original = await readFile(logPath(root), "utf8");
++  for (const corrupted of [original.replace('"status":"failed"', '"status":"passed"'), original.trimEnd().split("\n").reverse().join("\n") + "\n", original.slice(0, -3)]) {
++    await writeFile(logPath(root), corrupted);
++    await assert.rejects(readOutcome(root), /invalid|incomplete/);
++    await assert.rejects(appendOutcome(root, caseRecord("restart")), /invalid|incomplete/);
++    await assert.rejects(renderOutcome(root), /invalid|incomplete/);
++    assert.equal(await readFile(logPath(root), "utf8"), corrupted);
++  }
++});
++
++test("supplier-controlled markup and terminal controls remain inert in the human report", async () => {
++  const root = await workspace();
++  const input = contract();
++  input.target = '<script>alert("supplier")</script> & \u001b[31m bilingual 中文';
++  await initializeOutcome(root, input);
++  await appendOutcome(root, { type: "decision", decision: "propose", summary: '<img src=x onerror="alert(1)"> never authorizes ordering' });
++  const { ascii, html } = await renderOutcome(root);
++  assert.doesNotMatch(html, /<script>|<img/);
++  assert.match(html, /&lt;script&gt;/);
++  assert.match(html, /&lt;img/);
++  assert.match(html, /Content-Security-Policy/);
++  assert.doesNotMatch(ascii, /[^\x0a\x20-\x7e]/);
++  assert.match(ascii, /Decision: propose \(recorded intent; no authority granted\)/);
++});
++
++test("the builder rejects ambiguous contracts and out-of-scope or oversized evidence before persistence", async () => {
++  const root = await workspace();
++  for (const change of [
++    (input) => { input.currentVersion = {}; },
++    (input) => { input.cases[1].id = input.cases[0].id; },
++    (input) => { input.cases.forEach((item) => { item.required = false; }); },
++    (input) => { input.budgets.attemptsPerCase = 0; },
++    (input) => { input.unknownApproval = true; },
++    (input) => { input.target = "x".repeat(LIMITS.inputBytes); },
++  ]) {
++    const input = contract(); change(input);
++    await assert.rejects(initializeOutcome(root, input));
++  }
++  await initializeOutcome(root, contract());
++  const before = await readFile(logPath(root), "utf8");
++  await assert.rejects(appendOutcome(root, caseRecord("unknown")), /unknown case/);
++  await writeFile(path.join(root, "proof", "huge.txt"), Buffer.alloc(LIMITS.artifactBytes + 1));
++  await assert.rejects(appendOutcome(root, caseRecord("restart", "passed", "proof/huge.txt")), /at most/);
++  await writeFile(path.join(root, ".env"), "test fixture, not a credential");
++  await assert.rejects(appendOutcome(root, caseRecord("restart", "passed", ".env")), /credential files/);
++  const outside = await workspace();
++  await assert.rejects(appendOutcome(root, caseRecord("restart", "passed", path.join(outside, "proof", "evidence.json"))), /inside the project/);
++  assert.equal(await readFile(logPath(root), "utf8"), before);
++});
++
++test("sustained agent attempts stop at the frozen budget and retained history remains reportable", async () => {
++  const root = await workspace();
++  await initializeOutcome(root, contract());
++  for (let index = 0; index < 4; index++) await appendOutcome(root, caseRecord("restart", "failed"));
++  await assert.rejects(appendOutcome(root, caseRecord("restart")), /attempt budget exceeded/);
++  for (let index = 5; index < LIMITS.events - 1; index++) await appendOutcome(root, { type: "decision", decision: "continue", summary: `Retained diagnostic observation ${index}` });
++  await assert.rejects(appendOutcome(root, { type: "decision", decision: "continue", summary: "over limit" }), /event limit/);
++  assert.equal((await readOutcome(root)).events.length, LIMITS.events - 1);
++  assert.ok(Buffer.byteLength((await renderOutcome(root)).html) < LIMITS.reportBytes);
++});
++
++test("burst writers cannot fork the chain; failed writers leave explicit retryable errors", async () => {
++  const root = await workspace();
++  await initializeOutcome(root, contract());
++  const files = await Promise.all(Array.from({ length: 8 }, async (_, index) => {
++    const file = path.join(root, `decision-${index}.json`);
++    await writeFile(file, JSON.stringify({ type: "decision", decision: "continue", summary: `Parallel worker ${index}` }));
++    return file;
++  }));
++  const results = await Promise.all(files.map((file) => new Promise((resolve) => {
++    const child = spawn(process.execPath, [script, "append", file, "--root", root], { stdio: ["ignore", "pipe", "pipe"] });
++    let error = ""; child.stderr.on("data", (chunk) => { error += chunk; });
++    child.on("close", (code) => resolve({ code, error }));
++  })));
++  for (const result of results) assert.ok(result.code === 0 || /writer busy/.test(result.error), result.error);
++  const successful = results.filter((result) => result.code === 0).length;
++  assert.ok(successful > 0);
++  assert.equal((await readOutcome(root)).events.length, successful + 1);
++  await appendOutcome(root, { type: "decision", decision: "continue", summary: "Next session resumes the verified chain" });
++  assert.equal((await readOutcome(root)).events.length, successful + 2);
++});
+diff --git a/templates/base/test/workflow.test.mjs b/templates/base/test/workflow.test.mjs
+index 6e943d0..7ef3d84 100644
+--- a/templates/base/test/workflow.test.mjs
++++ b/templates/base/test/workflow.test.mjs
+@@ -1,5 +1,6 @@
+ import assert from "node:assert/strict";
+ import test from "node:test";
++import { contentHash } from "__NODEKIT_RUNTIME_IMPORT__";
+ import { createGuidedDemo } from "../agent/workflow.mjs";
+ 
+ test("generated base keeps proposals provisional until approval", () => {
+@@ -11,3 +12,33 @@ test("generated base keeps proposals provisional until approval", () => {
+   assert.equal(completed.artifact.canonicalVersion, 2);
+   assert.match(completed.receipt.receiptHash, /^[a-f0-9]{64}$/);
+ });
++
++// A reviewer rejects an unsafe attempt, then two proposals compete for the same version.
++// The stale decision must preserve the winner and the exact original user input.
++test("reviewed outcome survives rejection, competing proposals and receipt export", () => {
++  const demo = createGuidedDemo();
++  const initial = demo.start();
++  const outcome = '  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ';
++  const args = { artifactId: initial.artifact.artifactId, runId: initial.run.runId, outcome };
++  const baseline = demo.runtime.snapshot().artifacts[0];
++  const rejected = demo.propose(args);
++  demo.decide({ decision: "rejected", proposalId: rejected.proposalId, runId: args.runId });
++  assert.deepEqual(demo.runtime.snapshot().artifacts[0], baseline);
++  const winner = demo.propose(args);
++  const stale = demo.propose({ ...args, outcome: "Discard the original outcome." });
++  demo.runtime.decideProposal({ proposalId: winner.proposalId, decision: "accepted" });
++  const accepted = demo.runtime.snapshot().artifacts[0];
++  const conflict = demo.decide({ decision: "accepted", proposalId: stale.proposalId, runId: args.runId });
++  assert.equal(conflict.proposal.status, "conflicted");
++  assert.deepEqual(demo.runtime.snapshot().artifacts[0], accepted);
++  assert.equal(demo.runtime.snapshot().receipts.length, 0);
++  const version = accepted.versions.find((entry) => entry.version === accepted.canonicalVersion);
++  assert.equal(version.content.outcome, outcome);
++  assert.equal(version.contentHash, contentHash(version.content));
++  demo.runtime.enterStage({ runId: args.runId, stageId: "complete" });
++  const { receipt } = demo.runtime.completeRun({ runId: args.runId });
++  assert.equal(receipt.schemaVersion, "nodekit.receipt/v2");
++  assert.deepEqual(receipt.artifactBindings.map(({ artifactId, canonicalVersion, contentHash }) => ({ artifactId, canonicalVersion, contentHash })), [
++    { artifactId: accepted.artifactId, canonicalVersion: 2, contentHash: version.contentHash },
++  ]);
++});

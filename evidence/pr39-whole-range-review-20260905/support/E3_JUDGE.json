@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "portfolio.e3-independent-judge/v1",
+  "verdict": "REFUTED",
+  "mode": "Builder",
+  "reviewScope": "Frozen bounded NodeKit source/package candidate, not full-product readiness",
+  "source": {
+    "root": "D:/VSCode Projects/node-platform/.worktrees/project-consolidation-20260904",
+    "branch": "codex/project-consolidation-20260904",
+    "commit": "a9bbcb130a7ffbb755859c4242f1142d98b67958",
+    "base": "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+    "sourceHash": "1afba1b25ef400e2ee9676835eb364a580d36e6219933e5b3ff9a1b1a42fe87c",
+    "sourceUnchanged": true,
+    "changedFiles": 19
+  },
+  "claims": [
+    {
+      "id": "C1",
+      "status": "REFUTED",
+      "observation": "Existing scenario tests pass, but valid depth-10 artifact content accepted by createArtifact and snapshot cannot be checkpointed. Outcome journal bounds, evidence gates, restart, concurrent writers and inert reports passed.",
+      "defect": "E3-D1"
+    },
+    {
+      "id": "C2",
+      "status": "VERIFIED",
+      "observation": "Raw diff changes exact source citations, tour lines and generated test list; independent onboarding/tour/map scenario rerun passed without assertion weakening."
+    },
+    {
+      "id": "C3",
+      "status": "VERIFIED",
+      "observation": "Only synthetic fixture bytes now use present retrieval time and shared recomputed hashes; production freshness code and archived real evidence unchanged. Explicit freshness/stale tests passed."
+    },
+    {
+      "id": "C4",
+      "status": "VERIFIED",
+      "observation": "Only fast-uri version/resolved/integrity change from 3.1.5 to 3.1.7. Installed 3.1.7, fresh npm audit --omit=dev reports zero vulnerabilities. No added dependency/config."
+    },
+    {
+      "id": "C5",
+      "status": "VERIFIED",
+      "observation": "Raw historical after-log records 894 repository + 8 component passes before lock refresh; first log records 879/894 + 15 failures. Final-candidate independent run records 46 focused passes, public/component typechecks and sequential component build pass. Exact worker 36-count transcript not independently located; independent 46-count run supplies current focused evidence.",
+      "scope": "No claim that all 894 + 8 ran after final lock change. Full 18-minute suite intentionally not rerun."
+    },
+    {
+      "id": "C6",
+      "status": "VERIFIED",
+      "observation": "Factory acceptance installed exact final candidate into empty launcher then generated consumer; all source/tarball/vendor/archive/proof/receipt hashes independently rechecked. Browser evidence records reload and export; 180 screenshot and sidecar byte digests verified. Exported receipt hash and case/run identities rechecked.",
+      "scope": "Preserved browser recording inspected, not independently replayed; browser reload does not establish whole-server process persistence. EASE_NOT_CERTIFIED and submissionReady=false retained."
+    }
+  ],
+  "defects": [
+    {
+      "id": "E3-D1",
+      "severity": "P2",
+      "status": "UNRESOLVED",
+      "claim": "C1",
+      "title": "Checkpoint wrapper rejects existing snapshot-capable nested artifact",
+      "file": "D:/VSCode Projects/node-platform/.worktrees/project-consolidation-20260904/src/lib/caseflow.mjs",
+      "lines": [
+        678,
+        679,
+        202
+      ],
+      "symptom": "A returning developer cannot save the runtime checkpoint for a legal nested requirements artifact.",
+      "boundary": "snapshot() succeeds; exportCheckpoint body hashing fails.",
+      "mechanism": "contentHash(body) and clone(savedCheckpoint) apply the 15-level portable value envelope to the additional checkpoint.state wrapper. A depth-10 content object fits createArtifact and snapshot but reaches depth 16 in the checkpoint.",
+      "upstreamCause": "Local checkpoint serialization reused the per-value provider envelope validator without accounting for checkpoint bookkeeping depth.",
+      "missingGuard": "Checkpoint tests exercise small scalar payloads and collection count but omit existing legal nesting boundaries.",
+      "smallestRepair": "Normalize envelope metadata and state/retry subtrees separately, then canonical-hash the bounded local checkpoint without charging bookkeeping wrappers to subtree depth. maxNestingDepth overrides above 15 are rejected. Preserve current shallow checkpoint hashes, descriptor-safe import copying, byte/collection ceilings, owner matching and all shape/reference checks; do not raise global provider depth or reduce accepted payload depth.",
+      "knockout": "E3-judge-replay.mjs depth 10: createArtifact=passed, snapshot=passed, checkpoint throws nesting exceeds 15. Depth 9 passes all. Depth 11/12 snapshot failures predate this change and are not charged as new defects.",
+      "repairAttempted": false,
+      "reason": "Review-only frozen-source instruction; parent will perform bounded repair."
+    }
+  ],
+  "verification": {
+    "focused": {
+      "tests": 46,
+      "passed": 46,
+      "failed": 0,
+      "log": "E3-judge-focused.log"
+    },
+    "publicTypecheck": "PASS",
+    "componentTypecheck": "PASS",
+    "componentBuild": {
+      "status": "PASS",
+      "log": "E3-judge-build.log",
+      "sequentialAfterTests": true
+    },
+    "npmAuditProductionVulnerabilities": 0,
+    "packageReplay": {
+      "status": "PASS",
+      "script": "E3-judge-replay.mjs",
+      "log": "E3-judge-replay.log",
+      "tarballSha256": "b3390ee5082bb45c82e544d281bd1575b9ac73a13f083d6b9bc7de5045eb7a26",
+      "tarballBytes": 829235,
+      "consumerArchiveSha256": "b946145c2a398b2803f2e86870893c70830f560a253becbb5f3f47604633d6d0",
+      "screenshotPairs": 180
+    }
+  },
+  "readiness": {
+    "boundedCandidateReady": false,
+    "reviewablePRRecommendation": "Repair E3-D1, rerun the exact counterexample and focused/package proof against repaired identity, then propose only the bounded slice.",
+    "fullProductReady": false,
+    "verdict": "EASE_NOT_CERTIFIED"
+  },
+  "limits": [
+    "Full final-lock repository suite not rerun by instruction.",
+    "No deployment, publishing, pushing, committing, destructive action or application source edit performed.",
+    "Historical factory acceptance was not rerun; executable digest verifier and stored artifacts were inspected independently.",
+    "Checkpoint hashes and outcome logs are local integrity/bookkeeping, not authenticated approval or protected harness authority.",
+    "Only one completed-receipt screenshot was visually inspected; no whole-UI visual approval.",
+    "Source file and source digest remained unchanged; generated proof outputs remain dirty and excluded from source claim."
+  ],
+  "preservedCandidateProof": "D:/ProjectRecovery/nodekit-a9bbcb1-acceptance-20260904"
+}

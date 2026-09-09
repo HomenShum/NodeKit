@@ -1,0 +1,189 @@
+{
+  "artifact": {
+    "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "canonicalVersion": 1,
+    "createdAt": "2026-09-05T03:55:29.843Z",
+    "kind": "structured-document",
+    "runId": "run_f455fb218fc1452e98a17fd85f",
+    "schemaVersion": "nodekit.artifact/v1",
+    "title": "Primary artifact",
+    "updatedAt": "2026-09-05T03:55:29.843Z",
+    "versions": [
+      {
+        "content": {
+          "summary": "The last approved result remains here.",
+          "status": "baseline"
+        },
+        "contentHash": "1077e34cc8ffae57d4f0bcd7a40d9e5f152b05da45ab643d36195773c10a7de8",
+        "createdAt": "2026-09-05T03:55:29.843Z",
+        "version": 1
+      }
+    ]
+  },
+  "approvals": [],
+  "case": {
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "createdAt": "2026-09-05T03:55:29.843Z",
+    "currentRunId": "run_f455fb218fc1452e98a17fd85f",
+    "primaryJob": "Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.",
+    "schemaVersion": "nodekit.case/v1",
+    "status": "in_progress",
+    "title": "Nodekit Contract Consumer case",
+    "updatedAt": "2026-09-05T03:55:29.843Z"
+  },
+  "events": [
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "case_52fd9669e3d54f3aa47d147153",
+      "aggregateType": "case",
+      "eventId": "event_e8464f1121cd4f2397f0e78e7c",
+      "eventType": "case.created",
+      "occurredAt": "2026-09-05T03:55:29.843Z",
+      "payload": {
+        "caseId": "case_52fd9669e3d54f3aa47d147153",
+        "createdAt": "2026-09-05T03:55:29.843Z",
+        "currentRunId": null,
+        "primaryJob": "Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.",
+        "schemaVersion": "nodekit.case/v1",
+        "status": "ready",
+        "title": "Nodekit Contract Consumer case",
+        "updatedAt": "2026-09-05T03:55:29.843Z"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+      "aggregateType": "run",
+      "eventId": "event_2b46028be2954d84b0c51aefdc",
+      "eventType": "run.started",
+      "occurredAt": "2026-09-05T03:55:29.843Z",
+      "payload": {
+        "caseId": "case_52fd9669e3d54f3aa47d147153",
+        "createdAt": "2026-09-05T03:55:29.843Z",
+        "currentStageId": "intake",
+        "nextAction": "Confirm the intended outcome",
+        "nextActionOwner": "user",
+        "runId": "run_f455fb218fc1452e98a17fd85f",
+        "schemaVersion": "nodekit.run/v1",
+        "stages": [
+          {
+            "id": "intake",
+            "label": "Confirm the intended outcome",
+            "owner": "user",
+            "status": "active"
+          },
+          {
+            "id": "working",
+            "label": "Prepare a proposal",
+            "owner": "agent",
+            "status": "pending"
+          },
+          {
+            "id": "review",
+            "label": "Review the proposed change",
+            "owner": "user",
+            "status": "pending"
+          },
+          {
+            "id": "complete",
+            "label": "Verify and export",
+            "owner": "system",
+            "status": "pending"
+          }
+        ],
+        "status": "active",
+        "updatedAt": "2026-09-05T03:55:29.843Z"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+      "aggregateType": "run",
+      "eventId": "event_3a0350b8ef6f47169daa0c768c",
+      "eventType": "stage.entered",
+      "occurredAt": "2026-09-05T03:55:29.843Z",
+      "payload": {
+        "stageId": "intake"
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 2
+    },
+    {
+      "actor": {
+        "id": "nodekit",
+        "type": "system"
+      },
+      "aggregateId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+      "aggregateType": "artifact",
+      "eventId": "event_1341177435124186bf7163a429",
+      "eventType": "artifact.created",
+      "occurredAt": "2026-09-05T03:55:29.843Z",
+      "payload": {
+        "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "version": 1
+      },
+      "schemaVersion": "nodekit.caseflow-event/v1",
+      "sequence": 1
+    }
+  ],
+  "exceptions": [],
+  "presentation": {
+    "id": "first_arrival",
+    "kind": "orientation",
+    "message": "Confirm the outcome before the run begins.",
+    "title": "Ready for your direction"
+  },
+  "proposal": null,
+  "receipt": null,
+  "run": {
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "createdAt": "2026-09-05T03:55:29.843Z",
+    "currentStageId": "intake",
+    "nextAction": "Confirm the intended outcome",
+    "nextActionOwner": "user",
+    "runId": "run_f455fb218fc1452e98a17fd85f",
+    "schemaVersion": "nodekit.run/v1",
+    "stages": [
+      {
+        "id": "intake",
+        "label": "Confirm the intended outcome",
+        "owner": "user",
+        "status": "active"
+      },
+      {
+        "id": "working",
+        "label": "Prepare a proposal",
+        "owner": "agent",
+        "status": "pending"
+      },
+      {
+        "id": "review",
+        "label": "Review the proposed change",
+        "owner": "user",
+        "status": "pending"
+      },
+      {
+        "id": "complete",
+        "label": "Verify and export",
+        "owner": "system",
+        "status": "pending"
+      }
+    ],
+    "status": "active",
+    "updatedAt": "2026-09-05T03:55:29.843Z"
+  }
+}

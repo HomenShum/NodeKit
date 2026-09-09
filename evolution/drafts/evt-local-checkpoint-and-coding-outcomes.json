@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:local-checkpoint-and-coding-outcomes",
+  "projectId": "nodekit",
+  "repository": "HomenShum/NodeKit",
+  "source": {
+    "commitSha": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+    "occurredAt": "2026-09-04T23:45:35.943971+00:00",
+    "pullRequest": 39
+  },
+  "track": "architecture",
+  "category": "runtime",
+  "challenge": "A returning maker and developer need the same local artifact and a durable record of the work attempted.",
+  "observedFailure": "The baseline memory runtime exposes snapshots without checkpoint restore; generated applications lack the coding outcome log. The first checkpoint implementation also rejected valid nested content when adding its wrapper.",
+  "resolution": "Add bounded owner-bound checkpoint import/export and generated outcome records with text/HTML reports. Preserve existing payload depth, retry identities, failed attempts and evidence bytes; declare local bookkeeping separate from approval and release.",
+  "assumptionIds": [],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:local-checkpoint-and-coding-outcomes"
+  ],
+  "predecessorIds": [],
+  "knownLimitations": [
+    "Review remains agent-proposed and deferred in PR39.",
+    "No full product, human usability, live-provider or production certification.",
+    "Baseline Evolution Ledger history/authority failures remain unresolved."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

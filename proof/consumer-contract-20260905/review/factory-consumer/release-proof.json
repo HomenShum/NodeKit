@@ -1,0 +1,26 @@
+{
+  "applicationHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+  "checks": {
+    "browserContractPassed": true,
+    "browserJourneyPassed": true,
+    "browserCertified": true,
+    "deterministicDemo": true,
+    "deterministicEvaluation": true,
+    "productionReadinessSatisfied": false,
+    "identityBound": true,
+    "secretFree": true
+  },
+  "configHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+  "generatedAt": "2026-09-05T04:31:23.780Z",
+  "level": "browser-certified",
+  "missingReleaseGates": [
+    "productionReadiness",
+    "deployment",
+    "freshAgentHeldout",
+    "freshHumanUsability",
+    "threeConvexConsumers"
+  ],
+  "passed": true,
+  "releaseReady": false,
+  "schemaVersion": "nodekit.proof-receipt/v1"
+}

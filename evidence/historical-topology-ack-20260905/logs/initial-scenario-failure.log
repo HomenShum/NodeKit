@@ -1,0 +1,39 @@
+TAP version 13
+# warning: in the working copy of 'observation.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-observed-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use
+not ok 1 - historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use
+  ---
+  duration_ms: 1898.4961
+  type: 'test'
+  location: 'D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904\\test\\evolution-ledger.test.mjs:507:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    evd:historical-ack/ must NOT have additional properties
+    asm:strong-model-infers-topology was edited after it was committed in 1f8d3f5c; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> ["one open-ended request without a protected topology"]]
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/test/evolution-ledger.test.mjs:564:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1977.7525

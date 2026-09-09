@@ -69,7 +69,119 @@ function optionalFields(required, optional) {
   ]);
 }
 
-export function createMemoryCaseflow({ clock = () => new Date().toISOString(), ownerId = "local:memory" } = {}) {
+// Checkpoint hashes detect changed bytes; they do not establish authority or
+// guarantee that a producer saved usable lifecycle records. Validate that shape
+// once, before exposing a resumed runtime. No filesystem or schema engine needed.
+function validateCheckpointState(state) {
+  const check = (valid, label) => { if (!valid) throw new Error(`invalid checkpoint ${label}`); };
+  const present = (value, keys, label) => check(value && !Array.isArray(value) && keys.every((key) => Object.hasOwn(value, key)), `${label} fields`);
+  const strings = (value, keys, label) => keys.forEach((key) => requireTrimmedText(value[key], `checkpoint ${label}.${key}`));
+  const positive = (value) => Number.isSafeInteger(value) && value > 0;
+  const ref = (collection, id, label) => {
+    check(typeof id === "string" && collection.has(id), `${label} reference`);
+    return collection.get(id);
+  };
+  const definitions = {
+    cases: ["case", ["caseId", "createdAt", "primaryJob", "title", "updatedAt"], ["ready", "in_progress", "completed"]],
+    runs: ["run", ["runId", "caseId", "createdAt", "updatedAt", "currentStageId", "nextAction", "nextActionOwner"], ["active", "blocked", ...TERMINAL_RUN_STATUSES]],
+    artifacts: ["artifact", ["artifactId", "caseId", "runId", "createdAt", "updatedAt", "kind", "title"]],
+    proposals: ["proposal", ["proposalId", "artifactId", "createdAt"], ["pending", "accepted", "rejected", "conflicted"]],
+    approvals: ["approval", ["approvalId", "proposalId", "decidedAt"]],
+    exceptions: ["exception", ["exceptionId", "runId", "code", "message", "raisedAt"], ["open", "resolved"]],
+    receipts: ["receipt", ["receiptId", "runId", "caseId", "generatedAt", "receiptHash", "caseHash", "runHash"], TERMINAL_RUN_STATUSES],
+  };
+  for (const [name, [kind, fields, statuses]] of Object.entries(definitions)) {
+    for (const record of state[name].values()) {
+      present(record, fields, kind);
+      check(record.schemaVersion === CASEFLOW_SCHEMA_VERSIONS[kind], `${kind} schema`);
+      strings(record, fields, kind);
+      if (statuses) check(statuses.includes(record.status), `${kind} status`);
+    }
+  }
+  for (const work of state.cases.values()) {
+    check(work.currentRunId === null || typeof work.currentRunId === "string", "case current run");
+    if (work.currentRunId !== null) check(ref(state.runs, work.currentRunId, "case current run").caseId === work.caseId, "case/run ownership");
+  }
+  for (const run of state.runs.values()) {
+    ref(state.cases, run.caseId, "run case");
+    normalizeStageDefinitions(run.stages);
+    check(run.stages.every((stage) => ["active", "completed", "pending"].includes(stage.status)) && run.stages.some((stage) => stage.id === run.currentStageId), "run stages");
+  }
+  for (const artifact of state.artifacts.values()) {
+    check(ref(state.runs, artifact.runId, "artifact run").caseId === artifact.caseId, "artifact/run ownership");
+    check(Array.isArray(artifact.versions) && artifact.versions.length > 0 && artifact.versions.length <= 4096 && artifact.canonicalVersion === artifact.versions.length, "artifact versions");
+    for (const [index, version] of artifact.versions.entries()) {
+      present(version, ["content", "contentHash", "createdAt", "version"], "artifact version");
+      strings(version, ["createdAt"], "artifact version");
+      check(version.version === index + 1 && version.contentHash === contentHash(version.content), "artifact version hash or sequence");
+      if (index > 0) {
+        const proposal = ref(state.proposals, version.proposalId, "artifact version proposal");
+        check(proposal.artifactId === artifact.artifactId && proposal.status === "accepted" && proposal.baseVersion === index && contentHash(proposal.patch) === version.contentHash, "artifact/proposal binding");
+      }
+    }
+  }
+  const approvalsByProposal = new Map();
+  for (const approval of state.approvals.values()) {
+    const proposal = ref(state.proposals, approval.proposalId, "approval proposal");
+    check(typeof approval.comment === "string" && ["accepted", "rejected"].includes(approval.decision), "approval decision");
+    check(!approvalsByProposal.has(approval.proposalId) && (proposal.status === approval.decision || (proposal.status === "conflicted" && approval.decision === "accepted")), "approval/proposal decision");
+    approvalsByProposal.set(approval.proposalId, approval);
+  }
+  for (const proposal of state.proposals.values()) {
+    const artifact = ref(state.artifacts, proposal.artifactId, "proposal artifact");
+    check(positive(proposal.baseVersion) && proposal.baseVersion <= artifact.canonicalVersion && typeof proposal.rationale === "string" && Object.hasOwn(proposal, "patch"), "proposal fields");
+    check(proposal.status === "pending" ? !approvalsByProposal.has(proposal.proposalId) : approvalsByProposal.has(proposal.proposalId), "proposal decision reference");
+    if (proposal.status === "accepted") check(artifact.versions.some((version) => version.proposalId === proposal.proposalId), "accepted proposal version");
+  }
+  for (const exception of state.exceptions.values()) {
+    ref(state.runs, exception.runId, "exception run");
+    present(exception, ["preservedState", "resolution"], "exception");
+    check(exception.status === "open" ? exception.resolution === null : typeof exception.resolution === "string" && exception.resolution.trim() && typeof exception.resolvedAt === "string", "exception resolution");
+  }
+  const eventIndex = new Map(), sequences = new Map();
+  for (const event of state.events) {
+    present(event, ["actor", "aggregateId", "aggregateType", "eventId", "eventType", "occurredAt", "payload", "sequence"], "event");
+    strings(event, ["eventId", "eventType", "occurredAt"], "event");
+    check(event.schemaVersion === CASEFLOW_SCHEMA_VERSIONS.event, "event schema");
+    actorValue(event.actor);
+    const collection = { case: state.cases, run: state.runs, artifact: state.artifacts, proposal: state.proposals }[event.aggregateType];
+    check(collection instanceof Map, "event aggregate type");
+    ref(collection, event.aggregateId, "event aggregate");
+    const sequence = (sequences.get(event.aggregateId) ?? 0) + 1;
+    check(event.sequence === sequence, "event sequence");
+    sequences.set(event.aggregateId, sequence); eventIndex.set(event.eventId, event);
+  }
+  const receiptsByRun = new Set();
+  for (const receipt of state.receipts.values()) {
+    const run = ref(state.runs, receipt.runId, "receipt run");
+    check(receipt.caseId === run.caseId && receipt.status === run.status && !receiptsByRun.has(run.runId), "receipt/run binding");
+    receiptsByRun.add(run.runId);
+    const { receiptHash, receiptId, ...body } = receipt;
+    check(receiptHash === contentHash(body) && receipt.runHash === contentHash(run), "receipt hash");
+    for (const key of ["artifactBindings", "proposalBindings", "approvalBindings", "eventBindings", "artifactIds", "proposalIds", "eventIds"]) check(Array.isArray(receipt[key]) && receipt[key].length <= 4096, `receipt ${key}`);
+    const normalized = normalizeReceiptBindings(receipt);
+    for (const [key, value] of Object.entries(normalized)) check(contentHash(value) === contentHash(receipt[key]), `receipt ${key} order or identities`);
+    for (const binding of receipt.artifactBindings) {
+      const artifact = ref(state.artifacts, binding.artifactId, "receipt artifact");
+      check(artifact.runId === run.runId && artifact.canonicalVersion === binding.canonicalVersion && artifact.versions.at(-1).contentHash === binding.contentHash, "receipt artifact binding");
+    }
+    for (const binding of receipt.proposalBindings) {
+      const proposal = ref(state.proposals, binding.proposalId, "receipt proposal");
+      check(proposal.artifactId === binding.artifactId && proposal.baseVersion === binding.baseVersion && proposal.status === binding.status && contentHash(proposal.patch) === binding.patchHash, "receipt proposal binding");
+    }
+    for (const binding of receipt.approvalBindings) {
+      const approval = ref(state.approvals, binding.approvalId, "receipt approval");
+      check(approval.proposalId === binding.proposalId && approval.decision === binding.decision && contentHash(approval.comment) === binding.commentHash, "receipt approval binding");
+    }
+    for (const binding of receipt.eventBindings) {
+      const event = ref(eventIndex, binding.eventId, "receipt event");
+      check(["aggregateId", "aggregateType", "eventType", "sequence"].every((key) => event[key] === binding[key]) && contentHash(event.actor) === binding.actorHash && contentHash(event.payload) === binding.payloadHash, "receipt event binding");
+    }
+  }
+  for (const run of state.runs.values()) check(TERMINAL_RUN_STATUSES.includes(run.status) === receiptsByRun.has(run.runId), "terminal run receipt reference");
+}
+
+export function createMemoryCaseflow({ clock = () => new Date().toISOString(), ownerId = "local:memory", checkpoint: savedCheckpoint } = {}) {
   const owner = requireTrimmedText(ownerId, "memory Caseflow ownerId");
   const state = {
     approvals: new Map(),
@@ -82,6 +194,39 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     runs: new Map(),
   };
   const idempotencyJournal = new Map();
+
+  // Storage adapters may reopen the same lifecycle; they must never reconstruct
+  // IDs, receipts or retry results from a presentation snapshot. This checkpoint
+  // is local state, not a portable approval or a claim of independent proof.
+  if (savedCheckpoint !== undefined) {
+    const checkpoint = normalizeMemoryCheckpoint(savedCheckpoint);
+    const { checkpointHash, ...body } = checkpoint;
+    if (body.schemaVersion !== "nodekit.memory-checkpoint/v1" || body.ownerId !== owner
+      || checkpointHash !== memoryCheckpointHash(body)) throw new Error("checkpoint identity or hash mismatch");
+    const idFields = { approvals: "approvalId", artifacts: "artifactId", cases: "caseId", exceptions: "exceptionId", proposals: "proposalId", receipts: "receiptId", runs: "runId" };
+    if (!body.state || Object.keys(body.state).sort().join() !== Object.keys(state).sort().join()) throw new Error("invalid checkpoint collections");
+    for (const [name, collection] of Object.entries(state)) {
+      const entries = body.state[name];
+      if (!Array.isArray(entries) || entries.length > 4096) throw new Error("checkpoint collection exceeds limit");
+      const identifiers = new Set();
+      for (const entry of entries) {
+        const id = requireTrimmedText(entry?.[name === "events" ? "eventId" : idFields[name]], "checkpoint record ID");
+        if (identifiers.has(id)) throw new Error("duplicate checkpoint record ID");
+        identifiers.add(id);
+        if (collection instanceof Map) collection.set(id, entry);
+        else collection.push(entry);
+      }
+    }
+    if (!Array.isArray(body.idempotencyJournal) || body.idempotencyJournal.length > 4096) throw new Error("checkpoint retry journal exceeds limit");
+    for (const entry of body.idempotencyJournal) {
+      if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== "string"
+        || !entry[0].trim() || !entry[1] || !/^[a-f0-9]{64}$/.test(entry[1].requestHash)
+        || !Object.hasOwn(entry[1], "result") || !entry[1].result || Array.isArray(entry[1].result)
+        || typeof entry[1].result !== "object" || idempotencyJournal.has(entry[0])) throw new Error("invalid checkpoint retry record");
+      idempotencyJournal.set(entry[0], entry[1]);
+    }
+    validateCheckpointState(state);
+  }
 
   function idempotent(idempotencyKey, request, operation) {
     if (idempotencyKey === undefined) return operation();
@@ -527,6 +672,13 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     return clone(Object.fromEntries(Object.entries(state).map(([key, value]) => [key, value instanceof Map ? [...value.values()] : value])));
   }
 
+  function exportCheckpoint() {
+    if (Object.values(state).some((collection) => (collection.size ?? collection.length) > 4096)
+      || idempotencyJournal.size > 4096) throw new Error("checkpoint capacity reached; archive this case before continuing");
+    const body = normalizeMemoryCheckpoint({ schemaVersion: "nodekit.memory-checkpoint/v1", ownerId: owner, state: snapshot(), idempotencyJournal: [...idempotencyJournal.entries()] });
+    return checkMemoryCheckpointBytes({ ...body, checkpointHash: memoryCheckpointHash(body) });
+  }
+
   function getCase(caseId) {
     return clone(requireRecord(state.cases, caseId, "case"));
   }
@@ -576,6 +728,7 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     capabilities: runtimeProfiles.memory,
     ownerId: owner,
     provider: "memory",
+    checkpoint: exportCheckpoint,
     cancelRun,
     completeRun,
     createArtifact,
@@ -593,4 +746,47 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     startRun,
     updateCaseInput,
   };
+}
+
+// A local checkpoint wraps multiple already-portable records. Its bookkeeping
+// must not spend the provider document's nesting budget. Normalize those owned
+// subtrees separately, retaining descriptor/prototype checks on every container.
+function normalizeCheckpointContainer(value, children) {
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const deferred = [];
+  for (const [key, normalize] of Object.entries(children)) {
+    const descriptor = descriptors[key];
+    if (descriptor && Object.hasOwn(descriptor, "value")) {
+      deferred.push([key, normalize, descriptor.value]);
+      descriptors[key] = { ...descriptor, value: null };
+    }
+  }
+  const shell = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value));
+  if (Array.isArray(value)) Object.setPrototypeOf(shell, Object.getPrototypeOf(value));
+  Object.defineProperties(shell, descriptors);
+  const normalized = clone(shell);
+  for (const [key, normalize, child] of deferred) normalized[key] = normalize(child);
+  return normalized;
+}
+
+function normalizeMemoryCheckpoint(value) {
+  return checkMemoryCheckpointBytes(normalizeCheckpointContainer(value, {
+    state: clone,
+    idempotencyJournal: (entries) => {
+      if (!Array.isArray(entries) || entries.length > 4096) throw new TypeError("invalid checkpoint retry journal or limit");
+      const children = Object.fromEntries(Object.keys(entries).map((key) => [key, clone]));
+      return normalizeCheckpointContainer(entries, children);
+    },
+  }));
+}
+
+function checkMemoryCheckpointBytes(value) {
+  if (Buffer.byteLength(canonical(value), "utf8") > PORTABLE_VALUE_LIMITS.maxEncodedBytes) {
+    throw new RangeError("checkpoint exceeds portable encoded byte limit");
+  }
+  return value;
+}
+
+function memoryCheckpointHash(normalizedBody) {
+  return createHash("sha256").update(canonical(normalizedBody)).digest("hex");
 }

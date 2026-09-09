@@ -1,0 +1,407 @@
+{
+  "schemaVersion": "portfolio.pr-material-review-proposal/v1",
+  "generatedAt": "2026-09-05T07:49:46.872543Z",
+  "status": "UNSIGNED_REVIEW_PROPOSAL",
+  "repository": "HomenShum/NodeKit",
+  "pullRequest": 39,
+  "range": {
+    "from": "a2d2e8ce36cc3e87a6a8133469dd55d8b7580588",
+    "to": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825"
+  },
+  "materialBindings": {
+    ".github/workflows/quality.yml": {
+      "baseSha256": "97700d990026407d18daa712831ff978c37b492248ff443ce9a14c2289765874",
+      "currentSha256": "cf9ba3e24e508d4601f335cf520915129bf01055eca8237292c197181e27e76a",
+      "currentBytes": 2224,
+      "workingEqualsCommitted": true,
+      "preAction": true,
+      "authority": false
+    },
+    "schemas/nodekit.evolution-evidence.v1.schema.json": {
+      "baseSha256": "57202664112f2e20d3d517af7c7e05587c3ffcff07fa9f82d9607371da5de554",
+      "currentSha256": "6e77493f6be59b35bcd196f72212180f54f6760cef87d077219ba355cc2cb5b7",
+      "currentBytes": 4431,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": true
+    },
+    "src/caseflow.d.mts": {
+      "baseSha256": "364e9dec69b7c48a90dc1f3df5814ee75ca6f7040d0dfae2c1a75fbc8eb73b0e",
+      "currentSha256": "4b3b790a74010b8f237c8def438b8d611ca43bd038cb5fa8be4f3d78217ecfbb",
+      "currentBytes": 10009,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "src/lib/agent-run.mjs": {
+      "baseSha256": "b9ee2a91dd7f622fc0205283b64d99d1c60ffec5b9b45068f99cbb5d16c739c7",
+      "currentSha256": "f1d77da31a4f473750443c68299768ad68ca848ec03be22416ec9645676b8c8d",
+      "currentBytes": 24644,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "src/lib/caseflow.mjs": {
+      "baseSha256": "e49226adc2085636a2c88a55115bd594bc2bd89622df4345435f7c8eec3bf73a",
+      "currentSha256": "083c803079d5e65cd8119792155231ea3bee49bcb51be331dc274202765a2c7e",
+      "currentBytes": 38737,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "src/lib/evolution-immutability.mjs": {
+      "baseSha256": "327e75e93dae3f5baadbccb132f246b9f4c0f5046a515d4b9ca1fa03738a4bea",
+      "currentSha256": "59a8748d3cc336d39f6991a1dabacba9142805841d55f9fc8a66ed5f3160d69b",
+      "currentBytes": 7244,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": true
+    },
+    "src/lib/evolution-ledger.mjs": {
+      "baseSha256": "9f91724528c464e42b9221376ff71fc0706a7b20bc44a3a7363deccdf5ef8bb8",
+      "currentSha256": "4c74f5d219b34a5d5a1a7474ca38e092e2c4f9ade01034fe399e01860b65e3b5",
+      "currentBytes": 52909,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": true
+    },
+    "templates/base/.gitattributes": {
+      "baseSha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+      "currentSha256": "15ddfda42bb8d38f2aec9ee9f329517c6b4e1faf31430181f8f722ec476c75f9",
+      "currentBytes": 132,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/AGENTS.md": {
+      "baseSha256": "81afa6f5cfe86f25bce8d807cdc02a45f9e6566e525f654a8d084a10fb884477",
+      "currentSha256": "1a7a6afb657631c04f45c526a02099f899bbb560541fc8eb51f2b0a9585b7963",
+      "currentBytes": 3947,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/README.md": {
+      "baseSha256": "ef622e77ec0264f6f76001b90d638f0af553ebcf06c732cf459403de1deb00b6",
+      "currentSha256": "794ef16566634a290b65c4d5de72fa7ffb20402570814f86f449e4048920389a",
+      "currentBytes": 3311,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/agent/workflow.mjs": {
+      "baseSha256": "f8274bef96799eac092f938a839da7145c794db6be1c5218a90c7096d6cd27d4",
+      "currentSha256": "76213a2621a2d208914775c21201748c43db24ba8739f73b0c6e453557816d08",
+      "currentBytes": 2830,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/apps/web/public/app.js": {
+      "baseSha256": "c3e8dc478fb252dc7cfdc8a76077b155002394e1e0c979165df56a9c6b8cc516",
+      "currentSha256": "572cca9f9cb2fb172ca7306eb099bbb66be800fa619c96cc8dae21e3f4db247b",
+      "currentBytes": 12442,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/apps/web/public/styles.css": {
+      "baseSha256": "b50ab6810b95b444ed1543ab94d4df76d664ef56cea941cc7cc185d07ef12e5c",
+      "currentSha256": "63dcf76ecbb231daa4a668036713167271e669356eb68fee047938febfc4b88e",
+      "currentBytes": 17938,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/apps/web/server.mjs": {
+      "baseSha256": "61d5ac53333dd1190778771926a0c7782fdf7f032ca99f9b56b15fa974fa4e8e",
+      "currentSha256": "68c74ad544fe37454e64d545df26928531e581849d583bfa512dcd86a1a5ed36",
+      "currentBytes": 12702,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/docs/CODING_SEQUENCE.md": {
+      "baseSha256": null,
+      "currentSha256": "16c3bdd8cf058ccc01415d1669605e97583db1482c99f160a97df38cf9035bcb",
+      "currentBytes": 7391,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/package.json": {
+      "baseSha256": "7894b563dca913ddef667a61335f809819c1426f096cf699496de6edaf576a74",
+      "currentSha256": "8078b305aaffc1db4ea2b40175dc79de7f1dc1fac507bafaed19e41ac58d8894",
+      "currentBytes": 864,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/schemas/outcome-contract.schema.json": {
+      "baseSha256": null,
+      "currentSha256": "a2612481e89218caea5c4a6cc8e7a77d9a3316070f5282e50dce7bd704feade0",
+      "currentBytes": 3754,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/scripts/browser-certify.mjs": {
+      "baseSha256": "dadc80f217d98282e0381043558c8c4ea691a1d52974314a1dcdf79a0715a301",
+      "currentSha256": "a094c4886491528ad37059b413306ab1e47d9f4a7f8297301d11cfd3ec5bc393",
+      "currentBytes": 33591,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/scripts/outcome.mjs": {
+      "baseSha256": null,
+      "currentSha256": "a69dc179ed868bb7b07c774d204f612deba7ff8719a6d6c021b11cf3dd301f4a",
+      "currentBytes": 16095,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/test/outcome.test.mjs": {
+      "baseSha256": null,
+      "currentSha256": "91216a5384c41789ee6f406560e546e02eea2ef98452c330ef87410efc6bd640",
+      "currentBytes": 11262,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    },
+    "templates/base/test/workflow.test.mjs": {
+      "baseSha256": "6ef82b96ea99e761c70ca627ef778ebabb999f8fdc9c6ce8e66ce53d3424037b",
+      "currentSha256": "d4b11aff005abeeb3a1d02ee05ca1f732602fe8f8304537d388ccc3aec639426",
+      "currentBytes": 2757,
+      "workingEqualsCommitted": true,
+      "preAction": false,
+      "authority": false
+    }
+  },
+  "claimGroups": [
+    {
+      "name": "Local checkpoint and failed command receipt",
+      "paths": [
+        "src/caseflow.d.mts",
+        "src/lib/caseflow.mjs",
+        "src/lib/agent-run.mjs"
+      ],
+      "claim": "Bounded owner-bound memory checkpoint export/restore preserves lifecycle, sequence, content and receipt relationships. Synchronous process-spawn failure becomes the same durable failed receipt as asynchronous spawn failure. This is local recovery, not durable multi-user storage or signed approval.",
+      "evidence": [
+        "E3_JUDGE.json",
+        "E3_REPAIR_JUDGE.json",
+        "E3_FINAL_PACKAGE_JUDGE.json"
+      ]
+    },
+    {
+      "name": "Generated coding outcome record",
+      "paths": [
+        "templates/base/.gitattributes",
+        "templates/base/AGENTS.md",
+        "templates/base/README.md",
+        "templates/base/docs/CODING_SEQUENCE.md",
+        "templates/base/package.json",
+        "templates/base/schemas/outcome-contract.schema.json",
+        "templates/base/scripts/outcome.mjs",
+        "templates/base/test/outcome.test.mjs"
+      ],
+      "claim": "Generated projects receive a bounded append-only task/outcome log, required-case local artifact byte checks and matching text/HTML reports. Their reported status is not independent approval or release authority. Exact evidence bytes are preserved across platform line-ending conversion.",
+      "evidence": [
+        "E3_FINAL_PACKAGE_JUDGE.json",
+        "E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json"
+      ]
+    },
+    {
+      "name": "Actual consumer handoff",
+      "paths": [
+        "templates/base/agent/workflow.mjs",
+        "templates/base/apps/web/public/app.js",
+        "templates/base/apps/web/public/styles.css",
+        "templates/base/apps/web/server.mjs",
+        "templates/base/scripts/browser-certify.mjs",
+        "templates/base/test/workflow.test.mjs"
+      ],
+      "claim": "The confirmed original outcome reaches the accepted canonical artifact, four rendered identity attributes and actual downloaded proof. Reject/conflict preserve the canonical owner; completed cases expose Download proof; hidden empty error region remains hidden. Independent hash and identity knockouts reject altered exports. Fresh browser context preserves the same running process, not a restarted server.",
+      "evidence": [
+        "E3c_NODEKIT_CONSUMER_CONTRACT_JUDGE.json",
+        "E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json",
+        "E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json"
+      ]
+    },
+    {
+      "name": "Current governance repair",
+      "paths": [
+        "schemas/nodekit.evolution-evidence.v1.schema.json",
+        "src/lib/evolution-immutability.mjs",
+        "src/lib/evolution-ledger.mjs"
+      ],
+      "claim": "Recompute actual Git material and authority paths for deferred review, reject excluded pre-action files and later material changes, and acknowledge only the exact historically added dimensionsTested field using a hash-bound forward informational record. Historical canonical bytes and signed history remain intact; the original missing motion source is preserved by an exact durable Git tag. No blanket dimensions exception, fake signature or rewritten event.",
+      "evidence": [
+        "E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json",
+        "E3d_NODEKIT_MOTION_PRESERVATION_JUDGE.json",
+        "E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json",
+        "E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json"
+      ]
+    },
+    {
+      "name": "CI browser prerequisite requiring prior authority",
+      "paths": [
+        ".github/workflows/quality.yml"
+      ],
+      "claim": "Install the Playwright-selected Chromium and Linux OS dependencies immediately after npm ci for the existing required browser gate. The two added workflow lines retain all existing gates. This path is excluded from reversible deferred review, even though the prerequisite itself was independently reviewed.",
+      "evidence": [
+        "E3_CI_REPAIR_JUDGE.json"
+      ]
+    }
+  ],
+  "materialDiff": {
+    "path": "material-change.diff",
+    "sha256": "d1dd56fe18485434e8c9a8a564e41d78d6b6ee419954c1ce939c04487f1d6f55",
+    "bytes": 104602
+  },
+  "support": [
+    {
+      "path": "support/E3_JUDGE.json",
+      "sha256": "0c96ce07f7bf1383dfb0656efb86f6d268c15ca3f685552aa0e32716b786f025",
+      "bytes": 6826,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3_JUDGE.json"
+    },
+    {
+      "path": "support/E3_REPAIR_JUDGE.json",
+      "sha256": "33bc356b7cd7adc6429fce62565691a6920dad8e8022206e79a625cc20298566",
+      "bytes": 2413,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3_REPAIR_JUDGE.json"
+    },
+    {
+      "path": "support/E3_FINAL_PACKAGE_JUDGE.json",
+      "sha256": "9a8a4cbb65b19ecb4e8de797523a6b68f49b11d1e34de6533caeb57a1a52ba1e",
+      "bytes": 4233,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3_FINAL_PACKAGE_JUDGE.json"
+    },
+    {
+      "path": "support/E3_CI_REPAIR_JUDGE.json",
+      "sha256": "bb9bf2ed7f53b0c85371fcf1f64262676e462f65098dcc6a8220f878f3bf927f",
+      "bytes": 2406,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3_CI_REPAIR_JUDGE.json"
+    },
+    {
+      "path": "support/E3_DEFERRED_REVIEW_JUDGE.json",
+      "sha256": "390a54f65b6070b5ff91e2831ea3b8b4455fa0c8ea004a8150eaba485c214013",
+      "bytes": 8474,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3_DEFERRED_REVIEW_JUDGE.json"
+    },
+    {
+      "path": "support/E3c_NODEKIT_CONSUMER_CONTRACT_JUDGE.json",
+      "sha256": "9e58838b5cf9a9c40b558e2eb671e932dca647df6e3b02b4ad71ebd97796d2ae",
+      "bytes": 211316,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c_NODEKIT_CONSUMER_CONTRACT_JUDGE.json"
+    },
+    {
+      "path": "support/E3c_NODEKIT_CONSUMER_CONTRACT_RECEIPT.json",
+      "sha256": "b36dd0b2b492ee500853d239f8d163af20b76f46765dd4c704a80ff82265400d",
+      "bytes": 189483,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c_NODEKIT_CONSUMER_CONTRACT_RECEIPT.json"
+    },
+    {
+      "path": "support/E3c_NODEKIT_REVIEWED_FACTORY_JUDGE.json",
+      "sha256": "136dc0c8455b44a76b058559dd6a829e617e9a57404c61368509f7609613904d",
+      "bytes": 19553,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c_NODEKIT_REVIEWED_FACTORY_JUDGE.json"
+    },
+    {
+      "path": "support/E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json",
+      "sha256": "3df12dc20d43658a870f3e0b193812328baf7f75556cb16e24c80b680c124640",
+      "bytes": 22361,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3d_NODEKIT_GOVERNED_REPAIR_JUDGE.json"
+    },
+    {
+      "path": "support/E3d_NODEKIT_HISTORICAL_ACK_RECEIPT.json",
+      "sha256": "70c1ce9d9ada38b9e9b591a1af43e5739336917339a3b587a470164c5e660e5c",
+      "bytes": 27720,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3d_NODEKIT_HISTORICAL_ACK_RECEIPT.json"
+    },
+    {
+      "path": "support/E3d_NODEKIT_MOTION_PRESERVATION_JUDGE.json",
+      "sha256": "7fb67680d714d3f8e9fd1e29110fbd4d56564a5dfe27f75d5e3829679b64abb7",
+      "bytes": 540,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3d_NODEKIT_MOTION_PRESERVATION_JUDGE.json"
+    },
+    {
+      "path": "support/E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json",
+      "sha256": "334a9d4a5f6b8b98ff98e5da3b6d2205c45b8624aaefc8f5be43ce5eb9dbba1e",
+      "bytes": 22721,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json"
+    },
+    {
+      "path": "support/E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json",
+      "sha256": "d32618b5563d4e2b46adadf19c9efc5112c571b941d187e2aa2290b7bcf178fb",
+      "bytes": 19365,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json"
+    },
+    {
+      "path": "support/E3e_NODEKIT_RAW_STAGE_JUDGE.json",
+      "sha256": "bd102cb3d98ee589ac4adf304b598cb557ae60be4dbef073896413dbadcc7d65",
+      "bytes": 11524,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_RAW_STAGE_JUDGE.json"
+    },
+    {
+      "path": "support/E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json",
+      "sha256": "8b9ba887b39f8e48bd7011e5f94b780da4743363ddbc78a563b5f0c6fc10e09b",
+      "bytes": 16287,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json"
+    },
+    {
+      "path": "support/E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json",
+      "sha256": "55da0c061df8494af66886a2d56c9cecb91508f171a59f47c12137dbfafd47c1",
+      "bytes": 441740,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json"
+    },
+    {
+      "path": "support/E3f_NODEKIT_WHOLE_PR_AUTHORITY_INPUTS.json",
+      "sha256": "545fe8c09affda5be280d5fd3bea501f9ea616cdd7f8caa263fbcbce190f9433",
+      "bytes": 94889,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3f_NODEKIT_WHOLE_PR_AUTHORITY_INPUTS.json"
+    },
+    {
+      "path": "support/E3c-nodekit-governance-whole-pr-materiality-20260905.log",
+      "sha256": "34dbca5b51a3c13b3d7f0c8c47decbcb38274d4d557bb627a0a88a44aabff087",
+      "bytes": 101,
+      "original": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-whole-pr-materiality-20260905.log"
+    }
+  ],
+  "publicTrustPolicy": {
+    "version": "trust-policy-2026-07-29-1",
+    "requiredTrustLevel": "H1",
+    "sha256": "95fef15bfda88b1a45eb1b24e500eb2c958134be297e71cf608fc56b012647c1",
+    "credentials": {
+      "dev-software-key": {
+        "algorithm": "Ed25519",
+        "trustLevel": "H1",
+        "purposes": [
+          "evolution-canonical-promotion"
+        ],
+        "reviewer": "HomenShum",
+        "publicKeySha256": "5295653678d03fb7bfbd29f38f3fc662f7902859cc18e99208e36e9c49a01759",
+        "note": "Exportable software key. Credential-attested only; it does NOT prove a human acted."
+      }
+    }
+  },
+  "actualGate": {
+    "passed": false,
+    "materialFiles": 21,
+    "canonicalEvents": 0,
+    "validDeferredReviews": 0
+  },
+  "knownLimitations": [
+    "This is an unsigned review proposal. The whole-PR gate remains blocked until a valid canonical promotion is actually recorded.",
+    "The existing H1 exportable software credential attests control of that credential, not human presence or human usability acceptance.",
+    "The current factory passed 13 base checks in 178511 ms; warm-or-unknown caches, Windows/Node 22.22.2/npm 10.9.7. It is not a cold-install latency claim.",
+    "Browser certification binds the actual current package; the release verdict remains EASE_NOT_CERTIFIED with submissionReady false and 12 existing blockers. Full readiness dimensions remain null.",
+    "The consumer archive has 77 exact committed files. Current working proof/build-friction.json has five normal post-commit check events; the other 76 tracked files match. Do not call the whole consumer clean.",
+    "Historical raw failures and earlier reports remain historical; source hashes and reviewed commit boundaries decide which claims apply.",
+    "No production, managed-backend durability, host activation, live-model or human acceptance is claimed.",
+    "A signature obtained now would be current review before further governed integration. It cannot retroactively prove review before earlier local commits or pushes."
+  ],
+  "noPrivateCredentialAccess": true,
+  "reviewerContext": "Reused independent judge context; author is not the implementation author. No new reviewer agent was available under the active thread limit."
+}

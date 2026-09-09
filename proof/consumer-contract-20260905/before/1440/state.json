@@ -1,0 +1,67 @@
+{
+  "scenario": "completed_receipt",
+  "alert": {
+    "hidden": true,
+    "display": "flex",
+    "text": "Retry",
+    "rect": {
+      "x": 57.59375,
+      "y": 445.96875,
+      "width": 1324.8125,
+      "height": 34
+    }
+  },
+  "artifact": {
+    "attributes": {
+      "data-nodekit-artifact-type": null,
+      "data-nodekit-artifact-id": null,
+      "data-nodekit-artifact-version": null,
+      "data-nodekit-artifact-content-sha256": null
+    },
+    "displayedVersion": "v2"
+  },
+  "sourceLabels": [
+    "CHANGE A · Error feedback strip",
+    "CHANGE B · Canonical artifact and result"
+  ],
+  "boxes": [
+    {
+      "selector": "#error",
+      "label": "CHANGE A · Error feedback strip",
+      "color": "#9d174d",
+      "borderPx": 3,
+      "left": 57.59375,
+      "top": 445.96875,
+      "width": 1324.8125,
+      "height": 34
+    },
+    {
+      "selector": "#artifact",
+      "label": "CHANGE B · Canonical artifact and result",
+      "color": "#1d4ed8",
+      "borderPx": 3,
+      "left": 278.59375,
+      "top": 586.34375,
+      "width": 742.8125,
+      "height": 719.015625
+    },
+    {
+      "selector": "#review",
+      "label": "CHANGE C · Existing receipt export controls only",
+      "color": "#047857",
+      "borderPx": 3,
+      "left": 1021.40625,
+      "top": 586.34375,
+      "width": 360,
+      "height": 719.015625
+    }
+  ],
+  "viewport": {
+    "width": 1440,
+    "height": 960
+  },
+  "route": "http://127.0.0.1:43873",
+  "theme": "light",
+  "session": "anonymous isolated Chromium context",
+  "trigger": "Confirm outcome, prepare proposal, explicitly approve; scroll to top after settled render."
+}

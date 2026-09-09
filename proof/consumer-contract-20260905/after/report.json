@@ -1,0 +1,124 @@
+{
+  "at": "2026-09-05T03:56:09.628Z",
+  "origin": "http://127.0.0.1:43873",
+  "fixture": "Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.",
+  "sourceBefore": {
+    "apps/web/public/index.html": "9c8c901e03c5b9dfd0d905537e5d29348b3b674916c3d5f162d165460fe4f5cd",
+    "apps/web/public/app.js": "572cca9f9cb2fb172ca7306eb099bbb66be800fa619c96cc8dae21e3f4db247b",
+    "apps/web/public/styles.css": "63dcf76ecbb231daa4a668036713167271e669356eb68fee047938febfc4b88e",
+    "apps/web/server.mjs": "dca8683a455ecf0091b9ac7c849e250b5e92b9e89c8c4d2bea81d02051fcc6dc",
+    "agent/workflow.mjs": "57119b664a07e0419d4de327815c97c2f188d6bdb475df21e309d7acf659b1bb"
+  },
+  "states": [
+    {
+      "width": 1440,
+      "scenario": "completed_receipt",
+      "alert": {
+        "hidden": true,
+        "display": "none",
+        "text": "Retry",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      "artifact": {
+        "attributes": {
+          "data-nodekit-artifact-type": "structured-document",
+          "data-nodekit-artifact-id": "artifact_465d328e478640f4866b51615f",
+          "data-nodekit-artifact-version": "2",
+          "data-nodekit-artifact-content-sha256": "58ce412ce9c72d435073b80a3088ad7086a47a10d386386a1d91faa5e2eedbbf"
+        },
+        "displayedVersion": "v2"
+      },
+      "sourceLabels": [
+        "CHANGE A · Error feedback strip",
+        "CHANGE B · Canonical artifact and result"
+      ],
+      "boxes": [
+        {
+          "selector": "#error",
+          "label": "CHANGE A · Error feedback strip",
+          "color": "#9d174d",
+          "borderPx": 3,
+          "left": 0,
+          "top": 0,
+          "width": 0,
+          "height": 0
+        },
+        {
+          "selector": "#artifact",
+          "label": "CHANGE B · Canonical artifact and result",
+          "color": "#1d4ed8",
+          "borderPx": 3,
+          "left": 278.59375,
+          "top": 536.34375,
+          "width": 742.8125,
+          "height": 1049.015625
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "scenario": "completed_receipt",
+      "alert": {
+        "hidden": true,
+        "display": "none",
+        "text": "Retry",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      "artifact": {
+        "attributes": {
+          "data-nodekit-artifact-type": "structured-document",
+          "data-nodekit-artifact-id": "artifact_88474f803afc4af69de10cd565",
+          "data-nodekit-artifact-version": "2",
+          "data-nodekit-artifact-content-sha256": "58ce412ce9c72d435073b80a3088ad7086a47a10d386386a1d91faa5e2eedbbf"
+        },
+        "displayedVersion": "v2"
+      },
+      "sourceLabels": [
+        "CHANGE A · Error feedback strip",
+        "CHANGE B · Canonical artifact and result"
+      ],
+      "boxes": [
+        {
+          "selector": "#error",
+          "label": "CHANGE A · Error feedback strip",
+          "color": "#9d174d",
+          "borderPx": 3,
+          "left": 0,
+          "top": 0,
+          "width": 0,
+          "height": 0
+        },
+        {
+          "selector": "#artifact",
+          "label": "CHANGE B · Canonical artifact and result",
+          "color": "#1d4ed8",
+          "borderPx": 3,
+          "left": 17,
+          "top": 591.125,
+          "width": 356,
+          "height": 756.609375
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "browser": "149.0.7827.55",
+  "sourceAfter": {
+    "apps/web/public/index.html": "9c8c901e03c5b9dfd0d905537e5d29348b3b674916c3d5f162d165460fe4f5cd",
+    "apps/web/public/app.js": "572cca9f9cb2fb172ca7306eb099bbb66be800fa619c96cc8dae21e3f4db247b",
+    "apps/web/public/styles.css": "63dcf76ecbb231daa4a668036713167271e669356eb68fee047938febfc4b88e",
+    "apps/web/server.mjs": "dca8683a455ecf0091b9ac7c849e250b5e92b9e89c8c4d2bea81d02051fcc6dc",
+    "agent/workflow.mjs": "57119b664a07e0419d4de327815c97c2f188d6bdb475df21e309d7acf659b1bb"
+  },
+  "passed": true
+}

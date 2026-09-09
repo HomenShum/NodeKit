@@ -1,0 +1,454 @@
+{
+  "proof": "NODEKIT-CONSUMER-INTERCHANGE-01-FACTORY-JUDGE",
+  "at": "2026-09-05T04:53:34.915381+00:00",
+  "mode": "Builder / independent judge",
+  "verdict": "VERIFIED_WITH_CAVEATS",
+  "requestTraceability": "Prepare each individual repository for developer/user handoff, including visual responsiveness and interaction standards, using an independent planner-worker-judge method. This slice verifies post-commit NodeKit factory provenance and the actual retained consumer certificate.",
+  "reviewerIndependence": "Nonauthor independent reviewer; context reused because fresh agent slots were unavailable. This reviewer previously replayed the frozen consumer contract and did not implement NodeKit.",
+  "reviewScope": "Read-only actual post-commit factory artifacts, package bytes, generated commit, certificates, and bounded actual screenshot inspection. No repeat of 855 repository tests or the full browser matrix; no source/index/ref/environment edits, commits, provider requests or deployment.",
+  "source": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904",
+  "sourceCommit": "e7e4b10f02d25c4e63e4bc1ae23e283693d9fdd5",
+  "sourceTree": "f15e2a2b2d35110a9dff8c5a9932e2c267ae5ae1",
+  "nodekitSourceHash": "35c81da5838699b3177a1169121526a3b86e5b286b51b9e9400da595fb2ad56d",
+  "tarballSha256": "5964b7b265d3e9f79f49e825abd9682caf3440cc5125ceec1331569b9599b83b",
+  "tarballBytes": 832769,
+  "originalWorkspace": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z",
+  "durableWorkspace": "D:\\ProjectRecovery\\nodekit-consumer-contract-20260905\\reviewed-factory",
+  "consumer": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base",
+  "generatedCandidateCommit": "2926ee9cb5b8c848632a07a332c9ddbb7b081366",
+  "generatedCandidateArchive": {
+    "path": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904\\proof\\ease\\latest\\candidate.tar.gz",
+    "sha256": "3b534c70922f475ec76d98495c59d4397b89420d0c0d29ec96c1336ca41c8f30",
+    "bytes": 912634,
+    "files": 77,
+    "allFilesEqualCommit": true
+  },
+  "checks": [
+    {
+      "name": "source exact reviewed commit",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "source exact independently reviewed tree",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "no staged source delta",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "receipt equals durable manifest bytes",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "1675 durable artifact files equal actual originals",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "reviewed tarball raw hash",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "consumer vendored tarball exact",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "421 package file set exact",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "421 source packed and two installed files exact",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "factory actual receipt matches operator receipt",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "factory evidence manifest equals factory receipt bytes",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "generated consumer commit exists and exact",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "factory all 13 checks true",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "all measured command phases exit zero",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "browser certificate bound to committed source",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "browser 180 screenshots 18 journey assertions no failures",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "180 raw screenshots and sidecars bound to actual files",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "six browser artifacts raw hashes exact",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "browser manifest actual copies exact",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "retained candidate archive hash exact",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "all application identity bytes exact",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "release browser-certified but not release ready",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "factory ease remains not certified and submission held",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "staged source refusal retained",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "sourceHashMatches",
+      "pass": true
+    },
+    {
+      "name": "factoryReceiptDigestMatches",
+      "pass": true
+    },
+    {
+      "name": "browserManifestDigestMatches",
+      "pass": true
+    },
+    {
+      "name": "factoryBrowserDigestMatches",
+      "pass": true
+    },
+    {
+      "name": "releaseProofDigestMatches",
+      "pass": true
+    },
+    {
+      "name": "368 pre-factory generated outputs preserved",
+      "pass": true
+    },
+    {
+      "name": "canonical application and configuration identity recomputed",
+      "pass": true
+    },
+    {
+      "name": "read-only consumer compile freshness check",
+      "pass": true
+    },
+    {
+      "name": "77 archive files equal actual generated commit",
+      "pass": true
+    },
+    {
+      "name": "source and consumer HEAD/index preserved",
+      "pass": true
+    },
+    {
+      "name": "four actual factory PNGs viewed for receipt actions review and error state",
+      "pass": true,
+      "detail": "Mobile receipt/download content is readable and contained; desktop export shows the artifact, receipt and download action; mobile approval actions are available in the bottom bar; desktop validation error is explicit."
+    }
+  ],
+  "passed": true,
+  "custodyCounts": {
+    "durableFilesAndOriginals": 1675,
+    "exactSourcePackedLauncherConsumerFiles": 421,
+    "screenshotPngsAndSidecars": 180,
+    "browserEvidenceArtifacts": 6,
+    "applicationIdentityFiles": 36,
+    "preFactoryFiles": 368,
+    "preFactoryBytes": 29067667
+  },
+  "factoryResult": {
+    "passed": true,
+    "durationMs": 180676,
+    "timerBoundary": "empty-launcher-before-package-json-to-completed-proof",
+    "cacheClass": "warm-or-unknown",
+    "cacheIsolated": false,
+    "baseChecks": {
+      "browserContractPassed": true,
+      "browserJourneyPassed": true,
+      "candidateCommitted": true,
+      "compileReproducible": true,
+      "domainBlank": true,
+      "easeCertificationHonest": true,
+      "figuredOutContract": true,
+      "lockCreated": true,
+      "proofIdentityBound": true,
+      "proofPassed": true,
+      "runtimeHashBound": true,
+      "runtimeNotMisclassified": true,
+      "runtimeSpecifierPortable": true
+    },
+    "receiptDigest": "e6715b6b00aadf5dbbdb3b751484e7a66e14aa7b976403a48ecd0211f0b98bbe",
+    "digestRecomputed": true,
+    "verdict": "EASE_NOT_CERTIFIED",
+    "submissionReady": false,
+    "submissionBlockers": [
+      "developerTimingMatrix",
+      "freshAgentHeldout",
+      "freshHumanUsability",
+      "threeConvexConsumers",
+      "previewDeployment",
+      "managedSupabasePortability",
+      "knowledgeEvolutionAdoption",
+      "modelIntelligenceHarness",
+      "engineeringHealth",
+      "proofloopEaseVerification",
+      "packageInstallProof",
+      "publicationApproval"
+    ]
+  },
+  "browserResult": {
+    "passed": true,
+    "certified": true,
+    "verdict": "BROWSER_CERTIFIED",
+    "nodekitSourceBound": true,
+    "nodekitTarballBound": true,
+    "manifestDigest": "7f188245dd4b291c426e1bc762942faaf9a274e25bcbb197e3921f28412d9c7f",
+    "digestRecomputed": true,
+    "screenshots": 180,
+    "journeyAssertions": {
+      "activityModeOperable": true,
+      "approvalApplied": true,
+      "canonicalInterchangeVerified": true,
+      "contractKnockoutsRejected": true,
+      "freshContextPreserved": true,
+      "rejectedProposalPreserved": true,
+      "staleProposalPreserved": true,
+      "conflictRecovered": true,
+      "exceptionRecovered": true,
+      "exportBlockedBeforeCompletion": true,
+      "exportDownloadedAndVerified": true,
+      "outcomeConfirmed": true,
+      "proposalBlockedBeforeConfirmation": true,
+      "proposalVisible": true,
+      "receiptSurvivedReload": true,
+      "receiptVisible": true,
+      "shareSummaryProduced": true,
+      "stateActionsCoherent": true
+    },
+    "missingStates": [],
+    "generatedCandidateCommit": "2926ee9cb5b8c848632a07a332c9ddbb7b081366",
+    "sourceCommitIsRealVerifiedCommit": true
+  },
+  "releaseResult": {
+    "applicationHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+    "checks": {
+      "browserContractPassed": true,
+      "browserJourneyPassed": true,
+      "browserCertified": true,
+      "deterministicDemo": true,
+      "deterministicEvaluation": true,
+      "productionReadinessSatisfied": false,
+      "identityBound": true,
+      "secretFree": true
+    },
+    "configHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+    "generatedAt": "2026-09-05T04:31:23.780Z",
+    "level": "browser-certified",
+    "missingReleaseGates": [
+      "productionReadiness",
+      "deployment",
+      "freshAgentHeldout",
+      "freshHumanUsability",
+      "threeConvexConsumers"
+    ],
+    "passed": true,
+    "releaseReady": false,
+    "schemaVersion": "nodekit.proof-receipt/v1"
+  },
+  "applicationIdentity": {
+    "applicationHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+    "canonicalHashRecomputed": true,
+    "allRawFilesVerified": true
+  },
+  "preservation": {
+    "sourceHead": true,
+    "sourceIndexSha256": true,
+    "consumerHead": true,
+    "consumerIndexSha256": true
+  },
+  "observedScreenshots": [
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\receipt_inspection--mobile-portrait--light.png",
+      "sha256": "b97bb96c4eed07de0100c58ce694e346d53623db71d5805bb3e527ba1c800776"
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\export_share--desktop--light.png",
+      "sha256": "21e98e5ca8ae3309a30707055c38b68ae7d5e8eef84484c2f6c2252119124d75"
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\approval--mobile-portrait--dark.png",
+      "sha256": "e64fd8a330a1b61706a23d54b65e53f510f41a415a72a0190dd82e839cd72ab3"
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\validation_error--desktop--dark.png",
+      "sha256": "6aded5e5419255f6615e2519a1aa2a8869c34d5688d0baf5a0964704eee2c853"
+    }
+  ],
+  "failuresPreserved": [
+    {
+      "kind": "original factory refusal",
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory.log",
+      "detail": "The earlier factory invocation raced the still-staged source candidate and correctly refused it. The subsequent unchanged factory ran after the reviewed commit. This historical failure is retained and is not promoted to a pass."
+    },
+    {
+      "kind": "judge hash diagnostic",
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\digests.json",
+      "detail": "The initial diagnostic tried hashing only the application identity object and found a mismatch. The actual contract hashes canonical identity plus the complete manifest and resolved contracts. final-identity.json independently recomputes that contract and passes; the mistaken diagnostic remains preserved."
+    }
+  ],
+  "limitations": [
+    "The measured 180676 ms factory duration is one local warm-or-unknown-cache run; it is not a cold-install guarantee or ease certification.",
+    "Browser certification is bound to this generated local consumer. releaseReady stays false with five missing release gates; factory submissionReady stays false with twelve blockers and EASE_NOT_CERTIFIED.",
+    "Previously documented ledger/authority holds and in-memory runtime limits are independent and unchanged. A blank scaffold is not a completed domain application.",
+    "No deployed-site, production-user, whole-portfolio completion, fresh-human usability, or full numerical grade claim follows from this custody review."
+  ],
+  "fullGrades": null,
+  "deployedClaim": false,
+  "rawProof": {
+    "custody": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\custody.json",
+    "digests": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\digests.json",
+    "finalIdentity": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\final-identity.json"
+  },
+  "artifactManifest": [
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-after-commit.log",
+      "sha256": "1f923b5c9459227f97dcede966de1b2ca952cc94930005b523c735cec0d8e21f",
+      "bytes": 11905
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\custody.json",
+      "sha256": "52119c90b3eb40359b7554271500ea1ad157824ddf77d6801160ca5d64714a8a",
+      "bytes": 644757
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\digests.json",
+      "sha256": "143174cd2a9419f9f7c145c6aaff48aa1184d61001eddf9f92660d291d2b3268",
+      "bytes": 576
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\final-identity.json",
+      "sha256": "6c2c85343488ffb753b1fb8d92c11a514f8fea1fd2ef4f18460fe6d58b416362",
+      "bytes": 940
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\verify-application-identity.mjs",
+      "sha256": "8cbe2c432d004d27708c1ca5ce5c352dd6e81812e438200f3a2239ed3cf5b925",
+      "bytes": 1241
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory-judge\\verify-digests.mjs",
+      "sha256": "4d62919e88ec6d27e6fe2fdef7fd6cf00977a0f9782fa75ac0c016198b14c5dd",
+      "bytes": 1275
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-reviewed-factory.log",
+      "sha256": "97e78d724777e1249ba8fe91da6a78a8018db91a5a6ef092f661936b580f74e0",
+      "bytes": 1289
+    },
+    {
+      "path": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c_NODEKIT_REVIEWED_FACTORY_RECEIPT.json",
+      "sha256": "6a4e971085ffbcf5d664561bde9f78f0ff12fbdc17b077970c2554a6836fed34",
+      "bytes": 449198
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\.nodeagent\\application-identity.json",
+      "sha256": "8a1c8683d3ea1ab2563a433d5109d8fa57ea041d201da4ea491d98f19effe8a0",
+      "bytes": 7928
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\browser-certification.json",
+      "sha256": "58ea644d708f6df493bc6988c2c045ef9bd88d3a6f13ea54353407b4837fa813",
+      "bytes": 330108
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\approval--mobile-portrait--dark.png",
+      "sha256": "e64fd8a330a1b61706a23d54b65e53f510f41a415a72a0190dd82e839cd72ab3",
+      "bytes": 44219
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\export_share--desktop--light.png",
+      "sha256": "21e98e5ca8ae3309a30707055c38b68ae7d5e8eef84484c2f6c2252119124d75",
+      "bytes": 90110
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\receipt_inspection--mobile-portrait--light.png",
+      "sha256": "b97bb96c4eed07de0100c58ce694e346d53623db71d5805bb3e527ba1c800776",
+      "bytes": 27364
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\ease\\ease_d9e43b2679da475aabd8\\browser\\screenshots\\validation_error--desktop--dark.png",
+      "sha256": "6aded5e5419255f6615e2519a1aa2a8869c34d5688d0baf5a0964704eee2c853",
+      "bytes": 84718
+    },
+    {
+      "path": "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-lBlc4z\\measured-journey\\domain-blank-base\\proof\\release-proof.json",
+      "sha256": "4b422e9f338c88ff7db444b809d4254b3e847a5a66fa86a7d36741e94980abd2",
+      "bytes": 778
+    },
+    {
+      "path": "D:\\ProjectRecovery\\nodekit-consumer-contract-20260905\\pre-reviewed-factory\\manifest.json",
+      "sha256": "8e3b74f321d6eca7292a510f8eb5032d4891b4dca0097caee83b320e92978a69",
+      "bytes": 74057
+    },
+    {
+      "path": "D:\\ProjectRecovery\\nodekit-consumer-contract-20260905\\reviewed-factory\\manifest.json",
+      "sha256": "6a4e971085ffbcf5d664561bde9f78f0ff12fbdc17b077970c2554a6836fed34",
+      "bytes": 449198
+    },
+    {
+      "path": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904\\proof\\ease\\latest\\manifest.json",
+      "sha256": "2b992d0096b5fbd8e4a8dd8a3c358a1192d294fc7e1e98c92d7a358d0004e772",
+      "bytes": 11331
+    },
+    {
+      "path": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904\\proof\\factory-acceptance.json",
+      "sha256": "2b992d0096b5fbd8e4a8dd8a3c358a1192d294fc7e1e98c92d7a358d0004e772",
+      "bytes": 11331
+    }
+  ],
+  "artifactManifestCount": 19
+}

@@ -1,0 +1,3 @@
+# Preserve these original independent-review artifact bytes, including CRLF.
+source-judge.json -text
+source-judge.md.txt -text

@@ -1,0 +1,302 @@
+{
+  "artifact": {
+    "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "canonicalVersion": 2,
+    "createdAt": "2026-09-05T03:55:29.843Z",
+    "kind": "structured-document",
+    "runId": "run_f455fb218fc1452e98a17fd85f",
+    "schemaVersion": "nodekit.artifact/v1",
+    "title": "Primary artifact",
+    "updatedAt": "2026-09-05T03:55:31.600Z",
+    "versions": [
+      {
+        "content": {
+          "summary": "The last approved result remains here.",
+          "status": "baseline"
+        },
+        "contentHash": "1077e34cc8ffae57d4f0bcd7a40d9e5f152b05da45ab643d36195773c10a7de8",
+        "createdAt": "2026-09-05T03:55:29.843Z",
+        "version": 1
+      },
+      {
+        "content": {
+          "outcome": "  Verify supplier “茶” <receipt> & preserve €42.50 exactly.  ",
+          "summary": "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
+          "status": "proposed"
+        },
+        "contentHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "createdAt": "2026-09-05T03:55:31.600Z",
+        "proposalId": "proposal_93d0bcabaa3042ea95bf24db79",
+        "version": 2
+      }
+    ]
+  },
+  "case": {
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "createdAt": "2026-09-05T03:55:29.843Z",
+    "currentRunId": "run_f455fb218fc1452e98a17fd85f",
+    "primaryJob": "Verify supplier “茶” <receipt> & preserve €42.50 exactly.",
+    "schemaVersion": "nodekit.case/v1",
+    "status": "completed",
+    "title": "Nodekit Contract Consumer case",
+    "updatedAt": "2026-09-05T03:55:31.601Z"
+  },
+  "receipt": {
+    "approvalBindings": [
+      {
+        "approvalId": "approval_50e39a1791e440fb91c3c2e3d2",
+        "commentHash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+        "decision": "rejected",
+        "proposalId": "proposal_1f129af9de6c4917ba78839826"
+      },
+      {
+        "approvalId": "approval_6bbab8a092434de3ad7938699a",
+        "commentHash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+        "decision": "accepted",
+        "proposalId": "proposal_93d0bcabaa3042ea95bf24db79"
+      }
+    ],
+    "artifactBindings": [
+      {
+        "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "canonicalVersion": 2,
+        "contentHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537"
+      }
+    ],
+    "artifactIds": [
+      "artifact_7b6eb6bf5b084b47b70e57c6f3"
+    ],
+    "caseHash": "a0d4e913dcc7d71010264d5ab180c6ea90ed924b0444f6c1c7d2b4e1b4bc3f38",
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "eventBindings": [
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "aggregateType": "artifact",
+        "eventId": "event_1341177435124186bf7163a429",
+        "eventType": "artifact.created",
+        "payloadHash": "eecd6186c14151bbad7030ad04733d3a176e82b4251dce2dbfaa86082369662f",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "aggregateType": "artifact",
+        "eventId": "event_7ef44d43b030422085ad80cfad",
+        "eventType": "artifact.version_created",
+        "payloadHash": "d5f339fbf1ca9eebf3335f9a9bc2a4c29f5fd7df67d8271d90b7652f00ef49de",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_1f129af9de6c4917ba78839826",
+        "aggregateType": "proposal",
+        "eventId": "event_ed927d12d3164af3a27c80bcdb",
+        "eventType": "proposal.created",
+        "payloadHash": "caab42923619c1c1d45d91a2165681bc7a69b44c0d658c516465b4359764852c",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_1f129af9de6c4917ba78839826",
+        "aggregateType": "proposal",
+        "eventId": "event_775f48d737ad445d97a1105d9d",
+        "eventType": "proposal.rejected",
+        "payloadHash": "8313234b0fa5010eeb4ebb88355bcc16c34da4eea78c96af83b9a9b146d5af8c",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_93d0bcabaa3042ea95bf24db79",
+        "aggregateType": "proposal",
+        "eventId": "event_f51e2b6aadb74183ab2ba4a09d",
+        "eventType": "proposal.created",
+        "payloadHash": "31547135dd7a6279c553bef19d2548aab32d646d998200065f770ab45c465949",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_93d0bcabaa3042ea95bf24db79",
+        "aggregateType": "proposal",
+        "eventId": "event_52204b439aee4a1abc89912e9a",
+        "eventType": "proposal.accepted",
+        "payloadHash": "756ef06692deda8218ecce9e3e6b3e77d4eb11fa46166519b66bc17bc321bea7",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_2b46028be2954d84b0c51aefdc",
+        "eventType": "run.started",
+        "payloadHash": "069bd3eeb58d81daf341a8bc7bde7a96a8f1a11bcb2cc7644fcf09387174fad7",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_3a0350b8ef6f47169daa0c768c",
+        "eventType": "stage.entered",
+        "payloadHash": "054ab9efc9e6af11985b041b70762b5109be97b629c903b84487e8bd1cd54dca",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_cf8eedf60ef9489699b1d4a4ed",
+        "eventType": "stage.entered",
+        "payloadHash": "bf448bc810d3035ffc0e248412ded32200b0a4307cb4431dc12c5df5261f1eb1",
+        "sequence": 3
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_34c0508536354621a8c16db7e1",
+        "eventType": "stage.entered",
+        "payloadHash": "9dae3bf9ae8a69a2556a0b8f92b8b6baf6c09fa44f2372719f8e3704c40c7fbd",
+        "sequence": 4
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_701147a6e70743d08ec40dfaf0",
+        "eventType": "stage.entered",
+        "payloadHash": "be0cae85457ed787db684d5327249976584f68fbb9e7ad1782c2620ce85211e2",
+        "sequence": 5
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_9b72b1a2f8c547e9a0ff22c2fe",
+        "eventType": "stage.entered",
+        "payloadHash": "9a63c0b753a3de5118b8c108083f9cc25ca3b51f73139e2ef83bd89498f7f02e",
+        "sequence": 6
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_f5e3a4ab5d224f2ca9a062e896",
+        "eventType": "stage.entered",
+        "payloadHash": "9dae3bf9ae8a69a2556a0b8f92b8b6baf6c09fa44f2372719f8e3704c40c7fbd",
+        "sequence": 7
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_2f89e9dba7424cb085ef6403cd",
+        "eventType": "stage.entered",
+        "payloadHash": "be0cae85457ed787db684d5327249976584f68fbb9e7ad1782c2620ce85211e2",
+        "sequence": 8
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_14b6372348674901943488988f",
+        "eventType": "stage.entered",
+        "payloadHash": "85aa663576051eb0e18426b611ddde70f5f330ad78b1a7037a9de7954466eb54",
+        "sequence": 9
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_f455fb218fc1452e98a17fd85f",
+        "aggregateType": "run",
+        "eventId": "event_3a7ed80f8fa348a7aa6edc9cf2",
+        "eventType": "run.completed",
+        "payloadHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "sequence": 10
+      }
+    ],
+    "eventIds": [
+      "event_1341177435124186bf7163a429",
+      "event_7ef44d43b030422085ad80cfad",
+      "event_ed927d12d3164af3a27c80bcdb",
+      "event_775f48d737ad445d97a1105d9d",
+      "event_f51e2b6aadb74183ab2ba4a09d",
+      "event_52204b439aee4a1abc89912e9a",
+      "event_2b46028be2954d84b0c51aefdc",
+      "event_3a0350b8ef6f47169daa0c768c",
+      "event_cf8eedf60ef9489699b1d4a4ed",
+      "event_34c0508536354621a8c16db7e1",
+      "event_701147a6e70743d08ec40dfaf0",
+      "event_9b72b1a2f8c547e9a0ff22c2fe",
+      "event_f5e3a4ab5d224f2ca9a062e896",
+      "event_2f89e9dba7424cb085ef6403cd",
+      "event_14b6372348674901943488988f",
+      "event_3a7ed80f8fa348a7aa6edc9cf2"
+    ],
+    "generatedAt": "2026-09-05T03:55:31.601Z",
+    "proposalBindings": [
+      {
+        "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "baseVersion": 1,
+        "patchHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "proposalId": "proposal_1f129af9de6c4917ba78839826",
+        "status": "rejected"
+      },
+      {
+        "artifactId": "artifact_7b6eb6bf5b084b47b70e57c6f3",
+        "baseVersion": 1,
+        "patchHash": "a8a8f825c362acf83a570d3b0364d8fe858fc9affb8886f571db481fbe34b537",
+        "proposalId": "proposal_93d0bcabaa3042ea95bf24db79",
+        "status": "accepted"
+      }
+    ],
+    "proposalIds": [
+      "proposal_1f129af9de6c4917ba78839826",
+      "proposal_93d0bcabaa3042ea95bf24db79"
+    ],
+    "runHash": "7e32f8045e542df63b18ef08a37376a9171b2b8785c77f591f1fe9162a90016f",
+    "runId": "run_f455fb218fc1452e98a17fd85f",
+    "schemaVersion": "nodekit.receipt/v2",
+    "status": "completed",
+    "receiptId": "receipt_30338db19f834bc08c1098a9ff",
+    "receiptHash": "5b80d1d30f39d6ab2e9e0c53101a9ccdf1809a37783b9a591a578838bc2a68e4"
+  },
+  "run": {
+    "caseId": "case_52fd9669e3d54f3aa47d147153",
+    "createdAt": "2026-09-05T03:55:29.843Z",
+    "currentStageId": "complete",
+    "nextAction": "Review receipt",
+    "nextActionOwner": "user",
+    "runId": "run_f455fb218fc1452e98a17fd85f",
+    "schemaVersion": "nodekit.run/v1",
+    "stages": [
+      {
+        "id": "intake",
+        "label": "Confirm the intended outcome",
+        "owner": "user",
+        "status": "completed"
+      },
+      {
+        "id": "working",
+        "label": "Prepare a proposal",
+        "owner": "agent",
+        "status": "completed"
+      },
+      {
+        "id": "review",
+        "label": "Review the proposed change",
+        "owner": "user",
+        "status": "completed"
+      },
+      {
+        "id": "complete",
+        "label": "Verify and export",
+        "owner": "system",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-09-05T03:55:31.601Z"
+  },
+  "schemaVersion": "nodekit.portable-proof-bundle/v1"
+}

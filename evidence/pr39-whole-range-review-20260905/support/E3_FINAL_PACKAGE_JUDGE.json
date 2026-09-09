@@ -1,0 +1,98 @@
+{
+  "verdict": "VERIFIED WITH CAVEATS",
+  "scope": "Exact final NodeKit package, preserved acceptance archive and fresh restored consumer usability",
+  "at": "2026-09-05T00:32:56.880160+00:00",
+  "commit": "4980e9f534ebd9ecc499767a687002a2a68b6667",
+  "sourceHash": "db1340fda725755c5c57c95037e4e6e3bacc68d541b7c4531e31081f64af352e",
+  "tarball": {
+    "bytes": 829849,
+    "sha256": "b8ff3aedd439dfb5fb31ad7e01e65d9a3f88a7c989e48b613f2036946ca4946f"
+  },
+  "candidateArchive": {
+    "bytes": 907008,
+    "sha256": "3ca0b43e81ca3c8d19ef4b019da0a0816888285f2abbe43d845438906b14f592"
+  },
+  "retainedArchive": {
+    "files": 369,
+    "bytes": 32725454,
+    "screenshots": 180,
+    "matchingSidecars": 180,
+    "allHashesVerified": true,
+    "unchangedAfterReview": true
+  },
+  "checks": {
+    "run": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "factoryReceiptDigest": "863cd9785d472a20c413dc11735c0d85a285e7bf06c151bb0d92e147bcf5a9e4",
+  "browserManifestDigest": "31c58de86e6e349e286989abf42786517ba202836a68c2eab5ac7458b01fc4c9",
+  "restoredConsumer": {
+    "path": "D:\\ProjectRecovery\\nodekit-4980e9f-consumer-judge-20260905-002935",
+    "acl": "inheritance disabled; current user and SYSTEM only",
+    "npmCi": "PASS --ignore-scripts; lock unchanged",
+    "compile": "PASS",
+    "applicationTests": 9,
+    "check": "PASS",
+    "configHash": "03676c94385a8b9d6463ba607d20cde5a90d362bdc4815829d45d094ef889190",
+    "exactInstalledTarballMembers": 421
+  },
+  "publicReceiptArtifacts": {
+    "count": 6,
+    "allCurrentCommittedAndWorkingHashesMatch": true,
+    "scope": "Previously reviewed checkpoint/outcome receipt; no coverage claim for later agent launch or workflow changes"
+  },
+  "unchangedSince533": [
+    "src/lib/caseflow.mjs",
+    "templates/base/scripts/outcome.mjs"
+  ],
+  "transientEvidenceBoundary": {
+    "restoredConfigHash": "03676c94385a8b9d6463ba607d20cde5a90d362bdc4815829d45d094ef889190",
+    "receiptConfigHash": "03676c94385a8b9d6463ba607d20cde5a90d362bdc4815829d45d094ef889190",
+    "factoryOriginalReleaseProofBodyRetained": false,
+    "reason": "The complete369-file archive contains factory receipt/browser evidence and candidate.tar.gz; the candidate Git archive contains only proof/README.md and proof/build-friction.json. The original consumer release-proof body was transient.",
+    "configHashMatches": true
+  },
+  "broaderReadiness": {
+    "verdict": "EASE_NOT_CERTIFIED",
+    "submissionReady": false,
+    "blockers": [
+      "developerTimingMatrix",
+      "freshAgentHeldout",
+      "freshHumanUsability",
+      "threeConvexConsumers",
+      "previewDeployment",
+      "managedSupabasePortability",
+      "knowledgeEvolutionAdoption",
+      "modelIntelligenceHarness",
+      "engineeringHealth",
+      "proofloopEaseVerification",
+      "packageInstallProof",
+      "publicationApproval"
+    ],
+    "githubQuality": "Not queried by this bounded judge; no CI-green claim"
+  },
+  "visualInspection": {
+    "files": [
+      "completed_receipt--mobile-portrait--light.png",
+      "completed_receipt--desktop--dark.png"
+    ],
+    "observation": "Completed status, canonical artifact v2 and receipt action are visible. Both also contain an empty red-bordered strip. No new cosmetic or usability grade is awarded."
+  },
+  "evidence": [
+    "E3-final-package-judge-independent.json",
+    "E3-final-package-judge.py",
+    "E3-final-package-judge.log",
+    "E3-final-package-judge-proof-boundary.json",
+    "E3-4980e9f-acceptance-archive.json",
+    "E3-4980e9f-factory-acceptance.log"
+  ],
+  "rawRun": "E3-final-package-judge-2026-09-05T00-29-35",
+  "sourceUnchanged": true,
+  "limitations": [
+    "Original launcher installation and original transient consumer release-proof body are no longer directly inspectable after default factory cleanup.",
+    "Factory base.proofDigest cannot be independently recomputed from its absent original body; fresh consumer installation and config identity were independently verified.",
+    "No full factory rerun, source/ref/remote edits, production call, approval or deployment.",
+    "CI launch/workflow coverage and broader governance gates remain separate."
+  ]
+}

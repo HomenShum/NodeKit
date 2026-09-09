@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "node",
+    "src/factory-acceptance.mjs"
+  ],
+  "cwd": "D:/VSCode Projects/node-platform/.worktrees/project-consolidation-20260904",
+  "startedAt": "2026-09-05T07:02:29.760149+00:00",
+  "timeoutSeconds": 1200,
+  "log": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-factory-20260905.log",
+  "environment": "OS/runtime allowlist; no provider keys forwarded; lifecycle behavior follows explicit command flags",
+  "exit": 0,
+  "finishedAt": "2026-09-05T07:05:31.943814+00:00",
+  "durationSeconds": 182.172,
+  "logSha256": "d7b6fb6d0842fde542091f7840b7958087f65e968a914e07e82650865d7c0727",
+  "logBytes": 11472
+}

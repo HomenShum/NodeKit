@@ -1,0 +1,54 @@
+# NodeKit developer handoff
+
+A developer can turn a brief into a generated application, review a proposed result and download the exact approved artifact with its receipt. Start with README and START_HERE.md for setup, then docs/START_HERE.md for implementation ownership. Coding agents follow AGENTS.md and its canonical skill.
+
+## September 8 development-tool security patch
+
+A developer or consumer conformance job should install the patched toolchain before running
+checks. The draft already includes fast-uri3.1.7; this follow-up updates the exact Vitest pin
+to4.1.11 and ten development lock records, including PostCSS8.5.28 and Nano ID3.3.18. All eight
+production dependency records and application source remain unchanged. The old installation
+and resolver output are preserved in the portfolio recovery packet.
+
+The normal npm installer and full dependency audit pass with zero findings. Both typing checks,
+the component build, registry check and NodeVideo consumer conformance pass. The complete local
+suite passed898 repository cases and8 component cases with no skips or failures. Run `npm ci`,
+`npm run test:all`, `npm run typecheck:public`, `npm run typecheck:component`,
+`npm run build:component`, `npm run registry:check` and `npm audit` to reproduce. The separate
+NodeVideo conformance workflow still installs NodeKit main until this source is adopted.
+
+Inspect the exact pushed revision's shared CI and six factory smoke lanes before release.
+The ledger consistency check passes; whole-PR materiality still lacks canonical approval.
+The existing unsigned review packet below remains bound to its historical source and does not
+approve this dependency follow-up. No H1 signature, canonical promotion, independent review,
+production adoption or new visual/accessibility/performance grade is supplied by this patch.
+
+The reviewed consumer repair is commit e7e4b10f02d25c4e63e4bc1ae23e283693d9fdd5, tree f15e2a2b2d35110a9dff8c5a9932e2c267ae5ae1. It preserves the exact submitted outcome, exposes canonical identity in the DOM, makes the completed result downloadable and respects hidden error feedback. A rejected or stale proposal preserves the accepted result. The generic demonstration still uses a single in-memory server; this is not a persistence or multiuser production claim.
+
+Run npm ci and npm test for the repository. Run npm run acceptance:factory from a clean distributable candidate for the real generated-consumer check. Set NODEKIT_KEEP_ACCEPTANCE=1 to retain the actual launcher, consumer and release proof. The factory replaces proof/ease/latest; preserve previous evidence before another run. Do not treat passing application behavior as permission to skip release gates.
+
+Historical consumer review reproduced 855 repository tests, ten consumer tests, 180 browser captures and 14 additional deliberate contract failures. The subsequent ordinary factory passed all 13 base checks in 180676ms on Windows/npm with warm-or-unknown cache. Its package SHA256 is 5964b7b265d3e9f79f49e825abd9682caf3440cc5125ceec1331569b9599b83b. All 421 package files match source and both actual installations. The source-bound browser certificate is BROWSER_CERTIFIED; it covers the recorded six widths and two themes.
+
+Read proof/consumer-contract-20260905/review/README.md for the historical e7e4b10 independent reports and actual consumer certificates. The raw earlier uncommitted certificate remains unchanged in its historical directory. The older factory replay remains in its retained custody packet. The current proof/factory-acceptance.json and proof/ease/latest now bind the governance package described below. Original launcher/consumer bodies were retained and independently compared, with a second durable operator copy.
+
+Shared integration remains in draft PR39. The current local release still reports releaseReady=false; factory status is EASE_NOT_CERTIFIED and submissionReady=false. Ledger/authority, production/deployment, fresh-agent heldout, human usability, further Convex consumers, aggregate timing and whole-product grades remain separate open gates. This handoff does not manufacture their approvals.
+
+**Re your request:** make each repository usable for developer/user handoff, including visual and interaction proof. The consumer contract and bound local factory are verified; the remaining shared release gates are explicit. Portfolio parent proof PORTFOLIO-READY-01 remains OPEN.
+
+The current governance candidate keeps the original topology assumption byte-identical and adds one informational acknowledgment of its historical dimensions metadata addition. Verification still reports the raw mutation: claimMutations=1, acknowledged=1, unresolved=0, with a visible operator-directed-in-session warning. The directive records the user's repository recovery instruction and the agent's implementation choice; it is not a human review or signature. No canonical event or attestation was added.
+
+Read evidence/historical-topology-ack-20260905/README.md for the actual before/after verifier, exact original/current records, tampering scenarios and retained rollback proof. Reproduce with npm run evolution:verify and the existing ledger/immutability/approval tests. The verifier checks actual Git commits, the single allowed field addition, complete record digests, current directive and artifact bytes, and rejects conflicting or later-modified acknowledgments. The current review guard independently rejects forbidden workflow paths and material bytes changed after review.
+
+This governance code changes the current package source identity. The e7e4b10 factory and consumer receipts above remain historical evidence for that exact runtime. The reviewed governance code is committed as 0c33b8a4ae3ef00d300d48456131f2aadbcc0d7c. A new agent-proposed draft and API-generated deferred receipt bind that actual commit; the older baseline draft remains unchanged. Read evidence/historical-topology-final-range-20260905/README.md for exact committed before/after results and the exercised 2,695-file Git rollback. The metadata is independently judged and committed as 0d2223815ef73b80eeed8ce3dc6b96d16b3a2825; a fresh current-package factory now passes within the scope below. Existing H1 credential control and canonical promotion for the whole PR remain separate requirements, including the workflow authority boundary. No signature or final shared release approval is implied.
+
+
+## Current package verification
+
+Read [the current governance factory packet](evidence/governance-current-factory-20260905/README.md). The ordinary factory at 0d222381 passes all 13 base checks in 178511ms; its exact package SHA256 is efdf7edd77ec47a5e4fff5514950e4eaa76068e93c52a442371163363170bdeb. All 421 packaged files match source and both actual installations. Independent review verifies 1675 retained artifacts, all 180 screenshot/sidecar bindings and an additional 36-check mobile accept/download/reopen journey. The template and Caseflow runtime remain byte-identical to the earlier consumer repair; governance code is now included in the measured package identity.
+
+The generated archive matches all 77 committed files, while its later working friction receipt records five additional completion events. The consumer is therefore not reported wholly clean. Exact historical and current receipts are preserved; no prior certificate is relabelled. This local lane is BROWSER_CERTIFIED, while EASE_NOT_CERTIFIED, submissionReady=false and releaseReady=false remain unchanged.
+
+The complete PR39 materiality boundary still reports 21 material files with no covering canonical event. The new deferred receipt covers only the later three-file governance range, and cannot authorize earlier workflow changes. Shared integration needs the existing trusted H1 credential/canonical-event process. H1 means credential attestation, not proof that a human reviewed the change. No private credential was retrieved or signature manufactured.
+
+
+The current factory publication is committed as38411a2e741a33184fb9ee493058ceeb556d810e. The [complete unsigned PR39 review packet](evidence/pr39-whole-range-review-20260905/README.md) is now prepared in the repository with exact21material bindings and an agent-proposed event. Its new informational evidence was recorded using the existing CLI; prior canonical records are unchanged. The remaining operator action is the existing trusted H1 approval and canonical record operation. The packet includes exact commands and explicitly identifies which preparatory steps are already complete; no credential or signature has been supplied by the agent.

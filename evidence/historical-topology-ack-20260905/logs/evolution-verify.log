@@ -1,0 +1,5 @@
+
+> @homenshum/nodekit@0.2.1 evolution:verify
+> node src/cli.mjs evolution verify --repo-root .
+
+EVOLUTION PASS: 25 events, 24 invariants, 3 adoptions

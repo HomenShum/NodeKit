@@ -11,6 +11,9 @@ Read these files in order before changing the product:
 7. `product/SERVICE_BLUEPRINT.md`
 8. `product/EXPERIENCE.yaml`
 9. `nodeagent.yaml`
+10. `docs/CODING_SEQUENCE.md`
+
+For a substantive coding task, freeze its outcome contract, exact candidate and required cases using `docs/CODING_SEQUENCE.md`. Record attempts with `npm run outcome`; its local evidence gate does not grant approval or release authority.
 
 Keep the application blank in domain until the real user workflow is researched. Preserve the universal `Case -> Run -> Stage -> Artifact -> Proposal -> Approval -> Receipt` behavior and the in-memory deterministic demonstration.
 

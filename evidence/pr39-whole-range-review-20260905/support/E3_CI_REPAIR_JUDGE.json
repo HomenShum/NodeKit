@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "portfolio.ci-repair-judge/v1",
+  "verdict": "VERIFIED_WITH_CAVEATS",
+  "baseHead": "53348d606b2dfe4fc0bfb4b7d51291f7892afeb0",
+  "reviewedState": "three-file uncommitted repair",
+  "boundedRepairReviewMayProceed": true,
+  "files": [
+    {"path": "src/lib/agent-run.mjs", "sha256": "f1d77da31a4f473750443c68299768ad68ca848ec03be22416ec9645676b8c8d", "bytes": 24644},
+    {"path": "test/agent-run.test.mjs", "sha256": "5e1c1ab7c6e2717a1a78bbd6d74c5e38e4bd8d07de9350d1da5f230dc62528bf", "bytes": 16180},
+    {"path": ".github/workflows/quality.yml", "sha256": "cf9ba3e24e508d4601f335cf520915129bf01055eca8237292c197181e27e76a", "bytes": 2224}
+  ],
+  "independentVerification": {
+    "windows": {"passed": 12, "failed": 0, "skipped": 0, "log": "E3-ci-repair-judge-windows.log"},
+    "linux": {"runtime": "Node 22.21.1 in existing Ubuntu WSL", "passed": 10, "failed": 0, "skipped": 0, "log": "E3-ci-repair-judge-linux22.log"},
+    "failedLaunchRecovery": {"burstFailures": 8, "sustainedFailures": 48, "uniqueFailedReceipts": 56, "retainedCompletedRuns": 50, "unfinishedDirectories": 0, "followingSuccess": true, "nullExitAndSignal": true, "emptyStreamHashesAndReceiptDigestsVerified": true, "log": "E3-ci-repair-judge-recovery.json"},
+    "diffCheck": true,
+    "playwrightInstallFlagSupported": true
+  },
+  "review": {
+    "singleFinalizationPath": true,
+    "synchronousAndAsynchronousFailureCovered": true,
+    "noTimerCreatedWithoutChild": true,
+    "timeoutsAndCaptureBoundsPreserved": true,
+    "deterministicDigestsPreserved": true,
+    "gatesRelaxed": false,
+    "newDependenciesOrPublicAPI": false
+  },
+  "authority": {
+    "userExecutionScopeCoversReversibleRepairAndDraftPR": true,
+    "workflowExcludedFromExistingDeferredReviewLane": true,
+    "syntheticApprovalCreated": false,
+    "workflowGovernanceBypassed": false
+  },
+  "unresolved": ["Fresh GitHub Ubuntu quality run has not executed on this repair.", "Chromium/Linux dependency install step inspected, not run by judge.", "CI used Node22.23.2; local Linux replay used22.21.1."],
+  "judgeProbeCorrection": "Initial directory count included sessions metadata. Raw failure retained; probe corrected to count persisted receipts and fully rerun successfully.",
+  "fullCIPassed": false,
+  "productionApproved": false,
+  "judgeApplicationEdits": false,
+  "judgeRemoteWrites": false,
+  "separateDeferredPacketEdited": false
+}

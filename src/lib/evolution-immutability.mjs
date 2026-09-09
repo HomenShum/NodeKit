@@ -115,12 +115,19 @@ export async function detectLedgerMutations(repoRoot, loaded) {
 
     checked += 1;
     const changes = diffPaths(original, current);
+    // A historical acknowledgment already binds its known records and directive.
+    // Rebinding any part later would replace the acknowledgment itself, not fix
+    // a commit pointer that was unknowable when the old evidence was authored.
+    if (original.historicalResolution || current.historicalResolution) {
+      for (const change of changes) change.class = "claim";
+    }
     if (changes.length === 0) continue;
 
     const entry = {
       id: current.id ?? file,
       file,
       introducedIn: introducedIn.slice(0, 8),
+      introducedCommit: introducedIn,
       claimChanges: changes.filter((c) => c.class === "claim"),
       bindingChanges: changes.filter((c) => c.class === "binding"),
     };
@@ -132,11 +139,11 @@ export async function detectLedgerMutations(repoRoot, loaded) {
 }
 
 /** Human-readable issue lines for the verify report. */
-export function describeMutations(result) {
+export function describeMutations(result, acknowledged = []) {
   if (!result.gitAvailable) {
     return { issues: [], warnings: ["ledger immutability was NOT checked: not a git repository, so no record could be compared against the revision that introduced it"] };
   }
-  const issues = result.mutations.map((m) => {
+  const issues = result.mutations.filter((m) => !acknowledged.some((a) => a.file === m.file && a.id === m.id)).map((m) => {
     const detail = m.claimChanges
       .map((c) => `${c.path}: ${short(c.from)} -> ${short(c.to)}`)
       .join("; ");
@@ -144,5 +151,8 @@ export function describeMutations(result) {
   });
   const warnings = result.bindingRepairs.map((m) =>
     `${m.id} had its binding repaired after ${m.introducedIn} (${m.bindingChanges.map((c) => c.path).join(", ")}); allowed, because a record cannot name the commit that will contain it`);
+  warnings.push(...acknowledged.map((entry) =>
+    `${entry.id} historical dimensions metadata mutation is acknowledged by ${entry.evidenceId}; ` +
+    "the raw claim mutation remains recorded, with operator-directed-in-session assurance, not human review or a signature"));
   return { issues, warnings };
 }

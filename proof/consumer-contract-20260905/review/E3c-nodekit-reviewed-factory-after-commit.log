@@ -1,0 +1,351 @@
+
+> @homenshum/nodekit@0.2.1 acceptance:factory
+> node src/factory-acceptance.mjs
+
+FACTORY ACCEPTANCE domain-blank-base (npm)
+{
+  "base": {
+    "applicationHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+    "browserManifestDigest": "7f188245dd4b291c426e1bc762942faaf9a274e25bcbb197e3921f28412d9c7f",
+    "candidateCommit": "2926ee9cb5b8c848632a07a332c9ddbb7b081366",
+    "checks": {
+      "browserContractPassed": true,
+      "browserJourneyPassed": true,
+      "candidateCommitted": true,
+      "compileReproducible": true,
+      "domainBlank": true,
+      "easeCertificationHonest": true,
+      "figuredOutContract": true,
+      "lockCreated": true,
+      "proofIdentityBound": true,
+      "proofPassed": true,
+      "runtimeHashBound": true,
+      "runtimeNotMisclassified": true,
+      "runtimeSpecifierPortable": true
+    },
+    "configHash": "0aaf7bbe8e9dee1e1f1f949f4321a33ddd99753da38e3581ba84c33b238b4287",
+    "dependency": "file:vendor/nodekit.tgz",
+    "durationMs": 180676,
+    "phases": [
+      {
+        "durationMs": 3,
+        "measured": true,
+        "name": "launcher_initialization",
+        "startedAt": "2026-09-05T04:28:23.137Z"
+      },
+      {
+        "args": [
+          "install",
+          "<exact-nodekit-tarball>",
+          "--ignore-scripts",
+          "--prefer-offline",
+          "--no-audit",
+          "--no-fund",
+          "--cache",
+          "<isolated-cache>"
+        ],
+        "command": "npm",
+        "durationMs": 4460,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:23.139Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "9e859e320ecda3b7ac855a0609ad122a490ee6264598a2839789723914dc0773",
+        "name": "launcher_installation"
+      },
+      {
+        "args": [
+          "<installed-nodekit-cli>",
+          "create",
+          "<empty-target>",
+          "--name",
+          "factory-domain-blank-base",
+          "--brief",
+          "<neutral-brief>",
+          "--nodekit-specifier",
+          "file:vendor/nodekit.tgz",
+          "--package-manager",
+          "npm",
+          "--no-install"
+        ],
+        "command": "C:\\nvm4w\\nodejs\\node.exe",
+        "durationMs": 8517,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:27.599Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "bbaf47243cdf9d2075bd8c0e567ed0df0654f609588e1f31611aa0cc2a1618d4",
+        "name": "scaffold_generation"
+      },
+      {
+        "durationMs": 3,
+        "measured": true,
+        "name": "exact_tarball_binding",
+        "startedAt": "2026-09-05T04:28:36.116Z"
+      },
+      {
+        "args": [
+          "install",
+          "--ignore-scripts",
+          "--prefer-offline",
+          "--no-audit",
+          "--no-fund",
+          "--cache",
+          "<isolated-cache>"
+        ],
+        "command": "npm",
+        "durationMs": 4551,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:36.119Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "085fc9698776fc74087c1fe553da555f0ff13d28c3c55863bf1dcbc98cf88823",
+        "name": "generated_application_installation"
+      },
+      {
+        "args": [
+          "exec",
+          "--",
+          "playwright",
+          "install",
+          "chromium"
+        ],
+        "command": "npm",
+        "durationMs": 14876,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:40.671Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "27c1358cf459f197d2720d346f67049db77362d7bac4ba7d18e9157610bdcfad",
+        "name": "browser_runtime_installation"
+      },
+      {
+        "args": [
+          "add",
+          "--all"
+        ],
+        "command": "git",
+        "durationMs": 75,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:55.547Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "name": "candidate_stage_after_install"
+      },
+      {
+        "args": [
+          "-c",
+          "user.name=NodeKit",
+          "-c",
+          "user.email=nodekit@local",
+          "commit",
+          "-m",
+          "chore: bind exact candidate dependencies"
+        ],
+        "command": "git",
+        "durationMs": 105,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:55.662Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "7b1593514682a98633004c1b9c020b4605d49bb034f7f2c6f4119bede432c4dc",
+        "name": "candidate_lock_commit"
+      },
+      {
+        "args": [
+          "run",
+          "compile"
+        ],
+        "command": "npm",
+        "durationMs": 3881,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:55.806Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "58856a444a34e948919baaad5eaa2d796472cb621d071fcda281491b02ea067a",
+        "name": "compile"
+      },
+      {
+        "args": [
+          "run",
+          "check"
+        ],
+        "command": "npm",
+        "durationMs": 7560,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:28:59.687Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "1acfdce973c8c717c956110de4452404c7253b2830440f7892853c7f8592b3bd",
+        "name": "deterministic_checks"
+      },
+      {
+        "args": [
+          "run",
+          "demo"
+        ],
+        "command": "npm",
+        "durationMs": 588,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:29:07.248Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "6c3fe09d5ffc38cdad8e7166407c24df7d105b18fa35cdeb740d50cadf1309a2",
+        "name": "neutral_journey"
+      },
+      {
+        "args": [
+          "run",
+          "eval"
+        ],
+        "command": "npm",
+        "durationMs": 559,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:29:07.836Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "9a85f5e3b88abdd823786b584474b7539292fd2e54d8b0c2390321b65c0c5bf8",
+        "name": "evaluation"
+      },
+      {
+        "args": [
+          "run",
+          "proof:browser-contract"
+        ],
+        "command": "npm",
+        "durationMs": 761,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:29:08.394Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "794671a2123c5ee563e14a1bf0f9bd4cefd4ced1469f700f6b6854436b933afd",
+        "name": "browser_contract"
+      },
+      {
+        "args": [
+          "run",
+          "proof:browser"
+        ],
+        "command": "npm",
+        "durationMs": 134091,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:29:09.156Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "d7b0df6c37b6292f4073ec6085852c802aaacad43c7f059814d995ddbf6e64a8",
+        "name": "rendered_browser_journey"
+      },
+      {
+        "args": [
+          "run",
+          "proof"
+        ],
+        "command": "npm",
+        "durationMs": 566,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-09-05T04:31:23.246Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "a1943e2ef2ebad773db81e9d4bfa1366ed8adc4bd9f47149a580c1474401714a",
+        "name": "receipt_completion"
+      }
+    ],
+    "proofDigest": "bc817deca1fb418c3d3ce316dff21e2805fb3adc912e2ea68819d24c9ad35b74",
+    "startedAt": "2026-09-05T04:28:23.136Z",
+    "timerBoundary": "empty-launcher-before-package-json-to-completed-proof",
+    "timingEvidence": {
+      "cacheClass": "warm-or-unknown",
+      "cacheIsolated": false,
+      "firstMeaningfulPaintMs": 1663,
+      "horizontalOverflowPx": 0,
+      "neutralJourneyMs": 3925,
+      "reloadPreserved": true,
+      "serverReadinessMs": 127
+    },
+    "template": "domain-blank-base"
+  },
+  "cacheClass": "warm-or-unknown",
+  "cacheIsolated": false,
+  "ciProvenance": {
+    "githubRunAttempt": null,
+    "githubRunId": null,
+    "githubSha": null,
+    "githubWorkflowRef": null,
+    "provider": "local",
+    "runnerArch": "x64",
+    "runnerImageOs": null,
+    "runnerImageVersion": null,
+    "runnerName": "HomenLaptop",
+    "runnerOs": "win32",
+    "sourceCommitMatchesGithubSha": null,
+    "workflowFileSha256": "4dd502d6a36cf0b157df50f2847724050cc556f36b50e4b66925869a176cc820"
+  },
+  "durationMs": 180676,
+  "generatedAt": "2026-09-05T04:31:24.557Z",
+  "generatedCandidateArchiveBytes": 912634,
+  "generatedCandidateArchiveSha256": "3b534c70922f475ec76d98495c59d4397b89420d0c0d29ec96c1336ca41c8f30",
+  "nodeVersion": "v22.22.2",
+  "nodekitCommit": "e7e4b10f02d25c4e63e4bc1ae23e283693d9fdd5",
+  "nodekitPackage": "@homenshum/nodekit",
+  "nodekitSourceHash": "35c81da5838699b3177a1169121526a3b86e5b286b51b9e9400da595fb2ad56d",
+  "nodekitTarballBytes": 832769,
+  "nodekitTarballSha256": "5964b7b265d3e9f79f49e825abd9682caf3440cc5125ceec1331569b9599b83b",
+  "nodekitVersion": "0.2.1",
+  "operatingSystem": "win32-10.0.26200-x64",
+  "packageManager": "npm",
+  "packageManagerVersion": "10.9.7",
+  "packagingPhase": {
+    "args": [
+      "pack",
+      "--json",
+      "--pack-destination",
+      "<candidate-package>"
+    ],
+    "command": "npm",
+    "durationMs": 2395,
+    "exitCode": 0,
+    "failed": false,
+    "measured": false,
+    "startedAt": "2026-09-05T04:28:20.213Z",
+    "stderrSha256": "9c15ca4851b98a7a99a73dbbd3d9cea09c296cd286eb5c5b640664fc0a83b39e",
+    "stdoutSha256": "625fdd6664eef2db8868fa807c0a29c061e7af80f131c9dfa7235d9d723eabac"
+  },
+  "passed": true,
+  "primingPhases": [],
+  "runId": "ease_d9e43b2679da475aabd8",
+  "schemaVersion": "nodekit.ease-proof-run/v1",
+  "startedAt": "2026-09-05T04:28:23.136Z",
+  "submissionReady": false,
+  "submissionBlockers": [
+    "developerTimingMatrix",
+    "freshAgentHeldout",
+    "freshHumanUsability",
+    "threeConvexConsumers",
+    "previewDeployment",
+    "managedSupabasePortability",
+    "knowledgeEvolutionAdoption",
+    "modelIntelligenceHarness",
+    "engineeringHealth",
+    "proofloopEaseVerification",
+    "packageInstallProof",
+    "publicationApproval"
+  ],
+  "timerBoundary": "empty-launcher-before-package-json-to-completed-proof",
+  "verdict": "EASE_NOT_CERTIFIED",
+  "receiptDigest": "e6715b6b00aadf5dbbdb3b751484e7a66e14aa7b976403a48ecd0211f0b98bbe"
+}
+FACTORY ACCEPTANCE WORKSPACES C:\Users\hshum\AppData\Local\Temp\nodekit-factory-acceptance-lBlc4z

@@ -1,0 +1,23 @@
+# Complete the existing authority step
+
+The operator is deciding whether the complete PR39 implementation is suitable for governed integration. Technical tests alone cannot exercise the operator's credential or establish that decision. The following uses the existing event/evidence/approval APIs; it does not add a new policy or exception.
+
+1. The authorized repository owner copies this packet's manifest, diff and support directory to `evidence/pr39-whole-range-review-20260905/`, preserving bytes; copies `event-proposal.json` to `evolution/drafts/evt-pr39-portable-factory-and-governance-20260905.json`; and keeps `evidence-proposal.json` in the evidence packet. Verify the manifest SHA256 is `217c082e006db86d12aed23cc00f0ecfbaf45185547cbc32077de87eb9f0550c` and schema-check both proposals. Do not overwrite any existing named path if it has different bytes. These reversible preparations need no new credential action.
+2. Recompute the actual PR base and head material list. Compare all 21 current material hashes against the manifest; if any differ, stop and regenerate the proposal. Metadata-only publication is allowed to extend the head, but a changed base changes the reviewed range. Review the five claim groups, the exact workflow two-line change, the retained failures and the limitations.
+3. Record the new informational evidence with the existing CLI, preserving all previous canonical bytes:
+
+   `node src/cli.mjs evolution record --file evidence/pr39-whole-range-review-20260905/evidence-proposal.json`
+
+4. The trusted operator reviews the exact draft and evidence manifest. If they decide to adopt this complete change, they supply their existing credential file locally and run the following command from the NodeKit repository. `<operator-supplied-existing-key-file>` is deliberately unresolved: no agent searched for it. Ensure the output parent exists; do not overwrite an existing approval.
+
+   `node src/cli.mjs evolution approve --draft evolution/drafts/evt-pr39-portable-factory-and-governance-20260905.json --credential-id dev-software-key --key <operator-supplied-existing-key-file> --ttl-minutes 30 --out evolution/approvals/pr39-whole-range-20260905.json`
+
+5. Before expiry, use the existing canonical promotion command:
+
+   `node src/cli.mjs evolution record --file evolution/drafts/evt-pr39-portable-factory-and-governance-20260905.json --approval evolution/approvals/pr39-whole-range-20260905.json`
+
+6. Run `node src/cli.mjs evolution verify`. Commit the new exact evidence/event/approval records through the normal reviewed flow, then run `node src/cli.mjs evolution materiality --from a2d2e8ce36cc3e87a6a8133469dd55d8b7580588 --to <actual-current-commit>`. Capture raw output and confirm the event's source commit remains inside the actual PR range. Re-run existing shared CI after the reviewed push. Neither the signature nor a green materiality check certifies production or full user acceptance.
+
+The approval command hashes the event subject and sorted evidence **IDs**. Evidence records separately hash artifact bytes; this draft also embeds the exact manifest digest in the signed event subject so the approval cannot silently refer to a different review packet. The authority operation is a current short-lived single-use credential attestation. It does not backdate human review or attest to a person being physically present.
+
+Do not use `trust init`, create a substitute key, lower H1, edit old events, mark this draft human-reviewed, reuse an old signature, or relabel the narrower bf6..0d deferred receipt. If the operator cannot use the already trusted key, report that actual dependency; its availability was not inspected here.

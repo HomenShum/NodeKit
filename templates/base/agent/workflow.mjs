@@ -26,12 +26,15 @@ export function createGuidedDemo(options = {}) {
     return { artifact, case: work, run };
   }
 
-  function propose({ artifactId, runId }) {
+  function propose({ artifactId, runId, outcome }) {
+    const artifact = runtime.snapshot().artifacts.find((entry) => entry.artifactId === artifactId);
+    const confirmedOutcome = outcome ?? runtime.getCase(artifact.caseId).primaryJob;
     runtime.enterStage({ runId, stageId: "working" });
     const proposal = runtime.createProposal({
       artifactId,
-      baseVersion: runtime.snapshot().artifacts.find((entry) => entry.artifactId === artifactId).canonicalVersion,
+      baseVersion: artifact.canonicalVersion,
       patch: {
+        outcome: confirmedOutcome,
         summary: "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
         status: "proposed",
       },

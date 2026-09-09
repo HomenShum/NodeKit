@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "nodekit.evolution-verdict/v1",
+  "counts": {
+    "events": 25,
+    "assumptions": 6,
+    "invariants": 24,
+    "evidence": 36,
+    "adoptions": 3
+  },
+  "immutability": {
+    "checked": 94,
+    "gitAvailable": true,
+    "claimMutations": 1,
+    "acknowledged": 1,
+    "unresolved": 0,
+    "bindingRepairs": 3
+  },
+  "authority": {
+    "canonicalEvents": 25,
+    "attested": 3,
+    "unattested": 22,
+    "unattestedIds": [
+      "evt:caseflow-idempotent-retries",
+      "evt:convex-caseflow-receipt-retry-contract",
+      "evt:exact-candidate-contract",
+      "evt:postgres-caseflow-adapter",
+      "evt:rendered-browser-certification",
+      "evt:source-bound-submission-gates",
+      "evt:studio-boundary",
+      "evt:behavior-index-and-friction-loop",
+      "evt:copy-as-proof-surface",
+      "evt:frontend-decisive-evidence",
+      "evt:gym-proven-friction-loop",
+      "evt:invariant-proof-binding",
+      "evt:journey-harness-and-tour",
+      "evt:nodevideo-topology-contract",
+      "evt:repository-wide-behavior-ownership",
+      "evt:signed-repair-promotion",
+      "evt:builder-journey-j0",
+      "evt:builder-journey-j1-decide-build",
+      "evt:builder-journey-j1-finish",
+      "evt:domain-blank-factory",
+      "evt:guided-intake-mobile-decisions",
+      "evt:submission-cli-named-options"
+    ]
+  },
+  "issues": [],
+  "warnings": [
+    "inv:caseflow-idempotent-retries scope names more applications than verified adoptions",
+    "inv:exact-candidate-evidence scope names more applications than verified adoptions",
+    "inv:postgres-caseflow-conformance scope names more applications than verified adoptions",
+    "inv:stable-caseflow-package-entrypoint scope names more applications than verified adoptions",
+    "inv:submission-cli-explicit-options scope names more applications than verified adoptions",
+    "22 canonical event(s) claim human-reviewed with no verified approval, promoted before approval enforcement landed on 2026-07-26. Their status is a string a command wrote, not an attestation. They are reported rather than back-filled, because inventing an approval for a review that was never signed is fabrication: evt:caseflow-idempotent-retries, evt:convex-caseflow-receipt-retry-contract, evt:exact-candidate-contract, and 19 more",
+    "evd:convex-caseflow-receipt-retry-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+    "evd:guided-intake-mobile-decisions-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+    "evd:source-bound-submission-gates-materiality had its binding repaired after 2de08fa4 (sha256); allowed, because a record cannot name the commit that will contain it",
+    "asm:strong-model-infers-topology historical dimensions metadata mutation is acknowledged by evd:historical-topology-dimensions-acknowledgment; the raw claim mutation remains recorded, with operator-directed-in-session assurance, not human review or a signature"
+  ],
+  "passed": true
+}

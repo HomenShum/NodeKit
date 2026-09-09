@@ -184,7 +184,7 @@ application; the recovery is to delete the directory and re-run.
 
 **File:** `templates/base/agent/workflow.mjs` (becomes `agent/workflow.mjs` in the
 generated application)
-**Symbol:** `createGuidedDemo` (line 10), `propose` (line 29), `decide` (line 44)
+**Symbol:** `createGuidedDemo` (line 10), `propose` (line 29), `decide` (line 47)
 **Called by:** the generated `scripts/demo.mjs` and `apps/web/server.mjs`
 **Calls next:** `createMemoryCaseflow` in `src/lib/caseflow.mjs`
 
@@ -250,7 +250,7 @@ as text, rather than crashing the server. The agent sees the error and can retry
 ## Step 7 — Persistence: the one place an artifact changes
 
 **File:** `src/lib/caseflow.mjs`
-**Symbol:** `decideProposal` (line 289), `completeRun` (line 504)
+**Symbol:** `decideProposal` (line 434), `completeRun` (line 649)
 **Called by:** the generated application's `decide` (Step 5) and `/api/decide`
 **Calls next:** `contentHash` (line 48), then the receipt writer inside `completeRun`
 
@@ -316,7 +316,7 @@ because it tells the user their change was *not* applied.
 
 **File:** `src/cli-main.mjs`, then `src/lib/caseflow.mjs`
 **Symbol:** the top-level `main().catch` (cli-main.mjs line 2922), and the idempotent-retry return
-`reused: true` (caseflow.mjs line 308)
+`reused: true` (caseflow.mjs line 453)
 **Called by:** the Node process, and any client that retries
 **Calls next:** nothing — these are the ends of the chain
 

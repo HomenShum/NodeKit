@@ -1,0 +1,23 @@
+
+> @homenshum/nodekit@0.2.1 acceptance:factory
+> node src/factory-acceptance.mjs
+
+FACTORY ACCEPTANCE domain-blank-base (npm)
+FACTORY ACCEPTANCE WORKSPACES C:\Users\hshum\AppData\Local\Temp\nodekit-factory-acceptance-eZIbtP
+file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/src/factory-acceptance.mjs:92
+  if (status) throw new Error(`factory acceptance requires a clean distributable candidate:\n${status}`);
+                    ^
+
+Error: factory acceptance requires a clean distributable candidate:
+M  templates/base/README.md
+M  templates/base/agent/workflow.mjs
+M  templates/base/apps/web/public/app.js
+M  templates/base/apps/web/public/styles.css
+M  templates/base/apps/web/server.mjs
+M  templates/base/scripts/browser-certify.mjs
+M  templates/base/test/workflow.test.mjs
+    at assertCleanCandidate (file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/src/factory-acceptance.mjs:92:21)
+    at async prepareCandidateTarball (file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/src/factory-acceptance.mjs:99:23)
+    at async file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/src/factory-acceptance.mjs:353:21
+
+Node.js v22.22.2

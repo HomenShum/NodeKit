@@ -71,6 +71,69 @@
         "partial",
         "informational"
       ]
+    },
+    "historicalResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "recordId",
+        "recordPath",
+        "introducedCommit",
+        "editedCommit",
+        "originalRecordDigest",
+        "acknowledgedRecordDigest",
+        "changedFields",
+        "authorityDirective"
+      ],
+      "properties": {
+        "kind": {
+          "const": "historical-assumption-dimensions-added"
+        },
+        "recordId": {
+          "const": "asm:strong-model-infers-topology"
+        },
+        "recordPath": {
+          "const": "evolution/assumptions/asm-strong-model-infers-topology.json"
+        },
+        "introducedCommit": {
+          "$ref": "#/$defs/sha"
+        },
+        "editedCommit": {
+          "$ref": "#/$defs/sha"
+        },
+        "originalRecordDigest": {
+          "$ref": "#/$defs/hash"
+        },
+        "acknowledgedRecordDigest": {
+          "$ref": "#/$defs/hash"
+        },
+        "changedFields": {
+          "const": [
+            "dimensionsTested"
+          ]
+        },
+        "authorityDirective": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref",
+            "sha256",
+            "assurance"
+          ],
+          "properties": {
+            "ref": {
+              "$ref": "#/$defs/text"
+            },
+            "sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "assurance": {
+              "const": "operator-directed-in-session"
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -102,5 +165,27 @@
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "historicalResolution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "artifact"
+          },
+          "result": {
+            "const": "informational"
+          },
+          "verifiesInvariantIds": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
 }

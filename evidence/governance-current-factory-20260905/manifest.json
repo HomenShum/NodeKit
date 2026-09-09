@@ -1,0 +1,1463 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-09-05T07:43:44.999174+00:00",
+  "sourceCommit": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "sourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "tarballSha256": "efdf7edd77ec47a5e4fff5514950e4eaa76068e93c52a442371163363170bdeb",
+  "verdict": "PASS_CURRENT_GOVERNANCE_PACKAGE_FACTORY_WITH_LIMITS",
+  "rawMarkdownPolicy": "Historical Markdown retained as .md.txt; original absolute references map through this manifest.",
+  "files": [
+    {
+      "path": "E3c-nodekit-governance-factory-20260905.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-factory-20260905.json",
+      "sha256": "f2db9aa265ceaeba822bdfabf020d726710c8c9200a6ddb7a2213fc33edb06b8",
+      "bytes": 703
+    },
+    {
+      "path": "E3c-nodekit-governance-factory-20260905.log",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-factory-20260905.log",
+      "sha256": "d7b6fb6d0842fde542091f7840b7958087f65e968a914e07e82650865d7c0727",
+      "bytes": 11472
+    },
+    {
+      "path": "E3c-nodekit-governance-whole-pr-materiality-20260905.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-whole-pr-materiality-20260905.json",
+      "sha256": "4f8a3af0b3feddbfb120d0f812031284eb0d6ec006d05f600aa12f7dcf9a0483",
+      "bytes": 854
+    },
+    {
+      "path": "E3c-nodekit-governance-whole-pr-materiality-20260905.log",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3c-nodekit-governance-whole-pr-materiality-20260905.log",
+      "sha256": "34dbca5b51a3c13b3d7f0c8c47decbcb38274d4d557bb627a0a88a44aabff087",
+      "bytes": 101
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/accepted-390.html",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\accepted-390.html",
+      "sha256": "b219790a4391d7cecb903e215f33076270debb23003803683ddeedb765753086",
+      "bytes": 8412
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/accepted-390.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\accepted-390.json",
+      "sha256": "f186c6d64b0b7a2e1b83193e93d30b3a82a70c0fc7a7374a7c74a8d89e86c177",
+      "bytes": 139
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/accepted-390.png",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\accepted-390.png",
+      "sha256": "6bf6ef093f3f43225a4da652b764edb28a01efa400caf2cd4095e93072633a26",
+      "bytes": 38021
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/actual-downloaded-proof.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\actual-downloaded-proof.json",
+      "sha256": "dd3a19a5ddaf67817acb81dc7a74218524e1a6b0a41132aa1ff7033014e249ad",
+      "bytes": 12011
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/arrival-390.html",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\arrival-390.html",
+      "sha256": "ae8d05e24554ab8f77a31357a2f533957f341774ecf13a7df56c6338ba07766e",
+      "bytes": 7880
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/arrival-390.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\arrival-390.json",
+      "sha256": "3e9f441a8ccc114e6451031b49b2ea1300eb8c2ce6a5e74248588d8262c6d16f",
+      "bytes": 135
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/arrival-390.png",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\arrival-390.png",
+      "sha256": "ec777476b2719441f775a425db936fbbbf6de26016defb5ce9bbc844dc690cc4",
+      "bytes": 41015
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/fresh-context-390.html",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\fresh-context-390.html",
+      "sha256": "79bd1ab04d086f9cdc4aa153d5b3dc12152b75b817ff488f2bfbc2e22b383faa",
+      "bytes": 8412
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/fresh-context-390.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\fresh-context-390.json",
+      "sha256": "f186c6d64b0b7a2e1b83193e93d30b3a82a70c0fc7a7374a7c74a8d89e86c177",
+      "bytes": 139
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/fresh-context-390.png",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\fresh-context-390.png",
+      "sha256": "6bf6ef093f3f43225a4da652b764edb28a01efa400caf2cd4095e93072633a26",
+      "bytes": 38021
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/report.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\report.json",
+      "sha256": "abfb1c3c6c858d2ef541e70678527cc47bf5f56830c4436515ff5abb1a3d0783",
+      "bytes": 6288
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.html",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\running-mobile-controls-390.html",
+      "sha256": "0726e1ce6f24f468054366753f0bf50729aefdae32385529f0a28d2d33458e48",
+      "bytes": 8011
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\running-mobile-controls-390.json",
+      "sha256": "e94187ed53ddf9bcf07c78711d3943ffaafef9209cf5e348d3bc82c3edc073e6",
+      "bytes": 129
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.png",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\running-mobile-controls-390.png",
+      "sha256": "e9bbeaee4525d9a342d59b3b3997c3627a49b6a5ccfbf5a8d0dfbd847a387034",
+      "bytes": 41453
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser-02/server.log",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser-02\\server.log",
+      "sha256": "7d6eec7e2a7166e41af47663ba3f0395f1c8f336b235498bc8976f5d4d47b140",
+      "bytes": 59
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser/arrival-390.html",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser\\arrival-390.html",
+      "sha256": "e51f5420a6a1b494fb66534585f7e0f5c200bb3a7c1ea1a64c2eebc1d6319073",
+      "bytes": 7880
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser/arrival-390.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser\\arrival-390.json",
+      "sha256": "3e9f441a8ccc114e6451031b49b2ea1300eb8c2ce6a5e74248588d8262c6d16f",
+      "bytes": 135
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser/arrival-390.png",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser\\arrival-390.png",
+      "sha256": "ec777476b2719441f775a425db936fbbbf6de26016defb5ce9bbc844dc690cc4",
+      "bytes": 41015
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser/report.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser\\report.json",
+      "sha256": "910068956b248e1f11c111691e121e8a588fa559f60ceb262e9bc1a9852c2772",
+      "bytes": 3701
+    },
+    {
+      "path": "E3e-nodekit-factory-independent-browser/server.log",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-independent-browser\\server.log",
+      "sha256": "7d6eec7e2a7166e41af47663ba3f0395f1c8f336b235498bc8976f5d4d47b140",
+      "bytes": 59
+    },
+    {
+      "path": "E3e-nodekit-factory-judge-bindings.py",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-judge-bindings.py",
+      "sha256": "93ca5bebe888a449ad91d5cb1092cf1bc87fd2373bc292cf127b682b29a9188c",
+      "bytes": 8808
+    },
+    {
+      "path": "E3e-nodekit-factory-judge-browser-02.mjs",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-judge-browser-02.mjs",
+      "sha256": "914865909d53ea406832a6a60b535d8936548d52d1b41b466e26f167bb4dbcd1",
+      "bytes": 8789
+    },
+    {
+      "path": "E3e-nodekit-factory-judge-browser-replay.py",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-judge-browser-replay.py",
+      "sha256": "d7a09154c875f544abc1076460899ba82d2362561e1188230a7cc6314e243c64",
+      "bytes": 862
+    },
+    {
+      "path": "E3e-nodekit-factory-judge-browser.mjs",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-factory-judge-browser.mjs",
+      "sha256": "fad122f6ff4fd35033eb2537ad0b86b9dfdcefd8553b41c572480ceb77f27fb7",
+      "bytes": 8659
+    },
+    {
+      "path": "E3e-nodekit-metadata-commit.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-metadata-commit.json",
+      "sha256": "3d11c63fd60d3d269c2604a676674df859348ba20ad5b5c6b2506995161f690a",
+      "bytes": 655
+    },
+    {
+      "path": "E3e-nodekit-raw-byte-refreeze.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-nodekit-raw-byte-refreeze.json",
+      "sha256": "3eae0c453a8494565a08df05af078fc80703b21c98e5715379c45614410d71de",
+      "bytes": 4868
+    },
+    {
+      "path": "E3e-preserve-prior-factory.py",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-preserve-prior-factory.py",
+      "sha256": "64a3a67b4e4781dc9e0a59824c35dd10e060167b570ffea363a9c28cdab48d21",
+      "bytes": 2032
+    },
+    {
+      "path": "E3e-prior-factory-preservation.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-prior-factory-preservation.json",
+      "sha256": "60a74d7acd7a4176a93db52e22928634235be73d73707f7a8dd79086b6ba4062",
+      "bytes": 78964
+    },
+    {
+      "path": "E3e-retain-current-factory.py",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e-retain-current-factory.py",
+      "sha256": "f97ca88bdb62955acef7476b87efd99c99e395b4b682ef3b5ecf5db389af1891",
+      "bytes": 3544
+    },
+    {
+      "path": "E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json",
+      "sha256": "334a9d4a5f6b8b98ff98e5da3b6d2205c45b8624aaefc8f5be43ce5eb9dbba1e",
+      "bytes": 22721
+    },
+    {
+      "path": "E3e_NODEKIT_ACTUAL_HEAD_JUDGE.md.txt",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_ACTUAL_HEAD_JUDGE.md",
+      "sha256": "da84fcdd598a0566db2c200c5be9a7b7d7a4e00e556a2552d2cd9935ce566e31",
+      "bytes": 1356
+    },
+    {
+      "path": "E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_COMMITTED_RANGE_JUDGE.json",
+      "sha256": "d32618b5563d4e2b46adadf19c9efc5112c571b941d187e2aa2290b7bcf178fb",
+      "bytes": 19365
+    },
+    {
+      "path": "E3e_NODEKIT_COMMITTED_RANGE_JUDGE.md.txt",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_COMMITTED_RANGE_JUDGE.md",
+      "sha256": "2010280578ce0b67dcd42718002fbff0ce5ae955ba416fe3c5c9f010ceb6af49",
+      "bytes": 3974
+    },
+    {
+      "path": "E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_CURRENT_FACTORY_JUDGE.json",
+      "sha256": "8b9ba887b39f8e48bd7011e5f94b780da4743363ddbc78a563b5f0c6fc10e09b",
+      "bytes": 16287
+    },
+    {
+      "path": "E3e_NODEKIT_CURRENT_FACTORY_JUDGE.md.txt",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_CURRENT_FACTORY_JUDGE.md",
+      "sha256": "202f322d1d3597334a86da3e065978f72d712c20c430d65dffc5f1c9f06cdf7f",
+      "bytes": 4421
+    },
+    {
+      "path": "E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json",
+      "sha256": "55da0c061df8494af66886a2d56c9cecb91508f171a59f47c12137dbfafd47c1",
+      "bytes": 441740
+    },
+    {
+      "path": "E3e_NODEKIT_FACTORY_JUDGE_BINDINGS.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_FACTORY_JUDGE_BINDINGS.json",
+      "sha256": "463e9d930471d6eaa90bdac146d5e543caa1a5f1499b5961a204dbb3916a4970",
+      "bytes": 70706
+    },
+    {
+      "path": "E3e_NODEKIT_RAW_STAGE_JUDGE.json",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_RAW_STAGE_JUDGE.json",
+      "sha256": "bd102cb3d98ee589ac4adf304b598cb557ae60be4dbef073896413dbadcc7d65",
+      "bytes": 11524
+    },
+    {
+      "path": "E3e_NODEKIT_RAW_STAGE_JUDGE.md.txt",
+      "originalRef": "C:\\Users\\hshum\\.codex\\worktrees\\5dba\\nodebench-ai\\docs\\plans\\portfolio-recovery-20260904\\E3e_NODEKIT_RAW_STAGE_JUDGE.md",
+      "sha256": "bab9a7e3050879fd1c40ad45992192fe9a261ef3b2c1caf2a386029afce801d1",
+      "bytes": 1605
+    },
+    {
+      "path": "factory-consumer/browser-certification.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\browser-certification.json",
+      "sha256": "c39669c3ca4c8b36caf7b0f9debf8220556cd7edadf9ddc92068e65b315a9645",
+      "bytes": 330110
+    },
+    {
+      "path": "factory-consumer/browser-contract.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\browser-contract.json",
+      "sha256": "4f37d393da377e245655f87cc4b88c5f863f11e335e9f75ebd8de7b17b57ffd2",
+      "bytes": 412
+    },
+    {
+      "path": "factory-consumer/build-friction.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\build-friction.json",
+      "sha256": "0b25d3f5948ddc346f914c35f6cbf945238e98a6e6c948f02b92f077a227eac1",
+      "bytes": 2473
+    },
+    {
+      "path": "factory-consumer/demo-receipt.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\demo-receipt.json",
+      "sha256": "3957263195eafe90806d27e3c5a7f98e177368a058375f160a887ccd8a87c0e4",
+      "bytes": 24800
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/nodekit-accepted-proof.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\nodekit-accepted-proof.json",
+      "sha256": "fe901691e79dbbdce54421418fe496959e43aed29bca53b30b34fde9bef3f2b3",
+      "bytes": 11999
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/nodekit-altered-binding.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\nodekit-altered-binding.json",
+      "sha256": "22aebd26ec5690d21c7eadeae68269dc9ee62ac6fe3d6d63cf6eddfc4a962691",
+      "bytes": 11999
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/nodekit-altered-proof.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\nodekit-altered-proof.json",
+      "sha256": "96e230a6737f7576cb20ff2a1bcfcc0127994d2bea05469a814089b45e47d6ad",
+      "bytes": 11950
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/nodekit-proof.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\nodekit-proof.json",
+      "sha256": "57b2461084b54ca99fe7667d7612b52d28a214bf4c07d7620b50dec0b8fce6f6",
+      "bytes": 8730
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshot-manifest.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshot-manifest.json",
+      "sha256": "c39669c3ca4c8b36caf7b0f9debf8220556cd7edadf9ddc92068e65b315a9645",
+      "bytes": 330110
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--desktop--dark.json",
+      "sha256": "4d216a316458eafd57481b13f02a19d3f8e6073fc766c206a743ce25bc200db3",
+      "bytes": 1354
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--desktop--light.json",
+      "sha256": "d709ab9ed04e2330b707f18d8bc140501c4e7f5177817412b0363e4cdd5b7922",
+      "bytes": 1355
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--mobile-landscape--dark.json",
+      "sha256": "ea5e38eef1b2d7cc9061bd557bfedc4afd0fb431e060c9b15bc47c3231f3d4b1",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--mobile-landscape--light.json",
+      "sha256": "6c291e158d4f61407a9340f48ac2befaf4a4a48c95c50eb8b018d11e9731a6eb",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--mobile-portrait--dark.json",
+      "sha256": "e3311bf50a376586bfcde12a469c7a38a7ac43444dceb463cc4e6d5a2bfee3d5",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--mobile-portrait--light.json",
+      "sha256": "6589b1d53e3aa30291efbf958d0f6ec3d2e9b4943511d53c7fc15d7836eb0f04",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--tablet-landscape--dark.json",
+      "sha256": "c2b5a14dbfd5cd83b158c56620639f0510ae00446c62add16a1c95633bd29a5c",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--tablet-landscape--light.json",
+      "sha256": "e43cf0bc7b12b20979a1c7e31edc03514ea25582f0f60f9f6eb43364050e1697",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--tablet-portrait--dark.json",
+      "sha256": "f41d1a7ba421ee8305f56ad5b003b27f939738e56b6dacb1fa535c29ee5a7128",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--tablet-portrait--light.json",
+      "sha256": "5e64e1619b153b9f6b760d199120c4f53b221d1b64e0b112500e1ee639f77a28",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--wide--dark.json",
+      "sha256": "5d6d44a61a9f8025483b72830a6cf4627a8f0095a092cb88dd6b75583f40b63b",
+      "bytes": 1352
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/approval--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\approval--wide--light.json",
+      "sha256": "aa006dda8960d33eaf55361c1e6833b284d7aa5c73ce83e37cace3061d5990b3",
+      "bytes": 1353
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--desktop--dark.json",
+      "sha256": "c5b68fef7ca15a49f638632b2a15a5a6bc738258596c846d79fe9eaa66cc8726",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--desktop--light.json",
+      "sha256": "24df6e74885f9ec298196511ed336cf6b33f3749c6a4c8374f32c9fc13893c29",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--mobile-landscape--dark.json",
+      "sha256": "e568b35106da5523b91e848e6b198f00811da55c0a06b920b308a65dd9fda3b3",
+      "bytes": 1381
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--mobile-landscape--light.json",
+      "sha256": "653752774a2dafaaadaec35e1d491a870ef6aee67df11cd13bd089061a9d6b31",
+      "bytes": 1382
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--mobile-portrait--dark.json",
+      "sha256": "aa98ffb0ddd673f4993f70d59ebdcabfca20db0b5cd9338cc5d3cbc773666bcf",
+      "bytes": 1380
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--mobile-portrait--light.json",
+      "sha256": "6972deee0fe2e6e8af18d965254439559e7d4ac792d69dd128ad5df9b1028a67",
+      "bytes": 1381
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--tablet-landscape--dark.json",
+      "sha256": "7c41e2fd7eaca7fb857a78e7182ba5cd2a8e878a18461ee0ab51ad467c616c3a",
+      "bytes": 1381
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--tablet-landscape--light.json",
+      "sha256": "7805d1be2b662817f3eed604d7a40d99386b5674361505539be4bc394b971a24",
+      "bytes": 1382
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--tablet-portrait--dark.json",
+      "sha256": "ed5623523ae969d188a88d48e4fa238934408299283785b484ce357d317a0ecf",
+      "bytes": 1380
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--tablet-portrait--light.json",
+      "sha256": "7f2f907fe315cd20b5fb5ce3efee37b69ae6bf93cc6bd3a885136049622d5064",
+      "bytes": 1381
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--wide--dark.json",
+      "sha256": "99827748493dc8f83010d929fcb6d6dc9ef34e6fce811907bdfe5002baedea70",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/completed_receipt--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\completed_receipt--wide--light.json",
+      "sha256": "5752a10f776d7ec1e65ec2c0cd657397b64c2375e662e599700b08b5ec55cac5",
+      "bytes": 1371
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--desktop--dark.json",
+      "sha256": "be5edbd2d47175270b6f2558788aaef702ab3731a4d4725e6f38d087637acd73",
+      "bytes": 1354
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--desktop--light.json",
+      "sha256": "20552fd37c7cad179993e3f5c63412c16cd75cde974973e4b4c07a8fc73e6eaa",
+      "bytes": 1355
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--mobile-landscape--dark.json",
+      "sha256": "7781c9b4a0f39c64844c62d1b94af42f7ba2d2d42b55142df3fe68e33b54aabd",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--mobile-landscape--light.json",
+      "sha256": "f00c3d76292dfc212374e693bc89c62507164441eef2b95d5de6421f94225843",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--mobile-portrait--dark.json",
+      "sha256": "69b60b862e509d994f8a8b2c3b5a32ef08d90a0c689f1538b84125ae57fb692e",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--mobile-portrait--light.json",
+      "sha256": "5fe91823a012694b0e198292389d6f6ae3f63942c640c2f41d1d2e627fddcb65",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--tablet-landscape--dark.json",
+      "sha256": "57015e9820fea0ec7d60addd06fb30c0329f6b7d8be43df1fdc5d83a163dab1d",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--tablet-landscape--light.json",
+      "sha256": "2095c70d63f9fdafa6ef96c5e9e9fef9dea340b2aff6eb300d8a2504b90d3054",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--tablet-portrait--dark.json",
+      "sha256": "5264ffd5ce1664a0130095e13fee3c127aaecdeb97b86c525ce2e473c3f427a9",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--tablet-portrait--light.json",
+      "sha256": "b2a1a48001875de6a0f03d1fe3d4bd7b1d040332eb80031d6a2fc1590734d912",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--wide--dark.json",
+      "sha256": "c77aae78dcdc2c3aa0e106b7b776efe6d1f61e58901cc34871f90a47d04d11a4",
+      "bytes": 1352
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/conflict--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\conflict--wide--light.json",
+      "sha256": "5b193786aab61330a439ea4558959b16da86bcbbbf964644058d2b3a351d8e2f",
+      "bytes": 1353
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--desktop--dark.json",
+      "sha256": "0b3b06b93cf45800f46eef6aa6810dca4656e8bc5677015e5c2131490c0531fe",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--desktop--light.json",
+      "sha256": "22836d0ac94bf7e7532795afbcae038670f2d85b022934a76deba38d12fba285",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--mobile-landscape--dark.json",
+      "sha256": "61c492c2f7110edb14bd09dcb1134e4111383171ce5979b2c9c96efea178e3e6",
+      "bytes": 1371
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--mobile-landscape--light.json",
+      "sha256": "853d6395b608187e7ac389abf51a037f99bdc7bd055c4b4fb0c91a45c5cf5395",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--mobile-portrait--dark.json",
+      "sha256": "942120c7b400d2885fd575f24953a38b5a587599017af178fabef7ae7e4763cb",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--mobile-portrait--light.json",
+      "sha256": "37c2462a9b9535fdf8a180e0664c329c98f285b4605197ee7e8f503c57efa9eb",
+      "bytes": 1371
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--tablet-landscape--dark.json",
+      "sha256": "6177b496c1857678367099dd8c4182e07b53aa6ee62a0e1057669b208bf2a22b",
+      "bytes": 1371
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--tablet-landscape--light.json",
+      "sha256": "ab8d01510e45eace15e8636f7b8060c42589182057b657e688cd6ec00940634f",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--tablet-portrait--dark.json",
+      "sha256": "bfb0e5025ab5549dc16a788608d095021c05c9025f22c23b25582ab519b6edf1",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--tablet-portrait--light.json",
+      "sha256": "3fda5e617b9850775738dc2df3ab84deca2ac368027e70aeb640f9faf4e16f86",
+      "bytes": 1371
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--wide--dark.json",
+      "sha256": "b7399d8be0b64c5d3e1bffb7c9e214ecc67e9e327d79f3e77d5826e3bd49dde6",
+      "bytes": 1360
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/export_share--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\export_share--wide--light.json",
+      "sha256": "3d3013d136b828433c7d3649f18025e7f17a4bba51993fa4f257df9794789a41",
+      "bytes": 1361
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--desktop--dark.json",
+      "sha256": "7c212f7f6d2b29b59618f0f56a0c384ddf2c3b252c41a1681e0d970f8fa8173f",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--desktop--light.json",
+      "sha256": "7763fe87ae9a18986f45d5737b1bbc33ff1039133a304e8c9f621151ef915a91",
+      "bytes": 1365
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--mobile-landscape--dark.json",
+      "sha256": "9f37d141efec7faf6d817f9816d8e6381ea6953d8396850e3e3ae3a79093d1ff",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--mobile-landscape--light.json",
+      "sha256": "404c5f58cde04af4d584bbf79e305a5288eb70a18b61ce3bbfb0919c32b5760e",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--mobile-portrait--dark.json",
+      "sha256": "440517f97848148f73e3167d1acdbae06654c16898534a113dea2a5ee8a8309a",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--mobile-portrait--light.json",
+      "sha256": "31d156d1e357a0b410facea8c0600e7c0923c36e460b46f566ffb5b9b50990be",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--tablet-landscape--dark.json",
+      "sha256": "2cce527ef93f929612f2f9a9e2ed07c78e403a5f6dc6d527e4ab246dabf2131a",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--tablet-landscape--light.json",
+      "sha256": "49db95564efccd90160c9abe5615bb49a88ffe55a3f640997435b5455d2f53f1",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--tablet-portrait--dark.json",
+      "sha256": "936c070951c48a59e7902f9c823644cbad1b7d17afe42f52cecdf9adaf973f9e",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--tablet-portrait--light.json",
+      "sha256": "eb1a8bee24bd5dea1dda0b705db54b2688d15923e3eed674e0111ada082f5aae",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--wide--dark.json",
+      "sha256": "ef07205e7729bc6cd6b37d58eb2d748b95fdf3e91df1413010acc98ace564d01",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/external_wait--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\external_wait--wide--light.json",
+      "sha256": "6e31e74f97976080d4ec6b98c9e31a01e8e3c3bb622e3a35159da7e66f8b134a",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--desktop--dark.json",
+      "sha256": "e531c8a29a9cc23a49ff4620fb1422c0fbae0aabd772702349ff7458666962fd",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--desktop--light.json",
+      "sha256": "2f5878d691f3b32d172d5b9bd7803ec447af422d9f400ab1a0f951f755d6270e",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--mobile-landscape--dark.json",
+      "sha256": "e6b184ad9aadc4f1c2389d6555e6a8300d17af31c660516c5ba6ce38bc05ae4a",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--mobile-landscape--light.json",
+      "sha256": "2c6f9d7a5f1decd1e96fc7172dc629c769f564a0ec5fc91a29f3063707c0f6e8",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--mobile-portrait--dark.json",
+      "sha256": "2dc9736934844f45da814725c393851928b39b29863bea73193d78014819015f",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--mobile-portrait--light.json",
+      "sha256": "6a13026f9ac0dcde326727f1dcd3a707a099ca8cba6c7d18d2ef1c17ecbd04f7",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--tablet-landscape--dark.json",
+      "sha256": "c269e6e7da98b2ff29c43e4d64b4aef6faf7651a880a9d229549d9b85cffb9bf",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--tablet-landscape--light.json",
+      "sha256": "75122736a380ff2e5da80919248cf37027f77e0c3c6f674fe4cf1539a81005ac",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--tablet-portrait--dark.json",
+      "sha256": "dac3fbf643904d5184bce55f027609ca5a88dfdbfbdfe1b0f1e66001c6fbf5a6",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--tablet-portrait--light.json",
+      "sha256": "fc7e8122bc1ad184d8d9b6cf5da14e1e811e74f893c174f594a1323950be1a24",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--wide--dark.json",
+      "sha256": "42b6abcef61cbe6a19bb746db9e959976e3389eb3ac6252af09277bb8ef2a6b4",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/first_arrival--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\first_arrival--wide--light.json",
+      "sha256": "6fa05ff5c3d691e1f559694311dcb92aa1797f19740deb4f35b50227186ff5d8",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--desktop--dark.json",
+      "sha256": "64937d5eeeaaa9b4d453607d8d48adf92749b701f088c53e79e7000f17c96e3e",
+      "bytes": 1348
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--desktop--light.json",
+      "sha256": "5f3b52b16077598fe73885128df82b9322123d6a6a47e5cfe5d2b3480ab7b8a5",
+      "bytes": 1348
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--mobile-landscape--dark.json",
+      "sha256": "64ee7717e5cceb85a460ad41810f7df77bd866727cabbb98db620eaf5c805869",
+      "bytes": 1357
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--mobile-landscape--light.json",
+      "sha256": "4d8adc1dec9c2b0aaf83185a972217e36e68f2bb9a43845252e64e4b42922e43",
+      "bytes": 1358
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--mobile-portrait--dark.json",
+      "sha256": "88519d2ffc5c5289cd7907908d8f74609aff3466a9300a3d0f41ac110f0fd15d",
+      "bytes": 1356
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--mobile-portrait--light.json",
+      "sha256": "406a1822f42072d614b9bb6ad2bc963bc406225e099bfe369a357d3ed8702a25",
+      "bytes": 1356
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--tablet-landscape--dark.json",
+      "sha256": "6ec1fd8f9c4f6e0b0f13793427fc258cc7e91ec595f05d5f4c2730d0ce8aaa53",
+      "bytes": 1357
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--tablet-landscape--light.json",
+      "sha256": "ccce65b43c01e963f515aa8509a28bab45ff6bb902cc1602c5d6f52f7b8dd82a",
+      "bytes": 1358
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--tablet-portrait--dark.json",
+      "sha256": "5fd4044111bae2d5810d2c0b2b75dadf5ae9b869434b996843af1c753be2aa0c",
+      "bytes": 1356
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--tablet-portrait--light.json",
+      "sha256": "0cddf5b156ac05a67ea9373dae520b2fa465287e74e990858cd94e57c5bd1d7e",
+      "bytes": 1357
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--wide--dark.json",
+      "sha256": "65aa905e954fb78ad64b3e5641c68299b9c047b1f4d839a5ce5892dac8eac76c",
+      "bytes": 1346
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/input--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\input--wide--light.json",
+      "sha256": "16860e6e2cb07cad3b499048d305e2ef8d40d748df9d0c7dd343b1288deb31e4",
+      "bytes": 1347
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--desktop--dark.json",
+      "sha256": "5d911f8cd003867ba7c570de9503ffc74c34d224b1fdcdfd399b5afb3b44fcf8",
+      "bytes": 1360
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--desktop--light.json",
+      "sha256": "2568947f7a8c4edc4e124a6f423f2a8e393222be16535f67eea5dddc4519caed",
+      "bytes": 1360
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--mobile-landscape--dark.json",
+      "sha256": "e0cb547b1e1905640c41918432bc8014e9ba144c0e773154dc49f1ed4de92cbd",
+      "bytes": 1369
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--mobile-landscape--light.json",
+      "sha256": "9eff22e753592b0940cc68ffb9d1d3cd0bd9cfe10727319276851a61d41504ed",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--mobile-portrait--dark.json",
+      "sha256": "952207a4c5c8f09f18edcaea8f2345b9b31eeab3b87614219b2356227abe599f",
+      "bytes": 1368
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--mobile-portrait--light.json",
+      "sha256": "349147e5d44dee6f0400dac95e28aaf3229ea23e4e7c6ecdc064410d0562b7a0",
+      "bytes": 1368
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--tablet-landscape--dark.json",
+      "sha256": "03fde3daad7bbc85af4ab6d8b8ff1ca5ef28cb684d68774a38ea45c4883a8808",
+      "bytes": 1369
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--tablet-landscape--light.json",
+      "sha256": "30e6f8d399f68efb7b5c38e80fc2a1c2dad04f71d7b0b1a8c0f8114ea84f63e4",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--tablet-portrait--dark.json",
+      "sha256": "cbf7090cf4e5d76d871b364ad0a5d5335e2cf3657826e7ebb1d4aef3d6a92aea",
+      "bytes": 1368
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--tablet-portrait--light.json",
+      "sha256": "15898295aa599366bc668290b22e5e7ea48f5204b2aeba18f42f23ccec1f029b",
+      "bytes": 1369
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--wide--dark.json",
+      "sha256": "8705a03f9b24a3e9c0a7f78bbade94416ce5bb27ca91485e3007ee9188cf46d5",
+      "bytes": 1358
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/orientation--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\orientation--wide--light.json",
+      "sha256": "4bcc3f028201495b3b143570411ff8578601b8a949dfac00feaa91fb8523e493",
+      "bytes": 1359
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--desktop--dark.json",
+      "sha256": "89756bd5d866daf8e491dfca2eb04854fffa083dc9ba1b23c971c8c08a03afc8",
+      "bytes": 1366
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--desktop--light.json",
+      "sha256": "e9f1b74da5bc60f291939f81e25881728e7e6c535025a8e46d73410e8bd507a0",
+      "bytes": 1367
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--mobile-landscape--dark.json",
+      "sha256": "07b621c6555926b26cea09c56a0c27a74327737edc095ba5273a895df5c93f08",
+      "bytes": 1375
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--mobile-landscape--light.json",
+      "sha256": "f764b4afee4ae2886be003d58b52d2925267fbe7e88b49d78bfd03ac0eccf01b",
+      "bytes": 1376
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--mobile-portrait--dark.json",
+      "sha256": "6fe65e855e65d485dd6a9f4c68b139a9a5b3aefc5eda4db11672bc074bbe07a8",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--mobile-portrait--light.json",
+      "sha256": "85fbea2f2d61aa91f64b2f5f910d5ae7491471e6626c95e6f08b93372447d9eb",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--tablet-landscape--dark.json",
+      "sha256": "e454ecca52d480d40c046893a861f541aa518ed8b7278d687f8578aff7dc0391",
+      "bytes": 1375
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--tablet-landscape--light.json",
+      "sha256": "d9059b4ad812578a96aebbae1e35428e17e192b17f88f7a3df493c6e92bf4033",
+      "bytes": 1376
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--tablet-portrait--dark.json",
+      "sha256": "533df592c3a71277c42cd4428ed79974f503aca3d2b6c9241f542cf0ec2dcab5",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--tablet-portrait--light.json",
+      "sha256": "55260208decbdf0fec8a9e9d81fbf2d9d50ee7bcd3fddccf2fa5784bafd48fc7",
+      "bytes": 1375
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--wide--dark.json",
+      "sha256": "be075abb77d14e2a3d7a6e0d901017c3b847e2ff19c5572592bd56dacb1e21a4",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/partial_result--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\partial_result--wide--light.json",
+      "sha256": "2e374c5eddf04775b7b86b270d5397fc2d090009c9955285f2ea1e0a4682f490",
+      "bytes": 1365
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--desktop--dark.json",
+      "sha256": "100b7f4c1f05b81d4ac0150f1cfd3d95b71fb9ceb74a43b77e1e8cd276f7fd28",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--desktop--light.json",
+      "sha256": "41aa35d601d14b59c57795e278b96e029b4a39893ef2fde90eae283df02324aa",
+      "bytes": 1371
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--mobile-landscape--dark.json",
+      "sha256": "577af20b1744fbd8286cd6690da531c100f036664c7386f6411c9a68394a5e64",
+      "bytes": 1379
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--mobile-landscape--light.json",
+      "sha256": "be6444f456cea0525be76fba5cbfc59ecd217ac4fb1efe9bd8a7bd6b5fc425ee",
+      "bytes": 1380
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--mobile-portrait--dark.json",
+      "sha256": "a9a706f7fda3e5267c50aa68e40aecaf556954c04b8a9b2413d77e5e11aa8302",
+      "bytes": 1378
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--mobile-portrait--light.json",
+      "sha256": "3a719a273598700329dac0625ffdc7bb97491dfc698e702161f4fd288deaadfa",
+      "bytes": 1378
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--tablet-landscape--dark.json",
+      "sha256": "10e2bd8e4482efb53337e6e2ada2a9533457276dd16d8f1bb34280e1b1ea4d21",
+      "bytes": 1379
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--tablet-landscape--light.json",
+      "sha256": "b89f1116e6b4344f783341b140e37783b3553c6296e7043ecf97a46634fb18c0",
+      "bytes": 1380
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--tablet-portrait--dark.json",
+      "sha256": "095c03f2cae09395c23babc4a405222b6e3328729d85d61564a6e6fc2c255fe9",
+      "bytes": 1378
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--tablet-portrait--light.json",
+      "sha256": "c2f3a99433fdf0506cc8e19dd73c7c1221076550fc4eb05304270fb97fce76fa",
+      "bytes": 1379
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--wide--dark.json",
+      "sha256": "1198baae214ee7ef381fdda107a52893e97e112e319d997d6dfcd10258c56fd3",
+      "bytes": 1368
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/proposal_pending--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\proposal_pending--wide--light.json",
+      "sha256": "024090d6c96369652e5a77947acca0814e687324afcf90e58279da073ef6a591",
+      "bytes": 1369
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--desktop--dark.json",
+      "sha256": "575b28430a7d89506c0e7b24e40df1978abd152607a29bf95185a344c99bbd6e",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--desktop--light.json",
+      "sha256": "b5cf1d22c76f446ec2ef8d87806cfa08395c421484d593cba090832c329c023c",
+      "bytes": 1375
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--mobile-landscape--dark.json",
+      "sha256": "6f8a9cc9c0bf785542852215d8baee8f2e20ef8b3055e2fe39f90dcf7c850458",
+      "bytes": 1383
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--mobile-landscape--light.json",
+      "sha256": "96370dd949d2ce9252203bcf05debc380211fb05a86c476db4346e3039431200",
+      "bytes": 1384
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--mobile-portrait--dark.json",
+      "sha256": "70a8ee90d7d668a67d44993eb0b0d66f2075491fbdc47a784ad3a2293bb5c03b",
+      "bytes": 1382
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--mobile-portrait--light.json",
+      "sha256": "7cfcffbeec4e665691b8a220db255ea460573536a2a544f11589e540ae483eb3",
+      "bytes": 1383
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--tablet-landscape--dark.json",
+      "sha256": "0baedbc563ee30ce96146b6ad1d7e49589865646c48243ef26d59f1f7a09d450",
+      "bytes": 1383
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--tablet-landscape--light.json",
+      "sha256": "0308ce976cb39e0af068b8e162a376df9aa7d115e1c196e87cab026240434aff",
+      "bytes": 1384
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--tablet-portrait--dark.json",
+      "sha256": "5dd383e46392e4370b851a64c5e46c52c023256e0c2e6929d3884bb05ac629ea",
+      "bytes": 1382
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--tablet-portrait--light.json",
+      "sha256": "a0fbd1f2f9cdb2899f5ec8e2249f611d25f58f0d47e973ccfe71bbd0a0733319",
+      "bytes": 1383
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--wide--dark.json",
+      "sha256": "0701b4a4d668d1c4e603e6a5caf29b6a3527af8ddffa58070f05f9eb5f76adbc",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/receipt_inspection--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\receipt_inspection--wide--light.json",
+      "sha256": "6e6babf5fc55834d238a8b7c24a82973aa4bac4b753fa3968469c80b2d497512",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--desktop--dark.json",
+      "sha256": "5632b0dfc81b2975a7f5da4b221c65bc6521efcc26ae16375be922198263c5bb",
+      "bytes": 1376
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--desktop--light.json",
+      "sha256": "8a851a19a31ad6f8c36aaec523522304a9414da2d292db54501700249fd04f30",
+      "bytes": 1377
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--mobile-landscape--dark.json",
+      "sha256": "21b313f85ad969eb06d777903449c0b7d738fdacd2542ee6aef8d7d8315d7de4",
+      "bytes": 1385
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--mobile-landscape--light.json",
+      "sha256": "2172d44d68495805af87d82d4da5106a3a7cc2ed4619c134b8507c0c71800c1b",
+      "bytes": 1386
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--mobile-portrait--dark.json",
+      "sha256": "7e535687025581c5c5ee2508dc58bea4bf7ba3c38fbc59f18c5f0ab17cae0e14",
+      "bytes": 1384
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--mobile-portrait--light.json",
+      "sha256": "71cd8d8cf282578c9eea784954a3e7a793dda303366f5fd9b178025e946622f0",
+      "bytes": 1385
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--tablet-landscape--dark.json",
+      "sha256": "79ed1a034ec4e7d43a70e26da94957ed7616f40f26b7f55c681aa1cd0e168913",
+      "bytes": 1385
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--tablet-landscape--light.json",
+      "sha256": "8ec3391f1e8fabb5a39486b9f6ce5709d281b7eef185e7fca835a6fa71c7f735",
+      "bytes": 1386
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--tablet-portrait--dark.json",
+      "sha256": "1f2d6c36e1fc4b9c1d57e3f9ecf2da584c861ed7157120408a856ae8f0b16e42",
+      "bytes": 1384
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--tablet-portrait--light.json",
+      "sha256": "153192cbab27b8ed35174c447c4c14af2fc08535676d2efa16b48e3ea6081b59",
+      "bytes": 1385
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--wide--dark.json",
+      "sha256": "a0ea45080e3446661cc40a277ed826f4e2e6a00a0861055ccb00dbba7e56dae9",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/recoverable_failure--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\recoverable_failure--wide--light.json",
+      "sha256": "ff58a16433fedcc521bb2b3936147a4020d7269e55fb91c6355b37de5b328e47",
+      "bytes": 1375
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--desktop--dark.json",
+      "sha256": "7bd617a441425e7879ec491bcdbbe43edc21e0d5e5ac55a81b207d4120a28a59",
+      "bytes": 1364
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--desktop--light.json",
+      "sha256": "441ac76e1d70002b154bb30eda55ff6bb2a751700f5b16187a04e58b12aead84",
+      "bytes": 1365
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--mobile-landscape--dark.json",
+      "sha256": "ab2665ea17bb6f57b0ce9965bc8047f90236f0ed341259df6100d01cf213b094",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--mobile-landscape--light.json",
+      "sha256": "9a3e7d0ba402df4dac9e908f8ada105876e7721c43c38931d708f9cf8684264a",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--mobile-portrait--dark.json",
+      "sha256": "2dd21360141abe3096b37a08a53a75ba21412b087c1fa52fdb9df035141dffd0",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--mobile-portrait--light.json",
+      "sha256": "2234e5a2b40e3e12364f35d944036cbb5f013460783331bc92d15cc116d31e52",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--tablet-landscape--dark.json",
+      "sha256": "639b2dc6f698a9d72f550a93f53638caad4b601993fcf1f8c6a3694a53900bfc",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--tablet-landscape--light.json",
+      "sha256": "e2a85d4434ea9086d337de342b574c93c3a61cce704f15fef0d998722e40932c",
+      "bytes": 1374
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--tablet-portrait--dark.json",
+      "sha256": "d21dbe39587e7f01df5ad8576275f96ae55d610d7c75dbe37ea8c3f68e819de0",
+      "bytes": 1372
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--tablet-portrait--light.json",
+      "sha256": "f02e294b48ddd9521b75625ee3b4ca0205e5f072f05a027a909d8a12fd120119",
+      "bytes": 1373
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--wide--dark.json",
+      "sha256": "03966c91ad343fbd1eadd8ec8e6f76ae4035eb1b5959e43edcaeb07d7026daec",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/reload_resume--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\reload_resume--wide--light.json",
+      "sha256": "e7e78e10e799df89aa06b1352d087a87f599fff8530255ec8bcc89a5c1c83a2e",
+      "bytes": 1363
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--desktop--dark.json",
+      "sha256": "cc4464865e873dfd02bcc2fc4a9bc8e7f3540e0527b50a5a752b3e3e570d2523",
+      "bytes": 1352
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--desktop--light.json",
+      "sha256": "0b44f98b354c616c9b530a2a479a4fb1d99ee81f4123a412c42a8f4cc972d7d2",
+      "bytes": 1353
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--mobile-landscape--dark.json",
+      "sha256": "863af13b6c3b99c04bc106c23db6ab15b68fdcca236640e6be997a6057f5dcd6",
+      "bytes": 1361
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--mobile-landscape--light.json",
+      "sha256": "444524b7f20c1be732caa115e82ae53b5c45816384c7254ad88f0529ed9758d6",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--mobile-portrait--dark.json",
+      "sha256": "fe0f8ab494e71d1bb5d0b8b847748d10e5e9a3050de28166763188a0a672ed2f",
+      "bytes": 1360
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--mobile-portrait--light.json",
+      "sha256": "92414c30ac7a017500c55ffc6aff1700b8b9d226458fbe9ae1fb3bfb944c6674",
+      "bytes": 1360
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--tablet-landscape--dark.json",
+      "sha256": "f688beaf726e6d0d661a27a3fbe52a75559111d2755b1b83ec2a4ffb8436c7e5",
+      "bytes": 1361
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--tablet-landscape--light.json",
+      "sha256": "49674d48c47bd3ecb0cc21482d5956212b27dd8a9c15e3cf4b060d5234a44de3",
+      "bytes": 1362
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--tablet-portrait--dark.json",
+      "sha256": "72df9470ce3d85aa71b60fb069b772c895dac31da8da7d391abf66ae7eb88777",
+      "bytes": 1360
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--tablet-portrait--light.json",
+      "sha256": "5b085d248342450538e8392c93fd26860d7f86b24d38a27c906e8ba98628e664",
+      "bytes": 1361
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--wide--dark.json",
+      "sha256": "3bef97e780d02004488e91ae112fd4300c91d615bdba31eb0a5f5972ddf771b6",
+      "bytes": 1350
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/running--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\running--wide--light.json",
+      "sha256": "637f699ac42022ab320ade216bd15cd876888d8a21432bc94c25552b71f28e25",
+      "bytes": 1351
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--desktop--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--desktop--dark.json",
+      "sha256": "a88b8c4109a7588c1d9c90ba201b36e265b3a8db724b2b618afbc4cd0080c871",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--desktop--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--desktop--light.json",
+      "sha256": "1cf624f5a646be04234968a234639a12a7be7ee3818ed76f9d067b6712d157f2",
+      "bytes": 1370
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--mobile-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--mobile-landscape--dark.json",
+      "sha256": "bb9595be02451745849d39c24a8536fb02cffe0ab4fd80c9c251318256dd4df0",
+      "bytes": 1379
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--mobile-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--mobile-landscape--light.json",
+      "sha256": "f1320f109ae3b284b8693ab5d5e46af7d3a364dfa00b2ebb2a79da712667e1c9",
+      "bytes": 1380
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--mobile-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--mobile-portrait--dark.json",
+      "sha256": "26cf665030fb23b7df5145431fbde065a3d22285319febd464025feb68f9d038",
+      "bytes": 1378
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--mobile-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--mobile-portrait--light.json",
+      "sha256": "898c9b48efe408a3ca4ca92e351ca18748f4dcc2cb1ec0b2cb0518bc029b7c6e",
+      "bytes": 1378
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--tablet-landscape--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--tablet-landscape--dark.json",
+      "sha256": "51e434b56151f42f42fde9eea8d1657f3d84815609d0bc902fd5334b6c893011",
+      "bytes": 1379
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--tablet-landscape--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--tablet-landscape--light.json",
+      "sha256": "96ae79c4d99168ddcb4d154b74875835141ba922e12ffd0e120ca28bdd5e4020",
+      "bytes": 1380
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--tablet-portrait--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--tablet-portrait--dark.json",
+      "sha256": "4a89943c229efe74332024bc9ea069058569b199b026af394aa4c14b48c49630",
+      "bytes": 1378
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--tablet-portrait--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--tablet-portrait--light.json",
+      "sha256": "2d4a0e929c406bb83f5118da9dcf74dbbb2a50a3550accf08a7dc17b73617704",
+      "bytes": 1379
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--wide--dark.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--wide--dark.json",
+      "sha256": "89c8b27259e333d62e34a9b34c06c21fefb16f9158ba931ae5538064ef4b2da8",
+      "bytes": 1368
+    },
+    {
+      "path": "factory-consumer/ease/ease_5b8b0296771845e397ae/browser/screenshots/validation_error--wide--light.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\ease\\ease_5b8b0296771845e397ae\\browser\\screenshots\\validation_error--wide--light.json",
+      "sha256": "9d3582c8e043a8455f94a4f05a6b4ba5e3826878a4fef8b270b21120913e790a",
+      "bytes": 1369
+    },
+    {
+      "path": "factory-consumer/eval-receipt.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\eval-receipt.json",
+      "sha256": "f222ad38d458eaa102124c904b635724e8a4559fc173dafafef6b070f420345d",
+      "bytes": 280
+    },
+    {
+      "path": "factory-consumer/release-proof.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\measured-journey\\domain-blank-base\\proof\\release-proof.json",
+      "sha256": "5591769d665fd6bb9c4cbef817788b9b991ede824f073c5252e2a12b12eb6f7e",
+      "bytes": 778
+    },
+    {
+      "path": "original/candidate-package/homenshum-nodekit-0.2.1.tgz",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\candidate-package\\homenshum-nodekit-0.2.1.tgz",
+      "sha256": "efdf7edd77ec47a5e4fff5514950e4eaa76068e93c52a442371163363170bdeb",
+      "bytes": 834557
+    },
+    {
+      "path": "source/proof/ease/latest/browser/screenshot-manifest.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshot-manifest.json",
+      "sha256": "c39669c3ca4c8b36caf7b0f9debf8220556cd7edadf9ddc92068e65b315a9645",
+      "bytes": 330110
+    },
+    {
+      "path": "source/proof/ease/latest/browser/screenshots/conflict--desktop--dark.png",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshots\\conflict--desktop--dark.png",
+      "sha256": "8fd7689fb62e92edd42a5c0e8d4e7901ede633a59e0e06817b1bee344797f9c8",
+      "bytes": 92565
+    },
+    {
+      "path": "source/proof/ease/latest/browser/screenshots/export_share--desktop--light.png",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshots\\export_share--desktop--light.png",
+      "sha256": "457bea301dfe1040d23d811d3f1573a73482e23ea14c27f743a04c5884dd721d",
+      "bytes": 90340
+    },
+    {
+      "path": "source/proof/ease/latest/browser/screenshots/proposal_pending--mobile-portrait--dark.png",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshots\\proposal_pending--mobile-portrait--dark.png",
+      "sha256": "b84a50d26aa1bec312b03a760150b51fb2b4838dd1b81f3520196ce2d096b7f3",
+      "bytes": 44495
+    },
+    {
+      "path": "source/proof/ease/latest/candidate.tar.gz",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\candidate.tar.gz",
+      "sha256": "aa37fd6a720921110e26d1ef0786cf6388c3ab2d0e6a3f4f5ad63da684fc249c",
+      "bytes": 914392
+    },
+    {
+      "path": "source/proof/factory-acceptance.json",
+      "originalRef": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\factory-acceptance.json",
+      "sha256": "3967a7365983800966999c416ce60819db0426789220ecf382deb54e2d1f73ad",
+      "bytes": 11331
+    },
+    {
+      "path": ".gitattributes",
+      "sha256": "061910338e577361914a2a21533ff4be02bbcbd1aa050f8f48007dd1d02e2414",
+      "bytes": 1182,
+      "originalRef": "Authored exact raw-byte preservation for listed files only"
+    }
+  ]
+}

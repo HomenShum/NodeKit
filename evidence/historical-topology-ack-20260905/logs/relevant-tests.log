@@ -1,0 +1,254 @@
+TAP version 13
+# Subtest: the status and reviewer are derived from the credential, not read from anything the caller wrote
+ok 1 - the status and reviewer are derived from the credential, not read from anything the caller wrote
+  ---
+  duration_ms: 3.3085
+  type: 'test'
+  ...
+# Subtest: a reviewer named in the event itself has no effect on the derived reviewer
+ok 2 - a reviewer named in the event itself has no effect on the derived reviewer
+  ---
+  duration_ms: 0.5533
+  type: 'test'
+  ...
+# Subtest: a weaker credential does not quietly satisfy a stronger requirement
+ok 3 - a weaker credential does not quietly satisfy a stronger requirement
+  ---
+  duration_ms: 1.5832
+  type: 'test'
+  ...
+# Subtest: trust levels are ordered, so comparisons are meaningful
+ok 4 - trust levels are ordered, so comparisons are meaningful
+  ---
+  duration_ms: 0.1253
+  type: 'test'
+  ...
+# Subtest: an approval does not survive any change to what it approved
+ok 5 - an approval does not survive any change to what it approved
+  ---
+  duration_ms: 0.4392
+  type: 'test'
+  ...
+# Subtest: an approval is single use, so it is a decision rather than a standing grant
+ok 6 - an approval is single use, so it is a decision rather than a standing grant
+  ---
+  duration_ms: 0.4464
+  type: 'test'
+  ...
+# Subtest: an expired or not-yet-valid approval is refused
+ok 7 - an expired or not-yet-valid approval is refused
+  ---
+  duration_ms: 0.5739
+  type: 'test'
+  ...
+# Subtest: a signature made for repair promotion cannot promote a ledger event
+ok 8 - a signature made for repair promotion cannot promote a ledger event
+  ---
+  duration_ms: 0.6611
+  type: 'test'
+  ...
+# Subtest: an untrusted credential, or one not authorized for this purpose, is refused
+ok 9 - an untrusted credential, or one not authorized for this purpose, is refused
+  ---
+  duration_ms: 0.5557
+  type: 'test'
+  ...
+# Subtest: an approval issued under a superseded trust policy is refused
+ok 10 - an approval issued under a superseded trust policy is refused
+  ---
+  duration_ms: 0.496
+  type: 'test'
+  ...
+# Subtest: a forged signature is refused
+ok 11 - a forged signature is refused
+  ---
+  duration_ms: 0.5074
+  type: 'test'
+  ...
+# Subtest: editing an approved field breaks the approval's own hash
+ok 12 - editing an approved field breaks the approval's own hash
+  ---
+  duration_ms: 0.2511
+  type: 'test'
+  ...
+# Subtest: with no trust policy nothing can be promoted
+ok 13 - with no trust policy nothing can be promoted
+  ---
+  duration_ms: 0.1868
+  type: 'test'
+  ...
+# Subtest: every refusal exits 5, so a caller can tell it from an ordinary failure
+ok 14 - every refusal exits 5, so a caller can tell it from an ordinary failure
+  ---
+  duration_ms: 0.1934
+  type: 'test'
+  ...
+# Subtest: editing a committed record's claim is reported as a mutation
+ok 15 - editing a committed record's claim is reported as a mutation
+  ---
+  duration_ms: 387.3647
+  type: 'test'
+  ...
+# Subtest: an uncommitted edit is caught, because verify reports on the bytes on disk
+ok 16 - an uncommitted edit is caught, because verify reports on the bytes on disk
+  ---
+  duration_ms: 441.6661
+  type: 'test'
+  ...
+# Subtest: repairing a binding is allowed and reported separately from a claim change
+ok 17 - repairing a binding is allowed and reported separately from a claim change
+  ---
+  duration_ms: 433.3725
+  type: 'test'
+  ...
+# Subtest: an untouched record produces neither an issue nor a warning
+ok 18 - an untouched record produces neither an issue nor a warning
+  ---
+  duration_ms: 598.7046
+  type: 'test'
+  ...
+# Subtest: without git, the check reports that it could not look rather than passing
+ok 19 - without git, the check reports that it could not look rather than passing
+  ---
+  duration_ms: 37.5426
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: Evolution Ledger verifies causal records, immutable evidence, and consumer adoption
+ok 20 - Evolution Ledger verifies causal records, immutable evidence, and consumer adoption
+  ---
+  duration_ms: 893.8964
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: Evolution Ledger detects evidence drift and refuses canonical overwrite
+ok 21 - Evolution Ledger detects evidence drift and refuses canonical overwrite
+  ---
+  duration_ms: 995.8185
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: verified evolution history generates projections and only proposes Knowledge Evolution changes
+ok 22 - verified evolution history generates projections and only proposes Knowledge Evolution changes
+  ---
+  duration_ms: 686.4958
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/runtime.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: materiality gate blocks unrecorded system changes and accepts a reviewed event in range
+ok 23 - materiality gate blocks unrecorded system changes and accepts a reviewed event in range
+  ---
+  duration_ms: 752.4606
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/session-resume.mjs', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/session-resume.mjs', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/lib/evolution-trust.mjs', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of '.github/workflows/quality.yml', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/next-runtime.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: reversible package change continues with exact live I/O, human-goal proof, and no forged approval
+ok 24 - reversible package change continues with exact live I/O, human-goal proof, and no forged approval
+  ---
+  duration_ms: 4020.0638
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/ui-runtime.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: deferred review refuses missing UI proof and evidence that is not bound to rollback
+ok 25 - deferred review refuses missing UI proof and evidence that is not bound to rollback
+  ---
+  duration_ms: 1281.1398
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/lib/evolution-trust.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: approval-architecture changes require a content-bound operator directive
+ok 26 - approval-architecture changes require a content-bound operator directive
+  ---
+  duration_ms: 1061.8757
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/migrations/drop-state.mjs', LF will be replaced by CRLF the next time Git touches it
+# Subtest: deferred review cannot bypass pre-action review for migration paths
+ok 27 - deferred review cannot bypass pre-action review for migration paths
+  ---
+  duration_ms: 788.8103
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# Subtest: concurrent agent proposals with one id never become last-writer-wins
+ok 28 - concurrent agent proposals with one id never become last-writer-wins
+  ---
+  duration_ms: 863.754
+  type: 'test'
+  ...
+# Subtest: an assumption that generalises must name the dimension its evidence measured
+ok 29 - an assumption that generalises must name the dimension its evidence measured
+  ---
+  duration_ms: 1.0573
+  type: 'test'
+  ...
+# Subtest: every assumption shipped in this repository names its measured dimension
+ok 30 - every assumption shipped in this repository names its measured dimension
+  ---
+  duration_ms: 3.9409
+  type: 'test'
+  ...
+# warning: in the working copy of 'observation.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-observed-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-observed-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evidence/current-recovery/historical-records.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evidence/current-recovery/operator-directive.md', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-historical-ack.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use
+ok 31 - historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use
+  ---
+  duration_ms: 19603.1622
+  type: 'test'
+  ...
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/adoptions/adp-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/approval-evt-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/approvals/consumed.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/events/architecture/evt-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/invariants/inv-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/trust-policy.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'src/lib/evolution-immutability.mjs', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'verifier.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/adoptions/adp-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/approval-evt-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/approvals/consumed.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/events/architecture/evt-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/invariants/inv-test.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/trust-policy.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'schemas/nodekit.evolution-evidence.v1.schema.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: a maintainer changing either historical admission owner must bind the actual operator directive
+ok 32 - a maintainer changing either historical admission owner must bind the actual operator directive
+  ---
+  duration_ms: 5436.21
+  type: 'test'
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 36540.0895

@@ -1,0 +1,144 @@
+{
+  "at": "2026-09-05T03:35:03.758Z",
+  "origin": "http://127.0.0.1:43873",
+  "fixture": "Independently verify the proposal boundary, reject unsafe changes, then approve a bounded result.",
+  "sourceBefore": {
+    "apps/web/public/index.html": "9c8c901e03c5b9dfd0d905537e5d29348b3b674916c3d5f162d165460fe4f5cd",
+    "apps/web/public/app.js": "c3e8dc478fb252dc7cfdc8a76077b155002394e1e0c979165df56a9c6b8cc516",
+    "apps/web/public/styles.css": "b50ab6810b95b444ed1543ab94d4df76d664ef56cea941cc7cc185d07ef12e5c",
+    "apps/web/server.mjs": "dde4f9468df0ed42eb2a8870c2afe4f4167ab94c489cd82f739bbf057beeda5f",
+    "agent/workflow.mjs": "65344e953c9fd164a9459f782fc22807fc30c129470f6539cce27701cced3664"
+  },
+  "states": [
+    {
+      "width": 1440,
+      "scenario": "completed_receipt",
+      "alert": {
+        "hidden": true,
+        "display": "flex",
+        "text": "Retry",
+        "rect": {
+          "x": 57.59375,
+          "y": 445.96875,
+          "width": 1324.8125,
+          "height": 34
+        }
+      },
+      "artifact": {
+        "attributes": {
+          "data-nodekit-artifact-type": null,
+          "data-nodekit-artifact-id": null,
+          "data-nodekit-artifact-version": null,
+          "data-nodekit-artifact-content-sha256": null
+        },
+        "displayedVersion": "v2"
+      },
+      "sourceLabels": [
+        "CHANGE A · Error feedback strip",
+        "CHANGE B · Canonical artifact and result"
+      ],
+      "boxes": [
+        {
+          "selector": "#error",
+          "label": "CHANGE A · Error feedback strip",
+          "color": "#9d174d",
+          "borderPx": 3,
+          "left": 57.59375,
+          "top": 445.96875,
+          "width": 1324.8125,
+          "height": 34
+        },
+        {
+          "selector": "#artifact",
+          "label": "CHANGE B · Canonical artifact and result",
+          "color": "#1d4ed8",
+          "borderPx": 3,
+          "left": 278.59375,
+          "top": 586.34375,
+          "width": 742.8125,
+          "height": 719.015625
+        },
+        {
+          "selector": "#review",
+          "label": "CHANGE C · Existing receipt export controls only",
+          "color": "#047857",
+          "borderPx": 3,
+          "left": 1021.40625,
+          "top": 586.34375,
+          "width": 360,
+          "height": 719.015625
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "scenario": "completed_receipt",
+      "alert": {
+        "hidden": true,
+        "display": "flex",
+        "text": "Retry",
+        "rect": {
+          "x": 16,
+          "y": 463.984375,
+          "width": 358,
+          "height": 34
+        }
+      },
+      "artifact": {
+        "attributes": {
+          "data-nodekit-artifact-type": null,
+          "data-nodekit-artifact-id": null,
+          "data-nodekit-artifact-version": null,
+          "data-nodekit-artifact-content-sha256": null
+        },
+        "displayedVersion": "v2"
+      },
+      "sourceLabels": [
+        "CHANGE A · Error feedback strip",
+        "CHANGE B · Canonical artifact and result"
+      ],
+      "boxes": [
+        {
+          "selector": "#error",
+          "label": "CHANGE A · Error feedback strip",
+          "color": "#9d174d",
+          "borderPx": 3,
+          "left": 16,
+          "top": 463.984375,
+          "width": 358,
+          "height": 34
+        },
+        {
+          "selector": "#artifact",
+          "label": "CHANGE B · Canonical artifact and result",
+          "color": "#1d4ed8",
+          "borderPx": 3,
+          "left": 17,
+          "top": 641.125,
+          "width": 356,
+          "height": 558.609375
+        },
+        {
+          "selector": "#review",
+          "label": "CHANGE C · Existing receipt export controls only",
+          "color": "#047857",
+          "borderPx": 3,
+          "left": 17,
+          "top": 1385.71875,
+          "width": 356,
+          "height": 493.984375
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "browser": "149.0.7827.55",
+  "sourceAfter": {
+    "apps/web/public/index.html": "9c8c901e03c5b9dfd0d905537e5d29348b3b674916c3d5f162d165460fe4f5cd",
+    "apps/web/public/app.js": "c3e8dc478fb252dc7cfdc8a76077b155002394e1e0c979165df56a9c6b8cc516",
+    "apps/web/public/styles.css": "b50ab6810b95b444ed1543ab94d4df76d664ef56cea941cc7cc185d07ef12e5c",
+    "apps/web/server.mjs": "dde4f9468df0ed42eb2a8870c2afe4f4167ab94c489cd82f739bbf057beeda5f",
+    "agent/workflow.mjs": "65344e953c9fd164a9459f782fc22807fc30c129470f6539cce27701cced3664"
+  },
+  "passed": true
+}

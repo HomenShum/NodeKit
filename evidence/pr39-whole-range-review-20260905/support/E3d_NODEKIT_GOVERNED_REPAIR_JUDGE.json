@@ -1,0 +1,422 @@
+{
+  "proof": "NODEKIT-GOVERNED-REPAIR-INDEPENDENT-JUDGE-01",
+  "status": "APPROVED_SCOPED_WITH_DEPENDENCIES",
+  "at": "2026-09-05T06:27:50.673391+00:00",
+  "requestTrace": "Execute planner-worker-judge recovery so each individual repository is ready for use and developer/user handoff; preserve honest readiness and historical evidence.",
+  "reviewer": {
+    "agent": "/root/provider_ci_closure_judge",
+    "implementationAuthorship": false,
+    "contextReused": true,
+    "disclosure": "Reviewer context was reused after the fresh-agent concurrency/thread limit was reached. This reviewer previously diagnosed the receipt defects and wrote independent proof scripts; root and preservation_worker authored the candidate. Independent means separate implementation authorship and fresh raw replays, not a new blind reviewer context."
+  },
+  "candidate": {
+    "root": "D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904",
+    "head": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "indexTree": "6f95a3a4a973e05a22c78b0793f623faf9c265ba",
+    "workingFilesDigest": "40f37cea48b1b895c6c430f9c1de6a0743e967c7e312e003ef79ab8f2965cead",
+    "workingFileDigestSerialization": "SHA256 of UTF-8 JSON array sorted by path; each object insertion order path,sha256,bytes; compact separators comma/colon; ensure_ascii=false; no terminal newline",
+    "changedPaths": 32,
+    "trackedModified": 6,
+    "newFiles": 26,
+    "packageSourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+    "portableManifest": {
+      "path": "evidence/historical-topology-ack-20260905/manifest.json",
+      "sha256": "51b8fb6fe9f5af18b5bd303c6457399546a7010fd4b323aef924414f5b7a98c8",
+      "artifactCount": 23
+    },
+    "implementationBindings": {
+      "schemas/nodekit.evolution-evidence.v1.schema.json": {
+        "sha256": "6e77493f6be59b35bcd196f72212180f54f6760cef87d077219ba355cc2cb5b7",
+        "bytes": 4431
+      },
+      "src/lib/evolution-immutability.mjs": {
+        "sha256": "59a8748d3cc336d39f6991a1dabacba9142805841d55f9fc8a66ed5f3160d69b",
+        "bytes": 7244
+      },
+      "src/lib/evolution-ledger.mjs": {
+        "sha256": "4c74f5d219b34a5d5a1a7474ca38e092e2c4f9ade01034fe399e01860b65e3b5",
+        "bytes": 52909
+      },
+      "test/evolution-ledger.test.mjs": {
+        "sha256": "4a2ecc3a6e2fb47b7e034b9ecdc0bdaa6c636c87ef9af66c388864c4cbc89cdb",
+        "bytes": 39366
+      },
+      "behavior-index.json": {
+        "sha256": "438fd3ae030e358e11e1461af5289b0e6d3fd523a3f5970b0376e99a0ee3d48b",
+        "bytes": 36946
+      }
+    },
+    "scope": "Unstaged candidate snapshot. No future commit or whole-PR approval is asserted."
+  },
+  "findings": [],
+  "causalClosure": [
+    {
+      "symptom": "A relabeled old receipt could accept forbidden workflow changes or omit an authority owner; the same listed source file could change after review.",
+      "owner": "src/lib/evolution-ledger.mjs:verifyDeferredEvolutionReview",
+      "correction": "Recompute actual full Git changed paths and material coverage; use one shared pre-action classifier; derive authority from actual paths; reject later material bytes.",
+      "independentObservation": "The actual 18-file workflow receipt fails specifically for quality.yml. A fixture omission of evolution-trust.mjs fails caller coverage, receipt coverage, authority classification and missing directive. Existing scenario also rejects later wrong-session bytes and repeated recomputed workflow receipts while metadata continuation remains valid."
+    },
+    {
+      "symptom": "A historical dimensionsTested addition blocks the ledger although the current assumption preserves that exact historical record.",
+      "owner": "src/lib/evolution-ledger.mjs:acknowledgeHistoricalMutations and schemas/nodekit.evolution-evidence.v1.schema.json",
+      "correction": "One informational artifact acknowledges the exact named record/path, real introduction and edit provenance, complete canonical records and current content-bound directive. Raw mutation detection remains active.",
+      "independentObservation": "Fresh actual API reports checked93/raw1/ack1/unresolved0/bindingRepairs3. Restored actual baseline reports the single original mutation failure. Both responses exactly equal retained raw reports."
+    },
+    {
+      "symptom": "Nested hash/pointer changes could let a recorded acknowledgment be rebound under the old generic binding-repair rule.",
+      "owner": "src/lib/evolution-immutability.mjs:detectLedgerMutations",
+      "correction": "For a record whose original or current bytes contain historicalResolution, all later differences are claim changes.",
+      "independentObservation": "Scenario rejects rehashed changed directive, changed acknowledgment sourceCommit and later acknowledgment payload; repeated reads retain raw counts; exclusive creation allows one winner or an already completed duplicate without overwriting."
+    },
+    {
+      "symptom": "A genuine signed motion event referred to a pre-squash object unavailable through normal durable refs.",
+      "owner": "Existing Git history; no signed-record edit",
+      "correction": "Forward recovery tag retains exact original object.",
+      "independentObservation": "Earlier independent fresh-fetch/ref/blob receipt proves exact 3974-byte original artifact at 7a59bfb under refs/tags/codex/recovery-motion-source-20260905; current canonical bytes remain unchanged."
+    }
+  ],
+  "verification": {
+    "independentlyReplayed": {
+      "relevantTests": 32,
+      "failures": 0,
+      "publicTypecheck": true,
+      "componentTypecheck": true,
+      "normalEvolutionCli": true,
+      "actualCandidateAndRollbackApis": true,
+      "priorWorkflowAndOmittedAuthorityDefects": true,
+      "additionalHistoricalAdversarialCases": 7,
+      "fullExistingHistoricalScenarioReplayedWithExtraCases": true
+    },
+    "additionalCases": [
+      {
+        "label": "informational acknowledgment cannot claim pass",
+        "passed": false,
+        "issues": [
+          "evd:historical-ack/result must be equal to constant",
+          "evd:historical-ack/ must match \"then\" schema",
+          "asm:strong-model-infers-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"one open-ended request without a protected topology\"]]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 0,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      },
+      {
+        "label": "informational acknowledgment cannot be human-review evidence",
+        "passed": false,
+        "issues": [
+          "evd:historical-ack/kind must be equal to constant",
+          "evd:historical-ack/ must match \"then\" schema",
+          "asm:strong-model-infers-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"one open-ended request without a protected topology\"]]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 0,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      },
+      {
+        "label": "informational acknowledgment cannot verify an invariant",
+        "passed": false,
+        "issues": [
+          "evd:historical-ack/verifiesInvariantIds must NOT have more than 0 items",
+          "evd:historical-ack/ must match \"then\" schema",
+          "evd:historical-ack references missing inv:invented",
+          "asm:strong-model-infers-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"one open-ended request without a protected topology\"]]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 0,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      },
+      {
+        "label": "resolution rejects unknown authority escape hatch",
+        "passed": false,
+        "issues": [
+          "evd:historical-ack/historicalResolution must NOT have additional properties",
+          "asm:strong-model-infers-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"one open-ended request without a protected topology\"]]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 0,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      },
+      {
+        "label": "directive assurance cannot claim detached or human review",
+        "passed": false,
+        "issues": [
+          "evd:historical-ack/historicalResolution/authorityDirective/assurance must be equal to constant",
+          "asm:strong-model-infers-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"one open-ended request without a protected topology\"]]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 0,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      },
+      {
+        "label": "one valid acknowledgment does not hide another record claim edit",
+        "passed": false,
+        "issues": [
+          "evd:observed-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [result: informational -> pass]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 2,
+          "acknowledged": 1,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      },
+      {
+        "label": "same historical record bytes at a later commit do not invent edit provenance",
+        "passed": false,
+        "issues": [
+          "evd:historical-ack historical acknowledgment is invalid: historical acknowledgment requires only the actual dimensionsTested addition and unchanged current claim",
+          "asm:strong-model-infers-topology was edited after it was committed in 38d4797a; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [dimensionsTested: (absent) -> [\"one open-ended request without a protected topology\"]]"
+        ],
+        "immutability": {
+          "checked": 2,
+          "gitAvailable": true,
+          "claimMutations": 1,
+          "acknowledged": 0,
+          "unresolved": 1,
+          "bindingRepairs": 0
+        }
+      }
+    ],
+    "custody": {
+      "checks": 19,
+      "passed": true,
+      "protectedTrackedFiles": 654,
+      "oldCanonicalRecords": 93,
+      "actualBaselineRollbackFiles": 458,
+      "manifestArtifacts": 23,
+      "workingChangedPaths": 32
+    },
+    "workerChecksObservedInBoundRawLogs": {
+      "repositoryTests": 857,
+      "componentTests": 8,
+      "componentBuild": true,
+      "generatedComponentFilesUnchanged": 45,
+      "disclosure": "Full npm test and build:component were executed by worker, not rerun by judge. Judge replayed affected suites, both typechecks, normal ledger command and actual before/after APIs; inspected raw successful totals and command exit receipts."
+    },
+    "currentCounts": {
+      "events": 25,
+      "assumptions": 6,
+      "invariants": 24,
+      "evidence": 36,
+      "adoptions": 3
+    },
+    "currentImmutability": {
+      "checked": 93,
+      "gitAvailable": true,
+      "claimMutations": 1,
+      "acknowledged": 1,
+      "unresolved": 0,
+      "bindingRepairs": 3
+    },
+    "currentAuthority": {
+      "canonicalEvents": 25,
+      "attested": 3,
+      "unattested": 22,
+      "unattestedIds": [
+        "evt:caseflow-idempotent-retries",
+        "evt:convex-caseflow-receipt-retry-contract",
+        "evt:exact-candidate-contract",
+        "evt:postgres-caseflow-adapter",
+        "evt:rendered-browser-certification",
+        "evt:source-bound-submission-gates",
+        "evt:studio-boundary",
+        "evt:behavior-index-and-friction-loop",
+        "evt:copy-as-proof-surface",
+        "evt:frontend-decisive-evidence",
+        "evt:gym-proven-friction-loop",
+        "evt:invariant-proof-binding",
+        "evt:journey-harness-and-tour",
+        "evt:nodevideo-topology-contract",
+        "evt:repository-wide-behavior-ownership",
+        "evt:signed-repair-promotion",
+        "evt:builder-journey-j0",
+        "evt:builder-journey-j1-decide-build",
+        "evt:builder-journey-j1-finish",
+        "evt:domain-blank-factory",
+        "evt:guided-intake-mobile-decisions",
+        "evt:submission-cli-named-options"
+      ]
+    },
+    "beforeAfterExactRecordedMatch": [
+      true,
+      true
+    ],
+    "restoredBaselineLimit": "458-byte-bound input files restored in a retained scratch clone, not a future committed-range git-revert receipt."
+  },
+  "authorityDisposition": {
+    "alreadyAuthorized": "Current repository recovery/now execute instructions authorize this reversible local correction, exact history preservation and truthful proof preparation. The directive explicitly identifies exact code choices as agent choices. No additional human code-review or signature claim was made.",
+    "legitimateNextSlice": "After committing these exact reviewed bytes, create a new agent-proposed draft bound to the actual material commit, execute a real final-range rollback proof, then call the existing deferred review creator and verifier against bf6ff6c..actualCommit with the current directive and complete evidence. The slice has three material paths (two verifier owners and the evidence schema); both new historical admission owners are authority-sensitive.",
+    "cannotUseCurrentDraftAsFinalReceipt": "Existing proposed draft is honestly baseline-bound and preparation JSON is expressly not a receipt. Do not rewrite sourceCommit, reviewedTo or receiptDigest to manufacture final coverage.",
+    "wholePrDependency": "Existing whole-PR range includes .github/workflows/quality.yml, which remains forbidden in deferred review. Historical acknowledgment and local patch approval do not authorize that range.",
+    "canonicalPromotionDependency": "A new canonical event still calls unchanged deriveInterpretation/verifyEvolutionApproval and requires a genuine configured credential signature against the actual subject and policy. H1 proves credential control, not physical human presence. No real approval, consumed nonce, key access or canonical event was created here."
+  },
+  "reliability": {
+    "BOUND": "At most one acknowledgment candidate; no new persistent collections. Existing repository loader remains scope owner.",
+    "HONEST_STATUS": "Invalid histories and receipt attacks fail; baseline failure is retained. API returns false as data; the normal CLI correctly exits nonzero on failures.",
+    "HONEST_SCORES": "No grades or score floors; historical claimMutations remains one. Human-reviewed status is not fabricated.",
+    "TIMEOUT": "No new external call; existing synchronous local Git behavior is unchanged. No new latency or timeout-resilience certification.",
+    "SSRF": "No network fetch/URL execution added.",
+    "BOUND_READ": "New historical artifact uses the existing 2 MiB local evidence limit after read; this is not streaming or preallocation-bound read proof.",
+    "ERROR_BOUNDARY": "Invalid schema, artifact, directive, provenance and acknowledgment mutations become verifier issues; exclusive create does not overwrite a competing record.",
+    "DETERMINISTIC": "Sorted-key full-record digests, exact Git provenance and actual changed-path derivation; raw before/current bytes retained."
+  },
+  "claimAudit": {
+    "noHistoricalRewrite": true,
+    "noCanonicalPromotion": true,
+    "noDependencyOrWorkflowChangeInSlice": true,
+    "noBlanketDimensionsExemption": true,
+    "noGradeInflation": true,
+    "noFinalCommittedReceiptClaim": true,
+    "noFreshFactoryProofClaim": true,
+    "retainedFailures": [
+      "Initial historical schema/scenario rejection",
+      "Original nested binding classifier admitted rehashed changed directive",
+      "First full test rejected stale behavior-index owner line, corrected with normal generator",
+      "Incorrect npm run build command: no such script; documented build:component passed",
+      "Initial rollback minimal export omitted one referenced artifact; after exact hash-bound copy, baseline sole failure reproduced",
+      "Earlier intermediate test fixture omitted draft evidenceIds, then corrected; earlier race assertion was too strict about EEXIST versus observing a completed duplicate"
+    ],
+    "limits": "Current package identity changed. Prior e7e4b10 factory/consumer proof remains historical. No browser, production, live-provider, physical-platform, performance or human-acceptance certification is inferred. Full product grades remain unscored by this patch."
+  },
+  "evidence": {
+    "E3d_NODEKIT_GOVERNED_REPAIR_PLAN.md": {
+      "sha256": "a1e882555f7f574716f7986e38b7f3a7ed1ed848650b011f5605c9272ac21fee",
+      "bytes": 5136
+    },
+    "E3d_NODEKIT_GOVERNED_REPAIR_INPUTS.json": {
+      "sha256": "86c9ef1e3127058bd0fe4e0d78f85e754bab91a6355a5127aeb888ee608d2ea7",
+      "bytes": 4344
+    },
+    "E3d_NODEKIT_GATE_REPAIR_PLAN.md": {
+      "sha256": "c8a724f47b119644d25ce924042556e76f930250143cd67f87724efc5e0024f2",
+      "bytes": 3412
+    },
+    "E3d_NODEKIT_HISTORICAL_ACK_RECEIPT.json": {
+      "sha256": "70c1ce9d9ada38b9e9b591a1af43e5739336917339a3b587a470164c5e660e5c",
+      "bytes": 27720
+    },
+    "E3d-nodekit-historical-ack-final.diff": {
+      "sha256": "5189792ee2f6bb846dcbbed64bcaf0a56fd5e23545793ef9852c908ed7b77494",
+      "bytes": 37498
+    },
+    "E3d_NODEKIT_GOVERNED_JUDGE_BINDINGS.json": {
+      "sha256": "5469b44acc4155a60a038fe995e836b8bf99f1f09f1b5e99b21b3af978dfc36a",
+      "bytes": 8813
+    },
+    "E3d_NODEKIT_GOVERNED_JUDGE_REPLAY.json": {
+      "sha256": "3de9003742c5057c1ba505dfaf10bdca8070844b6a50ab8427a506083d8d5acd",
+      "bytes": 161624
+    },
+    "E3d_NODEKIT_GOVERNED_JUDGE_IO.json": {
+      "sha256": "3e98e8bd387a88ed249520c97ffa17844964c00830fbaa5b4e1fbfd56ef7a911",
+      "bytes": 7209
+    },
+    "E3d_NODEKIT_GOVERNED_CURRENT_WORKFLOW_PROBE.json": {
+      "sha256": "c14561fdea67333af382ef9c451ed1506074d8d9424e4e92da9a111a2f823742",
+      "bytes": 1580
+    },
+    "E3d_NODEKIT_GOVERNED_OMITTED_AUTHORITY_PROBE.json": {
+      "sha256": "f9ef17f04c97446868b85a1ab5e096cd4907382603c29ec248e9c03ffe9d0c01",
+      "bytes": 1081
+    },
+    "E3d_NODEKIT_GOVERNED_EXTRA_PROBES.json": {
+      "sha256": "35509dfec9f3a9f10999572ab2d0f5865b9016da82e0398f5d1718f58ba47df4",
+      "bytes": 5097
+    },
+    "E3d-nodekit-governed-extra-historical.log": {
+      "sha256": "90789d4dbed3487117619b135f8b8211be06b2968da1d5a1ead7c5db3cd00b71",
+      "bytes": 1885
+    },
+    "E3d-nodekit-governed-judge-relevant-tests.log": {
+      "sha256": "b682875ed22b91d6f0a8c6c2de4e228d9941b22bc637e9e1e8d33bfd3f05cdad",
+      "bytes": 13102
+    },
+    "E3d-nodekit-governed-judge-verify.log": {
+      "sha256": "111113a09a3121777c4d7300d7a6a93b262d1ae796cd4017c8a818a7912704ba",
+      "bytes": 54
+    },
+    "E3d-nodekit-governed-judge-typecheck-public.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "E3d-nodekit-governed-judge-typecheck-component.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "E3d-nodekit-governed-current-workflow-probe.mjs.log": {
+      "sha256": "a281db893608a2acb91678f31c34712193d84e5d27b5ab011e8fc74525c097a2",
+      "bytes": 176
+    },
+    "E3d-nodekit-governed-omitted-authority.test.mjs.log": {
+      "sha256": "43c19d6c56c30b8b6cc0ab4836324c43678977937c7deda997d944c0a8dda744",
+      "bytes": 834
+    },
+    "E3d_NODEKIT_MOTION_PRESERVATION_JUDGE.json": {
+      "sha256": "7fb67680d714d3f8e9fd1e29110fbd4d56564a5dfe27f75d5e3829679b64abb7",
+      "bytes": 540
+    },
+    "E3d_NODEKIT_GOVERNED_GAP_PROBE.json": {
+      "sha256": "c15c699c7a65e44cd2e8f114c8eeaa85631919a85f072cf7f08898223b9944e2",
+      "bytes": 1478
+    },
+    "E3d_NODEKIT_OMITTED_AUTHORITY_PROBE.json": {
+      "sha256": "ce164ce778bdaaf0d69b914536d7b888f70b692268173448c53d1d1165687046",
+      "bytes": 787
+    },
+    "E3d-nodekit-historical-ack-rollback-complete.json": {
+      "sha256": "bc6f51433bc677245134d2d7bae98720211e9e7a9bda7fcabbe275ae307d9da9",
+      "bytes": 4709
+    },
+    "E3d-nodekit-historical-ack-rollback-committed-baseline.json": {
+      "sha256": "8decfb3badd468cd1602e3925af6d4c26e26477ef0cd3acb1373be0cdbff6177",
+      "bytes": 59839
+    },
+    "E3d-nodekit-governed-judge-run.py": {
+      "sha256": "c2022e788da85291fae235f3e2764005fa766a0beff9cab511124188be9a44fd",
+      "bytes": 2257
+    },
+    "E3d-nodekit-governed-judge-probes.py": {
+      "sha256": "fe808b9de7c9d0802441d5c2ca10510c4a43e234002702a29e8aa4c7717ed885",
+      "bytes": 1001
+    },
+    "E3d-nodekit-governed-extra-probes.py": {
+      "sha256": "9bb340da8acd4f197d7c94992e46ab14ea86a5d1148f1c52c7023cc57e0e1dea",
+      "bytes": 4050
+    },
+    "E3d-nodekit-governed-judge-io.mjs": {
+      "sha256": "c16bb2d6db01846db96200ade248916deb050ebfdd8828d196370c14e03addf1",
+      "bytes": 1924
+    },
+    "E3d-nodekit-governed-judge-bindings.py": {
+      "sha256": "f2c252c47084f508f0f2071605ff24dd58f1c396345eab87c9ccf322182cc405",
+      "bytes": 4553
+    }
+  }
+}

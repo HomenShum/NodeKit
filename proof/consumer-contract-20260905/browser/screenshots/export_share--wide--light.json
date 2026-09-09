@@ -1,0 +1,33 @@
+{
+  "applicationHash": "4fe02780ecfdd5d27fa92542c546cac4cd7c968048a3ebfe65f1363c6ecfee9f",
+  "capturedAt": "2026-09-05T03:54:17.771Z",
+  "configHash": "4fe02780ecfdd5d27fa92542c546cac4cd7c968048a3ebfe65f1363c6ecfee9f",
+  "consoleErrors": 0,
+  "elapsedMs": 44448,
+  "failedRequests": 0,
+  "generatedCandidateCommit": "85f1628ca6eaf595969011391d173b66392fda97",
+  "horizontalOverflowPx": 0,
+  "mojibakeDetected": false,
+  "nodekitCommit": null,
+  "nodekitIdentity": null,
+  "nodekitSourceBound": false,
+  "nodekitSourceHash": null,
+  "nodekitTarballBound": false,
+  "nodekitTarballSha256": "5964b7b265d3e9f79f49e825abd9682caf3440cc5125ceec1331569b9599b83b",
+  "pageUrl": "http://127.0.0.1:43592/?scenario=export_share",
+  "postAgentTreeHash": null,
+  "pngSha256": "1f137c672d3a9b353f8469dbeba6dedc323dceb41a8e630cbf435c6d56c1bb01",
+  "runId": "ease_1b98a59e6b7f4adabe9b",
+  "schemaVersion": "nodekit.screenshot-proof/v1",
+  "serverProcess": {
+    "command": "C:\\nvm4w\\nodejs\\node.exe apps/web/server.mjs",
+    "pid": 13224
+  },
+  "state": "export_share",
+  "theme": "light",
+  "viewportId": "wide",
+  "viewport": {
+    "height": 1080,
+    "width": 1920
+  }
+}

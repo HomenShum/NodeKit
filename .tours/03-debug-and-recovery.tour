@@ -12,7 +12,7 @@
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 307,
+      "line": 452,
       "pattern": "if \\(!repeatedDecisionMatches\\) throw new Error",
       "title": "\"proposal retry does not match original decision request\"",
       "description": "You will see this if a client re-sends a decision that differs from the one already recorded. It is working as designed: the first decision stands, and the second is refused rather than silently overwriting it.\n\nAn *identical* retry does not reach this line — it returns the original result with `reused: true`."

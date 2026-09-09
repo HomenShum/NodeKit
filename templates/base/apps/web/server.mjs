@@ -43,7 +43,7 @@ function setPresentation(id, kind, title, message) {
 }
 
 function prepareProposal() {
-  return demo.propose({ artifactId: current.artifact.artifactId, runId: current.run.runId });
+  return demo.propose({ artifactId: current.artifact.artifactId, runId: current.run.runId, outcome: current.outcome });
 }
 
 // Every decision routes through here, and the presentation is a function of the status the runtime
@@ -149,9 +149,11 @@ async function api(request, response, url) {
   if (request.method === "POST" && url.pathname === "/api/confirm") {
     if (!["first_arrival", "orientation", "input", "validation_error"].includes(presentation.id)) throw new Error("the outcome is already confirmed");
     const input = await body(request);
-    const outcome = String(input.outcome ?? "").trim();
-    if (!outcome) throw new Error("add a concrete outcome before continuing");
+    const outcome = String(input.outcome ?? "");
+    if (!outcome.trim()) throw new Error("add a concrete outcome before continuing");
     demo.runtime.updateCaseInput({ caseId: current.case.caseId, primaryJob: outcome });
+    // Case labels normalize whitespace; the accepted artifact preserves the submitted text.
+    current.outcome = outcome;
     demo.runtime.enterStage({ runId: current.run.runId, stageId: "working", nextAction: "Prepare the bounded proposal", nextActionOwner: "agent", idempotencyKey: "confirm-outcome" });
     setPresentation("running", "running", "Outcome confirmed", "The agent can now prepare a bounded proposal while the canonical artifact remains unchanged.");
     return send(response, 200, view());

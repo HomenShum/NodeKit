@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:historical-topology-acknowledgment-proposal-20260905",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "occurredAt": "2026-09-05T05:55:46.968Z"
+  },
+  "track": "architecture",
+  "category": "security",
+  "challenge": "The baseline has one old dimensions metadata mutation and incomplete review-range verification",
+  "observedFailure": "The committed baseline rejects the historical dimensions addition; a relabeled receipt could previously bypass actual material review",
+  "resolution": "Propose the bounded current verifier repair and exact informational historical acknowledgment, retaining the raw mutation and all canonical authority gates",
+  "assumptionIds": [
+    "asm:strong-model-infers-topology"
+  ],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:historical-topology-dimensions-acknowledgment"
+  ],
+  "knownLimitations": [
+    "This draft source commit identifies the observed committed baseline. The proposed repair is uncommitted and its exact source hashes are in the current review packet.",
+    "No final deferred receipt can cover an uncommitted range; prepare its inputs after the independent judge and reviewed commit.",
+    "Operator-directed-in-session is not a detached signature, human review or canonical promotion."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

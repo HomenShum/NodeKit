@@ -1,0 +1,57 @@
+{
+  "scenario": "completed_receipt",
+  "alert": {
+    "hidden": true,
+    "display": "none",
+    "text": "Retry",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
+  },
+  "artifact": {
+    "attributes": {
+      "data-nodekit-artifact-type": "structured-document",
+      "data-nodekit-artifact-id": "artifact_88474f803afc4af69de10cd565",
+      "data-nodekit-artifact-version": "2",
+      "data-nodekit-artifact-content-sha256": "58ce412ce9c72d435073b80a3088ad7086a47a10d386386a1d91faa5e2eedbbf"
+    },
+    "displayedVersion": "v2"
+  },
+  "sourceLabels": [
+    "CHANGE A · Error feedback strip",
+    "CHANGE B · Canonical artifact and result"
+  ],
+  "boxes": [
+    {
+      "selector": "#error",
+      "label": "CHANGE A · Error feedback strip",
+      "color": "#9d174d",
+      "borderPx": 3,
+      "left": 0,
+      "top": 0,
+      "width": 0,
+      "height": 0
+    },
+    {
+      "selector": "#artifact",
+      "label": "CHANGE B · Canonical artifact and result",
+      "color": "#1d4ed8",
+      "borderPx": 3,
+      "left": 17,
+      "top": 591.125,
+      "width": 356,
+      "height": 756.609375
+    }
+  ],
+  "viewport": {
+    "width": 390,
+    "height": 960
+  },
+  "route": "http://127.0.0.1:43873",
+  "theme": "light",
+  "session": "anonymous isolated Chromium context",
+  "trigger": "Confirm outcome, prepare proposal, explicitly approve; scroll to top after settled render."
+}

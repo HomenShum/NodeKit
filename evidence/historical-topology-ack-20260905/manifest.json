@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "portfolio-evidence-manifest/v1",
+  "purpose": "NodeKit current historical acknowledgment proof; no independent-judgment or final-commit assertion",
+  "selfExcluded": "manifest.json",
+  "files": {
+    "acknowledged-record.json": {
+      "sha256": "c48813331219bbb0ff6f4a27910695ab5bf48a86384ba0c25e847128876231d3",
+      "bytes": 705
+    },
+    "after-verifier.json": {
+      "sha256": "783a201d62e18c3cb91050a5b49db655d9578c25550da378964ec1f0de8484e3",
+      "bytes": 3095
+    },
+    "before-verifier.json": {
+      "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+      "bytes": 3066
+    },
+    "deferred-review-preparation.json": {
+      "sha256": "3ce4a06407be1fe03cac0c7eeef5fb3b85750ad1ba34e9f718ac0454686cd5d8",
+      "bytes": 1928
+    },
+    "historical-records.json": {
+      "sha256": "567f7e90b5bb9d2b313b9b2dd1764b9673edbe30747abe47fcee8651a08ec432",
+      "bytes": 2750
+    },
+    "journey.md": {
+      "sha256": "6a85d87bb0d5dbf6b49606f216bc58214eee0679868d8f67b70e7a9f46425d66",
+      "bytes": 2902
+    },
+    "logs/build-component.log": {
+      "sha256": "040adfe957f91f0711122386f7d7a866c726afa3d8eb49fbda9aa42a0b3c6074",
+      "bytes": 204
+    },
+    "logs/evolution-verify.log": {
+      "sha256": "04b2563c6a3517a60c617ced7c35b6a3e72b27d00fb2bd7956197ef43120ff6e",
+      "bytes": 150
+    },
+    "logs/full-tests.log": {
+      "sha256": "2feeee203dd10880abf1302b0789b2ac3d24f16eddc8806b661b61781ce12d6e",
+      "bytes": 227398
+    },
+    "logs/incorrect-build-command.log": {
+      "sha256": "6bb67c33228fd23fb117a9ddda4946b3a20ce84c4f6a452aaf73dc2fa7545056",
+      "bytes": 230
+    },
+    "logs/initial-scenario-failure.log": {
+      "sha256": "7901c3f18043650357b90d4037bf27a8ec9711b38dc33d7301fdcfa1960a79f3",
+      "bytes": 2076
+    },
+    "logs/rehashed-directive-failure.log": {
+      "sha256": "ec9c6a3c70f5068d140faadc92370dd1f4f5af0dbb95e74374a599f6d22487e4",
+      "bytes": 2727
+    },
+    "logs/relevant-tests.log": {
+      "sha256": "098248366e4bd5028da793d6720999e853770c74b20aa98667832e74e6882353",
+      "bytes": 13357
+    },
+    "logs/stale-behavior-index-failure.log": {
+      "sha256": "f2afe619398f3ed63a3ad74e4790ae10e7f459883666969168850f2d3fa32eaf",
+      "bytes": 296565
+    },
+    "logs/typecheck-component.log": {
+      "sha256": "ca4c92379f83d4af6b446810516905860da0e6f732bf822501c7fd0bcb5a45b3",
+      "bytes": 140
+    },
+    "logs/typecheck-public.log": {
+      "sha256": "a3f83f5f3d7c1f7bbc53a6ea80551f9f28676410691f19e99f0ffc65d2426302",
+      "bytes": 111
+    },
+    "operator-directive.md": {
+      "sha256": "54b5422e84a5c64b9f6e01b9013f764e26e8bf965ce3c409e7cc85ded9c85e7f",
+      "bytes": 1239
+    },
+    "original-record.json": {
+      "sha256": "789f63d57314dae5d9ceca16b806fbb05f15fdfd24b327f79842851573c5e97a",
+      "bytes": 600
+    },
+    "proposed-evidence.json": {
+      "sha256": "850f442103e032358c94bc4103df206ddd58dd3074717ea31ee09c5142a23348",
+      "bytes": 1679
+    },
+    "README.md": {
+      "sha256": "5db2fdcea49f020f28a859c7a6691645960cb2c18c043d6db13f59fe99126bbe",
+      "bytes": 3432
+    },
+    "rollback-summary.json": {
+      "sha256": "418e6955edb375f51eae205a46ad87d3d24fbf036fb06c3728cdb928f6a597b0",
+      "bytes": 1831
+    },
+    "rollback-verifier.json": {
+      "sha256": "16fb27f090ba903becc16bba793d691398e246b62302059c4138bfb6e510f823",
+      "bytes": 3066
+    },
+    "source-bindings.json": {
+      "sha256": "139b3658cc2d8ccd747ca142e988daa031811f4555a2c75eb3323e7cac953e6e",
+      "bytes": 1113
+    }
+  }
+}

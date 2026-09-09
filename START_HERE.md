@@ -60,7 +60,7 @@ Five parts own everything. You should be able to name them after the tour:
 
 ## 4. Trace one real action
 
-Read `decideProposal` (src/lib/caseflow.mjs line 289). It is the one function in this repository
+Read `decideProposal` (src/lib/caseflow.mjs line 434). It is the one function in this repository
 that changes a saved artifact, and it is the whole governing rule in one function: **an accepted
 proposal is applied only if the version it was written against is still the current one.** If the
 artifact moved on in the meantime the proposal is marked `conflicted`, no version is written, and

@@ -1,0 +1,32 @@
+{
+  "proof": "NODEKIT-HISTORICAL-ACK-ROLLBACK-COMPLETE-01",
+  "baselineHead": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+  "restoredRuntimeAndCanonicalFiles": 458,
+  "allRestoredBytesMatchGitCommit": true,
+  "copiedReferencedArtifact": {
+    "path": "proof/ease/candidates/5cc61578b3c1bd5b5c8195b83347b91f8b83242b/0ced0adf6e0f719be9a5fabefd69754a79102f39b6b6a54b20daeb60ceba7c0b/backend/postgres-conformance.json",
+    "sha256": "e76b5931769e68367b42cfc8ce777298bb281328bef7c5dec616508be63e4195",
+    "bytes": 2223,
+    "matchesCanonicalEvidence": true
+  },
+  "command": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import {verifyEvolutionLedger} from './src/lib/evolution-ledger.mjs'; console.log(JSON.stringify(await verifyEvolutionLedger(process.cwd()),null,2));"
+  ],
+  "started": "2026-09-05T06:12:59.236492+00:00",
+  "finished": "2026-09-05T06:13:13.729773+00:00",
+  "exitCode": 0,
+  "verdictRef": "rollback-verifier.json",
+  "disclosure": "The initial minimal rollback export omitted one separately stored Postgres artifact and reported that omission in addition to the old mutation. Its raw reports remain unchanged. After copying the exact hash-bound existing artifact, all 458 baseline runtime/schema/canonical bytes still match and the old mutation is now the sole issue. No source, index or refs in the primary checkout changed. This is a restored-baseline proof, not a final committed-range revert receipt.",
+  "operatorEvidence": {
+    "retained": true,
+    "recordNames": [
+      "E3d-nodekit-historical-ack-rollback.json",
+      "E3d-nodekit-historical-ack-rollback-committed-baseline.json",
+      "E3d-nodekit-historical-ack-rollback-complete.json"
+    ],
+    "publicScope": "Portable summary and exact final verifier; complete recovery directory and 458-file map remain in the operator packet."
+  }
+}

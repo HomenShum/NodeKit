@@ -1,0 +1,44 @@
+TAP version 13
+# warning: in the working copy of 'observation.txt', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-observed-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/assumptions/asm-strong-model-infers-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-observed-topology.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/ledger.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evidence/current-recovery/historical-records.json', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evidence/current-recovery/operator-directive.md', LF will be replaced by CRLF the next time Git touches it
+# warning: in the working copy of 'evolution/evidence/evd-historical-ack.json', LF will be replaced by CRLF the next time Git touches it
+# Subtest: historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use
+not ok 1 - historical dimensions acknowledgment remains exact through tampering, repeated and concurrent use
+  ---
+  duration_ms: 19133.9859
+  type: 'test'
+  location: 'D:\\VSCode Projects\\node-platform\\.worktrees\\project-consolidation-20260904\\test\\evolution-ledger.test.mjs:507:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    rehashed changed directive cannot become an ordinary binding repair
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    rejects (file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/test/evolution-ledger.test.mjs:571:12)
+    async TestContext.<anonymous> (file:///D:/VSCode%20Projects/node-platform/.worktrees/project-consolidation-20260904/test/evolution-ledger.test.mjs:618:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19264.636

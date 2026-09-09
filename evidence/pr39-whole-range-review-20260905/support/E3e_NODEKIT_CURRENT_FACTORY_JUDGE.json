@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "portfolio.current-factory-independent-judge/v1",
+  "at": "2026-09-05T07:27:13.536155+00:00",
+  "mode": "Builder",
+  "verdict": "PASS_CURRENT_GOVERNANCE_PACKAGE_FACTORY_WITH_LIMITS",
+  "originalRequest": "Make each repository ready for usage and developer/user handoff through planner, worker and independent judge, including usable UI and evidence-bound automation.",
+  "proof": "NODEKIT-GOVERNANCE-CURRENT-PACKAGE-FACTORY-01",
+  "sourceCommit": "0d2223815ef73b80eeed8ce3dc6b96d16b3a2825",
+  "nodekitSourceHash": "cbd062964a7ada1774848f31408f2ffa3fc2953cfa28a096d398cb116810bf64",
+  "nodekitTarballSha256": "efdf7edd77ec47a5e4fff5514950e4eaa76068e93c52a442371163363170bdeb",
+  "nodekitTarballBytes": 834557,
+  "generatedCandidateCommit": "ff2aad17fd55ae994af82d6792d3fc29e074df03",
+  "generatedCandidateArchiveSha256": "aa37fd6a720921110e26d1ef0786cf6388c3ab2d0e6a3f4f5ad63da684fc249c",
+  "generatedCandidateArchiveBytes": 914392,
+  "factoryReceiptDigest": "1aa7d2431cfc1872daa990b7be91281b7570675dcbd0efacc7c9c0ddea77f21b",
+  "browserManifestDigest": "25dcdf4b265459b6aa96b276d84cfc7da8ec18f540528d54a9a49c6ec66e6922",
+  "verification": {
+    "baseChecks": 13,
+    "baseAllPass": true,
+    "normalFactoryDurationMs": 178511,
+    "cacheClass": "warm-or-unknown",
+    "spawnedCommandPhases": 13,
+    "packageArchiveFiles": 421,
+    "sourceArchiveTwoInstalledExact": true,
+    "sourceHashIndependentlyRecomputed": true,
+    "durableFiles": 1675,
+    "durableBytes": 78042063,
+    "priorFactoryArtifactsPreserved": 372,
+    "consumerArchiveFiles": 77,
+    "consumerWorkingArchiveByteMatches": 76,
+    "browserScreenshotsAndSidecars": 180,
+    "scenarioGrid": "15 required states x six CSS viewports x two themes",
+    "sidecarHashesIdentityAndPngDimensionsRecomputed": true,
+    "factoryPNGsPersonallyViewed": [
+      "export_share--desktop--light",
+      "proposal_pending--mobile-portrait--dark",
+      "conflict--desktop--dark"
+    ],
+    "independentActualBrowserChecks": 36,
+    "independentActualBrowserCaptures": 4,
+    "independentBrowserConsolePageNetworkErrors": 0,
+    "noPrimaryOrConsumerFilesChangedByJudge": true,
+    "templatesAndCaseflowUnchangedFromE7": true
+  },
+  "consumerGitDisposition": {
+    "trackedDelta": [
+      "proof/build-friction.json"
+    ],
+    "cause": "The normal factory commits the generated candidate before running check/demo/eval/browser-contract/proof. Their existing friction recorder appends five measured completion events afterward.",
+    "archivedBeforeSha256": "ed2b857081261e5aef549527b448b89f50587a0e5bc42af0519f5f15eb3c8d55",
+    "retainedCurrentSha256": "0b25d3f5948ddc346f914c35f6cbf945238e98a6e6c948f02b92f077a227eac1",
+    "allOtherArchivedBytesEqualWorking": true,
+    "wholeConsumerCleanClaim": false
+  },
+  "causalClosure": "The current governance implementation changes the distributable source identity. An older template-success receipt cannot certify that package. This fresh ordinary factory packs current committed bytes, installs that exact archive twice, creates a real committed consumer, runs its real browser/proof commands, and binds every screenshot and resulting receipt to the new source/tarball identity. Independent package/archive/receipt reconstruction and an actual mobile accept/download/reopen journey verify that chain.",
+  "retainedReviewerFailures": [
+    {
+      "report": "E3e-nodekit-factory-independent-browser/report.json",
+      "failure": "Initial independent 390px helper clicked hidden desktop #propose, producing a real timeout.",
+      "diagnosis": "Unchanged responsive CSS hides the desktop action group and exposes the actual #mobile-propose/#mobile-approve/#mobile-reject controls.",
+      "correction": "Use actual visible mobile controls; unchanged installed app passes 36 checks. Original failed report/script preserved."
+    },
+    {
+      "failure": "First archive-to-working assertion failed on proof/build-friction.json.",
+      "diagnosis": "All 77 archive members match Git; only the known normal generated receipt gained five appended completion events.",
+      "correction": "Preserve both hashes and explicitly report generated-output-only dirtiness, not a fully clean consumer."
+    },
+    {
+      "failure": "Helper construction first encountered PowerShell quoting and Python default cp1252 decoding errors; the missing generated module could not run.",
+      "correction": "Use a UTF-8 explicit helper file; no application code was involved."
+    }
+  ],
+  "limits": [
+    "This is the current local no-key domain-blank factory lane, not the entire repository quality matrix. The ordinary factory was not redundantly rerun by the judge; its actual artifacts were recomputed and one additional browser journey was executed.",
+    "The 180 screenshot grid includes explicitly loaded presentation scenarios; it does not represent 180 independent end-to-end user journeys. The canonical desktop sequence and independent mobile sequence use actual app decisions and downloads.",
+    "The judged machine is Windows/Chromium. Only three original factory PNGs and all four independent after PNGs were visually inspected in this bounded pass; all 180 PNG/sidecar byte bindings and dimensions were mechanically verified.",
+    "178511ms is a single warm-or-unknown local elapsed result. No cold-cache, cross-platform, human-usability or performance grade is inferred.",
+    "Factory passed and browser certified are scoped report results; submissionReady remains false and EASE_NOT_CERTIFIED remains the release verdict. All existing submission blockers remain.",
+    "The root-reported whole-PR materiality boundary remains blocked by workflow pre-action and H1/canonical authority requirements. This factory result is not an approval event, attestation, signature or deferred-review authorization.",
+    "Prior 372 factory files and current source/evidence are preserved. No primary source/index/ref/proof modification, credentials, model calls, deployments or remote writes occurred.",
+    "Reviewer context is reused due to the prior team thread-limit constraint. The reviewer did not implement the governance repair or execute the ordinary factory; it authored only bounded independent review/proof tooling."
+  ],
+  "submissionReady": false,
+  "releaseVerdict": "EASE_NOT_CERTIFIED",
+  "submissionBlockers": [
+    "developerTimingMatrix",
+    "freshAgentHeldout",
+    "freshHumanUsability",
+    "threeConvexConsumers",
+    "previewDeployment",
+    "managedSupabasePortability",
+    "knowledgeEvolutionAdoption",
+    "modelIntelligenceHarness",
+    "engineeringHealth",
+    "proofloopEaseVerification",
+    "packageInstallProof",
+    "publicationApproval"
+  ],
+  "wholePrApprovalCreated": false,
+  "newGrades": null,
+  "sourceEdits": 0,
+  "indexEdits": 0,
+  "refEdits": 0,
+  "providerCalls": 0,
+  "externalWrites": 0,
+  "evidenceRefs": {
+    "E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json": {
+      "path": "E3e_NODEKIT_CURRENT_FACTORY_RECEIPT.json",
+      "sha256": "55da0c061df8494af66886a2d56c9cecb91508f171a59f47c12137dbfafd47c1"
+    },
+    "E3e_NODEKIT_FACTORY_JUDGE_BINDINGS.json": {
+      "path": "E3e_NODEKIT_FACTORY_JUDGE_BINDINGS.json",
+      "sha256": "463e9d930471d6eaa90bdac146d5e543caa1a5f1499b5961a204dbb3916a4970"
+    },
+    "E3e-prior-factory-preservation.json": {
+      "path": "E3e-prior-factory-preservation.json",
+      "sha256": "60a74d7acd7a4176a93db52e22928634235be73d73707f7a8dd79086b6ba4062"
+    },
+    "E3e-retain-current-factory.py": {
+      "path": "E3e-retain-current-factory.py",
+      "sha256": "f97ca88bdb62955acef7476b87efd99c99e395b4b682ef3b5ecf5db389af1891"
+    },
+    "E3e-preserve-prior-factory.py": {
+      "path": "E3e-preserve-prior-factory.py",
+      "sha256": "64a3a67b4e4781dc9e0a59824c35dd10e060167b570ffea363a9c28cdab48d21"
+    },
+    "E3e-nodekit-factory-judge-bindings.py": {
+      "path": "E3e-nodekit-factory-judge-bindings.py",
+      "sha256": "93ca5bebe888a449ad91d5cb1092cf1bc87fd2373bc292cf127b682b29a9188c"
+    },
+    "E3e-nodekit-factory-judge-browser.mjs": {
+      "path": "E3e-nodekit-factory-judge-browser.mjs",
+      "sha256": "fad122f6ff4fd35033eb2537ad0b86b9dfdcefd8553b41c572480ceb77f27fb7"
+    },
+    "E3e-nodekit-factory-judge-browser-02.mjs": {
+      "path": "E3e-nodekit-factory-judge-browser-02.mjs",
+      "sha256": "914865909d53ea406832a6a60b535d8936548d52d1b41b466e26f167bb4dbcd1"
+    },
+    "E3e-nodekit-factory-judge-browser-replay.py": {
+      "path": "E3e-nodekit-factory-judge-browser-replay.py",
+      "sha256": "d7a09154c875f544abc1076460899ba82d2362561e1188230a7cc6314e243c64"
+    },
+    "E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json": {
+      "path": "E3e_NODEKIT_ACTUAL_HEAD_JUDGE.json",
+      "sha256": "334a9d4a5f6b8b98ff98e5da3b6d2205c45b8624aaefc8f5be43ce5eb9dbba1e"
+    },
+    "E3e-nodekit-factory-independent-browser/arrival-390.html": {
+      "path": "E3e-nodekit-factory-independent-browser/arrival-390.html",
+      "sha256": "e51f5420a6a1b494fb66534585f7e0f5c200bb3a7c1ea1a64c2eebc1d6319073"
+    },
+    "E3e-nodekit-factory-independent-browser/arrival-390.json": {
+      "path": "E3e-nodekit-factory-independent-browser/arrival-390.json",
+      "sha256": "3e9f441a8ccc114e6451031b49b2ea1300eb8c2ce6a5e74248588d8262c6d16f"
+    },
+    "E3e-nodekit-factory-independent-browser/arrival-390.png": {
+      "path": "E3e-nodekit-factory-independent-browser/arrival-390.png",
+      "sha256": "ec777476b2719441f775a425db936fbbbf6de26016defb5ce9bbc844dc690cc4"
+    },
+    "E3e-nodekit-factory-independent-browser/report.json": {
+      "path": "E3e-nodekit-factory-independent-browser/report.json",
+      "sha256": "910068956b248e1f11c111691e121e8a588fa559f60ceb262e9bc1a9852c2772"
+    },
+    "E3e-nodekit-factory-independent-browser/server.log": {
+      "path": "E3e-nodekit-factory-independent-browser/server.log",
+      "sha256": "7d6eec7e2a7166e41af47663ba3f0395f1c8f336b235498bc8976f5d4d47b140"
+    },
+    "E3e-nodekit-factory-independent-browser-02/accepted-390.html": {
+      "path": "E3e-nodekit-factory-independent-browser-02/accepted-390.html",
+      "sha256": "b219790a4391d7cecb903e215f33076270debb23003803683ddeedb765753086"
+    },
+    "E3e-nodekit-factory-independent-browser-02/accepted-390.json": {
+      "path": "E3e-nodekit-factory-independent-browser-02/accepted-390.json",
+      "sha256": "f186c6d64b0b7a2e1b83193e93d30b3a82a70c0fc7a7374a7c74a8d89e86c177"
+    },
+    "E3e-nodekit-factory-independent-browser-02/accepted-390.png": {
+      "path": "E3e-nodekit-factory-independent-browser-02/accepted-390.png",
+      "sha256": "6bf6ef093f3f43225a4da652b764edb28a01efa400caf2cd4095e93072633a26"
+    },
+    "E3e-nodekit-factory-independent-browser-02/actual-downloaded-proof.json": {
+      "path": "E3e-nodekit-factory-independent-browser-02/actual-downloaded-proof.json",
+      "sha256": "dd3a19a5ddaf67817acb81dc7a74218524e1a6b0a41132aa1ff7033014e249ad"
+    },
+    "E3e-nodekit-factory-independent-browser-02/arrival-390.html": {
+      "path": "E3e-nodekit-factory-independent-browser-02/arrival-390.html",
+      "sha256": "ae8d05e24554ab8f77a31357a2f533957f341774ecf13a7df56c6338ba07766e"
+    },
+    "E3e-nodekit-factory-independent-browser-02/arrival-390.json": {
+      "path": "E3e-nodekit-factory-independent-browser-02/arrival-390.json",
+      "sha256": "3e9f441a8ccc114e6451031b49b2ea1300eb8c2ce6a5e74248588d8262c6d16f"
+    },
+    "E3e-nodekit-factory-independent-browser-02/arrival-390.png": {
+      "path": "E3e-nodekit-factory-independent-browser-02/arrival-390.png",
+      "sha256": "ec777476b2719441f775a425db936fbbbf6de26016defb5ce9bbc844dc690cc4"
+    },
+    "E3e-nodekit-factory-independent-browser-02/fresh-context-390.html": {
+      "path": "E3e-nodekit-factory-independent-browser-02/fresh-context-390.html",
+      "sha256": "79bd1ab04d086f9cdc4aa153d5b3dc12152b75b817ff488f2bfbc2e22b383faa"
+    },
+    "E3e-nodekit-factory-independent-browser-02/fresh-context-390.json": {
+      "path": "E3e-nodekit-factory-independent-browser-02/fresh-context-390.json",
+      "sha256": "f186c6d64b0b7a2e1b83193e93d30b3a82a70c0fc7a7374a7c74a8d89e86c177"
+    },
+    "E3e-nodekit-factory-independent-browser-02/fresh-context-390.png": {
+      "path": "E3e-nodekit-factory-independent-browser-02/fresh-context-390.png",
+      "sha256": "6bf6ef093f3f43225a4da652b764edb28a01efa400caf2cd4095e93072633a26"
+    },
+    "E3e-nodekit-factory-independent-browser-02/report.json": {
+      "path": "E3e-nodekit-factory-independent-browser-02/report.json",
+      "sha256": "abfb1c3c6c858d2ef541e70678527cc47bf5f56830c4436515ff5abb1a3d0783"
+    },
+    "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.html": {
+      "path": "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.html",
+      "sha256": "0726e1ce6f24f468054366753f0bf50729aefdae32385529f0a28d2d33458e48"
+    },
+    "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.json": {
+      "path": "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.json",
+      "sha256": "e94187ed53ddf9bcf07c78711d3943ffaafef9209cf5e348d3bc82c3edc073e6"
+    },
+    "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.png": {
+      "path": "E3e-nodekit-factory-independent-browser-02/running-mobile-controls-390.png",
+      "sha256": "e9bbeaee4525d9a342d59b3b3997c3627a49b6a5ccfbf5a8d0dfbd847a387034"
+    },
+    "E3e-nodekit-factory-independent-browser-02/server.log": {
+      "path": "E3e-nodekit-factory-independent-browser-02/server.log",
+      "sha256": "7d6eec7e2a7166e41af47663ba3f0395f1c8f336b235498bc8976f5d4d47b140"
+    },
+    "factory:export_share--desktop--light": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshots\\export_share--desktop--light.png",
+      "sha256": "457bea301dfe1040d23d811d3f1573a73482e23ea14c27f743a04c5884dd721d"
+    },
+    "factory:proposal_pending--mobile-portrait--dark": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshots\\proposal_pending--mobile-portrait--dark.png",
+      "sha256": "b84a50d26aa1bec312b03a760150b51fb2b4838dd1b81f3520196ce2d096b7f3"
+    },
+    "factory:conflict--desktop--dark": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshots\\conflict--desktop--dark.png",
+      "sha256": "8fd7689fb62e92edd42a5c0e8d4e7901ede633a59e0e06817b1bee344797f9c8"
+    },
+    "source/proof/ease/latest/browser/screenshot-manifest.json": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\browser\\screenshot-manifest.json",
+      "sha256": "c39669c3ca4c8b36caf7b0f9debf8220556cd7edadf9ddc92068e65b315a9645"
+    },
+    "source/proof/factory-acceptance.json": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\factory-acceptance.json",
+      "sha256": "3967a7365983800966999c416ce60819db0426789220ecf382deb54e2d1f73ad"
+    },
+    "source/proof/ease/latest/candidate.tar.gz": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\source\\proof\\ease\\latest\\candidate.tar.gz",
+      "sha256": "aa37fd6a720921110e26d1ef0786cf6388c3ab2d0e6a3f4f5ad63da684fc249c"
+    },
+    "original/candidate-package/homenshum-nodekit-0.2.1.tgz": {
+      "path": "D:\\ProjectRecovery\\nodekit-governance-reviewed-factory-20260905\\original\\candidate-package\\homenshum-nodekit-0.2.1.tgz",
+      "sha256": "efdf7edd77ec47a5e4fff5514950e4eaa76068e93c52a442371163363170bdeb"
+    }
+  },
+  "remainingDependencies": [
+    "Root owns metadata publication and any commit of generated factory outputs after this judge.",
+    "Whole-PR workflow/H1/canonical authority remains a separate real approval dependency; do not manufacture it from this result.",
+    "Any further material package change invalidates this exact source/tarball identity and requires a new ordinary factory binding."
+  ]
+}

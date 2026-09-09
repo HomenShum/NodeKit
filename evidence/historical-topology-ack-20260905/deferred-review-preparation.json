@@ -1,0 +1,43 @@
+{
+  "kind": "review-input-preparation-only",
+  "status": "awaiting-independent-review-and-real-commit",
+  "knownInputs": {
+    "from": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "rollbackTarget": "bf6ff6c70f9f307c792d494b44fc8325c69db286",
+    "authorityDirectiveRef": "evidence/historical-topology-ack-20260905/operator-directive.md",
+    "uiChanged": false,
+    "uiReason": "This patch changes the local Git ledger verifier and evidence admission, with no rendered UI.",
+    "before": [
+      {
+        "ref": "evidence/historical-topology-ack-20260905/before-verifier.json",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/historical-topology-ack-20260905/operator-directive.md",
+        "kind": "operator-directive"
+      }
+    ],
+    "after": [
+      {
+        "ref": "evidence/historical-topology-ack-20260905/after-verifier.json",
+        "kind": "live-io"
+      },
+      {
+        "ref": "evidence/historical-topology-ack-20260905/journey.md",
+        "kind": "journey-card"
+      },
+      {
+        "ref": "evidence/historical-topology-ack-20260905/logs/full-tests.log",
+        "kind": "test-log"
+      }
+    ]
+  },
+  "requiredAfterReviewedCommit": [
+    "Set to to the actual independently reviewed commit, not the observed baseline.",
+    "Prepare a new agent-proposed draft whose source is that actual material commit; the existing draft describes the observed baseline and cannot cover a later range.",
+    "Perform and bind the actual final-range rollback verification through the existing mechanism; restored-baseline proof is preparation only.",
+    "Use createDeferredEvolutionReview and verifyDeferredEvolutionReview without editing their generated receipt fields or weakening forbidden workflow paths."
+  ],
+  "notAReceipt": true,
+  "canonicalPromotion": "No approval or signature exists for this candidate. H1 credential control and canonical workflow authority remain separate."
+}

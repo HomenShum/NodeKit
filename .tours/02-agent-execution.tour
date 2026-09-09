@@ -13,41 +13,41 @@
     {
       "file": "templates/base/agent/workflow.mjs",
       "line": 29,
-      "pattern": "^  function propose\\(\\{ artifactId, runId \\}\\)",
+      "pattern": "^  function propose\\(\\{ artifactId, runId, outcome \\}\\)",
       "title": "The agent proposes against a specific version",
       "description": "`baseVersion` is read from the artifact at the moment the proposal is made. That single number is what makes a stale proposal detectable minutes later — without it, a slow agent silently overwrites newer work."
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 72,
+      "line": 184,
       "pattern": "^export function createMemoryCaseflow",
       "title": "The default runtime is plain Maps",
       "description": "No database, no ORM, no migration step. `state.cases`, `state.runs`, `state.artifacts`, `state.proposals`, `state.receipts` are `Map`s in this process.\n\nSQL adapters exist under `adapters/` and are opt-in. The in-memory runtime is not a mock: it is the reference implementation the SQL adapters are tested against."
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 253,
+      "line": 398,
       "pattern": "^  function createProposal\\(\\{ artifactId, baseVersion",
       "title": "A proposal is recorded, not applied",
       "description": "Note what does not happen here: `artifact.canonicalVersion` is untouched and `artifact.content` is untouched. A proposal is an intention with a version stamp."
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 289,
+      "line": 434,
       "pattern": "^  function decideProposal\\(\\{ proposalId, decision",
       "title": "The only function that mutates a saved artifact",
       "description": "If you want to know how state changes in this system, this is the function. Everything else reads.\n\nThe first block handles a **repeated** decision: an agent or a flaky network re-sending the same accept must not create a second approval. An identical retry returns the first result with `reused: true`; a *different* decision on an already-decided proposal throws."
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 322,
+      "line": 467,
       "pattern": "proposal\\.status = \"conflicted\";",
       "title": "Stale changes are contained, not applied",
       "description": "The invariant in three lines. If the artifact moved on since the proposal was written, an accept produces `conflicted` and **nothing is applied**. The user is told their change was not applied; newer work survives.\n\n`test/generated-project-gates.test.mjs` drives this over real HTTP against a started server."
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 504,
+      "line": 649,
       "pattern": "^  function completeRun\\(\\{ runId, actor \\}\\)",
       "title": "The receipt binds the result to its bytes",
       "description": "A receipt is not a log line. `receiptHash` is a content hash of the run body, so a receipt cannot be reused to vouch for different content. Compare `contentHash` at the top of this file."
