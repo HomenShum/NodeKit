@@ -2,6 +2,27 @@
 
 A developer can turn a brief into a generated application, review a proposed result and download the exact approved artifact with its receipt. Start with README and START_HERE.md for setup, then docs/START_HERE.md for implementation ownership. Coding agents follow AGENTS.md and its canonical skill.
 
+## September 8 development-tool security patch
+
+A developer or consumer conformance job should install the patched toolchain before running
+checks. The draft already includes fast-uri3.1.7; this follow-up updates the exact Vitest pin
+to4.1.11 and ten development lock records, including PostCSS8.5.28 and Nano ID3.3.18. All eight
+production dependency records and application source remain unchanged. The old installation
+and resolver output are preserved in the portfolio recovery packet.
+
+The normal npm installer and full dependency audit pass with zero findings. Both typing checks,
+the component build, registry check and NodeVideo consumer conformance pass. The complete local
+suite passed898 repository cases and8 component cases with no skips or failures. Run `npm ci`,
+`npm run test:all`, `npm run typecheck:public`, `npm run typecheck:component`,
+`npm run build:component`, `npm run registry:check` and `npm audit` to reproduce. The separate
+NodeVideo conformance workflow still installs NodeKit main until this source is adopted.
+
+Inspect the exact pushed revision's shared CI and six factory smoke lanes before release.
+The ledger consistency check passes; whole-PR materiality still lacks canonical approval.
+The existing unsigned review packet below remains bound to its historical source and does not
+approve this dependency follow-up. No H1 signature, canonical promotion, independent review,
+production adoption or new visual/accessibility/performance grade is supplied by this patch.
+
 The reviewed consumer repair is commit e7e4b10f02d25c4e63e4bc1ae23e283693d9fdd5, tree f15e2a2b2d35110a9dff8c5a9932e2c267ae5ae1. It preserves the exact submitted outcome, exposes canonical identity in the DOM, makes the completed result downloadable and respects hidden error feedback. A rejected or stale proposal preserves the accepted result. The generic demonstration still uses a single in-memory server; this is not a persistence or multiuser production claim.
 
 Run npm ci and npm test for the repository. Run npm run acceptance:factory from a clean distributable candidate for the real generated-consumer check. Set NODEKIT_KEEP_ACCEPTANCE=1 to retain the actual launcher, consumer and release proof. The factory replaces proof/ease/latest; preserve previous evidence before another run. Do not treat passing application behavior as permission to skip release gates.
