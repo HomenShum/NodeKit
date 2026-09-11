@@ -392,7 +392,7 @@ test("a spawn failure lands in the receipt as one bounded line, never a raw erro
   try {
     // Long enough that the raw message would blow past the cap: the ENOENT message embeds the
     // whole program path, and the receipt is agent-visible.
-    const missingProgram = path.join(repositoryRoot, `${"definitely-not-installed-".repeat(30)}agent`);
+    const missingProgram = path.join(repositoryRoot, "definitely-not-installed-".repeat(8), "agent");
     const { receipt } = await runAgent({
       agent: "operator",
       goal: "Drive an agent CLI that does not exist on this machine",
@@ -409,6 +409,40 @@ test("a spawn failure lands in the receipt as one bounded line, never a raw erro
       receipt.process.error.length <= "ENOENT: ".length + 200,
       `error must stay bounded, got ${receipt.process.error.length} characters`,
     );
+  } finally {
+    await rm(store, { recursive: true, force: true });
+  }
+});
+
+test("an operator gets a durable failed receipt when an oversized program component prevents launch", async () => {
+  const store = await temporaryStore();
+  try {
+    // Linux throws synchronously here; Windows reports ENOENT through the child.
+    // Both must publish the failed run, without leaving an unfinished directory.
+    const result = await runAgent({
+      agent: "operator",
+      goal: "Recover evidence from a command the operating system cannot launch",
+      cwd: repositoryRoot,
+      out: store,
+      program: path.join(repositoryRoot, `${"definitely-not-installed-".repeat(30)}agent`),
+    });
+    const { receipt } = result;
+    assert.equal(receipt.status, "failed");
+    const expectedCode = process.platform === "win32" ? "ENOENT" : "ENAMETOOLONG";
+    assert.ok(receipt.process.error.startsWith(`${expectedCode}: `), receipt.process.error);
+    assert.ok(receipt.process.error.length <= expectedCode.length + 202);
+    assert.ok(!receipt.process.error.includes("\n"));
+    assert.equal(receipt.io.stdout.text, "");
+    assert.equal(receipt.io.stderr.text, "");
+    assert.equal(receipt.digests.stdout, createHash("sha256").update("").digest("hex"));
+    assert.equal(receipt.digests.stderr, receipt.digests.stdout);
+    assert.equal(receipt.events.at(-1).type, "process-failed");
+    assert.deepEqual(JSON.parse(await readFile(result.receiptPath, "utf8")), receipt);
+    const { receiptDigest, ...body } = receipt;
+    assert.equal(receiptDigest, contentDigest(body));
+    assert.match(await readFile(result.reportPath, "utf8"), /failed/u);
+    assert.deepEqual(await completedRunDirectories(store), [receipt.runId]);
+    assert.ok(!(await readdir(store)).some((name) => name.startsWith(".tmp-")));
   } finally {
     await rm(store, { recursive: true, force: true });
   }

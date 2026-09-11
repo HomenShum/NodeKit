@@ -990,7 +990,7 @@ async function collectEcosystem(parsed) {
 
   for (const repository of registry.repositoryCatalog.repositories) {
     if (repository.commandProfile === "untracked") continue;
-    const repoRoot = repository.name === "node-platform"
+    const repoRoot = repository.commandProfile === "platform"
       ? registry.root
       : path.join(workspace, repository.name);
     if (!(await pathExists(repoRoot))) {
