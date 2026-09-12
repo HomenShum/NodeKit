@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { renderDashboard } from "./lib/dashboard.mjs";
+import { renderDashboard, renderDashboardJson } from "./lib/dashboard.mjs";
 import { compileAgentDefinition, inspectAgentDefinition } from "./lib/agent-definition.mjs";
 import { pathExists } from "./lib/files.mjs";
 import { checkRepository, commandFor } from "./lib/repo-check.mjs";
@@ -226,7 +226,7 @@ Usage:
       --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
-  nodekit dashboard [--workspace <path>] [--write] [--out <path>]
+  nodekit dashboard [--workspace <path>] [--write] [--out <path>] [--json]
   nodekit governance visualize [--scenario pr32] [--out <governance.html>] [--json]
   nodekit graph import [--repo-root <path>] [--graph-dir <path>] [--repo-id <id>] [--commit <sha>] [--json]
   nodekit graph init [--repo-root <path>] [--graph-id <id>] [--owner-id <id>] [--json]
@@ -1027,7 +1027,21 @@ async function runEcosystemCheck(parsed) {
 }
 
 async function runDashboard(parsed) {
+  if (parsed.options.json && parsed.options.write) {
+    throw new Error("nodekit dashboard: --json cannot be combined with --write");
+  }
   const { registry, results } = await collectEcosystem(parsed);
+  if (parsed.options.json) {
+    const commit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: registry.root, encoding: "utf8" });
+    const generatorCommit = commit.status === 0 ? commit.stdout.trim() : null;
+    console.log(JSON.stringify(
+      renderDashboardJson(results, registry, { generatedAt: new Date().toISOString(), generatorCommit }),
+      null,
+      2,
+    ));
+    if (results.some((result) => !result.passed)) process.exitCode = 1;
+    return;
+  }
   const markdown = renderDashboard(results, registry);
   if (!parsed.options.write) {
     console.log(markdown);
