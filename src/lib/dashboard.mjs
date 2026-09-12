@@ -18,6 +18,39 @@ function certificationScore(result) {
   return { met: criteria.filter(Boolean).length, total: criteria.length };
 }
 
+function driftCount(result) {
+  return result.contractFindings.filter((finding) => !finding.declared).length +
+    result.sourceFindings.filter((finding) => !finding.excepted).length;
+}
+
+function setupSummary(result) {
+  const commandChecks = result.checks.filter((check) => check.id.startsWith("command:"));
+  return commandChecks.length > 0 && commandChecks.every((check) => check.passed) ? "PASS" : "FAIL";
+}
+
+export function renderDashboardJson(results, registry, meta) {
+  return {
+    schemaVersion: "nodekit.dashboard/v1",
+    generatedAt: meta.generatedAt,
+    generatorCommit: meta.generatorCommit,
+    rows: results.map((result) => {
+      const name = result.manifest ? result.manifest.repository.split("/").at(-1) : result.name;
+      const catalog = registry.repositoryCatalog.repositories.find((repo) => repo.name === name);
+      const score = certificationScore(result);
+      return {
+        repo: name,
+        lifecycle: catalog?.lifecycle ?? null,
+        role: catalog?.role ?? null,
+        commands: setupSummary(result),
+        noKey: result.manifest?.noKey?.status ?? null,
+        proofSchema: result.manifest?.proof?.receiptSchema ? "DECLARED" : "MISSING",
+        drift: driftCount(result),
+        p0: { met: score.met, total: score.total },
+      };
+    }),
+  };
+}
+
 export function renderDashboard(results, registry) {
   const lines = [
     "# Node Platform Ecosystem Status",
@@ -32,12 +65,8 @@ export function renderDashboard(results, registry) {
     const name = result.manifest ? result.manifest.repository.split("/").at(-1) : result.name;
     const catalog = registry.repositoryCatalog.repositories.find((repo) => repo.name === name);
     const score = certificationScore(result);
-    const commandChecks = result.checks.filter((check) => check.id.startsWith("command:"));
-    const setup = commandChecks.length > 0 && commandChecks.every((check) => check.passed) ? "PASS" : "FAIL";
-    const drift = result.contractFindings.filter((finding) => !finding.declared).length +
-      result.sourceFindings.filter((finding) => !finding.excepted).length;
     lines.push(
-      `| ${escapeCell(name)} | ${escapeCell(catalog?.lifecycle)} | ${escapeCell(catalog?.role)} | ${setup} | ${escapeCell(result.manifest?.noKey?.status)} | ${result.manifest?.proof?.receiptSchema ? "DECLARED" : "MISSING"} | ${drift} | ${score.met}/${score.total} |`,
+      `| ${escapeCell(name)} | ${escapeCell(catalog?.lifecycle)} | ${escapeCell(catalog?.role)} | ${setupSummary(result)} | ${escapeCell(result.manifest?.noKey?.status)} | ${result.manifest?.proof?.receiptSchema ? "DECLARED" : "MISSING"} | ${driftCount(result)} | ${score.met}/${score.total} |`,
     );
   }
 
