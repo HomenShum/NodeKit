@@ -1,8 +1,8 @@
 {
   "base": {
-    "applicationHash": "53dbed8659f925a3104da17839af72d91b9cbae4d1524f9ace8850e113a292be",
-    "browserManifestDigest": "97eed4335e854f07ab5430b8af4bc8d7654df8b8d30b0033f5183e52e064a085",
-    "candidateCommit": "31387f54d7dbe9886de835b322809cb63e687fa9",
+    "applicationHash": "decd8bee7f91aae8bef03fc37aa44e5c965e8aff9bdab0869e120004de16bcc8",
+    "browserManifestDigest": "bf76b0cb555c7d51dc6429a0cb1632c6699251d32e2b7edb4b9f9bee4ba4cddd",
+    "candidateCommit": "7ab63d4650a145782d8f0992458b12f0bbfee392",
     "checks": {
       "browserContractPassed": true,
       "browserJourneyPassed": true,
@@ -18,31 +18,105 @@
       "runtimeNotMisclassified": true,
       "runtimeSpecifierPortable": true
     },
-    "configHash": "53dbed8659f925a3104da17839af72d91b9cbae4d1524f9ace8850e113a292be",
-    "dependency": "file:vendor/nodekit",
+    "configHash": "decd8bee7f91aae8bef03fc37aa44e5c965e8aff9bdab0869e120004de16bcc8",
+    "dependency": "file:vendor/nodekit.tgz",
+    "durationMs": 188265,
     "phases": [
       {
-        "durationMs": 987,
-        "name": "scaffold_generation",
-        "startedAt": "2026-07-22T03:49:34.391Z"
+        "durationMs": 2,
+        "measured": true,
+        "name": "launcher_initialization",
+        "startedAt": "2026-08-11T06:58:11.045Z"
       },
       {
         "args": [
           "install",
+          "<exact-nodekit-tarball>",
+          "--ignore-scripts",
           "--prefer-offline",
           "--no-audit",
           "--no-fund",
           "--cache",
-          "C:\\Users\\hshum\\AppData\\Local\\Temp\\nodekit-factory-acceptance-fl8z8w\\npm-cache"
+          "<isolated-cache>"
         ],
         "command": "npm",
-        "durationMs": 3608,
+        "durationMs": 7060,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:34.391Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "3a4dd58f4f60772b4fb9acb255b6388b83dc0183d52b17a190c4ed9d05247fb8",
-        "name": "dependency_installation"
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:11.047Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "5b1e0581fe5bb254e2c58a4304a756d0a15c8d7ab29010b712de66f915f49970",
+        "name": "launcher_installation"
+      },
+      {
+        "args": [
+          "<installed-nodekit-cli>",
+          "create",
+          "<empty-target>",
+          "--name",
+          "factory-domain-blank-base",
+          "--brief",
+          "<neutral-brief>",
+          "--nodekit-specifier",
+          "file:vendor/nodekit.tgz",
+          "--package-manager",
+          "npm",
+          "--no-install"
+        ],
+        "command": "C:\\nvm4w\\nodejs\\node.exe",
+        "durationMs": 4788,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:18.107Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "bee7f334498d5553ee4102312c3f7165771297995e14d70e966dad58111e0eca",
+        "name": "scaffold_generation"
+      },
+      {
+        "durationMs": 5,
+        "measured": true,
+        "name": "exact_tarball_binding",
+        "startedAt": "2026-08-11T06:58:22.895Z"
+      },
+      {
+        "args": [
+          "install",
+          "--ignore-scripts",
+          "--prefer-offline",
+          "--no-audit",
+          "--no-fund",
+          "--cache",
+          "<isolated-cache>"
+        ],
+        "command": "npm",
+        "durationMs": 5919,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:22.901Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "ff3cb47c0f22a2a47b09642933529c3e0b2ca26b1146ca8292a786c2799bb28f",
+        "name": "generated_application_installation"
+      },
+      {
+        "args": [
+          "exec",
+          "--",
+          "playwright",
+          "install",
+          "chromium"
+        ],
+        "command": "npm",
+        "durationMs": 17942,
+        "exitCode": 0,
+        "failed": false,
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:28.820Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "3b39418d629183113121c83568d372e7d37a9931beb25415f4fb0d69f4be3a5e",
+        "name": "browser_runtime_installation"
       },
       {
         "args": [
@@ -50,12 +124,13 @@
           "--all"
         ],
         "command": "git",
-        "durationMs": 38,
+        "durationMs": 103,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:37.999Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:46.763Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "name": "candidate_stage_after_install"
       },
       {
@@ -66,15 +141,16 @@
           "user.email=nodekit@local",
           "commit",
           "-m",
-          "chore: lock generated dependencies"
+          "chore: bind exact candidate dependencies"
         ],
         "command": "git",
-        "durationMs": 72,
+        "durationMs": 106,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:38.071Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "7a666675058e491f3b7fcc35e7d5ecbb09f720e8ec3b3cb22b23c6ece69b50ad",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:46.908Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "af0c58498f3502bfa589598dd3c1530e49a9baafbbdd08b911488605386dc0f5",
         "name": "candidate_lock_commit"
       },
       {
@@ -83,12 +159,13 @@
           "compile"
         ],
         "command": "npm",
-        "durationMs": 8206,
+        "durationMs": 3781,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:38.170Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "25000aa814bc45b76f963c093a10fb5c4661bacb21aed1cd63dbcde9c325d41b",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:47.042Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "2110c93eb101988a2d53fbd462fda7d29d98073936e4c78e0b9ee102a0f40d2e",
         "name": "compile"
       },
       {
@@ -97,12 +174,13 @@
           "check"
         ],
         "command": "npm",
-        "durationMs": 960,
+        "durationMs": 1726,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:46.492Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "7597f6015eb3b4808924544a42bd97a6454c132b53ab12b9c3dba6205efcd58e",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:50.822Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "abe02d9777d3239bc9e5717dace754a167ada20cdfe8bb9237c8ac9d5d714e13",
         "name": "deterministic_checks"
       },
       {
@@ -111,12 +189,13 @@
           "demo"
         ],
         "command": "npm",
-        "durationMs": 435,
+        "durationMs": 594,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:47.452Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "592d60ad32008afe1df48a9cfa67696e9e52687b1abd79c21c6a5d1f2a3fdd96",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:52.548Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "8a5782d01bf7ce7825227bb6c918f16fa94db7424a963fcc2f038dc9edb52970",
         "name": "neutral_journey"
       },
       {
@@ -125,12 +204,13 @@
           "eval"
         ],
         "command": "npm",
-        "durationMs": 434,
+        "durationMs": 567,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:47.887Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "b3a5efa729299db5bfed22af4f51250c086071f1afce2bdc0c03945fdf6bb117",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:53.142Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "ada60f3e6704262d8ce88fca2d1621a68b6ad3692e3ed663aad3384b5ba08825",
         "name": "evaluation"
       },
       {
@@ -139,28 +219,14 @@
           "proof:browser-contract"
         ],
         "command": "npm",
-        "durationMs": 620,
+        "durationMs": 781,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:48.321Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "1059371a424f2c3959a96a17ed3509a3ef36660a44150be67e4e9a4eecb1c61c",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:53.710Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "1ce39ac5277c7f952cd8cb4173e0a7fd089f9e368127f76b5441f7c2082f06a9",
         "name": "browser_contract"
-      },
-      {
-        "args": [
-          "playwright",
-          "install",
-          "chromium"
-        ],
-        "command": "npx",
-        "durationMs": 2493,
-        "exitCode": 0,
-        "failed": false,
-        "startedAt": "2026-07-22T03:49:48.941Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "name": "browser_runtime_installation"
       },
       {
         "args": [
@@ -168,12 +234,13 @@
           "proof:browser"
         ],
         "command": "npm",
-        "durationMs": 131249,
+        "durationMs": 144207,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:49:51.434Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "9c18436c9a55947abb46d9327ba23d6e6253a83765ac67e11acc00c3f1701cc1",
+        "measured": true,
+        "startedAt": "2026-08-11T06:58:54.491Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "7b30a66b2f66b852a8fe2a5dc59be4ec6cea1b8c5c1e3ce74177d4960b340146",
         "name": "rendered_browser_journey"
       },
       {
@@ -182,40 +249,81 @@
           "proof"
         ],
         "command": "npm",
-        "durationMs": 439,
+        "durationMs": 611,
         "exitCode": 0,
         "failed": false,
-        "startedAt": "2026-07-22T03:52:02.684Z",
-        "stderrSha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
-        "stdoutSha256": "403d549554d4d3186d8bcdda8f5e27bd645791dda2e618a8941bc6dd6e88d121",
+        "measured": true,
+        "startedAt": "2026-08-11T07:01:18.698Z",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutSha256": "aad3ae5f81ab0dec345e7515126fce95fd6eeb4ba86c53b2deee57839a64a5a9",
         "name": "receipt_completion"
       }
     ],
-    "proofDigest": "75d3854644cb588aac008ffa3b2030f43342ccc1255a2ec22b28b8209f7f1555",
+    "proofDigest": "8a855f1392b6d813c4ba6de1641a6ff73eeceece42ff297ace93e8aeebf9969f",
+    "startedAt": "2026-08-11T06:58:11.045Z",
+    "timerBoundary": "empty-launcher-before-package-json-to-completed-proof",
     "timingEvidence": {
       "cacheClass": "warm-or-unknown",
       "cacheIsolated": false,
-      "firstMeaningfulPaintMs": 1277,
+      "firstMeaningfulPaintMs": 2102,
       "horizontalOverflowPx": 0,
-      "neutralJourneyMs": 1946,
+      "neutralJourneyMs": 3356,
       "reloadPreserved": true,
-      "serverReadinessMs": 127
+      "serverReadinessMs": 133
     },
     "template": "domain-blank-base"
   },
   "cacheClass": "warm-or-unknown",
   "cacheIsolated": false,
-  "durationMs": 150340,
-  "generatedAt": "2026-07-22T03:52:03.662Z",
+  "ciProvenance": {
+    "githubRunAttempt": null,
+    "githubRunId": null,
+    "githubSha": null,
+    "githubWorkflowRef": null,
+    "provider": "local",
+    "runnerArch": "x64",
+    "runnerImageOs": null,
+    "runnerImageVersion": null,
+    "runnerName": "HomenLaptop",
+    "runnerOs": "win32",
+    "sourceCommitMatchesGithubSha": null,
+    "workflowFileSha256": "4dd502d6a36cf0b157df50f2847724050cc556f36b50e4b66925869a176cc820"
+  },
+  "durationMs": 188265,
+  "generatedAt": "2026-08-11T07:01:19.924Z",
+  "generatedCandidateArchiveBytes": 974032,
+  "generatedCandidateArchiveSha256": "254fa953203417275054d12ddb599340a13ef4e556dee26e8da6a580beafadf2",
   "nodeVersion": "v22.22.2",
-  "nodekitCommit": "0cc282c68c316068447956f5c6729f98ba3435f8",
-  "nodekitSourceHash": "97989e9914aee93b83d5b120599bf4d9c8f69b3434040a3e06164cb58c84b987",
+  "nodekitCommit": "86628ee6abed312fd85776bac404e7e7a53dfcec",
+  "nodekitPackage": "@homenshum/nodekit",
+  "nodekitSourceHash": "4abd6b46239c47ab1aa6f3cf20c4e1cb5bdd3f66779e19d59e80c4514c04fe15",
+  "nodekitTarballBytes": 911552,
+  "nodekitTarballSha256": "4da6f8387cc868ac8298a098c79cb260e23324a997adfeb9de6a180623bb7ea1",
+  "nodekitVersion": "0.2.1",
   "operatingSystem": "win32-10.0.26200-x64",
   "packageManager": "npm",
+  "packageManagerVersion": "10.9.7",
+  "packagingPhase": {
+    "args": [
+      "pack",
+      "--json",
+      "--pack-destination",
+      "<candidate-package>"
+    ],
+    "command": "npm",
+    "durationMs": 2814,
+    "exitCode": 0,
+    "failed": false,
+    "measured": false,
+    "startedAt": "2026-08-11T06:58:07.570Z",
+    "stderrSha256": "066e8b424708caaaba356168187a2cfcc4f27aa7d41c5dbef64952f546d35d61",
+    "stdoutSha256": "b911262f2243f3ec7d08134de502f0e5e07ee92a73c2e8bf9470946d69ef0309"
+  },
   "passed": true,
-  "runId": "ease_baf96caf40fe4254ba25",
+  "primingPhases": [],
+  "runId": "ease_9095c61eb2634922b9a0",
   "schemaVersion": "nodekit.ease-proof-run/v1",
-  "startedAt": "2026-07-22T03:49:33.319Z",
+  "startedAt": "2026-08-11T06:58:11.045Z",
   "submissionReady": false,
   "submissionBlockers": [
     "developerTimingMatrix",
@@ -223,8 +331,15 @@
     "freshHumanUsability",
     "threeConvexConsumers",
     "previewDeployment",
-    "proofloopEaseVerification"
+    "managedSupabasePortability",
+    "knowledgeEvolutionAdoption",
+    "modelIntelligenceHarness",
+    "engineeringHealth",
+    "proofloopEaseVerification",
+    "packageInstallProof",
+    "publicationApproval"
   ],
+  "timerBoundary": "empty-launcher-before-package-json-to-completed-proof",
   "verdict": "EASE_NOT_CERTIFIED",
-  "receiptDigest": "8276999429f3f6394f4f5db7572119a690c909fd4f152ede9a9f04572a4e6f92"
+  "receiptDigest": "c74e673b6cbf1e0dbe7c0fedc30313cb65190c96d91938fcb012febf968e3227"
 }
