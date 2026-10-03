@@ -22,7 +22,7 @@ import {
 const digest = (value) => createHash("sha256").update(value).digest("hex");
 const heldoutTaskBytes = await readFile(path.resolve("evals", "ease", "heldout-tasks.json"));
 const lowerCostEvidenceBytes = await readFile(path.resolve("evals", "ease", "lower-cost-model-evidence.json"));
-const lowerCostSnapshotBytes = await readFile(path.resolve("evals", "ease", "openai-pricing-2026-07-22.json"));
+const lowerCostSnapshotBytes = await readFile(path.resolve("evals", "ease", JSON.parse(lowerCostEvidenceBytes).source.snapshotPath));
 const tasks = JSON.parse(heldoutTaskBytes.toString("utf8")).tasks;
 const profiles = { codex: 3, "claude-code": 1, "lower-cost": 1 };
 const protectedEvaluatorSha256 = digest(await readFile(path.resolve("scripts", "run-protected-agent-evaluator.mjs")));

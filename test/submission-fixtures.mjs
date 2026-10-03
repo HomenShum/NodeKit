@@ -75,34 +75,16 @@ const protectedEvaluationChecks = Object.freeze(Object.fromEntries([
   "independentScreenshotCaptured", "isolationBound", "renderedTaskRelevant", "sourceTaskRelevant", "taskBytesBound",
   "taskInputBound", "taskSetBound", "typedArtifactVerified", "visualReviewPassed",
 ].map((name) => [name, true])));
-const lowerCostPricingSnapshot = Object.freeze({
-  schemaVersion: "nodekit.external-source-snapshot/v1",
-  retrievedAt: "2026-07-22T00:00:00.000Z",
-  retrievalMethod: "OpenAI Developer Docs official pricing snapshot",
-  source: "https://developers.openai.com/api/docs/pricing",
-  section: "Flagship models / Standard",
-  unit: "USD per 1M tokens",
-  columns: ["model", "input", "cachedInput", "cacheWrite", "output"],
-  rows: [
-    ["gpt-5.6-sol", 5, 0.5, 6.25, 30],
-    ["gpt-5.6-terra", 2.5, 0.25, 3.125, 15],
-    ["gpt-5.6-luna", 1, 0.1, 1.25, 6],
-  ],
-  scope: "Fixture snapshot preserving the official-source pricing fields required to replay the lower-cost lane decision.",
-});
-const lowerCostPricingSnapshotBytes = Buffer.from(`${JSON.stringify(lowerCostPricingSnapshot, null, 2)}\n`);
+// Reuse the preserved, current source and exact prices: fixtures must not age a
+// separate hard-coded copy or fabricate a fresh retrieval time.
+const currentLowerCostEvidence = JSON.parse(readFileSync(new URL("../evals/ease/lower-cost-model-evidence.json", import.meta.url)));
+const lowerCostPricingSnapshotBytes = readFileSync(new URL(`../evals/ease/${currentLowerCostEvidence.source.snapshotPath}`, import.meta.url));
+const lowerCostPricingSnapshot = Object.freeze(JSON.parse(lowerCostPricingSnapshotBytes));
 const lowerCostModelEvidence = Object.freeze({
-  schemaVersion: "nodekit.lower-cost-model-evidence/v1",
-  agentDriver: "codex",
-  model: "gpt-5.6-luna",
-  lowerCost: { inputUsdPerMillion: 1, outputUsdPerMillion: 6 },
-  comparators: [{ model: "gpt-5.6-sol", inputUsdPerMillion: 5, outputUsdPerMillion: 30 }],
-  observedAt: lowerCostPricingSnapshot.retrievedAt,
-  passed: true,
+  ...currentLowerCostEvidence,
   source: {
-    url: lowerCostPricingSnapshot.source,
+    ...currentLowerCostEvidence.source,
     snapshotPath: "lower-cost-source.snapshot.json",
-    snapshotSha256: createHash("sha256").update(lowerCostPricingSnapshotBytes).digest("hex"),
   },
 });
 const lowerCostModelEvidenceBytes = Buffer.from(`${JSON.stringify(lowerCostModelEvidence, null, 2)}\n`);
