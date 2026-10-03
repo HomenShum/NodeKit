@@ -6,7 +6,7 @@
   "counts": {
     "schemas": 120,
     "modules": 96,
-    "tests": 107
+    "tests": 108
   },
   "architecture": [
     {
@@ -431,6 +431,7 @@
     "launch-video.test.mjs",
     "local-candidate-gate.test.mjs",
     "managed-evidence-capture.test.mjs",
+    "managed-handoff.test.mjs",
     "model-intelligence.test.mjs",
     "motion-portability.test.mjs",
     "native-agent-identity.test.mjs",
