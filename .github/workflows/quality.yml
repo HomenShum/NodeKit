@@ -18,6 +18,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Install Chromium for the required browser gate
+        run: npx playwright install --with-deps chromium
       - run: npm run typecheck:public
       - run: npm run typecheck:component
       # test:all, not test. `npm test` is the fast lane a developer runs on every change;
