@@ -7,7 +7,7 @@ import {
   requireTrimmedText,
   stageDefinitionsMatch,
 } from "../lib/portable-value.mjs";
-import { normalizeReceiptBindings } from "../lib/receipt-bindings.mjs";
+import { normalizeReceiptBindings, normalizeCompletionExpected, assertCompletionExpected } from "../lib/receipt-bindings.mjs";
 import type { Doc, TableNames } from "./_generated/dataModel.js";
 import type { MutationCtx, QueryCtx } from "./_generated/server.js";
 import { mutation, query } from "./_generated/server.js";
@@ -810,13 +810,14 @@ type TerminalReceiptStatus = "cancelled" | "completed" | "failed_safely";
 
 async function terminalizeRun(
   ctx: MutationCtx,
-  args: { actor?: Actor; runId: string; scopeKey: string },
+  args: { actor?: Actor; runId: string; scopeKey: string; expected?: unknown },
   status: TerminalReceiptStatus,
   reason?: string,
 ) {
+    const expected = normalizeCompletionExpected(args.expected);
     const actor = actorOrSystem(args.actor);
     const eventType = `run.${status}`;
-    const terminalPayload = status === "completed" ? {} : { reason };
+    const terminalPayload = status === "completed" ? (expected ? { expectedStateHash: contentHash(expected) } : {}) : { reason };
     const run = await requireScoped(ctx, "runs", args.runId, args.scopeKey, "run");
     if (run.status === status) {
       const receipt = await ctx.db
@@ -844,10 +845,10 @@ async function terminalizeRun(
       .query("exceptions")
       .withIndex("by_scope_run", (q) => q.eq("scopeKey", args.scopeKey).eq("runId", args.runId))
       .collect();
-    const runArtifacts = await ctx.db
-      .query("artifacts")
-      .withIndex("by_scope_run", (q) => q.eq("scopeKey", args.scopeKey).eq("runId", args.runId))
-      .collect();
+    const artifactQuery = ctx.db.query("artifacts")
+      .withIndex("by_scope_run", (q) => q.eq("scopeKey", args.scopeKey).eq("runId", args.runId));
+    const runArtifacts = await (expected ? artifactQuery.take(PORTABLE_VALUE_LIMITS.maxArrayItems + 1) : artifactQuery.collect());
+    if (expected && runArtifacts.length > PORTABLE_VALUE_LIMITS.maxArrayItems) throw new Error("reviewed artifact set exceeds the portable limit");
     const pendingProposalGroups = await Promise.all(runArtifacts.map((artifact) =>
       ctx.db.query("proposals").withIndex("by_scope_artifact", (q) =>
         q.eq("scopeKey", args.scopeKey).eq("artifactId", artifact.artifactId),
@@ -861,21 +862,9 @@ async function terminalizeRun(
       }
     }
 
-    const completedAt = timestamp();
-    await ctx.db.patch(run._id, {
-      nextAction: status === "completed" ? "Review receipt" : "Start a new run",
-      nextActionOwner: "user",
-      stages: status === "completed"
-        ? run.stages.map((stage) => ({ ...stage, status: "completed" as const }))
-        : run.stages,
-      status,
-      updatedAt: completedAt,
-    });
     const caseRecord = await requireScoped(ctx, "cases", run.caseId, args.scopeKey, "case");
-    await ctx.db.patch(caseRecord._id, { status: status === "completed" ? "completed" : "ready", updatedAt: completedAt });
-    await emit(ctx, args.scopeKey, "run", args.runId, eventType, terminalPayload, actor);
-
     const rawArtifactBindings = await Promise.all(runArtifacts.map(async (artifact) => {
+      if (expected && (artifact.caseId !== run.caseId || artifact.runId !== run.runId || artifact.scopeKey !== args.scopeKey)) throw new Error("artifact does not belong to expected case/run/scope");
       const canonicalVersion = await ctx.db
         .query("artifactVersions")
         .withIndex("by_scope_artifact_version", (q) =>
@@ -891,6 +880,23 @@ async function terminalizeRun(
         contentHash: canonicalVersion.contentHash,
       };
     }));
+    if (expected) assertCompletionExpected(expected, {
+      ...caseRecord, currentRunId: caseRecord.currentRunId ?? null,
+      caseInputHash: contentHash({ title: caseRecord.title, primaryJob: caseRecord.primaryJob }),
+    }, run, rawArtifactBindings);
+    const completedAt = timestamp();
+    await ctx.db.patch(run._id, {
+      nextAction: status === "completed" ? "Review receipt" : "Start a new run",
+      nextActionOwner: "user",
+      stages: status === "completed"
+        ? run.stages.map((stage) => ({ ...stage, status: "completed" as const }))
+        : run.stages,
+      status,
+      updatedAt: completedAt,
+    });
+    await ctx.db.patch(caseRecord._id, { status: status === "completed" ? "completed" : "ready", updatedAt: completedAt });
+    await emit(ctx, args.scopeKey, "run", args.runId, eventType, terminalPayload, actor);
+
     const rawArtifactIds = rawArtifactBindings.map((entry) => entry.artifactId);
     const proposalGroups = await Promise.all(rawArtifactIds.map((artifactId) =>
       ctx.db.query("proposals").withIndex("by_scope_artifact", (q) =>
@@ -998,7 +1004,13 @@ async function terminalizeRun(
 }
 
 export const completeRun = mutation({
-  args: { actor: v.optional(actorValidator), runId: v.string(), scopeKey: v.string() },
+  args: {
+    actor: v.optional(actorValidator), runId: v.string(), scopeKey: v.string(),
+    expected: v.optional(v.object({
+      caseId: v.string(), caseInputHash: v.string(),
+      artifactBindings: v.array(v.object({ artifactId: v.string(), canonicalVersion: v.number(), contentHash: v.string() })),
+    })),
+  },
   returns: completionValidator,
   handler: async (ctx, args) => terminalizeRun(ctx, args, "completed"),
 });

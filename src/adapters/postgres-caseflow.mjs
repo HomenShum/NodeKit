@@ -12,6 +12,7 @@ import {
   stageDefinitionsMatch,
 } from "../lib/portable-value.mjs";
 import { normalizeReceiptBindings } from "../lib/receipt-bindings.mjs";
+import { normalizeCompletionExpected, assertCompletionExpected } from "../lib/receipt-bindings.mjs";
 import { runtimeProfiles } from "../lib/runtime-capabilities.mjs";
 
 const defaultActor = Object.freeze({ type: "system", id: "nodekit" });
@@ -672,10 +673,11 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     });
   }
 
-  async function terminalizeRun({ runId, status, reason, actor }) {
+  async function terminalizeRun({ runId, status, reason, actor, expected: inputExpected }) {
+    const expected = normalizeCompletionExpected(inputExpected);
     const terminalActor = actorValue(actor);
     const eventType = `run.${status}`;
-    const terminalPayload = status === "completed" ? {} : { reason };
+    const terminalPayload = status === "completed" ? (expected ? { expectedStateHash: contentHash(expected) } : {}) : { reason };
     return withTransaction(pool, async (client) => {
       const runResult = await client.query(
         "select * from nodekit.runs where owner_id = $1 and run_id = $2 for update",
@@ -704,10 +706,30 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
       }
       if (TERMINAL_RUN_STATUSES.includes(current.status)) throw new Error(`run is terminal: ${current.status}`);
       if (status === "completed" && current.status !== "active") throw new Error(`run is not active: ${current.status}`);
+      // Keep the existing run -> case order. Artifact writers can hold an
+      // artifact while waiting on this run; never take artifact locks here.
+      const reviewedCase = expected ? (await client.query(
+        "select * from nodekit.cases where owner_id = $1 and case_id = $2 for update",
+        [owner, current.caseId],
+      )).rows[0] : undefined;
+      if (expected && !reviewedCase) throw new Error("expected case not found");
       const artifactRows = (await client.query(
-        "select * from nodekit.artifacts where owner_id = $1 and run_id = $2 order by artifact_id",
+        expected
+          ? `select a.*, v.content_hash from nodekit.artifacts a
+            left join nodekit.artifact_versions v on v.artifact_id = a.artifact_id and v.version = a.canonical_version
+            where a.owner_id = $1 and a.run_id = $2 order by a.artifact_id limit 8193`
+          : "select * from nodekit.artifacts where owner_id = $1 and run_id = $2 order by artifact_id",
         [owner, runId],
       )).rows;
+      if (expected && artifactRows.length > PORTABLE_VALUE_LIMITS.maxArrayItems) throw new Error("reviewed artifact set exceeds the portable limit");
+      const checkedBindings = expected ? artifactRows.map((row) => {
+        if (row.case_id !== current.caseId || row.run_id !== runId || row.owner_id !== owner) throw new Error("artifact does not belong to expected case/run/owner");
+        if (!row.content_hash) throw new Error(`artifact ${row.artifact_id} is missing its canonical version`);
+        return { artifactId: row.artifact_id, canonicalVersion: row.canonical_version, contentHash: row.content_hash };
+      }) : undefined;
+      if (expected) assertCompletionExpected(expected, {
+        ...caseRecord(reviewedCase), caseInputHash: contentHash({ title: reviewedCase.title, primaryJob: reviewedCase.primary_job }),
+      }, current, checkedBindings);
       if (status === "completed") {
         if (artifactRows.length === 0) throw new Error("run must have at least one canonical artifact");
         const open = await client.query(
@@ -737,7 +759,7 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
         [status === "completed" ? "completed" : "ready", now, owner, current.caseId],
       );
       await emit(client, { actor: terminalActor, aggregateId: runId, aggregateType: "run", eventType, now, ownerId: owner, payload: terminalPayload });
-      const rawArtifactBindings = (await client.query(
+      const rawArtifactBindings = checkedBindings ?? (await client.query(
         `select a.artifact_id, a.canonical_version, v.content_hash
           from nodekit.artifacts a join nodekit.artifact_versions v
             on v.artifact_id = a.artifact_id and v.version = a.canonical_version
@@ -827,8 +849,8 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     });
   }
 
-  async function completeRun({ runId, actor }) {
-    return terminalizeRun({ actor, runId, status: "completed" });
+  async function completeRun({ runId, actor, expected }) {
+    return terminalizeRun({ actor, runId, status: "completed", expected });
   }
 
   async function cancelRun({ runId, reason, actor }) {

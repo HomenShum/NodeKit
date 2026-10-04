@@ -38,6 +38,83 @@ jobs:
           "$install_dir/node_modules/.bin/nodekit" registry check
           "$install_dir/node_modules/.bin/nodekit" doctor --repo-root "$GITHUB_WORKSPACE"
 
+  postgres-conformance:
+    name: Installed candidate PostgreSQL interleavings
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nodekit_proof
+          POSTGRES_PASSWORD: nodekit_ephemeral_only
+          POSTGRES_DB: nodekit_proof
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U nodekit_proof -d nodekit_proof"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Record isolated database and checkout identity
+        shell: bash
+        env:
+          PG_SERVICE_ID: ${{ job.services.postgres.id }}
+        run: |
+          proof_dir="$RUNNER_TEMP/nodekit-postgres-proof"
+          mkdir -p "$proof_dir"
+          git rev-parse HEAD > "$proof_dir/checkout-sha.txt"
+          docker inspect --format '{"containerId":"{{.Id}}","imageId":"{{.Image}}","configuredImage":"{{.Config.Image}}","status":"{{.State.Status}}","health":"{{.State.Health.Status}}"}' "$PG_SERVICE_ID" > "$proof_dir/postgres-container.json"
+          cat "$proof_dir/postgres-container.json"
+      - run: npm ci
+        timeout-minutes: 4
+      - name: Pack the exact checked-out candidate
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          package_dir="$RUNNER_TEMP/nodekit-postgres-package"
+          mkdir -p "$package_dir"
+          node --input-type=module <<'NODE'
+          import { execFileSync } from "node:child_process";
+          import { writeFileSync } from "node:fs";
+          const root = process.env.RUNNER_TEMP;
+          try {
+            const result = execFileSync("npm", ["pack", "--pack-destination", `${root}/nodekit-postgres-package`], { encoding: "utf8", timeout: 170000, maxBuffer: 1048576, stdio: ["ignore", "pipe", "pipe"] });
+            writeFileSync(`${root}/nodekit-postgres-proof/pack.log`, result, { flag: "wx" });
+          } catch (error) {
+            const outputs = Buffer.concat([Buffer.from(error.stdout ?? ""), Buffer.from(error.stderr ?? "")]);
+            const metadata = JSON.stringify({ failed: true, code: error.code ?? null, status: error.status ?? null, signal: error.signal ?? null, outputBytes: outputs.length, outputTruncated: outputs.length > 1040000 });
+            writeFileSync(`${root}/nodekit-postgres-proof/pack.log`, Buffer.concat([Buffer.from(`${metadata}\n`), outputs.subarray(0, 1040000)]), { flag: "wx" });
+            process.exitCode = 1;
+          }
+          NODE
+          cat "$RUNNER_TEMP/nodekit-postgres-proof/pack.log"
+      - name: Prove installed candidate transactions and required cleanup
+        shell: bash
+        timeout-minutes: 12
+        env:
+          NODEKIT_POSTGRES_URL: postgresql://nodekit_proof:nodekit_ephemeral_only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/nodekit_proof
+        run: |
+          candidates=("$RUNNER_TEMP/nodekit-postgres-package/"*.tgz)
+          test "${#candidates[@]}" -eq 1
+          test -f "${candidates[0]}"
+          status=0
+          node scripts/run-postgres-conformance.mjs --candidate-tarball "${candidates[0]}" --output "$RUNNER_TEMP/nodekit-postgres-proof/postgres-conformance.json" > "$RUNNER_TEMP/nodekit-postgres-proof/conformance.log" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/nodekit-postgres-proof/conformance.log"
+          exit "$status"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: postgres-conformance-${{ github.sha }}
+          if-no-files-found: error
+          path: ${{ runner.temp }}/nodekit-postgres-proof/
+
   exact-candidate:
     name: Exact candidate factory gate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

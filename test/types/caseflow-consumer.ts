@@ -99,3 +99,13 @@ void postgres.snapshot();
 
 declare const artifact: NodeKitArtifact<{ value: number }>;
 artifact.versions.at(-1)?.content.value satisfies number | undefined;
+
+const expectedCompletion = { caseId: created.caseId, caseInputHash: "a".repeat(64), artifactBindings: [{ artifactId: "artifact", canonicalVersion: 1, contentHash: "b".repeat(64) }] };
+void memory.completeRun({ runId: terminalRun.runId, expected: expectedCompletion });
+void postgres.completeRun({ runId: terminalRun.runId, expected: expectedCompletion });
+void memory.completeRun({ runId: terminalRun.runId, expected: undefined });
+void postgres.completeRun({ runId: terminalRun.runId, expected: undefined });
+// @ts-expect-error Missing required reviewed case and artifact bindings.
+void memory.completeRun({ runId: terminalRun.runId, expected: { caseInputHash: "a".repeat(64) } });
+// @ts-expect-error A supplied null guard must not mean unguarded completion.
+void postgres.completeRun({ runId: terminalRun.runId, expected: null });

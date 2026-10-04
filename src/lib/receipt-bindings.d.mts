@@ -1,3 +1,13 @@
+import type { NodeKitCompletionExpected } from "../caseflow.mjs";
+
+export function normalizeCompletionExpected(input: unknown): NodeKitCompletionExpected | undefined;
+export function assertCompletionExpected(
+  expected: NodeKitCompletionExpected,
+  currentCase: { caseId: string; currentRunId: string | null; caseInputHash: string },
+  run: { runId: string; caseId: string },
+  actual: NodeKitCompletionExpected["artifactBindings"],
+): void;
+
 export interface ReceiptEventOrderKey {
   aggregateId: string;
   aggregateType: string;

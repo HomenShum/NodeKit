@@ -29,6 +29,105 @@ function exceptionArgs<T extends Record<string, unknown> & { preservedState?: un
 }
 
 describe("NodeKit Caseflow Convex component", () => {
+  async function reviewedComponentTask() {
+    const t = initConvexTest();
+    const work = await t.mutation(api.caseflow.createCase, { scopeKey: SCOPE, title: "Reviewed source", primaryJob: "Quote the approved revision" });
+    const run = await t.mutation(api.caseflow.startRun, { scopeKey: SCOPE, caseId: work.caseId, stages: [{ id: "review", label: "Review", owner: "user" }] });
+    const artifact = await t.mutation(api.caseflow.createArtifact, artifactArgs({ scopeKey: SCOPE, caseId: work.caseId, runId: run.runId, content: { quote: "original" } }));
+    const expected = { caseId: work.caseId, caseInputHash: contentHash({ title: work.title, primaryJob: work.primaryJob }), artifactBindings: [{ artifactId: artifact.artifactId, canonicalVersion: 1, contentHash: contentHash({ quote: "original" }) }] };
+    const snapshot = () => t.run(async (ctx) => ({
+      cases: await ctx.db.query("cases").collect(), runs: await ctx.db.query("runs").collect(),
+      artifacts: await ctx.db.query("artifacts").collect(), versions: await ctx.db.query("artifactVersions").collect(),
+      events: await ctx.db.query("timelineEvents").collect(), receipts: await ctx.db.query("receipts").collect(),
+    }));
+    return { t, work, run, artifact, expected, snapshot };
+  }
+
+  test("guarded close: component rejects every stale or ignored condition without mutation", async () => {
+    const f = await reviewedComponentTask();
+    const binding = f.expected.artifactBindings[0]!;
+    const invalid: unknown[] = [null, false, [], {},
+      ...Object.keys(f.expected).map((key) => Object.fromEntries(Object.entries(f.expected).filter(([name]) => name !== key))),
+      ...Object.keys(binding).map((key) => ({ ...f.expected, artifactBindings: [Object.fromEntries(Object.entries(binding).filter(([name]) => name !== key))] })),
+      { ...f.expected, caseRevision: 1 }, { ...f.expected, caseInputHash: null },
+      { ...f.expected, artifactBindings: [{ ...binding, approved: true }] },
+      { ...f.expected, artifactBindings: [binding, { ...binding, artifactId: ` ${binding.artifactId} ` }] },
+      ...[0, -1, 1.5, "1", Number.MAX_SAFE_INTEGER + 1].map((canonicalVersion) => ({ ...f.expected, artifactBindings: [{ ...binding, canonicalVersion }] })),
+      { ...f.expected, caseInputHash: f.expected.caseInputHash.toUpperCase() },
+      { ...f.expected, artifactBindings: [{ ...binding, contentHash: ` ${binding.contentHash}` }] },
+      { ...f.expected, caseId: "other-case" },
+      { ...f.expected, artifactBindings: [{ ...binding, artifactId: "other-artifact" }] },
+      { ...f.expected, artifactBindings: [] },
+      { ...f.expected, artifactBindings: Array.from({ length: 8193 }, () => binding) },
+    ];
+    const before = await f.snapshot();
+    for (const expected of invalid) {
+      await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: f.run.runId, expected: expected as typeof f.expected })).rejects.toThrow();
+      expect(await f.snapshot()).toEqual(before);
+    }
+    await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: "different-owner", runId: f.run.runId, expected: f.expected })).rejects.toThrow();
+    expect(await f.snapshot()).toEqual(before);
+    await f.t.mutation(api.caseflow.updateCaseInput, { scopeKey: SCOPE, caseId: f.work.caseId, primaryJob: "New criteria" });
+    const changed = await f.snapshot();
+    await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: f.run.runId, expected: f.expected })).rejects.toThrow(/expected reviewed state/);
+    expect(await f.snapshot()).toEqual(changed);
+  });
+
+  test("guarded close: component version, exact-set and missing-version checks preserve a pending review", async () => {
+    for (const mode of ["restored", "extra", "missing-version", "current-run", "blocked", "pending"]) {
+      const f = await reviewedComponentTask();
+      if (mode === "restored") for (const [index, quote] of ["changed", "original"].entries()) {
+        const proposal = await f.t.mutation(api.caseflow.createProposal, proposalArgs({ scopeKey: SCOPE, artifactId: f.artifact.artifactId, baseVersion: index + 1, patch: { quote } }));
+        await f.t.mutation(api.caseflow.decideProposal, { scopeKey: SCOPE, proposalId: proposal.proposalId, decision: "accepted" });
+      }
+      if (mode === "extra") await f.t.mutation(api.caseflow.createArtifact, artifactArgs({ scopeKey: SCOPE, caseId: f.work.caseId, runId: f.run.runId, content: { late: true } }));
+      if (mode === "missing-version") await f.t.run(async (ctx) => { const row = (await ctx.db.query("artifactVersions").collect())[0]!; await ctx.db.delete(row._id); });
+      if (mode === "current-run") await f.t.run(async (ctx) => { const row = (await ctx.db.query("cases").collect())[0]!; await ctx.db.patch(row._id, { currentRunId: "other-run" }); });
+      if (mode === "blocked") await f.t.mutation(api.caseflow.raiseException, exceptionArgs({ scopeKey: SCOPE, runId: f.run.runId, code: "reviewer_unavailable" }));
+      if (mode === "pending") await f.t.mutation(api.caseflow.createProposal, proposalArgs({ scopeKey: SCOPE, artifactId: f.artifact.artifactId, baseVersion: 1, patch: { quote: "pending" } }));
+      const before = await f.snapshot();
+      await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: f.run.runId, expected: f.expected })).rejects.toThrow();
+      expect(await f.snapshot()).toEqual(before);
+    }
+  });
+
+  test("guarded close: component retries preserve exact receipt identity after burst delivery and a later run", async () => {
+    const f = await reviewedComponentTask();
+    const second = await f.t.mutation(api.caseflow.createArtifact, artifactArgs({ scopeKey: SCOPE, caseId: f.work.caseId, runId: f.run.runId, content: { review: true } }));
+    f.expected.artifactBindings.push({ artifactId: second.artifactId, canonicalVersion: 1, contentHash: contentHash({ review: true }) });
+    const request = { scopeKey: SCOPE, runId: f.run.runId, expected: f.expected };
+    const completed = await f.t.mutation(api.caseflow.completeRun, request);
+    const reordered = { ...f.expected, caseId: ` ${f.expected.caseId} `, artifactBindings: [...f.expected.artifactBindings].reverse().map((entry) => ({ ...entry, artifactId: ` ${entry.artifactId} ` })) };
+    const before = await f.snapshot();
+    const retries = await Promise.all(Array.from({ length: 100 }, () => f.t.mutation(api.caseflow.completeRun, { ...request, expected: reordered })));
+    expect(retries.every((entry) => entry.reused && entry.receipt.receiptHash === completed.receipt.receiptHash)).toBe(true);
+    expect(await f.snapshot()).toEqual(before);
+    await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: f.run.runId })).rejects.toThrow(/retry/);
+    await expect(f.t.mutation(api.caseflow.completeRun, { ...request, actor: ACTOR })).rejects.toThrow(/retry/);
+    await f.t.mutation(api.caseflow.startRun, { scopeKey: SCOPE, caseId: f.work.caseId, stages: [{ id: "next", label: "Next", owner: "agent" }] });
+    const afterStart = await f.snapshot();
+    expect((await f.t.mutation(api.caseflow.completeRun, request)).receipt.receiptId).toBe(completed.receipt.receiptId);
+    expect(await f.snapshot()).toEqual(afterStart);
+    const plain = await reviewedComponentTask();
+    // Exercise the runtime omission rule; Convex's inferred exact-optional args
+    // do not represent explicit undefined, unlike the portable client contract.
+    await plain.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: plain.run.runId, expected: undefined as unknown as typeof plain.expected });
+    expect((await plain.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: plain.run.runId })).reused).toBe(true);
+    await expect(plain.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: plain.run.runId, expected: plain.expected })).rejects.toThrow(/retry/);
+  });
+
+  test("guarded close: component bounds acquisition before materializing an oversized task", async () => {
+    const f = await reviewedComponentTask();
+    await f.t.run(async (ctx) => {
+      const first = (await ctx.db.query("artifacts").collect())[0]!;
+      const { _id, _creationTime, ...fields } = first;
+      for (let index = 1; index < 8193; index += 1) await ctx.db.insert("artifacts", { ...fields, artifactId: `artifact_${index}` });
+    });
+    await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: f.run.runId, expected: f.expected })).rejects.toThrow(/exceeds the portable limit/);
+    expect((await f.t.query(api.caseflow.getRun, { scopeKey: SCOPE, runId: f.run.runId }))?.status).toBe("active");
+    expect(await f.t.query(api.caseflow.getReceiptForRun, { scopeKey: SCOPE, runId: f.run.runId })).toBeNull();
+  });
+
   test("defines an isolated nine-table schema and deterministic SHA-256", () => {
     expect(Object.keys(schema.tables).sort()).toEqual([
       "approvals",

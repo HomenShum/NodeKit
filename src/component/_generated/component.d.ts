@@ -67,7 +67,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
     decideProposal: Ref<"mutation", { actor?: Actor; comment?: string; decision: "accepted" | "rejected"; proposalId: string; scopeKey: string }, { approval: Approval; artifact: Artifact; proposal: Proposal; reused: boolean }, Name>;
     raiseException: Ref<"mutation", { actor?: Actor; code?: string; idempotencyKey?: string; message?: string; preservedState?: any; preservedStateHash: string; runId: string; scopeKey: string }, Exception, Name>;
     resolveException: Ref<"mutation", { actor?: Actor; exceptionId: string; nextAction?: string; nextActionOwner?: string; resolution?: string; scopeKey: string }, { exception: Exception; run: Run }, Name>;
-    completeRun: Ref<"mutation", { actor?: Actor; runId: string; scopeKey: string }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
+    completeRun: Ref<"mutation", { actor?: Actor; runId: string; scopeKey: string; expected?: { caseId: string; caseInputHash: string; artifactBindings: Array<{ artifactId: string; canonicalVersion: number; contentHash: string }> } | undefined }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
     cancelRun: Ref<"mutation", { actor?: Actor; reason?: string; runId: string; scopeKey: string }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
     failRunSafely: Ref<"mutation", { actor?: Actor; reason?: string; runId: string; scopeKey: string }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
     getCase: Ref<"query", { caseId: string; scopeKey: string }, Case | null, Name>;

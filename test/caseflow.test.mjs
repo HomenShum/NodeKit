@@ -10,6 +10,155 @@ import {
 } from "../src/lib/receipt-bindings.mjs";
 import { negotiateRuntimeCapabilities, runtimeProfiles } from "../src/lib/runtime-capabilities.mjs";
 
+function reviewedTask(runtime = createMemoryCaseflow()) {
+  const work = runtime.createCase({ title: "Reviewed source", primaryJob: "Quote the approved revision" });
+  const run = runtime.startRun({ caseId: work.caseId, stages: [{ id: "review", label: "Review", owner: "user" }] });
+  const artifact = runtime.createArtifact({ caseId: work.caseId, runId: run.runId, content: { quote: "original" } });
+  const expected = {
+    caseId: work.caseId,
+    caseInputHash: contentHash({ title: work.title, primaryJob: work.primaryJob }),
+    artifactBindings: [{ artifactId: artifact.artifactId, canonicalVersion: 1, contentHash: contentHash({ quote: "original" }) }],
+  };
+  return { runtime, work, run, artifact, expected };
+}
+
+test("guarded close: a reviewer cannot close an owner-edited task from stale proof", () => {
+  const { runtime, work, run, expected } = reviewedTask();
+  runtime.updateCaseInput({ caseId: work.caseId, primaryJob: "Quote the new criteria" });
+  const before = runtime.snapshot();
+  assert.throws(() => runtime.completeRun({ runId: run.runId, expected }), /expected|reviewed/);
+  assert.deepEqual(runtime.snapshot(), before);
+});
+
+test("guarded close: artifact edit then restore still invalidates the reviewed version", () => {
+  const { runtime, run, artifact, expected } = reviewedTask();
+  for (const [index, quote] of ["changed", "original"].entries()) {
+    const proposal = runtime.createProposal({ artifactId: artifact.artifactId, baseVersion: index + 1, patch: { quote } });
+    runtime.decideProposal({ proposalId: proposal.proposalId, decision: "accepted" });
+  }
+  const before = runtime.snapshot();
+  assert.throws(() => runtime.completeRun({ runId: run.runId, expected }), /expected|reviewed/);
+  assert.deepEqual(runtime.snapshot(), before);
+});
+
+test("guarded close: no supplied malformed or extra condition is silently dropped", () => {
+  const invalid = [null, false, [], {}, { extra: true },
+    (value) => ({ ...value, caseRevision: 1 }),
+    (value) => ({ ...value, artifactBindings: [{ ...value.artifactBindings[0], approved: true }] }),
+    (value) => ({ ...value, caseInputHash: undefined }),
+  ];
+  for (const candidate of invalid) {
+    const { runtime, run, expected } = reviewedTask();
+    const before = runtime.snapshot();
+    assert.throws(() => runtime.completeRun({ runId: run.runId, expected: typeof candidate === "function" ? candidate(expected) : candidate }));
+    assert.deepEqual(runtime.snapshot(), before);
+  }
+});
+
+test("guarded close: lost acknowledgment retries are stable through burst, sustained use and a later run", async () => {
+  const { runtime, work, run, expected } = reviewedTask();
+  const completed = runtime.completeRun({ runId: run.runId, expected });
+  const before = runtime.snapshot();
+  const burst = await Promise.all(Array.from({ length: 100 }, async () => runtime.completeRun({ runId: run.runId, expected })));
+  for (let i = 0; i < 1000; i += 1) assert.equal(runtime.completeRun({ runId: run.runId, expected }).receipt.receiptHash, completed.receipt.receiptHash);
+  assert.ok(burst.every((result) => result.reused && result.receipt.receiptId === completed.receipt.receiptId));
+  assert.deepEqual(runtime.snapshot(), before);
+  assert.throws(() => runtime.completeRun({ runId: run.runId }), /retry/);
+  assert.throws(() => runtime.completeRun({ runId: run.runId, expected: { ...expected, caseInputHash: "a".repeat(64) } }), /retry/);
+  const later = runtime.startRun({ caseId: work.caseId, stages: [{ id: "work", label: "Next task", owner: "agent" }] });
+  const afterStart = runtime.snapshot();
+  assert.equal(runtime.completeRun({ runId: run.runId, expected }).receipt.receiptId, completed.receipt.receiptId);
+  assert.deepEqual(runtime.snapshot(), afterStart);
+  assert.equal(afterStart.runs.find((entry) => entry.runId === later.runId).status, "active");
+});
+
+test("guarded close: exact shapes, portable values and normalized IDs fail before mutation", () => {
+  const { runtime, run, expected } = reviewedTask();
+  const first = expected.artifactBindings[0];
+  let getterCalls = 0;
+  const accessor = { ...expected };
+  Object.defineProperty(accessor, "caseId", { enumerable: true, get() { getterCalls += 1; return expected.caseId; } });
+  const invalid = [accessor, Object.assign(Object.create({ extra: 1 }), expected),
+    { ...expected, [Symbol("condition")]: true }, { ...expected, caseId: " " },
+    ...Object.keys(expected).map((key) => Object.fromEntries(Object.entries(expected).filter(([name]) => name !== key))),
+    ...Object.keys(first).map((key) => ({ ...expected, artifactBindings: [Object.fromEntries(Object.entries(first).filter(([name]) => name !== key))] })),
+    ...[null, undefined, "A".repeat(64), ` ${expected.caseInputHash}`, "bad"].map((caseInputHash) => ({ ...expected, caseInputHash })),
+    ...[0, -1, 1.5, "1", Number.MAX_SAFE_INTEGER + 1, Infinity, null].map((canonicalVersion) => ({ ...expected, artifactBindings: [{ ...first, canonicalVersion }] })),
+    { ...expected, artifactBindings: [{ ...first, contentHash: first.contentHash.toUpperCase() }] },
+    { ...expected, artifactBindings: [first, { ...first, artifactId: ` ${first.artifactId} ` }] },
+    { ...expected, artifactBindings: Array(1) },
+    { ...expected, artifactBindings: Array.from({ length: 8193 }, () => first) },
+    { ...expected, artifactBindings: [{ ...first, artifactId: "x".repeat(768 * 1024) }] },
+  ];
+  const before = runtime.snapshot();
+  for (const value of invalid) {
+    assert.throws(() => runtime.completeRun({ runId: run.runId, expected: value }));
+    assert.deepEqual(runtime.snapshot(), before);
+  }
+  assert.equal(getterCalls, 0);
+  const done = runtime.completeRun({ runId: run.runId, expected });
+  assert.equal(done.receipt.status, "completed");
+});
+
+test("guarded close: membership, criteria, blocked and pending state all preserve the user's open task", () => {
+  for (const change of ["missing", "extra", "wrong-case", "hash", "blocked", "pending"]) {
+    const { runtime, work, run, artifact, expected } = reviewedTask();
+    if (change === "missing") runtime.createArtifact({ caseId: work.caseId, runId: run.runId, content: { review: true } });
+    if (change === "extra") expected.artifactBindings.push({ ...expected.artifactBindings[0], artifactId: "other-task-artifact" });
+    if (change === "wrong-case") expected.caseId = "other-case";
+    if (change === "hash") expected.artifactBindings[0].contentHash = "0".repeat(64);
+    if (change === "blocked") runtime.raiseException({ runId: run.runId, code: "reviewer_unavailable" });
+    if (change === "pending") runtime.createProposal({ artifactId: artifact.artifactId, baseVersion: 1, patch: { quote: "new" } });
+    const before = runtime.snapshot();
+    assert.throws(() => runtime.completeRun({ runId: run.runId, expected }));
+    assert.deepEqual(runtime.snapshot(), before, change);
+  }
+});
+
+test("guarded close: equivalent order/trim and omitted/undefined retries retain distinct identities", () => {
+  const { runtime, work, run, expected } = reviewedTask();
+  const second = runtime.createArtifact({ caseId: work.caseId, runId: run.runId, content: { review: true } });
+  expected.artifactBindings.push({ artifactId: second.artifactId, canonicalVersion: 1, contentHash: contentHash({ review: true }) });
+  const original = structuredClone(expected);
+  const done = runtime.completeRun({ runId: run.runId, expected });
+  const reordered = { ...expected, caseId: ` ${expected.caseId} `, artifactBindings: [...expected.artifactBindings].reverse().map((binding) => ({ ...binding, artifactId: ` ${binding.artifactId} ` })) };
+  assert.equal(runtime.completeRun({ runId: run.runId, expected: reordered }).receipt.receiptHash, done.receipt.receiptHash);
+  assert.deepEqual(expected, original);
+  assert.throws(() => runtime.completeRun({ runId: run.runId, expected, actor: { id: "other", type: "human" } }), /retry/);
+  const plain = reviewedTask();
+  const unguarded = plain.runtime.completeRun({ runId: plain.run.runId, expected: undefined });
+  assert.equal(plain.runtime.completeRun({ runId: plain.run.runId }).receipt.receiptHash, unguarded.receipt.receiptHash);
+  assert.throws(() => plain.runtime.completeRun({ runId: plain.run.runId, expected: plain.expected }), /retry/);
+});
+
+test("guarded close: a long-running review refuses an oversized receipt without changing the task", (t) => {
+  const { runtime, work, run, expected } = reviewedTask(createMemoryCaseflow({ clock: () => "t" }));
+  for (let index = 0; index < 2300; index += 1) {
+    runtime.enterStage({ runId: run.runId, stageId: "review", nextAction: "x", nextActionOwner: "a", actor: { id: "a", type: "s" } });
+  }
+  const before = runtime.snapshot();
+  const snapshotBytes = Buffer.byteLength(JSON.stringify(before));
+  assert.ok(snapshotBytes < PORTABLE_VALUE_LIMITS.maxEncodedBytes);
+  assert.ok(Buffer.byteLength(JSON.stringify(expected)) < 1024);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    assert.throws(() => runtime.completeRun({ runId: run.runId, expected }), /encoded size cannot exceed/);
+    const after = runtime.snapshot();
+    t.diagnostic(JSON.stringify({ attempt, historyCalls: 2300, snapshotBytes, runStatus: after.runs[0].status, receipts: after.receipts.length, eventCount: after.events.length }));
+    assert.equal(runtime.getRun(run.runId).status, "active", "receipt refusal must leave the user's task active");
+    assert.equal(runtime.getCase(work.caseId).status, "in_progress");
+    assert.deepEqual(after, before);
+  }
+});
+
+test("guarded close: a growing task refuses the 8193rd artifact without completing", () => {
+  const { runtime, work, run, expected } = reviewedTask();
+  for (let index = 1; index < 8193; index += 1) runtime.createArtifact({ caseId: work.caseId, runId: run.runId, content: { index } });
+  const before = runtime.getRun(run.runId);
+  assert.throws(() => runtime.completeRun({ runId: run.runId, expected }), /exceeds the portable limit/);
+  assert.deepEqual(runtime.getRun(run.runId), before);
+  assert.equal(runtime.getCase(work.caseId).status, "in_progress");
+});
+
 // @nodekit-verifies inv:caseflow-idempotent-retries#idempotent-retry
 test("memory runtime passes the provider-neutral adapter conformance suite", async () => {
   const result = await runCaseflowConformance(() => createMemoryCaseflow());

@@ -240,6 +240,39 @@ export async function runCaseflowConformance(createRuntime, {
     }
   }
 
+  // A caller reviews one revision, then closes against exactly that state.
+  const reviewedCase = await runtime.createCase({ title: "Reviewed task", primaryJob: "Close only reviewed state" });
+  const reviewedRun = await runtime.startRun({ caseId: reviewedCase.caseId, stages: [{ id: "review", label: "Review", owner: "user" }] });
+  const reviewedArtifact = await runtime.createArtifact({ caseId: reviewedCase.caseId, runId: reviewedRun.runId, content: { revision: 1 } });
+  const expected = {
+    caseId: reviewedCase.caseId,
+    caseInputHash: contentHash({ title: reviewedCase.title, primaryJob: reviewedCase.primaryJob }),
+    artifactBindings: [{ artifactId: reviewedArtifact.artifactId, canonicalVersion: 1, contentHash: contentHash({ revision: 1 }) }],
+  };
+  const beforeInvalid = contentHash(await runtime.snapshot());
+  const invalidExpected = [null, {}, [], false,
+    { ...expected, ignoredCondition: true },
+    { ...expected, artifactBindings: [{ ...expected.artifactBindings[0], ignoredCondition: true }] },
+    { ...expected, artifactBindings: [expected.artifactBindings[0], { ...expected.artifactBindings[0], artifactId: ` ${reviewedArtifact.artifactId} ` }] },
+  ];
+  const invalidExpectedRejected = [];
+  for (const invalid of invalidExpected) {
+    try { await runtime.completeRun({ runId: reviewedRun.runId, expected: invalid }); invalidExpectedRejected.push(false); }
+    catch { invalidExpectedRejected.push(contentHash(await runtime.snapshot()) === beforeInvalid); }
+  }
+  await runtime.updateCaseInput({ caseId: reviewedCase.caseId, primaryJob: "Changed while review was pending" });
+  const beforeStale = contentHash(await runtime.snapshot());
+  let staleReviewedStateRejected = false;
+  try { await runtime.completeRun({ runId: reviewedRun.runId, expected }); }
+  catch { staleReviewedStateRejected = contentHash(await runtime.snapshot()) === beforeStale; }
+  await runtime.updateCaseInput({ caseId: reviewedCase.caseId, primaryJob: reviewedCase.primaryJob });
+  const reviewedCompletion = await runtime.completeRun({ runId: reviewedRun.runId, expected });
+  const reviewedRetry = await runtime.completeRun({ runId: reviewedRun.runId, expected: { ...expected, caseId: ` ${expected.caseId} ` } });
+  const beforeRetryConflict = contentHash(await runtime.snapshot());
+  let guardedRetryIdentityPreserved = false;
+  try { await runtime.completeRun({ runId: reviewedRun.runId }); }
+  catch { guardedRetryIdentityPreserved = contentHash(await runtime.snapshot()) === beforeRetryConflict; }
+
   let payloadAtDepthLimit = null;
   for (let depth = 0; depth < PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth; depth += 1) {
     payloadAtDepthLimit = { value: payloadAtDepthLimit };
@@ -266,6 +299,10 @@ export async function runCaseflowConformance(createRuntime, {
   }
 
   const assertions = {
+    guardedCompletionRejectsInvalidConditions: invalidExpectedRejected.every(Boolean),
+    guardedCompletionRejectsStaleStateWithoutMutation: staleReviewedStateRejected,
+    guardedCompletionReusesNormalizedRequest: reviewedRetry.reused === true && reviewedRetry.receipt.receiptHash === reviewedCompletion.receipt.receiptHash,
+    guardedCompletionPreservesRetryIdentity: guardedRetryIdentityPreserved,
     activeRunStartIsIdempotent: reusedRun.runId === run.runId,
     activeRunStagePlanMismatchFailsClosed: mismatchedActiveRunPlanRejected,
     blockedRunRejectsOrdinaryMutations: blockedMutationResults.every(Boolean),

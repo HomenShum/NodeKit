@@ -150,6 +150,12 @@ export interface RuntimeCapabilities {
 
 export type MaybePromise<T> = Promise<T> | T;
 
+export interface NodeKitCompletionExpected {
+  caseId: string;
+  caseInputHash: string;
+  artifactBindings: Array<{ artifactId: string; canonicalVersion: number; contentHash: string }>;
+}
+
 export interface CaseflowRuntime {
   capabilities: RuntimeCapabilities;
   ownerId: string;
@@ -171,7 +177,7 @@ export interface CaseflowRuntime {
     exception: NodeKitException;
     run: NodeKitRun;
   }>;
-  completeRun(input: { runId: string; actor?: NodeKitActor }): MaybePromise<{
+  completeRun(input: { runId: string; actor?: NodeKitActor; expected?: NodeKitCompletionExpected | undefined }): MaybePromise<{
     receipt: NodeKitReceipt;
     run: NodeKitRun;
     reused: boolean;
