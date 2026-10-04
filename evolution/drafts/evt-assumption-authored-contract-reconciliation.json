@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "nodekit.evolution-event/v1",
+  "id": "evt:assumption-authored-contract-reconciliation",
+  "projectId": "nodekit",
+  "repository": "HomenShum/node-platform",
+  "source": {
+    "commitSha": "9c321f94861000a45a9eddb50e50c8e77ada8c70",
+    "occurredAt": "2026-08-03T00:31:23.000Z"
+  },
+  "track": "architecture",
+  "category": "schema",
+  "challenge": "Preserve an earlier author claim while requiring current general claims to name their measured scope",
+  "observedFailure": "A later schema required dimensionsTested and the historical record was edited in place, contradicting append-or-supersede authority",
+  "resolution": "Restore the original authored record. Preserve the later interpretation as a noncanonical agent proposal: single open-ended frontend request with no protected product contract. Its attribution is the historical tightening commit, not a new repair commit.",
+  "assumptionIds": [
+    "asm:strong-model-infers-topology"
+  ],
+  "invariantIds": [],
+  "evidenceIds": [
+    "evd:nodevideo-topology-failure"
+  ],
+  "knownLimitations": [
+    "Materiality pending: source.commitSha identifies the existing historical interpretation only; this draft cannot satisfy a future repair materiality range until a genuine in-range repair commit is bound after it exists.",
+    "No native command I/O, intended-goal journey, rollback verification, operator directive or canonical signing proof is claimed by source preparation.",
+    "Historical validity does not certify a current measured scope; currentDimensionsCertified remains false.",
+    "This agent proposal is not canonical history and has no owner-review or signature stamp."
+  ],
+  "interpretation": {
+    "status": "agent-proposed"
+  }
+}

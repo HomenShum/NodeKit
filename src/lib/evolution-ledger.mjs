@@ -342,6 +342,8 @@ function commitExists(repoRoot, commitSha) {
   }
 }
 
+const MAX_LEDGER_RECORDS = 2048;
+
 async function jsonFiles(directory) {
   if (!(await pathExists(directory))) return [];
   const output = [];
@@ -351,7 +353,10 @@ async function jsonFiles(directory) {
     for (const entry of entries) {
       const target = path.join(current, entry.name);
       if (entry.isDirectory()) await visit(target);
-      else if (entry.name.endsWith(".json")) output.push(target);
+      else if (entry.name.endsWith(".json")) {
+        if (output.length >= MAX_LEDGER_RECORDS) throw new Error(`ledger read exceeds ${MAX_LEDGER_RECORDS} records`);
+        output.push(target);
+      }
     }
   }
   await visit(directory);
@@ -360,12 +365,13 @@ async function jsonFiles(directory) {
 
 async function readLedger(repoRoot) {
   const root = path.join(repoRoot, "evolution");
-  const ledger = { events: [], assumptions: [], invariants: [], evidence: [], adoptions: [], filesById: new Map() };
+  const ledger = { events: [], assumptions: [], invariants: [], evidence: [], adoptions: [], loadedRecords: [] };
   for (const definition of Object.values(EVOLUTION_RECORD_TYPES)) {
     for (const file of await jsonFiles(path.join(root, definition.directory))) {
+      if (ledger.loadedRecords.length >= MAX_LEDGER_RECORDS) throw new Error(`ledger read exceeds ${MAX_LEDGER_RECORDS} records`);
       const value = await readJson(file);
+      ledger.loadedRecords.push({ file: path.relative(repoRoot, file).split(path.sep).join("/"), record: value });
       ledger[definition.plural].push(value);
-      ledger.filesById.set(value.id, file);
     }
   }
   return ledger;
@@ -565,17 +571,36 @@ async function evidenceBytes(repoRoot, artifactRef) {
   return readFile(resolveInside(repoRoot, relative, "evolution evidence"));
 }
 
-export async function verifyEvolutionLedger(repoRoot) {
+async function inspectEvolutionLedger(repoRoot) {
   const root = path.resolve(repoRoot);
   const ledger = await readLedger(root);
   const issues = [];
   const warnings = [];
   const all = [...ledger.events, ...ledger.assumptions, ...ledger.invariants, ...ledger.evidence, ...ledger.adoptions];
+  // Validation and every consumer share these exact loaded objects; no verify-then-reread.
+  const mutationResult = await detectLedgerMutations(root, ledger.loadedRecords);
+  const origins = new Map(mutationResult.origins.map((origin) => [origin.file, origin]));
+  const historicalQualifications = [];
+  const historicalRecords = new Set();
+  for (const { file, record } of ledger.loadedRecords) {
+    const origin = origins.get(file);
+    if (origin?.classification === "authored-historical-unscoped") {
+      historicalRecords.add(record);
+      historicalQualifications.push({ ...origin, observedHead: mutationResult.observedHead });
+      warnings.push(`${record.id} is valid historical authorship; current measured dimensions are unknown`);
+    } else if (record.schemaVersion === "nodekit.assumption/v1"
+      && ["supported", "scope-limited"].includes(record.status)
+      && !Object.hasOwn(record, "dimensionsTested")) {
+      issues.push(`${record.id} has unknown authored provenance; the current measured-dimension contract applies`);
+    }
+  }
   const byId = new Map();
   for (const record of all) {
     const definition = EVOLUTION_RECORD_TYPES[record.schemaVersion];
     if (!definition) { issues.push(`unsupported schema ${record.schemaVersion} for ${record.id}`); continue; }
-    const findings = await validateSchema(definition.schema, record, record.id ?? definition.plural);
+    // Historical records already passed the frozen schema on exactly equal original payloads.
+    const findings = historicalRecords.has(record) ? []
+      : await validateSchema(definition.schema, record, record.id ?? definition.plural);
     issues.push(...findings);
     if (byId.has(record.id)) issues.push(`duplicate evolution id: ${record.id}`);
     byId.set(record.id, record);
@@ -607,7 +632,7 @@ export async function verifyEvolutionLedger(repoRoot) {
     if (["disproven", "superseded"].includes(assumption.status) && assumption.contradictingEvidenceIds.length === 0) issues.push(`${assumption.id} is ${assumption.status} without contradicting evidence`);
     // "Supported" is a claim that generalises, and without the axis it generalises to axes nobody
     // measured. Eight sequential calls drawing no complaint is not evidence about twelve at once.
-    if (["supported", "scope-limited"].includes(assumption.status) && !(assumption.dimensionsTested?.length > 0)) {
+    if (!historicalRecords.has(assumption) && ["supported", "scope-limited"].includes(assumption.status) && !(assumption.dimensionsTested?.length > 0)) {
       issues.push(`${assumption.id} is ${assumption.status} without naming the dimension its evidence measured`);
     }
     // A measured axis with no evidence behind it is a story about a probe. Either kind counts: the
@@ -658,12 +683,6 @@ export async function verifyEvolutionLedger(repoRoot) {
   // function. Verify now compares every record against the revision that
   // introduced it, so the authority rule is checked on the path people use.
   // @nodekit-behavior inv:ledger-records-are-immutable owner
-  const loadedRecords = all
-    .filter((record) => ledger.filesById.has(record.id))
-    .map((record) => ({
-      file: path.relative(root, ledger.filesById.get(record.id)).split(path.sep).join("/"),
-      record,
-    }));
   // Which canonical events actually carry a verified approval. Silence here would be the original
   // defect all over again: 22 events say human-reviewed because a command wrote that string, and a
   // reader must be able to tell those apart from ones a credential signed. Reported, never
@@ -679,13 +698,14 @@ export async function verifyEvolutionLedger(repoRoot) {
       (unattested.length > 3 ? `, and ${unattested.length - 3} more` : ""));
   }
 
-  const mutationResult = await detectLedgerMutations(root, loadedRecords);
   const mutationReport = describeMutations(mutationResult);
   issues.push(...mutationReport.issues);
   warnings.push(...mutationReport.warnings);
 
-  return {
+  historicalQualifications.sort((left, right) => left.file.localeCompare(right.file) || left.id.localeCompare(right.id));
+  const verdict = {
     schemaVersion: "nodekit.evolution-verdict/v1",
+    historicalQualifications,
     counts: { events: ledger.events.length, assumptions: ledger.assumptions.length, invariants: ledger.invariants.length, evidence: ledger.evidence.length, adoptions: ledger.adoptions.length },
     immutability: {
       checked: mutationResult.checked,
@@ -703,12 +723,23 @@ export async function verifyEvolutionLedger(repoRoot) {
     warnings: [...new Set(warnings)],
     passed: issues.length === 0,
   };
+  return { ledger, verdict };
+}
+
+export async function verifyEvolutionLedger(repoRoot) {
+  return (await inspectEvolutionLedger(repoRoot)).verdict;
 }
 
 export async function queryEvolutionLedger(repoRoot, { track, since, invariantId } = {}) {
-  const ledger = await readLedger(path.resolve(repoRoot));
+  const { ledger, verdict } = await inspectEvolutionLedger(path.resolve(repoRoot));
   const events = ledger.events.filter((event) => (!track || event.track === track) && (!since || Date.parse(event.source.occurredAt) >= Date.parse(since)) && (!invariantId || event.invariantIds.includes(invariantId)));
+  const returnedAssumptionIds = new Set(invariantId
+    ? ledger.assumptions.filter((assumption) => events.some((event) => event.assumptionIds.includes(assumption.id))).map((assumption) => assumption.id)
+    : ledger.assumptions.map((assumption) => assumption.id));
   return {
+    passed: verdict.passed,
+    issues: verdict.issues,
+    historicalQualifications: verdict.historicalQualifications.filter((qualification) => returnedAssumptionIds.has(qualification.id)),
     events,
     assumptions: invariantId ? ledger.assumptions.filter((assumption) => events.some((event) => event.assumptionIds.includes(assumption.id))) : ledger.assumptions,
     invariants: invariantId ? ledger.invariants.filter((invariant) => invariant.id === invariantId) : ledger.invariants,
@@ -798,7 +829,9 @@ export async function checkEvolutionMateriality(repoRoot, from, to) {
 
 export async function buildEvolutionDocs(repoRoot) {
   const root = path.resolve(repoRoot);
-  const ledger = await readLedger(root);
+  const { ledger, verdict } = await inspectEvolutionLedger(root);
+  if (!verdict.passed) throw new Error(`evolution ledger must verify before documentation projection:\n${verdict.issues.join("\n")}`);
+  const historicalById = new Map(verdict.historicalQualifications.map((qualification) => [qualification.id, qualification]));
   const byEvidence = new Map(ledger.evidence.map((record) => [record.id, record]));
   const byInvariant = new Map(ledger.invariants.map((record) => [record.id, record]));
   const lines = ["# NodeKit Evolution Ledger", "", "Canonical JSON records remain authoritative. This projection explains why material system guarantees exist.", ""];
@@ -807,6 +840,10 @@ export async function buildEvolutionDocs(repoRoot) {
     for (const event of ledger.events.filter((entry) => entry.track === track).sort((a, b) => a.source.occurredAt.localeCompare(b.source.occurredAt))) {
       lines.push(`### ${event.challenge}`, "", `- Event: \`${event.id}\``, `- Source: \`${event.source.commitSha}\``, `- Resolution: ${event.resolution}`);
       if (event.observedFailure) lines.push(`- Observed failure: ${event.observedFailure}`);
+      for (const id of event.assumptionIds) {
+        const qualification = historicalById.get(id);
+        if (qualification) lines.push(`- Historical assumption: \`${id}\`; current measured scope is unknown (currentDimensionsCertified: false). Authored at \`${qualification.introducedIn}\` under \`${qualification.readSchema}\` (SHA256 \`${qualification.originalSchemaSha256}\`).`);
+      }
       if (event.invariantIds.length) lines.push(`- Invariants: ${event.invariantIds.map((id) => `\`${id}\` (${byInvariant.get(id)?.status ?? "missing"})`).join(", ")}`);
       lines.push(`- Evidence: ${event.evidenceIds.map((id) => `\`${id}\` (${byEvidence.get(id)?.result ?? "missing"})`).join(", ")}`);
       if (event.knownLimitations.length) lines.push(`- Known limitations: ${event.knownLimitations.join("; ")}`);
@@ -818,14 +855,14 @@ export async function buildEvolutionDocs(repoRoot) {
   await writeFile(output, `${lines.join("\n")}\n`);
   const adoptionMap = ledger.adoptions.map((adoption) => ({ invariantId: adoption.invariantId, consumer: adoption.consumer, status: adoption.status, evidenceIds: adoption.evidenceIds }));
   await writeFile(path.join(root, "evolution", "projections", "adoption-map.json"), `${JSON.stringify(adoptionMap, null, 2)}\n`);
-  return { adoptionMap, output };
+  return { adoptionMap, output, verdict };
 }
 
 export async function proposeEvolutionKnowledgePatch(repoRoot, { graphPath } = {}) {
   const root = path.resolve(repoRoot);
-  const verdict = await verifyEvolutionLedger(root);
+  const { ledger, verdict } = await inspectEvolutionLedger(root);
   if (!verdict.passed) throw new Error(`evolution ledger must verify before graph projection:\n${verdict.issues.join("\n")}`);
-  const ledger = await readLedger(root);
+  const historicalIds = new Set(verdict.historicalQualifications.map((qualification) => `evolution:${qualification.id}`));
   const graph = await readKnowledgeGraph(root, { graphPath });
   const existing = new Set([...graph.nodes, ...graph.hyperedges].map((entity) => entity.id));
   const timestamp = now();
@@ -858,21 +895,39 @@ export async function proposeEvolutionKnowledgePatch(repoRoot, { graphPath } = {
       }) });
     }
   }
+  const historicalEvidence = new Map(ledger.assumptions
+    .filter((record) => historicalIds.has(`evolution:${record.id}`))
+    .map((record) => [`evolution:${record.id}`, [...new Set([
+      ...record.supportingEvidenceIds, ...record.contradictingEvidenceIds,
+    ])].map((id) => evidenceNodeIds.get(id)).filter(Boolean)]));
+  // Retire already-populated current claims and their causal edges through the existing
+  // evidence-grounded proposal/approval path. Source evidence remains immutable.
+  for (const entity of [...graph.nodes, ...graph.hyperedges]) {
+    const retiredIds = "participants" in entity && entity.predicate === "evolution-causal-chain"
+      ? entity.participants.map((participant) => participant.nodeId).filter((id) => historicalIds.has(id))
+      : historicalIds.has(entity.id) ? [entity.id] : [];
+    if (entity.layer !== "derived" || entity.deprecatedAt || retiredIds.length === 0) continue;
+    const grounded = [...new Set(retiredIds.flatMap((id) => historicalEvidence.get(id) ?? []))];
+    if (grounded.length === 0) throw new Error(`historical retirement lacks immutable source evidence: ${entity.id}`);
+    operations.push({ type: "DEPRECATE", targetId: entity.id,
+      reason: "Historical authored claim has no certified current measured scope; retire its current derived interpretation and causal links",
+      evidenceRefs: grounded });
+  }
   const records = [...ledger.events, ...ledger.assumptions, ...ledger.invariants, ...ledger.adoptions];
   for (const record of records) {
     const id = `evolution:${record.id}`;
-    if (existing.has(id)) continue;
+    if (existing.has(id) || historicalIds.has(id)) continue;
     const refs = record.evidenceIds ?? record.supportingEvidenceIds ?? (record.schemaVersion === "nodekit.invariant-claim/v1" ? ledger.evidence.filter((evidence) => evidence.verifiesInvariantIds.includes(record.id)).map((evidence) => evidence.id) : []);
     const grounded = refs.map((ref) => evidenceNodeIds.get(ref)).filter(Boolean);
     if (grounded.length === 0) continue;
     operations.push({ type: "INSERT", node: { id, kind: record.schemaVersion.split("/")[0].replace("nodekit.", ""), label: record.statement ?? record.challenge ?? record.id, layer: record.schemaVersion === "nodekit.evolution-adoption/v1" ? "canonical" : "derived", confidence: record.status === "verified" ? 1 : 0.8, evidenceRefs: grounded, metadata: record } });
   }
   for (const event of ledger.events) {
-    const participants = [event.id, ...event.assumptionIds, ...event.invariantIds].map((id, index) => ({ nodeId: `evolution:${id}`, role: index === 0 ? "event" : id.startsWith("asm") ? "challenged-assumption" : "introduced-invariant" })).filter((participant) => operations.some((operation) => operation.node?.id === participant.nodeId) || existing.has(participant.nodeId));
+    const participants = [event.id, ...event.assumptionIds, ...event.invariantIds].map((id, index) => ({ nodeId: `evolution:${id}`, role: index === 0 ? "event" : id.startsWith("asm") ? "challenged-assumption" : "introduced-invariant" })).filter((participant) => !historicalIds.has(participant.nodeId) && (operations.some((operation) => operation.node?.id === participant.nodeId) || existing.has(participant.nodeId)));
     const edgeId = `evolution:causal:${event.id}`;
     if (participants.length >= 2 && !existing.has(edgeId)) operations.push({ type: "INSERT", hyperedge: { id: edgeId, predicate: "evolution-causal-chain", layer: "derived", participants, confidence: 1, evidenceRefs: event.evidenceIds.map((id) => evidenceNodeIds.get(id)).filter(Boolean), createdAt: timestamp } });
   }
-  if (operations.length === 0) throw new Error("evolution ledger has no new evidence-grounded records to propose");
+  if (operations.length === 0) throw new Error(`evolution ledger has no new evidence-grounded records to propose; historicalQualifications=${JSON.stringify(verdict.historicalQualifications)}`);
   const patch = await proposeGraphPatch(root, {
     graphId: graph.graphId,
     baseVersion: graph.version,
