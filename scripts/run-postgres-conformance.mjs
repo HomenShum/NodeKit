@@ -776,9 +776,32 @@ async function runCandidate() {
     createPostgresKnowledgeRuntime({ pool, ownerId: ownerKnowledgeRace }).projectGraph({ graph: raceKnowledgeB, expectedVersion: null }),
   ]);
   const raceKnowledgeStored = await createPostgresKnowledgeRuntime({ pool, ownerId: ownerKnowledgeRace }).readGraph(raceGraphId);
-  const knowledgeFirstCreateRaceAtomic = raceKnowledgeResults.filter((entry) => entry.status === "fulfilled").length === 1
-    && raceKnowledgeResults.filter((entry) => entry.status === "rejected").length === 1
-    && [raceKnowledgeA.contentHash, raceKnowledgeB.contentHash].includes(raceKnowledgeStored.contentHash);
+  const knowledgeFirstCreateRace = {
+    outcomes: raceKnowledgeResults.map((entry, index) => ({
+      index,
+      inputContentHash: index === 0 ? raceKnowledgeA.contentHash : raceKnowledgeB.contentHash,
+      settlement: entry.status,
+      applied: typeof entry.value?.applied === "boolean" ? entry.value.applied : null,
+      reused: typeof entry.value?.reused === "boolean" ? entry.value.reused : null,
+      conflict: typeof entry.value?.conflict === "boolean" ? entry.value.conflict : null,
+      actualVersion: Number.isSafeInteger(entry.value?.actualVersion) ? entry.value.actualVersion : null,
+    })),
+    storedVersion: raceKnowledgeStored.version,
+    storedContentHash: raceKnowledgeStored.contentHash,
+  };
+  if (Buffer.byteLength(JSON.stringify(knowledgeFirstCreateRace), "utf8") > 2_048) {
+    throw new Error("knowledge first-create race evidence exceeds its byte bound");
+  }
+  const knowledgeRaceWinner = knowledgeFirstCreateRace.outcomes.findIndex((entry) => entry.settlement === "fulfilled"
+    && entry.applied === true && entry.reused === false && entry.conflict === false && entry.actualVersion === 0);
+  const knowledgeRaceConflict = knowledgeFirstCreateRace.outcomes.findIndex((entry) => entry.settlement === "fulfilled"
+    && entry.applied === false && entry.reused === false && entry.conflict === true && entry.actualVersion === 0);
+  const knowledgeFirstCreateRaceAtomic = knowledgeFirstCreateRace.outcomes.length === 2
+    && knowledgeFirstCreateRace.outcomes.every((entry) => entry.settlement === "fulfilled")
+    && knowledgeRaceWinner >= 0 && knowledgeRaceConflict >= 0 && knowledgeRaceWinner !== knowledgeRaceConflict
+    && knowledgeFirstCreateRace.storedVersion === 0
+    && knowledgeFirstCreateRace.storedContentHash === knowledgeFirstCreateRace.outcomes[knowledgeRaceWinner].inputContentHash
+    && knowledgeFirstCreateRace.storedContentHash !== knowledgeFirstCreateRace.outcomes[knowledgeRaceConflict].inputContentHash;
 
   const guardedCompletion = await runGuardedProof(createPostgresCaseflow, contentHash);
   const syntheticFailure = (code) => Object.assign(new Error(`controlled ${code}`), { code });
@@ -822,6 +845,7 @@ async function runCandidate() {
     capabilities: conformance.capabilities,
     conformance,
     guardedCompletion,
+    knowledgeFirstCreateRace,
     lifecycleFailureScenarios: { cleanupAfterPass, primaryAndCleanup },
     environment: "live-postgresql",
     testedAt: new Date().toISOString(),
