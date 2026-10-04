@@ -111,6 +111,75 @@ function isNotRepositoryFailure(error) {
     && /^fatal: not a git repository \(or any (?:of the parent directories\): \.git|parent up to mount point [^\r\n]{1,128}\))\r?\n(?:Stopping at filesystem boundary \(GIT_DISCOVERY_ACROSS_FILESYSTEM not set\)\.\r?\n)?$/u.test(error.stderr);
 }
 
+function introducingRevisions(history, file) {
+  const additions = new Set();
+  let commit = null;
+  for (const line of history.split(/\r?\n/u).filter(Boolean)) {
+    if (line.startsWith("commit:")) { commit = line.slice(7); continue; }
+    const [status, changedPath, ...extra] = line.split("\t");
+    if (!/^[AM]$/u.test(status) || changedPath !== file || extra.length || !/^[a-f0-9]{40}$/u.test(commit ?? "")) {
+      throw new Error("discontinuous or ambiguous ledger path lifecycle");
+    }
+    if (status === "A") additions.add(commit);
+    if (additions.size > 2) throw new Error("ledger path has more than two introducing revisions");
+  }
+  return additions;
+}
+
+// Scan complete NUL frames, retaining only the exact target's finite state. Path
+// filtering before rename pairing could hide a predecessor outside the ledger.
+function classifyIntroducingDiff(body, file) {
+  let cursor = 0;
+  let additions = 0;
+  let otherTargetChange = false;
+  const field = () => {
+    const end = body.indexOf("\0", cursor);
+    if (end <= cursor) throw new Error("incomplete introducing diff field");
+    const value = body.slice(cursor, end);
+    cursor = end + 1;
+    return value;
+  };
+  while (cursor < body.length) {
+    const status = field();
+    if (!/^(?:[ADTUXB]|M\d{0,3}|[RC]\d{1,3})$/u.test(status)
+      || (status.length > 1 && Number(status.slice(1)) > 100)) {
+      throw new Error("invalid introducing diff status");
+    }
+    const firstPath = field();
+    const secondPath = /^[RC]/u.test(status) ? field() : null;
+    if (firstPath === file || secondPath === file) {
+      if (status === "A") additions += 1;
+      else otherTargetChange = true;
+    }
+  }
+  if (additions !== 1 || otherTargetChange) throw new Error("target was not unambiguously added by this parent diff");
+}
+
+async function inspectIntroducingTarget(git, introducedIn, file) {
+  const metadata = await git(["show", "--no-patch", "--format=%H%x00%P%x00", introducedIn, "--"]);
+  const separator = metadata.indexOf("\0", 41);
+  if (!metadata.startsWith(`${introducedIn}\0`) || separator < 41 || metadata.slice(separator + 1) !== "\n") {
+    throw new Error("incomplete introducing commit metadata");
+  }
+  const parents = [];
+  let cursor = 41;
+  while (cursor < separator) {
+    if (parents.length === 2) throw new Error("introducing commit exceeds two actual parents");
+    const space = metadata.indexOf(" ", cursor);
+    const end = space >= 0 && space < separator ? space : separator;
+    const parent = metadata.slice(cursor, end);
+    if (!/^[a-f0-9]{40}$/u.test(parent) || parents.includes(parent)) throw new Error("ambiguous introducing parent metadata");
+    parents.push(parent);
+    cursor = end + 1;
+    if (end !== separator && cursor === separator) throw new Error("incomplete introducing parent metadata");
+  }
+  for (const parent of parents.length ? parents : [null]) {
+    const args = ["diff-tree", "--no-commit-id", "--name-status", "-r", "-z", "--find-renames", "--no-ext-diff", "--no-textconv"];
+    args.push(...(parent === null ? ["--root", introducedIn, "--"] : [parent, introducedIn, "--"]));
+    classifyIntroducingDiff(await git(args), file);
+  }
+}
+
 /**
  * @param {string} repoRoot
  * @param {Array<{file: string, record: object}>} loaded repo-relative path plus the record
@@ -127,6 +196,7 @@ export async function detectLedgerMutations(repoRoot, loaded) {
     const result = await run("git", args, {
       cwd: repoRoot, maxBuffer: MAX_HISTORY_BYTES, timeout: Math.min(CHILD_BUDGET_MS, remaining),
     });
+    if (args[0] === "diff-tree" && result.stderr) throw new Error("introducing diff inspection was incomplete");
     return result.stdout;
   };
   const mutations = [];
@@ -160,20 +230,43 @@ export async function detectLedgerMutations(repoRoot, loaded) {
       // than selecting an oldest A across deletion/readdition or following a renamed claim.
       if (/[\r\n\t]/u.test(file)) throw new Error("ambiguous ledger path");
       const history = await git(["log", "--full-history", "--format=commit:%H", "--name-status", "--no-renames", observedHead, "--", file]);
-      const additions = new Set();
-      let commit = null;
-      for (const line of history.split(/\r?\n/u).filter(Boolean)) {
-        if (line.startsWith("commit:")) { commit = line.slice(7); continue; }
-        const [status, changedPath, ...extra] = line.split("\t");
-        if (!/^[AM]$/u.test(status) || changedPath !== file || extra.length || !/^[a-f0-9]{40}$/u.test(commit ?? "")) {
-          throw new Error("discontinuous or ambiguous ledger path lifecycle");
-        }
-        if (status === "A") additions.add(commit);
-      }
+      const additions = introducingRevisions(history, file);
       if (additions.size === 0) { origin.reason = "no committed introducing revision"; continue; }
-      if (additions.size !== 1) throw new Error("ledger path was introduced more than once");
+      if (additions.size !== 1 && needsHistoricalContract(current)) throw new Error("historical ledger path was introduced more than once");
       const renamed = await git(["log", "--follow", "--diff-filter=R", "--format=%H", observedHead, "--", file]);
       if (renamed.trim()) throw new Error("moved ledger path has no unambiguous authored contract");
+      if (additions.size === 2) {
+        if (!historyComplete) throw new Error("independent origins require complete history");
+        const supplemental = introducingRevisions(await git(["log", "--full-history", "--diff-merges=separate", "--format=commit:%H", "--name-status", "--find-renames", observedHead, "--", file]), file);
+        if (supplemental.size !== 2 || [...supplemental].some((commit) => !additions.has(commit))) {
+          throw new Error("inconsistent parent-separated ledger lifecycle");
+        }
+        const introducing = [...additions].sort();
+        const independent = (await git(["merge-base", "--independent", ...introducing])).trim().match(/^([a-f0-9]{40})\s+([a-f0-9]{40})$/u);
+        if (!independent || independent[1] === independent[2]
+          || !introducing.includes(independent[1]) || !introducing.includes(independent[2])) {
+          throw new Error("introducing revisions are not independently inspectable");
+        }
+        for (const introducedIn of introducing) await inspectIntroducingTarget(git, introducedIn, file);
+        const staged = [];
+        for (const introducedIn of introducing) {
+          const original = JSON.parse(await git(["show", `${introducedIn}:${file}`]));
+          const changes = diffPaths(original, current);
+          staged.push({
+            id: current.id ?? file, file, introducedIn: introducedIn.slice(0, 8),
+            claimChanges: changes.filter((change) => change.class === "claim"),
+            bindingChanges: changes.filter((change) => change.class === "binding"),
+          });
+        }
+        origin.claimsEqual = staged.every((entry) => entry.claimChanges.length === 0);
+        origin.reason = "both independent committed origins inspected";
+        checked += 1;
+        for (const entry of staged) {
+          if (entry.claimChanges.length) mutations.push(entry);
+          else if (entry.bindingChanges.length) bindingRepairs.push(entry);
+        }
+        continue;
+      }
       const introducedIn = [...additions][0];
       const original = JSON.parse(await git(["show", `${introducedIn}:${file}`]));
       origin.introducedIn = introducedIn;

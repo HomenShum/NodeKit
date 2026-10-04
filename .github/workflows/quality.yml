@@ -26,7 +26,332 @@ jobs:
       - run: npm run typecheck:component
       # test:all, not test. `npm test` is the fast lane a developer runs on every change;
       # CI must still gate the slow acceptance lane, or splitting the suite quietly drops it.
-      - run: npm run test:all
+      - id: repository_tests
+        run: npm run test:all
+      - name: Capture native derived references after the unchanged check
+        if: ${{ always() && (steps.repository_tests.outcome == 'success' || steps.repository_tests.outcome == 'failure') }}
+        timeout-minutes: 2
+        shell: bash
+        env:
+          REFERENCE_TEST_OUTCOME: ${{ steps.repository_tests.outcome }}
+          REFERENCE_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import path from "node:path";
+          import { execFileSync } from "node:child_process";
+          import { createHash } from "node:crypto";
+
+          const MAX = Object.freeze({
+            gitRows: 8192, gitBytes: 2 * 1024 * 1024, entries: 16384, directories: 2048,
+            depth: 32, pathBytes: 512, files: 2048, roles: 8, invariants: 256, refs: 256,
+            fileBytes: 512 * 1024, snapshotBytes: 12 * 1024 * 1024, readBytes: 24 * 1024 * 1024,
+            manifestBytes: 4 * 1024 * 1024, outputBytes: 2 * 1024 * 1024, receiptBytes: 64 * 1024,
+            differences: 8, gitMs: 5000, producerMs: 20000, operationMs: 100000,
+          });
+          const root = process.cwd();
+          const deadline = Date.now() + MAX.operationMs;
+          let readBytes = 0;
+          const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+          const blobHash = (bytes) => createHash("sha1").update("blob " + bytes.length + "\0").update(bytes).digest("hex");
+          const sorted = (values) => [...values].sort();
+          const fail = (reason, differences = []) => {
+            const error = new Error(reason);
+            error.safe = { reason, differences: differences.slice(0, MAX.differences) };
+            throw error;
+          };
+          function budget() {
+            const remaining = deadline - Date.now();
+            if (remaining <= 0) fail("operation_timeout");
+            return remaining;
+          }
+          function relative(value) {
+            if (typeof value !== "string" || Buffer.byteLength(value) > MAX.pathBytes ||
+                !value || value.includes("\0") || value.includes("\\") || path.isAbsolute(value) ||
+                value.split("/").some((part) => !part || part === "." || part === "..")) fail("unbound_path");
+            return value;
+          }
+          function capture(command, args, bytes, milliseconds) {
+            try {
+              return execFileSync(command, args, {
+                cwd: root, timeout: Math.min(milliseconds, budget()), maxBuffer: bytes,
+                stdio: ["ignore", "pipe", "pipe"],
+              });
+            } catch { fail("child_failed_or_capture_limit"); }
+          }
+          const git = (args, bytes = MAX.gitBytes) => capture("git", ["--no-pager", ...args], bytes, MAX.gitMs);
+          function identity() {
+            const head = git(["rev-parse", "HEAD"], 128).toString("ascii").trim();
+            const tree = git(["rev-parse", "HEAD^{tree}"], 128).toString("ascii").trim();
+            if (!/^[a-f0-9]{40}$/.test(head) || !/^[a-f0-9]{40}$/.test(tree) ||
+                head !== process.env.GITHUB_SHA) fail("checkout_identity_mismatch");
+            git(["diff", "--quiet", "HEAD", "--"], 1024);
+            return { head, tree };
+          }
+          function kind(rel) {
+            const parts = relative(rel).split("/");
+            for (let index = 0; index < parts.length; index++) {
+              budget();
+              let stat;
+              try { stat = fs.lstatSync(path.join(root, ...parts.slice(0, index + 1))); }
+              catch (error) { if (error.code === "ENOENT") return null; fail("unknown_input_state"); }
+              if (stat.isSymbolicLink() || (!stat.isDirectory() && !stat.isFile())) fail("unsupported_input_kind");
+              if (index < parts.length - 1 && !stat.isDirectory()) fail("unsupported_ancestor");
+              if (index === parts.length - 1) return stat.isDirectory() ? "directory" : "file";
+            }
+          }
+          function charge(bytes) {
+            if (!Number.isSafeInteger(bytes) || bytes < 0 || bytes > MAX.fileBytes ||
+                readBytes + bytes > MAX.readBytes) fail("input_byte_limit");
+            readBytes += bytes;
+          }
+          function readBoundFile(rel, expected) {
+            charge(expected.size);
+            let fd;
+            try {
+              fd = fs.openSync(path.join(root, relative(rel)), fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+              const stat = fs.fstatSync(fd);
+              if (!stat.isFile() || stat.size !== expected.size ||
+                  ((stat.mode & 0o111) ? "100755" : "100644") !== expected.mode) fail("input_changed");
+              const bytes = Buffer.alloc(expected.size + 1);
+              let used = 0;
+              while (used < bytes.length) {
+                budget();
+                const count = fs.readSync(fd, bytes, used, Math.min(65536, bytes.length - used), null);
+                if (count === 0) {
+                  if (used !== expected.size) fail("input_changed");
+                  return bytes.subarray(0, used);
+                }
+                used += count;
+              }
+              fail("input_changed_or_byte_limit");
+            } finally { if (fd !== undefined) fs.closeSync(fd); }
+          }
+          function encode(manifest) {
+            const bytes = Buffer.alloc(MAX.manifestBytes);
+            let used = 0;
+            function append(text) {
+              const size = Buffer.byteLength(text);
+              if (used + size > bytes.length) fail("manifest_byte_limit");
+              used += bytes.write(text, used, size, "utf8");
+            }
+            function write(value) {
+              budget();
+              if (Array.isArray(value)) {
+                append("[");
+                for (let index = 0; index < value.length; index++) {
+                  if (index) append(",");
+                  write(value[index]);
+                }
+                append("]");
+              } else append(JSON.stringify(value));
+            }
+            write(manifest);
+            return bytes.subarray(0, used);
+          }
+          const roots = ["src", "templates/base", "scripts", "test", "schemas", "src/lib", "evolution/invariants"];
+          function roles(rel, type) {
+            const output = [];
+            if (/^(src|templates\/base|scripts)\//.test(rel) && /\.(mjs|js)$/.test(rel)) output.push("ownership");
+            if (rel.startsWith("test/") && rel.endsWith(".mjs")) output.push("verification");
+            if (/^evolution\/invariants\/[^/]+\.json$/.test(rel)) output.push("invariant");
+            if (type === "file" && /^schemas\/[^/]+\.schema\.json$/.test(rel)) output.push("schema-name");
+            if (type === "file" && /^src\/lib\/[^/]+\.mjs$/.test(rel)) output.push("module-name");
+            if (type === "file" && /^test\/[^/]+\.test\.mjs$/.test(rel)) output.push("test-name");
+            if (["nodekit.yaml", "package.json", "src/cli.mjs", "src/cli-main.mjs"].includes(rel)) output.push("direct");
+            return output;
+          }
+          function add(selected, rel, type, extra = []) {
+            relative(rel);
+            const values = new Set([...(selected.get(rel)?.roles ?? []), ...roles(rel, type), ...extra]);
+            if (values.size === 0) return;
+            if (values.size > MAX.roles || (!selected.has(rel) && selected.size >= MAX.files)) fail("manifest_entry_limit");
+            selected.set(rel, { type, roles: sorted(values) });
+          }
+          function refsFrom(bytes, rel, output) {
+            const value = JSON.parse(bytes.toString("utf8"));
+            const refs = value.verifierRefs ?? [];
+            if (!Array.isArray(refs) || refs.length > MAX.refs) fail("reference_limit_or_shape");
+            for (const ref of refs) {
+              if (typeof ref !== "string" || Buffer.byteLength(ref) > MAX.pathBytes ||
+                  output.length >= MAX.refs) fail("reference_limit_or_shape");
+              const joined = path.resolve(path.join(root, ref.split("#")[0]));
+              const target = relative(path.relative(root, joined).split(path.sep).join("/"));
+              output.push([rel, ref, target]);
+            }
+          }
+          function names(selected) {
+            return ["schema-name", "module-name", "test-name"].map((role) =>
+              [role, sorted([...selected].filter(([, value]) => value.roles.includes(role)).map(([rel]) => rel))]);
+          }
+          function treeInputs() {
+            const bytes = git(["ls-tree", "-rlz", "--full-tree", "HEAD"]);
+            const tree = new Map();
+            let offset = 0;
+            while (offset < bytes.length) {
+              budget();
+              const end = bytes.indexOf(0, offset);
+              if (end < 0 || end - offset > MAX.pathBytes + 160 || tree.size >= MAX.gitRows) fail("git_tree_limit");
+              const line = bytes.subarray(offset, end).toString("utf8");
+              const tab = line.indexOf("\t");
+              const metadata = line.slice(0, tab).trim().split(/\s+/);
+              const rel = relative(line.slice(tab + 1));
+              if (tab < 0 || metadata.length !== 4 || !/^[a-f0-9]{40}$/.test(metadata[2]) || tree.has(rel)) fail("git_tree_shape");
+              tree.set(rel, { mode: metadata[0], type: metadata[1], oid: metadata[2], size: Number(metadata[3]) });
+              offset = end + 1;
+            }
+            const selected = new Map();
+            for (const [rel, value] of tree) add(selected, rel, ["100644", "100755"].includes(value.mode) ? "file" : "unsupported");
+            const invariants = sorted([...selected].filter(([, value]) => value.roles.includes("invariant")).map(([rel]) => rel));
+            if (invariants.length > MAX.invariants) fail("invariant_limit");
+            const refs = [];
+            for (const rel of invariants) {
+              const value = tree.get(rel);
+              if (value.type !== "blob" || !["100644", "100755"].includes(value.mode)) fail("unsupported_tested_input");
+              charge(value.size);
+              const content = git(["cat-file", "blob", value.oid], value.size + 1);
+              if (content.length !== value.size || blobHash(content) !== value.oid) fail("tested_blob_mismatch");
+              refsFrom(content, rel, refs);
+            }
+            const targets = sorted(new Set(refs.map(([, , target]) => target)));
+            if (targets.length > MAX.refs) fail("reference_limit");
+            for (const target of targets) if (tree.has(target)) add(selected, target, "file", ["verifier"]);
+            const files = sorted(selected.keys()).map((rel) => {
+              const value = tree.get(rel);
+              if (value.type !== "blob" || !["100644", "100755"].includes(value.mode) ||
+                  !Number.isSafeInteger(value.size) || value.size < 0 || value.size > MAX.fileBytes) fail("unsupported_tested_input");
+              return [rel, value.mode, value.oid, value.size, selected.get(rel).roles];
+            });
+            if (files.reduce((sum, [, , , size]) => sum + size, 0) > MAX.snapshotBytes) fail("snapshot_byte_limit");
+            const rootStates = roots.map((rel) => [rel, [...tree.keys()].some((entry) => entry.startsWith(rel + "/")) ? "directory" : null]);
+            const refStates = targets.map((target) => [target, tree.has(target)]);
+            return { tree, selected, invariants, refs, targets, manifest: [rootStates, files, refs, refStates, names(selected)] };
+          }
+          function inspect(expected, pinned) {
+            const current = identity();
+            if (current.head !== pinned.head || current.tree !== pinned.tree) fail("checkout_changed");
+            const actual = new Map();
+            let entries = 0, directories = 0;
+            function scan(rel, recursive, invariantRoot = false, depth = 0) {
+              budget();
+              if (depth > MAX.depth || ++directories > MAX.directories) fail("directory_limit");
+              const type = kind(rel);
+              if (type === null) return;
+              if (type !== "directory") fail("unsupported_root");
+              const directory = fs.opendirSync(path.join(root, rel));
+              try {
+                let entry;
+                while ((entry = directory.readSync()) !== null) {
+                  budget();
+                  if (++entries > MAX.entries) fail("enumeration_limit");
+                  const child = relative(path.posix.join(rel, entry.name));
+                  if (recursive && entry.isDirectory()) scan(child, true, false, depth + 1);
+                  else if ((!entry.isDirectory() || invariantRoot) &&
+                           (roles(child, entry.isFile() ? "file" : "unsupported").length > 0)) {
+                    add(actual, child, entry.isFile() ? "file" : "unsupported");
+                  }
+                }
+              } finally { directory.closeSync(); }
+            }
+            for (const rel of ["src", "templates/base", "scripts", "test"]) scan(rel, true);
+            for (const rel of ["schemas", "src/lib", "test"]) scan(rel, false);
+            scan("evolution/invariants", false, true);
+            for (const rel of ["nodekit.yaml", "package.json", "src/cli.mjs", "src/cli-main.mjs"]) {
+              const type = kind(rel);
+              if (type !== null) add(actual, rel, type);
+            }
+            const refStates = expected.targets.map((rel) => {
+              const type = kind(rel);
+              if ((type !== null) !== expected.tree.has(rel) || (type !== null && type !== "file")) fail("reference_state_mismatch");
+              if (type === "file") add(actual, rel, type, ["verifier"]);
+              return [rel, type !== null];
+            });
+            const differences = [];
+            for (const rel of sorted(new Set([...actual.keys(), ...expected.selected.keys()]))) {
+              const observed = actual.get(rel), wanted = expected.selected.get(rel);
+              if (!observed || !wanted || observed.type !== "file" ||
+                  JSON.stringify(observed.roles) !== JSON.stringify(wanted.roles)) {
+                if (differences.length < MAX.differences) differences.push(hash(rel));
+              }
+            }
+            if (differences.length) fail("input_membership_or_kind_mismatch", differences);
+            const rootStates = roots.map((rel) => [rel, kind(rel)]);
+            if (JSON.stringify(rootStates) !== JSON.stringify(expected.manifest[0])) fail("root_state_mismatch");
+            const refs = [], files = [], invariantBytes = new Map();
+            let total = 0;
+            for (const rel of sorted(actual.keys())) {
+              const value = expected.tree.get(rel);
+              if (kind(rel) !== "file" || (total += value.size) > MAX.snapshotBytes) fail("snapshot_state_or_byte_limit");
+              const content = readBoundFile(rel, value);
+              const oid = blobHash(content);
+              if (oid !== value.oid) fail("input_content_mismatch");
+              if (actual.get(rel).roles.includes("invariant")) {
+                if (invariantBytes.size >= MAX.invariants) fail("invariant_limit");
+                invariantBytes.set(rel, content);
+              }
+              files.push([rel, value.mode, oid, content.length, actual.get(rel).roles]);
+            }
+            for (const rel of sorted(invariantBytes.keys())) refsFrom(invariantBytes.get(rel), rel, refs);
+            invariantBytes.clear();
+            const manifest = [rootStates, files, refs, refStates, names(actual)];
+            const bytes = encode(manifest);
+            if (!bytes.equals(encode(expected.manifest))) fail("input_closure_mismatch");
+            return { digest: hash(bytes), files: files.length, bytes: total, invariants: expected.invariants.length,
+              referenceOccurrences: refs.length, referenceTargets: refStates.length };
+          }
+          function producer(args, destination) {
+            const bytes = capture(process.execPath, ["src/cli.mjs", ...args, "--json"], MAX.outputBytes, MAX.producerMs);
+            JSON.parse(bytes.toString("utf8"));
+            fs.writeFileSync(destination, bytes, { flag: "wx" });
+            return { command: ["node", "src/cli.mjs", ...args, "--json"], exit: 0, bytes: bytes.length, sha256: hash(bytes) };
+          }
+          try {
+            const outcome = process.env.REFERENCE_TEST_OUTCOME;
+            const sourceHead = process.env.REFERENCE_SOURCE_HEAD;
+            if (!["success", "failure"].includes(outcome) || !/^[a-f0-9]{40}$/.test(sourceHead ?? "") ||
+                !/^\d{1,20}$/.test(process.env.GITHUB_RUN_ID ?? "") ||
+                !/^\d{1,6}$/.test(process.env.GITHUB_RUN_ATTEMPT ?? "") ||
+                !["pull_request", "push"].includes(process.env.GITHUB_EVENT_NAME)) fail("event_metadata_mismatch");
+            const pinned = identity();
+            const expected = treeInputs();
+            const before = inspect(expected, pinned);
+            const temporary = process.env.RUNNER_TEMP;
+            if (!temporary || !path.isAbsolute(temporary)) fail("temporary_output_root_missing");
+            const output = path.join(temporary, "nodekit-derived-references");
+            const inside = path.relative(root, output);
+            if (!inside.startsWith(".." + path.sep) || path.isAbsolute(inside)) fail("output_inside_source");
+            fs.mkdirSync(output);
+            const behavior = producer(["behavior", "index"], path.join(output, "behavior-index.json"));
+            const map = producer(["repo", "map"], path.join(output, "repo-map.json"));
+            const after = inspect(expected, pinned);
+            if (before.digest !== after.digest) fail("input_snapshot_changed");
+            const receipt = {
+              schema: "nodekit.native-reference-diagnostic/v1", status: "DIAGNOSTIC_COMPLETE_NOT_TEST_APPROVAL",
+              testedCheckout: pinned.head, testedTree: pinned.tree, sourceHead, event: process.env.GITHUB_EVENT_NAME,
+              runId: process.env.GITHUB_RUN_ID, runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+              priorTestOutcome: outcome, expectedInputDigest: hash(encode(expected.manifest)),
+              before, after, producers: { "behavior-index.json": behavior, "repo-map.json": map },
+              proofBoundary: "Measured before/after closure; no during-read atomicity, runtime, owner or readiness certification",
+            };
+            const bytes = Buffer.from(JSON.stringify(receipt, null, 2) + "\n");
+            if (bytes.length > MAX.receiptBytes) fail("receipt_byte_limit");
+            budget();
+            fs.writeFileSync(path.join(output, "receipt.json"), bytes, { flag: "wx" });
+          } catch (error) {
+            console.error(JSON.stringify(error.safe ?? { reason: "reference_diagnostic_failed" }));
+            process.exitCode = 1;
+          }
+          NODE
+      - name: Preserve diagnostic outputs without changing test status
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ always() && (steps.repository_tests.outcome == 'success' || steps.repository_tests.outcome == 'failure') }}
+        with:
+          name: native-derived-references-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/nodekit-derived-references/behavior-index.json
+            ${{ runner.temp }}/nodekit-derived-references/repo-map.json
+            ${{ runner.temp }}/nodekit-derived-references/receipt.json
       - run: npm run audit:prod
       - run: npm run registry:check
       - name: Pack and install NodeKit

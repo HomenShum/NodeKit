@@ -618,14 +618,14 @@ async function readerAtActualSeam(root, replaceAfterLoad) {
   ].join("\n").replace(/^export /gm, "");
   const reads = new Map();
   let inspected = 0;
-  const { EVOLUTION_RECORD_TYPES } = await import("../src/lib/evolution-ledger.mjs");
+  const { EVOLUTION_EVENT_SCHEMA, EVOLUTION_RECORD_TYPES } = await import("../src/lib/evolution-ledger.mjs");
   const { describeMutations } = await import("../src/lib/evolution-immutability.mjs");
   const { readdir } = await import("node:fs/promises");
   const { evidenceSnapshotToGraphNode, ingestEvidenceBytes, readEvidenceSnapshot } = await import("../src/lib/evidence-snapshots.mjs");
   const readers = vm.runInNewContext(`${body}\n({ verifyEvolutionLedger, queryEvolutionLedger, buildEvolutionDocs, proposeEvolutionKnowledgePatch })`, {
     createHash, execFileSync, mkdir, readFile, readdir, writeFile, path, pathExists,
     readJson: async (file) => { reads.set(file, (reads.get(file) ?? 0) + 1); return readJson(file); },
-    EVOLUTION_RECORD_TYPES, validateSchema, describeMutations,
+    EVOLUTION_EVENT_SCHEMA, EVOLUTION_RECORD_TYPES, validateSchema, describeMutations,
     detectLedgerMutations: async (_root, loaded) => {
       inspected += 1;
       await replaceAfterLoad(inspected);
