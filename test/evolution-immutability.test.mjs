@@ -524,7 +524,7 @@ async function observerAtChildSeam(root, interceptor = (_args, native) => native
     return interceptor(Array.from(args), native);
   };
   const owner = vm.runInNewContext(`${body}\nconst deadline = Date.now() + INSPECTION_BUDGET_MS;\n${source.slice(first, last)}\n({ observer: detectLedgerMutations, inspect: (id, file) => inspectIntroducingTarget(git, id, file), classify: classifyIntroducingDiff })`, {
-    run, createHash, Buffer, validateSchema, ...(clock ? { Date: { now: clock } } : {}),
+    repoRoot: root, run, createHash, Buffer, validateSchema, ...(clock ? { Date: { now: clock } } : {}),
   });
   return { ...owner, calls };
 }

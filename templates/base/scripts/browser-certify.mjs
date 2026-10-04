@@ -209,6 +209,9 @@ async function assertReviewState(page, state, viewport, theme) {
       : expectation.action === "recovery"
         ? [mobile ? "mobile-resume" : "resume"]
       : expectation.action === "propose" ? [mobile ? "mobile-propose" : "propose"] : [];
+  if ((state === "first_arrival" || completedReviewStates.has(state)) && !(await page.locator("#error").isHidden())) {
+    throw new Error(`error region should be hidden for ${context}`);
+  }
   const controls = ["propose", "approve", "reject", "resume", "resolve-conflict", "mobile-propose", "mobile-approve", "mobile-reject", "mobile-resume", "mobile-resolve-conflict"];
   for (const id of visible) {
     if (!(await page.locator(`#${id}`).isVisible())) throw new Error(`${id} should be visible for ${context}`);
@@ -319,6 +322,9 @@ try {
           await page.locator("#outcome").fill("");
           await page.locator("#primary-input button").click();
           await page.locator("#error").waitFor({ state: "visible" });
+          if ((await page.locator("#error-message").innerText()).trim().length === 0) {
+            throw new Error(`validation error has no recovery message for ${viewport.id}/${theme}`);
+          }
         }
         if (state === "approval") await page.locator("#approve").focus();
         if (state === "receipt_inspection" || state === "export_share") {
@@ -389,6 +395,7 @@ try {
           const receiptBeforeReload = await page.locator("#receipt-id").innerText();
           await page.reload({ waitUntil: "networkidle" });
           const receiptAfterReload = await page.locator("#receipt-id").innerText();
+          await assertReviewState(page, state, viewport, theme);
           if (!receiptBeforeReload.startsWith("Receipt ") || receiptAfterReload !== receiptBeforeReload) {
             throw new Error(`receipt did not survive reload for ${viewport.id}/${theme}`);
           }

@@ -14,4 +14,10 @@ rewritten after release.
 - [`cli/governance-visualize.md`](cli/governance-visualize.md) — deterministic governance visualization command
 - [`schemas/governance-contracts.md`](schemas/governance-contracts.md) — portable governance receipt contracts
 
+- [`library/evolution-ledger.md`](library/evolution-ledger.md) - src/lib/evolution-ledger.mjs
+- [`harness/evolution-immutability-fixtures.md`](harness/evolution-immutability-fixtures.md) - test/evolution-immutability.test.mjs
+- [`harness/evolution-ledger-fixtures.md`](harness/evolution-ledger-fixtures.md) - test/evolution-ledger.test.mjs
+- [`templates/base-web-alert.md`](templates/base-web-alert.md) - templates/base/apps/web/public/styles.css
+- [`harness/browser-certify.md`](harness/browser-certify.md) - templates/base/scripts/browser-certify.mjs
+
 See [`TEMPLATE.md`](TEMPLATE.md) for the lane format.

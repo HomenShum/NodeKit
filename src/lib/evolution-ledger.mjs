@@ -872,7 +872,8 @@ export async function proposeEvolutionKnowledgePatch(repoRoot, { graphPath } = {
     const bytes = await evidenceBytes(root, evidence.artifactRef);
     const rawSha256 = digest(bytes);
     const sourceUri = `https://nodekit.local/evolution/${encodeURIComponent(evidence.id)}`;
-    const id = `evidence_${digest(canonical({ sourceUri, capturedAt: evidence.generatedAt, rawSha256 })).slice(0, 24)}`;
+    const capturedAt = new Date(evidence.generatedAt).toISOString();
+    const id = `evidence_${digest(canonical({ sourceUri, capturedAt, rawSha256 })).slice(0, 24)}`;
     evidenceNodeIds.set(evidence.id, id);
     if (!existing.has(id)) {
       let snapshot;
@@ -884,7 +885,7 @@ export async function proposeEvolutionKnowledgePatch(repoRoot, { graphPath } = {
           bytes,
           sourceUri,
           mediaType: "application/octet-stream",
-          capturedAt: evidence.generatedAt,
+          capturedAt,
           expectedSha256: evidence.sha256,
         });
       }

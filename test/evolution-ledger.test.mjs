@@ -23,12 +23,13 @@ import {
 import { grantApproval, proposed } from "./helpers/evolution-approval-fixture.mjs";
 import { applyGraphPatch, decideGraphPatch, initializeKnowledgeGraph, proposeGraphPatch,
   queryKnowledgeGraph, readKnowledgeGraph, validateGraphPatch } from "../src/lib/knowledge-evolution.mjs";
+import { ingestEvidenceBytes, readEvidenceSnapshot } from "../src/lib/evidence-snapshots.mjs";
 
 function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
 }
 
-async function fixture() {
+async function fixture({ generatedAt = new Date().toISOString() } = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-evolution-"));
   git(root, ["init"]);
   git(root, ["config", "user.email", "nodekit@example.com"]);
@@ -41,7 +42,7 @@ async function fixture() {
   const sha256 = createHash("sha256").update(bytes).digest("hex");
   await initializeEvolutionLedger(root);
   const records = [
-    { schemaVersion: "nodekit.evolution-evidence/v1", id: "evd:test", kind: "test", artifactRef: "file:verifier.txt", sha256, sourceCommit: commit, generatedAt: new Date().toISOString(), command: "node --test", environment: { platform: process.platform }, verifiesInvariantIds: ["inv:test"], nodeProofReceiptId: "proof:test", result: "pass" },
+    { schemaVersion: "nodekit.evolution-evidence/v1", id: "evd:test", kind: "test", artifactRef: "file:verifier.txt", sha256, sourceCommit: commit, generatedAt, command: "node --test", environment: { platform: process.platform }, verifiesInvariantIds: ["inv:test"], nodeProofReceiptId: "proof:test", result: "pass" },
     { schemaVersion: "nodekit.assumption/v1", id: "asm:test", statement: "Direct mutation was safe", scope: { applications: ["fixture"] }, status: "disproven", introducedByEventId: "evt:test", invalidatedByEventId: "evt:test", supportingEvidenceIds: [], contradictingEvidenceIds: ["evd:test"] },
     { schemaVersion: "nodekit.invariant-claim/v1", id: "inv:test", statement: "Agent writes remain proposals until approval", scope: { applications: ["fixture"] }, enforcement: "runtime-gate", verifierRefs: ["verifier.txt"], introducedByEventId: "evt:test", status: "verified" },
     { schemaVersion: "nodekit.evolution-event/v1", id: "evt:test", projectId: "fixture", repository: "local/fixture", source: { commitSha: commit, occurredAt: new Date().toISOString() }, track: "architecture", category: "runtime", challenge: "Direct mutation corrupted canonical state", observedFailure: "A stale agent write replaced newer work", resolution: "Introduced proposal validation and approval", assumptionIds: ["asm:test"], invariantIds: ["inv:test"], evidenceIds: ["evd:test"], knownLimitations: [], interpretation: { status: "agent-proposed" } },
@@ -545,6 +546,58 @@ async function acceptFixturePatch(root, patch) {
   return applyGraphPatch(root, patch.patchId);
 }
 
+test("a maintainer grounds timestamped ledger evidence before approval and retries without rewriting source", async (t) => {
+  for (const generatedAt of ["2026-07-22T00:36:59-07:00", "2026-07-22T07:36:59Z", "2026-07-29T05:24:16.8363055Z"]) {
+    await t.test(generatedAt, async (t) => {
+      const f = await fixture({ generatedAt });
+      t.after(() => rm(f.root, { recursive: true, force: true }));
+      await initializeKnowledgeGraph(f.root, { graphId: "fixture:timestamped-source" });
+      const record = f.records.find((entry) => entry.id === "evd:test");
+      const snapshot = await ingestEvidenceBytes(f.root, {
+        bytes: await readFile(path.join(f.root, "verifier.txt")),
+        sourceUri: `https://nodekit.local/evolution/${encodeURIComponent(record.id)}`,
+        mediaType: "application/octet-stream",
+        capturedAt: generatedAt,
+        expectedSha256: record.sha256,
+      });
+      const empty = await readKnowledgeGraph(f.root);
+      assert.equal(empty.version, 0);
+      assert.equal(empty.nodes.length, 0);
+      assert.equal(empty.hyperedges.length, 0);
+      const first = await proposeEvolutionKnowledgePatch(f.root);
+      assert.equal(first.patch.status, "pending");
+      assert.equal((await readKnowledgeGraph(f.root)).nodes.length, 0, "proposal must not mutate canonical graph");
+      const source = first.patch.operations.find((entry) => entry.node?.kind === "evidence").node;
+      assert.equal(source.id, snapshot.snapshotId, "pending projection must reuse the actual ingested snapshot");
+      assert.equal(source.properties.snapshotContentHash, snapshot.contentHash);
+      assert.deepEqual(first.patch.evidenceRefs, [snapshot.snapshotId]);
+      assert.deepEqual(await readEvidenceSnapshot(f.root, snapshot.snapshotId), snapshot, "recovery must leave immutable snapshot metadata unchanged");
+      const pending = await readKnowledgeGraph(f.root);
+      assert.deepEqual(
+        { graphId: pending.graphId, version: pending.version, nodes: pending.nodes, hyperedges: pending.hyperedges },
+        { graphId: empty.graphId, version: empty.version, nodes: empty.nodes, hyperedges: empty.hyperedges },
+        "snapshot reuse must leave canonical graph empty until approval",
+      );
+      assert.deepEqual(pending.proposals.filter((entry) => entry.status === "pending"), [first.patch]);
+      await acceptFixturePatch(f.root, first.patch);
+      const graph = await readKnowledgeGraph(f.root);
+      const evidence = graph.nodes.find((node) => node.kind === "evidence" && node.properties?.evolutionRecordId === "evd:test");
+      assert.ok(evidence, "the approved graph must contain its authenticated source evidence");
+      assert.equal(evidence.id, snapshot.snapshotId);
+      assert.equal(evidence.capturedAt, new Date(generatedAt).toISOString());
+      for (const entity of [...graph.nodes, ...graph.hyperedges]) {
+        if (entity.kind === "evidence") continue;
+        assert.ok(entity.evidenceRefs.length > 0, "every derived claim or causal edge needs real source evidence");
+        assert.ok(entity.evidenceRefs.every((id) => id === evidence.id), "references must name the actual authenticated snapshot");
+      }
+      const stored = await readJson(path.join(f.root, "evolution", "evidence", "evd-test.json"));
+      assert.equal(stored.generatedAt, generatedAt, "projection must preserve the original authored timestamp");
+      await assert.rejects(() => proposeEvolutionKnowledgePatch(f.root), /no new evidence-grounded records/);
+      assert.equal((await readKnowledgeGraph(f.root)).version, graph.version, "a retry must not rewrite the approved graph");
+    });
+  }
+});
+
 test("a populated graph retires the old current claim and causal edge only through grounded approval", async (t) => {
   const f = await authoredConsumerFixture(t);
   await initializeKnowledgeGraph(f.root, { graphId: "fixture:authored-retirement" });
@@ -643,7 +696,7 @@ test("concurrent replacement after inspection cannot leak later bytes through ve
     const f = await fixture();
     t.after(() => rm(f.root, { recursive: true, force: true }));
     const assumptionFile = path.join(f.root, "evolution", "assumptions", "asm-test.json");
-    const scoped = { ...f.records.find((record) => record.id === "asm:test"), status: "scope-limited", dimensionsTested: ["the originally loaded scoped payload"] };
+    const scoped = { ...f.records.find((record) => record.id === "asm:test"), status: "scope-limited", supportingEvidenceIds: ["evd:test"], contradictingEvidenceIds: [], dimensionsTested: ["the originally loaded scoped payload"] };
     await writeFile(assumptionFile, `${JSON.stringify(scoped, null, 2)}\n`);
     if (operation === "proposeEvolutionKnowledgePatch") await initializeKnowledgeGraph(f.root, { graphId: "fixture:snapshot" });
     const seam = await readerAtActualSeam(f.root, async (inspection) => {
