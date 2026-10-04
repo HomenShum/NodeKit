@@ -263,6 +263,15 @@ export declare const completeRun: import("convex/server").RegisteredMutation<"pu
         id: string;
         type: string;
     };
+    expected?: {
+        artifactBindings: {
+            artifactId: string;
+            canonicalVersion: number;
+            contentHash: string;
+        }[];
+        caseId: string;
+        caseInputHash: string;
+    };
     runId: string;
     scopeKey: string;
 }, Promise<{

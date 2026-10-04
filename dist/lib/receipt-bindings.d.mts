@@ -1,3 +1,38 @@
+export type CompletionArtifactBinding = {
+    artifactId: string;
+    canonicalVersion: number;
+    contentHash: string;
+};
+export type CompletionExpected = {
+    caseId: string;
+    caseInputHash: string;
+    artifactBindings: CompletionArtifactBinding[];
+};
+/** Copy and validate before any asynchronous adapter work. @param {unknown} input */
+export declare function normalizeCompletionExpected(input: unknown): {
+    caseId: string;
+    caseInputHash: string;
+    artifactBindings: {
+        artifactId: string;
+        canonicalVersion: number;
+        contentHash: string;
+    }[];
+} | undefined;
+/**
+ * Compare a bounded, complete actual set under the adapter's write fence.
+ * @param {CompletionExpected} expected
+ * @param {{ caseId: string, currentRunId: string | null, caseInputHash: string }} currentCase
+ * @param {{ runId: string, caseId: string }} run
+ * @param {CompletionArtifactBinding[]} actual
+ */
+export declare function assertCompletionExpected(expected: CompletionExpected, currentCase: {
+    caseId: string;
+    currentRunId: string | null;
+    caseInputHash: string;
+}, run: {
+    runId: string;
+    caseId: string;
+}, actual: CompletionArtifactBinding[]): void;
 /**
  * Compare strings using JavaScript's stable UTF-16 code-unit ordering.
  *
