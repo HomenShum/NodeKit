@@ -114,6 +114,12 @@ jobs:
           name: postgres-conformance-${{ github.sha }}
           if-no-files-found: error
           path: ${{ runner.temp }}/nodekit-postgres-proof/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: compiled-component-${{ github.sha }}
+          if-no-files-found: error
+          path: dist/
 
   exact-candidate:
     name: Exact candidate factory gate
