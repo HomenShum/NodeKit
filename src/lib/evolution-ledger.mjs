@@ -250,6 +250,13 @@ export async function verifyDeferredEvolutionReview(repoRoot, receipt, from, to,
   if (canonical(receipt.coverage.materialFiles) !== canonical([...materialFiles].sort())) {
     findings.push("material file coverage does not match the tested range");
   }
+  const preActionReviewFiles = git(root, ["diff", "--no-ext-diff", "--no-textconv", "--no-renames", "--name-only", "-z", `${from}..${to}`], { timeout: 5000 })
+    .split("\0")
+    .filter((file) => PRE_ACTION_REVIEW_PATHS.some((pattern) => pattern.test(file)));
+  if (preActionReviewFiles.length > 0) {
+    findings.push(`deferred review is forbidden for pre-action-review paths: ${preActionReviewFiles.join(", ")}`);
+    return { passed: false, findings };
+  }
   const rangeCommits = commitsInRange(root, from, receipt.range.reviewedTo);
   for (const eventRef of receipt.events) {
     const draftPath = resolveInside(root, eventRef.draftRef, "deferred-review draft");
@@ -324,9 +331,9 @@ function resolveInside(repoRoot, relative, label) {
 
 // Bound the buffer explicitly: Node's 1 MB execFileSync default overflows on a large
 // working tree or a large `git show` payload, turning a readable ledger error into ENOBUFS.
-function git(repoRoot, args, { allowFailure = false } = {}) {
+function git(repoRoot, args, { allowFailure = false, timeout } = {}) {
   try {
-    return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] }).trim();
+    return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, timeout, stdio: ["ignore", "pipe", "pipe"] }).trim();
   } catch (error) {
     if (allowFailure) return null;
     throw error;

@@ -178,7 +178,7 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   await writeFile(path.join(evidenceRoot, "rollback-test.log"), "PASS baseline import fails; candidate import succeeds; reverting restores baseline behavior\n");
 
   const relativeEvidence = (name) => path.join("evidence", "deferred-review", name).replaceAll("\\", "/");
-  const created = await createDeferredEvolutionReview(root, {
+  const reviewInput = {
     draftRefs: [draftRef],
     from: before,
     to: after,
@@ -192,7 +192,8 @@ test("reversible package change continues with exact live I/O, human-goal proof,
     uiChanged: false,
     uiReason: "Package runtime only; the intended user goal is shown by the journey card and exact I/O.",
     rollbackVerificationRefs: [relativeEvidence("rollback-test.log")],
-  });
+  };
+  const created = await createDeferredEvolutionReview(root, reviewInput);
 
   assert.equal(created.receipt.events[0].eventId, event.id);
   assert.equal(created.receipt.review.status, "deferred-human-review");
@@ -201,6 +202,111 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   assert.equal(passed.passed, true, passed.reason);
   assert.equal(passed.events.length, 0, "deferred review must not forge a canonical event");
   assert.equal(passed.deferredReviews.length, 1);
+
+  await writeFile(path.join(root, "README.md"), "Maintainer handoff notes; no runtime contract change.\n");
+  git(root, ["add", "README.md"]);
+  git(root, ["commit", "-m", "benign handoff descendant"]);
+  const benign = git(root, ["rev-parse", "HEAD"]);
+  const continued = await checkEvolutionMateriality(root, before, benign);
+  assert.equal(continued.passed, true, continued.reason);
+  assert.equal(continued.deferredReviews.length, 1, "an eligible ancestor receipt must survive a benign descendant");
+  const canonicalBefore = await readFile(path.join(root, "evolution", "events", "architecture", "evt-test.json"));
+  const draftBefore = await readFile(path.join(root, draftRef));
+  // A maintainer can import JSON without using the creator. Recompute an ordinary
+  // content digest for truthful coverage; that digest confers no review authority.
+  const ordered = (value) => Array.isArray(value) ? value.map(ordered)
+    : value && typeof value === "object"
+      ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, ordered(value[key])])) : value;
+  for (const protectedPath of [".github/workflows/imported.yml", "ops/deploy/release.mjs"]) {
+    git(root, ["checkout", "--detach", benign]);
+    await writeFile(created.output, `${JSON.stringify(created.receipt, null, 2)}\n`);
+    await mkdir(path.dirname(path.join(root, protectedPath)), { recursive: true });
+    await writeFile(path.join(root, protectedPath), "# Imported protected change\n");
+    git(root, ["add", protectedPath]);
+    git(root, ["commit", "-m", "import a protected descendant"]);
+    const protectedHead = git(root, ["rev-parse", "HEAD"]);
+    const imported = structuredClone(created.receipt);
+    const expectedMaterial = protectedPath.startsWith(".github/")
+      ? [protectedPath, "src/session-resume.mjs"] : ["src/session-resume.mjs"];
+    imported.coverage.materialFiles = expectedMaterial;
+    const { receiptDigest: ignoredDigest, ...subject } = imported;
+    imported.receiptDigest = createHash("sha256").update(JSON.stringify(ordered(subject))).digest("hex");
+    assert.deepEqual(await validateSchema("nodekit.evolution-deferred-review.v1.schema.json", imported, imported.id), []);
+    await writeFile(created.output, `${JSON.stringify(imported, null, 2)}\n`);
+    const importedBytes = await readFile(created.output);
+    const rejectImport = async () => {
+      const verdict = await checkEvolutionMateriality(root, before, protectedHead);
+      assert.equal(verdict.passed, false, "protected active-range paths cannot be deferred by an imported receipt");
+      assert.deepEqual(verdict.materialFiles, expectedMaterial);
+      assert.equal(verdict.deferredReviews.length, 0);
+      assert.equal(verdict.events.length, 0, "persisted rejection must not promote a canonical event");
+      assert.equal(verdict.rejectedDeferredReviews.length, 1);
+      assert.deepEqual(verdict.rejectedDeferredReviews[0].findings,
+        [`deferred review is forbidden for pre-action-review paths: ${protectedPath}`]);
+    };
+    await Promise.all(Array.from({ length: 8 }, () => rejectImport()));
+    for (let index = 0; index < 16; index++) await rejectImport();
+    assert.deepEqual(await readFile(created.output), importedBytes, "checking must not rewrite the imported receipt");
+    assert.deepEqual(await readFile(path.join(root, "evolution", "events", "architecture", "evt-test.json")), canonicalBefore);
+    assert.deepEqual(await readFile(path.join(root, draftRef)), draftBefore);
+    assert.equal(JSON.parse(draftBefore.toString("utf8")).interpretation.status, "agent-proposed");
+  }
+  // The protected source must exist at this new baseline. A path introduced and
+  // removed entirely inside the range would not be an aggregate rename-out.
+  git(root, ["checkout", "--detach", benign]);
+  const protectedSource = ".github/workflows/rename-out.yml";
+  const destination = "docs/imported-workflow.txt";
+  await mkdir(path.dirname(path.join(root, protectedSource)), { recursive: true });
+  await writeFile(path.join(root, protectedSource), "name: Existing workflow\non: workflow_dispatch\n");
+  await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = () => { throw new Error('ERR_PACKAGE_PATH_NOT_EXPORTED'); };\n");
+  git(root, ["add", protectedSource, "src/session-resume.mjs"]);
+  git(root, ["commit", "-m", "baseline contains a protected workflow"]);
+  const renameBefore = git(root, ["rev-parse", "HEAD"]);
+  await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = (id) => ({ sessionId: id, resumed: true });\n");
+  git(root, ["add", "src/session-resume.mjs"]);
+  git(root, ["commit", "-m", "eligible reversible resume change"]);
+  const eligibleAfter = git(root, ["rev-parse", "HEAD"]);
+  const renameDraftRef = "evolution/drafts/evt-rename-out-import.json";
+  const renameDraft = { ...event, id: "evt:rename-out-import", source: { ...event.source, commitSha: eligibleAfter } };
+  await writeFile(path.join(root, renameDraftRef), `${JSON.stringify(renameDraft, null, 2)}\n`);
+  const renameReview = await createDeferredEvolutionReview(root, {
+    ...reviewInput, draftRefs: [renameDraftRef], from: renameBefore, to: eligibleAfter, rollbackTarget: renameBefore,
+  });
+  const eligible = await checkEvolutionMateriality(root, renameBefore, eligibleAfter);
+  assert.equal(eligible.passed, true, eligible.reason);
+  assert.deepEqual(eligible.materialFiles, ["src/session-resume.mjs"]);
+  const renameReceiptBytes = await readFile(renameReview.output);
+  const renameDraftBytes = await readFile(path.join(root, renameDraftRef));
+  git(root, ["config", "diff.renames", "true"]);
+  await mkdir(path.dirname(path.join(root, destination)), { recursive: true });
+  git(root, ["mv", protectedSource, destination]);
+  git(root, ["commit", "-m", "move the protected workflow into documentation"]);
+  const renameHead = git(root, ["rev-parse", "HEAD"]);
+  const postImagePaths = git(root, ["diff", "--name-only", `${renameBefore}..${renameHead}`]).split(/\r?\n/);
+  assert.equal(postImagePaths.includes(destination), true, "real rename detection reports the destination");
+  assert.equal(postImagePaths.includes(protectedSource), false, "post-image names omit the protected original");
+  const rejectRenameOut = async () => {
+    const verdict = await checkEvolutionMateriality(root, renameBefore, renameHead);
+    assert.equal(verdict.passed, false, "moving a protected baseline path cannot make its review deferrable");
+    assert.deepEqual(verdict.materialFiles, ["src/session-resume.mjs"], "the imported receipt retains truthful material coverage");
+    assert.equal(verdict.events.length, 0);
+    assert.equal(verdict.deferredReviews.length, 0);
+    assert.equal(verdict.rejectedDeferredReviews.length, 1);
+    assert.deepEqual(verdict.rejectedDeferredReviews[0].findings,
+      [`deferred review is forbidden for pre-action-review paths: ${protectedSource}`]);
+  };
+  await Promise.all(Array.from({ length: 8 }, () => rejectRenameOut()));
+  for (let index = 0; index < 16; index++) await rejectRenameOut();
+  assert.deepEqual(await readFile(renameReview.output), renameReceiptBytes, "rename-out admission must not rewrite the receipt");
+  assert.deepEqual(await readFile(path.join(root, renameDraftRef)), renameDraftBytes);
+  assert.equal(renameDraft.interpretation.status, "agent-proposed");
+  assert.deepEqual(await readFile(path.join(root, "evolution", "events", "architecture", "evt-test.json")), canonicalBefore);
+  await rm(renameReview.output);
+  git(root, ["checkout", "--detach", benign]);
+  await writeFile(created.output, `${JSON.stringify(created.receipt, null, 2)}\n`);
+  const restored = await checkEvolutionMateriality(root, before, benign);
+  assert.equal(restored.passed, true, restored.reason);
+  assert.equal(restored.deferredReviews.length, 1, "protected rejection must not poison the original eligible receipt");
 
   await writeFile(path.join(evidenceRoot, "after-live.json"), "{\"tampered\":true}\n");
   const tampered = await checkEvolutionMateriality(root, before, after);
