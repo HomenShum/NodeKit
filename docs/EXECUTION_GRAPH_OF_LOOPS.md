@@ -51,7 +51,7 @@ those handles to a caller while Caseflow owns the durable project state.
 5. Repeat until a delivery or human gate is terminal.
 6. Run `verifyExecutionProof`.
 
-The [source-checkout managed-handoff recipe](https://github.com/HomenShum/NodeKit/blob/main/docs/MANAGED_HANDOFF.md)
+The [source-checkout managed-handoff recipe](https://github.com/HomenShum/NodeKit/blob/45d0b200bd79d0d673d36ddaad1f4fd44f4412ef/docs/MANAGED_HANDOFF.md)
 connects this proof to one synchronous Caseflow task: a host's final response stays open until
 the exact source and note have been checked. The recipe is not part of the npm package.
 
