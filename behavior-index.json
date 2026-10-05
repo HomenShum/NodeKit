@@ -1125,7 +1125,7 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
-      "line": 685
+      "line": 692
     },
     {
       "behaviorId": "journey.explain.produce-story",
