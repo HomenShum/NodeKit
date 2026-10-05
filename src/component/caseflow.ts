@@ -155,6 +155,8 @@ function toException(record: Doc<"exceptions">) {
     code: record.code,
     exceptionId: record.exceptionId,
     message: record.message,
+    ...(record.nextAction === undefined ? {} : { nextAction: record.nextAction }),
+    ...(record.nextActionOwner === undefined ? {} : { nextActionOwner: record.nextActionOwner }),
     preservedState: record.preservedState,
     raisedAt: record.raisedAt,
     resolution: record.resolution ?? null,
@@ -701,6 +703,8 @@ export const raiseException = mutation({
     code: v.optional(v.string()),
     idempotencyKey: v.optional(v.string()),
     message: v.optional(v.string()),
+    nextAction: v.optional(v.string()),
+    nextActionOwner: v.optional(v.string()),
     preservedState: v.optional(v.any()),
     preservedStateHash: v.string(),
     runId: v.string(),
@@ -715,13 +719,20 @@ export const raiseException = mutation({
       maxNestingDepth: PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth,
     });
     requireTransportHash(args.preservedStateHash, contentHash(preservedState), "preservedStateHash");
-    const idempotency = await findIdempotentEvent(ctx, args.scopeKey, args.idempotencyKey, "raiseException", {
+    const metadata = {
+      ...(args.nextAction === undefined ? {} : { nextAction: requireTrimmedText(args.nextAction, "nextAction") }),
+      ...(args.nextActionOwner === undefined ? {} : { nextActionOwner: requireTrimmedText(args.nextActionOwner, "nextActionOwner") }),
+    };
+    const request = {
       actor,
       code,
       message,
+      ...metadata,
       preservedState,
       runId: args.runId,
-    });
+    };
+    normalizePortableValue({ operation: "raiseException", request }, "raiseException request");
+    const idempotency = await findIdempotentEvent(ctx, args.scopeKey, args.idempotencyKey, "raiseException", request);
     if (idempotency.event !== null) {
       if (idempotency.event.idempotencyResult === undefined) throw new Error("idempotency result is missing");
       return idempotency.event.idempotencyResult as ReturnType<typeof toException>;
@@ -734,15 +745,20 @@ export const raiseException = mutation({
       code,
       exceptionId,
       message,
+      ...metadata,
       preservedState,
       raisedAt,
       runId: args.runId,
       scopeKey: args.scopeKey,
       status: "open",
     });
+    const selected = await ctx.db.query("exceptions")
+      .withIndex("by_scope_run_status_id", (q) => q.eq("scopeKey", args.scopeKey).eq("runId", args.runId).eq("status", "open"))
+      .first();
+    if (selected === null) throw new Error("raised exception is missing");
     await ctx.db.patch(run._id, {
-      nextAction: "Resolve exception",
-      nextActionOwner: "user",
+      nextAction: selected.nextAction ?? "Resolve exception",
+      nextActionOwner: selected.nextActionOwner ?? "user",
       status: "blocked",
       updatedAt: raisedAt,
     });
@@ -774,24 +790,28 @@ export const resolveException = mutation({
   returns: exceptionResolutionValidator,
   handler: async (ctx, args) => {
     const actor = actorOrSystem(args.actor);
+    const resolution = args.resolution === undefined ? "resolved" : requireTrimmedText(args.resolution, "resolution");
+    const nextAction = args.nextAction === undefined ? "Continue run" : requireTrimmedText(args.nextAction, "nextAction");
+    const nextActionOwner = args.nextActionOwner === undefined ? "system" : requireTrimmedText(args.nextActionOwner, "nextActionOwner");
+    normalizePortableValue({ actor, exceptionId: args.exceptionId, resolution, nextAction, nextActionOwner }, "resolveException request");
     const exception = await requireScoped(ctx, "exceptions", args.exceptionId, args.scopeKey, "exception");
     if (exception.status !== "open") throw new Error("exception is already resolved");
     const run = await requireScoped(ctx, "runs", exception.runId, args.scopeKey, "run");
     requireNonTerminalRun(run);
     const resolvedAt = timestamp();
-    const resolution = args.resolution === undefined ? "resolved" : requireTrimmedText(args.resolution, "resolution");
-    const nextAction = args.nextAction === undefined ? "Continue run" : requireTrimmedText(args.nextAction, "nextAction");
-    const nextActionOwner = args.nextActionOwner === undefined ? "system" : requireTrimmedText(args.nextActionOwner, "nextActionOwner");
     await ctx.db.patch(exception._id, { resolution, resolvedAt, status: "resolved" });
     const unresolved = await ctx.db
       .query("exceptions")
       .withIndex("by_scope_run", (q) => q.eq("scopeKey", args.scopeKey).eq("runId", exception.runId))
       .collect();
     const remainingOpen = unresolved.filter((entry) => entry.status === "open" && entry._id !== exception._id);
+    const selected = await ctx.db.query("exceptions")
+      .withIndex("by_scope_run_status_id", (q) => q.eq("scopeKey", args.scopeKey).eq("runId", exception.runId).eq("status", "open"))
+      .first();
     await ctx.db.patch(run._id, {
-      nextAction: remainingOpen.length > 0 ? "Resolve exception" : nextAction,
-      nextActionOwner: remainingOpen.length > 0 ? "user" : nextActionOwner,
-      status: remainingOpen.length > 0 ? "blocked" : "active",
+      nextAction: selected ? selected.nextAction ?? "Resolve exception" : nextAction,
+      nextActionOwner: selected ? selected.nextActionOwner ?? "user" : nextActionOwner,
+      status: selected ? "blocked" : "active",
       updatedAt: resolvedAt,
     });
     await emit(ctx, args.scopeKey, "run", exception.runId, "exception.resolved", {

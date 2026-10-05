@@ -16,10 +16,10 @@ function completionDatabase() {
     work: { case_id: "case_review", owner_id: owner, current_run_id: "run_review", title: "Review", primary_job: "Close reviewed state", status: "in_progress", created_at: now, updated_at: now },
     run: { run_id: "run_review", owner_id: owner, case_id: "case_review", status: "active", stages: [], current_stage_id: "review", next_action: "Review", next_action_owner: "user", created_at: now, updated_at: now },
     artifacts: [{ artifact_id: "artifact_review", owner_id: owner, case_id: "case_review", run_id: "run_review", canonical_version: 1, content_hash: contentHash({ source: "original" }) }],
-    events: [], receipts: [],
+    events: [], receipts: [], exceptions: [],
   };
   const calls = [];
-  let before, failOn, waitForClient;
+  let before, failOn, waitForClient, connects = 0;
   const result = (rows) => ({ rows: structuredClone(rows), rowCount: rows.length });
   const client = {
     async query(text, values = []) {
@@ -29,7 +29,25 @@ function completionDatabase() {
       if (sql === "rollback") { Object.assign(state, before); return result([]); }
       if (sql === "commit") return result([]);
       if (failOn && sql.includes(failOn)) throw new Error("fixture statement failure");
-      if (sql.startsWith("select * from nodekit.runs")) return result(values[0] === owner && values[1] === state.run.run_id ? [state.run] : []);
+      if (sql.startsWith("select * from nodekit.runs") || sql.startsWith("select status from nodekit.runs")) return result(values[0] === owner && values[1] === state.run.run_id ? [state.run] : []);
+      if (sql.startsWith("select request_hash, result")) return result(state.events.filter((event) => event.owner_id === values[0] && event.idempotency_key === values[1]).slice(0, 1));
+      if (sql.startsWith("select * from nodekit.exceptions")) {
+        const scoped = state.exceptions.filter((entry) => entry.owner_id === values[0]);
+        if (sql.includes("status = 'open'")) {
+          assert.match(sql, /order by exception_id collate "C" limit 1$/);
+          return result(scoped.filter((entry) => entry.run_id === values[1] && entry.status === "open").sort((a, b) => a.exception_id < b.exception_id ? -1 : a.exception_id > b.exception_id ? 1 : 0).slice(0, 1));
+        }
+        return result(scoped.filter((entry) => entry.exception_id === values[1]));
+      }
+      if (sql.startsWith("insert into nodekit.exceptions")) {
+        const row = { exception_id: values[0], owner_id: values[1], run_id: values[2], code: values[3], message: values[4], preserved_state: JSON.parse(values[5]), status: "open", resolution: null, raised_at: values[6], next_action: values[7], next_action_owner: values[8] };
+        state.exceptions.push(row); return result([row]);
+      }
+      if (sql.startsWith("update nodekit.exceptions")) {
+        const row = state.exceptions.find((entry) => entry.owner_id === values[2] && entry.exception_id === values[3]);
+        if (!row) return result([]);
+        Object.assign(row, { status: "resolved", resolution: values[0], resolved_at: values[1] }); return result([row]);
+      }
       if (sql.startsWith("select * from nodekit.cases")) return result(values[0] === owner && values[1] === state.work.case_id ? [state.work] : []);
       if (sql.startsWith("select a.*, v.content_hash")) {
         assert.match(sql, /left join/); assert.match(sql, /limit 8193$/); assert.doesNotMatch(sql, /for update/);
@@ -38,12 +56,17 @@ function completionDatabase() {
       if (sql.startsWith("select * from nodekit.artifacts")) return result(state.artifacts);
       if (sql.startsWith("select a.artifact_id, a.canonical_version")) return result(state.artifacts);
       if (sql.startsWith("select 1 from nodekit.exceptions") || sql.startsWith("select 1 from nodekit.proposals")) return result([]);
-      if (sql.startsWith("update nodekit.runs")) { Object.assign(state.run, { status: values[0], next_action: values[1], next_action_owner: "user", stages: JSON.parse(values[2]), updated_at: values[3] }); return result([state.run]); }
+      if (sql.startsWith("update nodekit.runs")) {
+        if (sql.includes("status = 'blocked'")) Object.assign(state.run, { status: "blocked", next_action: values[0], next_action_owner: values[1], updated_at: values[2] });
+        else if (sql.includes("next_action_owner = $3")) Object.assign(state.run, { status: values[0], next_action: values[1], next_action_owner: values[2], updated_at: values[3] });
+        else Object.assign(state.run, { status: values[0], next_action: values[1], next_action_owner: "user", stages: JSON.parse(values[2]), updated_at: values[3] });
+        return result([state.run]);
+      }
       if (sql.startsWith("update nodekit.cases")) { Object.assign(state.work, { status: values[0], updated_at: values[1] }); return result([]); }
       if (sql === "select pg_advisory_xact_lock(hashtextextended($1, 0))") return result([]);
       if (sql.startsWith("select coalesce(max(sequence)")) return result([{ sequence: state.events.length + 1 }]);
       if (sql.startsWith("insert into nodekit.events")) {
-        state.events.push({ event_id: values[0], owner_id: values[1], aggregate_type: values[2], aggregate_id: values[3], sequence: values[4], event_type: values[5], actor: JSON.parse(values[6]), payload: JSON.parse(values[7]) }); return result([]);
+        state.events.push({ event_id: values[0], owner_id: values[1], aggregate_type: values[2], aggregate_id: values[3], sequence: values[4], event_type: values[5], actor: JSON.parse(values[6]), payload: JSON.parse(values[7]), idempotency_key: values[8], request_hash: values[9], result: values[10] === null ? null : JSON.parse(values[10]), occurred_at: values[11] }); return result([]);
       }
       if (sql.startsWith("select * from nodekit.proposals") || sql.startsWith("select * from nodekit.approvals")) return result([]);
       if (sql.startsWith("select * from nodekit.events")) return result(state.events);
@@ -54,9 +77,9 @@ function completionDatabase() {
     },
     release() { calls.push({ sql: "release", values: [] }); },
   };
-  const pool = { async query() { throw new Error("pool query outside transaction"); }, async connect() { if (waitForClient) await waitForClient; return client; } };
+  const pool = { async query() { throw new Error("pool query outside transaction"); }, async connect() { connects += 1; if (waitForClient) await waitForClient; return client; } };
   const expected = { caseId: state.work.case_id, caseInputHash: contentHash({ title: state.work.title, primaryJob: state.work.primary_job }), artifactBindings: [{ artifactId: state.artifacts[0].artifact_id, canonicalVersion: 1, contentHash: state.artifacts[0].content_hash }] };
-  return { state, calls, expected, runtime: createPostgresCaseflow({ pool, ownerId: owner, clock: () => now }), failAt(value) { failOn = value; }, delayClient(value) { waitForClient = value; } };
+  return { state, calls, expected, connectCalls: () => connects, runtime: createPostgresCaseflow({ pool, ownerId: owner, clock: () => now }), failAt(value) { failOn = value; }, delayClient(value) { waitForClient = value; } };
 }
 
 test("guarded PostgreSQL contract: stale reviewer state rolls back before mutation", async () => {
@@ -324,4 +347,92 @@ test("Supabase profile extends the complete portable record set with owner RLS",
   assert.doesNotMatch(sql, /create policy nodekit_\w+_owner[^;]*for (insert|update|delete)/);
   assert.match(sql, /Revoke direct DML\s+-- even though RLS is enabled/);
   assert.match(sql, /pg_publication_tables/);
+});
+
+
+test("a PostgreSQL host keeps restored external blockers assigned through partial recovery", async () => {
+  for (const order of [["z", "A", "10"], ["10", "A", "z"]]) {
+    const f = completionDatabase();
+    f.state.run.status = "blocked";
+    f.state.exceptions = order.map((suffix) => ({ exception_id: `exception_${suffix}`, owner_id: f.state.run.owner_id, run_id: f.state.run.run_id,
+      code: "restored_review", message: "Preserve the review", preserved_state: { artifactVersion: 1 }, status: "open", resolution: null,
+      raised_at: suffix === "10" ? "2026-10-05T01:00:00.000Z" : "2026-10-05T00:00:00.000Z",
+      ...(suffix === "10" ? { next_action: "Await external review", next_action_owner: "external" } : suffix === "A" ? { next_action: "Attach source", next_action_owner: null } : {}),
+    }));
+    const partial = await f.runtime.resolveException({ exceptionId: "exception_z", nextAction: "Do not override", nextActionOwner: "agent" });
+    assert.equal(partial.run.status, "blocked");
+    assert.equal(partial.run.nextAction, "Await external review");
+    assert.equal(partial.run.nextActionOwner, "external");
+    assert.equal(Object.hasOwn(partial.exception, "nextAction"), false);
+    const external = await f.runtime.resolveException({ exceptionId: "exception_10", nextActionOwner: "agent" });
+    assert.equal(external.run.nextAction, "Attach source"); assert.equal(external.run.nextActionOwner, "user");
+    assert.equal(external.exception.nextActionOwner, "external");
+    const last = await f.runtime.resolveException({ exceptionId: "exception_A" });
+    assert.equal(last.run.status, "active"); assert.equal(last.run.nextAction, "Continue run"); assert.equal(last.run.nextActionOwner, "system");
+    const before = structuredClone(f.state);
+    await assert.rejects(f.runtime.resolveException({ exceptionId: "exception_z" }), /already resolved/);
+    assert.deepEqual(f.state, before);
+    const selected = f.calls.filter(({ sql }) => sql.startsWith("select * from nodekit.exceptions") && sql.includes("status = 'open'"));
+    assert.equal(selected.length, 3);
+    assert.equal(selected.every(({ sql, values }) => /owner_id = \$1 and run_id = \$2/.test(sql) && /collate "C" limit 1$/.test(sql) && values[0] === f.state.run.owner_id), true);
+    assert.equal(f.state.events.every((event, index) => /^event_[a-f0-9]{26}$/.test(event.event_id) && event.sequence === index + 1), true);
+  }
+});
+
+test("a pooled PostgreSQL raise validates and copies assignments before acquisition, preserving legacy journals", async () => {
+  const f = completionDatabase();
+  let release;
+  f.delayClient(new Promise((resolve) => { release = resolve; }));
+  const input = { runId: f.state.run.run_id, code: "review_wait", nextAction: " Await external review ", nextActionOwner: " external ", preservedState: { artifactVersion: 1 }, idempotencyKey: "external" };
+  const original = structuredClone(input);
+  const pending = f.runtime.raiseException(input);
+  input.preservedState.artifactVersion = 99; input.nextAction = "changed"; input.nextActionOwner = "user";
+  release();
+  const raised = await pending;
+  assert.equal(raised.nextAction, "Await external review"); assert.equal(raised.nextActionOwner, "external");
+  assert.deepEqual(raised.preservedState, { artifactVersion: 1 });
+  const before = structuredClone(f.state);
+  for (let index = 0; index < 100; index += 1) assert.deepEqual(await f.runtime.raiseException(original), raised);
+  assert.deepEqual(f.state, before);
+  for (const changed of [{ nextAction: "Different instruction" }, { nextActionOwner: "user" }]) {
+    await assert.rejects(f.runtime.raiseException({ ...original, ...changed }), /different request/);
+    assert.deepEqual(f.state, before);
+  }
+  const legacyInput = { runId: f.state.run.run_id, code: "legacy", idempotencyKey: "legacy" };
+  const legacy = await f.runtime.raiseException(legacyInput);
+  assert.equal(Object.hasOwn(legacy, "nextAction"), false); assert.equal(Object.hasOwn(legacy, "nextActionOwner"), false);
+  const event = f.state.events.find((entry) => entry.idempotency_key === "legacy");
+  assert.equal(event.request_hash, contentHash({ actor: { id: "nodekit", type: "system" }, code: "legacy", message: "An exception occurred.", operation: "raiseException", preservedState: {}, runId: f.state.run.run_id }));
+  assert.deepEqual(await f.runtime.raiseException({ ...legacyInput, nextAction: undefined, nextActionOwner: undefined }), legacy);
+  f.state.run.status = "completed";
+  const terminal = structuredClone(f.state);
+  assert.deepEqual(await f.runtime.raiseException(original), raised);
+  assert.deepEqual(await f.runtime.raiseException(legacyInput), legacy);
+  await assert.rejects(f.runtime.raiseException({ ...original, idempotencyKey: "fresh" }), /terminal/);
+  assert.deepEqual(f.state, terminal);
+});
+
+test("a PostgreSQL operator's invalid assignment never acquires a client; post-write failures roll back", async () => {
+  for (const candidate of [{ nextAction: null }, { nextActionOwner: null }, { nextAction: "" }, { nextActionOwner: " " }, { nextAction: 2 }, { nextActionOwner: {} }, { nextAction: "bad\0action" }, { nextActionOwner: "\ud800" },
+    { nextAction: "x".repeat(786_432) }, { nextAction: "x".repeat(300_000), nextActionOwner: "y".repeat(300_000), preservedState: { body: "z".repeat(300_000) } }]) {
+    const f = completionDatabase();
+    await assert.rejects(f.runtime.raiseException({ runId: f.state.run.run_id, ...candidate }));
+    assert.equal(f.connectCalls(), 0); assert.deepEqual(f.calls, []); assert.equal(f.state.exceptions.length, 0);
+  }
+  for (const candidate of [{ resolution: "" }, { resolution: "bad\0resolution" }, { nextAction: "\ud800" }, { nextActionOwner: null }]) {
+    const f = completionDatabase();
+    await assert.rejects(f.runtime.resolveException({ exceptionId: "exception_unseen", ...candidate }));
+    assert.equal(f.connectCalls(), 0); assert.deepEqual(f.calls, []);
+  }
+  const f = completionDatabase();
+  f.failAt("update nodekit.runs");
+  const before = structuredClone(f.state);
+  await assert.rejects(f.runtime.raiseException({ runId: f.state.run.run_id, nextActionOwner: "external" }), /fixture statement failure/);
+  assert.deepEqual(f.state, before); assert.deepEqual(f.calls.slice(-2).map(({ sql }) => sql), ["rollback", "release"]);
+  f.failAt(undefined);
+  const raised = await f.runtime.raiseException({ runId: f.state.run.run_id, nextActionOwner: "external" });
+  const blocked = structuredClone(f.state);
+  f.failAt("update nodekit.runs");
+  await assert.rejects(f.runtime.resolveException({ exceptionId: raised.exceptionId }), /fixture statement failure/);
+  assert.deepEqual(f.state, blocked); assert.deepEqual(f.calls.slice(-2).map(({ sql }) => sql), ["rollback", "release"]);
 });

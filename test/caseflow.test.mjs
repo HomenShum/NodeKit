@@ -500,3 +500,111 @@ test("memory caseflow retries decisions and completion without duplicate writes"
   assert.equal(retriedCompletion.receipt.receiptId, completed.receipt.receiptId);
   assert.equal(runtime.snapshot().receipts.length, 1);
 });
+
+
+test("a reviewer keeps external ownership through mixed blockers and reversed clocks", () => {
+  for (const externalFirst of [false, true]) for (const resolveExternalFirst of [false, true]) {
+    let tick = 0;
+    const runtime = createMemoryCaseflow({ clock: () => `2026-10-05T00:00:${String(59 - tick++ % 60).padStart(2, "0")}.000Z` });
+    const { work, run, artifact } = reviewedTask(runtime);
+    const pending = runtime.createProposal({ artifactId: artifact.artifactId, baseVersion: 1, patch: { quote: "pending" } });
+    const externalInput = { runId: run.runId, code: "review_wait", nextAction: " Await external review ", nextActionOwner: " external ", preservedState: { artifactVersion: 1 }, idempotencyKey: "external-once" };
+    let external, user;
+    if (externalFirst) { external = runtime.raiseException(externalInput); user = runtime.raiseException({ runId: run.runId, code: "missing_source" }); }
+    else { user = runtime.raiseException({ runId: run.runId, code: "missing_source" }); external = runtime.raiseException(externalInput); }
+    const selected = [external, user].sort((a, b) => compareCodeUnits(a.exceptionId, b.exceptionId))[0];
+    assert.equal(runtime.getRun(run.runId).nextAction, selected.nextAction ?? "Resolve exception");
+    assert.equal(runtime.getRun(run.runId).nextActionOwner, selected.nextActionOwner ?? "user");
+    assert.equal(external.nextAction, "Await external review");
+    assert.equal(external.nextActionOwner, "external");
+    const before = runtime.snapshot();
+    for (const operation of [
+      () => runtime.enterStage({ runId: run.runId, stageId: "review" }),
+      () => runtime.createArtifact({ caseId: work.caseId, runId: run.runId, content: {} }),
+      () => runtime.createProposal({ artifactId: artifact.artifactId, baseVersion: 1, patch: {} }),
+      () => runtime.decideProposal({ proposalId: pending.proposalId, decision: "accepted" }),
+      () => runtime.completeRun({ runId: run.runId }),
+    ]) { assert.throws(operation, /blocked/); assert.deepEqual(runtime.snapshot(), before); }
+    const first = resolveExternalFirst ? external : user;
+    const remaining = resolveExternalFirst ? user : external;
+    const partial = runtime.resolveException({ exceptionId: first.exceptionId, nextAction: "Do not override remaining review", nextActionOwner: "agent" });
+    assert.equal(partial.run.status, "blocked");
+    assert.equal(partial.run.nextAction, remaining.nextAction ?? "Resolve remaining exception");
+    assert.equal(partial.run.nextActionOwner, remaining.nextActionOwner ?? "user");
+    assert.deepEqual(runtime.getArtifact(artifact.artifactId), artifact);
+    const last = runtime.resolveException({ exceptionId: remaining.exceptionId });
+    assert.equal(last.run.status, "active");
+    assert.equal(last.run.nextAction, "Continue run");
+    assert.equal(last.run.nextActionOwner, "system");
+    const final = runtime.snapshot();
+    const runEvents = final.events.filter((event) => event.aggregateId === run.runId);
+    assert.equal(runEvents.every((event, index) => /^event_[a-f0-9]{26}$/.test(event.eventId) && event.sequence === index + 1), true);
+    assert.equal(new Set(runEvents.map((event) => event.eventId)).size, runEvents.length);
+    assert.throws(() => runtime.resolveException({ exceptionId: first.exceptionId }), /already resolved/);
+    assert.deepEqual(runtime.snapshot(), final);
+  }
+});
+
+test("lost acknowledgments preserve legacy omission and external metadata under finite burst and sustained retries", async () => {
+  const { runtime, run } = reviewedTask();
+  const legacyInput = { runId: run.runId, code: "legacy", idempotencyKey: "legacy" };
+  const legacy = runtime.raiseException(legacyInput);
+  assert.equal(Object.hasOwn(legacy, "nextAction"), false);
+  assert.equal(Object.hasOwn(legacy, "nextActionOwner"), false);
+  assert.deepEqual(runtime.raiseException({ ...legacyInput, nextAction: undefined, nextActionOwner: undefined }), legacy);
+  const input = { runId: run.runId, code: "external", nextAction: " Await approval ", nextActionOwner: " external ", idempotencyKey: "external" };
+  const raised = runtime.raiseException(input);
+  const before = runtime.snapshot();
+  const burst = await Promise.all(Array.from({ length: 100 }, () => Promise.resolve().then(() => runtime.raiseException({ ...input, nextAction: "Await approval", nextActionOwner: "external" }))));
+  for (const retry of burst) assert.deepEqual(retry, raised);
+  for (let i = 0; i < 1_000; i += 1) assert.deepEqual(runtime.raiseException(input), raised);
+  assert.deepEqual(runtime.snapshot(), before);
+  for (const changed of [{ nextAction: "New instructions" }, { nextActionOwner: "user" }]) {
+    assert.throws(() => runtime.raiseException({ ...input, ...changed }), /different request/);
+    assert.deepEqual(runtime.snapshot(), before);
+  }
+  runtime.resolveException({ exceptionId: legacy.exceptionId });
+  runtime.resolveException({ exceptionId: raised.exceptionId });
+  runtime.cancelRun({ runId: run.runId });
+  const terminal = runtime.snapshot();
+  assert.deepEqual(runtime.raiseException(input), raised, "exact cached result remains historical, never reopens or reassigns a terminal run");
+  assert.deepEqual(runtime.raiseException(legacyInput), legacy);
+  assert.throws(() => runtime.raiseException({ ...input, idempotencyKey: "fresh" }), /terminal/);
+  assert.deepEqual(runtime.snapshot(), terminal);
+});
+
+test("an operator's malformed assignment cannot partly write a blocker or its recovery", () => {
+  const { runtime, run } = reviewedTask();
+  const input = { runId: run.runId, code: "review_wait" };
+  for (const invalid of [
+    { nextAction: null }, { nextActionOwner: null }, { nextAction: "" }, { nextActionOwner: " " },
+    { nextAction: 1 }, { nextActionOwner: {} }, { nextAction: "bad\0action" }, { nextActionOwner: "\ud800" },
+    { nextAction: "x".repeat(PORTABLE_VALUE_LIMITS.maxEncodedBytes) },
+    { nextAction: "x".repeat(300_000), nextActionOwner: "y".repeat(300_000), preservedState: { body: "z".repeat(300_000) } },
+    { message: "m".repeat(PORTABLE_VALUE_LIMITS.maxEncodedBytes) },
+  ]) for (const keyed of [false, true]) {
+    const before = runtime.snapshot();
+    assert.throws(() => runtime.raiseException({ ...input, ...invalid, ...(keyed ? { idempotencyKey: "invalid" } : {}) }));
+    assert.deepEqual(runtime.snapshot(), before);
+  }
+  const blockers = [
+    runtime.raiseException({ ...input, nextAction: "Await approval" }),
+    runtime.raiseException({ ...input, nextActionOwner: "external" }),
+    runtime.raiseException(input),
+  ];
+  while (blockers.length) {
+    const selected = [...blockers].sort((a, b) => compareCodeUnits(a.exceptionId, b.exceptionId))[0];
+    assert.equal(runtime.getRun(run.runId).nextActionOwner, selected.nextActionOwner ?? "user");
+    const before = runtime.snapshot();
+    for (const invalid of [{ resolution: "" }, { resolution: "bad\0resolution" }, { nextAction: "\ud800" }, { nextActionOwner: null }, { nextAction: "x".repeat(PORTABLE_VALUE_LIMITS.maxEncodedBytes) }]) {
+      assert.throws(() => runtime.resolveException({ exceptionId: selected.exceptionId, ...invalid }));
+      assert.deepEqual(runtime.snapshot(), before);
+    }
+    runtime.resolveException({ exceptionId: selected.exceptionId });
+    blockers.splice(blockers.indexOf(selected), 1);
+    if (blockers.length) {
+      const next = [...blockers].sort((a, b) => compareCodeUnits(a.exceptionId, b.exceptionId))[0];
+      assert.equal(runtime.getRun(run.runId).nextAction, next.nextAction ?? "Resolve remaining exception");
+    }
+  }
+});

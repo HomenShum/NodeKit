@@ -83,6 +83,9 @@ export interface NodeKitException<T = unknown> {
   code: string;
   exceptionId: string;
   message: string;
+  /** Work assignment only; these strings grant no authorization or callback identity. */
+  nextAction?: string;
+  nextActionOwner?: NodeKitStageOwner;
   preservedState: T;
   raisedAt: string;
   resolution: string | null;
@@ -172,7 +175,9 @@ export interface CaseflowRuntime {
     proposal: NodeKitProposal;
     reused: boolean;
   }>;
-  raiseException<T = unknown>(input: { runId: string; code?: string; message?: string; preservedState?: T; actor?: NodeKitActor; idempotencyKey?: string }): MaybePromise<NodeKitException<T>>;
+  /** Optional blocker assignment; omission retains legacy defaults and retry identity. */
+  raiseException<T = unknown>(input: { runId: string; code?: string; message?: string; nextAction?: string | undefined; nextActionOwner?: NodeKitStageOwner | undefined; preservedState?: T; actor?: NodeKitActor; idempotencyKey?: string }): MaybePromise<NodeKitException<T>>;
+  /** Continuation applies only after the last open blocker; it cannot replace a remaining assignment. */
   resolveException(input: { exceptionId: string; resolution?: string; nextAction?: string; nextActionOwner?: NodeKitStageOwner; actor?: NodeKitActor }): MaybePromise<{
     exception: NodeKitException;
     run: NodeKitRun;

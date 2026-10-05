@@ -428,7 +428,176 @@ async function runGuardedProof(createPostgresCaseflow, contentHash) {
   const replacementStatus = (await pool.query("select status from nodekit.runs where owner_id = $1 and run_id = $2", [ownerGuard, replacement.runId])).rows[0].status;
   requireProof(replacementStatus === "active", "old-run retry closed the replacement run");
   assertions.lostAckBurstSustainedReplacementRetriesStable = true;
-  return { assertions, schedules, rollbackObservation, heldLockObservation,
+
+  // An operator may resolve their failure while another reviewer still owns a
+  // blocker. Exercise the installed mutation owner, not a presentation label.
+  const externalAction = "Wait for the external reviewer";
+  const ownershipAssertions = {};
+  const mixedRecoveries = [];
+  const raiseOwned = (selected, task, nextActionOwner, idempotencyKey) => selected.raiseException({
+    runId: task.run.runId, code: `${nextActionOwner}_review`, message: `${nextActionOwner} owns the interrupted step`,
+    preservedState: { artifactVersion: 1 }, nextActionOwner,
+    nextAction: nextActionOwner === "external" ? externalAction : "Resolve your interrupted step",
+    ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
+  });
+  async function ownershipState(task) {
+    const result = await pool.query(
+      "select r.status, r.next_action, r.next_action_owner, a.canonical_version, v.content_hash, (select count(*)::int from nodekit.receipts where owner_id = $1 and run_id = $2) as receipts from nodekit.runs r join nodekit.artifacts a on a.run_id = r.run_id join nodekit.artifact_versions v on v.artifact_id = a.artifact_id and v.version = a.canonical_version where r.owner_id = $1 and r.run_id = $2",
+      [ownerGuard, task.run.runId],
+    );
+    requireProof(result.rowCount === 1, "ownership fixture lost its actual canonical run/artifact");
+    const row = result.rows[0];
+    requireProof(row.status === "blocked" && row.canonical_version === 1
+      && row.content_hash === task.expected.artifactBindings[0].contentHash && row.receipts === 0,
+    "ownership recovery reopened work or changed its canonical artifact/receipt");
+    return row;
+  }
+  for (const raiseOrder of ["user-first", "external-first"]) {
+    for (const resolvedOwner of ["user", "external"]) {
+      const task = await fixture(`mixed ownership ${raiseOrder} resolve ${resolvedOwner}`);
+      const firstOwner = raiseOrder === "user-first" ? "user" : "external";
+      const first = await raiseOwned(runtime, task, firstOwner);
+      const second = await raiseOwned(runtime, task, firstOwner === "user" ? "external" : "user");
+      const selected = first.exceptionId < second.exceptionId ? first : second;
+      const raised = await ownershipState(task);
+      requireProof(raised.next_action_owner === selected.nextActionOwner && raised.next_action === selected.nextAction,
+        "raise did not select the ordinal-lowest open exception assignment");
+      const resolving = first.nextActionOwner === resolvedOwner ? first : second;
+      const remaining = resolving.exceptionId === first.exceptionId ? second : first;
+      const resolved = await runtime.resolveException({ exceptionId: resolving.exceptionId,
+        resolution: "The selected interruption was addressed", nextAction: "Attempted continuation override", nextActionOwner: "agent" });
+      const partial = await ownershipState(task);
+      requireProof(resolved.exception.status === "resolved" && resolved.run.status === "blocked"
+        && resolved.run.nextActionOwner === remaining.nextActionOwner && resolved.run.nextAction === remaining.nextAction
+        && partial.next_action_owner === remaining.nextActionOwner && partial.next_action === remaining.nextAction,
+      "partial recovery overrode the unrelated remaining blocker");
+      mixedRecoveries.push({ raiseOrder, resolvedOwner, remainingOwner: remaining.nextActionOwner,
+        selectedExceptionId: selected.exceptionId, remainingExceptionId: remaining.exceptionId, status: partial.status });
+    }
+  }
+  ownershipAssertions.mixedRecoveryPreservesRemainingAssignment = true;
+
+  // Inject a real PostgreSQL statement error after observing the actual run
+  // and exception writes. An independent client must see exact rollback.
+  const ownershipRollbacks = [];
+  for (const operation of ["raiseException", "resolveException"]) {
+    const task = await fixture(`ownership post-write rollback ${operation}`);
+    let userException;
+    if (operation === "resolveException") {
+      userException = await raiseOwned(runtime, task, "user");
+      await raiseOwned(runtime, task, "external");
+    }
+    const observer = await pool.connect();
+    try {
+      const before = await state(observer);
+      let uncommitted;
+      let rollbackCommand;
+      const injected = createRuntime(delegatedPool({ after: async (text, values, result, client) => {
+        if (text === "rollback") { rollbackCommand = result.command; return; }
+        if (!text.startsWith("update nodekit.runs set ") || !values?.includes(task.run.runId)) return;
+        requireProof(result.rowCount === 1 && client.processID !== observer.processID,
+          "ownership rollback requires a real run write and independent observer");
+        const row = (await client.query(
+          "select r.status, r.next_action, r.next_action_owner, e.status as exception_status from nodekit.runs r join nodekit.exceptions e on e.run_id = r.run_id and e.owner_id = r.owner_id where r.owner_id = $1 and r.run_id = $2 and (($3::text is null and e.next_action_owner = 'external') or e.exception_id = $3)",
+          [ownerGuard, task.run.runId, userException?.exceptionId ?? null],
+        )).rows;
+        const expectedExceptionStatus = operation === "raiseException" ? "open" : "resolved";
+        requireProof(row.length === 1 && row[0].status === "blocked" && row[0].next_action_owner === "external"
+          && row[0].next_action === externalAction && row[0].exception_status === expectedExceptionStatus,
+        "ownership rollback did not observe its actual prospective run/exception assignment");
+        uncommitted = { writerPid: client.processID, observerPid: observer.processID, exceptionStatus: row[0].exception_status,
+          runStatus: row[0].status, nextActionOwner: row[0].next_action_owner };
+        await client.query("select 1 / 0");
+        throw new Error("controlled PostgreSQL statement unexpectedly succeeded");
+      } }));
+      let error;
+      try {
+        if (operation === "raiseException") await raiseOwned(injected, task, "external");
+        else await injected.resolveException({ exceptionId: userException.exceptionId, resolution: "Addressed user interruption" });
+      } catch (caught) { error = caught; }
+      const after = await state(observer);
+      requireProof(error?.code === "22012" && uncommitted && rollbackCommand === "ROLLBACK" && before.hash === after.hash,
+        "ownership post-write statement failure did not roll back exact owned state");
+      ownershipRollbacks.push({ operation, injection: "after-real-run-update-before-commit", ...uncommitted,
+        rollbackCommand, beforeStateHash: before.hash, afterStateHash: after.hash, originalError: errorSummary(error) });
+    } finally { observer.release(); }
+  }
+  ownershipAssertions.postWriteStatementFailuresRestoreExactState = true;
+
+  const ownershipRetry = await fixture("external wait lost acknowledgment and bounded retries");
+  const pending = await runtime.createProposal({ artifactId: ownershipRetry.artifact.artifactId, baseVersion: 1, patch: { quote: "pending" } });
+  const retryKey = "external-ownership-lost-ack";
+  const ownershipRequest = { runId: ownershipRetry.run.runId, code: "external_review",
+    message: "external owns the interrupted step", preservedState: { artifactVersion: 1 },
+    nextActionOwner: "external", nextAction: externalAction, idempotencyKey: retryKey };
+  let ownershipCommit;
+  let ownershipAckError;
+  const ownershipLostAck = createRuntime(delegatedPool({ after: async (text, _values, result) => {
+    if (text !== "commit") return;
+    requireProof(result.command === "COMMIT", "ownership lost acknowledgment was not after actual commit");
+    ownershipCommit = result.command;
+    throw Object.assign(new Error("controlled ownership acknowledgment loss after real commit"), { code: "PROOF_OWNERSHIP_LOST_ACK" });
+  } }));
+  try { await raiseOwned(ownershipLostAck, ownershipRetry, "external", retryKey); } catch (error) { ownershipAckError = error; }
+  requireProof(ownershipAckError?.code === "PROOF_OWNERSHIP_LOST_ACK" && ownershipCommit === "COMMIT",
+    "ownership acknowledgment failure was not observed after commit");
+  const retryResult = await raiseOwned(runtime, ownershipRetry, "external", retryKey);
+  const resultHash = contentHash(retryResult);
+  const canonicalWait = await ownershipState(ownershipRetry);
+  requireProof(retryResult.nextActionOwner === "external" && retryResult.nextAction === externalAction
+    && canonicalWait.next_action_owner === "external" && canonicalWait.next_action === externalAction,
+  "saved external waiting assignment disagrees with the replay result");
+  ownershipAssertions.canonicalExternalWaitIsBlocked = true;
+  const beforeOwnershipRetries = await state(pool);
+  let ownershipRetryCount = 0;
+  let activeOwnershipCalls = 0;
+  let maximumOwnershipCalls = 0;
+  const ownershipBurst = await Promise.allSettled(Array.from({ length: LIMITS.clients }, async () => {
+    while (ownershipRetryCount < 100) {
+      checkBudget();
+      ownershipRetryCount += 1;
+      activeOwnershipCalls += 1;
+      maximumOwnershipCalls = Math.max(maximumOwnershipCalls, activeOwnershipCalls);
+      try { requireProof(contentHash(await raiseOwned(runtime, ownershipRetry, "external", retryKey)) === resultHash,
+        "burst ownership retry changed the original exception result"); }
+      finally { activeOwnershipCalls -= 1; }
+    }
+  }));
+  const ownershipBurstFailure = ownershipBurst.find((result) => result.status === "rejected");
+  if (ownershipBurstFailure) throw ownershipBurstFailure.reason;
+  for (let index = 0; index < 1000; index += 1) {
+    checkBudget();
+    requireProof(contentHash(await raiseOwned(runtime, ownershipRetry, "external", retryKey)) === resultHash,
+      "sustained ownership retry changed the original exception result");
+  }
+  const afterOwnershipRetries = await state(pool);
+  requireProof(ownershipRetryCount === 100 && maximumOwnershipCalls <= LIMITS.clients && activeOwnershipCalls === 0
+    && beforeOwnershipRetries.hash === afterOwnershipRetries.hash, "bounded ownership retries accumulated state");
+  ownershipAssertions.lostAckBurstAndSustainedRetriesPreserveState = true;
+  const refusals = [];
+  for (const [operation, action, pattern] of [
+    ["changedOwnerReplay", () => runtime.raiseException({ ...ownershipRequest, nextActionOwner: "user" }), /idempotencyKey/],
+    ["changedActionReplay", () => runtime.raiseException({ ...ownershipRequest, nextAction: "Wait for a different review" }), /idempotencyKey/],
+    ["enterStage", () => runtime.enterStage({ runId: ownershipRetry.run.runId, stageId: "review" }), /not active|blocked/],
+    ["createArtifact", () => runtime.createArtifact({ caseId: ownershipRetry.work.caseId, runId: ownershipRetry.run.runId, content: { late: true } }), /not active|blocked/],
+    ["createProposal", () => runtime.createProposal({ artifactId: ownershipRetry.artifact.artifactId, baseVersion: 1, patch: { quote: "late" } }), /not active|blocked/],
+    ["decideProposal", () => runtime.decideProposal({ proposalId: pending.proposalId, decision: "accepted" }), /not active|blocked/],
+    ["completeRun", () => close(ownershipRetry)(runtime), /unresolved exceptions|not active|blocked/],
+  ]) {
+    const observation = await unchangedRejection(action, pattern);
+    refusals.push({ operation, beforeStateHash: observation.before.hash, afterStateHash: observation.after.hash, error: observation.error });
+  }
+  ownershipAssertions.freshBlockedMutationsAndCompletionRefuseWithoutChange = true;
+  ownershipAssertions.changedOwnerReplayRefusesWithoutChange = true;
+  ownershipAssertions.changedActionReplayRefusesWithoutChange = true;
+  const exceptionOwnership = {
+    schemaVersion: "nodekit.exception-ownership-observations/v1", assertions: ownershipAssertions, mixedRecoveries,
+    rollbacks: ownershipRollbacks, refusals,
+    retries: { burstCalls: ownershipRetryCount, sustainedCalls: 1000, maximumConcurrentCalls: maximumOwnershipCalls,
+      retainedPerRetryResults: 0, simulatedAcknowledgmentLossAfter: ownershipCommit,
+      exceptionId: retryResult.exceptionId, resultHash, beforeStateHash: beforeOwnershipRetries.hash, afterStateHash: afterOwnershipRetries.hash },
+  };
+  return { assertions, schedules, rollbackObservation, heldLockObservation, exceptionOwnership,
     retries: { burstCalls: 100, sustainedCalls: 1000, maximumConcurrentCalls: LIMITS.clients, retainedPerRetryResults: 0,
       simulatedAcknowledgmentLossAfter: committedCommand,
       before: beforeRetries, after: afterRetries, afterReplacement, replacementRunActive: true } };
@@ -845,6 +1014,7 @@ async function runCandidate() {
     capabilities: conformance.capabilities,
     conformance,
     guardedCompletion,
+    exceptionOwnership: guardedCompletion.exceptionOwnership,
     knowledgeFirstCreateRace,
     lifecycleFailureScenarios: { cleanupAfterPass, primaryAndCleanup },
     environment: "live-postgresql",

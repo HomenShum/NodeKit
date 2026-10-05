@@ -39,6 +39,7 @@ describe("NodeKit Caseflow Convex component", () => {
       cases: await ctx.db.query("cases").collect(), runs: await ctx.db.query("runs").collect(),
       artifacts: await ctx.db.query("artifacts").collect(), versions: await ctx.db.query("artifactVersions").collect(),
       events: await ctx.db.query("timelineEvents").collect(), receipts: await ctx.db.query("receipts").collect(),
+      exceptions: await ctx.db.query("exceptions").collect(), proposals: await ctx.db.query("proposals").collect(), approvals: await ctx.db.query("approvals").collect(),
     }));
     return { t, work, run, artifact, expected, snapshot };
   }
@@ -746,6 +747,79 @@ describe("NodeKit Caseflow Convex component", () => {
       exceptionId: firstException.exceptionId,
       scopeKey: SCOPE,
     })).rejects.toThrow(/run is terminal: failed_safely/);
+  });
+
+  test("a host restores mixed blockers in reverse order without giving external work to the user", async () => {
+    for (const order of [["z", "A", "10"], ["10", "A", "z"]]) {
+      const f = await reviewedComponentTask();
+      // Authentic legacy/new scoped documents, deliberately unlike insertion
+      // and timestamp order. No caller-supplied run action decides selection.
+      await f.t.run(async (ctx) => {
+        for (const suffix of order) await ctx.db.insert("exceptions", {
+          scopeKey: SCOPE, runId: f.run.runId, exceptionId: `exception_${suffix}`, code: "restored_blocker",
+          message: "Preserve the reviewed artifact", preservedState: { artifactVersion: 1 }, status: "open", raisedAt: suffix === "10" ? "2026-10-05T01:00:00.000Z" : "2026-10-05T00:00:00.000Z",
+          ...(suffix === "10" ? { nextAction: "Await external review", nextActionOwner: "external" } : suffix === "A" ? { nextAction: "Attach the source" } : {}),
+        });
+        await ctx.db.patch((await ctx.db.query("runs").first())!._id, { status: "blocked", nextAction: "Restored legacy banner", nextActionOwner: "user" });
+      });
+      const partial = await f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: "exception_z", nextAction: "Do not override remaining blocker", nextActionOwner: "agent" });
+      expect(partial.run).toMatchObject({ status: "blocked", nextAction: "Await external review", nextActionOwner: "external" });
+      const before = await f.snapshot();
+      await expect(f.t.mutation(api.caseflow.resolveException, { scopeKey: "other_workspace", exceptionId: "exception_10" })).rejects.toThrow(/not found/);
+      await expect(f.t.mutation(api.caseflow.enterStage, { scopeKey: SCOPE, runId: f.run.runId, stageId: "review" })).rejects.toThrow(/blocked/);
+      await expect(f.t.mutation(api.caseflow.completeRun, { scopeKey: SCOPE, runId: f.run.runId })).rejects.toThrow(/blocked/);
+      expect(await f.snapshot()).toEqual(before);
+      const next = await f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: "exception_10", nextActionOwner: "agent" });
+      expect(next.run).toMatchObject({ status: "blocked", nextAction: "Attach the source", nextActionOwner: "user" });
+      const final = await f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: "exception_A" });
+      expect(final.run).toMatchObject({ status: "active", nextAction: "Continue run", nextActionOwner: "system" });
+      expect(await f.t.query(api.caseflow.getArtifact, { scopeKey: SCOPE, artifactId: f.artifact.artifactId })).toEqual(f.artifact);
+      const events = (await f.snapshot()).events.filter((event) => event.aggregateId === f.run.runId);
+      expect(events.map((event) => event.sequence)).toEqual(events.map((_, index) => index + 1));
+      expect(events.every((event) => /^event_[a-f0-9]{26}$/.test(event.eventId))).toBe(true);
+      expect(events.filter((event) => event.eventType === "exception.resolved").map((event) => (event.payload as { remainingOpenExceptions: number }).remainingOpenExceptions)).toEqual([2, 1, 0]);
+    }
+  });
+
+  test("a component caller's assignment retries preserve old fingerprints and atomic failures", async () => {
+    const f = await reviewedComponentTask();
+    const legacyInput = exceptionArgs({ scopeKey: SCOPE, runId: f.run.runId, code: "legacy", idempotencyKey: "legacy" });
+    const legacy = await f.t.mutation(api.caseflow.raiseException, legacyInput);
+    expect(Object.hasOwn(legacy, "nextAction")).toBe(false);
+    expect(Object.hasOwn(legacy, "nextActionOwner")).toBe(false);
+    expect(await f.t.mutation(api.caseflow.raiseException, { ...legacyInput, nextAction: undefined, nextActionOwner: undefined })).toEqual(legacy);
+    const legacyEvent = (await f.snapshot()).events.find((event) => event.idempotencyKey === "legacy")!;
+    expect(legacyEvent.requestHash).toBe(contentHash({ operation: "raiseException", request: { actor: { id: "nodekit", type: "system" }, code: "legacy", message: "An exception occurred.", preservedState: {}, runId: f.run.runId } }));
+    const input = exceptionArgs({ scopeKey: SCOPE, runId: f.run.runId, code: "review_wait", nextAction: " Await external review ", nextActionOwner: " external ", idempotencyKey: "external" });
+    const raised = await f.t.mutation(api.caseflow.raiseException, input);
+    expect(raised).toMatchObject({ nextAction: "Await external review", nextActionOwner: "external" });
+    const before = await f.snapshot();
+    const burst = await Promise.all(Array.from({ length: 8 }, () => f.t.mutation(api.caseflow.raiseException, { ...input, nextAction: "Await external review", nextActionOwner: "external" })));
+    expect(burst.every((entry) => contentHash(entry) === contentHash(raised))).toBe(true);
+    for (let index = 0; index < 16; index += 1) expect(await f.t.mutation(api.caseflow.raiseException, input)).toEqual(raised);
+    for (const changed of [{ nextAction: "Another instruction" }, { nextActionOwner: "user" }]) await expect(f.t.mutation(api.caseflow.raiseException, { ...input, ...changed })).rejects.toThrow(/different raiseException request/);
+    expect(await f.snapshot()).toEqual(before);
+    const invalid = [{ nextAction: null }, { nextActionOwner: null }, { nextAction: "" }, { nextActionOwner: " " }, { nextAction: 3 }, { nextActionOwner: {} }, { nextAction: "bad\0action" }, { nextActionOwner: "\ud800" },
+      { nextAction: "x".repeat(PORTABLE_VALUE_LIMITS.maxEncodedBytes) },
+      { nextAction: "x".repeat(300_000), nextActionOwner: "y".repeat(300_000), preservedState: { body: "z".repeat(300_000) } }];
+    for (const candidate of invalid) {
+      await expect(f.t.mutation(api.caseflow.raiseException, exceptionArgs({ scopeKey: SCOPE, runId: f.run.runId, ...candidate }) as never)).rejects.toThrow();
+      expect(await f.snapshot()).toEqual(before);
+    }
+    for (const candidate of [{ resolution: "" }, { resolution: "bad\0resolution" }, { nextAction: "\ud800" }, { nextActionOwner: null }]) {
+      await expect(f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: raised.exceptionId, ...candidate } as never)).rejects.toThrow();
+      expect(await f.snapshot()).toEqual(before);
+    }
+    await f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: legacy.exceptionId, nextActionOwner: "agent" });
+    expect(await f.t.query(api.caseflow.getRun, { scopeKey: SCOPE, runId: f.run.runId })).toMatchObject({ status: "blocked", nextAction: "Await external review", nextActionOwner: "external" });
+    await f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: raised.exceptionId });
+    await f.t.mutation(api.caseflow.cancelRun, { scopeKey: SCOPE, runId: f.run.runId });
+    const terminal = await f.snapshot();
+    expect(await f.t.mutation(api.caseflow.raiseException, input)).toEqual(raised);
+    expect(await f.t.mutation(api.caseflow.raiseException, legacyInput)).toEqual(legacy);
+    await expect(f.t.mutation(api.caseflow.raiseException, { ...input, idempotencyKey: "fresh" })).rejects.toThrow(/terminal/);
+    await expect(f.t.mutation(api.caseflow.resolveException, { scopeKey: SCOPE, exceptionId: raised.exceptionId })).rejects.toThrow(/already resolved/);
+    expect(await f.snapshot()).toEqual(terminal);
   });
 
   test("near-limit idempotent results stay separate from small domain event payloads", async () => {

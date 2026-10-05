@@ -354,20 +354,38 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     return { approval: clone(approval), artifact: clone(artifact), proposal: clone(proposal), reused: false };
   }
 
-  function raiseException({ runId, code, message, preservedState, actor, idempotencyKey }) {
+  // Portable ASCII ids define one blocker order, independent of clocks and
+  // collection insertion order. The scan allocates no growing candidate list.
+  function selectOpenException(runId, excludedId, prospective = null) {
+    let selected = prospective;
+    for (const exception of state.exceptions.values()) {
+      if (exception.runId === runId && exception.status === "open" && exception.exceptionId !== excludedId
+        && (selected === null || exception.exceptionId < selected.exceptionId)) selected = exception;
+    }
+    return selected;
+  }
+
+  function raiseException({ runId, code, message, preservedState, nextAction, nextActionOwner, actor, idempotencyKey }) {
     const eventActor = actorValue(actor);
     const normalizedCode = requireTrimmedText(code ?? "unknown", "code");
     const normalizedMessage = requireTrimmedText(message ?? "An exception occurred.", "message");
     const portableState = normalizePortableValue(preservedState ?? {}, "preservedState", {
       maxNestingDepth: PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth,
     });
-    const request = { actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId };
+    const metadata = optionalFields({}, {
+      nextAction: nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction"),
+      nextActionOwner: nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner"),
+    });
+    // Validate the complete request even without a key. Omitted metadata stays
+    // absent, preserving the exact legacy canonical request fingerprint.
+    const request = clone({ actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId, ...metadata });
     return idempotent(idempotencyKey, request, () => {
       const run = requireNonTerminalRun(runId);
       const exception = {
         code: normalizedCode,
         exceptionId: nodeId("exception"),
         message: normalizedMessage,
+        ...metadata,
         preservedState: portableState,
         raisedAt: clock(),
         resolution: null,
@@ -375,37 +393,42 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
         schemaVersion: CASEFLOW_SCHEMA_VERSIONS.exception,
         status: "open",
       };
-      state.exceptions.set(exception.exceptionId, exception);
-      Object.assign(run, { status: "blocked", nextAction: "Resolve exception", nextActionOwner: "user", updatedAt: clock() });
-      emit("run", runId, "exception.raised", {
+      const selected = selectOpenException(runId, undefined, exception);
+      const updatedRun = clone({ ...run, status: "blocked", nextAction: selected.nextAction ?? "Resolve exception", nextActionOwner: selected.nextActionOwner ?? "user", updatedAt: clock() });
+      const result = clone(exception);
+      const event = clone(createEvent({ eventId: nodeId("event"), aggregateType: "run", aggregateId: runId, eventType: "exception.raised", payload: {
         code: exception.code,
         exceptionId: exception.exceptionId,
         messageHash: contentHash(exception.message),
         preservedStateHash: contentHash(exception.preservedState),
-      }, eventActor);
-      return clone(exception);
+      }, actor: eventActor, sequence: state.events.filter((entry) => entry.aggregateId === runId).length + 1, occurredAt: clock() }));
+      state.exceptions.set(exception.exceptionId, result);
+      Object.assign(run, updatedRun);
+      state.events.push(event);
+      return clone(result);
     });
   }
 
   function resolveException({ exceptionId, resolution, nextAction, nextActionOwner, actor }) {
     const eventActor = actorValue(actor);
+    const normalized = clone(optionalFields({ exceptionId, resolution: requireTrimmedText(resolution ?? "resolved", "resolution"), actor: eventActor }, {
+      nextAction: nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction"),
+      nextActionOwner: nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner"),
+    }));
     const exception = requireRecord(state.exceptions, exceptionId, "exception");
     if (exception.status !== "open") throw new Error("exception is already resolved");
     const run = requireNonTerminalRun(exception.runId);
-    exception.status = "resolved";
-    exception.resolution = requireTrimmedText(resolution ?? "resolved", "resolution");
-    exception.resolvedAt = clock();
-    const hasAnotherOpenException = [...state.exceptions.values()].some((entry) => entry.runId === run.runId && entry.status === "open");
-    Object.assign(run, hasAnotherOpenException
-      ? { status: "blocked", nextAction: "Resolve remaining exception", nextActionOwner: "user", updatedAt: clock() }
-      : {
-          status: "active",
-          nextAction: nextAction === undefined ? "Continue run" : requireTrimmedText(nextAction, "nextAction"),
-          nextActionOwner: nextActionOwner === undefined ? "system" : requireTrimmedText(nextActionOwner, "nextActionOwner"),
-          updatedAt: clock(),
-        });
-    emit("run", run.runId, "exception.resolved", { exceptionId, resolution: exception.resolution }, eventActor);
-    return { exception: clone(exception), run: clone(run) };
+    const resolved = clone({ ...exception, status: "resolved", resolution: normalized.resolution, resolvedAt: clock() });
+    const remaining = selectOpenException(exception.runId, exceptionId);
+    const updatedRun = clone({ ...run, ...(remaining
+      ? { status: "blocked", nextAction: remaining.nextAction ?? "Resolve remaining exception", nextActionOwner: remaining.nextActionOwner ?? "user" }
+      : { status: "active", nextAction: normalized.nextAction ?? "Continue run", nextActionOwner: normalized.nextActionOwner ?? "system" }), updatedAt: clock() });
+    const result = clone({ exception: resolved, run: updatedRun });
+    const event = clone(createEvent({ eventId: nodeId("event"), aggregateType: "run", aggregateId: run.runId, eventType: "exception.resolved", payload: { exceptionId, resolution: resolved.resolution }, actor: eventActor, sequence: state.events.filter((entry) => entry.aggregateId === run.runId).length + 1, occurredAt: clock() }));
+    Object.assign(exception, resolved);
+    Object.assign(run, updatedRun);
+    state.events.push(event);
+    return result;
   }
 
   function terminalizeRun({ runId, status, reason, actor, expected: inputExpected }) {

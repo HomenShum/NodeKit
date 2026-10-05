@@ -58,12 +58,103 @@
     "capabilities": { "$ref": "#/$defs/capabilities" },
     "conformance": { "$ref": "#/$defs/conformance" },
     "assertions": { "$ref": "#/$defs/assertions" },
+    "exceptionOwnership": { "$ref": "#/$defs/exceptionOwnership" },
     "passed": { "const": true },
     "errors": { "type": "array", "maxItems": 0 },
     "publicationPerformed": { "const": false },
     "deployPerformed": { "const": false }
   },
   "$defs": {
+    "ownershipExceptionId": { "type": "string", "pattern": "^exception_[a-f0-9]{26}$" },
+    "ownershipError": {
+      "type": "object", "additionalProperties": false, "required": ["name", "code", "message"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 80 },
+        "code": { "type": "string", "maxLength": 80 },
+        "message": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "exceptionOwnership": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schemaVersion", "assertions", "mixedRecoveries", "rollbacks", "refusals", "retries"],
+      "properties": {
+        "schemaVersion": { "const": "nodekit.exception-ownership-observations/v1" },
+        "assertions": {
+          "type": "object", "additionalProperties": false,
+          "required": ["mixedRecoveryPreservesRemainingAssignment", "postWriteStatementFailuresRestoreExactState", "canonicalExternalWaitIsBlocked", "lostAckBurstAndSustainedRetriesPreserveState", "freshBlockedMutationsAndCompletionRefuseWithoutChange", "changedOwnerReplayRefusesWithoutChange", "changedActionReplayRefusesWithoutChange"],
+          "properties": {
+            "mixedRecoveryPreservesRemainingAssignment": { "const": true },
+            "postWriteStatementFailuresRestoreExactState": { "const": true },
+            "canonicalExternalWaitIsBlocked": { "const": true },
+            "lostAckBurstAndSustainedRetriesPreserveState": { "const": true },
+            "freshBlockedMutationsAndCompletionRefuseWithoutChange": { "const": true },
+            "changedOwnerReplayRefusesWithoutChange": { "const": true },
+            "changedActionReplayRefusesWithoutChange": { "const": true }
+          }
+        },
+        "mixedRecoveries": {
+          "type": "array", "minItems": 4, "maxItems": 4,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["raiseOrder", "resolvedOwner", "remainingOwner", "selectedExceptionId", "remainingExceptionId", "status"],
+            "properties": {
+              "raiseOrder": { "enum": ["user-first", "external-first"] },
+              "resolvedOwner": { "enum": ["user", "external"] },
+              "remainingOwner": { "enum": ["user", "external"] },
+              "selectedExceptionId": { "$ref": "#/$defs/ownershipExceptionId" },
+              "remainingExceptionId": { "$ref": "#/$defs/ownershipExceptionId" },
+              "status": { "const": "blocked" }
+            }
+          }
+        },
+        "rollbacks": {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["operation", "injection", "writerPid", "observerPid", "exceptionStatus", "runStatus", "nextActionOwner", "rollbackCommand", "beforeStateHash", "afterStateHash", "originalError"],
+            "properties": {
+              "operation": { "enum": ["raiseException", "resolveException"] },
+              "injection": { "const": "after-real-run-update-before-commit" },
+              "writerPid": { "type": "integer", "minimum": 1 },
+              "observerPid": { "type": "integer", "minimum": 1 },
+              "exceptionStatus": { "enum": ["open", "resolved"] },
+              "runStatus": { "const": "blocked" },
+              "nextActionOwner": { "const": "external" },
+              "rollbackCommand": { "const": "ROLLBACK" },
+              "beforeStateHash": { "$ref": "#/$defs/sha256" },
+              "afterStateHash": { "$ref": "#/$defs/sha256" },
+              "originalError": { "$ref": "#/$defs/ownershipError" }
+            }
+          }
+        },
+        "refusals": {
+          "type": "array", "minItems": 7, "maxItems": 7,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["operation", "beforeStateHash", "afterStateHash", "error"],
+            "properties": {
+              "operation": { "enum": ["changedOwnerReplay", "changedActionReplay", "enterStage", "createArtifact", "createProposal", "decideProposal", "completeRun"] },
+              "beforeStateHash": { "$ref": "#/$defs/sha256" },
+              "afterStateHash": { "$ref": "#/$defs/sha256" },
+              "error": { "$ref": "#/$defs/ownershipError" }
+            }
+          }
+        },
+        "retries": {
+          "type": "object", "additionalProperties": false,
+          "required": ["burstCalls", "sustainedCalls", "maximumConcurrentCalls", "retainedPerRetryResults", "simulatedAcknowledgmentLossAfter", "exceptionId", "resultHash", "beforeStateHash", "afterStateHash"],
+          "properties": {
+            "burstCalls": { "const": 100 }, "sustainedCalls": { "const": 1000 },
+            "maximumConcurrentCalls": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "retainedPerRetryResults": { "const": 0 }, "simulatedAcknowledgmentLossAfter": { "const": "COMMIT" },
+            "exceptionId": { "$ref": "#/$defs/ownershipExceptionId" },
+            "resultHash": { "$ref": "#/$defs/sha256" },
+            "beforeStateHash": { "$ref": "#/$defs/sha256" },
+            "afterStateHash": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    },
     "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
     "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "timestamp": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$" },

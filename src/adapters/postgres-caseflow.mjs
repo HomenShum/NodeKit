@@ -101,6 +101,8 @@ function exceptionRecord(row) {
     code: row.code,
     exceptionId: row.exception_id,
     message: row.message,
+    ...(row.next_action == null ? {} : { nextAction: row.next_action }),
+    ...(row.next_action_owner == null ? {} : { nextActionOwner: row.next_action_owner }),
     preservedState: json(row.preserved_state),
     raisedAt: iso(row.raised_at),
     resolution: row.resolution,
@@ -582,15 +584,30 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     });
   }
 
-  async function raiseException({ runId, code, message, preservedState = {}, actor, idempotencyKey }) {
+  async function selectOpenException(client, runId) {
+    const result = await client.query(
+      `select * from nodekit.exceptions where owner_id = $1 and run_id = $2 and status = 'open'
+        order by exception_id collate "C" limit 1`,
+      [owner, runId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async function raiseException({ runId, code, message, preservedState = {}, nextAction, nextActionOwner, actor, idempotencyKey }) {
     const eventActor = actorValue(actor);
     const normalizedCode = requireTrimmedText(code ?? "unknown", "code");
     const normalizedMessage = requireTrimmedText(message ?? "An exception occurred.", "message");
     const portableState = normalizePortableValue(preservedState, "preservedState", {
       maxNestingDepth: PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth,
     });
+    const metadata = optionalFields({}, {
+      nextAction: nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction"),
+      nextActionOwner: nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner"),
+    });
+    // Copy/validate the whole request before waiting for a pooled client, even
+    // without a key; missing fields must not change old journal fingerprints.
+    const request = normalizePortableValue({ actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId, ...metadata }, "raiseException request");
     return withTransaction(pool, async (client) => {
-      const request = { actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId };
       return withIdempotency(client, { idempotencyKey, ownerId: owner, request }, async (journal) => {
         const run = await client.query(
           "select * from nodekit.runs where owner_id = $1 and run_id = $2 for update",
@@ -602,13 +619,14 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
         const exceptionId = nodeId("exception");
         const row = (await client.query(
           `insert into nodekit.exceptions
-            (exception_id, owner_id, run_id, code, message, preserved_state, status, resolution, raised_at)
-            values ($1, $2, $3, $4, $5, $6::jsonb, 'open', null, $7) returning *`,
-          [exceptionId, owner, runId, normalizedCode, normalizedMessage, JSON.stringify(portableState), now],
+            (exception_id, owner_id, run_id, code, message, preserved_state, status, resolution, raised_at, next_action, next_action_owner)
+            values ($1, $2, $3, $4, $5, $6::jsonb, 'open', null, $7, $8, $9) returning *`,
+          [exceptionId, owner, runId, normalizedCode, normalizedMessage, JSON.stringify(portableState), now, metadata.nextAction ?? null, metadata.nextActionOwner ?? null],
         )).rows[0];
+        const selected = await selectOpenException(client, runId);
         await client.query(
-          "update nodekit.runs set status = 'blocked', next_action = 'Resolve exception', next_action_owner = 'user', updated_at = $1 where owner_id = $2 and run_id = $3",
-          [now, owner, runId],
+          "update nodekit.runs set status = 'blocked', next_action = $1, next_action_owner = $2, updated_at = $3 where owner_id = $4 and run_id = $5",
+          [selected.next_action ?? "Resolve exception", selected.next_action_owner ?? "user", now, owner, runId],
         );
         const record = exceptionRecord(row);
         await emit(client, {
@@ -637,6 +655,7 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     const normalizedResolution = requireTrimmedText(resolution ?? "resolved", "resolution");
     const normalizedNextAction = nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction");
     const normalizedNextActionOwner = nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner");
+    normalizePortableValue(optionalFields({ actor: eventActor, exceptionId, resolution: normalizedResolution }, { nextAction: normalizedNextAction, nextActionOwner: normalizedNextActionOwner }), "resolveException request");
     return withTransaction(pool, async (client) => {
       const existing = await client.query(
         "select * from nodekit.exceptions where owner_id = $1 and exception_id = $2 for update",
@@ -656,12 +675,9 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
           where owner_id = $3 and exception_id = $4 returning *`,
         [normalizedResolution, now, owner, exceptionId],
       )).rows[0];
-      const remaining = await client.query(
-        "select 1 from nodekit.exceptions where owner_id = $1 and run_id = $2 and status = 'open' limit 1",
-        [owner, resolved.run_id],
-      );
-      const runState = remaining.rowCount > 0
-        ? { status: "blocked", nextAction: "Resolve remaining exception", nextActionOwner: "user" }
+      const remaining = await selectOpenException(client, resolved.run_id);
+      const runState = remaining
+        ? { status: "blocked", nextAction: remaining.next_action ?? "Resolve remaining exception", nextActionOwner: remaining.next_action_owner ?? "user" }
         : { status: "active", nextAction: normalizedNextAction ?? "Continue run", nextActionOwner: normalizedNextActionOwner ?? "system" };
       const runRow = (await client.query(
         `update nodekit.runs set status = $1, next_action = $2, next_action_owner = $3, updated_at = $4
