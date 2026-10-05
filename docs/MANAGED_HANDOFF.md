@@ -117,3 +117,44 @@ skill. Reuse the existing [execution graph](EXECUTION_GRAPH_OF_LOOPS.md),
 [native session continuity](NATIVE_AGENT_SESSION_IDENTITY.md), and protected skill-evaluation
 contracts before adding host-specific integrations. Preserve research, approved procedures and
 operational evidence as distinct kinds of information.
+
+## Carry the handoff into an existing product
+
+A developer connecting an assistant to a real product needs every screen and reviewer to use the
+same saved task state. A chat can show an old proposal while a comparison card shows the new one,
+or an operations badge can report a limit that never stops a request (host integration).
+Keep one authoritative project record and require observations at the boundary that enforces it.
+
+These are host acceptance requirements, not capabilities exercised by this local recipe:
+
+- Bind each turn to the current case/run, confirmed requirements, unresolved questions, selected
+  objects, exact source revisions and pending decisions. Re-read that record when resuming;
+  browser recovery state and a graph view are projections, not cross-device authority.
+- Use the existing guarded completion and proposal workflow for stale decisions and repeated
+  deliveries. A proposed correction does not mark a failed check as passed; attach a retest of
+  the exact corrected revision and retain the original failure.
+- Keep three telemetry audiences distinct. Users need current work, waiting owner, partial
+  results, changed output and the next decision. Developers need tool failures, latency,
+  source coverage and model/prompt/tool versions. Product owners need completed user milestones.
+  Missing cost or usage is unknown, not zero. Redact private inputs, message bodies and secrets;
+  explanations are decision summaries, not private model reasoning.
+- Trace a run to its project revision, input references, source observations, output artifacts
+  and terminal status. A telemetry store does not become the business record. Where a backend
+  owns a schema, generated client types still need runtime validation at the trust boundary.
+- Verify context collection, domain constraints, evidence/calculations, authorization/durability,
+  agreement between views, and the correction/retest loop separately. Deterministic checks own
+  arithmetic, IDs and transitions; qualified reviewers assess whether evidence supports meaning.
+  A model judge cannot replace those checks or supply a missing human grade.
+- Same-client replay checks drift and remains dependent on the producing implementation. Reserve
+  independent verification for a separate implementation with a meaningful negative control.
+  Prove a timeout, budget or circuit breaker on the request path;
+  a recorded metric or open-breaker badge alone does not establish enforcement.
+- Name what was actually exercised: source recipe, packaged interface, deployed endpoint or
+  production journey. Pin the tested revision and comparison range. A passing fixture does not
+  prove an external integration, an accessible interaction or a deployed user outcome.
+
+Preserve the working lockfile and existing product primitives when adapting this recipe. Add a
+provider, transport, UI library or storage adapter only for a current requirement. External sends
+need an authorized recipient and approved content; received material remains untrusted source data.
+Host authentication, permissions, retention, durable recovery and real browser proof remain the
+host's responsibility, as described above.

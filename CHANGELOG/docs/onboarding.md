@@ -4,6 +4,16 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-05 - Explain host acceptance beyond local handoff proof
+
+Carry the source-note recipe into other products with explicit authoritative state, three telemetry
+audiences, independent verification and actual request-gate checks. Keep host requirements separate
+from the local recipe's measured capabilities so developers can reuse the pattern without assuming
+it implements authenticated, durable or instrumented production execution.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `docs/MANAGED_HANDOFF.md`
+
 ## 2026-08-02 - Reconcile NodeVideo's surviving product boundaries
 
 Make three previously implied field rules explicit without adding another framework or principle:
