@@ -250,7 +250,7 @@ as text, rather than crashing the server. The agent sees the error and can retry
 ## Step 7 — Persistence: the one place an artifact changes
 
 **File:** `src/lib/caseflow.mjs`
-**Symbol:** `decideProposal` (line 302), `completeRun` (line 554)
+**Symbol:** `decideProposal` (line 302), `completeRun` (line 577)
 **Called by:** the generated application's `decide` (Step 5) and `/api/decide`
 **Calls next:** `contentHash` (line 48), then the receipt writer inside `completeRun`
 

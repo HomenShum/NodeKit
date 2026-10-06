@@ -47,7 +47,7 @@
     },
     {
       "file": "src/lib/caseflow.mjs",
-      "line": 554,
+      "line": 577,
       "pattern": "^  function completeRun\\(\\{ runId, actor, expected \\}\\)",
       "title": "The receipt binds the result to its bytes",
       "description": "A receipt is not a log line. `receiptHash` is a content hash of the run body, so a receipt cannot be reused to vouch for different content. Compare `contentHash` at the top of this file."
