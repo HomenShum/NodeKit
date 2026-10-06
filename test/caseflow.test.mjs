@@ -166,6 +166,21 @@ test("memory runtime passes the provider-neutral adapter conformance suite", asy
   assert.equal(result.capabilities.provider, "memory");
 });
 
+test("an adapter developer can verify mixed review ownership using only the asynchronous portable contract", async () => {
+  const result = await runCaseflowConformance(() => {
+    const runtime = createMemoryCaseflow();
+    const methods = ["createCase", "updateCaseInput", "startRun", "enterStage", "createArtifact", "createProposal", "decideProposal", "raiseException", "resolveException", "completeRun", "cancelRun", "failRunSafely", "snapshot"];
+    return {
+      capabilities: runtime.capabilities,
+      ...Object.fromEntries(methods.map((name) => [name, async (...args) => runtime[name](...args)])),
+    };
+  });
+  assert.equal(result.passed, true);
+  for (const name of ["ordinalExceptionOwnerSelection", "partialRecoveryKeepsRemainingOwner", "exceptionMetadataRetriesStable", "invalidExceptionMetadataFailsBeforeMutation", "externalWaitPreservesCanonicalArtifact"]) {
+    assert.equal(result.assertions[name], true, name);
+  }
+});
+
 test("host-bound conformance verifies server-derived identity without requiring caller actor control", async () => {
   const createHostBoundRuntime = () => {
     const runtime = createMemoryCaseflow();

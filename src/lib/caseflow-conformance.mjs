@@ -293,14 +293,16 @@ export async function runCaseflowConformance(createRuntime, {
       const omitted = await runtime.raiseException({ ...legacyInput, nextAction: undefined, nextActionOwner: undefined });
       let changedRejected = false;
       try { await runtime.raiseException({ ...externalInput, nextActionOwner: "user" }); } catch { changedRejected = true; }
-      const retriesPreservedState = beforeRetries === contentHash(await runtime.snapshot());
+      const afterRetries = await runtime.snapshot();
+      const retriesPreservedState = beforeRetries === contentHash(afterRetries);
       const selected = external.exceptionId < legacy.exceptionId ? external : legacy;
-      const blocked = await runtime.getRun(ownershipRun.runId);
+      const blocked = afterRetries.runs.find((entry) => entry.runId === ownershipRun.runId);
+      if (!blocked) throw new Error("ownership conformance run is missing from the portable snapshot");
       const first = resolveExternalFirst ? external : legacy;
       const remaining = resolveExternalFirst ? legacy : external;
       const partial = await runtime.resolveException({ exceptionId: first.exceptionId, nextAction: "Do not override a remaining blocker", nextActionOwner: "agent" });
       const final = await runtime.resolveException({ exceptionId: remaining.exceptionId });
-      const preserved = await runtime.getArtifact(ownershipArtifact.artifactId);
+      const preserved = (await runtime.snapshot()).artifacts.find((entry) => entry.artifactId === ownershipArtifact.artifactId);
       ownershipResults.push({
         persisted: external.nextAction === "Await external review" && external.nextActionOwner === "external",
         retries: stable && changedRejected && contentHash(omitted) === contentHash(legacy)
