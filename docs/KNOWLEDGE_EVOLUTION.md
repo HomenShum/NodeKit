@@ -85,6 +85,12 @@ semantic location; it does not invent a page, bounding box, or timestamp. For im
 positions, the byte anchor is verified while the semantic position remains attributed to its
 declared source.
 
+For a host using a visual location to support a claim, bind that location to the exact original
+capture, coordinate system, viewport or page, and video frame or time range where applicable.
+Preserve any crop, resize, rotation or masking transform. Verify the location mapping separately
+from whether the depicted content supports the claim; missing mapping remains unassessed.
+These are host acceptance requirements, not checks implemented by the byte verifier.
+
 ```bash
 nodekit graph evidence-ingest \
   --file sources/report.pdf \
