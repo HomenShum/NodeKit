@@ -153,6 +153,36 @@ These are host acceptance requirements, not capabilities exercised by this local
   production journey. Pin the tested revision and comparison range. A passing fixture does not
   prove an external integration, an accessible interaction or a deployed user outcome.
 
+### Verify how evidence was read
+
+A sourcing analyst comparing two supplier quotes needs the warranty exclusions before choosing.
+A keyword hit can miss a restriction on the next page (retrieval acceptance).
+The host must show which authorized evidence it read, omitted and used before grading the answer.
+
+These are host acceptance requirements. **Own-data benchmark: NOT_RUN**; no model or architecture is selected.
+
+- Bind the run to an immutable authorized corpus revision, document/source hashes, authority and
+  scope. Maintain the source registry when revisions or permissions change.
+- Test connector auth, response shapes, errors and acquisition coverage separately from source
+  selection, queries/filters, reading depth and stopping quality; connector success cannot grade an answer.
+- Choose task-needed keyword, page, section, chapter or document depth within both global and
+  per-document budgets. Report omitted evidence and unknown coverage instead of implying completeness.
+- Use existing action/evidence/decision summaries with exact locations and depth/stop choices; never require private chain-of-thought.
+- Compare flat lexical, hybrid and optional hierarchical candidates on the same frozen cases,
+  authorized corpus and budget, including unanswerable tasks, wrong revisions, misleading nearby hits
+  and failed context expansion. Separate retrieval relevance/coverage from answer correctness;
+  record evidence locations, latency, cost, failures and omissions.
+- Public evidence used within its license and expert-authored held-out cases are proxies, not
+  customer-corpus completeness or production certification.
+- Calibrate the rubric with domain experts and freeze rubric/judge versions within each epoch.
+  Choose domain-specific under-reading/over-reading costs before the run, not universal weights.
+- Route grading disagreements into reviewed candidates through the existing protected promotion
+  contracts; disagreement alone never changes a canonical rule or passes a failed check.
+
+Public proxy examples: [BEIR](https://github.com/beir-cellar/beir) for heterogeneous retrieval,
+[Qasper](https://allenai.org/open-data) for full-paper evidence QA, and
+[BRIGHT](https://github.com/xlang-ai/BRIGHT) for reasoning-intensive retrieval.
+
 Preserve the working lockfile and existing product primitives when adapting this recipe. Add a
 provider, transport, UI library or storage adapter only for a current requirement. External sends
 need an authorized recipient and approved content; received material remains untrusted source data.
