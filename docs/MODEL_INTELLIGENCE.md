@@ -187,6 +187,20 @@ When changing both model and context builder, compare each model with both the b
 candidate context builders under those fixed conditions. Report the interaction before attributing
 the gain to the model; a combined improvement alone does not isolate its cause.
 
+A product owner deciding whether to automate a task needs both useful completion and correctness.
+A gate that holds every case has no accepted errors but completes no work (selective prediction).
+For a gate that accepts or abstains, report accepted/eligible cases separately from incorrect/accepted
+decisions; zero accepted cases makes the latter undefined, not zero. Retain abstentions, execution
+failures, case-family counts and repeated-attempt counts. Choose gates on development cases and
+freeze them before held-out comparison. See [Geifman and El-Yaniv](https://proceedings.mlr.press/v97/geifman19a.html).
+
+A reviewer deciding whether to trust several judges needs to know whether they share a mistake.
+When using multiple reviewers, collect and retain their initial judgments against authorized
+primary evidence before exposing peer judgments; a shared lossy summary cannot be their only
+evidence. Audit unanimous agreement alongside disagreement, borderline and novel cases against
+independently reviewed references. Agreement alone does not establish correctness. These are host
+acceptance requirements; no decision gate, reviewer panel or audit runner is implemented here.
+
 ## Implemented routing mechanics
 
 The routing compiler orders eligible non-expired cards using project-before-domain-before-ecosystem
