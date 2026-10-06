@@ -165,19 +165,40 @@ These are host acceptance requirements. **Own-data benchmark: NOT_RUN**; no mode
   scope. Maintain the source registry when revisions or permissions change.
 - Test connector auth, response shapes, errors and acquisition coverage separately from source
   selection, queries/filters, reading depth and stopping quality; connector success cannot grade an answer.
+- Declare the required read scope before processing content: filters, candidate document/chunk
+  IDs and counts, source revisions, pagination status and limits. An exhaustive task requires the
+  full declared scope; a smaller context-expansion baseline does not satisfy it. Budget exhaustion,
+  missing pages or truncation leave the task partial or held, naming known unread IDs and an unknown remainder.
 - Choose task-needed keyword, page, section, chapter or document depth within both global and
-  per-document budgets. Report omitted evidence and unknown coverage instead of implying completeness.
+  per-document budgets, while preserving the declared coverage requirement.
+- Verify processing coverage against actual tool returns and processing records bound to the
+  task, scope and source/chunk revisions; a model's reading claim or tally is insufficient.
+  Processing every listed item establishes listed-set coverage only. Evaluate whether the set
+  includes the required evidence against a separately reviewed must-read reference.
+- Record the exact evidence delivered to the decision stage: passage content, locations,
+  relevant conditions and contradictions, and source bindings. Retrieval receipts or IDs alone
+  do not prove delivery or interpretation. Check citation membership and identity deterministically;
+  assess whether the passage supports the claim and applies to this task separately.
 - Use existing action/evidence/decision summaries with exact locations and depth/stop choices; never require private chain-of-thought.
 - Compare flat lexical, hybrid and optional hierarchical candidates on the same frozen cases,
   authorized corpus and budget, including unanswerable tasks, wrong revisions, misleading nearby hits
   and failed context expansion. Separate retrieval relevance/coverage from answer correctness;
-  record evidence locations, latency, cost, failures and omissions.
+  also test the decision stage with fixed supplied evidence to locate the first failing boundary.
+  Record evidence locations, latency, cost, failures and omissions.
+- Keep per-stage expected outputs and answer keys outside the agent-visible prompts and context.
+  Include varied document density, a decisive clause outside the initial hit, a complete case
+  paired with one required fact removed, and a draft/retired or wrong-scope source. Label synthetic
+  data and distinguish supplied facts from inferred facts.
 - Public evidence used within its license and expert-authored held-out cases are proxies, not
   customer-corpus completeness or production certification.
 - Calibrate the rubric with domain experts and freeze rubric/judge versions within each epoch.
   Choose domain-specific under-reading/over-reading costs before the run, not universal weights.
 - Route grading disagreements into reviewed candidates through the existing protected promotion
   contracts; disagreement alone never changes a canonical rule or passes a failed check.
+- Use the existing exception/recovery workflow for incomplete reading or unsupported conclusions.
+  Bound repair attempts and name the responsible owner, missing input and safe resume action.
+  Human clarification and approval of an external tool action are different decisions; recheck
+  current task/source bindings before either resume or completion.
 
 Public proxy examples: [BEIR](https://github.com/beir-cellar/beir) for heterogeneous retrieval,
 [Qasper](https://allenai.org/open-data) for full-paper evidence QA, and
