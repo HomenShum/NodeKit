@@ -201,6 +201,8 @@ export declare const raiseException: import("convex/server").RegisteredMutation<
     code?: string;
     idempotencyKey?: string;
     message?: string;
+    nextAction?: string;
+    nextActionOwner?: string;
     preservedState?: any;
     preservedStateHash: string;
     runId: string;
@@ -209,6 +211,8 @@ export declare const raiseException: import("convex/server").RegisteredMutation<
     code: string;
     exceptionId: string;
     message: string;
+    nextAction?: string;
+    nextActionOwner?: string;
     preservedState: any;
     raisedAt: string;
     resolution: string | null;
@@ -232,6 +236,8 @@ export declare const resolveException: import("convex/server").RegisteredMutatio
         code: string;
         exceptionId: string;
         message: string;
+        nextAction?: string;
+        nextActionOwner?: string;
         preservedState: any;
         raisedAt: string;
         resolution: string | null;

@@ -787,7 +787,9 @@ describe("NodeKit Caseflow Convex component", () => {
     const legacy = await f.t.mutation(api.caseflow.raiseException, legacyInput);
     expect(Object.hasOwn(legacy, "nextAction")).toBe(false);
     expect(Object.hasOwn(legacy, "nextActionOwner")).toBe(false);
-    expect(await f.t.mutation(api.caseflow.raiseException, { ...legacyInput, nextAction: undefined, nextActionOwner: undefined })).toEqual(legacy);
+    // Probe runtime omission; Convex's inferred exact-optional args exclude
+    // explicit undefined, unlike the portable public client contract.
+    expect(await f.t.mutation(api.caseflow.raiseException, { ...legacyInput, nextAction: undefined as unknown as string, nextActionOwner: undefined as unknown as string })).toEqual(legacy);
     const legacyEvent = (await f.snapshot()).events.find((event) => event.idempotencyKey === "legacy")!;
     expect(legacyEvent.requestHash).toBe(contentHash({ operation: "raiseException", request: { actor: { id: "nodekit", type: "system" }, code: "legacy", message: "An exception occurred.", preservedState: {}, runId: f.run.runId } }));
     const input = exceptionArgs({ scopeKey: SCOPE, runId: f.run.runId, code: "review_wait", nextAction: " Await external review ", nextActionOwner: " external ", idempotencyKey: "external" });
