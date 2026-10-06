@@ -165,6 +165,10 @@ Model A + Harness v2 +/- candidate skill             # skill effect
 Tasks, evidence, tools, budgets, judges, and scoring remain fixed. Candidate code cannot edit
 held-out tasks, decisive judges, thresholds, safety requirements, or official outcomes.
 
+When changing both model and context builder, compare each model with both the baseline and
+candidate context builders under those fixed conditions. Report the interaction before attributing
+the gain to the model; a combined improvement alone does not isolate its cause.
+
 ## Implemented routing mechanics
 
 The routing compiler orders eligible non-expired cards using project-before-domain-before-ecosystem

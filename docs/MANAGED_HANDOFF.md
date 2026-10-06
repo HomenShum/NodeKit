@@ -130,6 +130,9 @@ These are host acceptance requirements, not capabilities exercised by this local
 - Bind each turn to the current case/run, confirmed requirements, unresolved questions, selected
   objects, exact source revisions and pending decisions. Re-read that record when resuming;
   browser recovery state and a graph view are projections, not cross-device authority.
+  Compaction must preserve source bindings, live alternatives, unresolved obligations and update
+  conditions. Test histories with the same current answer that require different answers after
+  the same later update; current-answer agreement alone does not prove safe continuation.
 - Use the existing guarded completion and proposal workflow for stale decisions and repeated
   deliveries. A proposed correction does not mark a failed check as passed; attach a retest of
   the exact corrected revision and retain the original failure.
@@ -169,6 +172,9 @@ These are host acceptance requirements. **Own-data benchmark: NOT_RUN**; no mode
   IDs and counts, source revisions, pagination status and limits. An exhaustive task requires the
   full declared scope; a smaller context-expansion baseline does not satisfy it. Budget exhaustion,
   missing pages or truncation leave the task partial or held, naming known unread IDs and an unknown remainder.
+  For conversation sources, record observed native response/message identities, body ranges and
+  attachment revisions. Unbound rendered copies, unread history and unavailable attachment bodies
+  remain explicit gaps; a rendered reading does not close a native-format capture gap.
 - Choose task-needed keyword, page, section, chapter or document depth within both global and
   per-document budgets, while preserving the declared coverage requirement.
 - Verify processing coverage against actual tool returns and processing records bound to the
@@ -185,10 +191,14 @@ These are host acceptance requirements. **Own-data benchmark: NOT_RUN**; no mode
   and failed context expansion. Separate retrieval relevance/coverage from answer correctness;
   also test the decision stage with fixed supplied evidence to locate the first failing boundary.
   Record evidence locations, latency, cost, failures and omissions.
+  Label task-preserving benchmark adaptations, derived subtasks and workflow-policy checks
+  separately; keep their scores and capability claims distinct.
 - Keep per-stage expected outputs and answer keys outside the agent-visible prompts and context.
   Include varied document density, a decisive clause outside the initial hit, a complete case
   paired with one required fact removed, and a draft/retired or wrong-scope source. Label synthetic
   data and distinguish supplied facts from inferred facts.
+  Holding run inputs fixed, changing only an evaluator-held reference must leave the provider
+  request and agent-visible context unchanged. Check metadata and source selection for indirect leakage.
 - Public evidence used within its license and expert-authored held-out cases are proxies, not
   customer-corpus completeness or production certification.
 - Calibrate the rubric with domain experts and freeze rubric/judge versions within each epoch.
