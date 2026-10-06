@@ -18,9 +18,24 @@ jobs:
       - name: Checkout active repositories
         shell: bash
         run: |
-          mkdir -p ../ecosystem
-          for repo in NodeAgent NodeRoom NodeSlide NodeVideo NodeVoice NodeTrace NodeMem NodeProof agentic-ui-qa; do
-            git clone --depth 1 "https://github.com/HomenShum/${repo}.git" "../ecosystem/${repo}"
-          done
+          node --input-type=module <<'NODE'
+          import { execFileSync } from "node:child_process";
+          import path from "node:path";
+          import { loadRegistry, validateRegistry } from "./src/lib/registry.mjs";
+
+          const registry = await loadRegistry(process.cwd());
+          const errors = validateRegistry(registry);
+          if (errors.length) throw new Error(errors.join("\n"));
+          const repositories = registry.repositoryCatalog.repositories.filter((repo) => repo.commandProfile !== "untracked");
+          for (const repo of repositories) {
+            if (typeof repo.name !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(repo.name) ||
+                !/^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(repo.github)) {
+              throw new Error("Invalid ecosystem checkout name or GitHub slug");
+            }
+          }
+          for (const repo of repositories.filter((repo) => repo.name !== "NodeKit")) {
+            execFileSync("git", ["clone", "--depth", "1", "--", `https://github.com/${repo.github}.git`, path.join("..", repo.name)], { stdio: "inherit" });
+          }
+          NODE
       - name: Verify ecosystem
-        run: node src/cli.mjs ecosystem check --registry-root . --workspace ../ecosystem
+        run: node src/cli.mjs ecosystem check --registry-root . --workspace ..
