@@ -621,7 +621,8 @@ async function authoredConsumerFixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-authored-consumer-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-  execFileSync("git", ["clone", "--quiet", "--no-hardlinks", sourceRoot, root], { stdio: "ignore" });
+  // Keep automatic maintenance from outliving the disposable clone's Git calls.
+  execFileSync("git", ["clone", "--quiet", "--no-hardlinks", "--config", "maintenance.auto=false", sourceRoot, root], { stdio: "ignore" });
   const original = git(root, ["show", "5b9c4d73c286020fe7b7c52d208d7e0cbfeef626:evolution/assumptions/asm-strong-model-infers-topology.json"]);
   await writeFile(path.join(root, "evolution", "assumptions", "asm-strong-model-infers-topology.json"), `${original}\n`);
   return { root, original: JSON.parse(original) };

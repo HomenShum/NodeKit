@@ -130,7 +130,8 @@ const historicalSchemaHash = "4d2998bf89b4eb2c1caf3cf5b2a95b600f68ed1565b0cb87a4
 async function historicalFixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-authored-history-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  execFileSync("git", ["clone", "--quiet", "--no-hardlinks", repositoryRoot, root], { stdio: "ignore" });
+  // Keep automatic maintenance from outliving the disposable clone's Git calls.
+  execFileSync("git", ["clone", "--quiet", "--no-hardlinks", "--config", "maintenance.auto=false", repositoryRoot, root], { stdio: "ignore" });
   const git = (...args) => execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
   git("config", "user.email", "fixture@example.com");
   git("config", "user.name", "Authored contract fixture");
