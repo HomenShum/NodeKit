@@ -367,6 +367,163 @@ test("knowledge adoption closure recomputes protected cases, aggregates, and exe
   );
 });
 
+// A maintainer must be able to hand the complete native-shaped report to the
+// existing consumer. These synthetic records certify shape/admission, not SQL.
+test("a maintainer hands current and legacy PostgreSQL reports through strict repeated admission", async (t) => {
+  const { validateSchema } = await import("../src/lib/schema-validation.mjs");
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-postgres-report-closure-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const candidateCommit = "a".repeat(40);
+  const sourceHash = "b".repeat(64);
+  const schemaName = "nodekit.postgres-conformance.v2.schema.json";
+  const reportPath = "proof/postgres-conformance.json";
+  const verdict = exactSubmissionVerdicts(candidateCommit, sourceHash).managedSupabasePortability;
+  await writeGateEvidence(root, "managedSupabasePortability", verdict);
+  const report = JSON.parse(submissionEvidenceFixtureBytes(reportPath, candidateCommit, sourceHash).toString("utf8"));
+  const reference = verdict.evidence.find((entry) => entry.kind === "postgres-conformance");
+  assert.ok(reference);
+  const schemaErrors = (value) => validateSchema(schemaName, value, reportPath);
+  const closure = () => resolveSubmissionEvidenceClosure(root, "managedSupabasePortability", verdict);
+  async function store(value) {
+    const bytes = Buffer.from(`${JSON.stringify(value, null, 2)}\n`);
+    await writeFile(path.join(root, reportPath), bytes);
+    reference.sha256 = digest(bytes);
+    verdict.postgresConformance.sha256 = reference.sha256;
+    // This low-level closure scenario does not grant or replace the unchanged
+    // protected attestation. The full signed-fixture gate below still tests it.
+  }
+  assert.deepEqual(await schemaErrors(report), []);
+  const expectedClosure = await closure();
+  assert.equal(expectedClosure.length, 8);
+  assert.ok(expectedClosure.some((entry) => entry.path === reportPath && entry.sha256 === reference.sha256));
+  assert.equal(Object.keys(report.assertions).length, 25);
+  assert.equal(Object.keys(report.conformance.assertions).length, 39);
+  assert.equal(report.guardedCompletion.schedules.length, 7);
+  assert.equal(report.exceptionOwnership.rollbacks.length, 2);
+  assert.equal(report.exceptionOwnership.refusals.length, 7);
+  assert.deepEqual(report.exceptionOwnership, report.guardedCompletion.exceptionOwnership);
+  assert.equal(report.lifecycleFailureScenarios.cleanupAfterPass.passed, false);
+  assert.equal(report.lifecycleFailureScenarios.cleanupAfterPass.exitCode, 1);
+  assert.equal(report.lifecycleFailureScenarios.primaryAndCleanup.primaryError.code, "PROOF_PRIMARY");
+  assert.equal(report.lifecycleFailureScenarios.primaryAndCleanup.cleanup[0].error.code, "PROOF_CLEANUP");
+  assert.deepEqual(report.cleanup.map((entry) => entry.name), [
+    "settle-scenario-clients", "exact-owned-fixtures", "pool-and-clients", "exact-disposable-installation",
+  ]);
+  assert.equal(report.postgres.serverVersion, "16.15 (Debian 16.15-1.pgdg13+2)");
+
+  const legacy = structuredClone(report);
+  for (const key of ["guardedCompletion", "knowledgeFirstCreateRace", "lifecycleFailureScenarios", "namedProof", "limits", "finalizedAt",
+    "primaryError", "failedAssertions", "cleanup", "poolErrorCount", "poolErrors", "exceptionOwnership"]) delete legacy[key];
+  delete legacy.conformance.actorMode;
+  const oldTop = ["artifactCompletionRaceAtomic", "crossOwnerDenied", "ownerIsolation", "receiptIntegrity", "reloadPreservedState",
+    "sameBaseRaceFailedClosed", "sharedConformancePassed", "knowledgeFirstCreateRaceAtomic", "knowledgeOwnerIsolation",
+    "knowledgePackageExportsResolved", "knowledgeProjectionApplied", "knowledgeProjectionReloaded", "knowledgeRetrievalReceiptDurable"];
+  const oldShared = ["activeRunStartIsIdempotent", "canonicalVersionAdvancedOnce", "contentAddressedReceipt", "exceptionStatePreserved",
+    "nextActionOwnerExplicit", "oneAuthoritativeCase", "repeatedCompletionIsIdempotent", "repeatedDecisionIsIdempotent", "staleProposalFailedClosed"];
+  legacy.assertions = Object.fromEntries(oldTop.map((name) => [name, legacy.assertions[name]]));
+  legacy.conformance.assertions = Object.fromEntries(oldShared.map((name) => [name, legacy.conformance.assertions[name]]));
+  legacy.postgres = { serverVersion: "17.10", serverVersionNum: 170010 };
+  verdict.postgresConformance.serverVersionNum = 170010;
+  await store(legacy);
+  assert.deepEqual(await schemaErrors(legacy), []);
+  assert.equal((await closure()).length, 8);
+  verdict.postgresConformance.serverVersionNum = report.postgres.serverVersionNum;
+  await store(report);
+  assert.deepEqual(await closure(), expectedClosure);
+
+  async function rejectShape(label, mutate, pattern) {
+    const changed = structuredClone(report);
+    mutate(changed);
+    await store(changed);
+    const errors = await schemaErrors(changed);
+    assert.ok(errors.length > 0, `${label}: schema admitted a changed claim`);
+    assert.match(errors.join("\n"), pattern, label);
+    await assert.rejects(closure, pattern, `${label}: actual consumer admitted the changed record`);
+  }
+  for (const [label, select] of [
+    ["root", (value) => value],
+    ["conformance", (value) => value.conformance],
+    ["top assertions", (value) => value.assertions],
+    ["shared assertions", (value) => value.conformance.assertions],
+    ["guarded observation", (value) => value.guardedCompletion],
+    ["guard assertions", (value) => value.guardedCompletion.assertions],
+    ["schedule", (value) => value.guardedCompletion.schedules[0]],
+    ["cleanup detail", (value) => value.cleanup[0].detail],
+    ["root ownership", (value) => value.exceptionOwnership],
+    ["nested ownership", (value) => value.guardedCompletion.exceptionOwnership],
+  ]) await rejectShape(`unknown ${label}`, (value) => { select(value).unknownClaim = true; }, /must NOT have additional properties/);
+  // Every recorded success predicate must remain honest, including new names.
+  for (const name of Object.keys(report.assertions)) {
+    await rejectShape(`false top assertion ${name}`, (value) => { value.assertions[name] = false; }, /must be equal to constant/);
+  }
+  for (const name of Object.keys(report.conformance.assertions)) {
+    await rejectShape(`false shared assertion ${name}`, (value) => { value.conformance.assertions[name] = false; }, /must be equal to constant/);
+  }
+  for (const [label, mutate, pattern] of [
+    ["failed actual cleanup", (value) => { value.cleanup[0].passed = false; }, /must be equal to constant/],
+    ["missing cleanup kind", (value) => { value.cleanup = Array.from({ length: 4 }, () => structuredClone(value.cleanup[0])); }, /must contain at least 1 and no more than 1 valid item/],
+    ["remaining owned rows", (value) => { value.cleanup[1].detail.counts.artifacts = 1; }, /must be equal to constant/],
+    ["late primary failure", (value) => { value.primaryError = { name: "Error", code: "PROOF_PRIMARY", message: "primary failure" }; }, /must be null/],
+    ["pool failure", (value) => { value.poolErrorCount = 1; }, /must be equal to constant/],
+    ["malformed rollback hash", (value) => { value.guardedCompletion.rollbackObservation.before.hash = "not-a-hash"; }, /must match pattern/],
+    ["unsupported actor mode", (value) => { value.conformance.actorMode = "trusted-anyone"; }, /must be equal to one of the allowed values/],
+    ["schedule overflow", (value) => { value.guardedCompletion.schedules.push(structuredClone(value.guardedCompletion.schedules[0])); }, /must NOT have more than 7 items/],
+    ["missing rollback receipt", (value) => { delete value.guardedCompletion.rollbackObservation.rollbackCommand; }, /must have required property 'rollbackCommand'/],
+    ["changed bound", (value) => { value.limits.clients = 9; }, /must be equal to constant/],
+    ["long vendor version", (value) => { value.postgres.serverVersion = `16.15 ${"A".repeat(128)}`; }, /must NOT have more than 128 characters/],
+    ["invalid finalization time", (value) => { value.finalizedAt = "not-a-time"; }, /must match pattern/],
+    ["erased child failure", (value) => { value.lifecycleFailureScenarios.cleanupAfterPass.passed = true; }, /must be equal to constant/],
+    ["missing child cleanup error", (value) => { delete value.lifecycleFailureScenarios.primaryAndCleanup.cleanup[0].error; }, /must have required property 'error'/],
+    ["lost original primary error", (value) => { value.lifecycleFailureScenarios.primaryAndCleanup.primaryError = null; }, /must be object/],
+    ["overlong refusal error", (value) => { value.exceptionOwnership.refusals[0].error.message = "A".repeat(1025); }, /must NOT have more than 1024 characters/],
+    ["failed report", (value) => { value.passed = false; value.errors.push({ name: "Error", code: "PROOF_FAILURE", message: "observed failure" }); }, /must be equal to constant/],
+    ["checkout runtime import", (value) => { value.packageInstallation.sourceCheckoutImported = true; }, /must be equal to constant/],
+  ]) await rejectShape(label, mutate, pattern);
+
+  const identityFailure = /live PostgreSQL conformance does not match the exact managed-portability release candidate/;
+  for (const [label, mutate] of [
+    ["candidate commit", (value) => { value.candidateCommit = "c".repeat(40); }],
+    ["NodeKit commit", (value) => { value.nodekitCommit = "c".repeat(40); }],
+    ["source hash", (value) => { value.nodekitSourceHash = "c".repeat(64); }],
+    ["combined identity", (value) => { value.nodekitIdentity = `${"c".repeat(40)}/${sourceHash}`; }],
+    ["tarball", (value) => { value.releaseCandidate.nodekitTarballSha256 = "c".repeat(64); }],
+    ["package version", (value) => { value.releaseCandidate.packageVersion = "0.2.2"; }],
+    ["server version identity", (value) => { value.postgres.serverVersionNum += 1; }],
+    ["future test time", (value) => { value.testedAt = "2099-07-22T00:00:00.000Z"; }],
+  ]) {
+    const changed = structuredClone(report);
+    mutate(changed);
+    await store(changed);
+    assert.deepEqual(await schemaErrors(changed), [], `${label}: intended identity failure stopped at shape`);
+    await assert.rejects(closure, identityFailure, label);
+  }
+  await store(report);
+  const burst = await Promise.all(Array.from({ length: 8 }, () => closure()));
+  for (const result of burst) assert.deepEqual(result, expectedClosure);
+  for (let index = 0; index < 16; index += 1) {
+    const restored = index % 2 === 0 ? structuredClone(report) : structuredClone(legacy);
+    verdict.postgresConformance.serverVersionNum = restored.postgres.serverVersionNum;
+    await store(restored);
+    assert.deepEqual(await schemaErrors(restored), []);
+    assert.equal((await closure()).length, 8);
+    const unknown = structuredClone(restored);
+    unknown.unknownClaim = index;
+    await store(unknown);
+    await assert.rejects(closure, /must NOT have additional properties/, `successive admission ${index}`);
+    await store(restored);
+    assert.equal((await closure()).length, 8);
+    const falseClaim = structuredClone(restored);
+    falseClaim.assertions.sharedConformancePassed = false;
+    await store(falseClaim);
+    await assert.rejects(closure, /must be equal to constant/, `successive false claim ${index}`);
+    await store(restored);
+    assert.equal((await closure()).length, 8);
+  }
+  verdict.postgresConformance.serverVersionNum = report.postgres.serverVersionNum;
+  await store(report);
+  assert.deepEqual(await closure(), expectedClosure);
+});
+
 test("submission gate requires all evidence, hashes, and explicit approval", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-submission-"));
   await mkdir(path.join(root, "schemas"), { recursive: true });

@@ -12,6 +12,7 @@ import {
   parseGitStatusPorcelainZ,
 } from "../src/lib/distributable-candidate.mjs";
 import { computeNodeKitSourceHash } from "../src/lib/source-hash.mjs";
+import { validateSchema } from "../src/lib/schema-validation.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const connectionString = process.env.NODEKIT_POSTGRES_URL;
@@ -1074,6 +1075,21 @@ const verdict = {
   publicationPerformed: false,
   deployPerformed: false,
 };
+// Certify the complete success report after real cleanup, not the runtime from
+// the checkout. Adapters and conformance still come from the installed tarball.
+if (verdict.passed) {
+  try {
+    const schemaErrors = await validateSchema("nodekit.postgres-conformance.v2.schema.json", verdict, "native PostgreSQL report");
+    if (schemaErrors.length > 0) {
+      throw Object.assign(new Error(`native PostgreSQL report contract rejected (${schemaErrors.length} errors): ${schemaErrors.slice(0, 4).join("; ")}`),
+        { code: "PROOF_REPORT_CONTRACT" });
+    }
+  } catch (error) {
+    verdict.passed = false;
+    verdict.errors.push(errorSummary(error));
+  }
+}
+
 function encodeReport(report) {
   const encoded = `${JSON.stringify(report, null, 2)}\n`;
   if (Buffer.byteLength(encoded) <= LIMITS.reportBytes) return encoded;
