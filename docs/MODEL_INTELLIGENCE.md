@@ -177,6 +177,12 @@ Model A + Harness v2 +/- candidate skill             # skill effect
 Tasks, evidence, tools, budgets, judges, and scoring remain fixed. Candidate code cannot edit
 held-out tasks, decisive judges, thresholds, safety requirements, or official outcomes.
 
+A separately labeled evaluator-only experiment must rescore identical frozen outputs and report
+agreement against independently reviewed reference judgments and calibration limits; it does not
+demonstrate improvement in the generating pipeline. Compare isolated components on identical
+intermediate inputs; evaluate the whole pipeline with each arm's actual upstream outputs. Keep
+these result scopes separate from each other and from protected promotion evidence.
+
 When changing both model and context builder, compare each model with both the baseline and
 candidate context builders under those fixed conditions. Report the interaction before attributing
 the gain to the model; a combined improvement alone does not isolate its cause.

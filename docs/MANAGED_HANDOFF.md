@@ -166,6 +166,14 @@ These are host acceptance requirements. **Own-data benchmark: NOT_RUN**; no mode
 
 - Bind the run to an immutable authorized corpus revision, document/source hashes, authority and
   scope. Maintain the source registry when revisions or permissions change.
+  Preserve source restrictions on derived chunks. Reuse existing host controls to derive identity
+  and allowed tenant/resource/action scope from trusted state at each protected request boundary
+  (server-side for remote requests), including cached, background and resumed work. Caller or model
+  attributes never grant access by themselves; authorization failure fails closed. Test the actual authenticated
+  path with isolated synthetic fixtures: forged attributes, cross-tenant highest-ranked evidence,
+  authorization-service failure, revoked access before cache reuse or resume, and a permitted happy
+  path. See [OWASP authorization guidance](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
+  and the separate [outbound disclosure requirements](KNOWLEDGE_EVOLUTION.md#byte-authenticated-evidence-snapshots).
 - Test connector auth, response shapes, errors and acquisition coverage separately from source
   selection, queries/filters, reading depth and stopping quality; connector success cannot grade an answer.
 - Declare the required read scope before processing content: filters, candidate document/chunk
