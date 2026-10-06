@@ -177,6 +177,12 @@ Model A + Harness v2 +/- candidate skill             # skill effect
 Tasks, evidence, tools, budgets, judges, and scoring remain fixed. Candidate code cannot edit
 held-out tasks, decisive judges, thresholds, safety requirements, or official outcomes.
 
+A reviewer checking performance on unseen source/case families must not count another revision
+or near-duplicate of a development case as an unseen family. Freeze family membership before
+development/held-out splitting and keep related revisions and near-duplicates together.
+Label intentional within-family or cross-version evaluations separately. These are host acceptance
+requirements; no split builder or duplicate detector is implemented here.
+
 A separately labeled evaluator-only experiment must rescore identical frozen outputs and report
 agreement against independently reviewed reference judgments and calibration limits; it does not
 demonstrate improvement in the generating pipeline. Compare isolated components on identical
