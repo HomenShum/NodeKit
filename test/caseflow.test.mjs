@@ -546,7 +546,7 @@ test("a reviewer keeps external ownership through mixed blockers and reversed cl
     assert.equal(partial.run.status, "blocked");
     assert.equal(partial.run.nextAction, remaining.nextAction ?? "Resolve remaining exception");
     assert.equal(partial.run.nextActionOwner, remaining.nextActionOwner ?? "user");
-    assert.deepEqual(runtime.getArtifact(artifact.artifactId), artifact);
+    assert.deepEqual(runtime.snapshot().artifacts.find((entry) => entry.artifactId === artifact.artifactId), artifact);
     const last = runtime.resolveException({ exceptionId: remaining.exceptionId });
     assert.equal(last.run.status, "active");
     assert.equal(last.run.nextAction, "Continue run");
