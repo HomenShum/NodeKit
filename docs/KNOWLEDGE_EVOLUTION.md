@@ -89,6 +89,13 @@ For a host using a visual location to support a claim, bind that location to the
 capture, coordinate system, viewport or page, and video frame or time range where applicable.
 Preserve any crop, resize, rotation or masking transform. Verify the location mapping separately
 from whether the depicted content supports the claim; missing mapping remains unassessed.
+
+A reviewer asking an external service to inspect one page or a short clip may still disclose the
+full document or recording (analysis versus disclosure scope). Record requested and observed
+analysis scope separately from the exact material disclosed to each recipient and its access
+and retention status. Bind supplied derivatives to originals by identity, hash and transform.
+Offsets alone do not prove limited disclosure or evaluation; unsupported status stays unknown.
+
 These are host acceptance requirements, not checks implemented by the byte verifier.
 
 ```bash
