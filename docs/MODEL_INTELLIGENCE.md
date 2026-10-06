@@ -115,6 +115,18 @@ No card is generated from NodeKit's deterministic factory proof because that pro
 live model comparison. Existing NodeSlide or NodeVideo evidence must be normalized into valid
 observations before it can support a card.
 
+A reviewer deciding whether to rely on an agent's answer needs to know what its confidence
+describes. A score of `0.9` alone does not establish a 90% chance of correctness. Current
+capability-card confidence is an ordinal level and reason, not a probability. If a host presents
+a correctness probability (probability calibration), require evidence from representative,
+independently resolved held-out cases for the stated task/model/harness, with sample counts,
+evidence window and limitations. Report calibration separately from evidence coverage and rubric
+grades; source verification, review, authority and release checks still apply. See
+[Guo et al.](https://proceedings.mlr.press/v70/guo17a.html).
+
+These are host acceptance requirements; no probability estimator or calibration check is
+implemented here.
+
 ## Implemented skill compiler mechanics
 
 `nodekit harness init` creates the five skill roots for the resolved stack:
