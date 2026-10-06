@@ -139,6 +139,17 @@ collection emits `nodekit.research-collection/v1`, records an `EXTERNAL_RESEARCH
 only a pending, source-grounded graph patch. The graph version and canonical entities must remain
 unchanged.
 
+A reviewer importing structured data needs the source value and its interpretation to remain
+distinguishable. For example, an identifier written as `0012` must not silently become the number
+`12`. Preserve the original representation, source locator, type and unit separately from the
+proposed interpretation (normalized value); ambiguous dates, identifiers, currencies and
+leading-zero values remain unresolved for review. A person's correction retains source lineage
+and whether it is an assertion or confirmed against evidence, without changing raw evidence or
+bypassing governed review.
+
+These are host acceptance requirements; no additional parser or normalization checks are
+implemented here.
+
 The bundled CLI deliberately supports only a deterministic local fixture provider, so tests and
 no-key demos never invoke a paid or mutable live service:
 
