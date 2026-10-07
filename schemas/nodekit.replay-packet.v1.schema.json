@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.replay-packet.v1.schema.json",
+  "title": "What a coding-agent run preserved, and how far that actually reproduces it",
+  "description": "Capturing the prompts feels like capturing the build, and it is not. Prompt text alone establishes that the instruction can be replayed; it says nothing about whether the same application comes back. So the packet records the three prompt forms and then names, on a ladder, exactly how far reproduction was demonstrated — with the evidence for that rung attached. A packet that captured prompts and claims BEHAVIOR_REPRODUCED is the failure this schema exists to make unrepresentable.",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "baseline", "prompts", "environment", "reproduction"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.replay-packet/v1" },
+    "runId": { "$ref": "#/$defs/nonEmpty" },
+    "baseline": {
+      "description": "Reproduction starts from a repository state, not from a blank directory. Without this the prompts describe a change to something nobody can identify.",
+      "type": "object",
+      "required": ["commit"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        "worktreeClean": { "type": "boolean" },
+        "fixtureRefs": { "$ref": "#/$defs/paths" }
+      },
+      "additionalProperties": false
+    },
+    "prompts": {
+      "description": "Three forms, and the original is immutable. The improved prompt is what you would send next time; it is not what happened, and a packet that keeps only the cleaned version has quietly rewritten its own history.",
+      "type": "object",
+      "required": ["original", "resolvedExecution"],
+      "properties": {
+        "original": {
+          "description": "The exact instruction as given. Never corrected, never cleaned, never regenerated.",
+          "$ref": "#/$defs/promptRecord"
+        },
+        "resolvedExecution": {
+          "description": "What was actually dispatched after binding scope, repository identity, authority, inputs, completion tests and runtime topology.",
+          "$ref": "#/$defs/promptRecord"
+        },
+        "recommendedReplay": {
+          "description": "The cleaned prompt written after the run, carrying what the corrections taught. Optional, because a run that learned nothing should not invent a lesson.",
+          "$ref": "#/$defs/promptRecord"
+        },
+        "humanInterventions": {
+          "description": "Corrections and reprompts. A run steered three times by a human and recorded as one clean prompt is not reproducible by that prompt.",
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "required": ["at", "instruction"],
+            "properties": {
+              "at": { "type": "string", "format": "date-time" },
+              "instruction": { "$ref": "#/$defs/nonEmpty" },
+              "reason": { "$ref": "#/$defs/nonEmpty" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "description": "The agent, model and authority the run had. The same prompt under different tool permissions is a different run.",
+      "type": "object",
+      "required": ["agent", "model"],
+      "properties": {
+        "agent": { "$ref": "#/$defs/nonEmpty" },
+        "model": { "$ref": "#/$defs/nonEmpty" },
+        "settings": { "type": "object" },
+        "toolsAllowed": { "$ref": "#/$defs/strings" },
+        "deterministic": {
+          "description": "Whether the generation process itself is deterministic. Only a deterministic process may claim BYTE_IDENTICAL; for everything else identical bytes are luck, not reproduction.",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reproduction": {
+      "type": "object",
+      "required": ["levelClaimed", "evidence"],
+      "properties": {
+        "levelClaimed": {
+          "description": "PROMPT_REPLAYABLE: the exact prompt and context exist. BUILD_REPLAYABLE: the recorded workflow runs against the same baseline. BEHAVIOR_REPRODUCED: the required journeys and invariants pass. VISUAL_EQUIVALENT: required UI states match within the declared comparison rules. BYTE_IDENTICAL: generated files are identical, which only a deterministic process may claim.",
+          "enum": ["PROMPT_REPLAYABLE", "BUILD_REPLAYABLE", "BEHAVIOR_REPRODUCED", "VISUAL_EQUIVALENT", "BYTE_IDENTICAL"]
+        },
+        "evidence": {
+          "description": "What was observed at each rung. The rung claimed must appear here, and so must every rung beneath it: reproduction is a ladder, and a level cannot stand on an untested one below it.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "required": ["level", "observed", "artifact"],
+            "properties": {
+              "level": { "enum": ["PROMPT_REPLAYABLE", "BUILD_REPLAYABLE", "BEHAVIOR_REPRODUCED", "VISUAL_EQUIVALENT", "BYTE_IDENTICAL"] },
+              "observed": { "$ref": "#/$defs/nonEmpty" },
+              "artifact": { "$ref": "#/$defs/path" },
+              "freshWorktree": {
+                "description": "Whether the replay ran in a worktree created from baseline. A replay in the directory that already contains the result is not a replay.",
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "notReproduced": {
+          "description": "What this packet does NOT establish. Required, and required to be non-empty at every level below BYTE_IDENTICAL, because a packet with no stated limit is one whose limit was never considered.",
+          "$ref": "#/$defs/strings"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Only a deterministic process may claim identical bytes.",
+      "if": {
+        "properties": { "reproduction": { "properties": { "levelClaimed": { "const": "BYTE_IDENTICAL" } }, "required": ["levelClaimed"] } },
+        "required": ["reproduction"]
+      },
+      "then": {
+        "properties": { "environment": { "properties": { "deterministic": { "const": true } }, "required": ["deterministic"] } }
+      },
+      "else": {
+        "$comment": "Everything short of byte-identical must say what it did not establish.",
+        "properties": { "reproduction": { "properties": { "notReproduced": { "minItems": 1 } }, "required": ["notReproduced"] } }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "strings": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+    "path": { "type": "string", "minLength": 1, "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" },
+    "paths": { "type": "array", "items": { "$ref": "#/$defs/path" }, "uniqueItems": true },
+    "promptRecord": {
+      "type": "object",
+      "required": ["text", "digest"],
+      "properties": {
+        "text": { "$ref": "#/$defs/nonEmpty" },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "capturedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

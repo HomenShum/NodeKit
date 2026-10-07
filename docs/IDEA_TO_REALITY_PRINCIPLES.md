@@ -25,9 +25,8 @@ reading and build the smallest proof.
 
 1. Find one person with one recurring, consequential job.
 2. Observe how they do it now, including workarounds and failure costs.
-3. Freeze the smallest useful outcome, the working behavior that must survive, and everything that
-   is not part of it.
-4. Build or migrate one complete path from real input to an inspectable artifact.
+3. Freeze the smallest useful outcome and everything that is not part of it.
+4. Build one complete path from real input to an inspectable artifact.
 5. Make the artifact primary; keep proof and debug machinery in an explicit inspection surface.
 6. Let agents orchestrate reversible work through shared typed operations; let deterministic or
    specialist tools execute the work they own.
@@ -50,13 +49,6 @@ DECIDE -> BUILD -> EXPLAIN -> LAUNCH -> LEARN
 
 Proof crosses every stage. It is an exit condition, not the product.
 
-When a working product already exists, use the brownfield lane instead of generating a replacement
-shell:
-
-```text
-INSPECT -> INVENTORY -> BOUND -> MIGRATE IN PLACE -> PROVE PARITY -> RETIRE DUPLICATES
-```
-
 For each working session, use the same compact execution contract:
 
 1. Inspect repository instructions, current state, ownership, and uncommitted work before editing.
@@ -70,13 +62,11 @@ For each working session, use the same compact execution contract:
 
 ## Where this doctrine came from
 
-NodeSlide, NodeVideo, NodeVision, and NodeBook were the field tests. NodeSlide exposed the sharpest gap
+NodeSlide, NodeVideo, and NodeVision were the field tests. NodeSlide exposed the sharpest gap
 between system-green and user-good: exact slide counts, valid schemas, broad component inventories,
 and successful exports could still produce repetitive, semantically weak, or visually broken
 decks. NodeVideo showed how capability accumulation can bury the creator's job. NodeVision showed
-the value of completing one phone-sized path, including the handoff into the real device. NodeBook
-showed that a technically cleaner replacement can still be the wrong product when it discards a
-working interface or legacy behavior before understanding it.
+the value of completing one phone-sized path, including the handoff into the real device.
 
 Across them, productivity improved when the work returned to one user job, one canonical artifact,
 a small surface, shared human/agent operations, durable recovery, causal diagnosis, and direct
@@ -148,10 +138,11 @@ a slice. Define the terminal condition at the user boundary: a command that writ
 file but fails to validate, export, publish, or reopen the requested result has not finished the
 job.
 
-For an existing product, the slice must begin inside the real application. Inventory active
-behaviors, tools, events, commands, data paths, journeys, failure states, and inactive stubs before
-replacing any engine, store, or surface. Preserve behavior first; rename or retire only after parity
-is observable.
+For an existing product, inventory active capabilities and inactive stubs from its pinned source,
+history, tests, and observed journeys before replacing an engine, store, or surface. Compare the
+same baseline/candidate user job using the Existing-product parity record below. Preserve the
+declared state owner; retire duplicates only after ownership is mapped and required parity evidence
+shows no unapproved behavior loss.
 
 **Action:** at the midpoint of the timebox, freeze the workflow. Defer aesthetic expansion and
 secondary integrations before they consume the proof window.
@@ -255,8 +246,6 @@ benefit is merely architectural neatness or future possibility, defer it.
 - one owner for canonical state;
 - one core service with several transports, never separate logic per transport;
 - integrate a validated package, service, or product primitive when it covers the measured job;
-- prefer a maintained renderer, component, or protocol over bespoke infrastructure when it fits
-  the interaction and authority boundary;
 - rebuild only when evidence identifies a material gap, control boundary, or measurable advantage;
 - add a platform abstraction only after repeated consumers expose the same seam;
 - delete or demote surfaces that users do not open.
@@ -521,30 +510,25 @@ authority_boundaries: []
 kill_condition: "evidence that stops or redirects the build"
 ```
 
-### Existing behavior inventory
+### Existing-product parity record
 
-Use this before changing a working application, agent, database, or interaction model. Generate it
-from source and tests where possible; do not rely on a manually remembered feature list.
+Record source/evidence bindings for each capability; inactive stubs are provenance, not working
+behavior. This is a copyable acceptance record, not a new registry or an implemented inventory tool.
 
 ```yaml
-baseline_revision: "immutable existing-product revision"
-primary_journey: "one real job that must continue to work"
-active_behaviors: []
-active_tools: []
-stream_events: []
-inline_commands: []
-data_paths: []
-failure_and_recovery_states: []
+baseline_revision: "immutable working-product revision"
+candidate_revision: "exact candidate revision"
+primary_journey: "same persona, input, artifact, and required states in both arms"
+active_capabilities: []  # capability, source/evidence, owner, test/proof bindings
 inactive_stubs: []
-owners: {}
-test_bindings: {}
-proof_bindings: {}
 unmapped_active_capabilities: []
-retirement_gate: "parity proof required before a duplicate path is removed"
+parity_evidence: []      # baseline/candidate observations, including failure and recovery
 ```
 
-The inventory fails closed while `unmapped_active_capabilities` is non-empty. An inactive stub is
-recorded as provenance, not promoted into a product promise.
+Retirement stays blocked while active capabilities are unmapped or parity shows unapproved behavior
+loss. Preserve the [historical NodeBook field case](https://github.com/HomenShum/NodeKit/blob/682699cfc4b9e03fe07422a9843bcf9dd4c1f36f/docs/NODEBOOK_FIELD_CASE.md) as source
+provenance. The proposed Fresh Builder In-Place Wedge Proof is **NOT_RUN**; this documentation change
+does not execute a migration or establish a productivity improvement.
 
 ### Minimal interface contract
 
@@ -553,7 +537,7 @@ leave the rest of the screen out of scope.
 
 ```yaml
 user_job: "the one action this surface helps finish"
-change_boundary: "route, viewport, and stable CHANGE A/B region labels"
+change_boundary: "route, region, or component"
 primary_artifact: "what deserves most visual weight"
 primary_action: "one next action in this state"
 states:
@@ -623,14 +607,6 @@ story afterward:
 | One NodeAgent runtime and creator workspace beat parallel agent surfaces | [NodeVideo `48fa86d`](https://github.com/HomenShum/NodeVideo/commit/48fa86dc375a3347047c232b430a977dceb2fb92) |
 | Mobile became usable after configuration moved behind disclosure and recovery stayed contextual | [NodeVideo `7c2fcc7`](https://github.com/HomenShum/NodeVideo/commit/7c2fcc7bcc6f8fb9935bfb32c4cc5e356dd1f65a) |
 | Model failures required boundary-level causal diagnosis and exact-case repair | [NodeVideo `d3ebe73`](https://github.com/HomenShum/NodeVideo/commit/d3ebe73bbfc8dac5b12458bb743a11118dc06efe) |
-| A generic replacement shell lost the real notebook product; the successful path inventoried legacy behavior and migrated the existing application in place | [NodeBook `bb9d2a8`](https://github.com/HomenShum/NodeBook/commit/bb9d2a8c) |
-| Inline, sidebar, API, durable execution, and evaluation surfaces converged on one engine before the duplicate writer was retired | [NodeBook `0419f81`](https://github.com/HomenShum/NodeBook/commit/0419f815) |
-| Safe agent work became checkpoint -> automatic execution -> receipt -> whole-run Undo while destructive or external effects retained consequence gates | [NodeBook `cd533b7`](https://github.com/HomenShum/NodeBook/commit/cd533b73) |
-| A prose parity ledger still drifted after green runtime tests; a source-derived capability manifest and drift test found and closed the mismatch | [NodeBook `05f4658`](https://github.com/HomenShum/NodeBook/commit/05f4658a) |
-
-The complete NodeBook sequence, including the wrong turn, causal corrections, UI constraints,
-production proof, and portable versus app-specific lessons, is recorded in
-[the NodeBook in-place migration field case](NODEBOOK_FIELD_CASE.md).
 
 Copy the process, not a product's domain. A new NodeKit application does not inherit slide
 grammars, video editing, pose tracking, model providers, navigation count, or a visual style unless

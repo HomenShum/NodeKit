@@ -1,8 +1,19 @@
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
 let state;
+const baseTitle = document.title;
 
 async function api(path, options = {}) {
-  const response = await fetch(path, { headers: { "content-type": "application/json" }, ...options });
+  let response;
+  try {
+    response = await fetch(path, { headers: { "content-type": "application/json" }, ...options });
+  } catch {
+    // A transport failure rejects with the browser's own wording — "Failed to fetch" — which
+    // names neither the cause nor the way out. Replaced here, at the one seam every call
+    // routes through, so no caller can leak it to the page.
+    const error = new Error("Could not reach the server. Check that it is still running, then retry.");
+    error.retryable = true;
+    throw error;
+  }
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error ?? `HTTP ${response.status}`);
   return payload;
@@ -21,6 +32,9 @@ function render() {
   document.querySelector(".status").dataset.status = state.run.status;
   elements["state-kind"].textContent = String(state.presentation?.kind ?? "status").replaceAll("_", " ");
   elements["state-title"].textContent = state.presentation?.title ?? "Case status";
+  // WIG Content "Accurate page titles": the tab, and any shared link, name the stage the run
+  // is actually at. baseTitle is captured once at load so this cannot compound on re-render.
+  document.title = state.presentation?.title ? `${state.presentation.title} | ${baseTitle}` : baseTitle;
   elements["state-message"].textContent = state.presentation?.message ?? "The case state is available.";
   elements["state-banner"].dataset.kind = state.presentation?.kind ?? "status";
   elements["case-name"].textContent = state.case.title;
@@ -86,7 +100,35 @@ function render() {
 }
 
 function escapeText(value) { const node = document.createElement("span"); node.textContent = String(value ?? ""); return node.innerHTML; }
-async function act(path, body = {}) { elements.error.hidden = true; try { state = await api(path, { method: "POST", body: JSON.stringify(body) }); render(); } catch (error) { elements.error.textContent = error.message; elements.error.hidden = false; } }
+let lastAction = null;
+let inFlight = false;
+
+// One writer for the error region, so a message can never arrive without its exit.
+function showError(message, { retryable = false } = {}) {
+  elements["error-message"].textContent = message;
+  elements.retry.hidden = !retryable;
+  elements.error.hidden = false;
+}
+
+async function act(path, body = {}) {
+  if (inFlight) return;                    // a second submit while one is in flight is a double-apply
+  inFlight = true;
+  lastAction = { body, path };
+  document.body.dataset.busy = "true";     // in-flight state; labels stay put, controls stop accepting input
+  document.body.setAttribute("aria-busy", "true");
+  elements.error.hidden = true;
+  try {
+    state = await api(path, { method: "POST", body: JSON.stringify(body) });
+    render();
+  } catch (error) {
+    showError(error.message, { retryable: Boolean(error.retryable) });
+  } finally {
+    inFlight = false;
+    delete document.body.dataset.busy;
+    document.body.removeAttribute("aria-busy");
+  }
+}
+elements.retry.addEventListener("click", () => { if (lastAction) act(lastAction.path, lastAction.body); });
 elements.reset.addEventListener("click", () => act("/api/reset"));
 elements.propose.addEventListener("click", () => act("/api/propose"));
 elements["mobile-propose"].addEventListener("click", () => act("/api/propose"));
@@ -124,7 +166,7 @@ elements["copy-share"].addEventListener("click", async () => {
     elements["copy-status"].textContent = summary;
   }
 });
-elements["primary-input"].addEventListener("submit", (event) => { event.preventDefault(); const outcome = elements.outcome.value.trim(); if (!outcome) { elements.error.textContent = "Add a concrete outcome before continuing."; elements.error.hidden = false; elements.outcome.setAttribute("aria-invalid", "true"); } else { elements.outcome.setAttribute("aria-invalid", "false"); act("/api/confirm", { outcome }); } });
+elements["primary-input"].addEventListener("submit", (event) => { event.preventDefault(); const outcome = elements.outcome.value.trim(); if (!outcome) { showError("Add a concrete outcome before continuing."); elements.outcome.setAttribute("aria-invalid", "true"); } else { elements.outcome.setAttribute("aria-invalid", "false"); act("/api/confirm", { outcome }); } });
 const requestedScenario = new URL(window.location.href).searchParams.get("scenario");
 const existingState = await api("/api/state");
 state = requestedScenario && existingState.presentation?.id !== requestedScenario

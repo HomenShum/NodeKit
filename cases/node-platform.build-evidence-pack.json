@@ -1,0 +1,490 @@
+{
+  "schemaVersion": "nodekit.build-evidence-pack/v1",
+  "caseId": "node-platform",
+  "stage": "build",
+  "producedAt": "2026-08-03T11:31:23.981Z",
+  "inputs": [
+    {
+      "schemaVersion": "nodekit.opportunity-contract/v1",
+      "caseId": "node-platform",
+      "sha256": "1000235cdccef280f159bb338e294da551373550aa2ad46a324be61afffc63f3",
+      "path": "cases/node-platform.opportunity-contract.json"
+    }
+  ],
+  "content": {
+    "summary": "Mechanical BUILD-stage evidence for case node-platform: 0 contract decision(s) honoured with digested source evidence, 25 defaulted with a written disclosure, 0 contradicted, and 0 emergent decisions surfaced by a receipted sweep of 451 tracked files. Every evidence entry is a real file with a digest and a generation record; nothing in this pack is asserted.",
+    "built": {
+      "surfaces": []
+    },
+    "decisions": {
+      "contract": {
+        "user": {
+          "pointer": "/user",
+          "disposition": "defaulted-with-disclosure",
+          "evidenceRefs": [
+            "ev-default-disclosures",
+            "ev-opportunity-contract-source"
+          ],
+          "defaultApplied": "The build attached no evidence for /user; the repository's existing state was left as found and nothing about this decision is attested.",
+          "disclosure": "No build action attested to /user. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /user as unverified until evidence is attached.",
+          "disclosedIn": "ev-default-disclosures",
+          "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+        },
+        "problem": {
+          "pointer": "/problem",
+          "disposition": "defaulted-with-disclosure",
+          "evidenceRefs": [
+            "ev-default-disclosures",
+            "ev-opportunity-contract-source"
+          ],
+          "defaultApplied": "The build attached no evidence for /problem; the repository's existing state was left as found and nothing about this decision is attested.",
+          "disclosure": "No build action attested to /problem. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /problem as unverified until evidence is attached.",
+          "disclosedIn": "ev-default-disclosures",
+          "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+        },
+        "wedge": {
+          "pointer": "/wedge",
+          "disposition": "defaulted-with-disclosure",
+          "evidenceRefs": [
+            "ev-default-disclosures",
+            "ev-opportunity-contract-source"
+          ],
+          "defaultApplied": "The build attached no evidence for /wedge; the repository's existing state was left as found and nothing about this decision is attested.",
+          "disclosure": "No build action attested to /wedge. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /wedge as unverified until evidence is attached.",
+          "disclosedIn": "ev-default-disclosures",
+          "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+        },
+        "primaryJob": {
+          "pointer": "/primaryJob",
+          "disposition": "defaulted-with-disclosure",
+          "evidenceRefs": [
+            "ev-default-disclosures",
+            "ev-opportunity-contract-source"
+          ],
+          "defaultApplied": "The build attached no evidence for /primaryJob; the repository's existing state was left as found and nothing about this decision is attested.",
+          "disclosure": "No build action attested to /primaryJob. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /primaryJob as unverified until evidence is attached.",
+          "disclosedIn": "ev-default-disclosures",
+          "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+        },
+        "primaryArtifact": {
+          "pointer": "/primaryArtifact",
+          "disposition": "defaulted-with-disclosure",
+          "evidenceRefs": [
+            "ev-default-disclosures",
+            "ev-opportunity-contract-source"
+          ],
+          "defaultApplied": "The build attached no evidence for /primaryArtifact; the repository's existing state was left as found and nothing about this decision is attested.",
+          "disclosure": "No build action attested to /primaryArtifact. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /primaryArtifact as unverified until evidence is attached.",
+          "disclosedIn": "ev-default-disclosures",
+          "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+        },
+        "successCondition": {
+          "pointer": "/successCondition",
+          "disposition": "defaulted-with-disclosure",
+          "evidenceRefs": [
+            "ev-default-disclosures",
+            "ev-opportunity-contract-source"
+          ],
+          "defaultApplied": "The build attached no evidence for /successCondition; the repository's existing state was left as found and nothing about this decision is attested.",
+          "disclosure": "No build action attested to /successCondition. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /successCondition as unverified until evidence is attached.",
+          "disclosedIn": "ev-default-disclosures",
+          "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+        },
+        "inputs": {
+          "pointer": "/inputs",
+          "declaredElementCount": 4,
+          "elements": [
+            {
+              "pointer": "/inputs/0",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /inputs/0; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /inputs/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /inputs/0 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            },
+            {
+              "pointer": "/inputs/1",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /inputs/1; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /inputs/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /inputs/1 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            },
+            {
+              "pointer": "/inputs/2",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /inputs/2; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /inputs/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /inputs/2 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            },
+            {
+              "pointer": "/inputs/3",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /inputs/3; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /inputs/3. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /inputs/3 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            }
+          ]
+        },
+        "rejectedAlternatives": {
+          "pointer": "/rejectedAlternatives",
+          "declaredElementCount": 2,
+          "elements": [
+            {
+              "pointer": "/rejectedAlternatives/0",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /rejectedAlternatives/0; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /rejectedAlternatives/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /rejectedAlternatives/0 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            },
+            {
+              "pointer": "/rejectedAlternatives/1",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /rejectedAlternatives/1; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /rejectedAlternatives/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /rejectedAlternatives/1 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            }
+          ]
+        },
+        "openUnknowns": {
+          "pointer": "/openUnknowns",
+          "declaredElementCount": 2,
+          "elements": [
+            {
+              "pointer": "/openUnknowns/0",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /openUnknowns/0; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /openUnknowns/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /openUnknowns/0 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            },
+            {
+              "pointer": "/openUnknowns/1",
+              "disposition": "defaulted-with-disclosure",
+              "evidenceRefs": [
+                "ev-default-disclosures",
+                "ev-opportunity-contract-source"
+              ],
+              "defaultApplied": "The build attached no evidence for /openUnknowns/1; the repository's existing state was left as found and nothing about this decision is attested.",
+              "disclosure": "No build action attested to /openUnknowns/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /openUnknowns/1 as unverified until evidence is attached.",
+              "disclosedIn": "ev-default-disclosures",
+              "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+            }
+          ]
+        },
+        "authorityLimits": {
+          "read": {
+            "pointer": "/authorityLimits/read",
+            "declaredElementCount": 4,
+            "elements": [
+              {
+                "pointer": "/authorityLimits/read/0",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/read/0; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/read/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/0 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/read/1",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/read/1; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/read/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/1 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/read/2",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/read/2; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/read/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/2 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/read/3",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/read/3; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/read/3. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/read/3 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              }
+            ]
+          },
+          "propose": {
+            "pointer": "/authorityLimits/propose",
+            "declaredElementCount": 3,
+            "elements": [
+              {
+                "pointer": "/authorityLimits/propose/0",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/propose/0; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/propose/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/propose/0 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/propose/1",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/propose/1; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/propose/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/propose/1 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/propose/2",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/propose/2; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/propose/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/propose/2 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              }
+            ]
+          },
+          "approve": {
+            "pointer": "/authorityLimits/approve",
+            "declaredElementCount": 0,
+            "elements": []
+          },
+          "prohibited": {
+            "pointer": "/authorityLimits/prohibited",
+            "declaredElementCount": 4,
+            "elements": [
+              {
+                "pointer": "/authorityLimits/prohibited/0",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/prohibited/0; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/prohibited/0. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/0 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/1",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/prohibited/1; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/prohibited/1. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/1 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/2",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/prohibited/2; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/prohibited/2. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/2 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              },
+              {
+                "pointer": "/authorityLimits/prohibited/3",
+                "disposition": "defaulted-with-disclosure",
+                "evidenceRefs": [
+                  "ev-default-disclosures",
+                  "ev-opportunity-contract-source"
+                ],
+                "defaultApplied": "The build attached no evidence for /authorityLimits/prohibited/3; the repository's existing state was left as found and nothing about this decision is attested.",
+                "disclosure": "No build action attested to /authorityLimits/prohibited/3. The producer recorded the repository as found and made no claim that this decision was honoured; treat every downstream statement about /authorityLimits/prohibited/3 as unverified until evidence is attached.",
+                "disclosedIn": "ev-default-disclosures",
+                "whyNotEscalated": "The producer ran unattended with no human in the loop to ask; recording the default with a written disclosure was the only honest option that neither blocked the pipeline nor asserted an honour it could not show."
+              }
+            ]
+          }
+        }
+      },
+      "emergent": [],
+      "emergentSweep": {
+        "method": "Mechanical inventory: every tracked file under the scanned paths was enumerated by a receipted git ls-files run. The producer surfaced no emergent decisions because it does not read semantics; the receipt shows exactly what was and was not searched.",
+        "scannedPaths": [
+          "src",
+          "schemas",
+          "scripts",
+          "test"
+        ],
+        "evidenceRefs": [
+          "ev-emergent-sweep"
+        ],
+        "knownBlindSpots": [
+          "The sweep enumerates file paths only; a decision expressed inside code, copy, or a configuration value does not appear.",
+          "Untracked files are invisible to git ls-files and were not inventoried."
+        ]
+      }
+    },
+    "claims": [],
+    "evidence": [
+      {
+        "evidenceId": "ev-opportunity-contract-source",
+        "kind": "source-file",
+        "artifact": {
+          "path": "cases/node-platform.opportunity-contract.json",
+          "sha256": "928face9b537315f2be217e8b9f46a2a32ab8fc36f599a019ee3382b15f69d6a",
+          "byteLength": 2879,
+          "mediaType": "application/json"
+        },
+        "generatedBy": {
+          "method": "file-read",
+          "tool": "src/lib/build-evidence-producer.mjs",
+          "actor": "platform-tool",
+          "producedAt": "2026-08-03T11:31:23.981Z"
+        },
+        "observation": "The OpportunityContract this pack reconciles against, read as 2879 bytes; its canonical-JSON digest is recorded in inputs[0].",
+        "boundary": "Shows what the contract says, not that any of it was built. Reconciliation dispositions carry that burden separately."
+      },
+      {
+        "evidenceId": "ev-emergent-sweep",
+        "kind": "command-output",
+        "artifact": {
+          "path": "cases/evidence/emergent-sweep.txt",
+          "sha256": "56a2377e0e62cee889ac649de76a0df2a950e8d8755889931c3a6e24922cc000",
+          "byteLength": 17996,
+          "mediaType": "text/plain"
+        },
+        "generatedBy": {
+          "method": "command",
+          "tool": "git",
+          "actor": "platform-tool",
+          "producedAt": "2026-08-03T11:31:23.981Z",
+          "command": "git -c core.quotepath=false ls-files -- src schemas scripts test",
+          "exitCode": 0,
+          "durationMs": 37
+        },
+        "observation": "The sweep inventoried 451 tracked files under src, schemas, scripts, test and the producer surfaced zero emergent decisions from that inventory.",
+        "boundary": "A file inventory, not a reading. It cannot detect a decision expressed in code semantics, copy, or a default value; those blind spots are declared in decisions.emergentSweep."
+      },
+      {
+        "evidenceId": "ev-test-run",
+        "kind": "test-run",
+        "artifact": {
+          "path": "cases/evidence/test-run.log",
+          "sha256": "fc9bfd9f2f323238bdf7a67b019bb817a4c06c618bbd2eabcc92edd2bb476590",
+          "byteLength": 4849,
+          "mediaType": "text/plain"
+        },
+        "generatedBy": {
+          "method": "command",
+          "tool": "shell",
+          "actor": "platform-tool",
+          "producedAt": "2026-08-03T11:31:23.981Z",
+          "command": "node --test test/knockout.test.mjs test/delivery-brief.test.mjs test/replay-book.test.mjs",
+          "exitCode": 0,
+          "durationMs": 469
+        },
+        "observation": "The configured test command exited 0; its full stdout and stderr are the artifact bytes, recorded whether it passed or failed.",
+        "boundary": "One invocation on one machine at one time. It does not establish coverage of the contract's success condition, only what this command reported."
+      },
+      {
+        "evidenceId": "ev-default-disclosures",
+        "kind": "disclosure-copy",
+        "artifact": {
+          "path": "cases/evidence/default-disclosures.md",
+          "sha256": "3e8d5ece6110c4e311a4b6c9812e4bc09e515143487c4b7db381403a0d69e5e7",
+          "byteLength": 7179,
+          "mediaType": "text/markdown"
+        },
+        "generatedBy": {
+          "method": "instrumented-run",
+          "tool": "src/lib/build-evidence-producer.mjs",
+          "actor": "platform-tool",
+          "producedAt": "2026-08-03T11:31:23.981Z"
+        },
+        "observation": "The human-readable disclosure listing all 25 contract decisions this pack defaults rather than honours, one line per pointer.",
+        "boundary": "A disclosure written, not a disclosure read. No human has seen it; completeness.notRun says so."
+      }
+    ],
+    "promotionAuthorized": false
+  },
+  "completeness": {
+    "claimed": [
+      "All 25 decision-bearing contract pointers carry an explicit disposition; none is silently honoured and none is omitted.",
+      "The inputs[0] binding digest was recomputed from the canonical JSON of the contract actually read, via the same canonicalSha256 the chain gate uses.",
+      "The emergent-decision sweep ran as a real command (exit 0) and its receipt lists all 451 files inventoried.",
+      "The configured test command was executed and its exit code (0) recorded exactly as it happened."
+    ],
+    "notRun": [
+      "No semantic assessment of the built system against any contract decision was performed by this producer; every pointer without caller-supplied evidence is recorded as defaulted-with-disclosure, not honoured.",
+      "No human has read the disclosure artifact; it exists on disk with a digest, and nothing more is claimed for it.",
+      "The emergent sweep inventoried tracked file paths only; decisions expressed inside code semantics, copy, or configuration values were not searched for.",
+      "No adversarial review was run. This pack carries the author's own test command and no independent attempt to break the build, which is unfalsified rather than verified."
+    ],
+    "refused": [
+      {
+        "item": "Marking any contract decision honoured without caller-supplied evidence files",
+        "reason": "An honoured disposition asserts the build did something specific, and this producer cannot see intent — only bytes and exit codes. Where no evidence was supplied it defaulted with disclosure instead."
+      },
+      {
+        "item": "Writing promotionAuthorized: true",
+        "reason": "Authorization is derived by verification from an attestation. A producer granting it to itself is the self-approval the authority model forbids, so the field is pinned false."
+      }
+    ]
+  }
+}

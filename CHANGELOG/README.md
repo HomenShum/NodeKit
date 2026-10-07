@@ -7,6 +7,7 @@ rewritten after release.
 
 - [`docs/onboarding.md`](docs/onboarding.md) - newcomer orientation and idea-to-reality operating doctrine
 - [`package/public-docs.md`](package/public-docs.md) - documentation shipped with the npm package
+- [`package/agent-skills.md`](package/agent-skills.md) - coding-agent policy and projected NodeKit skills
 - [`library/agent-run.md`](library/agent-run.md) - bounded local process recording, receipts, and static reports
 - [`cli/agent-run.md`](cli/agent-run.md) - `nodekit agent run` command and honest process exits
 - [`library/governance.md`](library/governance.md) — risk classification, evidence, rollback, and graph projection

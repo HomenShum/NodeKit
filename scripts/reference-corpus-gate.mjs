@@ -59,7 +59,19 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { validateSchema } from "../src/lib/schema-validation.mjs";
 
-const corpusDir = process.argv[2] ?? "atlas/references";
+// The rules belong to the project being gated, not to whatever package this file was installed
+// into, so a ref resolves against that project. Deriving the root from this module's own location
+// works only while the gate lives in the repository it checks: from inside a consumer's
+// node_modules it would resolve every ref against NodeKit and report the consumer's own files as
+// missing — a check that runs, prints a denominator, and answers a question nobody asked.
+const args = process.argv.slice(2);
+const rootFlag = args.findIndex((a) => a === "--repo-root");
+const repoRoot = path.resolve(
+  rootFlag >= 0 ? (args[rootFlag + 1] ?? ".") : (args.find((a) => a.startsWith("--repo-root="))?.slice(12) ?? process.cwd()),
+);
+const positional = args.filter((a, i) => !a.startsWith("--") && !(rootFlag >= 0 && i === rootFlag + 1));
+
+const corpusDir = positional[0] ?? "atlas/references";
 const BANNED = /\b(clean|beautiful|modern|premium|polished|delightful|good UX|elegant|sleek)\b/i;
 const SELF_GRADING = /^(reviewedBy|approved|verified|bannedTagCheck|compliant|passesChecks|selfCheck)$/i;
 
@@ -219,8 +231,76 @@ for (const { file, doc } of records) {
   }
 }
 
+// 6. A DESIGN CONTRACT IS REQUIREMENTS, NOT DECORATION. Each rule declares where it terminates
+//    in something checkable; `kind: none` is a legitimate answer for an advisory rule, but a
+//    contract made mostly of them is a set of paragraphs wearing citations. The schema enforces
+//    per-rule honesty (none must carry a reason); only the corpus can see the ratio.
+const UNCHECKED_RULE_RATIO_MAX = 0.3;
+const ruleTerminations = [...rulesById.values()].map((r) => r.boundToGate?.kind ?? "none");
+const uncheckedRules = ruleTerminations.filter((k) => k === "none").length;
+const delegatedRules = ruleTerminations.filter((k) => k === "delegated").length;
+
+// A ref is only a termination if it resolves. "src/render.mjs:assertNoPie" naming an assertion that
+// does not exist reads exactly like one that does, and is the shape a rule takes as the code moves
+// out from under it. Resolved against the repository, not the corpus, because that is where the
+// artifact lives.
+let refsResolved = 0;
+for (const rule of rulesById.values()) {
+  const { kind, ref } = rule.boundToGate ?? {};
+  if (kind === "none" || !ref) continue;
+  const [locator, anchor] = ref.includes("#") ? [ref.slice(0, ref.indexOf("#")), ref.slice(ref.indexOf("#") + 1)] : [ref, null];
+  // A trailing :symbol is only a symbol when it is not a Windows drive or a line number.
+  const symbolMatch = anchor === null ? /^(.*?):([A-Za-z_$][\w$.]*)$/.exec(locator) : null;
+  const filePath = symbolMatch ? symbolMatch[1] : locator;
+  const symbol = symbolMatch ? symbolMatch[2] : null;
+  const absolute = path.resolve(repoRoot, filePath);
+
+  let source;
+  try {
+    source = statSync(absolute).isFile() ? readFileSync(absolute, "utf8") : null;
+  } catch {
+    source = null;
+  }
+  if (source === null) {
+    violations.push(`${rule.ruleId}: boundToGate.ref points at ${filePath}, which is not a file in this repository`);
+    continue;
+  }
+
+  if (anchor !== null) {
+    // A JSON pointer into a schema: walk it rather than trust that the path reads plausibly.
+    let node;
+    try {
+      node = JSON.parse(source);
+    } catch {
+      node = undefined;
+    }
+    for (const rawSegment of anchor.split("/").filter(Boolean)) {
+      const segment = rawSegment.replace(/~1/g, "/").replace(/~0/g, "~");
+      node = node && typeof node === "object" ? node[segment] : undefined;
+    }
+    if (node === undefined) {
+      violations.push(`${rule.ruleId}: boundToGate.ref resolves to nothing at ${anchor} in ${filePath}`);
+      continue;
+    }
+  } else if (symbol && !new RegExp(`\\b${symbol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(source)) {
+    violations.push(`${rule.ruleId}: boundToGate.ref names ${symbol}, which does not appear in ${filePath}`);
+    continue;
+  }
+  refsResolved += 1;
+}
+if (ruleTerminations.length > 0) {
+  const ratio = uncheckedRules / ruleTerminations.length;
+  if (ratio > UNCHECKED_RULE_RATIO_MAX) {
+    violations.push(
+      `${uncheckedRules}/${ruleTerminations.length} rule(s) terminate in nothing checkable ` +
+        `(${(ratio * 100).toFixed(0)}% > ${UNCHECKED_RULE_RATIO_MAX * 100}%); this is a decorated contract, not requirements`,
+    );
+  }
+}
+
 console.log(`${violations.length === 0 ? "PASS" : "FAIL"}  reference corpus`);
 console.log(`      ${records.length} record(s) read from ${corpusDir}; ${recordsValidated} validated against a declared schema`);
 console.log(`      ${factsRecorded} fact(s) recorded; ${citationsChecked} citation(s) checked; ${criterionScoresChecked} criterion score(s) checked`);
+console.log(`      ${ruleTerminations.length} rule(s) checked for termination; ${uncheckedRules} terminate in nothing checkable; ${delegatedRules} delegated to a consumer; ${refsResolved} ref(s) resolved to a real artifact`);
 for (const v of violations) console.log(`      ${v}`);
 process.exit(violations.length === 0 ? 0 : 1);

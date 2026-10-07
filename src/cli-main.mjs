@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Full command implementation. The public wrapper keeps reference-loop startup bounded.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { realpathSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -14,6 +15,11 @@ import { auditCopy } from "./lib/copy-audit.mjs";
 import { buildBehaviorIndex } from "./lib/behavior-index.mjs";
 import { compareMotionPortability } from "./lib/motion-portability.mjs";
 import { verifyJourneyContract } from "./lib/journey-contract-verify.mjs";
+import { BuildEvidenceRefusal, produceBuildEvidencePack } from "./lib/build-evidence-producer.mjs";
+import { StoryPackRefusal, formatStoryPack, produceStoryPack } from "./lib/story-pack-producer.mjs";
+import { CapabilityContractRefusal, evaluateCapability, formatCapabilityVerdict, parseCapabilityContract } from "./lib/capability-contract.mjs";
+import { validateSchema as validateNodekitSchema } from "./lib/schema-validation.mjs";
+import { SessionContractRefusal, evaluateSessionContract, formatSessionContract } from "./lib/session-contract.mjs";
 import { loadRegistry, validateRegistry } from "./lib/registry.mjs";
 import { adoptProject, createProject, recordSetupEvent } from "./lib/scaffold.mjs";
 import {
@@ -135,13 +141,24 @@ function parseArgs(argv) {
       continue;
     }
     const [rawName, inlineValue] = token.slice(2).split("=", 2);
+    let value;
     if (inlineValue !== undefined) {
-      options[rawName] = inlineValue;
+      value = inlineValue;
     } else if (tokens[index + 1] && !tokens[index + 1].startsWith("--")) {
-      options[rawName] = tokens[index + 1];
+      value = tokens[index + 1];
       index += 1;
     } else {
-      options[rawName] = true;
+      value = true;
+    }
+    // A repeated flag COLLECTS rather than overwriting. Last-wins silently discarded every earlier
+    // value, so `--test a --test b --test c` ran only c and reported honestly on a quarter of what
+    // was asked — a partial result wearing the shape of a complete one. Verbs that expect a single
+    // string now see an array and refuse on their own type check, which fails closed instead of
+    // quietly acting on one of several values the caller supplied.
+    if (Object.hasOwn(options, rawName)) {
+      options[rawName] = Array.isArray(options[rawName]) ? [...options[rawName], value] : [options[rawName], value];
+    } else {
+      options[rawName] = value;
     }
   }
 
@@ -149,9 +166,34 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`NodeKit
+  console.log(`NodeKit — generate an agent application, then prove what it did.
+
+Build your app
+  nodekit create <dir> --name <slug> --brief <text>   scaffold a proof-carrying app (demo passes in ~40s)
+  nodekit adopt [dir] --name <slug> --brief <text>    add NodeKit to an existing repository
+  nodekit explain --for <node|convex|postgres|...>    which surfaces apply to you; start here
+  nodekit demo | check | proof                        run your app's demo, checks, receipt trail
+  nodekit compile | inspect | doctor                  definition, environment, diagnosis
+  nodekit agent run --agent <name> --goal <text> -- <command>
+                                                      record any agent command with a receipt
+
+Platform & governance (maintainers, CI)
+  Run "nodekit help --all" for the other 25 command groups: evolution, graph,
+  harness, atlas, frontend, registry, certify, skills, attestation ...`);
+}
+
+function printFullHelp() {
+  console.log(`NodeKit — every command
 
 Usage:
+  nodekit explain --for <any|node|convex|python|postgres|supabase|frontend> [--json]
+      Which surfaces apply to your project, and which you can stop reading. Start here.
+  nodekit audience check [--record <audience-research.json>] [--json]
+      Was the reviewer researched BEFORE the design was decided, and was the primary document
+      (job description, rubric, RFP) asked for rather than inferred from the web?
+  nodekit preflight [--repo-root <path>] [--session-started-at <iso>] [--json]
+      Run BEFORE the work: refuses a session whose harness.yaml declares a blocking dependency
+      that cannot take effect yet, or an external service with no recent liveness probe.
   nodekit create <directory> --name <slug> --brief <text>
       [--provider openrouter] [--model openai/gpt-4o-mini] [--backend filesystem]
       [--nodekit-specifier <npm-or-file-spec>] [--sponsors <comma-list>]
@@ -166,6 +208,22 @@ Usage:
   nodekit dev|demo|check|proof [--repo-root <path>] [-- <args>]
   nodekit repo check [--repo-root <path>] [--json]
   nodekit motion compare <repoA> <repoB> [repoC ...] [--output <receipt.json>] [--json]
+  nodekit journey verify [--repo-root <path>] [--json]
+  nodekit journey build-evidence --contract <opportunity-contract.json>
+      [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]
+  nodekit regression prove --baseline <commit> --test <file> [--test <file>...] [--name <pattern>] [--repo-root <path>] [--json]
+  nodekit skills sync [--repo-root <path>] [--json]
+  nodekit sessions check --contract <session-contract.json> [--repo-root <path>] [--json]
+  nodekit capability declare --out <capability-contract.json> --capability <slug> [--json]
+  nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json> [--json]
+  nodekit production-agent declare --out <production-agent.json> --application <slug> [--json]
+  nodekit production-agent check --contract <production-agent.json> [--json]
+  nodekit launch-video declare --out <launch-video.json> --application <slug> [--json]
+  nodekit launch-video check --contract <launch-video.json> [--json]
+  nodekit workspace index [--repo-root <path>] [--json]
+  nodekit workspace check [--repo-root <path>] [--json]
+  nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json>
+      --story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]
   nodekit registry check [--registry-root <path>] [--json]
   nodekit ecosystem check [--workspace <path>] [--json]
   nodekit dashboard [--workspace <path>] [--write] [--out <path>]
@@ -355,6 +413,333 @@ async function runJourneyVerify(parsed) {
   if (!verdict.passed) process.exitCode = 1;
 }
 
+// The BUILD-stage producer, wired to the same journey the chain gate walks. The four stage schemas
+// enforce shape; this is the first thing that writes a conforming artifact from a real repository
+// instead of a hand-authored fixture. It fails closed: an unreconcilable contract or a fabricated
+// evidence path refuses the whole pack rather than shipping a partial truth.
+/**
+ * The EXPLAIN stage. Audience, surfaces, claims and narrative are structured enough that flags would
+ * mangle them, so they arrive as one --story file; the producer decides which claims survive.
+ */
+/**
+ * The measurement gate. `declare` writes the bet before the build; `settle` scores it afterwards and
+ * refuses if the bet postdates its own evidence.
+ */
+/** Reject a multi-session plan before launch, while rejecting it is still free. */
+async function runSessionsCheck(parsed) {
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error("usage: nodekit sessions check --contract <session-contract.json> [--repo-root <path>]");
+    process.exitCode = 2;
+    return;
+  }
+  const root = path.resolve(parsed.options["repo-root"] ?? ".");
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    // Tracked files only. An untracked lockfile is not yet a shared-write problem, and demanding a
+    // classification for a build artifact is the noise that gets a gate turned off.
+    const listed = spawnSync("git", ["ls-files"], { cwd: root, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    const repoFiles = listed.status === 0 ? listed.stdout.split("\n").filter(Boolean) : [];
+    if (listed.status !== 0) {
+      console.error("sessions check: not a git repository, so no file list could be read; the manifest coverage check did NOT run");
+      process.exitCode = 1;
+      return;
+    }
+    // realpath supplied so symlinked aliases collide instead of reading as two separate paths.
+    // Resolution is relative to the repository, and a path that cannot be resolved falls back to
+    // its lexical form inside the library rather than failing the run.
+    const verdict = evaluateSessionContract(contract, repoFiles, {
+      resolvePath: (relative) => path.relative(root, realpathSync.native(path.resolve(root, relative))).split(path.sep).join("/"),
+    });
+    printStructured(verdict, parsed, formatSessionContract);
+    if (!verdict.passed) process.exitCode = 1;
+  } catch (error) {
+    if (error instanceof SessionContractRefusal) {
+      console.error(`SESSION CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runCapability(parsed, mode) {
+
+  if (mode === "declare") {
+    const capability = parsed.options.capability;
+    const out = parsed.options.out;
+    if (typeof capability !== "string" || typeof out !== "string") {
+      console.error("usage: nodekit capability declare --capability <slug> --out <capability-contract.json>");
+      process.exitCode = 2;
+      return;
+    }
+    // A template with every field present and obviously unanswered. Blanks an author must replace
+    // beat a form they can submit unread, which is how a kill condition becomes a formality.
+    const template = {
+      schemaVersion: "nodekit.capability-contract/v1",
+      capability,
+      declaredAt: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
+      questionItServes: "REPLACE: a question a USER asks, in their words — not this capability with a question mark on it",
+      whyExistingToolsCannot: "REPLACE: why the tools already here cannot answer it. If this is hard to write, that is the finding.",
+      measuredImprovement: {
+        metric: "REPLACE: what you will count",
+        baseline: 0,
+        predicted: 0,
+        howMeasured: "REPLACE: the command that reads this number, used for BOTH baseline and result",
+      },
+      killCondition: [
+        { metric: "REPLACE: same metric", comparator: "below", value: 0, rationale: "REPLACE: what result would make you delete this" },
+      ],
+      consumers: [],
+    };
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), `${JSON.stringify(template, null, 2)}
+`, "utf8");
+    console.log(`CAPABILITY CONTRACT declared: ${out}`);
+    console.log(`  declaredAt ${template.declaredAt} — settle refuses any measurement observed at or before this.`);
+    console.log("  Fill every REPLACE before building. Declaring after the build is the failure this prevents.");
+    return;
+  }
+
+  const { contract: contractPath, measurement: measurementPath } = parsed.options;
+  if (typeof contractPath !== "string" || typeof measurementPath !== "string") {
+    console.error("usage: nodekit capability settle --contract <capability-contract.json> --measurement <measurement.json>");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    const measurement = JSON.parse(await readFile(path.resolve(measurementPath), "utf8"));
+    const errors = await validateNodekitSchema("nodekit.capability-contract.v1.schema.json", contract, contract.capability ?? "capability");
+    if (errors.length > 0) throw new CapabilityContractRefusal(errors);
+    parseCapabilityContract(contract);
+    const verdict = evaluateCapability(contract, measurement);
+    printStructured(verdict, parsed, formatCapabilityVerdict);
+    // Only load-bearing exits clean. decorative, killed and insufficient are all "do not ship this
+    // as-is", and a gate that exits 0 on three of its four verdicts is a report.
+    if (verdict.verdict !== "load-bearing") process.exitCode = 1;
+  } catch (error) {
+    if (error instanceof CapabilityContractRefusal) {
+      console.error(`CAPABILITY CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runProductionAgent(parsed, mode) {
+  const { parseProductionAgentContract, productionAgentTemplate, formatProductionAgentVerdict, ProductionAgentRefusal, PRODUCTION_AGENT_SCHEMA } = await import("./lib/production-agent.mjs");
+
+  if (mode === "declare") {
+    const application = parsed.options.application;
+    const out = parsed.options.out;
+    if (typeof application !== "string" || typeof out !== "string") {
+      console.error("usage: nodekit production-agent declare --application <slug> --out <production-agent.json>");
+      process.exitCode = 2;
+      return;
+    }
+    const template = productionAgentTemplate(application, new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"));
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), `${JSON.stringify(template, null, 2)}\n`, "utf8");
+    console.log(`PRODUCTION-AGENT CONTRACT declared: ${out}`);
+    console.log("  Fill every REPLACE before the agent loop ships. `production-agent check` refuses an unfilled form.");
+    return;
+  }
+
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error("usage: nodekit production-agent check --contract <production-agent.json>");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    const errors = await validateNodekitSchema(PRODUCTION_AGENT_SCHEMA, contract, contract.application ?? "production-agent");
+    if (errors.length > 0) throw new ProductionAgentRefusal(errors);
+    parseProductionAgentContract(contract);
+    printStructured(contract, parsed, formatProductionAgentVerdict);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error(`cannot parse the contract at ${contractPath}: ${error.message}`);
+      process.exitCode = 2;
+      return;
+    }
+    if (error?.name === "ProductionAgentRefusal") {
+      console.error(`PRODUCTION-AGENT CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runLaunchVideo(parsed, mode) {
+  const { parseLaunchVideoContract, launchVideoTemplate, formatLaunchVideoVerdict, LaunchVideoRefusal, LAUNCH_VIDEO_SCHEMA } = await import("./lib/launch-video.mjs");
+
+  if (mode === "declare") {
+    const application = parsed.options.application;
+    const out = parsed.options.out;
+    if (typeof application !== "string" || typeof out !== "string") {
+      console.error("usage: nodekit launch-video declare --application <slug> --out <launch-video.json>");
+      process.exitCode = 2;
+      return;
+    }
+    const template = launchVideoTemplate(application, new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"));
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), `${JSON.stringify(template, null, 2)}\n`, "utf8");
+    console.log(`LAUNCH-VIDEO CONTRACT declared: ${out}`);
+    console.log("  Direction before the first render, a human taste call at direction and delivery. `launch-video check` refuses a render made before direction was approved.");
+    return;
+  }
+
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error("usage: nodekit launch-video check --contract <launch-video.json>");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const contract = JSON.parse(await readFile(path.resolve(contractPath), "utf8"));
+    const errors = await validateNodekitSchema(LAUNCH_VIDEO_SCHEMA, contract, contract.application ?? "launch-video");
+    if (errors.length > 0) throw new LaunchVideoRefusal(errors);
+    parseLaunchVideoContract(contract);
+    printStructured(contract, parsed, formatLaunchVideoVerdict);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error(`cannot parse the contract at ${contractPath}: ${error.message}`);
+      process.exitCode = 2;
+      return;
+    }
+    if (error?.name === "LaunchVideoRefusal") {
+      console.error(`LAUNCH-VIDEO CONTRACT REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runWorkspace(parsed, mode) {
+  const { buildWorkspaceIndex, renderWorkspaceMd, checkWorkspace, WORKSPACE_MD, WORKSPACE_JSON } = await import("./lib/workspace-index.mjs");
+  const root = path.resolve(typeof parsed.options["repo-root"] === "string" ? parsed.options["repo-root"] : ".");
+
+  if (mode === "index") {
+    const index = buildWorkspaceIndex(root);
+    await writeFile(path.join(root, WORKSPACE_JSON), `${JSON.stringify(index, null, 2)}\n`, "utf8");
+    await writeFile(path.join(root, WORKSPACE_MD), renderWorkspaceMd(index), "utf8");
+    const counts = Object.entries(index.branches).map(([k, l]) => `${k} ${l.length}`).join(" · ");
+    console.log(`WORKSPACE INDEX: ${counts}${index.unfiled.length ? ` · UNFILED ${index.unfiled.length}` : ""} (wrote ${WORKSPACE_MD} + ${WORKSPACE_JSON})`);
+    if (index.unfiled.length) process.exitCode = 1;
+    return;
+  }
+
+  const refusals = checkWorkspace(root);
+  if (refusals.length > 0) {
+    console.error(`WORKSPACE CHECK REFUSED\n${refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log("WORKSPACE CHECK OK — the committed map still tells the truth");
+}
+
+async function runJourneyStoryPack(parsed) {
+
+  const { contract, pack, story } = parsed.options;
+  if (typeof pack !== "string" || typeof contract !== "string" || typeof story !== "string") {
+    console.error(
+      "usage: nodekit journey story-pack --pack <build-evidence-pack.json> --contract <opportunity-contract.json> "
+        + "--story <story-input.json> [--out <story-pack.json>] [--case-id <id>] [--now <iso8601>] [--json]",
+    );
+    process.exitCode = 2;
+    return;
+  }
+  let input;
+  try {
+    input = JSON.parse(await readFile(path.resolve(story), "utf8"));
+  } catch (error) {
+    console.error(`cannot read the story input at ${story}: ${error?.message ?? error}`);
+    process.exitCode = 2;
+    return;
+  }
+  const outPath = typeof parsed.options.out === "string" ? parsed.options.out : undefined;
+  try {
+    const storyPack = await produceStoryPack({
+      packPath: pack,
+      contractPath: contract,
+      outPath,
+      caseId: typeof parsed.options["case-id"] === "string" ? parsed.options["case-id"] : undefined,
+      audience: input.audience,
+      surfaces: input.surfaces ?? [],
+      sources: input.sources ?? [],
+      disclosures: input.disclosures ?? [],
+      claims: input.claims ?? [],
+      narrative: input.narrative ?? [],
+      demoMode: input.demoMode ?? { engaged: false, surfaceRefs: [] },
+      // Explicit so a regenerated pack is byte-comparable with the committed one. Without it the
+      // only difference is producedAt, and "it differs" then carries no information.
+      now: typeof parsed.options.now === "string" ? parsed.options.now : undefined,
+    });
+    printStructured({ storyPack, outPath }, parsed, (value) =>
+      [formatStoryPack(value.storyPack), outPath ? `  written to ${outPath}` : "  not written (no --out)"].join("\n"),
+    );
+  } catch (error) {
+    if (error instanceof StoryPackRefusal) {
+      console.error(`STORY PACK REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
+async function runJourneyBuildEvidence(parsed) {
+  const repoRoot = path.resolve(parsed.options.repo ?? parsed.options["repo-root"] ?? ".");
+  const contractPath = parsed.options.contract;
+  if (typeof contractPath !== "string") {
+    console.error(
+      "usage: nodekit journey build-evidence --contract <opportunity-contract.json> [--repo <path>] [--out <pack.json>] [--case-id <id>] [--test-command <cmd>] [--json]",
+    );
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const { pack, packPath } = await produceBuildEvidencePack({
+      repoRoot,
+      contractPath,
+      outPath: typeof parsed.options.out === "string" ? parsed.options.out : undefined,
+      caseId: typeof parsed.options["case-id"] === "string" ? parsed.options["case-id"] : undefined,
+      testCommand: typeof parsed.options["test-command"] === "string" ? parsed.options["test-command"] : undefined,
+    });
+    const entries = [
+      ...Object.values(pack.content.decisions.contract).flatMap((entry) =>
+        entry.elements ? entry.elements : entry.disposition ? [entry] : Object.values(entry).flatMap((bucket) => bucket.elements),
+      ),
+    ];
+    const byDisposition = entries.reduce((acc, entry) => {
+      acc[entry.disposition] = (acc[entry.disposition] ?? 0) + 1;
+      return acc;
+    }, {});
+    printStructured({ pack, packPath }, parsed, () =>
+      [
+        `BUILD EVIDENCE PACK written: ${packPath}`,
+        `  case ${pack.caseId}; contract bound by canonical sha256 ${pack.inputs[0].sha256.slice(0, 12)}…`,
+        `  reconciled ${entries.length} decision pointer(s): ${byDisposition.honoured ?? 0} honoured, ${byDisposition["defaulted-with-disclosure"] ?? 0} defaulted-with-disclosure, ${byDisposition.contradicted ?? 0} contradicted`,
+        `  evidence ${pack.content.evidence.length} entr(ies), each a real file with digest + generation record`,
+        `  emergent 0 surfaced; sweep receipt at ${pack.content.evidence.find((e) => e.kind === "command-output")?.artifact.path}`,
+        `  notRun ${pack.completeness.notRun.length}, refused ${pack.completeness.refused.length}; promotionAuthorized: false (a producer may never write true)`,
+      ].join("\n"),
+    );
+  } catch (error) {
+    if (error instanceof BuildEvidenceRefusal) {
+      console.error(`BUILD EVIDENCE REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+      process.exitCode = 1;
+      return;
+    }
+    throw error;
+  }
+}
+
 async function runBehaviorIndex(parsed) {
   const root = path.resolve(parsed.options["repo-root"] ?? ".");
   const index = await buildBehaviorIndex(root);
@@ -507,18 +892,32 @@ async function runTour(parsed) {
     fix: missingParts.length === 0 ? null : `These parts are named in the map but missing on disk: ${missingParts.join(", ")}. The map is stale; run \`npm run repo:map\`.`,
   });
 
-  const traceFiles = ["src/lib/caseflow.mjs", "src/lib/builder-journey.mjs", "schemas/nodekit.builder-case.v1.schema.json"];
-  const traceMissing = (await Promise.all(traceFiles.map(async (f) => ({ f, ok: await pathExists(path.join(root, f)) })))).filter((x) => !x.ok).map((x) => x.f);
+  // A citation is a claim about CONTENT. Checking that the cited FILE EXISTS proves anchor
+  // stability and nothing else — it passes unchanged while the symbol it names has moved to
+  // another module or stopped existing. So each citation carries the substring it promises the
+  // reader will be there, and the step fails when the source stops saying it.
+  const traceCitations = [
+    { file: "src/lib/caseflow.mjs", expect: "function decideProposal(" },
+    { file: "schemas/nodekit.builder-case.v1.schema.json", expect: "\"currentStage\"" },
+    { file: "src/lib/builder-journey.mjs", expect: "export async function advanceStage(" },
+  ];
+  const traceBroken = [];
+  for (const citation of traceCitations) {
+    const source = await readFile(path.join(root, citation.file), "utf8").catch(() => null);
+    if (source === null) traceBroken.push(`${citation.file} is missing`);
+    else if (!source.includes(citation.expect)) traceBroken.push(`${citation.file} no longer contains \`${citation.expect}\``);
+  }
   steps.push({
     id: "trace.one-action",
     title: "Trace one action from start to receipt",
     checked: true,
-    passed: traceMissing.length === 0,
+    passed: traceBroken.length === 0,
     detail:
-      "A builder case advances a stage only when that stage's handoff artifact exists AND a receipt binds it by content hash:\n    " +
-      traceFiles.join("\n    ") +
-      "\n    Read advanceStage in src/lib/builder-journey.mjs — it is the whole rule in one function.",
-    fix: traceMissing.length ? `Missing: ${traceMissing.join(", ")}` : null,
+      "A saved artifact changes in exactly one function, and only when the approval names the version it was written against:\n    " +
+      traceCitations.map((c) => `${c.file} — ${c.expect}`).join("\n    ") +
+      "\n    Read decideProposal in src/lib/caseflow.mjs — that is the whole governing rule, and it is on the path every generated application runs." +
+      "\n    advanceStage in src/lib/builder-journey.mjs is the same idea per builder stage, but nothing runnable calls it: a reference implementation, not the live rule.",
+    fix: traceBroken.length ? `These citations no longer match the source: ${traceBroken.join("; ")}. Fix the source or update this step and START_HERE.md together.` : null,
   });
 
   steps.push({
@@ -780,6 +1179,20 @@ async function runAdopt(parsed) {
   console.log(`ADOPTED ${result.name} at ${result.target}`);
   console.log("NodeKit only added missing harness files; existing auth, routes, CSS, and schemas were preserved.");
   console.log(`COLLISIONS ${result.collisions.length}; inspect proof/adoption-receipt.json before installation.`);
+  // An adopted project keeps its OWN `check`, deliberately — hijacking somebody's entry point is
+  // hostile, and adopt is non-destructive by design. But that leaves the gates installed and
+  // uncalled: measured on a real adoption, everything landed correctly and nothing in the project
+  // ran any of it, with no output saying so. Installed-but-unwired is the exact failure this
+  // repository spent a day closing elsewhere; printing the wiring is the cheapest possible fix.
+  console.log([
+    "",
+    "NOT WIRED: your `check` script is still yours, on purpose. These gates are installed and nothing calls them yet:",
+    "  nodekit preflight        harness liveness, plus skill and code-graph freshness",
+    "  nodekit deferrals check  refuses a submission while a deliberate deferral is still open",
+    "  nodekit audience check   refuses a design decided before its audience was researched",
+    "Add them to your own check script when you want them enforced:",
+    '  "check": "<your existing check> && nodekit preflight && nodekit deferrals check"',
+  ].join("\n"));
 }
 
 async function runCompile(parsed) {
@@ -1837,7 +2250,8 @@ async function main() {
   const parsed = parseArgs(process.argv.slice(2));
   const [first, second, third] = parsed.positional;
   if (!first || first === "help" || first === "--help") {
-    printHelp();
+    if (parsed.options.all || parsed.positional.includes("--all")) printFullHelp();
+    else printHelp();
     return;
   }
   if (["dev", "demo", "check", "proof"].includes(first)) {
@@ -1850,6 +2264,133 @@ async function main() {
   }
   if (first === "adopt") {
     await runAdopt(parsed);
+    return;
+  }
+  if (first === "audience" && second === "check") {
+    const { evaluateAudienceRecord, readAudienceRecord } = await import("./lib/audience-contract.mjs");
+    const file = path.resolve(parsed.options.record ?? parsed.positional[2] ?? "audience-research.json");
+    const { record, present } = await readAudienceRecord(file);
+    const verdict = evaluateAudienceRecord(record);
+    if (parsed.options.json) console.log(JSON.stringify({ ...verdict, present, file }, null, 2));
+    else if (verdict.passed) console.log(`AUDIENCE PASS: ${record.audience.organisation} — researched before the design was decided.`);
+    else console.log(["AUDIENCE BLOCKED:", ...verdict.faults.map((f) => `  ${f}`)].join("\n"));
+    if (!verdict.passed) process.exitCode = 1;
+    return;
+  }
+  if (first === "production" && (second === "check" || second === undefined)) {
+    const { evaluateProductionReadiness, formatProductionReadiness } = await import("./lib/production-gate.mjs");
+    const file = path.resolve(parsed.options.record ?? "production-readiness.json");
+    let record = null;
+    try {
+      record = JSON.parse(await readFile(file, "utf8"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    // No record is not a pass. Seven questions nobody asked is seven NOT_RUNs.
+    const verdict = record
+      ? evaluateProductionReadiness(record)
+      : { releasable: false, blockers: [`no ${path.basename(file)}; every production check is unasked, and an unasked question is NOT_RUN`], checked: 7, passed: 0, waived: 0 };
+    console.log(parsed.options.json ? JSON.stringify(verdict, null, 2) : formatProductionReadiness(verdict));
+    if (!verdict.releasable) process.exitCode = 1;
+    return;
+  }
+  if (first === "deferrals" && (second === "check" || second === undefined)) {
+    const { evaluateDeferrals, formatDeferrals, readDeferrals } = await import("./lib/deferrals.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const ledger = await readDeferrals(repoRoot);
+    const verdict = evaluateDeferrals(ledger);
+    console.log(parsed.options.json ? JSON.stringify({ ...verdict, present: ledger.present }, null, 2) : formatDeferrals(ledger, verdict));
+    if (!verdict.passed) process.exitCode = 1;
+    return;
+  }
+  if (first === "reproduce") {
+    const { produceReplayPacket, reproduce, writeReplayPacket } = await import("./lib/replay-packet-producer.mjs");
+    const { formatReplayVerdict } = await import("./lib/replay-packet.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const packet = await produceReplayPacket({
+      repoRoot,
+      runId: parsed.options.run ?? `run-${Date.now().toString(36)}`,
+      originalPrompt: parsed.options.prompt ?? "",
+      resolvedPrompt: parsed.options["resolved-prompt"],
+      agent: parsed.options.agent ?? "unknown-agent",
+      model: parsed.options.model ?? "unknown-model",
+    });
+    // --fresh-worktree is not a flag that asserts a fresh worktree; it is the flag that CREATES one
+    // and runs the command there. Without a command there is nothing to replay and the packet
+    // honestly stays at PROMPT_REPLAYABLE.
+    const replayed = parsed.options.command
+      ? await reproduce({ repoRoot, packet, command: parsed.options.command })
+      : { packet, verdict: { passed: true, claimed: packet.reproduction.levelClaimed, earned: packet.reproduction.levelClaimed, faults: [] } };
+    if (parsed.options.out) await writeReplayPacket(repoRoot, replayed.packet, path.dirname(parsed.options.out));
+
+    // The two documents a person actually opens. Generated, never authored: a hand-written
+    // RECREATE.md drifts from the packet and then reads with more authority than the receipt it
+    // contradicts.
+    if (parsed.options.book) {
+      const { renderPromptBook, renderRecreate } = await import("./lib/replay-book.mjs");
+      const dir = path.resolve(parsed.options.book);
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, "PROMPT_BOOK.md"), renderPromptBook(replayed.packet), "utf8");
+      await writeFile(path.join(dir, "RECREATE.md"), renderRecreate(replayed.packet), "utf8");
+      console.error(`wrote PROMPT_BOOK.md and RECREATE.md to ${dir}`);
+    }
+    console.log(parsed.options.json ? JSON.stringify(replayed.packet, null, 2) : formatReplayVerdict(replayed.verdict));
+    if (!replayed.verdict.passed) process.exitCode = 1;
+    return;
+  }
+  if (first === "preflight") {
+    const { evaluatePreflight, formatPreflight, readHarnessManifest } = await import("./lib/preflight.mjs");
+    const repoRoot = path.resolve(parsed.options["repo-root"] ?? ".");
+    const manifest = await readHarnessManifest(repoRoot);
+    // Session start is explicit rather than guessed: the whole restart rule turns on whether the
+    // install predates the session, and inferring that from process uptime would quietly answer a
+    // question the caller is the only one who actually knows.
+    const verdict = evaluatePreflight(manifest, {
+      sessionStartedAt: parsed.options["session-started-at"] ?? new Date().toISOString(),
+    });
+    // Skill freshness rides along with preflight rather than getting its own verb, because
+    // preflight already runs in every generated project's `check` and a gate nobody invokes is the
+    // problem this whole session has been about. The projected skills ARE the agent's instructions;
+    // a project reading a superseded copy is a preflight fact by any reasonable reading.
+    const { evaluateSkillFreshness, formatSkillFreshness } = await import("./lib/skill-freshness.mjs");
+    let installedVersion = null;
+    for (const candidate of ["vendor/nodekit/package.json", "node_modules/@homenshum/nodekit/package.json", "package.json"]) {
+      try {
+        const pkg = JSON.parse(await readFile(path.join(repoRoot, candidate), "utf8"));
+        if (pkg.name === "@homenshum/nodekit" && typeof pkg.version === "string") { installedVersion = pkg.version; break; }
+      } catch { /* absent is not an error; it leaves the skew question unanswered rather than answered no */ }
+    }
+    const skills = await evaluateSkillFreshness(repoRoot, installedVersion);
+
+    // Same reasoning as the skills above, and the third surface today with this shape. The code
+    // graph is what an agent consults during implementation — "what calls this, what imports it" —
+    // and it is commit-pinned by design. The pin worked; nothing ever mentioned it, so the graph
+    // aged 201 commits while still answering confidently.
+    const { evaluateCodeGraphFreshness, formatCodeGraphFreshness } = await import("./lib/code-graph-freshness.mjs");
+    const codeGraph = await evaluateCodeGraphFreshness(repoRoot);
+
+    console.log(parsed.options.json
+      ? JSON.stringify({ ...verdict, present: manifest.present, skills, codeGraph }, null, 2)
+      : `${formatPreflight(verdict)}\n${formatSkillFreshness(skills)}\n${formatCodeGraphFreshness(codeGraph)}`);
+    // Skew and unrecorded provenance are reported, never fatal. A project legitimately pins an old
+    // skill or predates the record, and failing preflight over it would train people to skip
+    // preflight — which costs more than the drift it was catching.
+    if (!verdict.passed) process.exitCode = 1;
+    return;
+  }
+  if (first === "explain") {
+    const { explainFor, formatExplanation, STACKS } = await import("./lib/nodekit-surfaces.mjs");
+    const stack = parsed.options.for ?? parsed.positional[1] ?? "any";
+    let explanation;
+    try {
+      explanation = explainFor(String(stack));
+    } catch (error) {
+      if (error.code !== "UNKNOWN_STACK") throw error;
+      console.error(`${error.message}\nUsage: nodekit explain --for <${STACKS.join("|")}> [--json]`);
+      process.exitCode = 2;
+      return;
+    }
+    console.log(parsed.options.json ? JSON.stringify(explanation, null, 2) : formatExplanation(explanation));
     return;
   }
   if (first === "compile") {
@@ -1955,6 +2496,72 @@ async function main() {
   }
   if (first === "session" && second === "migrate-legacy") {
     await runNativeSessionMigration(parsed);
+    return;
+  }
+  if (first === "journey" && second === "build-evidence") {
+    await runJourneyBuildEvidence(parsed);
+    return;
+  }
+  if (first === "regression" && second === "prove") {
+    const { RegressionProofRefusal, formatRegressionProof, proveRegression } = await import("./lib/regression-proof.mjs");
+    const root = path.resolve(parsed.options["repo-root"] ?? ".");
+    const baseline = parsed.options.baseline;
+    const raw = parsed.options.test;
+    const testFiles = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : [];
+    if (typeof baseline !== "string" || testFiles.length === 0) {
+      console.error("usage: nodekit regression prove --baseline <commit> --test <file> [--test <file>...] [--repo-root <path>]");
+      process.exitCode = 2;
+      return;
+    }
+    try {
+      const verdict = proveRegression(root, {
+        baseline,
+        testFiles,
+        namePattern: typeof parsed.options.name === "string" ? parsed.options.name : undefined,
+        worktreeDir: path.join(root, "..", `.nodekit-regression-${process.pid}`),
+        // Real test files import real dependencies; the throwaway checkout has none of its own.
+        copyNodeModules: true,
+      });
+      printStructured(verdict, parsed, formatRegressionProof);
+      // Only a full proof exits clean. An unproven test and a run that never happened are both
+      // "this has not been demonstrated", and exiting 0 on either is how the check becomes a ritual.
+      if (verdict.status !== "proven") process.exitCode = 1;
+    } catch (error) {
+      if (error instanceof RegressionProofRefusal) {
+        console.error(`REGRESSION PROOF REFUSED\n${error.refusals.map((entry) => `  - ${entry}`).join("\n")}`);
+        process.exitCode = 1;
+        return;
+      }
+      throw error;
+    }
+    return;
+  }
+  if (first === "sessions" && second === "check") {
+    await runSessionsCheck(parsed);
+    return;
+  }
+  if (first === "capability" && (second === "settle" || second === "declare")) {
+    await runCapability(parsed, second);
+    return;
+  }
+  // "production-agent", not "production" — `nodekit production` already belongs to the seven-check
+  // data-safety gate above, and a second meaning grafted onto the same word would be dispatch-order
+  // roulette. Discovered live: the first name chosen here WAS "production", and the existing
+  // handler swallowed every `production check` call.
+  if (first === "production-agent" && (second === "declare" || second === "check")) {
+    await runProductionAgent(parsed, second);
+    return;
+  }
+  if (first === "launch-video" && (second === "declare" || second === "check")) {
+    await runLaunchVideo(parsed, second);
+    return;
+  }
+  if (first === "workspace" && (second === "index" || second === "check")) {
+    await runWorkspace(parsed, second);
+    return;
+  }
+  if (first === "journey" && second === "story-pack") {
+    await runJourneyStoryPack(parsed);
     return;
   }
   if (first === "tour") {
@@ -2249,6 +2856,20 @@ async function main() {
   }
   if (first === "harness" && second === "promote") {
     await runSkillsPromote(parsed);
+    return;
+  }
+  if (first === "skills" && second === "sync") {
+    const { syncCodingAgentSkills } = await import("./lib/scaffold.mjs");
+    const root = path.resolve(parsed.options["repo-root"] ?? parsed.positional[2] ?? ".");
+    const result = await syncCodingAgentSkills(root);
+    printStructured(result, parsed, (value) => {
+      const lines = [`SKILLS SYNCED to NodeKit ${value.version}`];
+      if (value.added.length > 0) lines.push(`  added:   ${value.added.join(", ")}`);
+      if (value.changed.length > 0) lines.push(`  replaced: ${value.changed.join(", ")}`);
+      if (value.added.length === 0 && value.changed.length === 0) lines.push("  nothing changed; the copies already matched.");
+      else lines.push("  A local edit to a projected skill is legitimate — this says what was overwritten so it is not discovered later.");
+      return lines.join(String.fromCharCode(10));
+    });
     return;
   }
   if (first === "skills" && second === "propose") {

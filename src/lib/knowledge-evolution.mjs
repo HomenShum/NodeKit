@@ -27,6 +27,20 @@ const KNOWLEDGE_ACTION_STATUSES = new Set(["completed", "failed", "blocked", "ca
 const GRAPH_LOCK_STALE_MS = 120_000;
 const GRAPH_LOCK_WAIT_MS = 10_000;
 const GRAPH_LOCK_RETRY_MS = 20;
+// Absolute ceiling on acquisition, regardless of how much progress the queue makes. Generous enough
+// that a real queue never reaches it — 32 contended writers finish in about 3.5s measured — and
+// finite so a writer that loses every race fails instead of hanging.
+const GRAPH_LOCK_CEILING_MS = 120_000;
+
+/**
+ * The ceiling, tunable per deployment. Read at call time rather than module load so a long-lived
+ * process can be reconfigured, and so the starvation property is testable in bounded time — a
+ * 120-second assertion is one nobody runs, and a property nobody runs is not a property.
+ */
+function graphLockCeilingMs() {
+  const configured = Number.parseInt(process.env.NODEKIT_GRAPH_LOCK_CEILING_MS ?? "", 10);
+  return Number.isInteger(configured) && configured > 0 ? configured : GRAPH_LOCK_CEILING_MS;
+}
 
 function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -197,12 +211,53 @@ async function recoverStaleGraphLock(repoRoot, graphPath, lockPath) {
   return true;
 }
 
+/**
+ * Who holds the lock right now, as its identity token — or null if that cannot be observed.
+ *
+ * Never throws. Every failure here (the file vanished between the failed open and this read, a
+ * partial write, a delete-pending handle on Windows) means "no observation", and no observation must
+ * not be mistaken for progress: returning null leaves the caller's stall budget running.
+ */
+async function observeLockHolder(repoRoot, graphPath, lockPath) {
+  try {
+    // The same bounded, symlink-checked reader the release path uses. A raw read here would skip
+    // those guards for the sake of a hint that only ever extends a wait.
+    const file = await stableGraphFile(repoRoot, graphPath, "knowledge graph mutation lock", {
+      targetOverride: lockPath,
+      maximumBytes: 4096,
+    });
+    const holder = JSON.parse(file.bytes.toString("utf8"));
+    return typeof holder?.token === "string" ? holder.token : null;
+  } catch {
+    return null;
+  }
+}
+
 async function withGraphMutationLock(repoRoot, graphPath, operation) {
   const resolved = containedPath(repoRoot, graphPath);
   const lockPath = `${resolved.absolute}.mutation.lock`;
   const root = path.resolve(repoRoot);
   await ensureSecureGraphDirectory(root, path.dirname(lockPath), "knowledge graph mutation lock");
-  const deadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+  // The wait budget measures LACK OF PROGRESS, not elapsed time. A fixed deadline set once at entry
+  // conflates two different situations: the holder is wedged (a real failure, must time out) and
+  // there are writers queued ahead of me (normal, must keep waiting). With 32 contending writers the
+  // last one waits behind 31 predecessors, so a fixed budget calls a healthy queue a failure as soon
+  // as the machine is busy — and the caller loses a receipt it was told would be recorded. Observed
+  // as 2 of 32 writers timing out under full-suite load, green in isolation on the same machine.
+  // Raising the constant only moves the cliff to a larger writer count; resetting the budget each
+  // time the lock changes hands removes it, while a genuinely wedged holder still expires because
+  // the token stops changing.
+  // Two deadlines, and the wait ends at whichever comes first.
+  //
+  // The stall deadline resets whenever the lock changes hands, which is what makes a long healthy
+  // queue free. On its own that is unbounded: `open(..., "wx")` has no fairness, so a writer can
+  // lose every race while others cycle, resetting the stall budget forever. That trades a lost
+  // receipt for a hang, which is a worse failure and a harder one to diagnose. The ceiling never
+  // resets, so acquisition stays bounded for every input while still tolerating a real queue.
+  let stallDeadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+  const ceilingMs = graphLockCeilingMs();
+  const ceiling = Date.now() + ceilingMs;
+  let lastHolder = null;
   let handle;
   const token = randomBytes(24).toString("hex");
   while (!handle) {
@@ -215,7 +270,25 @@ async function withGraphMutationLock(repoRoot, graphPath, operation) {
       // instead of waiting: measured losing 1-2 of 12 concurrent receipts, invisible on Linux CI.
       if (!["EEXIST", "EPERM", "EACCES"].includes(error?.code)) throw error;
       if (await recoverStaleGraphLock(repoRoot, graphPath, lockPath)) continue;
-      if (Date.now() >= deadline) throw new Error(`knowledge graph mutation lock timed out: ${resolved.relative}`);
+      // A different token than last look means the lock changed hands: the queue is moving, so the
+      // wait has not stalled. Unreadable is not observed progress and deliberately does not extend.
+      const holder = await observeLockHolder(repoRoot, graphPath, lockPath);
+      if (holder !== null && holder !== lastHolder) {
+        lastHolder = holder;
+        stallDeadline = Date.now() + GRAPH_LOCK_WAIT_MS;
+      }
+      if (Date.now() >= ceiling) {
+        throw new Error(
+          `knowledge graph mutation lock timed out: ${resolved.relative}`
+            + ` (never acquired within ${ceilingMs}ms; the lock kept changing hands and this writer lost every race)`,
+        );
+      }
+      if (Date.now() >= stallDeadline) {
+        throw new Error(
+          `knowledge graph mutation lock timed out: ${resolved.relative}`
+            + ` (no change of holder for ${GRAPH_LOCK_WAIT_MS}ms; the holder is wedged rather than busy)`,
+        );
+      }
       await new Promise((resolve) => setTimeout(resolve, GRAPH_LOCK_RETRY_MS));
     }
   }

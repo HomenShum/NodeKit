@@ -1,0 +1,12 @@
+{
+  "errorText": "Add a concrete outcome before continuing.",
+  "errorHidden": false,
+  "errorRole": "alert",
+  "inputAriaInvalid": "true",
+  "stageBanner": "ORIENTATION Ready for your direction Confirm the outcome before the run begins.",
+  "afterTransportFailure": {
+    "errorText": "Failed to fetch",
+    "errorHidden": false,
+    "stageBanner": "ORIENTATION Ready for your direction Confirm the outcome before the run begins."
+  }
+}

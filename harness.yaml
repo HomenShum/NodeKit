@@ -1,0 +1,92 @@
+# What this session's agent harness depends on, and whether each dependency can actually take
+# effect. `nodekit preflight` reads this before work starts.
+#
+# Derived from observation, not memory: plugin ids, versions and commit SHAs come from
+# ~/.claude/plugins/installed_plugins_v2.json; skills from ~/.claude/skills/.
+#
+# TWO HONEST CAVEATS, both of which weaken this file and are recorded rather than hidden:
+#
+# 1. Every plugin below carries installedAt 2026-08-03T09:18:05.584Z — the same millisecond. That is
+#    a bulk re-registration timestamp, not four real install times. The restart rule in
+#    src/lib/preflight.mjs compares installedAt against session start, so for these entries that
+#    comparison is meaningless. confirmedActive is set from what was actually observed working in
+#    the session instead, which is weaker evidence than a real timestamp and is marked as such.
+#
+# 2. The restart requirement itself was contradicted by observation today. fable-method, fable-judge
+#    and fable-loop were installed into ~/.claude/skills mid-session and were invocable immediately,
+#    with no restart. So standalone skills are recorded as requires: none because that is what
+#    happened — not because the docs say so. Plugins were not re-tested this way and keep the
+#    stricter assumption.
+
+harness:
+  - id: ponytail
+    kind: plugin
+    version: 4.8.4
+    commit: 16f29800
+    verifyBefore: npm test
+    installedAt: "2026-08-03T09:18:05.584Z"
+    activation:
+      requires: restart
+      blocking: false
+      confirmedActive: true
+    note: >-
+      Observed active this session: the session-start hook announced PONYTAIL MODE ACTIVE. Marked
+      non-blocking because it shapes how code is written rather than gating whether work is valid —
+      an inert ponytail produces more verbose code, not wrong code.
+
+  - id: codex
+    kind: plugin
+    version: 1.0.4
+    commit: 807e03ac
+    verifyBefore: npm test
+    installedAt: "2026-08-03T09:18:05.584Z"
+    activation:
+      requires: restart
+      blocking: true
+      confirmedActive: true
+    note: >-
+      Observed active: mcp__codex__codex ran an adversarial review this session and returned
+      REFUTED with two P0 findings. Blocking because it is the only independent adversary in this
+      harness, and a green suite without it is unfalsified rather than verified.
+
+  - id: context-mode
+    kind: plugin
+    version: 1.0.169
+    commit: 4d0e1105
+    verifyBefore: npm test
+    installedAt: "2026-08-03T09:18:05.584Z"
+    activation:
+      requires: restart
+      blocking: false
+      confirmedActive: true
+    note: >-
+      Observed active: ctx_fetch_and_index and ctx_search both returned results this session.
+
+  - id: claude-mem
+    kind: plugin
+    version: 12.0.1
+    commit: 6461d718
+    verifyBefore: npm test
+    installedAt: "2026-08-03T09:18:05.584Z"
+    activation:
+      requires: restart
+      blocking: false
+      confirmedActive: false
+    note: >-
+      Installed and NOT confirmed active this session — no claude-mem tool was invoked, so there is
+      no observation either way. Recorded as unconfirmed rather than assumed working, which is the
+      distinction this file exists to keep.
+
+  - id: fable-judge
+    kind: plugin
+    version: standalone-skill
+    verifyBefore: npm test
+    installedAt: "2026-08-03T00:00:00.000Z"
+    activation:
+      requires: none
+      blocking: true
+      confirmedActive: true
+    note: >-
+      Installed mid-session into ~/.claude/skills and invocable immediately, with no restart — the
+      observation that corrected this file's assumption. Blocking for the same reason as codex: it
+      is the adversarial verifier, and its absence turns every completion claim back into a report.

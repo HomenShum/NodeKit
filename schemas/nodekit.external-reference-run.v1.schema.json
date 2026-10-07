@@ -63,6 +63,11 @@
       }
     },
     "reasonCode": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "reverifyBy": {
+      "description": "When a provider is unreachable, work proceeds on unverified provenance and the intent to re-check it lives in someone's memory. A non-pass run is therefore a dated obligation, not a note: this is the date by which the run must be repeated before anything citing it can be treated as verified. reasonCode says what went wrong; this says when it stops being acceptable.",
+      "type": "string",
+      "format": "date-time"
+    },
     "attestation": {
       "type": "object",
       "additionalProperties": false,
@@ -114,7 +119,7 @@
         "properties": { "status": { "enum": ["fail", "not-run"] } },
         "required": ["status"]
       },
-      "then": { "required": ["reasonCode"] }
+      "then": { "required": ["reasonCode", "reverifyBy"] }
     }
   ]
 }

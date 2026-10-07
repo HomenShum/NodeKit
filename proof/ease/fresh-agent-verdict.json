@@ -1,0 +1,29 @@
+{
+  "errors": [],
+  "nodekitIdentity": "e398398d7f1dd4ff0b65409d2c8da971e83bc488/97989e9914aee93b83d5b120599bf4d9c8f69b3434040a3e06164cb58c84b987",
+  "observedTrials": 19,
+  "passed": true,
+  "requiredTasks": [
+    "research-map",
+    "volunteer-onboarding",
+    "launch-presentation"
+  ],
+  "schemaVersion": "nodekit.fresh-agent-verdict/v1",
+  "selectedRuns": [
+    {
+      "runId": "agent_research_map_e398398",
+      "taskId": "research-map",
+      "receiptSha256": "ccff9235c015aa5b2ce63adee08757d792a3e42915449043816a9705b652e66d"
+    },
+    {
+      "runId": "agent_volunteer_onboarding_e398398",
+      "taskId": "volunteer-onboarding",
+      "receiptSha256": "0133ca3add1d8d4668ba7b3917d8f31bbdfdd3be3e759d9502296af4ce15e49f"
+    },
+    {
+      "runId": "agent_launch_presentation_e398398",
+      "taskId": "launch-presentation",
+      "receiptSha256": "337d22ea66e9e3e4993edad726641bcf53da45da602889767e547a51ac61a0bc"
+    }
+  ]
+}

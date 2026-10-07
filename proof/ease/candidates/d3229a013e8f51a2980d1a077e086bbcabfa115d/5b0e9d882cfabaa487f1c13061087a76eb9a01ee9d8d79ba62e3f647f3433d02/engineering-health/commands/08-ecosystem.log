@@ -1,0 +1,157 @@
+$ npm run ecosystem:check
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 ecosystem:check
+> node src/cli.mjs ecosystem check --registry-root . --workspace ..
+
+PASS HomenShum/node-platform
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: node-platform
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS contract-declarations: 3/3 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeAgent
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeAgent
+  PASS lifecycle: production
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 4/4 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeRoom
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeRoom
+  PASS lifecycle: production
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 4/4 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeSlide
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeSlide
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 1/1 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeVideo
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeVideo
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeVoice
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeVoice
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeTrace
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeTrace
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeMem
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeMem
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeProof
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeProof
+  PASS lifecycle: production
+  PASS support: active
+  PASS command:dev: dev
+  PASS command:demo: demo
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 1/1 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/agentic-ui-qa
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: agentic-ui-qa
+  PASS lifecycle: production
+  PASS support: active
+  PASS command:doctor: doctor
+  PASS command:check: check
+  PASS command:proof: proof
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/NodeTasks
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: NodeTasks
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:doctor: validate
+  PASS command:check: validate
+  PASS command:proof: validate
+  PASS contract-declarations: 4/4 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/BetterPRHandoff
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: BetterPRHandoff
+  PASS lifecycle: production
+  PASS support: active
+  PASS command:doctor: test
+  PASS command:check: test
+  PASS command:proof: test
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS HomenShum/FeatureClipStudio
+  PASS manifest-schema: nodekit.repo/v1
+  PASS catalog-entry: FeatureClipStudio
+  PASS lifecycle: preview
+  PASS support: active
+  PASS command:doctor: check
+  PASS command:check: check
+  PASS command:proof: judge
+  PASS contract-declarations: 0/0 classified
+  PASS source-rules: 0/0 excepted
+PASS ecosystem conformance
+
+
+[stderr]
+

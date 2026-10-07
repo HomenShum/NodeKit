@@ -46,7 +46,32 @@ test("an uninformed senior engineer can orient with `nodekit tour` and the tour 
   const architecture = result.steps.find((s) => s.id === "architecture.five-parts");
   assert.equal(architecture.passed, true);
   const trace = result.steps.find((s) => s.id === "trace.one-action");
-  assert.match(trace.detail, /advanceStage/);
+  // It must hand over the rule that RUNS. A cold reader followed this step to `advanceStage` in
+  // src/lib/builder-journey.mjs, which no product path reaches, and lost the time. The step may
+  // still mention that module — as a labelled reference implementation, never as the live rule.
+  assert.match(trace.detail, /decideProposal/);
+  assert.match(trace.detail, /advanceStage[\s\S]*nothing runnable calls it/);
+});
+
+// The defect this replaced: the step reported `[ ok ]` after checking only that its cited files
+// EXISTED, so it passed whether or not the symbols it sends the reader to were still there.
+// Give it files that exist and say nothing, and it must fail.
+// @nodekit-verifies inv:tour-verifies-what-it-claims#citation-content-not-existence
+test("the trace step fails when its cited files exist but no longer contain the symbols it cites", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-tour-citation-"));
+  await mkdir(path.join(root, "src", "lib"), { recursive: true });
+  await mkdir(path.join(root, "schemas"), { recursive: true });
+  await writeFile(path.join(root, "package.json"), JSON.stringify({ name: "x", scripts: {} }));
+  await writeFile(path.join(root, "src", "cli.mjs"), 'if (first === "doctor") {}\n');
+  await writeFile(path.join(root, "src", "lib", "caseflow.mjs"), "export const nothingHere = 1;\n");
+  await writeFile(path.join(root, "src", "lib", "builder-journey.mjs"), "export const nothingHere = 1;\n");
+  await writeFile(path.join(root, "schemas", "nodekit.builder-case.v1.schema.json"), "{}\n");
+
+  const { out } = await cli(["tour", "--repo-root", root, "--json"]);
+  const trace = JSON.parse(out).steps.find((s) => s.id === "trace.one-action");
+  assert.equal(trace.passed, false, "present-but-wrong files must not report a pass");
+  assert.match(trace.fix, /caseflow\.mjs no longer contains/, "the failure must name which citation broke");
+  await rm(root, { recursive: true, force: true });
 });
 
 // Adversarial: the tour must not be able to report success for something it did not observe.

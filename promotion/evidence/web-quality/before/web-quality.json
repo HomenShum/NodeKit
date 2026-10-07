@@ -1,0 +1,293 @@
+{
+  "axe": {
+    "cliEngineVersion": "4.13.0",
+    "cliPackage": "@axe-core/cli@4.13.0",
+    "cliViolations": 1,
+    "majorFindings": [
+      {
+        "id": "color-contrast",
+        "impact": "serious"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "first_arrival",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "orientation",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "input",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "validation_error",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "running",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "partial_result",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "external_wait",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "proposal_pending",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "approval",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "conflict",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "recoverable_failure",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "reload_resume",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "receipt_inspection",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "export_share",
+        "width": "desktop"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "first_arrival",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "orientation",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "input",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "validation_error",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "running",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "partial_result",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "external_wait",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "proposal_pending",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "approval",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "conflict",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "recoverable_failure",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "reload_resume",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "receipt_inspection",
+        "width": "mobile"
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "scheme": "dark",
+        "state": "export_share",
+        "width": "mobile"
+      }
+    ],
+    "sweepCells": 60,
+    "sweepEngineVersion": "4.12.1",
+    "sweepViolations": 28
+  },
+  "commands": [
+    "npx --yes lighthouse@13.4.1 http://127.0.0.1:4916/ --output=json --output-path=promotion/evidence/web-quality/lighthouse-app.json --chrome-flags=\"--headless\"",
+    "npx --yes @axe-core/cli@4.13.0 http://127.0.0.1:4916/ --save promotion/evidence/web-quality/axe-app.json",
+    "node scripts/capture-web-quality.mjs"
+  ],
+  "consoleErrors": [
+    {
+      "source": "network",
+      "description": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "sourceLocation": {
+        "type": "source-location",
+        "url": "http://127.0.0.1:4916/favicon.ico",
+        "urlProvider": "network",
+        "line": 0,
+        "column": 0
+      }
+    }
+  ],
+  "lighthouse": {
+    "categories": {
+      "performance": 0.99,
+      "accessibility": 0.95,
+      "best-practices": 0.96,
+      "seo": 1,
+      "agentic-browsing": 0.99
+    },
+    "lighthouseVersion": "13.4.1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+    "vitals": {
+      "cls": 0.05362264114324445,
+      "fcpMs": 1069,
+      "lcpMs": 1379,
+      "tbtMs": 0
+    }
+  },
+  "measuredAt": "2026-08-14T02:39:42.839Z",
+  "passed": false,
+  "failures": [
+    "lighthouse accessibility 0.95 < 1",
+    "lighthouse best-practices 0.96 < 1",
+    "1 console error(s): Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "axe CLI serious color-contrast",
+    "axe sweep serious color-contrast at first_arrival/desktop/dark",
+    "axe sweep serious color-contrast at orientation/desktop/dark",
+    "axe sweep serious color-contrast at input/desktop/dark",
+    "axe sweep serious color-contrast at validation_error/desktop/dark",
+    "axe sweep serious color-contrast at running/desktop/dark",
+    "axe sweep serious color-contrast at partial_result/desktop/dark",
+    "axe sweep serious color-contrast at external_wait/desktop/dark",
+    "axe sweep serious color-contrast at proposal_pending/desktop/dark",
+    "axe sweep serious color-contrast at approval/desktop/dark",
+    "axe sweep serious color-contrast at conflict/desktop/dark",
+    "axe sweep serious color-contrast at recoverable_failure/desktop/dark",
+    "axe sweep serious color-contrast at reload_resume/desktop/dark",
+    "axe sweep serious color-contrast at receipt_inspection/desktop/dark",
+    "axe sweep serious color-contrast at export_share/desktop/dark",
+    "axe sweep serious color-contrast at first_arrival/mobile/dark",
+    "axe sweep serious color-contrast at orientation/mobile/dark",
+    "axe sweep serious color-contrast at input/mobile/dark",
+    "axe sweep serious color-contrast at validation_error/mobile/dark",
+    "axe sweep serious color-contrast at running/mobile/dark",
+    "axe sweep serious color-contrast at partial_result/mobile/dark",
+    "axe sweep serious color-contrast at external_wait/mobile/dark",
+    "axe sweep serious color-contrast at proposal_pending/mobile/dark",
+    "axe sweep serious color-contrast at approval/mobile/dark",
+    "axe sweep serious color-contrast at conflict/mobile/dark",
+    "axe sweep serious color-contrast at recoverable_failure/mobile/dark",
+    "axe sweep serious color-contrast at reload_resume/mobile/dark",
+    "axe sweep serious color-contrast at receipt_inspection/mobile/dark",
+    "axe sweep serious color-contrast at export_share/mobile/dark"
+  ],
+  "surface": "http://127.0.0.1:4916/ (application produced by `nodekit create`)",
+  "thresholds": {
+    "accessibility": 1,
+    "best-practices": 1,
+    "performance": 0.9,
+    "seo": 0.9,
+    "cls": 0.1,
+    "lcpMs": 2500,
+    "tbtMs": 200
+  }
+}

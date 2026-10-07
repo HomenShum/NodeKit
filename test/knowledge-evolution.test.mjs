@@ -276,16 +276,33 @@ test("rejects fabricated source anchors and every stale reference location", asy
   const fabricatedValidation = await validateGraphPatch(root, fabricated.patchId);
   assert.ok(fabricatedValidation.validation.errors.some((error) => error.includes("authentication failed")));
 
-  const expiresAt = new Date(Date.now() + 2_000).toISOString();
+  // The expiring fixture is created and inserted LAST, immediately before the wait, so its short
+  // TTL races nothing but its own insert.
+  //
+  // It previously expired during its own setup. The TTL was two seconds measured from creation, and
+  // the two propose/validate/accept/apply cycles between creation and use each do real crypto and
+  // file I/O — under full-suite parallel load that setup took longer than the fixture lived, so the
+  // snapshot was already stale when inserted and the run failed with "snapshot bytes did not
+  // verify" before reaching a single assertion. Intermittent, and it read as a filesystem race
+  // rather than a fixture outliving its own preparation.
   const durable = await storedEvidence(root, { bytes: Buffer.from("durable freshness source"), sourceUri: "https://example.test/durable-freshness", expiresAt: "2035-01-01T00:00:00.000Z" });
-  const expiring = await storedEvidence(root, { bytes: Buffer.from("expiring source"), sourceUri: "https://example.test/expiring", expiresAt });
   await proposeValidateAcceptApply(root, {
-    operations: [{ type: "INSERT", node: durable }, { type: "INSERT", node: expiring }],
+    operations: [{ type: "INSERT", node: durable }],
     evidenceRefs: [], contradictionRefs: [],
   });
   const target = { id: "claim:freshness-target", kind: "claim", label: "Target", layer: "canonical", confidence: 1, evidenceRefs: [durable.id] };
   await proposeValidateAcceptApply(root, { operations: [{ type: "INSERT", node: target }], evidenceRefs: [durable.id], contradictionRefs: [] });
-  await delay(2_100);
+
+  const EXPIRING_TTL_MS = 6_000;   // generous enough to survive one loaded insert, short enough to wait out
+  const expiresAt = new Date(Date.now() + EXPIRING_TTL_MS).toISOString();
+  const expiring = await storedEvidence(root, { bytes: Buffer.from("expiring source"), sourceUri: "https://example.test/expiring", expiresAt });
+  await proposeValidateAcceptApply(root, {
+    operations: [{ type: "INSERT", node: expiring }],
+    evidenceRefs: [], contradictionRefs: [],
+  });
+  // Wait past the recorded expiry rather than a fixed guess, so a slow insert cannot leave the
+  // fixture still fresh when the stale-reference assertions below run.
+  await delay(Math.max(200, Date.parse(expiresAt) - Date.now() + 200));
 
   const cases = [
     await proposeGraphPatch(root, {

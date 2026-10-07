@@ -1,0 +1,12 @@
+$ npm run evolution:verify
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 evolution:verify
+> node src/cli.mjs evolution verify --repo-root .
+
+EVOLUTION PASS: 10 events, 11 invariants, 3 adoptions
+
+
+[stderr]
+

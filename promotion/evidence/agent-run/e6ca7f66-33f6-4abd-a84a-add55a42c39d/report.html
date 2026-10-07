@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>codex - Agent run report</title>
+<style>
+:root{color-scheme:light dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.5;--bg:#f6f7fb;--card:#fff;--ink:#172033;--muted:#5c667a;--line:#d9deea;--accent:#3157d5}
+@media(prefers-color-scheme:dark){:root{--bg:#10131b;--card:#181d29;--ink:#edf0f7;--muted:#a9b1c2;--line:#343c4e;--accent:#8ea8ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{width:min(960px,calc(100% - 2rem));margin:2rem auto 4rem}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(1rem,3vw,2rem);margin-block:1rem;box-shadow:0 8px 30px #0000000d}h1,h2{line-height:1.15}h1{margin:.35rem 0;font-size:clamp(1.7rem,5vw,3rem)}h2{font-size:1.15rem}.eyebrow,.meta{color:var(--muted)}.status{display:inline-block;border:1px solid currentColor;border-radius:999px;padding:.25rem .65rem;font-weight:700}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.75rem}.datum{border-left:3px solid var(--accent);padding-left:.75rem}.datum b{display:block}.flow{display:grid;grid-template-columns:repeat(7,auto);align-items:center;gap:.5rem;overflow-x:auto;padding:.5rem}.node{min-width:130px;text-align:center;border:1px solid var(--line);border-radius:12px;padding:.75rem;background:var(--bg)}.arrow{color:var(--accent);font-size:1.3rem}ol{padding-left:1.25rem}li{margin:.7rem 0}time{display:block;color:var(--muted);font-size:.85rem}details{border-top:1px solid var(--line);padding-top:1rem}summary{cursor:pointer;font-weight:700}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--bg);padding:1rem;border-radius:10px;max-height:26rem;overflow:auto}.io-meta{color:var(--muted);font-size:.9rem}
+@media(max-width:680px){main{width:min(100% - 1rem,960px);margin-top:.5rem}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);text-align:center}}
+</style>
+</head>
+<body>
+<main data-testid="agent-run-report">
+<section class="card" aria-labelledby="report-title">
+  <p class="eyebrow">NodeKit Agent Flight Recorder</p>
+  <h1 id="report-title">codex</h1>
+  <p>Inspect the repository</p>
+  <p><span class="status" data-testid="run-status">Completed</span></p>
+  <div class="summary-grid">
+    <p class="datum"><b>Outcome</b>The requested command completed.</p>
+    <p class="datum"><b>Duration</b>311 ms</p>
+    <p class="datum"><b>Exit code</b>0</p>
+    <p class="datum"><b>Run ID</b><span class="meta">e6ca7f66-33f6-4abd-a84a-add55a42c39d</span></p>
+  </div>
+</section>
+<section class="card" aria-labelledby="graph-title">
+  <h2 id="graph-title">Execution graph</h2>
+  <div class="flow" data-testid="execution-graph" role="img" aria-label="Goal: completed; Agent process: completed; Captured evidence: completed; Outcome: completed"><div class="node" data-testid="execution-node-goal" data-node-status="completed"><b>Goal</b><br>Inspect the repository<br><span class="meta">completed</span></div><span class="arrow" aria-label="requested">-&gt;</span><div class="node" data-testid="execution-node-process" data-node-status="completed"><b>Agent process</b><br>node (1 argument)<br><span class="meta">completed</span></div><span class="arrow" aria-label="observed">-&gt;</span><div class="node" data-testid="execution-node-evidence" data-node-status="completed"><b>Captured evidence</b><br>10 stdout bytes; 0 stderr bytes<br><span class="meta">completed</span></div><span class="arrow" aria-label="supports">-&gt;</span><div class="node" data-testid="execution-node-outcome" data-node-status="completed"><b>Outcome</b><br>The requested command completed.<br><span class="meta">completed</span></div></div>
+</section>
+<section class="card" aria-labelledby="timeline-title">
+  <h2 id="timeline-title">What happened</h2>
+  <ol><li><time datetime="2026-08-13T09:19:53.986Z">2026-08-13T09:19:53.986Z</time><span>Started node with 1 argument.</span></li><li><time datetime="2026-08-13T09:19:54.297Z">2026-08-13T09:19:54.297Z</time><span>The process completed successfully.</span></li></ol>
+</section>
+<section class="card" data-testid="exact-io" aria-labelledby="exact-title">
+  <h2 id="exact-title">Exact I/O</h2>
+  <details>
+    <summary>Command</summary>
+    <pre>node --version</pre>
+  </details>
+  <details>
+    <summary>stdout</summary>
+    <p class="io-meta">10 bytes observed</p>
+    <pre>v22.22.2
+</pre>
+  </details>
+  <details>
+    <summary>stderr</summary>
+    <p class="io-meta">0 bytes observed</p>
+    <pre></pre>
+  </details>
+  <details>
+    <summary>Capture limitations</summary>
+    <ul><li>Captures the spawned process boundary only; child-created files, tool calls, and network activity are not independently observed.</li><li>Retains at most 262144 bytes from each output stream and 128 lifecycle events.</li><li>Retains the newest 50 completed run directories and deterministically evicts older runs.</li><li>Environment variables, stdin, and inherited credentials are not copied into the receipt.</li><li>Termination is best-effort for descendant processes that detach from the spawned process.</li></ul>
+  </details>
+</section>
+</main>
+</body>
+</html>

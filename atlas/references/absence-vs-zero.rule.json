@@ -27,6 +27,8 @@
   ],
   "counterexampleNote": "obs-midday-empty is retained deliberately as the anti-reference. A shipped, audience-proven product does the wrong thing three tiles below doing the right thing, which is stronger evidence that the failure is easy than any invented fixture would be.",
   "boundToGate": {
+    "kind": "schema-field",
+    "ref": "schemas/nodekit.story-pack.v1.schema.json#/$defs/storyClaim/properties/contentBinding",
     "gate": "nodekit.story-pack/v1 content provenance",
     "relationship": "This rule is the visual form of the schema constraint already shipped: a claim with rendersData true requires a contentBinding, and an unbound claim cannot be rendered as bound. The schema makes the dishonest record unrepresentable; this rule says what the honest surface looks like.",
     "schemaPath": "schemas/nodekit.story-pack.v1.schema.json"

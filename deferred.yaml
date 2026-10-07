@@ -1,0 +1,204 @@
+# Open threads that were deliberately left undone.
+#
+# Deferring is fine. Deferring silently is how a considered decision becomes a surprise three weeks
+# later, when nobody can name what was consciously skipped. `nodekit-submission-prepare` reads this
+# file and refuses to report a submission ready while anything here is still `open`.
+#
+# status: open | resolved | accepted-risk
+#   open          — nobody has decided yet. This is the state that blocks.
+#   resolved      — it was done. `outcome` says what closed it.
+#   accepted-risk — it will not be done, on purpose. `outcome` says why that is acceptable.
+#
+# Seeded only with threads observed directly. An entry nobody verified is the thing this file exists
+# to prevent, and it would be a strange way to start.
+
+deferred:
+  - id: docs-onboarding-compact-loop
+    what: >-
+      test/docs-onboarding "a fresh human or coding agent reaches the compact loop before the
+      detailed manual" fails, and fails identically at a clean HEAD with no local changes.
+    why: >-
+      Observed while verifying the reference-loop and provenance contract work. It is a
+      pre-existing failure in the onboarding docs ordering, unrelated to those changes, and folding
+      a docs fix into contract commits would have made both harder to review.
+    deferredAt: "2026-08-02"
+    status: resolved
+    outcome: >-
+      Root cause was a duplicated constant, not the docs ordering: the principle count was written
+      in three places (the summary sentence, the expected array length, and the last principle's
+      boundary), so adding a sixteenth principle in fe8f7aa4d required editing three and edited
+      none. The test now derives the count and asserts numbering contiguity plus prose agreement,
+      so gaining a principle stays green and claiming a stale total does not. Suite is 622/622.
+
+  - id: replay-packet-producers
+    what: >-
+      nodekit.replay-packet/v1 and its ladder evaluator exist, but nothing produces a packet yet.
+      The NodeKit thread also specified `nodekit reproduce --run <id> --fresh-worktree`,
+      PROMPT_BOOK.md, RECREATE.md, and a typed PromptImprovementRecord; none are built.
+    why: >-
+      The contract is the part that stops a false claim, and it is worth having before a producer
+      exists. Writing producers first would have meant deciding the honesty rules while also
+      deciding the plumbing, and the rules are the half that was actually asked for.
+    deferredAt: "2026-08-02"
+    status: resolved
+    outcome: >-
+      Producer shipped: src/lib/replay-packet-producer.mjs plus `nodekit reproduce`. The design
+      constraint is the deliverable — writing a packet earns PROMPT_REPLAYABLE and nothing more,
+      because recording a prompt proves the instruction survived and nothing else. --command creates
+      a real worktree at the baseline commit and runs there, so BUILD_REPLAYABLE is earned rather
+      than asserted, and a failed replay stays at the lower rung as a recorded observation. The
+      level is never an argument, which was the defect Codex refuted in the trust gate. Still not
+      built and deliberately not faked: PROMPT_BOOK.md, RECREATE.md, and the typed
+      PromptImprovementRecord — those are presentation over this data, not new evidence.
+
+      COMPLETED 2026-08-03: the three items this entry's `what` listed as unbuilt now exist.
+      `nodekit reproduce --book <dir>` generates PROMPT_BOOK.md and RECREATE.md from the packet
+      rather than by hand, and nodekit.prompt-improvement/v1 types the change kinds with a required
+      learnedFrom so an improvement traces to something that happened in the run. RECREATE.md leads
+      with the rung actually earned and names the rungs it did not, because a hand-written recreate
+      guide drifts from its packet and then reads with more authority than the receipt it
+      contradicts. Verified by running it against this repo: with --command it built a fresh
+      worktree from the baseline, ran the suite there, earned BUILD_REPLAYABLE rather than
+      asserting it, and left no worktree behind.
+  - id: preflight-and-integration-records-unwired
+    what: >-
+      src/lib/preflight.mjs and src/lib/integration-record.mjs were tested libraries with no caller.
+      Nothing ran preflight before a session, and no integrations/*.yaml records exist.
+    why: >-
+      Wiring preflight to a session start needs a decision about where a session begins for this
+      repo, which is a question for the owner rather than an implementation detail to guess at.
+    deferredAt: "2026-08-02"
+    status: resolved
+    outcome: >-
+      CLOSED 2026-08-03 by deriving both declarations from observation rather than leaving them to
+      the owner. That earlier framing was too cautious: plugin ids, versions and commit SHAs are
+      readable from ~/.claude/plugins/installed_plugins_v2.json, and ajv's version and entry point
+      are readable from the installed package, so neither record required inventing anything.
+
+      harness.yaml records five dependencies and two caveats that weaken it: all four plugins carry
+      an identical installedAt to the millisecond, which is a bulk re-registration timestamp rather
+      than four install times; and the restart assumption was contradicted by observation, since
+      fable-* installed mid-session into ~/.claude/skills and was invocable with no restart.
+
+      Writing it immediately exposed a defect in the gate itself. claude-mem is marked
+      confirmedActive:false — somebody looked and did not confirm it — and preflight reported it
+      active anyway, because a timestamp inference silently overruled the observation. Precedence
+      is now explicit: true wins, false wins, and the timestamp only answers when nobody looked.
+
+      integrations/ajv.yaml was written docs-first and it earned its keep: the current docs say
+      draft-2020-12 is BREAKING and needs a different Ajv class, and all 114 schemas here are
+      2020-12. Introspection confirmed src/lib/schema-validation.mjs:24 uses Ajv2020 correctly. It
+      also records a real loosening nobody had flagged — strict:false is set, so unknown keywords
+      and ignored formats pass unreported.
+
+      Superseded framing follows:
+      Half closed, and the remaining half is deliberately left to the owner. `nodekit preflight`
+      now exists and takes --session-started-at explicitly rather than inferring a session boundary
+      from process uptime, which would have answered a question only the caller knows. What is
+      still absent is a harness.yaml for this repository and any integrations/*.yaml records:
+      writing either would mean inventing declarations nobody verified, which is the failure the
+      surrounding contracts exist to prevent. The libraries and the command are proven; the
+      declarations are the owner''s to make.
+
+  - id: studio-working-tree-edit
+    what: >-
+      src/studio.mjs carries an uncommitted local modification that predates this session and was
+      excluded from all seven contract commits.
+    why: >-
+      It is the repository owner's in-progress work. Committing someone else's unfinished edit to
+      main as a side effect of unrelated schema changes is not a decision this session gets to make.
+    deferredAt: "2026-08-02"
+    status: resolved
+    outcome: >-
+      Read before committing rather than assumed: a 14-line re-export of motion-portability through
+      the studio surface, no deletions, matching the file's own convention, and green in every suite
+      run because it was present throughout. Landed in 91102bcc9 on the owner's explicit
+      instruction. The change was never what kept it open — committing another party's in-progress
+      work as a side effect of unrelated edits is a different class of act from finishing your own.
+
+  - id: production-agent-retry-backoff
+    what: >-
+      `production-agent check` refuses the platform's own contract: toolFaultTolerance must have
+      required property 'retry' (backoff const exponential). No retry-with-backoff loop exists in
+      this repo; the contract omits the block rather than declaring one.
+    why: >-
+      Automatically re-running a spawned agent CLI would replay its side effects invisibly.
+      Re-attempts here are deliberate and event-recorded: execution-graph maximumAttempts
+      (src/lib/execution-graph.mjs) is a bounded allowance a caller spends by recording a new
+      attempt, not an automatic retry. Declaring exponential backoff would invent a guard.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      The refusal is correct and stands. A spawned CLI is not an idempotent provider call, so
+      automatic retry is the wrong guard for this loop; the truthful contract records its absence
+      instead of faking it. Revisit only if agent-run ever wraps a call that is safe to replay.
+
+  - id: production-agent-circuit-breaker
+    what: >-
+      `production-agent check` refuses the platform's own contract: runtimeGuards must have
+      required property 'circuitBreaker'. No error-rate circuit breaker exists in this repo —
+      nothing trips after N failed runs in a window.
+    why: >-
+      A breaker over run receipts (trip when the failed-run rate in a window crosses a threshold)
+      is buildable from data agent-run already writes, but it does not exist yet and declaring one
+      would be the invented guard the gate refuses.
+    deferredAt: "2026-08-04"
+    status: open
+
+  - id: production-agent-cost-fuse
+    what: >-
+      `production-agent check` refuses the platform's own contract: runtimeGuards must have
+      required property 'costFuse' (maxTokensPerRun or maxSpendUsdPerDay). There is no LLM
+      provider call site in this repo, so no tokens are counted and no spend accrues.
+    why: >-
+      The fuses that do exist are time (AGENT_RUN_LIMITS.timeoutMaxMs, abort + SIGKILL) and bytes
+      (AGENT_RUN_LIMITS.outputBytes per stream), both declared in the contract's slos. A token or
+      dollar fuse would meter a resource this platform never consumes.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      Correct refusal, accepted: the schema's cost vocabulary assumes a provider. The platform's
+      real cost boundaries are enforced in code and declared truthfully. Revisit the moment a
+      provider call site lands in this repo.
+
+  - id: production-agent-canary
+    what: >-
+      `production-agent check` refuses the platform's own contract: release must have required
+      property 'canary' (trafficPercent with automatic rollback). node-platform ships as an npm
+      package and CLI; there is no request traffic to split and no router to roll back.
+    why: >-
+      A canary needs a traffic plane. The nearest real analogue here is the quality workflow's
+      pack-and-install job, which proves the published artifact before it ships, and that is
+      already in CI.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      Correct refusal, accepted: declaring a trafficPercent for a package registry would be
+      fiction. Revisit if the platform ever runs as a hosted service.
+
+  - id: production-agent-model-migration
+    what: >-
+      `production-agent check` refuses the platform's own contract: release must have required
+      property 'modelMigration' (pinnedModel plus a migration eval). There is no model to pin —
+      agent-run spawns whatever agent CLI the caller names and never selects an LLM.
+    why: >-
+      Model pinning belongs to the applications the platform launches, which do have providers.
+      Writing a model id into this repo's contract would claim a dependency that is not there.
+    deferredAt: "2026-08-04"
+    status: accepted-risk
+    outcome: >-
+      Correct refusal, accepted: the provider-shaped fields stay absent until a provider exists.
+      Generated projects that call providers must fill this block for themselves.
+
+  - id: production-agent-golden-metrics
+    what: >-
+      Behind the schema refusals sits a semantic one the check has not reached yet: the contract
+      deliberately omits task-completion-rate and tool-call-error-rate, so parseProductionAgentContract
+      would refuse it even with the schema satisfied. No measurement pipeline aggregates rates over
+      run receipts today.
+    why: >-
+      Declaring a rate nothing measures is a number wearing a guard's clothes. The receipts
+      already carry status per run, so a rate aggregator is buildable — it just is not built, and
+      the contract says so instead of pretending.
+    deferredAt: "2026-08-04"
+    status: open

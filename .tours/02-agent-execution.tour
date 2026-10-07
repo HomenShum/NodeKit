@@ -1,0 +1,70 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "2 · Where the agent proposes and the runtime decides",
+  "description": "The rule this codebase exists to enforce: an agent may propose a change, and only an approval that names the exact version it was written against may apply one. Follow a proposal from the agent loop into the single function that mutates a saved artifact.",
+  "steps": [
+    {
+      "file": "templates/base/agent/workflow.mjs",
+      "line": 3,
+      "pattern": "^export const stages = Object.freeze",
+      "title": "Four stages, and who owns each one",
+      "description": "This is what every generated application starts from. `owner` is the load-bearing field: `working` belongs to the agent, `review` belongs to the user. The agent never owns a stage that changes saved state."
+    },
+    {
+      "file": "templates/base/agent/workflow.mjs",
+      "line": 29,
+      "pattern": "^  function propose\\(\\{ artifactId, runId \\}\\)",
+      "title": "The agent proposes against a specific version",
+      "description": "`baseVersion` is read from the artifact at the moment the proposal is made. That single number is what makes a stale proposal detectable minutes later — without it, a slow agent silently overwrites newer work."
+    },
+    {
+      "file": "src/lib/caseflow.mjs",
+      "line": 72,
+      "pattern": "^export function createMemoryCaseflow",
+      "title": "The default runtime is plain Maps",
+      "description": "No database, no ORM, no migration step. `state.cases`, `state.runs`, `state.artifacts`, `state.proposals`, `state.receipts` are `Map`s in this process.\n\nSQL adapters exist under `adapters/` and are opt-in. The in-memory runtime is not a mock: it is the reference implementation the SQL adapters are tested against."
+    },
+    {
+      "file": "src/lib/caseflow.mjs",
+      "line": 253,
+      "pattern": "^  function createProposal\\(\\{ artifactId, baseVersion",
+      "title": "A proposal is recorded, not applied",
+      "description": "Note what does not happen here: `artifact.canonicalVersion` is untouched and `artifact.content` is untouched. A proposal is an intention with a version stamp."
+    },
+    {
+      "file": "src/lib/caseflow.mjs",
+      "line": 289,
+      "pattern": "^  function decideProposal\\(\\{ proposalId, decision",
+      "title": "The only function that mutates a saved artifact",
+      "description": "If you want to know how state changes in this system, this is the function. Everything else reads.\n\nThe first block handles a **repeated** decision: an agent or a flaky network re-sending the same accept must not create a second approval. An identical retry returns the first result with `reused: true`; a *different* decision on an already-decided proposal throws."
+    },
+    {
+      "file": "src/lib/caseflow.mjs",
+      "line": 322,
+      "pattern": "proposal\\.status = \"conflicted\";",
+      "title": "Stale changes are contained, not applied",
+      "description": "The invariant in three lines. If the artifact moved on since the proposal was written, an accept produces `conflicted` and **nothing is applied**. The user is told their change was not applied; newer work survives.\n\n`test/generated-project-gates.test.mjs` drives this over real HTTP against a started server."
+    },
+    {
+      "file": "src/lib/caseflow.mjs",
+      "line": 504,
+      "pattern": "^  function completeRun\\(\\{ runId, actor \\}\\)",
+      "title": "The receipt binds the result to its bytes",
+      "description": "A receipt is not a log line. `receiptHash` is a content hash of the run body, so a receipt cannot be reused to vouch for different content. Compare `contentHash` at the top of this file."
+    },
+    {
+      "file": "src/lib/atlas-mcp.mjs",
+      "line": 34,
+      "pattern": "^export const ATLAS_MCP_TOOLS = Object.freeze",
+      "title": "Tools a coding agent may call",
+      "description": "Registered as Model Context Protocol tools, served by `nodekit atlas serve --mcp`. The tool descriptions state a RUNG: rung 1 returns ranked candidates with no code at all, and only a later rung returns source.\n\nThat rung discipline exists because handing an agent the whole index floods its context and makes its answers worse."
+    },
+    {
+      "file": "src/lib/atlas-mcp.mjs",
+      "line": 123,
+      "pattern": "^export async function handleAtlasRpc",
+      "title": "How a tool call arrives and returns",
+      "description": "One JSON-RPC message in, one result out. A failing tool returns `{ isError: true }` with the message as text rather than crashing the server, so the agent can read the error and retry."
+    }
+  ]
+}

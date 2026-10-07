@@ -1,0 +1,161 @@
+{
+  "audience": {
+    "reader": "An engineer deciding whether to let an agent build something they will have to defend",
+    "decision": "whether the proof this platform produces is worth the ceremony it costs",
+    "stakes": "prospective-user",
+    "priorBeliefs": [
+      "agent output cannot be trusted and cannot be checked either",
+      "every proof framework is a report generator with extra steps"
+    ]
+  },
+  "surfaces": [
+    {
+      "surfaceId": "surface-readme",
+      "kind": "readme",
+      "description": "README.md, the reference page",
+      "route": "README.md"
+    },
+    {
+      "surfaceId": "surface-start",
+      "kind": "readme",
+      "description": "START_HERE.md, the ten-minute onboarding",
+      "route": "START_HERE.md"
+    }
+  ],
+  "sources": [
+    {
+      "sourceId": "src-this-repo",
+      "origin": "authority-issued",
+      "describes": "The node-platform repository at the commit these claims were produced from",
+      "artifact": {
+        "path": "cases/node-platform.build-evidence-pack.json",
+        "mediaType": "application/json"
+      },
+      "authority": {
+        "issuer": "the repository owner",
+        "issuerKind": "human-attestation",
+        "artifactType": "source tree",
+        "receivedAt": "2026-08-03T00:00:00.000Z",
+        "receipt": {
+          "path": "cases/evidence/test-run.log"
+        }
+      }
+    }
+  ],
+  "disclosures": [],
+  "claims": [
+    {
+      "claimId": "sc-gates-run",
+      "statement": "The platform runs its own gates against itself, and the run is recorded rather than reported.",
+      "surfaceRefs": [
+        "surface-readme"
+      ],
+      "consequential": true,
+      "rendersData": false,
+      "buildBinding": {
+        "bepClaimIds": [],
+        "evidenceRefs": [
+          "ev-test-run"
+        ],
+        "restatement": "narrowed",
+        "strengthDelta": "weaker"
+      },
+      "contentBinding": {
+        "origin": "authority-issued",
+        "sourceRefs": [
+          "src-this-repo"
+        ]
+      },
+      "boundary": "It establishes that the suite ran and what it returned. It does not establish that the suite tests the right things."
+    },
+    {
+      "claimId": "sc-contract-derived",
+      "statement": "The opportunity contract is derived from the repository's own documentation, and the fields the docs do not support are named as unverified.",
+      "surfaceRefs": [
+        "surface-start"
+      ],
+      "consequential": true,
+      "rendersData": false,
+      "buildBinding": {
+        "bepClaimIds": [],
+        "evidenceRefs": [
+          "ev-opportunity-contract-source"
+        ],
+        "restatement": "verbatim"
+      },
+      "contentBinding": {
+        "origin": "authority-issued",
+        "sourceRefs": [
+          "src-this-repo"
+        ]
+      },
+      "boundary": "Naming a field unverified is not the same as verifying the rest."
+    },
+    {
+      "claimId": "sc-emergent",
+      "statement": "A sweep for undeclared behaviour ran and produced a receipt, so an empty result and an unasked question do not look the same.",
+      "surfaceRefs": [
+        "surface-readme"
+      ],
+      "consequential": true,
+      "rendersData": false,
+      "buildBinding": {
+        "bepClaimIds": [],
+        "evidenceRefs": [
+          "ev-emergent-sweep"
+        ]
+      },
+      "contentBinding": {
+        "origin": "authority-issued",
+        "sourceRefs": [
+          "src-this-repo"
+        ]
+      },
+      "boundary": "The sweep surfaced nothing. That is a recorded zero, not a guarantee there was nothing to find."
+    },
+    {
+      "claimId": "sc-faster",
+      "statement": "Teams ship 40% faster with NodeKit.",
+      "surfaceRefs": [
+        "surface-readme"
+      ],
+      "consequential": true,
+      "rendersData": true,
+      "buildBinding": {
+        "bepClaimIds": [],
+        "evidenceRefs": [
+          "ev-velocity-study"
+        ]
+      },
+      "contentBinding": {
+        "origin": "unknown",
+        "sourceRefs": []
+      },
+      "boundary": "none"
+    }
+  ],
+  "narrative": [
+    {
+      "order": 1,
+      "heading": "It checks itself",
+      "claimRefs": [
+        "sc-gates-run",
+        "sc-emergent"
+      ],
+      "surfaceRef": "surface-readme"
+    },
+    {
+      "order": 2,
+      "heading": "The contract came from somewhere",
+      "claimRefs": [
+        "sc-contract-derived"
+      ],
+      "surfaceRef": "surface-start"
+    }
+  ],
+  "demoMode": {
+    "engaged": false,
+    "surfaceRefs": [],
+    "reason": "the platform is the product; there is no demo data"
+  }
+}

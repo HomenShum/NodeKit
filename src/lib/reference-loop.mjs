@@ -682,7 +682,9 @@ async function validateAuthenticatedExternalRun(
   return run;
 }
 
-function externalNotRun(provider, reasonCode) {
+// A provider outage is not a note to self. Every non-pass run leaves a dated obligation behind it,
+// so the intent to re-check cannot decay into scrollback while receipts keep citing the gap.
+function externalNotRun(provider, reasonCode, now = Date.now()) {
   return buildExternalReferenceRun({
     schemaVersion: "nodekit.external-reference-run/v1",
     provider,
@@ -690,6 +692,7 @@ function externalNotRun(provider, reasonCode) {
     policyId: "nodekit.mobbin-remote-mcp/v1",
     status: "not-run",
     reasonCode,
+    reverifyBy: new Date(now + MAX_EXTERNAL_RUN_TTL_MS).toISOString(),
   });
 }
 

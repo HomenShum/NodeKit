@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/node-platform/blob/main/schemas/nodekit.launch-video.v1.schema.json",
+  "description": "A launch film walked through Motion Studio's four stages — brief, direction, drafts, delivery — with a human taste call at direction and delivery, timestamped reference facts, and a launch date the delivery must precede. Semantic rules (mom-test block, drafts-before-direction refusal, date ordering) live in src/lib/launch-video.mjs.",
+  "type": "object",
+  "required": ["schemaVersion", "application", "declaredAt", "brief"],
+  "properties": {
+    "schemaVersion": { "const": "nodekit.launch-video/v1" },
+    "application": { "$ref": "#/$defs/id" },
+    "declaredAt": { "$ref": "#/$defs/text" },
+    "brief": {
+      "type": "object",
+      "required": ["product", "story", "audience", "launchDate", "channels"],
+      "properties": {
+        "product": { "$ref": "#/$defs/text" },
+        "story": { "$ref": "#/$defs/text" },
+        "audience": { "$ref": "#/$defs/text" },
+        "launchDate": { "$ref": "#/$defs/text" },
+        "channels": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } }
+      },
+      "additionalProperties": false
+    },
+    "direction": {
+      "type": "object",
+      "required": ["singleMoment", "beats", "references", "durationTargetSeconds"],
+      "properties": {
+        "singleMoment": { "$ref": "#/$defs/text" },
+        "beats": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["order", "job"],
+            "properties": {
+              "order": { "type": "integer", "minimum": 1 },
+              "job": { "$ref": "#/$defs/text" },
+              "evidenceId": { "$ref": "#/$defs/text" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "references": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["url", "facts"],
+            "properties": {
+              "url": { "type": "string", "pattern": "^https?://" },
+              "facts": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["at", "fact"],
+                  "properties": {
+                    "at": { "type": "string", "pattern": "^\\d{1,2}:\\d{2}(:\\d{2})?$" },
+                    "fact": { "$ref": "#/$defs/text" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "whatToSteal": { "$ref": "#/$defs/text" },
+              "whatNotToSteal": { "$ref": "#/$defs/text" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "durationTargetSeconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 180 },
+        "tone": { "$ref": "#/$defs/text" },
+        "approval": { "$ref": "#/$defs/approval" }
+      },
+      "additionalProperties": false
+    },
+    "draftCycles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cut", "renderedAt"],
+        "properties": {
+          "cut": { "$ref": "#/$defs/text" },
+          "renderedAt": { "$ref": "#/$defs/text" },
+          "judge": {
+            "type": "object",
+            "properties": {
+              "craftVerdict": { "enum": ["publish", "recut", "block"] },
+              "comprehension": {
+                "type": "object",
+                "additionalProperties": { "type": "number", "minimum": 0, "maximum": 2 }
+              },
+              "receipt": { "$ref": "#/$defs/text" }
+            },
+            "additionalProperties": false
+          },
+          "humanNotes": { "$ref": "#/$defs/text" },
+          "disposition": { "enum": ["recut", "approve"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "required": ["finalCut", "judgeReceipt", "deliveredAt", "approval"],
+      "properties": {
+        "finalCut": { "$ref": "#/$defs/text" },
+        "judgeReceipt": { "$ref": "#/$defs/text" },
+        "videoProofReceipt": { "$ref": "#/$defs/text" },
+        "deliveredAt": { "$ref": "#/$defs/text" },
+        "postCopy": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+        "approval": { "$ref": "#/$defs/approval" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "text": { "type": "string", "minLength": 1 },
+    "approval": {
+      "type": "object",
+      "required": ["approvedBy", "at"],
+      "properties": {
+        "approvedBy": { "$ref": "#/$defs/text" },
+        "at": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

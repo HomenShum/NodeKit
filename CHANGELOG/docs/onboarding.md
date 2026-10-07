@@ -4,18 +4,19 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
-## 2026-08-02 - Add the NodeBook brownfield field case
+## 2026-10-07 - Preserve working behavior during existing-product adoption
 
-Turn the NodeBook/MewAgent production-replacement session into a reusable in-place adoption lane:
-inspect the real product, inventory active behavior, freeze product/state/agent/interface/authority
-boundaries, migrate one slice, prove parity on the shipping route, and retire duplicates only after
-evidence. Add the detailed field case and compact launch card without creating a second doctrine,
-workflow engine, graph authority, or approval system. Repair the principles-count regression found
-on current `main` and bind the new packaged documentation to a public scenario test.
+Carry the portable inventory, baseline/candidate parity and retirement requirements from the
+[historical NodeBook proposal](https://github.com/HomenShum/NodeKit/blob/682699cfc4b9e03fe07422a9843bcf9dd4c1f36f/docs/NODEBOOK_FIELD_CASE.md) into the existing
+principles and launch contract. Keep inactive stubs distinct from working capabilities and block
+retirement on unmapped ownership or unapproved behavior loss. No new manual, registry or runtime
+is introduced. This salvage's migration and productivity validation remain NOT_RUN. The
+principle-count repair is already present on current main; the proposal's 591/591 result is
+historical, not current proof.
 
 **Commit**: `this commit`. **Author**: Codex.
-**Touches**: `docs/IDEA_TO_REALITY_PRINCIPLES.md`, `docs/NODEBOOK_FIELD_CASE.md`,
-`plugins/nodekit/skills/nodekit-launch/`, `package.json`, `test/public-api.test.mjs`
+**Touches**: `docs/IDEA_TO_REALITY_PRINCIPLES.md`, `plugins/nodekit/skills/nodekit-launch/SKILL.md`,
+`plugins/nodekit/skills/nodekit-launch/references/launch-contract.md`
 
 ## 2026-08-02 - Reconcile NodeVideo's surviving product boundaries
 

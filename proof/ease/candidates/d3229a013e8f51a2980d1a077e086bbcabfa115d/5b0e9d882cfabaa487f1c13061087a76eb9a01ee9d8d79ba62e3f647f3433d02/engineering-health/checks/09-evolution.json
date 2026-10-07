@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "nodekit.engineering-check-receipt/v1",
+  "candidateCommit": "d3229a013e8f51a2980d1a077e086bbcabfa115d",
+  "nodekitSourceHash": "5b0e9d882cfabaa487f1c13061087a76eb9a01ee9d8d79ba62e3f647f3433d02",
+  "checkId": "evolution",
+  "command": "npm run evolution:verify",
+  "exitCode": 0,
+  "startedAt": "2026-07-22T13:13:20.555Z",
+  "completedAt": "2026-07-22T13:13:22.459Z"
+}

@@ -1,0 +1,659 @@
+{
+  "assertions": {
+    "canonicalVersionAdvanced": true,
+    "explicitNextAction": true,
+    "proposalAccepted": true,
+    "receiptCreated": true
+  },
+  "receipt": {
+    "approvalBindings": [
+      {
+        "approvalId": "approval_0d27db42212e461a84a08ed160",
+        "commentHash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+        "decision": "accepted",
+        "proposalId": "proposal_a0847830ee644478980b5300d8"
+      }
+    ],
+    "artifactBindings": [
+      {
+        "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+        "canonicalVersion": 2,
+        "contentHash": "5cbf8cdb4ab5ba5d3ad2b6c2b938190dbd2e470769604929a5f8d5924808c2f8"
+      }
+    ],
+    "artifactIds": [
+      "artifact_89cae0172d06419ca6d620eaaf"
+    ],
+    "caseHash": "1fcd2077c9f9073ffbcfdcab30befc8577080021f2da153de059fa53ea86cc26",
+    "caseId": "case_4962b185b1d54d6cb22803f52c",
+    "eventBindings": [
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "artifact_89cae0172d06419ca6d620eaaf",
+        "aggregateType": "artifact",
+        "eventId": "event_875019ad7e33474caef6cec7ac",
+        "eventType": "artifact.created",
+        "payloadHash": "d6f3e2af40f027fc2f07278e7e969beafdd62a4d450877889001b7a19eb39aff",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "artifact_89cae0172d06419ca6d620eaaf",
+        "aggregateType": "artifact",
+        "eventId": "event_0d392ff4f2434defb906db5b10",
+        "eventType": "artifact.version_created",
+        "payloadHash": "00d9866127121240e6d4a521c581472711d1b8691cd11e21db048793e2bebd22",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_a0847830ee644478980b5300d8",
+        "aggregateType": "proposal",
+        "eventId": "event_988da80b99b040d4a8283aeea2",
+        "eventType": "proposal.created",
+        "payloadHash": "36869f546cb2d09b5dc3c84924588fde4f6eb680bc9ec956f6b49a8e1af27acb",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "proposal_a0847830ee644478980b5300d8",
+        "aggregateType": "proposal",
+        "eventId": "event_5bddb56d5a6e4417acb6fe6f01",
+        "eventType": "proposal.accepted",
+        "payloadHash": "bb58be492f2fd75f209054f7c6851180a925839a210ba82182c6e666f23906b3",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_0dfaaab8c221486e92b58e933b",
+        "eventType": "run.started",
+        "payloadHash": "6589999d3c1f6e2b6369b65378d1441240f63dedbc82dba256193895b19550c1",
+        "sequence": 1
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_3be98b7880fe4ba0bced7c40ff",
+        "eventType": "stage.entered",
+        "payloadHash": "054ab9efc9e6af11985b041b70762b5109be97b629c903b84487e8bd1cd54dca",
+        "sequence": 2
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_a81ef311d536410182700b999f",
+        "eventType": "stage.entered",
+        "payloadHash": "9dae3bf9ae8a69a2556a0b8f92b8b6baf6c09fa44f2372719f8e3704c40c7fbd",
+        "sequence": 3
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_23344ace92fd457382d822cef8",
+        "eventType": "stage.entered",
+        "payloadHash": "be0cae85457ed787db684d5327249976584f68fbb9e7ad1782c2620ce85211e2",
+        "sequence": 4
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_e71aaa74120e445499b0274bdf",
+        "eventType": "stage.entered",
+        "payloadHash": "85aa663576051eb0e18426b611ddde70f5f330ad78b1a7037a9de7954466eb54",
+        "sequence": 5
+      },
+      {
+        "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_3b04fd5b07ad4454bba20cf4ef",
+        "eventType": "run.completed",
+        "payloadHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "sequence": 6
+      }
+    ],
+    "eventIds": [
+      "event_875019ad7e33474caef6cec7ac",
+      "event_0d392ff4f2434defb906db5b10",
+      "event_988da80b99b040d4a8283aeea2",
+      "event_5bddb56d5a6e4417acb6fe6f01",
+      "event_0dfaaab8c221486e92b58e933b",
+      "event_3be98b7880fe4ba0bced7c40ff",
+      "event_a81ef311d536410182700b999f",
+      "event_23344ace92fd457382d822cef8",
+      "event_e71aaa74120e445499b0274bdf",
+      "event_3b04fd5b07ad4454bba20cf4ef"
+    ],
+    "generatedAt": "2026-07-22T13:31:03.717Z",
+    "proposalBindings": [
+      {
+        "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+        "baseVersion": 1,
+        "patchHash": "5cbf8cdb4ab5ba5d3ad2b6c2b938190dbd2e470769604929a5f8d5924808c2f8",
+        "proposalId": "proposal_a0847830ee644478980b5300d8",
+        "status": "accepted"
+      }
+    ],
+    "proposalIds": [
+      "proposal_a0847830ee644478980b5300d8"
+    ],
+    "runHash": "817d9289fba21063120f7d45516a59a2ab34d13057c7c61a5a7ecfefb69ec4d0",
+    "runId": "run_0c29101a7010426ea931642e9e",
+    "schemaVersion": "nodekit.receipt/v2",
+    "status": "completed",
+    "receiptId": "receipt_0f6ebdafae2548bab600013bca",
+    "receiptHash": "70828bf39eeef68e5de8b5a131b970e2732ce5f355cb71c1ec17417d6e37c8c1"
+  },
+  "schemaVersion": "nodekit.figured-out-demo/v1",
+  "snapshot": {
+    "approvals": [
+      {
+        "approvalId": "approval_0d27db42212e461a84a08ed160",
+        "comment": "",
+        "decidedAt": "2026-07-22T13:31:03.716Z",
+        "decision": "accepted",
+        "proposalId": "proposal_a0847830ee644478980b5300d8",
+        "schemaVersion": "nodekit.approval/v1"
+      }
+    ],
+    "artifacts": [
+      {
+        "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+        "caseId": "case_4962b185b1d54d6cb22803f52c",
+        "canonicalVersion": 2,
+        "createdAt": "2026-07-22T13:31:03.714Z",
+        "kind": "structured-document",
+        "runId": "run_0c29101a7010426ea931642e9e",
+        "schemaVersion": "nodekit.artifact/v1",
+        "title": "Primary artifact",
+        "updatedAt": "2026-07-22T13:31:03.716Z",
+        "versions": [
+          {
+            "content": {
+              "summary": "The last approved result remains here.",
+              "status": "baseline"
+            },
+            "contentHash": "1077e34cc8ffae57d4f0bcd7a40d9e5f152b05da45ab643d36195773c10a7de8",
+            "createdAt": "2026-07-22T13:31:03.714Z",
+            "version": 1
+          },
+          {
+            "content": {
+              "summary": "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
+              "status": "proposed"
+            },
+            "contentHash": "5cbf8cdb4ab5ba5d3ad2b6c2b938190dbd2e470769604929a5f8d5924808c2f8",
+            "createdAt": "2026-07-22T13:31:03.716Z",
+            "proposalId": "proposal_a0847830ee644478980b5300d8",
+            "version": 2
+          }
+        ]
+      }
+    ],
+    "cases": [
+      {
+        "caseId": "case_4962b185b1d54d6cb22803f52c",
+        "createdAt": "2026-07-22T13:31:03.712Z",
+        "currentRunId": "run_0c29101a7010426ea931642e9e",
+        "primaryJob": "Carry one neutral case from intention to a verified artifact.",
+        "schemaVersion": "nodekit.case/v1",
+        "status": "completed",
+        "title": "Nodekit Package Proof case",
+        "updatedAt": "2026-07-22T13:31:03.717Z"
+      }
+    ],
+    "events": [
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "case_4962b185b1d54d6cb22803f52c",
+        "aggregateType": "case",
+        "eventId": "event_9ab67b8b4fc3436aa5c53ffafb",
+        "eventType": "case.created",
+        "occurredAt": "2026-07-22T13:31:03.713Z",
+        "payload": {
+          "caseId": "case_4962b185b1d54d6cb22803f52c",
+          "createdAt": "2026-07-22T13:31:03.712Z",
+          "currentRunId": null,
+          "primaryJob": "Carry one neutral case from intention to a verified artifact.",
+          "schemaVersion": "nodekit.case/v1",
+          "status": "ready",
+          "title": "Nodekit Package Proof case",
+          "updatedAt": "2026-07-22T13:31:03.712Z"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 1
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_0dfaaab8c221486e92b58e933b",
+        "eventType": "run.started",
+        "occurredAt": "2026-07-22T13:31:03.714Z",
+        "payload": {
+          "caseId": "case_4962b185b1d54d6cb22803f52c",
+          "createdAt": "2026-07-22T13:31:03.714Z",
+          "currentStageId": "intake",
+          "nextAction": "Confirm the intended outcome",
+          "nextActionOwner": "user",
+          "runId": "run_0c29101a7010426ea931642e9e",
+          "schemaVersion": "nodekit.run/v1",
+          "stages": [
+            {
+              "id": "intake",
+              "label": "Confirm the intended outcome",
+              "owner": "user",
+              "status": "active"
+            },
+            {
+              "id": "working",
+              "label": "Prepare a proposal",
+              "owner": "agent",
+              "status": "pending"
+            },
+            {
+              "id": "review",
+              "label": "Review the proposed change",
+              "owner": "user",
+              "status": "pending"
+            },
+            {
+              "id": "complete",
+              "label": "Verify and export",
+              "owner": "system",
+              "status": "pending"
+            }
+          ],
+          "status": "active",
+          "updatedAt": "2026-07-22T13:31:03.714Z"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 1
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_3be98b7880fe4ba0bced7c40ff",
+        "eventType": "stage.entered",
+        "occurredAt": "2026-07-22T13:31:03.714Z",
+        "payload": {
+          "stageId": "intake"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 2
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "artifact_89cae0172d06419ca6d620eaaf",
+        "aggregateType": "artifact",
+        "eventId": "event_875019ad7e33474caef6cec7ac",
+        "eventType": "artifact.created",
+        "occurredAt": "2026-07-22T13:31:03.715Z",
+        "payload": {
+          "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+          "version": 1
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 1
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_a81ef311d536410182700b999f",
+        "eventType": "stage.entered",
+        "occurredAt": "2026-07-22T13:31:03.715Z",
+        "payload": {
+          "nextAction": "Prepare a proposal",
+          "nextActionOwner": "agent",
+          "stageId": "working"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 3
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "proposal_a0847830ee644478980b5300d8",
+        "aggregateType": "proposal",
+        "eventId": "event_988da80b99b040d4a8283aeea2",
+        "eventType": "proposal.created",
+        "occurredAt": "2026-07-22T13:31:03.716Z",
+        "payload": {
+          "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+          "baseVersion": 1,
+          "proposalId": "proposal_a0847830ee644478980b5300d8"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 1
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_23344ace92fd457382d822cef8",
+        "eventType": "stage.entered",
+        "occurredAt": "2026-07-22T13:31:03.716Z",
+        "payload": {
+          "nextAction": "Approve or reject the proposed change",
+          "nextActionOwner": "user",
+          "stageId": "review"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 4
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "artifact_89cae0172d06419ca6d620eaaf",
+        "aggregateType": "artifact",
+        "eventId": "event_0d392ff4f2434defb906db5b10",
+        "eventType": "artifact.version_created",
+        "occurredAt": "2026-07-22T13:31:03.716Z",
+        "payload": {
+          "proposalId": "proposal_a0847830ee644478980b5300d8",
+          "version": 2
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 2
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "proposal_a0847830ee644478980b5300d8",
+        "aggregateType": "proposal",
+        "eventId": "event_5bddb56d5a6e4417acb6fe6f01",
+        "eventType": "proposal.accepted",
+        "occurredAt": "2026-07-22T13:31:03.717Z",
+        "payload": {
+          "approvalId": "approval_0d27db42212e461a84a08ed160"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 2
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_e71aaa74120e445499b0274bdf",
+        "eventType": "stage.entered",
+        "occurredAt": "2026-07-22T13:31:03.717Z",
+        "payload": {
+          "nextAction": "Verify and export",
+          "nextActionOwner": "system",
+          "stageId": "complete"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 5
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_3b04fd5b07ad4454bba20cf4ef",
+        "eventType": "run.completed",
+        "occurredAt": "2026-07-22T13:31:03.717Z",
+        "payload": {},
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 6
+      },
+      {
+        "actor": {
+          "id": "nodekit",
+          "type": "system"
+        },
+        "aggregateId": "run_0c29101a7010426ea931642e9e",
+        "aggregateType": "run",
+        "eventId": "event_fd837bfeea824fc9a4e0af8463",
+        "eventType": "receipt.created",
+        "occurredAt": "2026-07-22T13:31:03.719Z",
+        "payload": {
+          "receiptHash": "70828bf39eeef68e5de8b5a131b970e2732ce5f355cb71c1ec17417d6e37c8c1",
+          "receiptId": "receipt_0f6ebdafae2548bab600013bca"
+        },
+        "schemaVersion": "nodekit.caseflow-event/v1",
+        "sequence": 7
+      }
+    ],
+    "exceptions": [],
+    "proposals": [
+      {
+        "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+        "baseVersion": 1,
+        "createdAt": "2026-07-22T13:31:03.716Z",
+        "patch": {
+          "summary": "A bounded, reviewable result is ready. Replace this with the researched domain artifact.",
+          "status": "proposed"
+        },
+        "proposalId": "proposal_a0847830ee644478980b5300d8",
+        "rationale": "Demonstrate proposal-before-mutation without assuming a domain.",
+        "schemaVersion": "nodekit.proposal/v1",
+        "status": "accepted"
+      }
+    ],
+    "receipts": [
+      {
+        "approvalBindings": [
+          {
+            "approvalId": "approval_0d27db42212e461a84a08ed160",
+            "commentHash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+            "decision": "accepted",
+            "proposalId": "proposal_a0847830ee644478980b5300d8"
+          }
+        ],
+        "artifactBindings": [
+          {
+            "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+            "canonicalVersion": 2,
+            "contentHash": "5cbf8cdb4ab5ba5d3ad2b6c2b938190dbd2e470769604929a5f8d5924808c2f8"
+          }
+        ],
+        "artifactIds": [
+          "artifact_89cae0172d06419ca6d620eaaf"
+        ],
+        "caseHash": "1fcd2077c9f9073ffbcfdcab30befc8577080021f2da153de059fa53ea86cc26",
+        "caseId": "case_4962b185b1d54d6cb22803f52c",
+        "eventBindings": [
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "artifact_89cae0172d06419ca6d620eaaf",
+            "aggregateType": "artifact",
+            "eventId": "event_875019ad7e33474caef6cec7ac",
+            "eventType": "artifact.created",
+            "payloadHash": "d6f3e2af40f027fc2f07278e7e969beafdd62a4d450877889001b7a19eb39aff",
+            "sequence": 1
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "artifact_89cae0172d06419ca6d620eaaf",
+            "aggregateType": "artifact",
+            "eventId": "event_0d392ff4f2434defb906db5b10",
+            "eventType": "artifact.version_created",
+            "payloadHash": "00d9866127121240e6d4a521c581472711d1b8691cd11e21db048793e2bebd22",
+            "sequence": 2
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "proposal_a0847830ee644478980b5300d8",
+            "aggregateType": "proposal",
+            "eventId": "event_988da80b99b040d4a8283aeea2",
+            "eventType": "proposal.created",
+            "payloadHash": "36869f546cb2d09b5dc3c84924588fde4f6eb680bc9ec956f6b49a8e1af27acb",
+            "sequence": 1
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "proposal_a0847830ee644478980b5300d8",
+            "aggregateType": "proposal",
+            "eventId": "event_5bddb56d5a6e4417acb6fe6f01",
+            "eventType": "proposal.accepted",
+            "payloadHash": "bb58be492f2fd75f209054f7c6851180a925839a210ba82182c6e666f23906b3",
+            "sequence": 2
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "run_0c29101a7010426ea931642e9e",
+            "aggregateType": "run",
+            "eventId": "event_0dfaaab8c221486e92b58e933b",
+            "eventType": "run.started",
+            "payloadHash": "6589999d3c1f6e2b6369b65378d1441240f63dedbc82dba256193895b19550c1",
+            "sequence": 1
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "run_0c29101a7010426ea931642e9e",
+            "aggregateType": "run",
+            "eventId": "event_3be98b7880fe4ba0bced7c40ff",
+            "eventType": "stage.entered",
+            "payloadHash": "054ab9efc9e6af11985b041b70762b5109be97b629c903b84487e8bd1cd54dca",
+            "sequence": 2
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "run_0c29101a7010426ea931642e9e",
+            "aggregateType": "run",
+            "eventId": "event_a81ef311d536410182700b999f",
+            "eventType": "stage.entered",
+            "payloadHash": "9dae3bf9ae8a69a2556a0b8f92b8b6baf6c09fa44f2372719f8e3704c40c7fbd",
+            "sequence": 3
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "run_0c29101a7010426ea931642e9e",
+            "aggregateType": "run",
+            "eventId": "event_23344ace92fd457382d822cef8",
+            "eventType": "stage.entered",
+            "payloadHash": "be0cae85457ed787db684d5327249976584f68fbb9e7ad1782c2620ce85211e2",
+            "sequence": 4
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "run_0c29101a7010426ea931642e9e",
+            "aggregateType": "run",
+            "eventId": "event_e71aaa74120e445499b0274bdf",
+            "eventType": "stage.entered",
+            "payloadHash": "85aa663576051eb0e18426b611ddde70f5f330ad78b1a7037a9de7954466eb54",
+            "sequence": 5
+          },
+          {
+            "actorHash": "80802cafa45c8980699ab969c45979e659a91802a3245116d92563c4c8d2847a",
+            "aggregateId": "run_0c29101a7010426ea931642e9e",
+            "aggregateType": "run",
+            "eventId": "event_3b04fd5b07ad4454bba20cf4ef",
+            "eventType": "run.completed",
+            "payloadHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "sequence": 6
+          }
+        ],
+        "eventIds": [
+          "event_875019ad7e33474caef6cec7ac",
+          "event_0d392ff4f2434defb906db5b10",
+          "event_988da80b99b040d4a8283aeea2",
+          "event_5bddb56d5a6e4417acb6fe6f01",
+          "event_0dfaaab8c221486e92b58e933b",
+          "event_3be98b7880fe4ba0bced7c40ff",
+          "event_a81ef311d536410182700b999f",
+          "event_23344ace92fd457382d822cef8",
+          "event_e71aaa74120e445499b0274bdf",
+          "event_3b04fd5b07ad4454bba20cf4ef"
+        ],
+        "generatedAt": "2026-07-22T13:31:03.717Z",
+        "proposalBindings": [
+          {
+            "artifactId": "artifact_89cae0172d06419ca6d620eaaf",
+            "baseVersion": 1,
+            "patchHash": "5cbf8cdb4ab5ba5d3ad2b6c2b938190dbd2e470769604929a5f8d5924808c2f8",
+            "proposalId": "proposal_a0847830ee644478980b5300d8",
+            "status": "accepted"
+          }
+        ],
+        "proposalIds": [
+          "proposal_a0847830ee644478980b5300d8"
+        ],
+        "runHash": "817d9289fba21063120f7d45516a59a2ab34d13057c7c61a5a7ecfefb69ec4d0",
+        "runId": "run_0c29101a7010426ea931642e9e",
+        "schemaVersion": "nodekit.receipt/v2",
+        "status": "completed",
+        "receiptId": "receipt_0f6ebdafae2548bab600013bca",
+        "receiptHash": "70828bf39eeef68e5de8b5a131b970e2732ce5f355cb71c1ec17417d6e37c8c1"
+      }
+    ],
+    "runs": [
+      {
+        "caseId": "case_4962b185b1d54d6cb22803f52c",
+        "createdAt": "2026-07-22T13:31:03.714Z",
+        "currentStageId": "complete",
+        "nextAction": "Review receipt",
+        "nextActionOwner": "user",
+        "runId": "run_0c29101a7010426ea931642e9e",
+        "schemaVersion": "nodekit.run/v1",
+        "stages": [
+          {
+            "id": "intake",
+            "label": "Confirm the intended outcome",
+            "owner": "user",
+            "status": "completed"
+          },
+          {
+            "id": "working",
+            "label": "Prepare a proposal",
+            "owner": "agent",
+            "status": "completed"
+          },
+          {
+            "id": "review",
+            "label": "Review the proposed change",
+            "owner": "user",
+            "status": "completed"
+          },
+          {
+            "id": "complete",
+            "label": "Verify and export",
+            "owner": "system",
+            "status": "completed"
+          }
+        ],
+        "status": "completed",
+        "updatedAt": "2026-07-22T13:31:03.717Z"
+      }
+    ]
+  },
+  "passed": true
+}

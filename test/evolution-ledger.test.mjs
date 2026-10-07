@@ -394,3 +394,55 @@ test("concurrent agent proposals with one id never become last-writer-wins", asy
   assert.deepEqual(stored.evidenceIds, ["evd:test"]);
   assert.deepEqual(stored.interpretation, { status: "agent-proposed" });
 });
+
+// Eight sequential calls that drew no complaint were read as "no meaningful rate limiting", and the
+// next thing to run was twelve concurrent requests, which got a 429. The measurement was real; it
+// just answered a different question than the one the claim was later asked. So a claim that
+// generalises has to name the axis it was measured on.
+test("an assumption that generalises must name the dimension its evidence measured", async () => {
+  const { validateSchema } = await import("../src/lib/schema-validation.mjs");
+  const SCHEMA = "nodekit.assumption.v1.schema.json";
+  const base = {
+    schemaVersion: "nodekit.assumption/v1",
+    id: "asm:rate-limit",
+    statement: "The API applies no meaningful rate limiting",
+    scope: { applications: ["fixture"] },
+    introducedByEventId: "evt:test",
+    supportingEvidenceIds: ["evd:test"],
+    contradictingEvidenceIds: [],
+  };
+  const errors = (doc) => validateSchema(SCHEMA, doc, "assumption");
+
+  for (const status of ["supported", "scope-limited"]) {
+    assert.ok(
+      (await errors({ ...base, status })).length > 0,
+      `${status} without a named dimension is a measurement travelling to a question it never asked`,
+    );
+    assert.ok((await errors({ ...base, status, dimensionsTested: [] })).length > 0, "an empty axis list is the same silence");
+    assert.deepEqual(await errors({ ...base, status, dimensionsTested: ["8 sequential requests"] }), []);
+  }
+
+  // untested/disproven/superseded make no generalising claim, so they owe no axis.
+  for (const status of ["untested", "disproven", "superseded"]) {
+    assert.deepEqual(
+      await errors({ ...base, status, contradictingEvidenceIds: status === "untested" ? [] : ["evd:test"] }),
+      [],
+      `${status} should not require a dimension`,
+    );
+  }
+});
+
+test("every assumption shipped in this repository names its measured dimension", async () => {
+  const { readdir, readFile } = await import("node:fs/promises");
+  const dir = path.resolve("evolution/assumptions");
+  const files = (await readdir(dir)).filter((f) => f.endsWith(".json"));
+  assert.ok(files.length > 0, "a pass over zero assumptions measures nothing");
+  let generalising = 0;
+  for (const file of files) {
+    const doc = JSON.parse(await readFile(path.join(dir, file), "utf8"));
+    if (!["supported", "scope-limited"].includes(doc.status)) continue;
+    generalising += 1;
+    assert.ok(doc.dimensionsTested?.length > 0, `${doc.id} generalises without naming what was measured`);
+  }
+  assert.ok(generalising > 0, "no generalising assumption was checked, so this asserts nothing");
+});

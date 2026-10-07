@@ -1,0 +1,12 @@
+$ npm run registry:check
+
+[stdout]
+
+> @homenshum/nodekit@0.2.1 registry:check
+> node src/cli.mjs registry check --registry-root .
+
+PASS Node Platform registry
+
+
+[stderr]
+

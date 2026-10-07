@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "nodekit.engineering-check-receipt/v1",
+  "candidateCommit": "e67e2fde9078654aa1bafbfe5502e8bd193ec8ae",
+  "nodekitSourceHash": "41caf570a3e02ead06aee11d2e0d66b69ee93f29afb7be64eaa7e0625a913ff4",
+  "checkId": "componentTypecheck",
+  "command": "npm run typecheck:component",
+  "exitCode": 0,
+  "startedAt": "2026-07-22T13:28:51.940Z",
+  "completedAt": "2026-07-22T13:28:52.726Z"
+}

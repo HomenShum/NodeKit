@@ -15,5 +15,13 @@ Every QA run records:
 The browser surface, runtime event stream, durable state, and exported artifact
 must describe the same run. Fail closed when those identities diverge.
 
+When a `production-agent.json` contract exists (the PRODUCTION-AGENT gate), its
+declared guards are testable claims, not documentation: the loop breaker must be
+seen firing in a test, the fallback path must be exercised (kill or stub the
+provider and observe the declared degraded behaviour, not an error), one
+suspend-approve tier must be walked end to end (suspend, approve, resume), and
+one trace id must be followed from request to receipt. A guard that has never
+fired in a test is reasoned-about, not verified.
+
 Risky writes, production deployments, paid resource activation, publication,
 and destructive cleanup still require the authority defined by the host project.

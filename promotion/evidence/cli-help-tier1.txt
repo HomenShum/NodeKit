@@ -1,0 +1,14 @@
+NodeKit — generate an agent application, then prove what it did.
+
+Build your app
+  nodekit create <dir> --name <slug> --brief <text>   scaffold a proof-carrying app (demo passes in ~40s)
+  nodekit adopt [dir] --name <slug> --brief <text>    add NodeKit to an existing repository
+  nodekit explain --for <node|convex|postgres|...>    which surfaces apply to you; start here
+  nodekit demo | check | proof                        run your app's demo, checks, receipt trail
+  nodekit compile | inspect | doctor                  definition, environment, diagnosis
+  nodekit agent run --agent <name> --goal <text> -- <command>
+                                                      record any agent command with a receipt
+
+Platform & governance (maintainers, CI)
+  Run "nodekit help --all" for the other 25 command groups: evolution, graph,
+  harness, atlas, frontend, registry, certify, skills, attestation ...

@@ -4,7 +4,12 @@
   "problem": "The owner cannot tell during the week whether higher sales are actually producing higher operating profit.",
   "wedge": "A read-only weekly profit health check generated from uploaded files, with no live banking connection and no accounting write-back.",
   "primaryJob": "Understand estimated operating profit for the week and resolve the few items preventing verification.",
-  "inputs": ["bank_csv", "square_export", "payroll_summary", "receipt_images"],
+  "inputs": [
+    "bank_csv",
+    "square_export",
+    "payroll_summary",
+    "receipt_images"
+  ],
   "primaryArtifact": "A source-linked Verified Weekly Salon Brief.",
   "rejectedAlternatives": [
     {

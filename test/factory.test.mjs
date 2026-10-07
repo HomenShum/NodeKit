@@ -42,10 +42,17 @@ test("create emits a parseable, reproducible application from multiline input", 
     await readFile(path.join(target, ".claude", "skills", "nodekit-present", "SKILL.md"), "utf8"),
     /evidence-backed presentation/,
   );
-  assert.match(
-    await readFile(path.join(target, ".codex", "skills", "nodekit-launch", "SKILL.md"), "utf8"),
-    /smallest undeniable vertical slice/,
-  );
+  const projectedLaunchPath = path.join(target, ".codex", "skills", "nodekit-launch", "SKILL.md");
+  const projectedLaunch = await readFile(projectedLaunchPath, "utf8");
+  assert.match(projectedLaunch, /smallest undeniable vertical slice/);
+  for (const match of projectedLaunch.matchAll(/\[[^\]]*\]\((?![a-z]+:|#)([^)]+)\)/giu)) {
+    await readFile(path.resolve(path.dirname(projectedLaunchPath), match[1].split(/[?#]/u, 1)[0]), "utf8");
+  }
+  for (const match of projectedLaunch.matchAll(/sibling `([^`]+)` skill/gu)) {
+    for (const agentRoot of [".codex", ".claude"]) {
+      await readFile(path.join(target, agentRoot, "skills", match[1], "SKILL.md"), "utf8");
+    }
+  }
   assert.match(
     await readFile(path.join(target, ".claude", "skills", "nodekit-qa", "SKILL.md"), "utf8"),
     /rendered user surface/,
@@ -390,11 +397,19 @@ test("a fresh no-key Git candidate reaches an honest local-ready proof", async (
   assert.equal(receipt.releaseReady, false);
   assert.equal(receipt.applicationHash, compiled.definition.applicationHash);
   assert.equal(receipt.configHash, compiled.definition.configHash);
+  // productionReadiness joined this list when the seven fail-closed checks landed. This is an
+  // expected value changed to match new behaviour, which is normally the shape of a weakened test —
+  // legitimate here because the list IS the declaration of what is still missing, and a newly added
+  // gate that nobody has run is exactly a missing release gate. A fresh candidate ships with all
+  // seven checks NOT_RUN, so it must appear.
   assert.deepEqual(receipt.missingReleaseGates, [
     "browserCertification",
+    "productionReadiness",
     "deployment",
     "freshAgentHeldout",
     "freshHumanUsability",
     "threeConvexConsumers",
   ]);
+  assert.equal(receipt.checks.productionReadinessSatisfied, false, "a scaffold that starts satisfied is a lie about work nobody did");
+  assert.equal(receipt.passed, true, "local proof must still pass on day one; production readiness gates RELEASE, not local proof");
 });

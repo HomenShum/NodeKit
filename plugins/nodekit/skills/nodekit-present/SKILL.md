@@ -22,6 +22,158 @@ Read [the change-story contract](references/change-story-contract.md) before cre
 9. Export the requested editable format and reopen it. Verify the rendered deck, speaker notes, source bindings, and any PPTX round trip.
 10. Derive the demo script, README section, release notes, and submission copy from the same Change Story and Evidence Index.
 
+## A demo clip is a rendered walkthrough, never a screen recording
+
+This section exists because of a measured failure. A production deploy was verified 11/11 with a
+recorded clip, and the clip was a raw Playwright capture: no focus framing, no captions, no visible
+streaming or tool calls, no slides. The tooling for every one of those already existed and this
+skill named none of it, so it was hand-rolled badly instead of driven well.
+
+**FeatureClipStudio** (`feature-walkthrough-gif/`) is the capture-to-render pipeline, and it covers
+the four things a raw capture never has:
+
+| what a raw capture lacks | what the pipeline does |
+|---|---|
+| focus on what matters | zoom-to-focus camera, animated cursor gliding to each click with a ripple |
+| explanation | step captions per state |
+| the work being visible | loading and streaming captured LIVE — spinner spinning, results arriving |
+| the internals when the claim depends on them | raw JSON/state evidence panels |
+
+```bash
+npm run capture   # Playwright drives the live flow and records every UI state
+npm run studio    # storyboard the captured states
+npm run render    # Remotion renders the walkthrough
+npm run judge     # Gemini watches the RENDER and scores it
+```
+
+`judge-video.mjs` is the gate, and it is the one to run before calling a clip done. It watches the
+rendered MP4 against an anti-hero-shot rubric and returns timestamped defects at P0/P1/P2 — P0
+blocks publishing. Its own header states the point: the final cut stops being the one stage only
+human eyes ever check. Judge the MP4 rather than the GIF; GIF is not a supported video MIME.
+
+Do not enter a re-render polish loop over P2s the judge already passed.
+
+### Two axes, and the second one is the one that fails
+
+`judge-video.mjs` scores CRAFT — cursor truth, pacing, legibility, motion — and separately scores
+COMPREHENSION, the ten things a viewer must actually come away with:
+
+    persona · purpose · use_case · feature_clarity · full_interaction
+    responsiveness · flow · result · non_expert_sense · transfer
+
+They are orthogonal, and a cut can be well made and incomprehensible. Measured on a real render:
+craft passed with a verdict of `publish`, and comprehension scored 1 on all ten — nothing absent,
+nothing explicit, everything merely implied — with the judge naming 0:06 as the second a non-expert
+was lost ("layer architecture concepts and terminal log outputs").
+
+`non_expert_sense` is the mom test and it BLOCKS on its own, regardless of the totals. A gate that
+passes a video its own judge says nobody outside the field could follow is not a gate. Uniform
+scores across all ten are flagged rather than averaged, because "all 1s" means all implied and none
+stated, which is a finding and not a middling pass.
+
+THE LOOP IS THE DEFAULT, not a final check: render, judge, read what it says is missing, recut,
+judge again. Three cuts on one film moved it 10/20 to 13/20 and, more usefully, told the maker the
+story had been built around the wrong moment — something no amount of self-review had surfaced.
+Stop when comprehension clears and the remaining defects are P2.
+
+**NodeSlide** for the deck, **NodeVideo** for frame-level evidence — a frame presented as the
+running product must bind to the deployment it came from, and `presentedAs` is what makes that
+checkable.
+
+### Where reference videos come from
+
+Mobbin works for UI because it is a corpus you OBSERVE and CITE, never copy. Video needs the same
+discipline and splits into two kinds, which are not interchangeable:
+
+**FLOW references — what a real product actually does, step by step.**
+[Page Flows](https://pageflows.com) is the direct analogue: recorded user journeys rather than
+screenshots, 20,000+ apps, organised by task — sign up, upgrade, cancel — including the consent
+dialog, the field validation, the empty state and the success screen. Its own framing is the
+anti-hero-shot rule stated from the other side: Mobbin shows you the destination, Page Flows shows
+you the trip. [ScreensDesign](https://screensdesign.com) covers onboarding and paywalls with
+revenue signals attached. Use these to answer "what states does a real flow of this kind contain,
+and which am I skipping?"
+
+**CRAFT references — how a launch film is built. Start with YouTube.**
+The judge reads a YouTube URL directly — verified: Gemini watched one and described its opening
+seconds and runtime from the URL alone, no download. So a reference is CITED, never copied, which
+dissolves the licensing question entirely and makes the locator a URL plus a timestamp:
+
+The agent builds its own corpus rather than waiting to be handed one. yt-dlp SEARCHES YouTube and
+reads metadata; nothing is downloaded, and Gemini watches the URL:
+
+```bash
+node find-references.mjs "Raycast product demo" "Linear product demo"   # search, triage, observe
+node judge-video.mjs out/demo.mp4                                       # corpus used automatically
+node judge-video.mjs out/demo.mp4 --no-reference                        # opt out
+```
+
+`find-references.mjs` triages BEFORE spending tokens: anything over 180s is rejected by default as
+the wrong shape and the wrong cost for a short walkthrough, with the reason printed. Measured on a
+real run — a 39s first-party demo cost 3.9k prompt tokens, an 18-minute one 102k. It then writes
+`references/video/<id>.json`: timestamped atomic facts (`0:07 motion — keycaps turn green on
+keypress`), hookSeconds, statesShown, whatToSteal and whatNotToSteal, plus a `notRun` list for
+anything it could not determine. Facts, never adjectives — a fact scores a candidate, an adjective
+cannot.
+
+The verdict gains a `reference` block — singleMoment, statePacing, motionPurpose, whatToSteal, and
+whatNotToSteal — with a timestamp required for every claim about the reference. Every product launch
+film worth studying is already on YouTube and is the primary source; the curated libraries below are
+a discovery layer over it, useful for FINDING candidates rather than for watching them.
+
+Cost is real: one 18-minute reference measured 102k prompt tokens. Prefer a 30-90 second cut, and
+pass at most two or three references.
+
+
+[FlowJam](https://www.flowjam.com/library) is hand-curated SaaS and product-launch videos;
+[Tella's library](https://www.tella.com/examples/demo-video) and
+[Vidico's breakdowns](https://vidico.com/news/best-product-demo-video-examples/) publish examples
+with the reasoning attached. Use these for pacing, the single moment, and where motion is doing work
+versus decorating.
+
+Do not paste either kind into the rubric as prose. Record them the way a Mobbin observation is
+recorded: an atomic fact, with a `locatorDescription` that for video is a TIMESTAMP, cited to the
+source URL. The claim is "at 0:12 the loading state is held for 1.4s before the result", not "their
+pacing is good". A rule derived from a timestamped observation can be scored; an adjective cannot.
+
+Licence: observe and attribute, never re-host. `licenceMode` in the observation schema is an
+enumerated single value on purpose — extending it to a new source class is a licence review and a
+deliberate schema edit, not a typed string.
+
+## A launch film is directed, then rendered — the launch-video contract
+
+Everything above judges a cut that already exists. A LAUNCH film fails earlier than that: it is
+built around the wrong moment, or delivered after the launch, and no judge loop can recover either.
+Studied live at [Motion Studio](https://motion.so/studio) (launch films for YC-tier startups):
+their process is Direction → First draft → Revisions → Delivery, and "a human director makes every
+taste call". That ordering is the product. `nodekit launch-video` carries it as a refusable
+contract, so a driven coding agent walks the stages instead of jumping to `npm run render`:
+
+```bash
+nodekit launch-video declare --application <slug> --out launch-video.json
+# 1 BRIEF      fill product, story (stakeholder's words), audience, launchDate, channels
+# 2 DIRECTION  singleMoment, ordered beats, references via find-references.mjs (timestamped
+#              facts, never adjectives), durationTargetSeconds ≤ 180 — then a HUMAN approves
+# 3 DRAFTS     capture → studio → render (FeatureClipStudio or NodeVideo), judge-video.mjs on
+#              the MP4, record the cycle: cut, judge scores, humanNotes, disposition
+# 4 DELIVERY   finalCut + judgeReceipt + human approval, deliveredAt BEFORE launchDate
+nodekit launch-video check --contract launch-video.json   # refuses at every stage exit
+```
+
+What the check refuses, and why each refusal exists:
+- **drafts before an approved direction** — the first cut aligns on a direction, it does not
+  discover one; a render made before direction came back is the revision bill.
+- **a reference claim without a timestamp** — "their pacing is good" cannot be scored; "at 0:12
+  the loading state holds 1.4s" can.
+- **a final cycle failing `non_expert_sense`** — the mom test blocks delivery alone, same rule as
+  the judge loop above; the contract makes it a stage exit rather than advice.
+- **`deliveredAt` after `launchDate`** — a launch film delivered after the launch is a
+  retrospective.
+- **delivery without a human approval** — the judge is advisory; the taste call is a person.
+
+The judge loop stays the inner loop of stage 3 exactly as described above. The contract adds what
+the loop alone never held: the stages in order, the human at the two taste gates, and the date.
+
 ## Parallel lane
 
 For a large implementation, run presentation work as a read-mostly lane beside building and QA. Draft the problem and architecture early; replace placeholders only with verified evidence from later gates. Block release only for unsupported claims, missing required proof, stale evidence, or a broken export.

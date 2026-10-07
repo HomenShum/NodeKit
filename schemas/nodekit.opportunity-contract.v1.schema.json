@@ -3,15 +3,41 @@
   "$id": "https://nodekit.dev/schemas/nodekit.opportunity-contract.v1.schema.json",
   "title": "NodeKit opportunity contract",
   "type": "object",
-  "required": ["schemaVersion", "user", "problem", "wedge", "primaryJob", "inputs", "primaryArtifact", "rejectedAlternatives", "openUnknowns", "successCondition", "authorityLimits"],
+  "required": [
+    "schemaVersion",
+    "user",
+    "problem",
+    "wedge",
+    "primaryJob",
+    "inputs",
+    "primaryArtifact",
+    "rejectedAlternatives",
+    "openUnknowns",
+    "successCondition",
+    "authorityLimits"
+  ],
   "properties": {
-    "schemaVersion": { "const": "nodekit.opportunity-contract/v1" },
-    "user": { "$ref": "#/$defs/nonEmpty" },
-    "problem": { "$ref": "#/$defs/nonEmpty" },
-    "wedge": { "$ref": "#/$defs/nonEmpty" },
-    "primaryJob": { "$ref": "#/$defs/nonEmpty" },
-    "inputs": { "$ref": "#/$defs/nonEmptyStrings" },
-    "primaryArtifact": { "$ref": "#/$defs/nonEmpty" },
+    "schemaVersion": {
+      "const": "nodekit.opportunity-contract/v1"
+    },
+    "user": {
+      "$ref": "#/$defs/nonEmpty"
+    },
+    "problem": {
+      "$ref": "#/$defs/nonEmpty"
+    },
+    "wedge": {
+      "$ref": "#/$defs/nonEmpty"
+    },
+    "primaryJob": {
+      "$ref": "#/$defs/nonEmpty"
+    },
+    "inputs": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
+    "primaryArtifact": {
+      "$ref": "#/$defs/nonEmpty"
+    },
     "rejectedAlternatives": {
       "type": "array",
       "minItems": 1,
@@ -19,31 +45,109 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["alternative", "reason"],
+        "required": [
+          "alternative",
+          "reason"
+        ],
         "properties": {
-          "alternative": { "$ref": "#/$defs/nonEmpty" },
-          "reason": { "$ref": "#/$defs/nonEmpty" }
+          "alternative": {
+            "$ref": "#/$defs/nonEmpty"
+          },
+          "reason": {
+            "$ref": "#/$defs/nonEmpty"
+          }
         }
       }
     },
-    "openUnknowns": { "$ref": "#/$defs/nonEmptyStrings" },
-    "successCondition": { "$ref": "#/$defs/nonEmpty" },
+    "openUnknowns": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
+    "successCondition": {
+      "$ref": "#/$defs/nonEmpty"
+    },
     "authorityLimits": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["read", "propose", "approve", "prohibited"],
+      "required": [
+        "read",
+        "propose",
+        "approve",
+        "prohibited"
+      ],
       "properties": {
-        "read": { "$ref": "#/$defs/nonEmptyStrings" },
-        "propose": { "$ref": "#/$defs/stringList" },
-        "approve": { "$ref": "#/$defs/stringList" },
-        "prohibited": { "$ref": "#/$defs/nonEmptyStrings" }
+        "read": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        },
+        "propose": {
+          "$ref": "#/$defs/stringList"
+        },
+        "approve": {
+          "$ref": "#/$defs/stringList"
+        },
+        "prohibited": {
+          "$ref": "#/$defs/nonEmptyStrings"
+        }
+      }
+    },
+    "derivedFrom": {
+      "description": "Present when this contract was DERIVED from something the product already says about itself, rather than authored by whoever owns the product. An authored contract and a derived one read identically, and the difference decides how much weight a reader should give it — the same distinction namedStack.confidence draws between a stated and an inferred stack. Every field of a derived contract should be traceable to the cited source; if it is not, the contract is authored and should not claim otherwise.",
+      "type": "object",
+      "required": [
+        "source",
+        "method"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What it was derived from, precisely enough to reopen: a file path, a URL, a document name."
+        },
+        "method": {
+          "enum": [
+            "quoted",
+            "paraphrased",
+            "mixed"
+          ],
+          "description": "quoted: fields lift the source's own words. paraphrased: restated. mixed: both, which is the usual honest answer."
+        },
+        "derivedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unverifiedFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields the source did NOT settle, filled in by judgement. A derived contract with none of these is claiming the source answered everything, which is rarely true."
+        }
       }
     }
   },
   "$defs": {
-    "nonEmpty": { "type": "string", "minLength": 1 },
-    "nonEmptyStrings": { "type": "array", "minItems": 1, "maxItems": 24, "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmpty" } },
-    "stringList": { "type": "array", "minItems": 0, "maxItems": 24, "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmpty" } }
+    "nonEmpty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonEmpty"
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 24,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonEmpty"
+      }
+    }
   },
   "additionalProperties": false
 }

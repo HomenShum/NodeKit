@@ -1,3 +1,13 @@
+// REFERENCE IMPLEMENTATION — nothing a user can run calls this module.
+//
+// `advanceStage` below writes the stage-handoff rule out plainly for a reader: a builder case
+// advances only when that stage's artifact exists AND a receipt binds it by content hash. It is
+// kept on purpose as a worked example, and `npm run unreached` lists it every time; the decision
+// not to delete it is recorded in docs/codebase/CONCERNS.md#1.
+//
+// The rule that actually runs in this repository is `decideProposal` in ./caseflow.mjs. A passing
+// test here is not evidence that this code runs — the test is the caller.
+
 import { createMemoryCaseflow, contentHash, TERMINAL_RUN_STATUSES } from "./caseflow.mjs";
 import { validateSchema } from "./schema-validation.mjs";
 

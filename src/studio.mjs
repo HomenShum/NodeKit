@@ -75,6 +75,20 @@ export {
   stateManifestHashOf,
 } from "./lib/frontend-render-contract.mjs";
 
+// --- Behavior portability ---------------------------------------------------------------------
+// A copied recipe is not portable when the same token name resolves to a different behavior.
+// This comparison binds the exact static CSS source set, maps legacy names to canonical semantics,
+// and emits review-only disclosures for value changes. It does NOT claim runtime execution; that
+// remains a separate receipt so static, runtime, perceptual, and audience evidence cannot collapse
+// into one reassuring score.
+export {
+  DEFAULT_MOTION_SEMANTICS,
+  MOTION_PORTABILITY_RECEIPT_SCHEMA,
+  MOTION_SEMANTICS_SCHEMA,
+  compareMotionPortability,
+  normalizeMotionValue,
+} from "./lib/motion-portability.mjs";
+
 // --- Generated copy as a proof surface ---------------------------------------------------------
 // A rendered interface can pass every visual check while its text lies: claiming a task completed
 // that never ran, or an authority the agent does not hold. Copy findings extend the existing

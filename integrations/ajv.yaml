@@ -1,0 +1,45 @@
+# Docs-then-introspect record for the library every gate in this repository stands on.
+#
+# The order is the discipline: current docs say what is true NOW, introspection says what is true
+# HERE. Memory answers neither. A record written from recall is the failure this file exists to
+# prevent, so docsCheckedAt is only ever written after actually fetching them.
+
+library: ajv
+resolvedVersion: "8.20.0"
+docsSource: "https://raw.githubusercontent.com/ajv-validator/ajv/master/docs/api.md + https://ajv.js.org/json-schema.html"
+docsCheckedAt: "2026-08-03"
+
+deprecationsFound:
+  - >-
+    draft-2020-12 is documented as BREAKING and NOT backwards compatible: "You cannot use
+    draft-2020-12 and previous JSON Schema versions in the same Ajv instance", and using it requires
+    importing a different Ajv class rather than the default export. This repository's 114 schemas
+    are all 2020-12, so the default `new Ajv()` would silently fail to understand prefixItems, the
+    changed items keyword, and $dynamicAnchor/$dynamicRef.
+
+introspection: >-
+  src/lib/schema-validation.mjs:24 constructs `new Ajv2020({ allErrors: true, strict: false })` —
+  the correct class for 2020-12, confirmed by reading the file rather than assuming. The installed
+  package ships dist/2020.js (verified present on disk), which is what that import resolves to.
+  Note the installed ajv 8.20.0 declares no `exports` map, so subpath imports resolve by file path;
+  that is why the 2020 entry point is reachable at all and would break under a package that added
+  one without listing it.
+
+frameworkVsProtocol:
+  advertisedPath: "Ajv as the validation framework, with its own keyword/format extension system"
+  adopted: "protocol-only — schemas are plain JSON Schema 2020-12 files, validated through one wrapper"
+  rationale: >-
+    No custom keywords, no ajv-keywords, no compiled-schema caching API in use. The schemas are
+    portable JSON Schema documents that any conforming validator could check, and ajv is the
+    executor rather than the contract. That was not a decision made here — it is what introspection
+    found, and it is worth recording because it means replacing the validator is a one-file change.
+
+knownLimitations:
+  - >-
+    strict: false is set. That is a real loosening: ajv's strict mode catches schema mistakes like
+    unknown keywords and ignored formats, and this repository turns it off. It was not evaluated in
+    this pass and should be — a gate whose validator ignores unknown keywords can pass a schema
+    whose constraint is silently misspelled.
+  - >-
+    Only ajv's behaviour was introspected. ajv-formats 3.0.1 is also a dependency and was not
+    examined; its format assertions are what several schemas rely on for date-time.

@@ -2,7 +2,7 @@ schemaVersion: nodeplatform.ownership/v1
 
 concepts:
   nodeplatform.repo-contract:
-    owner: node-platform
+    owner: NodeKit
     package: "@homenshum/nodekit"
     targetPackage: "@homenshum/nodekit"
     status: canonical
@@ -22,7 +22,7 @@ concepts:
       - FeatureClipStudio
 
   nodeplatform.change-story:
-    owner: node-platform
+    owner: NodeKit
     package: "@homenshum/nodekit"
     targetPackage: "@homenshum/nodekit"
     status: canonical
@@ -32,7 +32,7 @@ concepts:
       - FeatureClipStudio
 
   nodekit.knowledge-evolution:
-    owner: node-platform
+    owner: NodeKit
     package: "@homenshum/nodekit"
     targetPackage: "@homenshum/nodekit"
     status: canonical
@@ -43,7 +43,7 @@ concepts:
         regex: '^export const KNOWLEDGE_GRAPH_SCHEMA = "nodekit\.knowledge-graph/v1";'
 
   nodekit.frontend-specialist:
-    owner: node-platform
+    owner: NodeKit
     package: "@homenshum/nodekit"
     targetPackage: "@homenshum/nodekit"
     status: canonical
@@ -54,7 +54,7 @@ concepts:
         regex: '^export const FRONTEND_ROUTE_SCHEMA = "nodekit\.frontend-route/v1";'
 
   nodekit.evolution-ledger:
-    owner: node-platform
+    owner: NodeKit
     package: "@homenshum/nodekit"
     targetPackage: "@homenshum/nodekit"
     status: canonical
@@ -71,7 +71,7 @@ concepts:
     status: canonical-domain
     contractVersion: featureclip.evidence-manifest/v1
     consumers:
-      - node-platform
+      - NodeKit
 
   featureclip.evidence-receipt:
     owner: FeatureClipStudio
@@ -80,7 +80,7 @@ concepts:
     status: canonical-domain
     contractVersion: featureclip.evidence-receipt/v1
     consumers:
-      - node-platform
+      - NodeKit
 
   betterprhandoff.handoff:
     owner: BetterPRHandoff
@@ -89,7 +89,7 @@ concepts:
     status: canonical
     contractVersion: betterprhandoff.handoff/v1
     consumers:
-      - node-platform
+      - NodeKit
 
   betterprhandoff.nodekit-present-receipt:
     owner: BetterPRHandoff
@@ -98,7 +98,7 @@ concepts:
     status: canonical
     contractVersion: betterprhandoff.nodekit-present-receipt/v1
     consumers:
-      - node-platform
+      - NodeKit
 
   nodetasks.corpus-receipt:
     owner: NodeTasks
@@ -107,10 +107,10 @@ concepts:
     status: canonical-domain
     contractVersion: nodetasks.corpus-receipt/v1
     consumers:
-      - node-platform
+      - NodeKit
 
   nodeplatform.environment:
-    owner: node-platform
+    owner: NodeKit
     package: null
     targetPackage: "@nodeagent/config"
     status: planned
@@ -278,7 +278,7 @@ concepts:
     status: canonical-unpackaged
     contractVersion: nodeslide.slidelang/v1
     consumers:
-      - node-platform
+      - NodeKit
       - NodeRoom
 
   nodeslide.deck-patch:
@@ -288,7 +288,7 @@ concepts:
     status: canonical-unpackaged
     contractVersion: nodeslide.deck-patch/v1
     consumers:
-      - node-platform
+      - NodeKit
       - NodeRoom
     signatures:
       - id: nodeslide-patch-operation

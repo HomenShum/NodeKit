@@ -4,6 +4,11 @@ You are looking at **NodeKit**, and this repository is the *platform* — the th
 applications and then proves what they did. It is not itself the application. That one sentence
 resolves the most common wrong turn.
 
+**Fastest first win (measured at 40 seconds, cold clone):** the README's
+"40 seconds to a running, proof-carrying app" block — clone, install,
+`node src/cli.mjs create`, demo. Do that before reading anything here; this
+page explains what you just ran.
+
 New here? Do these four things in order. It takes about ten minutes.
 
 ## 1. Install, then check your setup
@@ -55,11 +60,19 @@ Five parts own everything. You should be able to name them after the tour:
 
 ## 4. Trace one real action
 
-Read `advanceStage` in [`src/lib/builder-journey.mjs`](src/lib/builder-journey.mjs). It is the whole
-governing rule in one function: **a case cannot advance a stage unless that stage's artifact exists
-and a receipt binds it by content hash.** A forged or mismatched reference stays blocked.
+Read `decideProposal` (src/lib/caseflow.mjs line 289). It is the one function in this repository
+that changes a saved artifact, and it is the whole governing rule in one function: **an accepted
+proposal is applied only if the version it was written against is still the current one.** If the
+artifact moved on in the meantime the proposal is marked `conflicted`, no version is written, and
+the stale change is contained rather than silently overwriting newer work. Acceptance appends a
+version carrying `contentHash` of the exact patch that was approved.
 
 That single function is the system in miniature. Understand it and the rest follows.
+
+`src/lib/builder-journey.mjs` states the same idea per builder stage and reads well, but **nothing
+a user can run calls it** — its file header says so, `npm run unreached` lists it, and
+[docs/codebase/CONCERNS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md#1-eight-modules-that-nothing-runnable-calls--1180-lines)
+records why it was kept. Read it as a worked example, never as the live rule.
 
 ## Then: make one small change and prove it
 
@@ -71,6 +84,13 @@ npm test
 npm run evolution:verify
 ```
 
+> **This one currently reports `EVOLUTION BLOCKED` on a clean checkout, before you
+> change anything.** You did not break it. The ledger cites a commit that is not in
+> this repository's history, and one assumption record was edited in place instead
+> of superseded. Reproduction, the four exact reasons, and the fix are in
+> [docs/codebase/CONCERNS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md#3-npm-run-evolutionverify-exits-1-on-an-unmodified-clean-checkout).
+> Use `npm test` as your proof step until that is corrected.
+
 If you changed `src/`, `schemas/`, `templates/base/`, `harness/`, `nodekit.yaml`, `ownership.yaml`,
 or `.github/workflows/`, that is a **material** change and needs a reviewed Evolution Ledger entry
 before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
@@ -80,6 +100,7 @@ before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
 
 | You want to | Read |
 |---|---|
+| **Change the code, not just use it** | [docs/START_HERE.md](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) — the same `create` command traced through the source in execution order, then [docs/codebase/](https://github.com/HomenShum/NodeKit/tree/main/docs/codebase) and [.tours/](https://github.com/HomenShum/NodeKit/tree/main/.tours) |
 | Generate an application | [README.md](README.md#from-a-brief-to-a-running-app) |
 | Turn an idea into the smallest useful product | [docs/IDEA_TO_REALITY_PRINCIPLES.md](docs/IDEA_TO_REALITY_PRINCIPLES.md) |
 | Understand a term | [GLOSSARY.md](GLOSSARY.md) |

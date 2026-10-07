@@ -140,6 +140,7 @@
           "type": "string",
           "enum": [
             "test-run",
+            "adversarial-review",
             "command-output",
             "measurement",
             "source-file",

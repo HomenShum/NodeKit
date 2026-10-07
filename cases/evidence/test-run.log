@@ -1,0 +1,148 @@
+command: node --test test/knockout.test.mjs test/delivery-brief.test.mjs test/replay-book.test.mjs
+exit code: 0
+duration ms: 469
+--- stdout ---
+TAP version 13
+# Subtest: a claim citing evidence the build cannot show is an invented capability
+ok 1 - a claim citing evidence the build cannot show is an invented capability
+  ---
+  duration_ms: 3.378
+  type: 'test'
+  ...
+# Subtest: a claim bound to real pack evidence passes, and the coverage is reported
+ok 2 - a claim bound to real pack evidence passes, and the coverage is reported
+  ---
+  duration_ms: 0.9992
+  type: 'test'
+  ...
+# Subtest: a claim with an empty evidence list is refused at write time
+ok 3 - a claim with an empty evidence list is refused at write time
+  ---
+  duration_ms: 1.0405
+  type: 'test'
+  ...
+# Subtest: the brief inherits the build's own statement of what it did not establish
+ok 4 - the brief inherits the build's own statement of what it did not establish
+  ---
+  duration_ms: 0.3035
+  type: 'test'
+  ...
+# Subtest: a brief compiled against one case cannot be evaluated against another
+ok 5 - a brief compiled against one case cannot be evaluated against another
+  ---
+  duration_ms: 0.3683
+  type: 'test'
+  ...
+# Subtest: a brief with no claims measured nothing, and is not a pass
+ok 6 - a brief with no claims measured nothing, and is not a pass
+  ---
+  duration_ms: 0.3143
+  type: 'test'
+  ...
+# Subtest: three directions that tell the same story are one direction with three titles
+ok 7 - three directions that tell the same story are one direction with three titles
+  ---
+  duration_ms: 0.8275
+  type: 'test'
+  ...
+# Subtest: fewer than three directions is not a choice, and an unknown role is refused
+ok 8 - fewer than three directions is not a choice, and an unknown role is refused
+  ---
+  duration_ms: 0.3636
+  type: 'test'
+  ...
+# Subtest: the brief refuses shapes that would read as complete
+ok 9 - the brief refuses shapes that would read as complete
+  ---
+  duration_ms: 1.0693
+  type: 'test'
+  ...
+# Subtest: a derived contract says so, and names what its source did not settle
+ok 10 - a derived contract says so, and names what its source did not settle
+  ---
+  duration_ms: 197.1237
+  type: 'test'
+  ...
+# Subtest: derivedFrom refuses a shape that would read as provenance without being it
+ok 11 - derivedFrom refuses a shape that would read as provenance without being it
+  ---
+  duration_ms: 2.4778
+  type: 'test'
+  ...
+# Subtest: a mechanism whose removal changes nothing is present, not responsible
+ok 12 - a mechanism whose removal changes nothing is present, not responsible
+  ---
+  duration_ms: 1.779
+  type: 'test'
+  ...
+# Subtest: a knockout landing on the baseline's terminal state proves nothing
+ok 13 - a knockout landing on the baseline's terminal state proves nothing
+  ---
+  duration_ms: 0.3592
+  type: 'test'
+  ...
+# Subtest: a real removal that lands somewhere else establishes necessity
+ok 14 - a real removal that lands somewhere else establishes necessity
+  ---
+  duration_ms: 0.1904
+  type: 'test'
+  ...
+# Subtest: methods that cannot establish necessity are refused by name, with the reason
+ok 15 - methods that cannot establish necessity are refused by name, with the reason
+  ---
+  duration_ms: 1.6805
+  type: 'test'
+  ...
+# Subtest: without a declared terminal state the gaming route is undetectable, so it is required
+ok 16 - without a declared terminal state the gaming route is undetectable, so it is required
+  ---
+  duration_ms: 0.3658
+  type: 'test'
+  ...
+# Subtest: an observation is required on both sides; a verdict is not an observation
+ok 17 - an observation is required on both sides; a verdict is not an observation
+  ---
+  duration_ms: 0.3752
+  type: 'test'
+  ...
+# Subtest: RECREATE leads with the rung earned, not with a step list
+ok 18 - RECREATE leads with the rung earned, not with a step list
+  ---
+  duration_ms: 2.6821
+  type: 'test'
+  ...
+# Subtest: a packet at the top rung names nothing as unestablished
+ok 19 - a packet at the top rung names nothing as unestablished
+  ---
+  duration_ms: 0.2933
+  type: 'test'
+  ...
+# Subtest: the prompt book prints the original verbatim and never substitutes the cleaned one
+ok 20 - the prompt book prints the original verbatim and never substitutes the cleaned one
+  ---
+  duration_ms: 0.6002
+  type: 'test'
+  ...
+# Subtest: human interventions are surfaced, because a steered run is not prompt-reproducible
+ok 21 - human interventions are surfaced, because a steered run is not prompt-reproducible
+  ---
+  duration_ms: 0.3299
+  type: 'test'
+  ...
+# Subtest: an improvement record must name what changed and what taught it
+ok 22 - an improvement record must name what changed and what taught it
+  ---
+  duration_ms: 1.0339
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 349.5787
+
+--- stderr ---

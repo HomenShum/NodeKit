@@ -1,0 +1,13 @@
+{
+  "checks": {
+    "componentRegistered": true,
+    "crossScopeDenied": true,
+    "exceptionRecovery": true,
+    "idempotentRetries": true,
+    "receiptVerified": true,
+    "scopedLifecycleCompleted": true,
+    "staleConflictProtected": true
+  },
+  "receiptHash": "321640e34c6ff85aaccc52c504cf50f2775ed337e470a4f1582cebbf27762973",
+  "schemaVersion": "nodekit.installed-convex-runtime-proof/v1"
+}

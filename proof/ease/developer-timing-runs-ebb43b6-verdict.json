@@ -1,0 +1,885 @@
+{
+  "schemaVersion": "nodekit.developer-timing-verdict/v1",
+  "passed": true,
+  "errors": [],
+  "requiredRuns": 60,
+  "observedRuns": 60,
+  "cells": {
+    "windows/npm": {
+      "cold": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 2524,
+          "minimum": 1333,
+          "maximum": 10753,
+          "q1": 1689,
+          "q3": 4330,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 16004,
+          "minimum": 10745,
+          "maximum": 22172,
+          "q1": 11274,
+          "q3": 20483,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 712,
+          "minimum": 601,
+          "maximum": 1410,
+          "q1": 699,
+          "q3": 727,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 132,
+          "minimum": 122,
+          "maximum": 250,
+          "q1": 127,
+          "q3": 241,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1389,
+          "minimum": 1292,
+          "maximum": 2328,
+          "q1": 1349,
+          "q3": 1446,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2129,
+          "minimum": 2078,
+          "maximum": 3065,
+          "q1": 2111,
+          "q3": 2153,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 169309,
+          "minimum": 162110,
+          "maximum": 186936,
+          "q1": 167190,
+          "q3": 171098,
+          "p95": null,
+          "p95Eligible": false
+        }
+      },
+      "warm": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 1285,
+          "minimum": 1064,
+          "maximum": 1612,
+          "q1": 1225,
+          "q3": 1344,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 8872,
+          "minimum": 6727,
+          "maximum": 9926,
+          "q1": 7182,
+          "q3": 9577,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 720,
+          "minimum": 565,
+          "maximum": 733,
+          "q1": 665,
+          "q3": 729,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 127,
+          "minimum": 119,
+          "maximum": 135,
+          "q1": 125,
+          "q3": 127,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1175,
+          "minimum": 1126,
+          "maximum": 2482,
+          "q1": 1140,
+          "q3": 1175,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 1881,
+          "minimum": 1827,
+          "maximum": 3173,
+          "q1": 1867,
+          "q3": 1908,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 167844,
+          "minimum": 163558,
+          "maximum": 170241,
+          "q1": 165727,
+          "q3": 169263,
+          "p95": null,
+          "p95Eligible": false
+        }
+      }
+    },
+    "windows/pnpm": {
+      "cold": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 1441,
+          "minimum": 1384,
+          "maximum": 2342,
+          "q1": 1386,
+          "q3": 1509,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 8704,
+          "minimum": 6002,
+          "maximum": 10551,
+          "q1": 6867,
+          "q3": 8998,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 871,
+          "minimum": 850,
+          "maximum": 1137,
+          "q1": 862,
+          "q3": 911,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 125,
+          "minimum": 123,
+          "maximum": 127,
+          "q1": 125,
+          "q3": 126,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1117,
+          "minimum": 1107,
+          "maximum": 1205,
+          "q1": 1109,
+          "q3": 1140,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 1845,
+          "minimum": 1823,
+          "maximum": 1941,
+          "q1": 1831,
+          "q3": 1855,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 154689,
+          "minimum": 153755,
+          "maximum": 163638,
+          "q1": 154024,
+          "q3": 158318,
+          "p95": null,
+          "p95Eligible": false
+        }
+      },
+      "warm": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 1304,
+          "minimum": 1091,
+          "maximum": 1932,
+          "q1": 1270,
+          "q3": 1376,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 1498,
+          "minimum": 1280,
+          "maximum": 2882,
+          "q1": 1315,
+          "q3": 1881,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 875,
+          "minimum": 854,
+          "maximum": 962,
+          "q1": 866,
+          "q3": 887,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 130,
+          "minimum": 124,
+          "maximum": 134,
+          "q1": 126,
+          "q3": 130,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1159,
+          "minimum": 1116,
+          "maximum": 1201,
+          "q1": 1130,
+          "q3": 1194,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 1860,
+          "minimum": 1813,
+          "maximum": 1929,
+          "q1": 1829,
+          "q3": 1902,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 156178,
+          "minimum": 153676,
+          "maximum": 165239,
+          "q1": 153780,
+          "q3": 156502,
+          "p95": null,
+          "p95Eligible": false
+        }
+      }
+    },
+    "ubuntu/npm": {
+      "cold": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 123,
+          "minimum": 98,
+          "maximum": 134,
+          "q1": 122,
+          "q3": 124,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 2531,
+          "minimum": 2243,
+          "maximum": 2906,
+          "q1": 2258,
+          "q3": 2562,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 348,
+          "minimum": 319,
+          "maximum": 353,
+          "q1": 333,
+          "q3": 353,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 123,
+          "minimum": 122,
+          "maximum": 137,
+          "q1": 122,
+          "q3": 131,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1566,
+          "minimum": 1030,
+          "maximum": 2533,
+          "q1": 1456,
+          "q3": 2442,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2275,
+          "minimum": 1744,
+          "maximum": 3246,
+          "q1": 2193,
+          "q3": 3144,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 142163,
+          "minimum": 140787,
+          "maximum": 142311,
+          "q1": 141112,
+          "q3": 142245,
+          "p95": null,
+          "p95Eligible": false
+        }
+      },
+      "warm": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 124,
+          "minimum": 121,
+          "maximum": 142,
+          "q1": 122,
+          "q3": 126,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 724,
+          "minimum": 654,
+          "maximum": 775,
+          "q1": 663,
+          "q3": 726,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 348,
+          "minimum": 330,
+          "maximum": 384,
+          "q1": 339,
+          "q3": 358,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 135,
+          "minimum": 121,
+          "maximum": 138,
+          "q1": 126,
+          "q3": 137,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1003,
+          "minimum": 970,
+          "maximum": 2343,
+          "q1": 995,
+          "q3": 1056,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 1708,
+          "minimum": 1690,
+          "maximum": 3064,
+          "q1": 1692,
+          "q3": 1809,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 141250,
+          "minimum": 140475,
+          "maximum": 145367,
+          "q1": 140882,
+          "q3": 143110,
+          "p95": null,
+          "p95Eligible": false
+        }
+      }
+    },
+    "ubuntu/pnpm": {
+      "cold": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 121,
+          "minimum": 116,
+          "maximum": 135,
+          "q1": 116,
+          "q3": 124,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 1355,
+          "minimum": 1262,
+          "maximum": 1512,
+          "q1": 1326,
+          "q3": 1368,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 567,
+          "minimum": 561,
+          "maximum": 595,
+          "q1": 565,
+          "q3": 568,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 121,
+          "minimum": 121,
+          "maximum": 123,
+          "q1": 121,
+          "q3": 123,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1282,
+          "minimum": 966,
+          "maximum": 3921,
+          "q1": 978,
+          "q3": 1391,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 1999,
+          "minimum": 1700,
+          "maximum": 4625,
+          "q1": 1709,
+          "q3": 2125,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 142565,
+          "minimum": 140921,
+          "maximum": 143547,
+          "q1": 142384,
+          "q3": 142629,
+          "p95": null,
+          "p95Eligible": false
+        }
+      },
+      "warm": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 121,
+          "minimum": 94,
+          "maximum": 132,
+          "q1": 109,
+          "q3": 124,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 523,
+          "minimum": 477,
+          "maximum": 581,
+          "q1": 522,
+          "q3": 529,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 562,
+          "minimum": 503,
+          "maximum": 576,
+          "q1": 508,
+          "q3": 574,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 122,
+          "minimum": 120,
+          "maximum": 122,
+          "q1": 122,
+          "q3": 122,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1724,
+          "minimum": 963,
+          "maximum": 2666,
+          "q1": 979,
+          "q3": 1727,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2431,
+          "minimum": 1678,
+          "maximum": 3363,
+          "q1": 1714,
+          "q3": 2463,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 141952,
+          "minimum": 141251,
+          "maximum": 150017,
+          "q1": 141496,
+          "q3": 143141,
+          "p95": null,
+          "p95Eligible": false
+        }
+      }
+    },
+    "macos/npm": {
+      "cold": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 243,
+          "minimum": 205,
+          "maximum": 735,
+          "q1": 213,
+          "q3": 297,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 6299,
+          "minimum": 5089,
+          "maximum": 9036,
+          "q1": 5966,
+          "q3": 8833,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 389,
+          "minimum": 291,
+          "maximum": 616,
+          "q1": 353,
+          "q3": 441,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 117,
+          "minimum": 113,
+          "maximum": 129,
+          "q1": 114,
+          "q3": 125,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1878,
+          "minimum": 1545,
+          "maximum": 2166,
+          "q1": 1707,
+          "q3": 2141,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2609,
+          "minimum": 2234,
+          "maximum": 2994,
+          "q1": 2503,
+          "q3": 2938,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 150792,
+          "minimum": 140316,
+          "maximum": 156038,
+          "q1": 141800,
+          "q3": 152639,
+          "p95": null,
+          "p95Eligible": false
+        }
+      },
+      "warm": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 254,
+          "minimum": 183,
+          "maximum": 548,
+          "q1": 216,
+          "q3": 289,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 815,
+          "minimum": 458,
+          "maximum": 1531,
+          "q1": 668,
+          "q3": 881,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 386,
+          "minimum": 269,
+          "maximum": 473,
+          "q1": 364,
+          "q3": 407,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 115,
+          "minimum": 113,
+          "maximum": 131,
+          "q1": 115,
+          "q3": 116,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1700,
+          "minimum": 1467,
+          "maximum": 2340,
+          "q1": 1523,
+          "q3": 2289,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2436,
+          "minimum": 2183,
+          "maximum": 3273,
+          "q1": 2267,
+          "q3": 3072,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 155843,
+          "minimum": 140213,
+          "maximum": 156740,
+          "q1": 147241,
+          "q3": 156173,
+          "p95": null,
+          "p95Eligible": false
+        }
+      }
+    },
+    "macos/pnpm": {
+      "cold": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 181,
+          "minimum": 159,
+          "maximum": 663,
+          "q1": 171,
+          "q3": 258,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 1277,
+          "minimum": 980,
+          "maximum": 1663,
+          "q1": 1207,
+          "q3": 1427,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 517,
+          "minimum": 375,
+          "maximum": 843,
+          "q1": 386,
+          "q3": 733,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 116,
+          "minimum": 112,
+          "maximum": 122,
+          "q1": 115,
+          "q3": 117,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1294,
+          "minimum": 1106,
+          "maximum": 1753,
+          "q1": 1161,
+          "q3": 1709,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2145,
+          "minimum": 1802,
+          "maximum": 2605,
+          "q1": 1880,
+          "q3": 2471,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 136927,
+          "minimum": 136450,
+          "maximum": 150441,
+          "q1": 136925,
+          "q3": 145925,
+          "p95": null,
+          "p95Eligible": false
+        }
+      },
+      "warm": {
+        "scaffoldGenerationMs": {
+          "samples": 5,
+          "median": 241,
+          "minimum": 173,
+          "maximum": 641,
+          "q1": 181,
+          "q3": 259,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "dependencyInstallationMs": {
+          "samples": 5,
+          "median": 528,
+          "minimum": 393,
+          "maximum": 990,
+          "q1": 426,
+          "q3": 648,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "compileMs": {
+          "samples": 5,
+          "median": 525,
+          "minimum": 420,
+          "maximum": 1104,
+          "q1": 491,
+          "q3": 740,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "serverReadinessMs": {
+          "samples": 5,
+          "median": 117,
+          "minimum": 114,
+          "maximum": 231,
+          "q1": 115,
+          "q3": 120,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "firstMeaningfulPaintMs": {
+          "samples": 5,
+          "median": 1681,
+          "minimum": 1321,
+          "maximum": 2794,
+          "q1": 1554,
+          "q3": 1980,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "neutralJourneyMs": {
+          "samples": 5,
+          "median": 2439,
+          "minimum": 2110,
+          "maximum": 3750,
+          "q1": 2225,
+          "q3": 2837,
+          "p95": null,
+          "p95Eligible": false
+        },
+        "totalMs": {
+          "samples": 5,
+          "median": 143279,
+          "minimum": 135002,
+          "maximum": 156562,
+          "q1": 137086,
+          "q3": 151359,
+          "p95": null,
+          "p95Eligible": false
+        }
+      }
+    }
+  }
+}

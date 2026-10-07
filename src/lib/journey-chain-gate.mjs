@@ -168,7 +168,7 @@ function findSelfApprovalKeys(value, trail = "", depth = 0) {
  * unattempted and nothing refused, is claiming its whole scope was covered. That is the vacuous
  * pass at artifact scale -- a conclusion with no denominator behind it.
  */
-function completenessFaults(stage, completeness) {
+function completenessFaults(stage, completeness, doc) {
   const faults = [];
   if (!isPlainObject(completeness)) {
     return [{ stage, clause: "missing", detail: "completeness must be an object with claimed, notRun and refused" }];
@@ -201,6 +201,55 @@ function completenessFaults(stage, completeness) {
       });
     }
   });
+
+  // A green suite says nobody has falsified this yet. It does not say anyone tried. Adversarial
+  // review reliably finds classes a test suite is structurally blind to -- the ones where the
+  // tests share the author's model of the problem, so they agree with the bug. A pack standing
+  // only on its own passing tests is unfalsified by its author, which is a weaker thing than
+  // verified, and the two must not be spelled the same. Declaring the gap in notRun or refused
+  // is a legitimate answer; leaving it unsaid is the one that is not.
+  // An observation window is required, and required to be a closed interval — but "from" and "to"
+  // are two independent date strings, and no schema can say the first must precede the second. A
+  // window whose end is not after its start measured no time and is still shaped exactly like a
+  // measurement, which is the same silence as an absent window wearing a timestamp.
+  const windows = [];
+  const collectWindows = (node, path) => {
+    if (!node || typeof node !== "object") return;
+    if (isNonEmptyString(node.from) && isNonEmptyString(node.to) && /window/i.test(path)) {
+      windows.push({ path, from: node.from, to: node.to });
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (value && typeof value === "object") collectWindows(value, `${path}/${key}`);
+    }
+  };
+  collectWindows(doc?.content, "content");
+  for (const w of windows) {
+    const from = Date.parse(w.from);
+    const to = Date.parse(w.to);
+    if (!Number.isFinite(from) || !Number.isFinite(to)) {
+      faults.push({ stage, clause: "window-unparseable", detail: `${w.path} is not a parseable interval (${w.from} .. ${w.to})` });
+    } else if (to <= from) {
+      faults.push({
+        stage,
+        clause: "window-measured-no-time",
+        detail: `${w.path} ends at or before it starts (${w.from} .. ${w.to}); a window that spans no time is shaped like a measurement and is not one`,
+      });
+    }
+  }
+
+  const evidence = Array.isArray(doc?.content?.evidence) ? doc.content.evidence : [];
+  if (claimed.length > 0 && evidence.length > 0) {
+    const adversarial = evidence.some((entry) => entry?.kind === "adversarial-review");
+    const declared = [...notRunSet, ...refused.map((entry) => entry?.item)]
+      .some((entry) => typeof entry === "string" && /adversarial/i.test(entry));
+    if (!adversarial && !declared) {
+      faults.push({
+        stage,
+        clause: "unfalsified-by-author",
+        detail: "carries no adversarial-review evidence and does not declare its absence in notRun or refused; a green suite is not an independent attempt to break the work",
+      });
+    }
+  }
   return faults;
 }
 
@@ -397,7 +446,7 @@ export async function verifyJourneyChain({ chainDir, caseId } = {}) {
       });
     }
     failures.push(
-      ...completenessFaults(spec.stage, doc.completeness).map((fault) => ({
+      ...completenessFaults(spec.stage, doc.completeness, doc).map((fault) => ({
         code: `completeness-${fault.clause}`,
         stage: fault.stage,
         detail: `${record.file}: ${fault.detail}`,

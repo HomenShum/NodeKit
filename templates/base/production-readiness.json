@@ -1,0 +1,14 @@
+{
+  "$comment": "The seven checks a real person's data depends on. Absence is NOT_RUN and NOT_RUN blocks release — this file starts with all seven unrun on purpose, because a scaffold that starts PASS is a lie about work nobody did. Neither this application nor NodeKit may attest itself: attestedBy must be a party that did not build it. Only PAYMENT_INTEGRITY is waivable, and only by a verifier who looked for billing surfaces and found none.",
+  "application": "REPLACE_WITH_APPLICATION_NAME",
+  "revision": "REPLACE_WITH_EXACT_REVISION",
+  "checks": [
+    { "id": "SECRET_BOUNDARY", "outcome": "NOT_RUN" },
+    { "id": "SERVER_AUTHORIZATION", "outcome": "NOT_RUN" },
+    { "id": "TENANT_ISOLATION", "outcome": "NOT_RUN" },
+    { "id": "ERROR_OBSERVABILITY", "outcome": "NOT_RUN" },
+    { "id": "RESTORE_PROOF", "outcome": "NOT_RUN" },
+    { "id": "CHANGE_REGRESSION", "outcome": "NOT_RUN" },
+    { "id": "PAYMENT_INTEGRITY", "outcome": "NOT_RUN" }
+  ]
+}

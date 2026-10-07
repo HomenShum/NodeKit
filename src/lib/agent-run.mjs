@@ -403,6 +403,17 @@ function addEvent(events, event) {
   if (events.length < AGENT_RUN_LIMITS.events) events.push(event);
 }
 
+// A spawn failure's message embeds caller-shaped input (the program path, up to programChars) and
+// is otherwise unbounded, and receipts are agent-visible. Only a normalized single line lands in
+// the receipt: the errno code plus the first line of the message, capped at 200 characters, never
+// a stack. Same cap the repo already uses in replay-packet-producer.mjs.
+function normalizeProcessError(error) {
+  if (!error) return null;
+  const code = typeof error.code === "string" && error.code.length > 0 ? error.code : "SPAWN_FAILED";
+  const firstLine = String(error.message ?? "").split("\n", 1)[0].slice(0, 200);
+  return firstLine.length > 0 ? `${code}: ${firstLine}` : code;
+}
+
 async function execute(program, args, repoRoot, timeoutMs, events) {
   const stdout = createBoundedCapture();
   const stderr = createBoundedCapture();
@@ -458,7 +469,7 @@ async function execute(program, args, repoRoot, timeoutMs, events) {
   return {
     durationMs: endedAtMs - startedAtMs,
     endedAt: new Date(endedAtMs).toISOString(),
-    error: spawnError?.message ?? null,
+    error: normalizeProcessError(spawnError),
     exitCode: code,
     signal,
     status,

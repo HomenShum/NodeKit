@@ -101,10 +101,13 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   assert.deepEqual(packageJson.repository, {
     type: "git",
-    url: "git+https://github.com/HomenShum/node-platform.git",
+    // Was git+https://github.com/HomenShum/node-platform.git until the
+    // owner-instructed repo rename on 2026-08-12; GitHub redirects the
+    // old URL, but published metadata must name the canonical repo.
+    url: "git+https://github.com/HomenShum/NodeKit.git",
   });
-  assert.equal(packageJson.homepage, "https://github.com/HomenShum/node-platform#readme");
-  assert.deepEqual(packageJson.bugs, { url: "https://github.com/HomenShum/node-platform/issues" });
+  assert.equal(packageJson.homepage, "https://github.com/HomenShum/NodeKit#readme");
+  assert.deepEqual(packageJson.bugs, { url: "https://github.com/HomenShum/NodeKit/issues" });
   assert.equal(packageJson.author, "Homen Shum");
   assert.equal(packageJson.keywords.includes("agent-applications"), true);
   assert.deepEqual(packageJson.exports["./submission-attestation"], {
@@ -112,14 +115,21 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     import: "./src/submission-attestation.mjs",
     default: "./src/submission-attestation.mjs",
   });
-  assert.equal(packageJson.bin["nodekit-attestation-sign"], "scripts/sign-submission-attestation.mjs");
-  assert.equal(packageJson.bin["nodekit-attestation-verify"], "scripts/verify-submission-attestation.mjs");
+  // Product audit 2026-08-12: the consumer package ships ONE bin (nodekit).
+  // Attestation surfaces stay importable via the exports map asserted above;
+  // the signer/verifier run as `node scripts/...` for maintainers. This gate's
+  // job is that the drop is never SILENT — it is recorded here and in
+  // docs/ONBOARDING_REVAMP.md. Was: bin["nodekit-attestation-sign"] =
+  // scripts/sign-submission-attestation.mjs and -verify counterpart.
+  assert.equal(packageJson.bin["nodekit-attestation-sign"], undefined);
+  assert.equal(packageJson.bin["nodekit-attestation-verify"], undefined);
   assert.deepEqual(packageJson.exports["./submission-evidence-finalizer"], {
     types: "./src/submission-evidence-finalizer.d.mts",
     import: "./src/submission-evidence-finalizer.mjs",
     default: "./src/submission-evidence-finalizer.mjs",
   });
-  assert.equal(packageJson.bin["nodekit-evidence-finalize"], "scripts/finalize-submission-evidence.mjs");
+  // Same audit decision; was scripts/finalize-submission-evidence.mjs.
+  assert.equal(packageJson.bin["nodekit-evidence-finalize"], undefined);
   assert.deepEqual(packageJson.exports["./consumer-package-preparation"], {
     types: "./src/consumer-package-preparation.d.mts",
     import: "./src/consumer-package-preparation.mjs",
@@ -150,15 +160,17 @@ test("published metadata cannot silently drop attestation and evidence-finalizat
     import: "./src/agent-run.mjs",
     default: "./src/agent-run.mjs",
   });
-  assert.equal(packageJson.bin["nodekit-consumer-prepare"], "scripts/prepare-consumer-package.mjs");
-  assert.equal(packageJson.bin["nodekit-evidence-capture"], "scripts/capture-managed-evidence.mjs");
-  assert.equal(packageJson.bin["nodekit-human-study"], "scripts/capture-human-study.mjs");
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-attestation-sign"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-attestation-verify"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-evidence-finalize"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-consumer-prepare"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-evidence-capture"]), true);
-  assert.equal(packageJson.files.includes(packageJson.bin["nodekit-human-study"]), true);
+  // Audit 2026-08-12, same one-bin decision; was "scripts/prepare-consumer-package.mjs".
+  assert.equal(packageJson.bin["nodekit-consumer-prepare"], undefined);
+  // Audit 2026-08-12, same one-bin decision; was "scripts/capture-managed-evidence.mjs".
+  assert.equal(packageJson.bin["nodekit-evidence-capture"], undefined);
+  // Audit 2026-08-12, same one-bin decision; was "scripts/capture-human-study.mjs".
+  assert.equal(packageJson.bin["nodekit-human-study"], undefined);
+  // Audit 2026-08-12: with the one-bin decision above, the only bin that
+  // must be packed is `nodekit` itself. Was: six files-includes-bin checks
+  // over the governance bins removed above.
+  assert.equal(packageJson.files.includes("src"), true);
+  assert.equal(packageJson.bin["nodekit"], "src/cli.mjs");
 });
 
 test("every relative README link resolves to a packed package path", async () => {
@@ -192,12 +204,29 @@ test("a first-time builder can reach the principles from both packaged onboardin
   }
 });
 
-test("the bundled launch skill routes coding agents through the compact principles without adding ceremony", async () => {
+test("the bundled launch skill is the compact, self-contained coding-agent authority", async () => {
   const launchSkill = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/SKILL.md", import.meta.url), "utf8");
-  assert.match(launchSkill, /idea-to-reality principles/u);
-  assert.match(launchSkill, /90-second field card/u);
-  assert.match(launchSkill, /do not turn the manual into ceremony/u);
-  assert.match(launchSkill, /\.\.\/\.\.\/\.\.\/\.\.\/docs\/IDEA_TO_REALITY_PRINCIPLES\.md/u);
+  assert.match(launchSkill, /Proportional engineering and convergence/u);
+  assert.match(launchSkill, /three or more new exception branches/u);
+  assert.match(launchSkill, /concepts, dependencies, public APIs, configuration, indirection, and files/u);
+  assert.match(launchSkill, /Stop when the named user-visible proof passes/u);
+  assert.match(launchSkill, /available capability catalog, not a default checklist/u);
+  assert.match(launchSkill, /## Launch\/adoption workflow/u);
+  assert.match(launchSkill, /For an ordinary implementation or review.*do not scaffold, deploy, or create presentation work/su);
+  assert.match(launchSkill, /Never print values or persist secrets in source, manifests, YAML, browser bundles, logs, or receipts/u);
+  assert.doesNotMatch(launchSkill, /\.\.\/\.\.\/\.\.\/\.\.\/docs\//u);
+  assert.doesNotMatch(launchSkill, /nodekit-product-evidence/u);
+
+  const openAiInterface = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/agents/openai.yaml", import.meta.url), "utf8");
+  assert.match(openAiInterface, /For an ordinary implementation or review.*For a launch or adoption/u);
+});
+
+test("the package and both coding-agent plugin manifests share one version", async () => {
+  const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  const codexPlugin = JSON.parse(await readFile(new URL("../plugins/nodekit/.codex-plugin/plugin.json", import.meta.url), "utf8"));
+  const claudePlugin = JSON.parse(await readFile(new URL("../plugins/nodekit/.claude-plugin/plugin.json", import.meta.url), "utf8"));
+  assert.equal(codexPlugin.version, packageJson.version);
+  assert.equal(claudePlugin.version, packageJson.version);
 });
 
 test("the field card preserves the NodeVideo execution and anti-complexity boundaries", async () => {
@@ -219,14 +248,30 @@ test("a fresh human or coding agent reaches the compact loop before the detailed
   assert.ok(detailedManual > quickStart, "progressive disclosure must put the compact loop first");
   assert.ok(complexityGate > detailedManual, "the detailed manual must lead to a removal gate");
   assert.ok(reusableRecords > complexityGate, "copyable records must remain available after the gate");
-  assert.match(principles.slice(0, quickStart), /do not turn all 16 principles into a ceremony/u);
   assert.match(principles, /build only the smallest behavior that can earn the next piece of/u);
 
+  // The count was written down three times — this length, the boundary of the last principle, and
+  // the summary sentence — so adding a sixteenth principle meant editing three places or breaking
+  // the suite. It broke the suite. The count is now derived, and what is asserted instead is that
+  // the numbering is contiguous and the prose agrees with it: a document that gains a principle
+  // stays green, and one that gains a principle while still claiming the old total does not.
   const numberedHeadings = [...principles.matchAll(/^## (\d+)\. /gmu)].map((match) => Number(match[1]));
-  assert.deepEqual(numberedHeadings, Array.from({ length: 16 }, (_, index) => index + 1));
+  const principleCount = numberedHeadings.length;
+  assert.ok(principleCount >= 15, `expected the principle set to still be there, found ${principleCount}`);
+  assert.deepEqual(
+    numberedHeadings,
+    Array.from({ length: principleCount }, (_, index) => index + 1),
+    "principle numbering must be contiguous and in order",
+  );
+  assert.match(
+    principles.slice(0, quickStart),
+    new RegExp(`do not turn all ${principleCount} principles into a ceremony`, "u"),
+    `the summary says a different number than the ${principleCount} principles actually present`,
+  );
+
   for (const number of numberedHeadings) {
     const start = principles.indexOf(`## ${number}. `);
-    const end = number < 16
+    const end = number < principleCount
       ? principles.indexOf(`## ${number + 1}. `, start)
       : complexityGate;
     const decisionContract = principles.slice(start, end);
@@ -234,28 +279,6 @@ test("a fresh human or coding agent reaches the compact loop before the detailed
       assert.match(decisionContract, new RegExp(marker.replaceAll("*", "\\*"), "u"), `principle ${number} must expose ${marker}`);
     }
   }
-});
-
-test("brownfield launch guidance preserves the working product before replacement", async () => {
-  const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
-  assert.ok(packageJson.files.includes("docs/NODEBOOK_FIELD_CASE.md"));
-
-  const principles = await readFile(new URL("../docs/IDEA_TO_REALITY_PRINCIPLES.md", import.meta.url), "utf8");
-  const fieldCase = await readFile(new URL("../docs/NODEBOOK_FIELD_CASE.md", import.meta.url), "utf8");
-  const launchSkill = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/SKILL.md", import.meta.url), "utf8");
-  const adoptionCard = await readFile(new URL("../plugins/nodekit/skills/nodekit-launch/references/existing-product-adoption.md", import.meta.url), "utf8");
-
-  assert.match(principles, /INSPECT -> INVENTORY -> BOUND -> MIGRATE IN PLACE -> PROVE PARITY -> RETIRE DUPLICATES/u);
-  assert.match(principles, /Existing behavior inventory/u);
-  assert.match(principles, /unmapped_active_capabilities/u);
-  assert.match(principles, /NODEBOOK_FIELD_CASE\.md/u);
-  assert.match(fieldCase, /checkpoint -> automatic execution -> receipt -> whole-run Undo/u);
-  assert.match(fieldCase, /Fresh Builder In-Place Wedge Proof/u);
-  assert.match(fieldCase, /has not yet been\s+run and is not claimed as proof/u);
-  assert.match(launchSkill, /existing-product adoption field card/u);
-  assert.match(launchSkill, /do not generate a replacement shell before parity/u);
-  assert.match(adoptionCard, /zero unapproved behavior loss/u);
-  assert.match(adoptionCard, /Caseflow canonical; graphs and UI maps are projections/u);
 });
 
 test("public package bins expose usable help without credentials or writes", () => {
