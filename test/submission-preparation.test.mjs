@@ -4,14 +4,19 @@ import { execFileSync } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rename, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import test from "node:test";
+import test, { beforeEach } from "node:test";
 import {
   canonicalSubmissionEvidence,
   prepareSubmissionManifest,
 } from "../src/lib/submission-preparation.mjs";
 import { transitiveSubmissionEvidence } from "../src/lib/submission-gate.mjs";
 import { computeNodeKitSourceHash } from "../src/lib/source-hash.mjs";
-import { exactSubmissionVerdicts, submissionEvidenceFixtureBytes, submissionEvidenceFixtureClosure, submissionFixtureTrustedKeys } from "./submission-fixtures.mjs";
+import { exactSubmissionVerdicts, submissionEvidenceFixtureBytes, submissionEvidenceFixtureClosure, submissionFixtureReferenceTime, submissionFixtureTrustedKeys } from "./submission-fixtures.mjs";
+
+// Date-only mocks are scoped to each test; node:test restores them afterward.
+beforeEach((t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: submissionFixtureReferenceTime });
+});
 
 function git(root, args) {
   // The evidence closure stages thousands of files, and Git emits a line-ending

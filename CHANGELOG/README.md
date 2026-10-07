@@ -5,6 +5,11 @@ rewritten after release.
 
 ## Index
 
+- [`ci/ecosystem.md`](ci/ecosystem.md) - catalog-derived external checkouts for scheduled ecosystem conformance
+- [`test/historical-evidence.md`](test/historical-evidence.md) - test-owned historical pricing clocks and preserved stale-evidence rejection
+- [`ci/quality.md`](ci/quality.md) - required Chromium setup for the Quality browser check
+- [`cli/dashboard.md`](cli/dashboard.md) - machine-readable repository checks and bounded registry revision lookup
+- [`library/dashboard.md`](library/dashboard.md) - honest checker verdicts beside static dashboard summaries
 - [`docs/onboarding.md`](docs/onboarding.md) - newcomer orientation and idea-to-reality operating doctrine
 - [`package/public-docs.md`](package/public-docs.md) - documentation shipped with the npm package
 - [`package/agent-skills.md`](package/agent-skills.md) - coding-agent policy and projected NodeKit skills

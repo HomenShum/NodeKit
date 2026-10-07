@@ -106,6 +106,7 @@ before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
 | Understand a term | [GLOSSARY.md](GLOSSARY.md) |
 | Work on this repo as a coding agent | [AGENTS.md](AGENTS.md) |
 | Understand why a decision was made | [docs/DECISIONS.md](docs/DECISIONS.md), [docs/EVOLUTION_LEDGER.md](docs/EVOLUTION_LEDGER.md) |
+| Read repository checks from a script | [Dashboard JSON guide](docs/START_HERE.md#read-the-repository-dashboard-from-a-script) — validation results, static summaries and registry identity |
 | See the full command list | `node src/cli.mjs --help` or `repo-map.json` |
 
 `docs/` holds deeper reference documents. They are references, not onboarding — do not start there.

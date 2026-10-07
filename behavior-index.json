@@ -582,7 +582,7 @@
           {
             "scenario": "candidate-identity-bound",
             "file": "test/submission-gate.test.mjs",
-            "line": 142
+            "line": 147
           }
         ],
         "namedTestFiles": [
@@ -953,7 +953,7 @@
           {
             "scenario": "evidence-source-bound",
             "file": "test/submission-gate.test.mjs",
-            "line": 234
+            "line": 239
           }
         ],
         "namedTestFiles": [

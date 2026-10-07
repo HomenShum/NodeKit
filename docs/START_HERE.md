@@ -67,7 +67,7 @@ to `cli-main.mjs`, which throws `unknown command: …` in Step 2.
 ## Step 2 — Arguments are parsed and the command is dispatched
 
 **File:** `src/cli-main.mjs`
-**Symbol:** `parseArgs` (line 130), `main` (line 2249)
+**Symbol:** `parseArgs` (line 130), `main` (line 2272)
 **Called by:** the top-level `await import` in Step 1
 **Calls next:** `runCreate`
 
@@ -105,7 +105,7 @@ exit code 1. No files have been touched at this point.
 ## Step 3 — The primary user action: scaffold an application
 
 **File:** `src/cli-main.mjs`
-**Symbol:** `runCreate` (line 1119)
+**Symbol:** `runCreate` (line 1142)
 **Called by:** `main`
 **Calls next:** `createProject` in `src/lib/scaffold.mjs`
 
@@ -315,7 +315,7 @@ because it tells the user their change was *not* applied.
 ## Step 9 — Failure and recovery
 
 **File:** `src/cli-main.mjs`, then `src/lib/caseflow.mjs`
-**Symbol:** the top-level `main().catch` (cli-main.mjs line 2922), and the idempotent-retry return
+**Symbol:** the top-level `main().catch` (cli-main.mjs line 2945), and the idempotent-retry return
 `reused: true` (caseflow.mjs line 308)
 **Called by:** the Node process, and any client that retries
 **Calls next:** nothing — these are the ends of the chain
@@ -391,3 +391,47 @@ test; it means you added or removed a module and the committed map is stale.
 - `docs/codebase/STRUCTURE.md` — what each top-level directory is for.
 - `docs/codebase/CONCERNS.md` — what is known to be wrong, with the command that
   reproduces each one.
+
+## Read the repository dashboard from a script
+
+A maintainer uses this report to decide which repositories need attention before
+handing work to a developer or coding agent. A repository can have runnable
+command declarations and still fail its environment or ownership contract.
+Read the actual validation result before treating any summary as ready.
+
+Use a revision containing [the JSON dashboard change](https://github.com/HomenShum/NodeKit/pull/41):
+
+```bash
+node src/cli.mjs dashboard --registry-root . --workspace .. --json
+```
+
+The workspace contains checkouts named as the registry expects. This command
+reads repository declarations and source; it does not execute their application
+tests. When repository checking completes, failed checker results make the process
+exit nonzero with JSON on stdout. Registry, read or collection errors can stop
+before JSON is produced; inspect stderr and the exit status. Inspect each returned
+row's `passed` and `errors`; overall `passed` is true only when every returned
+checker result passed.
+
+The `nodekit.dashboard/v1` envelope includes `generatedAt`, `registryCommit`,
+`passed` and `rows`. Each row includes the repository name, its checker verdict
+and errors, lifecycle/role, command summary, no-key declaration, proof-schema
+declaration, drift and the existing `p0` summary. A complete `p0` summary does
+not override `passed: false`. No-key and proof-schema fields are declarations;
+this report does not certify a fresh no-key run, application quality or production.
+
+`registryCommit` identifies the inspected registry checkout only when Git reports
+that exact directory as its repository root. It is null when Git is unavailable,
+has no commit, or finds a containing application's repository. It does not
+identify the installed NodeKit generator. It records the checkout's HEAD and does
+not hash uncommitted registry files. The prototype's `generatorCommit`
+field has been replaced; consumers must use `registryCommit`.
+
+`--json` and `--write` are incompatible. The npm `dashboard` alias already
+includes `--write`, so call the CLI directly for JSON. Markdown output remains
+available for people. The existing platform-checkout naming issue is tracked in
+[PR #40](https://github.com/HomenShum/NodeKit/pull/40); inspect missing-checkout
+errors rather than ignoring them.
+
+Review exact-revision CI and authority evidence separately before accepting the
+change. Dashboard JSON is a static repository report, not a release certificate.
