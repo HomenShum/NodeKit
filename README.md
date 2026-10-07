@@ -42,17 +42,17 @@ change this repository without the person who built it sitting beside them — t
 
 | Read | For |
 |---|---|
-| [`docs/START_HERE.md`](docs/START_HERE.md) | Trace `create`, then the generated app, optional tools, and separately invoked tests |
-| [`.tours/`](.tours) | The same three walkthroughs inside VS Code, pointing at live source ([CodeTour](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)) |
-| [`docs/codebase/STRUCTURE.md`](docs/codebase/STRUCTURE.md) | Find implementation, templates, contracts, and historical records |
-| [`docs/codebase/ARCHITECTURE.md`](docs/codebase/ARCHITECTURE.md) | The one invariant everything else is downstream of |
-| [`docs/codebase/CONCERNS.md`](docs/codebase/CONCERNS.md) | Historical findings and reproduction commands; recheck them on your revision |
-| [`docs/SIMPLIFICATION_REPORT.md`](docs/SIMPLIFICATION_REPORT.md) | Before/after measurements for the last reduction pass, with every evidence command |
+| [`docs/START_HERE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) | Trace `create`, then the generated app, optional tools, and separately invoked tests |
+| [`.tours/`](https://github.com/HomenShum/NodeKit/tree/main/.tours) | The same three walkthroughs inside VS Code, pointing at live source ([CodeTour](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)) |
+| [`docs/codebase/STRUCTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STRUCTURE.md) | Find implementation, templates, contracts, and historical records |
+| [`docs/codebase/ARCHITECTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/ARCHITECTURE.md) | The one invariant everything else is downstream of |
+| [`docs/codebase/CONCERNS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md) | Historical findings and reproduction commands; recheck them on your revision |
+| [`docs/SIMPLIFICATION_REPORT.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/SIMPLIFICATION_REPORT.md) | Before/after measurements for the last reduction pass, with every evidence command |
 
-Also: [`docs/codebase/STACK.md`](docs/codebase/STACK.md),
-[`CONVENTIONS.md`](docs/codebase/CONVENTIONS.md),
-[`INTEGRATIONS.md`](docs/codebase/INTEGRATIONS.md),
-[`TESTING.md`](docs/codebase/TESTING.md).
+Also: [`docs/codebase/STACK.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STACK.md),
+[`CONVENTIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONVENTIONS.md),
+[`INTEGRATIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/INTEGRATIONS.md),
+[`TESTING.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/TESTING.md).
 
 Looking for another project? [Choose a repository by the developer task](#repository-directory).
 
@@ -170,7 +170,7 @@ receipt, an operational lease, and a new durable checkpoint. The execution graph
 disposable projection and cannot authorize continuity.
 
 See the
-[native-agent identity contract](docs/NATIVE_AGENT_SESSION_IDENTITY.md).
+[native-agent identity contract](https://github.com/HomenShum/NodeKit/blob/main/docs/NATIVE_AGENT_SESSION_IDENTITY.md).
 
 ### Compare copied behavior
 
@@ -188,7 +188,7 @@ node src/cli.mjs motion compare \
 The command returns `PASS`, `FAIL`, or `NOT_RUN`; missing coverage is never green. Its receipt is
 decisive for static name/value conflicts only and explicitly leaves runtime, DOM/trace, video, and
 audience evidence unrun. See
-[`docs/BEHAVIOR_PORTABILITY_SHOWCASE.md`](docs/BEHAVIOR_PORTABILITY_SHOWCASE.md) for the measured
+[`docs/BEHAVIOR_PORTABILITY_SHOWCASE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/BEHAVIOR_PORTABILITY_SHOWCASE.md) for the measured
 NodeSlide/NodeRoom example.
 
 By default, `nodekit create` vendors the exact compile/check runtime that generated
@@ -225,16 +225,16 @@ the rendered screenshot matrix, hosted timing or agent/human studies, deploy, pu
 Convex submission, or claim external certification.
 
 The consolidated strategy, evidence-backed status, Harness Gym roadmap, and ordered checklist are in
-[`docs/NODEKIT_MASTER_PLAN.md`](docs/NODEKIT_MASTER_PLAN.md). The complete submission lock,
+[`docs/NODEKIT_MASTER_PLAN.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/NODEKIT_MASTER_PLAN.md). The complete submission lock,
 cross-platform workflow, fresh-agent protocol, and uncoached human-study thresholds are documented
-in [`docs/EASE_PROOF.md`](docs/EASE_PROOF.md). The cross-platform workflow is manual so a reviewer
+in [`docs/EASE_PROOF.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/EASE_PROOF.md). The cross-platform workflow is manual so a reviewer
 can deliberately label a run cold or warm; one matrix run is evidence, not a percentile claim.
 The five-person study now has a privacy-safe append-only operator (`npm run ease:human-study --
-help`) and exact runbook in [`docs/FRESH_HUMAN_USABILITY_STUDY.md`](docs/FRESH_HUMAN_USABILITY_STUDY.md).
+help`) and exact runbook in [`docs/FRESH_HUMAN_USABILITY_STUDY.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/FRESH_HUMAN_USABILITY_STUDY.md).
 That collector does not create participants or close the still-external 0/5 human gate.
 
 The adopted evidence-driven model profiling, executable skill, and capability-routing architecture
-is in [`docs/MODEL_INTELLIGENCE.md`](docs/MODEL_INTELLIGENCE.md). Its implemented P0 commands do not
+is in [`docs/MODEL_INTELLIGENCE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/MODEL_INTELLIGENCE.md). Its implemented P0 commands do not
 make provider calls or certify routing from an empty evidence set.
 
 Factory commands (a `--local-proof` run creates an initial local Git commit so
@@ -261,7 +261,7 @@ Runtime consumers use `@homenshum/nodekit/knowledge-runtime` for accepted-canoni
 Caseflow-bound context packs, durable retrieval receipts, and safe abstention. PostgreSQL-backed
 applications use `@homenshum/nodekit/adapters/postgres/knowledge` with the exported
 `knowledge-migration.sql`. See
-[`docs/KNOWLEDGE_EVOLUTION.md`](docs/KNOWLEDGE_EVOLUTION.md)
+[`docs/KNOWLEDGE_EVOLUTION.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/KNOWLEDGE_EVOLUTION.md)
 for the authority boundary and protected comparison contract.
 
 From a generated or adopted repository carrying the vendored runtime:
@@ -307,11 +307,11 @@ Consumer preparation is read-only unless `--apply` is supplied. Managed capture 
 candidate identity, provider resources, elapsed phases, browser evidence, and cleanup receipts,
 but never creates or deletes those resources. Evidence finalization only signs already-measured
 evidence with a purpose-scoped external key. None of these commands deploys, publishes, submits,
-or certifies adoption. Follow the [managed capture runbook](docs/MANAGED_EVIDENCE_CAPTURE.md)
+or certifies adoption. Follow the [managed capture runbook](https://github.com/HomenShum/NodeKit/blob/main/docs/MANAGED_EVIDENCE_CAPTURE.md)
 for the external operator steps.
 
 The provider-neutral reference contract and its fail-closed Mobbin boundary are documented in
-[`docs/REFERENCE_LOOP.md`](docs/REFERENCE_LOOP.md).
+[`docs/REFERENCE_LOOP.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/REFERENCE_LOOP.md).
 
 ## PostgreSQL adapter
 
@@ -391,10 +391,10 @@ claims do not replace checks bound to the revision you intend to use.
 - [`schemas/nodeagent.event.v1.schema.json`](schemas/nodeagent.event.v1.schema.json) defines the canonical portable event envelope. Applications resolve `nodeagent.event/v1` and `nodeagent.trace/v1` contract references even when an older v1 manifest omits the optional `contracts` block.
 - `nodekit compile` discovers authored files, validates pack references, rejects literal secrets, and emits a full application identity in `.nodeagent/`. The identity binds the agent, packs, integrations, backend, UI/app surface, scripts, workflow definitions, evaluations, fixtures, dependency locks, and recognized deployment configuration.
 - `nodekit graph import` imports a pinned Understand Anything `knowledge-graph.json` as a namespaced, commit-bound code graph snapshot. `nodekit graph query --code` retrieves from that snapshot; it never turns the code graph into a write authority.
-- [`docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md`](docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md) defines the graph authority, privacy, freshness, and NodeGraph/NodeRoom projection boundary.
-- [`docs/KNOWLEDGE_EVOLUTION.md`](docs/KNOWLEDGE_EVOLUTION.md) defines the EvoGraph-R1-inspired, backend-neutral Knowledge Evolution Plane: immutable multimodal evidence, n-ary hyperedges, typed gaps, proposal-only graph mutations, explicit approval, stale-version conflicts, replay, receipts, Harness Gym projection, and evaluation boundaries.
-- [`docs/FRONTEND_SPECIALIST.md`](docs/FRONTEND_SPECIALIST.md) defines the evidence-ranked frontend route, protected product packet, mandatory three-direction tournament, bounded repair, and fresh-user canary.
-- [`docs/EVOLUTION_LEDGER.md`](docs/EVOLUTION_LEDGER.md) defines the permanent reasoning ledger from limitation and failed assumption through invariant, immutable evidence, verifier, and verified downstream adoption.
+- [`docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md) defines the graph authority, privacy, freshness, and NodeGraph/NodeRoom projection boundary.
+- [`docs/KNOWLEDGE_EVOLUTION.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/KNOWLEDGE_EVOLUTION.md) defines the EvoGraph-R1-inspired, backend-neutral Knowledge Evolution Plane: immutable multimodal evidence, n-ary hyperedges, typed gaps, proposal-only graph mutations, explicit approval, stale-version conflicts, replay, receipts, Harness Gym projection, and evaluation boundaries.
+- [`docs/FRONTEND_SPECIALIST.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/FRONTEND_SPECIALIST.md) defines the evidence-ranked frontend route, protected product packet, mandatory three-direction tournament, bounded repair, and fresh-user canary.
+- [`docs/EVOLUTION_LEDGER.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/EVOLUTION_LEDGER.md) defines the permanent reasoning ledger from limitation and failed assumption through invariant, immutable evidence, verifier, and verified downstream adoption.
 - `nodekit create` refuses non-empty targets. `nodekit adopt` writes missing files only, preserves host scripts, and emits a collision receipt.
 - `nodekit repo check` validates ownership declarations, command aliases, migration origins, signature classification, and source rules.
 - `nodekit ecosystem check` checks all active local clones together.
@@ -421,8 +421,8 @@ mechanics for exact browser export/reopen and recursive evidence verification.
 None of those facts proves the mutable working tree is the final candidate. Three real authenticated
 Convex consumers, final-candidate timing and agent matrices, five real humans, live Supabase, an
 isolated deployed preview, real Knowledge Evolution adoption, and independent final verification
-remain separate evidence gates. See [`docs/REMAINING_GAPS.md`](docs/REMAINING_GAPS.md).
+remain separate evidence gates. See [`docs/REMAINING_GAPS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/REMAINING_GAPS.md).
 
-See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the ownership split and migration rules.
-The coordinated consumer commits, pull requests, hosted checks, and known limits are recorded in [`docs/P0_ROLLOUT.md`](docs/P0_ROLLOUT.md) and [`proof/p0-rollout.json`](proof/p0-rollout.json).
-The overnight Casca/Agentic-RL delivery and morning adversarial-review sequence is in [`docs/NODEKIT_ULTRA_V1_HANDOFF.md`](docs/NODEKIT_ULTRA_V1_HANDOFF.md).
+See [`docs/DECISIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/DECISIONS.md) for the ownership split and migration rules.
+The coordinated consumer commits, pull requests, hosted checks, and known limits are recorded in [`docs/P0_ROLLOUT.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/P0_ROLLOUT.md) and [`proof/p0-rollout.json`](https://github.com/HomenShum/NodeKit/blob/main/proof/p0-rollout.json).
+The overnight Casca/Agentic-RL delivery and morning adversarial-review sequence is in [`docs/NODEKIT_ULTRA_V1_HANDOFF.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/NODEKIT_ULTRA_V1_HANDOFF.md).
