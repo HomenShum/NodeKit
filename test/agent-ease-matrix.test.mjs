@@ -17,6 +17,7 @@ import {
   protectedTaskArtifact,
   submissionEvidenceFixtureBytes,
   submissionEvidenceFixtureClosure,
+  submissionFixtureReferenceTime,
 } from "./submission-fixtures.mjs";
 
 const digest = (value) => createHash("sha256").update(value).digest("hex");
@@ -677,8 +678,13 @@ async function createMatrix(root, candidateCommit, sourceHash, packageCandidate)
   return { browserManifestPaths, firstEvidencePath: firstEvidencePath[0], manifestPaths };
 }
 
-function evaluate(root, output, candidateCommit, sourceHash, packageCandidate) {
+function evaluate(root, output, candidateCommit, sourceHash, packageCandidate, referenceTime = submissionFixtureReferenceTime) {
+  // Simulate Date only in this historical evaluator subprocess, never NODE_OPTIONS.
+  const fixtureClock = `data:text/javascript,${encodeURIComponent(
+    `import { mock } from "node:test"; mock.timers.enable({ apis: ["Date"], now: ${referenceTime} });`,
+  )}`;
   return spawnSync(process.execPath, [
+    "--import", fixtureClock,
     path.resolve("scripts", "evaluate-agent-ease.mjs"),
     `--root=${root}`,
     `--output=${output}`,
@@ -735,6 +741,14 @@ test("agent-ease verdict binds all 15 trials to the exact packed candidate and t
     packageVersion: packageCandidate.packageVersion,
   });
   assert.ok(verdict.selectedRuns.every((entry) => entry.applicationHash && entry.configHash));
+
+  // A separate child and output keep the stale failure from reusing a passing verdict.
+  const expiredOutput = path.join(root, "expired-verdict.json");
+  const expired = evaluate(root, expiredOutput, candidateCommit, sourceHash, packageCandidate,
+    submissionFixtureReferenceTime + 32 * 24 * 60 * 60 * 1000);
+  assert.equal(expired.status, 1, `${expired.stdout}\n${expired.stderr}`);
+  assert.match(expired.stderr, /official pricing snapshot is stale/);
+  await assert.rejects(access(expiredOutput), { code: "ENOENT" });
 
   await writeFile(firstEvidencePath, "tampered\n");
   const blocked = evaluate(root, output, candidateCommit, sourceHash, packageCandidate);
