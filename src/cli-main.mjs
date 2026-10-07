@@ -1032,10 +1032,19 @@ async function runDashboard(parsed) {
   }
   const { registry, results } = await collectEcosystem(parsed);
   if (parsed.options.json) {
-    const commit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: registry.root, encoding: "utf8" });
-    const generatorCommit = commit.status === 0 ? commit.stdout.trim() : null;
+    const commit = spawnSync("git", ["rev-parse", "--show-toplevel", "HEAD"], {
+      cwd: registry.root,
+      encoding: "utf8",
+      timeout: 2_000,
+      maxBuffer: 16 * 1024,
+      windowsHide: true,
+    });
+    const [gitRoot, revision] = commit.status === 0 ? commit.stdout.trim().split(/\r?\n/u) : [];
+    const registryCommit = gitRoot && path.resolve(gitRoot) === path.resolve(registry.root)
+      ? revision ?? null
+      : null;
     console.log(JSON.stringify(
-      renderDashboardJson(results, registry, { generatedAt: new Date().toISOString(), generatorCommit }),
+      renderDashboardJson(results, registry, { generatedAt: new Date().toISOString(), registryCommit }),
       null,
       2,
     ));

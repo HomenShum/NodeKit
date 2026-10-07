@@ -4,6 +4,15 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-07 - Keep dashboard onboarding tied to its actual source
+
+Correct six CLI symbol references after the dashboard change and link the JSON guide from the
+newcomer entry point. Explain failed-row diagnostics, inspected-registry identity and static-only
+summaries. Preserve application, authority and production verification as separate requirements.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `CHANGELOG/cli/dashboard.md`, `CHANGELOG/library/dashboard.md`
+
 ## 2026-08-02 - Reconcile NodeVideo's surviving product boundaries
 
 Make three previously implied field rules explicit without adding another framework or principle:

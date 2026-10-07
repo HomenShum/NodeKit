@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
 import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -7,7 +7,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { buildRepoMap } from "../src/lib/repo-map.mjs";
-
+import { renderDashboard, renderDashboardJson } from "../src/lib/dashboard.mjs";
 const run = promisify(execFile);
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = path.join(REPO, "src", "cli.mjs");
@@ -17,9 +17,9 @@ const CLI = path.join(REPO, "src", "cli.mjs");
 async function cli(args, cwd = REPO) {
   try {
     const { stdout } = await run(process.execPath, [CLI, ...args], { cwd, maxBuffer: 16 * 1024 * 1024 });
-    return { code: 0, out: stdout };
+    return { code: 0, out: stdout, stdout };
   } catch (error) {
-    return { code: error.code ?? 1, out: `${error.stdout ?? ""}${error.stderr ?? ""}` };
+    return { code: error.code ?? 1, out: `${error.stdout ?? ""}${error.stderr ?? ""}`, stdout: error.stdout ?? "" };
   }
 }
 
@@ -154,4 +154,180 @@ test("the repository map is derived from source, so a newly added command appear
   // The committed map must not be stale relative to source.
   const committed = JSON.parse(await readFile(path.join(REPO, "repo-map.json"), "utf8"));
   assert.deepEqual(committed, map, "repo-map.json is stale — run `npm run repo:map`");
+});
+
+// Persona: a maintainer feeds repository snapshots to a coding agent. Static declarations
+// and the checker verdict must remain distinct, including when the summary is complete.
+function makeResult({ name, passed = true, drift = false, proof = true, noKey = "certified", errors = [], commandPassed = true }) {
+  return {
+    name,
+    passed,
+    errors,
+    checks: [{ id: "command:build", passed: commandPassed }],
+    contractFindings: [{ declared: !drift }],
+    sourceFindings: [{ excepted: true }],
+    manifest: {
+      repository: `HomenShum/${name}`,
+      lifecycle: "production",
+      support: "active",
+      canonicalFor: [],
+      noKey: { status: noKey },
+      proof: proof ? { receiptSchema: "some.schema/v1" } : {},
+    },
+  };
+}
+
+const registry = {
+  root: "/tmp/registry",
+  repositoryCatalog: {
+    repositories: [
+      { name: "alpha", lifecycle: "production", role: "core" },
+      { name: "beta", lifecycle: "preview", role: "extension" },
+    ],
+  },
+  ownership: { concepts: {} },
+};
+
+const results = [
+  makeResult({ name: "alpha" }),
+  makeResult({ name: "beta", drift: true, proof: false, noKey: "not-applicable" }),
+];
+
+const meta = { generatedAt: "2026-09-12T00:00:00.000Z", registryCommit: "deadbeef" };
+
+test("renderDashboardJson has the declared envelope", () => {
+  const json = renderDashboardJson(results, registry, meta);
+  assert.equal(json.schemaVersion, "nodekit.dashboard/v1");
+  assert.equal(json.generatedAt, meta.generatedAt);
+  assert.equal(json.registryCommit, meta.registryCommit);
+  assert.equal(json.rows.length, 2);
+});
+
+test("renderDashboardJson rows match the markdown table row-for-row", () => {
+  const markdown = renderDashboard(results, registry);
+  const json = renderDashboardJson(results, registry, meta);
+  const tableLines = markdown.split("\n").filter((line) => line.startsWith("| ") && !line.startsWith("| Repo") && !line.includes("---"));
+
+  assert.equal(tableLines.length, json.rows.length);
+  for (const [index, row] of json.rows.entries()) {
+    const cells = tableLines[index].split("|").map((cell) => cell.trim()).filter(Boolean);
+    const [name, lifecycle, role, , noKey, proofSchema, drift, p0] = cells;
+    assert.equal(row.repo, name);
+    assert.equal(row.lifecycle, lifecycle);
+    assert.equal(row.role, role);
+    assert.equal(row.noKey, noKey);
+    assert.equal(row.proofSchema, proofSchema);
+    assert.equal(String(row.drift), drift);
+    assert.equal(`${row.p0.met}/${row.p0.total}`, p0);
+  }
+});
+
+test("nodekit dashboard --json --write is rejected before touching the filesystem", () => {
+  const run = spawnSync(process.execPath, [CLI, "dashboard", "--json", "--write"], {
+    encoding: "utf8",
+  });
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /--json cannot be combined with --write/);
+});
+
+test("a maintainer sees validation failures even when all static summary criteria are met", () => {
+  const failing = makeResult({
+    name: "alpha",
+    passed: false,
+    errors: ["environment.contractVersion must be nodeplatform.env/v1"],
+  });
+  const json = renderDashboardJson([results[0], failing], registry, meta);
+  assert.equal(json.passed, false);
+  assert.equal(json.rows[0].passed, true);
+  assert.deepEqual(json.rows[0].errors, []);
+  assert.equal(json.rows[1].passed, false);
+  assert.deepEqual(json.rows[1].errors, failing.errors);
+  assert.equal(json.rows[1].commands, "PASS");
+  assert.deepEqual(json.rows[1].p0, { met: 8, total: 8 });
+});
+
+test("an agent keeps failed commands and missing checkouts visible across repeated snapshots", () => {
+  const commandFailure = makeResult({
+    name: "beta",
+    passed: false,
+    commandPassed: false,
+    errors: ["required command build is not runnable"],
+  });
+  const missing = {
+    name: "missing",
+    passed: false,
+    errors: ["repository checkout is missing"],
+    checks: [],
+    contractFindings: [],
+    sourceFindings: [],
+    manifest: null,
+  };
+  const input = [results[0], commandFailure, missing];
+  for (let snapshot = 0; snapshot < 12; snapshot += 1) {
+    const json = renderDashboardJson(input, registry, meta);
+    assert.equal(json.passed, false);
+    assert.deepEqual(json.rows.map((row) => row.passed), [true, false, false]);
+    assert.deepEqual(json.rows.map((row) => row.commands), ["PASS", "FAIL", "FAIL"]);
+    assert.deepEqual(json.rows[2].p0, { met: 0, total: 8 });
+    assert.deepEqual(json.rows[2].errors, missing.errors);
+    assert.deepEqual(json.rows[1].errors, commandFailure.errors);
+    assert.equal(json.rows.length, input.length);
+  }
+});
+
+test("a burst of operator scripts receives valid failure JSON and the inspected registry revision", async () => {
+  const workspace = await mkdtemp(path.join(os.tmpdir(), "nodekit-dashboard-missing-"));
+  try {
+    const expected = await run("git", ["rev-parse", "HEAD"], {
+      cwd: REPO, timeout: 2_000, maxBuffer: 16 * 1024,
+    });
+    const args = ["dashboard", "--registry-root", REPO, "--workspace", workspace, "--json"];
+    const burst = await Promise.all(Array.from({ length: 4 }, () => cli(args)));
+    for (const response of burst) {
+      assert.equal(response.code, 1);
+      const json = JSON.parse(response.stdout);
+      assert.equal(json.passed, false);
+      assert.equal(json.registryCommit, expected.stdout.trim());
+      assert.ok(!("generatorCommit" in json));
+      assert.ok(json.rows.length > 0);
+      assert.ok(json.rows.every((row) => !row.passed && row.errors.some((error) => error.includes("repository checkout is missing"))));
+    }
+    const first = JSON.parse(burst[0].stdout).rows;
+    for (let snapshot = 0; snapshot < 3; snapshot += 1) {
+      const response = await cli(args);
+      assert.equal(response.code, 1);
+      assert.deepEqual(JSON.parse(response.stdout).rows, first);
+    }
+  } finally {
+    await rm(workspace, { recursive: true, force: true });
+  }
+});
+
+test("a downloaded registry never borrows the containing application's Git revision", async () => {
+  const app = await mkdtemp(path.join(os.tmpdir(), "nodekit-dashboard-context-"));
+  const downloaded = path.join(app, "downloaded-registry");
+  try {
+    await mkdir(downloaded);
+    for (const file of ["architecture.yaml", "ownership.yaml", "repositories.yaml"]) {
+      await writeFile(path.join(downloaded, file), await readFile(path.join(REPO, file)));
+    }
+    const args = ["dashboard", "--registry-root", downloaded, "--workspace", path.join(app, "missing"), "--json"];
+    const unpacked = await cli(args);
+    assert.equal(unpacked.code, 1);
+    assert.equal(JSON.parse(unpacked.stdout).registryCommit, null);
+    const gitOptions = { timeout: 2_000, maxBuffer: 16 * 1024 };
+    await run("git", ["init", "--quiet", app], gitOptions);
+    await run("git", [
+      "-C", app, "-c", "user.name=NodeKit fixture", "-c", "user.email=fixture@example.invalid",
+      "-c", "commit.gpgsign=false", "commit", "--allow-empty", "--quiet", "-m", "Fixture application",
+    ], gitOptions);
+    const nested = await cli(args);
+    assert.equal(nested.code, 1);
+    const json = JSON.parse(nested.stdout);
+    assert.equal(json.registryCommit, null);
+    assert.equal(json.passed, false);
+    assert.ok(json.rows.every((row) => !row.passed && row.errors.length > 0));
+  } finally {
+    await rm(app, { recursive: true, force: true });
+  }
 });

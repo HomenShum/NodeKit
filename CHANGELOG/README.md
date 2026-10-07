@@ -5,6 +5,8 @@ rewritten after release.
 
 ## Index
 
+- [`cli/dashboard.md`](cli/dashboard.md) - machine-readable repository checks and bounded registry revision lookup
+- [`library/dashboard.md`](library/dashboard.md) - honest checker verdicts beside static dashboard summaries
 - [`docs/onboarding.md`](docs/onboarding.md) - newcomer orientation and idea-to-reality operating doctrine
 - [`package/public-docs.md`](package/public-docs.md) - documentation shipped with the npm package
 - [`package/agent-skills.md`](package/agent-skills.md) - coding-agent policy and projected NodeKit skills

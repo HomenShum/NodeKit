@@ -32,13 +32,16 @@ export function renderDashboardJson(results, registry, meta) {
   return {
     schemaVersion: "nodekit.dashboard/v1",
     generatedAt: meta.generatedAt,
-    generatorCommit: meta.generatorCommit,
+    registryCommit: meta.registryCommit,
+    passed: results.every((result) => result.passed),
     rows: results.map((result) => {
       const name = result.manifest ? result.manifest.repository.split("/").at(-1) : result.name;
       const catalog = registry.repositoryCatalog.repositories.find((repo) => repo.name === name);
       const score = certificationScore(result);
       return {
         repo: name,
+        passed: result.passed,
+        errors: result.errors,
         lifecycle: catalog?.lifecycle ?? null,
         role: catalog?.role ?? null,
         commands: setupSummary(result),
