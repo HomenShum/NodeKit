@@ -427,33 +427,40 @@ async function execute(program, args, repoRoot, timeoutMs, events) {
   });
 
   const controller = new AbortController();
-  const child = spawn(program, args, {
-    cwd: repoRoot,
-    shell: false,
-    signal: controller.signal,
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-  });
-  child.stdout.on("data", (chunk) => stdout.append(chunk));
-  child.stderr.on("data", (chunk) => stderr.append(chunk));
-  child.on("error", (error) => {
+  let child;
+  try {
+    child = spawn(program, args, {
+      cwd: repoRoot,
+      shell: false,
+      signal: controller.signal,
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    });
+  } catch (error) {
+    // Some OS launch failures throw before a ChildProcess exists. They need the
+    // same bounded failure receipt as the asynchronous error event.
     spawnError = error;
-  });
-
-  let forceTimer;
-  const timeoutTimer = setTimeout(() => {
-    timedOut = true;
-    controller.abort();
-    forceTimer = setTimeout(() => child.kill("SIGKILL"), 1_000);
-    forceTimer.unref();
-  }, timeoutMs);
-  timeoutTimer.unref();
-
-  const { code, signal } = await new Promise((resolve) => {
-    child.once("close", (exitCode, exitSignal) => resolve({ code: exitCode, signal: exitSignal }));
-  });
-  clearTimeout(timeoutTimer);
-  clearTimeout(forceTimer);
+  }
+  let code = null;
+  let signal = null;
+  if (child) {
+    child.stdout.on("data", (chunk) => stdout.append(chunk));
+    child.stderr.on("data", (chunk) => stderr.append(chunk));
+    child.on("error", (error) => { spawnError = error; });
+    let forceTimer;
+    const timeoutTimer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+      forceTimer = setTimeout(() => child.kill("SIGKILL"), 1_000);
+      forceTimer.unref();
+    }, timeoutMs);
+    timeoutTimer.unref();
+    ({ code, signal } = await new Promise((resolve) => {
+      child.once("close", (exitCode, exitSignal) => resolve({ code: exitCode, signal: exitSignal }));
+    }));
+    clearTimeout(timeoutTimer);
+    clearTimeout(forceTimer);
+  }
   const endedAtMs = Date.now();
   const status = timedOut ? "timeout" : !spawnError && code === 0 ? "completed" : "failed";
   addEvent(events, {

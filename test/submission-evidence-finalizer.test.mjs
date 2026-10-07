@@ -5,6 +5,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import "./historical-pricing-clock.fixture.mjs";
 import {
   FINALIZABLE_EXTERNAL_GATES,
   FINALIZABLE_SUBMISSION_GATES,

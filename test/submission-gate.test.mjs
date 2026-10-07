@@ -3,6 +3,7 @@ import { link, mkdtemp, mkdir, open, cp, readFile, rm, symlink, writeFile } from
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import "./historical-pricing-clock.fixture.mjs";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import {
