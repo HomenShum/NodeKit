@@ -5,6 +5,7 @@ import { mkdtemp, mkdir, readFile, rename, symlink, writeFile } from "node:fs/pr
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import "./historical-pricing-clock.fixture.mjs";
 import {
   canonicalSubmissionEvidence,
   prepareSubmissionManifest,

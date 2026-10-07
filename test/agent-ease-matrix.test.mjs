@@ -5,6 +5,7 @@ import { access, cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/pro
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import "./historical-pricing-clock.fixture.mjs";
 import { independentlyPackCandidate } from "../scripts/run-agent-ease-matrix.mjs";
 import {
   PROTECTED_BROWSER_STATES,
@@ -679,6 +680,7 @@ async function createMatrix(root, candidateCommit, sourceHash, packageCandidate)
 
 function evaluate(root, output, candidateCommit, sourceHash, packageCandidate) {
   return spawnSync(process.execPath, [
+    "--import", new URL("./historical-pricing-clock.fixture.mjs", import.meta.url).href,
     path.resolve("scripts", "evaluate-agent-ease.mjs"),
     `--root=${root}`,
     `--output=${output}`,

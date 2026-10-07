@@ -432,17 +432,23 @@ test("an assumption that generalises must name the dimension its evidence measur
   }
 });
 
-test("every assumption shipped in this repository names its measured dimension", async () => {
+test("every current assumption names its measured dimension and exact historical authorship stays explicitly unscoped", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const dir = path.resolve("evolution/assumptions");
   const files = (await readdir(dir)).filter((f) => f.endsWith(".json"));
   assert.ok(files.length > 0, "a pass over zero assumptions measures nothing");
+  const verdict = await verifyEvolutionLedger(path.resolve("."));
+  assert.equal(verdict.passed, true, verdict.issues.join("\n"));
   let generalising = 0;
   for (const file of files) {
     const doc = JSON.parse(await readFile(path.join(dir, file), "utf8"));
     if (!["supported", "scope-limited"].includes(doc.status)) continue;
     generalising += 1;
-    assert.ok(doc.dimensionsTested?.length > 0, `${doc.id} generalises without naming what was measured`);
+    if (!(doc.dimensionsTested?.length > 0)) {
+      const historical = verdict.historicalQualifications.find((entry) => entry.file === `evolution/assumptions/${file}`);
+      assert.equal(historical?.currentDimensionsCertified, false, `${doc.id} has no verified authored contract`);
+      assert.ok(verdict.warnings.some((warning) => warning.includes(doc.id) && warning.includes("unknown")));
+    }
   }
   assert.ok(generalising > 0, "no generalising assumption was checked, so this asserts nothing");
 });

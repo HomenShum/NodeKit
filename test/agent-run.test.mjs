@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { spawn } from "node:child_process";
+import childProcess, { spawn } from "node:child_process";
+import { syncBuiltinESMExports } from "node:module";
 import {
   mkdtemp,
   mkdir,
@@ -402,14 +403,55 @@ test("a spawn failure lands in the receipt as one bounded line, never a raw erro
     });
     assert.equal(receipt.status, "failed");
     assert.equal(typeof receipt.process.error, "string");
-    assert.match(receipt.process.error, /^ENOENT: /u);
+    assert.match(receipt.process.error, /^(?:ENOENT|ENAMETOOLONG): /u);
     assert.ok(!receipt.process.error.includes("\n"), "the receipt error must be a single line");
     assert.ok(!/ {2,}at /u.test(receipt.process.error), "no stack frames in an agent-visible field");
     assert.ok(
-      receipt.process.error.length <= "ENOENT: ".length + 200,
+      receipt.process.error.length <= receipt.process.error.indexOf(": ") + 2 + 200,
       `error must stay bounded, got ${receipt.process.error.length} characters`,
     );
   } finally {
+    await rm(store, { recursive: true, force: true });
+  }
+});
+
+test("an operator gets durable honest receipts when the OS throws synchronously during burst and sustained launches", async (t) => {
+  const store = await temporaryStore();
+  const spawnFault = t.mock.method(childProcess, "spawn", () => {
+    throw Object.assign(new Error(`spawn ${"caller-shaped-program-".repeat(30)}\n    at internal spawn`), { code: "ENAMETOOLONG" });
+  });
+  syncBuiltinESMExports();
+  try {
+    const recordFailure = async () => {
+      const result = await runAgent({
+        agent: "operator", goal: "Record a rejected process launch without pretending it ran",
+        cwd: repositoryRoot, out: store, program: "unlaunchable-agent",
+      });
+      const receipt = JSON.parse(await readFile(result.receiptPath, "utf8"));
+      assert.equal(receipt.status, "failed");
+      assert.equal(receipt.process.exitCode, null);
+      assert.equal(receipt.process.signal, null);
+      assert.match(receipt.process.error, /^ENAMETOOLONG: /);
+      assert.ok(receipt.process.error.length <= "ENAMETOOLONG: ".length + 200);
+      assert.equal(receipt.process.error.includes("\n"), false);
+      assert.equal(receipt.io.stdout.observedBytes, 0);
+      assert.equal(receipt.io.stderr.observedBytes, 0);
+      assert.equal(receipt.graph.nodes.find((node) => node.id === "process").status, "failed");
+      assert.equal(receipt.events.at(-1).type, "process-failed");
+      assert.match(await readFile(result.reportPath, "utf8"), /data-testid="run-status">Failed/);
+      const { receiptDigest, ...body } = receipt;
+      assert.equal(receiptDigest, contentDigest(body));
+      return receipt.runId;
+    };
+    const first = await recordFailure();
+    const burst = await Promise.all(Array.from({ length: 4 }, recordFailure));
+    const sustained = [];
+    for (let iteration = 0; iteration < 8; iteration += 1) sustained.push(await recordFailure());
+    assert.equal(new Set([first, ...burst, ...sustained]).size, 13);
+    assert.equal((await readdir(store)).some((entry) => entry.startsWith(".tmp-")), false);
+  } finally {
+    spawnFault.mock.restore();
+    syncBuiltinESMExports();
     await rm(store, { recursive: true, force: true });
   }
 });

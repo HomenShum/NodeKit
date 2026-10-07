@@ -1,5 +1,7 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { promisify } from "node:util";
+import { createSchemaAjv } from "./schema-validation.mjs";
 
 const run = promisify(execFile);
 
@@ -78,6 +80,46 @@ const short = (value) => {
   return text === undefined ? "(absent)" : text.length > 90 ? `${text.slice(0, 87)}...` : text;
 };
 
+// Read the contract that actually authored an immutable claim. This is not an
+// admission waiver: new records still use the current schema and signed authority.
+const DIMENSIONS_EPOCH = "9c321f94861000a45a9eddb50e50c8e77ada8c70";
+const AUTHORED_SCHEMA_SHA256 = "4d2998bf89b4eb2c1caf3cf5b2a95b600f68ed1565b0cb87a4aca2837526922f";
+const MAX_ORIGIN_RECORDS = 2048;
+
+async function qualifyHistoricalAssumption(git, head, file, introducedIn, original) {
+  if (original.schemaVersion !== "nodekit.assumption/v1"
+    || !["supported", "scope-limited"].includes(original.status)
+    || Object.hasOwn(original, "dimensionsTested")) return null;
+  try {
+    if ((await git(["rev-parse", "--is-shallow-repository"])).stdout.trim() !== "false") return null;
+    // A deletion/readdition or moved path cannot borrow an earlier authored contract.
+    const history = (await git(["log", "--full-history", "--no-renames", "--format=commit:%H", "--name-status", head, "--", file])).stdout;
+    let commit;
+    const additions = [];
+    for (const line of history.split(/\r?\n/).filter(Boolean)) {
+      if (line.startsWith("commit:")) { commit = line.slice(7); continue; }
+      const [status, changedPath, ...extra] = line.split("\t");
+      if (!/^[AM]$/.test(status) || changedPath !== file || extra.length || !/^[a-f0-9]{40}$/.test(commit ?? "")) return null;
+      if (status === "A") additions.push(commit);
+    }
+    if (additions.length !== 1 || additions[0] !== introducedIn || introducedIn === DIMENSIONS_EPOCH) return null;
+    await git(["merge-base", "--is-ancestor", introducedIn, DIMENSIONS_EPOCH]);
+    await git(["merge-base", "--is-ancestor", DIMENSIONS_EPOCH, head]);
+    const schemaBytes = (await git(["show", `${introducedIn}:schemas/nodekit.assumption.v1.schema.json`])).stdout;
+    if (createHash("sha256").update(schemaBytes).digest("hex") !== AUTHORED_SCHEMA_SHA256) return null;
+    if (!createSchemaAjv().compile(JSON.parse(schemaBytes))(original)) return null;
+    return {
+      id: original.id, file, introducedIn, observedHead: head,
+      originalSchemaSha256: AUTHORED_SCHEMA_SHA256,
+      currentDimensionsCertified: false,
+    };
+  } catch {
+    // Unknown provenance owes the current contract. No date, version, id or caller
+    // flag can turn an unavailable history read into a historical qualification.
+    return null;
+  }
+}
+
 /**
  * @param {string} repoRoot
  * @param {Array<{file: string, record: object}>} loaded repo-relative path plus the record
@@ -86,12 +128,25 @@ const short = (value) => {
  *   reports on the bytes on disk, so immutability has to be judged on those same bytes.
  */
 export async function detectLedgerMutations(repoRoot, loaded) {
-  const git = (args) => run("git", args, { cwd: repoRoot, maxBuffer: 64 * 1024 * 1024 });
+  if (loaded.length > MAX_ORIGIN_RECORDS) throw new Error(`ledger origin inspection exceeds ${MAX_ORIGIN_RECORDS} records`);
+  const deadline = Date.now() + 30000;
+  const git = (args) => {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw new Error("ledger origin inspection budget exhausted");
+    return run("git", args, { cwd: repoRoot, maxBuffer: 2 * 1024 * 1024, timeout: Math.min(5000, remaining) });
+  };
+  const historicalQualifications = [];
+  const inspectionIssues = [];
+  let observedHead;
 
   try {
     await git(["rev-parse", "--is-inside-work-tree"]);
-  } catch {
-    return { gitAvailable: false, checked: 0, mutations: [], bindingRepairs: [] };
+    observedHead = (await git(["rev-parse", "HEAD^{commit}"])).stdout.trim();
+  } catch (error) {
+    const notRepository = error?.code === 128 && !error.killed && !error.signal
+      && /^fatal: not a git repository \(or any of the parent directories\): \.git\r?\n$/.test(error.stderr ?? "");
+    if (!notRepository) inspectionIssues.push("ledger origin inspection failed before its Git history could be pinned");
+    return { gitAvailable: false, checked: 0, mutations: [], bindingRepairs: [], historicalQualifications, inspectionIssues };
   }
 
   const mutations = [];
@@ -102,20 +157,24 @@ export async function detectLedgerMutations(repoRoot, loaded) {
     let introducedIn;
     try {
       // The oldest commit touching this path is where it entered the ledger.
-      const { stdout } = await git(["log", "--diff-filter=A", "--format=%H", "--", file]);
+      const { stdout } = await git(["log", "--diff-filter=A", "--format=%H", observedHead, "--", file]);
       introducedIn = stdout.trim().split("\n").filter(Boolean).pop();
-    } catch { continue; }
+    } catch { inspectionIssues.push(`${current.id ?? file} ledger origin history could not be inspected`); continue; }
     if (!introducedIn) continue;                       // untracked, or never committed
 
     let original;
     try {
       const { stdout } = await git(["show", `${introducedIn}:${file}`]);
       original = JSON.parse(stdout);
-    } catch { continue; }                              // unreadable or not JSON at that rev
+    } catch { inspectionIssues.push(`${current.id ?? file} original ledger payload could not be inspected`); continue; }
 
     checked += 1;
     const changes = diffPaths(original, current);
-    if (changes.length === 0) continue;
+    if (changes.length === 0) {
+      const qualification = await qualifyHistoricalAssumption(git, observedHead, file, introducedIn, original);
+      if (qualification) historicalQualifications.push(qualification);
+      continue;
+    }
 
     const entry = {
       id: current.id ?? file,
@@ -128,20 +187,21 @@ export async function detectLedgerMutations(repoRoot, loaded) {
     else bindingRepairs.push(entry);
   }
 
-  return { gitAvailable: true, checked, mutations, bindingRepairs };
+  return { gitAvailable: true, checked, mutations, bindingRepairs, historicalQualifications, inspectionIssues };
 }
 
 /** Human-readable issue lines for the verify report. */
 export function describeMutations(result) {
   if (!result.gitAvailable) {
-    return { issues: [], warnings: ["ledger immutability was NOT checked: not a git repository, so no record could be compared against the revision that introduced it"] };
+    return { issues: result.inspectionIssues ?? [], warnings: result.inspectionIssues?.length ? []
+      : ["ledger immutability was NOT checked: not a git repository, so no record could be compared against the revision that introduced it"] };
   }
-  const issues = result.mutations.map((m) => {
+  const issues = [...(result.inspectionIssues ?? []), ...result.mutations.map((m) => {
     const detail = m.claimChanges
       .map((c) => `${c.path}: ${short(c.from)} -> ${short(c.to)}`)
       .join("; ");
     return `${m.id} was edited after it was committed in ${m.introducedIn}; ledger authority is append-or-supersede, so supersede instead of rewriting the claim [${detail}]`;
-  });
+  })];
   const warnings = result.bindingRepairs.map((m) =>
     `${m.id} had its binding repaired after ${m.introducedIn} (${m.bindingChanges.map((c) => c.path).join(", ")}); allowed, because a record cannot name the commit that will contain it`);
   return { issues, warnings };
