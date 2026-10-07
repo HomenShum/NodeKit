@@ -1,8 +1,9 @@
-# START HERE — one real action, traced in the order the code runs
+# START HERE — trace create, then the generated application
 
-This page is not an architecture essay. It follows a single command through the
-codebase in **execution order**, one step per stage, so a new engineer can put a
-breakpoint anywhere in the chain and know what came before it and what comes next.
+Use this page to find where a new engineer should place a breakpoint. It traces
+the `create` command through scaffolding and compilation, then follows the
+generated application's runtime. Tools and tests have separate entry points;
+they are not all called by `create`.
 
 The root [`START_HERE.md`](../START_HERE.md) orients you to *what this project is*.
 This page tells you *where the code is*. Read that one first if the words below
@@ -27,7 +28,12 @@ The command that starts all of this:
 node src/cli.mjs create ./my-app --brief "Track salon appointments"
 ```
 
-Everything below is what happens when you press Enter, in order.
+Steps 1–4 run when you press Enter. Steps 5, 7, and 8 describe the generated
+application after you run its demo or web server and make a decision. Step 6 is
+the optional `atlas serve --mcp` entry point, Step 9 explains failure handling,
+and Step 10 is invoked by `npm test` in this repository. Adding `--local-proof`
+to `create` also runs the generated demo, evaluation, and proof scripts; it does
+not start the web server, optional MCP server, or this repository's test suite.
 
 > **One thing to know before you read.** This repository is the *factory*, not the
 > product. It generates applications. Some steps below therefore live in
@@ -96,7 +102,7 @@ async function main() {
 **Input** — `process.argv` minus `node` and the script path.
 **Output** — `parsed.positional` (the words) and `parsed.options` (the `--flags`).
 **Failure behavior** — an unrecognised command reaches the final `throw`, which
-the process-level handler in Step 8 turns into `nodekit: unknown command …` and
+the process-level handler in Step 9 turns into `nodekit: unknown command …` and
 exit code 1. No files have been touched at this point.
 **Next** — `runCreate` in the same file, Step 3.
 
@@ -171,7 +177,8 @@ const ajv = new Ajv2020({ allErrors: true, strict: false, ...options });
 **Failure behavior** — a schema violation throws with the offending JSON pointer.
 The directory exists at this point, so a failure here leaves a partially built
 application; the recovery is to delete the directory and re-run.
-**Next** — the generated application's own agent loop, Step 5.
+**Next** — `create` returns after compilation. Run the generated application's
+demo or web server to reach Step 5; `--local-proof` also invokes its demo.
 
 > **Known loosening, recorded rather than hidden.** `strict: false` above means Ajv
 > accepts unknown keywords and silently ignores unrecognised `format` values. A
@@ -208,7 +215,8 @@ export const stages = Object.freeze([
 **Output** — a pending proposal and a run parked on the `review` stage.
 **Failure behavior** — the agent cannot fail into a mutation. Every path out of
 `propose` either produces a proposal or throws; neither changes the saved artifact.
-**Next** — either an MCP tool call (Step 6) or a human decision (Step 7).
+**Next** — a human decision reaches Step 7. Step 6 describes a separate, optional
+tool server; the generated workflow does not start it.
 
 ---
 
@@ -243,7 +251,8 @@ export const ATLAS_MCP_TOOLS = Object.freeze([
 **Output** — a JSON-RPC result. `tools/list` returns the frozen array above.
 **Failure behavior** — a failing tool returns `{ isError: true }` with the message
 as text, rather than crashing the server. The agent sees the error and can retry.
-**Next** — persistence, Step 7.
+**Next** — the RPC response returns to the caller. Step 7 follows the generated
+application's decision path, not this Atlas retrieval call.
 
 ---
 
@@ -339,7 +348,7 @@ main().catch((error) => {
 **Output** — one line on stderr, exit code 1 (or a command-specific code).
 **Failure behavior** — this *is* the failure behavior. Nothing above it is allowed
 to call `process.exit` directly, so buffered stdout still flushes.
-**Next** — the tests, Step 10.
+**Next** — invoke the tests separately, as described in Step 10.
 
 ---
 
@@ -368,15 +377,17 @@ three to run first when something is wrong:
 *generated* index (`repo-map.json`, `behavior-index.json`) against the source and
 tell you to run `npm run repo:map` / `npm run behavior:index`. That is not a broken
 test; it means you added or removed a module and the committed map is stale.
-**Next** — nothing. That is the whole chain.
+**Next** — nothing. This completes the walkthrough of these separate entry points.
 
 ---
 
 ## Where the stages you might expect are, if they are not above
 
-- **There is no login, session, or multi-tenant request path.** This is a CLI and a
-  library. The generated application's web server binds to localhost and has no
-  authentication. Do not deploy it as-is.
+- **The default generated demo has no login or authenticated tenant boundary.**
+  Its web server binds to localhost and has no authentication. Do not deploy it
+  as-is. The library's separate [native-agent session identity contract](NATIVE_AGENT_SESSION_IDENTITY.md)
+  supports workspace/session/checkpoint continuity; it does not add authentication
+  to this demo.
 - **There is no streaming.** Progress reaches the user as ordinary stdout lines and
   ordinary HTTP responses. There is no SSE or WebSocket anywhere in `src/`.
 - **There is no ORM or migration runner in the default path.** The default runtime
@@ -388,6 +399,6 @@ test; it means you added or removed a module and the committed map is stale.
 - Follow the same path interactively: the `.tours/` CodeTour files open in VS Code
   with the [CodeTour extension](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)
   and step through live source rather than the copies above.
-- `docs/codebase/STRUCTURE.md` — what each top-level directory is for.
-- `docs/codebase/CONCERNS.md` — what is known to be wrong, with the command that
-  reproduces each one.
+- [Codebase structure](codebase/STRUCTURE.md) — what each top-level directory is for.
+- [Historical concerns](codebase/CONCERNS.md) — recorded findings and commands to
+  recheck on your revision.

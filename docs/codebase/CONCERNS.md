@@ -1,10 +1,11 @@
 # CONCERNS
 
-Known problems, each with the command that reproduces it and the reason it is still
-open. Nothing here is speculative — if it is listed, it was measured on this commit.
+Historical findings from the 2026-08-13 onboarding pass, with the commands and
+reasons recorded then. Re-run the relevant check on your revision before treating
+a finding as still open; this page is not a current health report.
 
 `deferred.yaml` is the older, longer ledger of the same kind. This page is the
-subset a new engineer will trip over in their first week.
+subset selected for a new engineer's first week during that pass.
 
 ---
 
@@ -72,6 +73,12 @@ broken checkout rather than a missing workspace.
 ---
 
 ## 3. `npm run evolution:verify` exits 1 on an unmodified clean checkout
+
+**Historical transcript.** Do not use this failure as a reason to bypass the
+verifier. Ledger verification and pull-request material-change coverage are
+separate steps in [the Evolution workflow](../../.github/workflows/evolution.yml).
+A passing ledger check does not establish material-change coverage, and tests
+replace neither check.
 
 **Reproduce:** clone, `npm ci`, change nothing, `npm run evolution:verify`
 

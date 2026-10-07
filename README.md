@@ -18,7 +18,7 @@ cd ../my-app && npm install && npm run demo
 That is a working agent application with a compiled definition, deterministic
 fixtures, and a no-key demo — 40 seconds end to end when this section was
 written, `"passed": true` from the demo's own output, and it is the same
-path the factory acceptance proves on every release. When it works, run
+creation path exercised by the factory acceptance gate. When it works, run
 `npm run proof` inside your app to see the receipt trail. **Coding-agent users skip all of this:**
 
 ```
@@ -38,21 +38,23 @@ itself. You do not need it to build your first app. Unfamiliar terms are in
 
 Read these instead, in this order. They exist so a new engineer can run, trace and
 change this repository without the person who built it sitting beside them — the
-[HUMAN-READY gate](https://github.com/HomenShum/NodeKit/blob/main/templates/promotion/HUMAN_READY.md) is the standard they answer to.
+[HUMAN-READY gate](templates/promotion/HUMAN_READY.md) is the standard they answer to.
 
 | Read | For |
 |---|---|
-| [`docs/START_HERE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) | One real command traced through the code **in the order it executes**, ten steps, entry to tests |
-| [`.tours/`](https://github.com/HomenShum/NodeKit/tree/main/.tours) | The same three walkthroughs inside VS Code, pointing at live source ([CodeTour](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)) |
-| [`docs/codebase/STRUCTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STRUCTURE.md) | Which of the 2,118 files are code (207) and which are records |
-| [`docs/codebase/ARCHITECTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/ARCHITECTURE.md) | The one invariant everything else is downstream of |
-| [`docs/codebase/CONCERNS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md) | What is known to be wrong, each with the command that reproduces it |
-| [`docs/SIMPLIFICATION_REPORT.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/SIMPLIFICATION_REPORT.md) | Before/after measurements for the last reduction pass, with every evidence command |
+| [`docs/START_HERE.md`](docs/START_HERE.md) | Trace `create`, then the generated app, optional tools, and separately invoked tests |
+| [`.tours/`](.tours) | The same three walkthroughs inside VS Code, pointing at live source ([CodeTour](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)) |
+| [`docs/codebase/STRUCTURE.md`](docs/codebase/STRUCTURE.md) | Find implementation, templates, contracts, and historical records |
+| [`docs/codebase/ARCHITECTURE.md`](docs/codebase/ARCHITECTURE.md) | The one invariant everything else is downstream of |
+| [`docs/codebase/CONCERNS.md`](docs/codebase/CONCERNS.md) | Historical findings and reproduction commands; recheck them on your revision |
+| [`docs/SIMPLIFICATION_REPORT.md`](docs/SIMPLIFICATION_REPORT.md) | Before/after measurements for the last reduction pass, with every evidence command |
 
-Also: [`docs/codebase/STACK.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STACK.md),
-[`CONVENTIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONVENTIONS.md),
-[`INTEGRATIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/INTEGRATIONS.md),
-[`TESTING.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/TESTING.md).
+Also: [`docs/codebase/STACK.md`](docs/codebase/STACK.md),
+[`CONVENTIONS.md`](docs/codebase/CONVENTIONS.md),
+[`INTEGRATIONS.md`](docs/codebase/INTEGRATIONS.md),
+[`TESTING.md`](docs/codebase/TESTING.md).
+
+Looking for another project? [Choose a repository by the developer task](#repository-directory).
 
 NodeKit is the figured-out product foundation and conformance layer for proof-carrying agent applications. It turns an empty directory or existing repository into a domain-blank application with one guided lifecycle, a compiled definition, deterministic fixtures, browser proof, and receipts.
 
@@ -126,9 +128,10 @@ The generated app includes `docs/FIGURED_OUT.md`, a product brief, audience plac
 There is no domain chooser, public preset catalog, or silent fallback. Narrow examples in this source repository are regression fixtures and historical demonstrations only: they are not shipped in the npm package and cannot be selected by the creation CLI. The coding agent starts from the same blank foundation every time, researches the user's actual workflow, and adds only the domain behavior that job requires.
 
 `pnpm proof` works before credentials exist in the pnpm quickstart: it emits a passing `local-ready`
-receipt after the deterministic demo and evaluation. If live Pi, browser, or deployment receipts
-are present, every attempted gate must pass; the receipt becomes `release-ready` only when all three
-are present and green. That generated-application status is not NodeKit Ease certification or Convex
+receipt after the deterministic demo and evaluation. Supplied browser evidence must pass.
+The generated proof script may label a passing result `browser-certified` when certified
+browser evidence is present, but it always reports `releaseReady: false` and lists remaining
+release gates. These generated-application levels are not NodeKit Ease certification or Convex
 submission authorization. Use the equivalent script command for the package manager selected at creation.
 
 Every created or adopted repository receives the same three coding-agent skills
@@ -167,7 +170,7 @@ receipt, an operational lease, and a new durable checkpoint. The execution graph
 disposable projection and cannot authorize continuity.
 
 See the
-[native-agent identity contract](https://github.com/HomenShum/NodeKit/blob/main/docs/NATIVE_AGENT_SESSION_IDENTITY.md).
+[native-agent identity contract](docs/NATIVE_AGENT_SESSION_IDENTITY.md).
 
 ### Compare copied behavior
 
@@ -185,7 +188,7 @@ node src/cli.mjs motion compare \
 The command returns `PASS`, `FAIL`, or `NOT_RUN`; missing coverage is never green. Its receipt is
 decisive for static name/value conflicts only and explicitly leaves runtime, DOM/trace, video, and
 audience evidence unrun. See
-[`docs/BEHAVIOR_PORTABILITY_SHOWCASE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/BEHAVIOR_PORTABILITY_SHOWCASE.md) for the measured
+[`docs/BEHAVIOR_PORTABILITY_SHOWCASE.md`](docs/BEHAVIOR_PORTABILITY_SHOWCASE.md) for the measured
 NodeSlide/NodeRoom example.
 
 By default, `nodekit create` vendors the exact compile/check runtime that generated
@@ -222,16 +225,16 @@ the rendered screenshot matrix, hosted timing or agent/human studies, deploy, pu
 Convex submission, or claim external certification.
 
 The consolidated strategy, evidence-backed status, Harness Gym roadmap, and ordered checklist are in
-[`docs/NODEKIT_MASTER_PLAN.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/NODEKIT_MASTER_PLAN.md). The complete submission lock,
+[`docs/NODEKIT_MASTER_PLAN.md`](docs/NODEKIT_MASTER_PLAN.md). The complete submission lock,
 cross-platform workflow, fresh-agent protocol, and uncoached human-study thresholds are documented
-in [`docs/EASE_PROOF.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/EASE_PROOF.md). The cross-platform workflow is manual so a reviewer
+in [`docs/EASE_PROOF.md`](docs/EASE_PROOF.md). The cross-platform workflow is manual so a reviewer
 can deliberately label a run cold or warm; one matrix run is evidence, not a percentile claim.
 The five-person study now has a privacy-safe append-only operator (`npm run ease:human-study --
-help`) and exact runbook in [`docs/FRESH_HUMAN_USABILITY_STUDY.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/FRESH_HUMAN_USABILITY_STUDY.md).
+help`) and exact runbook in [`docs/FRESH_HUMAN_USABILITY_STUDY.md`](docs/FRESH_HUMAN_USABILITY_STUDY.md).
 That collector does not create participants or close the still-external 0/5 human gate.
 
 The adopted evidence-driven model profiling, executable skill, and capability-routing architecture
-is in [`docs/MODEL_INTELLIGENCE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/MODEL_INTELLIGENCE.md). Its implemented P0 commands do not
+is in [`docs/MODEL_INTELLIGENCE.md`](docs/MODEL_INTELLIGENCE.md). Its implemented P0 commands do not
 make provider calls or certify routing from an empty evidence set.
 
 Factory commands (a `--local-proof` run creates an initial local Git commit so
@@ -258,7 +261,7 @@ Runtime consumers use `@homenshum/nodekit/knowledge-runtime` for accepted-canoni
 Caseflow-bound context packs, durable retrieval receipts, and safe abstention. PostgreSQL-backed
 applications use `@homenshum/nodekit/adapters/postgres/knowledge` with the exported
 `knowledge-migration.sql`. See
-[`docs/KNOWLEDGE_EVOLUTION.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/KNOWLEDGE_EVOLUTION.md)
+[`docs/KNOWLEDGE_EVOLUTION.md`](docs/KNOWLEDGE_EVOLUTION.md)
 for the authority boundary and protected comparison contract.
 
 From a generated or adopted repository carrying the vendored runtime:
@@ -304,11 +307,11 @@ Consumer preparation is read-only unless `--apply` is supplied. Managed capture 
 candidate identity, provider resources, elapsed phases, browser evidence, and cleanup receipts,
 but never creates or deletes those resources. Evidence finalization only signs already-measured
 evidence with a purpose-scoped external key. None of these commands deploys, publishes, submits,
-or certifies adoption. Follow the [managed capture runbook](https://github.com/HomenShum/NodeKit/blob/main/docs/MANAGED_EVIDENCE_CAPTURE.md)
+or certifies adoption. Follow the [managed capture runbook](docs/MANAGED_EVIDENCE_CAPTURE.md)
 for the external operator steps.
 
 The provider-neutral reference contract and its fail-closed Mobbin boundary are documented in
-[`docs/REFERENCE_LOOP.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/REFERENCE_LOOP.md).
+[`docs/REFERENCE_LOOP.md`](docs/REFERENCE_LOOP.md).
 
 ## PostgreSQL adapter
 
@@ -343,6 +346,41 @@ Storage policies. The worker module enables a server-only PGMQ queue and pg_cron
 either to browser roles. Checked-in SQL is not a claim that live Supabase Auth, Storage, Realtime,
 Queue, or Cron conformance has passed; see [`adapters/supabase/README.md`](adapters/supabase/README.md).
 
+## Repository directory
+
+Start with the job you need to finish. These are the repositories listed in
+[`repositories.yaml`](repositories.yaml); the descriptions summarize their maintained
+GitHub descriptions and entry pages observed on 2026-10-07. Open the repository's own README for setup
+and read its agent instructions before editing. This directory is a navigation aid,
+not a claim that every project is tested, published, licensed for reuse, or ready for production.
+
+| Developer task | Repository |
+|---|---|
+| Generate an agent application and use shared contracts | [NodeKit](#nodekit) |
+| Integrate an agent with room context, documents, spreadsheets, and notes | [NodeAgent](https://github.com/HomenShum/NodeAgent) |
+| Build shared editing flows for humans and agents | [NodeRoom](https://github.com/HomenShum/NodeRoom) |
+| Work on reviewable AI edits to presentation decks | [NodeSlide](https://github.com/HomenShum/NodeSlide) |
+| Inspect the default NodeSlide app or the separately enabled local Parity UI workflow | [parity-studio](https://github.com/HomenShum/parity-studio) |
+| Work on inspectable video reconstruction | [NodeVideo](https://github.com/HomenShum/NodeVideo) |
+| Coordinate agents in shared voice rooms | [NodeVoice](https://github.com/HomenShum/NodeVoice) |
+| Connect an app surface to its agent trace | [NodeTrace](https://github.com/HomenShum/NodeTrace) |
+| Add passive memory from agent activity streams | [NodeMem](https://github.com/HomenShum/NodeMem) |
+| Use a proof supervisor for coding-agent work | [NodeProof](https://github.com/HomenShum/NodeProof) |
+| Follow persona journeys and artifact-based UI QA | [agentic-ui-qa](https://github.com/HomenShum/agentic-ui-qa) |
+| Find task corpora, benchmark adapters, and rubrics | [NodeTasks](https://github.com/HomenShum/NodeTasks) |
+| Prepare readable developer and coding-agent handoffs | [BetterPRHandoff](https://github.com/HomenShum/BetterPRHandoff) |
+| Capture reproducible feature walkthrough videos and GIFs | [FeatureClipStudio](https://github.com/HomenShum/FeatureClipStudio) |
+| Read portable specifications for inspectable agent systems | [NodeAgentSpec](https://github.com/HomenShum/NodeAgentSpec) |
+| Model relationships between artifacts, traces, and proposals | [NodeGraph](https://github.com/HomenShum/NodeGraph) |
+| Explore trace, reward, memory, and repair research | [NodeRL](https://github.com/HomenShum/NodeRL) |
+| Work on sourced entity research and reusable artifacts | [NodeBenchAI](https://github.com/HomenShum/NodeBenchAI) |
+| Inspect a template for NodeBench MCP agent projects | [NodeBenchBoilerplate](https://github.com/HomenShum/NodeBenchBoilerplate) |
+
+For a local checkout, `rg --files` finds the entry documents and `rg "<symbol or topic>"`
+finds the code that owns a change. Start with source directories; open recorded evidence
+when investigating the specific run it describes. Registry lifecycle labels and README
+claims do not replace checks bound to the revision you intend to use.
+
 ## Contracts
 
 - [`ownership.yaml`](ownership.yaml) names one owner, current package, target package, status, version, and consumers for every governed concept.
@@ -353,10 +391,10 @@ Queue, or Cron conformance has passed; see [`adapters/supabase/README.md`](adapt
 - [`schemas/nodeagent.event.v1.schema.json`](schemas/nodeagent.event.v1.schema.json) defines the canonical portable event envelope. Applications resolve `nodeagent.event/v1` and `nodeagent.trace/v1` contract references even when an older v1 manifest omits the optional `contracts` block.
 - `nodekit compile` discovers authored files, validates pack references, rejects literal secrets, and emits a full application identity in `.nodeagent/`. The identity binds the agent, packs, integrations, backend, UI/app surface, scripts, workflow definitions, evaluations, fixtures, dependency locks, and recognized deployment configuration.
 - `nodekit graph import` imports a pinned Understand Anything `knowledge-graph.json` as a namespaced, commit-bound code graph snapshot. `nodekit graph query --code` retrieves from that snapshot; it never turns the code graph into a write authority.
-- [`docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md) defines the graph authority, privacy, freshness, and NodeGraph/NodeRoom projection boundary.
-- [`docs/KNOWLEDGE_EVOLUTION.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/KNOWLEDGE_EVOLUTION.md) defines the EvoGraph-R1-inspired, backend-neutral Knowledge Evolution Plane: immutable multimodal evidence, n-ary hyperedges, typed gaps, proposal-only graph mutations, explicit approval, stale-version conflicts, replay, receipts, Harness Gym projection, and evaluation boundaries.
-- [`docs/FRONTEND_SPECIALIST.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/FRONTEND_SPECIALIST.md) defines the evidence-ranked frontend route, protected product packet, mandatory three-direction tournament, bounded repair, and fresh-user canary.
-- [`docs/EVOLUTION_LEDGER.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/EVOLUTION_LEDGER.md) defines the permanent reasoning ledger from limitation and failed assumption through invariant, immutable evidence, verifier, and verified downstream adoption.
+- [`docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md`](docs/UNDERSTAND_ANYTHING_CODE_GRAPH.md) defines the graph authority, privacy, freshness, and NodeGraph/NodeRoom projection boundary.
+- [`docs/KNOWLEDGE_EVOLUTION.md`](docs/KNOWLEDGE_EVOLUTION.md) defines the EvoGraph-R1-inspired, backend-neutral Knowledge Evolution Plane: immutable multimodal evidence, n-ary hyperedges, typed gaps, proposal-only graph mutations, explicit approval, stale-version conflicts, replay, receipts, Harness Gym projection, and evaluation boundaries.
+- [`docs/FRONTEND_SPECIALIST.md`](docs/FRONTEND_SPECIALIST.md) defines the evidence-ranked frontend route, protected product packet, mandatory three-direction tournament, bounded repair, and fresh-user canary.
+- [`docs/EVOLUTION_LEDGER.md`](docs/EVOLUTION_LEDGER.md) defines the permanent reasoning ledger from limitation and failed assumption through invariant, immutable evidence, verifier, and verified downstream adoption.
 - `nodekit create` refuses non-empty targets. `nodekit adopt` writes missing files only, preserves host scripts, and emits a collision receipt.
 - `nodekit repo check` validates ownership declarations, command aliases, migration origins, signature classification, and source rules.
 - `nodekit ecosystem check` checks all active local clones together.
@@ -383,8 +421,8 @@ mechanics for exact browser export/reopen and recursive evidence verification.
 None of those facts proves the mutable working tree is the final candidate. Three real authenticated
 Convex consumers, final-candidate timing and agent matrices, five real humans, live Supabase, an
 isolated deployed preview, real Knowledge Evolution adoption, and independent final verification
-remain separate evidence gates. See [`docs/REMAINING_GAPS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/REMAINING_GAPS.md).
+remain separate evidence gates. See [`docs/REMAINING_GAPS.md`](docs/REMAINING_GAPS.md).
 
-See [`docs/DECISIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/DECISIONS.md) for the ownership split and migration rules.
-The coordinated consumer commits, pull requests, hosted checks, and known limits are recorded in [`docs/P0_ROLLOUT.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/P0_ROLLOUT.md) and [`proof/p0-rollout.json`](https://github.com/HomenShum/NodeKit/blob/main/proof/p0-rollout.json).
-The overnight Casca/Agentic-RL delivery and morning adversarial-review sequence is in [`docs/NODEKIT_ULTRA_V1_HANDOFF.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/NODEKIT_ULTRA_V1_HANDOFF.md).
+See [`docs/DECISIONS.md`](docs/DECISIONS.md) for the ownership split and migration rules.
+The coordinated consumer commits, pull requests, hosted checks, and known limits are recorded in [`docs/P0_ROLLOUT.md`](docs/P0_ROLLOUT.md) and [`proof/p0-rollout.json`](proof/p0-rollout.json).
+The overnight Casca/Agentic-RL delivery and morning adversarial-review sequence is in [`docs/NODEKIT_ULTRA_V1_HANDOFF.md`](docs/NODEKIT_ULTRA_V1_HANDOFF.md).
