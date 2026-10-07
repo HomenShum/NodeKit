@@ -138,6 +138,12 @@ a slice. Define the terminal condition at the user boundary: a command that writ
 file but fails to validate, export, publish, or reopen the requested result has not finished the
 job.
 
+For an existing product, inventory active capabilities and inactive stubs from its pinned source,
+history, tests, and observed journeys before replacing an engine, store, or surface. Compare the
+same baseline/candidate user job using the Existing-product parity record below. Preserve the
+declared state owner; retire duplicates only after ownership is mapped and required parity evidence
+shows no unapproved behavior loss.
+
 **Action:** at the midpoint of the timebox, freeze the workflow. Defer aesthetic expansion and
 secondary integrations before they consume the proof window.
 
@@ -503,6 +509,26 @@ not_in_scope: []
 authority_boundaries: []
 kill_condition: "evidence that stops or redirects the build"
 ```
+
+### Existing-product parity record
+
+Record source/evidence bindings for each capability; inactive stubs are provenance, not working
+behavior. This is a copyable acceptance record, not a new registry or an implemented inventory tool.
+
+```yaml
+baseline_revision: "immutable working-product revision"
+candidate_revision: "exact candidate revision"
+primary_journey: "same persona, input, artifact, and required states in both arms"
+active_capabilities: []  # capability, source/evidence, owner, test/proof bindings
+inactive_stubs: []
+unmapped_active_capabilities: []
+parity_evidence: []      # baseline/candidate observations, including failure and recovery
+```
+
+Retirement stays blocked while active capabilities are unmapped or parity shows unapproved behavior
+loss. Preserve the [historical NodeBook field case](https://github.com/HomenShum/NodeKit/blob/682699cfc4b9e03fe07422a9843bcf9dd4c1f36f/docs/NODEBOOK_FIELD_CASE.md) as source
+provenance. The proposed Fresh Builder In-Place Wedge Proof is **NOT_RUN**; this documentation change
+does not execute a migration or establish a productivity improvement.
 
 ### Minimal interface contract
 

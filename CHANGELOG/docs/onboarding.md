@@ -4,6 +4,20 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-07 - Preserve working behavior during existing-product adoption
+
+Carry the portable inventory, baseline/candidate parity and retirement requirements from the
+[historical NodeBook proposal](https://github.com/HomenShum/NodeKit/blob/682699cfc4b9e03fe07422a9843bcf9dd4c1f36f/docs/NODEBOOK_FIELD_CASE.md) into the existing
+principles and launch contract. Keep inactive stubs distinct from working capabilities and block
+retirement on unmapped ownership or unapproved behavior loss. No new manual, registry or runtime
+is introduced. This salvage's migration and productivity validation remain NOT_RUN. The
+principle-count repair is already present on current main; the proposal's 591/591 result is
+historical, not current proof.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `docs/IDEA_TO_REALITY_PRINCIPLES.md`, `plugins/nodekit/skills/nodekit-launch/SKILL.md`,
+`plugins/nodekit/skills/nodekit-launch/references/launch-contract.md`
+
 ## 2026-08-02 - Reconcile NodeVideo's surviving product boundaries
 
 Make three previously implied field rules explicit without adding another framework or principle:

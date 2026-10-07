@@ -43,7 +43,7 @@ Run this section only when the task is a launch or adoption. For an ordinary imp
 3. Research current official sources for the user problem and every sponsor. Record links, package versions, authentication, pricing or limits, and one visible contribution to the demo.
 4. Select one workflow shaped as `input -> agent decision -> tool-backed action -> measurable artifact -> visible proof`. Prefer a real metric and a reversible experiment.
 5. Compile the prose into `hackathon.yaml`. Ask only questions whose answers materially change the product, security model, or irreversible action.
-6. For an empty target, run `nodekit create --local-proof`; add `--package-manager pnpm` when pnpm is available and appropriate. For an existing target, run `nodekit adopt` and inspect its collision receipt before accepting changes.
+6. For an empty target, run `nodekit create --local-proof`; add `--package-manager pnpm` when pnpm is available and appropriate. For an existing target, first inventory its working behavior as described in the launch contract; run `nodekit adopt`, then inspect its collision receipt and compare required baseline/candidate parity before accepting changes or retiring old paths.
 7. Run `nodekit compile` and `nodekit inspect`. Confirm the filesystem-discovered tools, skills, integrations, fixtures, evals, provider, secret references, and config hash.
 8. Implement one end-to-end surface. Preserve one execution path for the no-key demo, live provider, browser, and evals.
 9. Read and run the sibling `nodekit-qa` skill. Establish the deterministic floor, strict live-provider smoke, and the critical browser journey; test missing secrets, malformed input, reload or resume, repeated actions, narrow or mobile layout, and export or reopen.

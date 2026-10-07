@@ -16,6 +16,14 @@ Capture problem, affected user, desired outcome, current workaround, demo input,
 8. Deployment: exact tested revision with environment identity.
 9. Proof: release receipt plus an honest phase timeline.
 
+## Existing-product parity
+
+Before adoption, pin the working revision and inventory active capabilities, inactive stubs, owners,
+and source/test/proof bindings. After the candidate slice, compare the same baseline/candidate user
+job, including its required failure and recovery states. Preserve the declared canonical owner. Block duplicate retirement
+while active capabilities are unmapped or the evidence shows unapproved behavior loss. These are
+acceptance requirements; documentation and collision receipts do not prove migration parity.
+
 ## Completion language
 
 - Say `scaffolded` after generation only.
