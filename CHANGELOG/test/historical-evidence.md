@@ -4,6 +4,23 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-07 - Keep the behavior index bound to the shifted test annotations
+
+The clock repair moved two existing submission scenario annotations by five
+lines. Update only their committed behavior-index pointers from 142/234 to
+147/239; preserve all scenarios, verdicts, counts and generation metadata.
+
+At head `91f0b28e`, automatic Quality run37625374589/job112805662074
+reported **898 tests, 897 pass, 1 fail, 0 skipped**. All ten previous failure
+scenarios and the new oversized-launch scenario passed. The only test failure
+was the index freshness assertion. After this pointer repair, exact-head CI is
+pending. Evolution still fails; later audit, registry and package stages did
+not run. These are contract results, not matched architecture or live-provider
+measurements.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `behavior-index.json`
+
 ## 2026-10-07 - Replay preserved evidence at a test-owned historical time
 
 A maintainer can reach the real trust and tampering assertions without old
