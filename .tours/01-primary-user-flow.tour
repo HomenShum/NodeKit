@@ -19,7 +19,7 @@
     },
     {
       "file": "src/cli-main.mjs",
-      "line": 2272,
+      "line": 2277,
       "pattern": "^async function main\\(\\)",
       "title": "One flat dispatch table",
       "description": "109 commands, each a flat `if`. Deliberately one long function: to find where a command goes you search one file, instead of following a handler registry through three indirections.\n\nSearch this function for any command you see in the README and you will land on its implementation."

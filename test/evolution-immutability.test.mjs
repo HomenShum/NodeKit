@@ -263,9 +263,11 @@ test("replacement objects cannot manufacture historical qualification for an edi
 
 test("an inherited graft file cannot hide the committed claim mutation by truncating its origin", async (t) => {
   const f = await authoredFixture(t);
-  const head = f.git("rev-parse", "HEAD");
-  const current = JSON.parse(f.git("show", `HEAD:${authoredFile}`));
+  const current = { ...f.original, dimensionsTested: ["fixture-only invented axis"] };
   await writeFile(path.join(f.root, authoredFile), `${JSON.stringify(current, null, 2)}\n`);
+  f.git("add", "--", authoredFile);
+  f.git("commit", "-qm", "fixture commits fabricated dimensions");
+  const head = f.git("rev-parse", "HEAD");
   const graftFile = path.join(f.root, "adversarial-graft.txt");
   await writeFile(graftFile, `${head}\n`);
   const previous = process.env.GIT_GRAFT_FILE;

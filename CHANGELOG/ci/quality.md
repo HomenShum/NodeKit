@@ -4,6 +4,41 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-08 - Supply real history and retain the graft and citation checks
+
+A maintainer's release checks must inspect actual authored history and point new
+contributors at current source. The first Quality test checkout now fetches full
+history. The graft scenario itself commits invented dimensions inside its owned
+fixture before attempting to hide that mutation; every rejection assertion stays
+unchanged. Repair the moved main/catch references in docs/START_HERE and tours01/03.
+The later factory checkout, verifier, schemas, current admission and package lock
+are unchanged.
+
+**Before / after**: `NODEKIT-QUALITY-HISTORY-FIXTURE-CITATIONS-01`, local Windows,
+Node22.22.2, authentic published PR40 head `658b598d` source. Run the same four
+existing test files once per context: unchanged shallow history returned exit1,
+20 passes/14 failures; unchanged full history returned exit1,29 passes/5 failures;
+the repaired full-history source returned a durably captured exit0,34 passes,
+zero failures, skips or cancellations. Real history resolves the nine origin
+fixture setup failures and current-ledger failure. The remaining five are the
+missing committed graft attack plus the four observed citation/tour failures.
+The docs' second catch reference is also repaired before the entire citation
+loop can finish. Mutation, shallow/outside-epoch, replacement/graft, current
+admission/evidence, four disjoint reads and eight sustained reads remain tested.
+
+The shallow capture has post-return-only bounds; full-before/after use active
+owned deadline/stream limits and observed natural exit/pipe closure. No limit or
+kill branch was exercised. This is targeted source proof, not the entire909-case
+Linux suite, hosted synthetic Git context, production or rendered-pixel evidence.
+At capture, new exact-head hosted CI remains pending and whole-PR materiality
+7/0/0 remains unresolved. No event, signature, approval or policy waiver is added.
+Historical header and released entries below are preserved byte for byte.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `.github/workflows/quality.yml`,
+`test/evolution-immutability.test.mjs`, `docs/START_HERE.md`,
+`.tours/01-primary-user-flow.tour`, `.tours/03-debug-and-recovery.tour`.
+
 ## 2026-10-08 - Read original authorship without claiming current measurements
 
 A maintainer reviewing an old supported assumption must be able to read its

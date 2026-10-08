@@ -67,7 +67,7 @@ to `cli-main.mjs`, which throws `unknown command: …` in Step 2.
 ## Step 2 — Arguments are parsed and the command is dispatched
 
 **File:** `src/cli-main.mjs`
-**Symbol:** `parseArgs` (line 130), `main` (line 2272)
+**Symbol:** `parseArgs` (line 130), `main` (line 2277)
 **Called by:** the top-level `await import` in Step 1
 **Calls next:** `runCreate`
 
@@ -315,7 +315,7 @@ because it tells the user their change was *not* applied.
 ## Step 9 — Failure and recovery
 
 **File:** `src/cli-main.mjs`, then `src/lib/caseflow.mjs`
-**Symbol:** the top-level `main().catch` (cli-main.mjs line 2945), and the idempotent-retry return
+**Symbol:** the top-level `main().catch` (cli-main.mjs line 2950), and the idempotent-retry return
 `reused: true` (caseflow.mjs line 308)
 **Called by:** the Node process, and any client that retries
 **Calls next:** nothing — these are the ends of the chain
