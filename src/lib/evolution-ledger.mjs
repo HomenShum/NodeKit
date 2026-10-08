@@ -571,11 +571,21 @@ export async function verifyEvolutionLedger(repoRoot) {
   const issues = [];
   const warnings = [];
   const all = [...ledger.events, ...ledger.assumptions, ...ledger.invariants, ...ledger.evidence, ...ledger.adoptions];
+  const loadedRecords = all
+    .filter((record) => ledger.filesById.has(record.id))
+    .map((record) => ({ file: path.relative(root, ledger.filesById.get(record.id)).split(path.sep).join("/"), record }));
+  const mutationResult = await detectLedgerMutations(root, loadedRecords);
+  const historicalRecords = new Set(mutationResult.historicalQualifications.map((entry) =>
+    loadedRecords.find(({ file }) => file === entry.file)?.record));
+  for (const entry of mutationResult.historicalQualifications) {
+    warnings.push(`${entry.id} preserves verified historical authorship; current measured dimensions remain unknown`);
+  }
   const byId = new Map();
   for (const record of all) {
     const definition = EVOLUTION_RECORD_TYPES[record.schemaVersion];
     if (!definition) { issues.push(`unsupported schema ${record.schemaVersion} for ${record.id}`); continue; }
-    const findings = await validateSchema(definition.schema, record, record.id ?? definition.plural);
+    const findings = historicalRecords.has(record) ? []
+      : await validateSchema(definition.schema, record, record.id ?? definition.plural);
     issues.push(...findings);
     if (byId.has(record.id)) issues.push(`duplicate evolution id: ${record.id}`);
     byId.set(record.id, record);
@@ -607,7 +617,7 @@ export async function verifyEvolutionLedger(repoRoot) {
     if (["disproven", "superseded"].includes(assumption.status) && assumption.contradictingEvidenceIds.length === 0) issues.push(`${assumption.id} is ${assumption.status} without contradicting evidence`);
     // "Supported" is a claim that generalises, and without the axis it generalises to axes nobody
     // measured. Eight sequential calls drawing no complaint is not evidence about twelve at once.
-    if (["supported", "scope-limited"].includes(assumption.status) && !(assumption.dimensionsTested?.length > 0)) {
+    if (!historicalRecords.has(assumption) && ["supported", "scope-limited"].includes(assumption.status) && !(assumption.dimensionsTested?.length > 0)) {
       issues.push(`${assumption.id} is ${assumption.status} without naming the dimension its evidence measured`);
     }
     // A measured axis with no evidence behind it is a story about a probe. Either kind counts: the
@@ -658,12 +668,6 @@ export async function verifyEvolutionLedger(repoRoot) {
   // function. Verify now compares every record against the revision that
   // introduced it, so the authority rule is checked on the path people use.
   // @nodekit-behavior inv:ledger-records-are-immutable owner
-  const loadedRecords = all
-    .filter((record) => ledger.filesById.has(record.id))
-    .map((record) => ({
-      file: path.relative(root, ledger.filesById.get(record.id)).split(path.sep).join("/"),
-      record,
-    }));
   // Which canonical events actually carry a verified approval. Silence here would be the original
   // defect all over again: 22 events say human-reviewed because a command wrote that string, and a
   // reader must be able to tell those apart from ones a credential signed. Reported, never
@@ -679,13 +683,13 @@ export async function verifyEvolutionLedger(repoRoot) {
       (unattested.length > 3 ? `, and ${unattested.length - 3} more` : ""));
   }
 
-  const mutationResult = await detectLedgerMutations(root, loadedRecords);
   const mutationReport = describeMutations(mutationResult);
   issues.push(...mutationReport.issues);
   warnings.push(...mutationReport.warnings);
 
   return {
     schemaVersion: "nodekit.evolution-verdict/v1",
+    historicalQualifications: mutationResult.historicalQualifications,
     counts: { events: ledger.events.length, assumptions: ledger.assumptions.length, invariants: ledger.invariants.length, evidence: ledger.evidence.length, adoptions: ledger.adoptions.length },
     immutability: {
       checked: mutationResult.checked,
@@ -709,6 +713,7 @@ export async function queryEvolutionLedger(repoRoot, { track, since, invariantId
   const ledger = await readLedger(path.resolve(repoRoot));
   const events = ledger.events.filter((event) => (!track || event.track === track) && (!since || Date.parse(event.source.occurredAt) >= Date.parse(since)) && (!invariantId || event.invariantIds.includes(invariantId)));
   return {
+    verification: { status: "NOT_RUN", currentDimensionsCertified: false },
     events,
     assumptions: invariantId ? ledger.assumptions.filter((assumption) => events.some((event) => event.assumptionIds.includes(assumption.id))) : ledger.assumptions,
     invariants: invariantId ? ledger.invariants.filter((invariant) => invariant.id === invariantId) : ledger.invariants,

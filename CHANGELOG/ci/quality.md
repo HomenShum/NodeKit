@@ -4,6 +4,59 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-08 - Read original authorship without claiming current measurements
+
+A maintainer reviewing an old supported assumption must be able to read its
+original meaning without treating missing measurements as evidence. Restore the
+original immutable record and qualify historical authorship only from continuous,
+full native Git history, the pinned schema epoch and the original schema hash.
+The current measured dimensions remain explicitly unknown. Current admission,
+evidence, authority, schema and materiality requirements are unchanged. Raw
+queries say verification was not run and never certify current measurements.
+Native origin reads have record, byte and time bounds; replacement objects and
+graft files cannot manufacture the inspected history view.
+
+**Before / after**: `NODEKIT-AUTHORED-HISTORY-CURRENT-MEASUREMENT-SEPARATION-01`,
+local Windows capture on 2026-10-08 against PR40 head `6d50b204`. The original
+verifier returned exit 1 with one claim-mutation issue; restoring only the
+original record returned exit 1 with three current-schema/measurement issues.
+The repaired source returned a durably captured exit 0: zero issues and claim
+mutations, all 92 records checked using full Git history, three reported binding
+repairs, and unchanged counts of 25 events, six assumptions, 24 invariants,
+34 evidence records and three adoptions. One historical qualification explicitly
+sets current measurement certification false. Ten warnings remain, including the
+unknown dimensions and the existing 22 unattested events; no approvals were
+invented or signed. Three existing attestations remain credential-control
+assurance, not proof of human presence.
+
+**Scenario proof**: the final two-file run returned a durably captured exit 0,
+27 passes, zero failures and zero skips. It retains mutation, new/moved/readded
+path, shallow/outside-epoch, broken-history, replacement/graft, current
+admission/evidence, raw-query, four disjoint concurrent-read and eight sustained
+read boundaries. Prior long-temp setup failures and the later fixture checkout
+failure remain in the external proof. The latter exposed an incorrectly ordered
+fixture prerequisite; one ordinary restore inside that owned clone fixed setup
+without weakening an assertion. The external receipt writer was also corrected
+to persist the native exit immediately; its earlier lost exit remains unknown.
+The pinned authored-schema digest/missing-schema fail-closed branches were
+source-reviewed, not separately manufactured as synthetic history proof.
+
+The existing behavior-index generator returned exit 0 and updated only source
+line bindings; its 31 undeclared annotations remain reported. The existing docs
+generator and projection-drift check both returned exit 0, with both tracked
+projection files byte-identical. No source-independent product, rendered-pixel,
+performance, deployed-content or current-measurement certificate follows.
+At this local capture, new exact-head hosted CI is pending and whole-PR
+materiality/authority coverage remains unresolved. No canonical event, signature,
+clock change, policy waiver or merge is included. Historical entries below are
+preserved byte for byte.
+
+**Commit**: `this commit`. **Author**: Codex.
+**Touches**: `evolution/assumptions/asm-strong-model-infers-topology.json`,
+`src/lib/evolution-immutability.mjs`, `src/lib/evolution-ledger.mjs`,
+`src/cli-main.mjs`, both evolution test files, `docs/EVOLUTION_LEDGER.md`,
+`behavior-index.json`.
+
 ## 2026-10-08 - Patch the compatible repository test toolchain
 
 The repository now declares Vitest 4.1.11 instead of 4.1.10 and retains the

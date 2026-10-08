@@ -1876,13 +1876,18 @@ async function runTrustInit(parsed) {
 
 async function runEvolutionVerify(parsed) {
   const output = await verifyEvolutionLedger(repoRootFrom(parsed));
-  printStructured(output, parsed, (value) => `EVOLUTION ${value.passed ? "PASS" : "BLOCKED"}: ${value.counts.events} events, ${value.counts.invariants} invariants, ${value.counts.adoptions} adoptions`);
+  printStructured(output, parsed, (value) =>
+    `EVOLUTION ${value.passed ? "PASS" : "BLOCKED"}: ${value.counts.events} events, ${value.counts.invariants} invariants, ${value.counts.adoptions} adoptions` +
+    (value.historicalQualifications.length
+      ? `; ${value.historicalQualifications.length} historical record(s), current measured dimensions uncertified`
+      : ""));
   if (!output.passed) process.exitCode = 1;
 }
 
 async function runEvolutionQuery(parsed) {
   const output = await queryEvolutionLedger(repoRootFrom(parsed), { track: parsed.options.track, since: parsed.options.since, invariantId: parsed.options.invariant });
-  printStructured(output, parsed, (value) => `EVOLUTION QUERY: ${value.events.length} events, ${value.invariants.length} invariants, ${value.evidence.length} evidence records`);
+  printStructured(output, parsed, (value) =>
+    `EVOLUTION QUERY: ${value.events.length} events, ${value.invariants.length} invariants, ${value.evidence.length} evidence records; declared history, verification NOT_RUN, current measured dimensions uncertified`);
 }
 
 async function runEvolutionDiff(parsed) {
