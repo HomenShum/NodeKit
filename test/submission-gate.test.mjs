@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { link, mkdtemp, mkdir, open, cp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import test from "node:test";
+import test, { beforeEach } from "node:test";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import {
@@ -19,7 +19,12 @@ import {
 } from "../src/lib/submission-gate.mjs";
 import { computeNodeKitSourceHash } from "../src/lib/source-hash.mjs";
 import { knowledgeRuntimeHash } from "../src/lib/knowledge-runtime.mjs";
-import { exactSubmissionVerdicts, submissionEvidenceFixtureBytes, submissionEvidenceFixtureClosure, submissionFixtureTrustedKeys } from "./submission-fixtures.mjs";
+import { exactSubmissionVerdicts, submissionEvidenceFixtureBytes, submissionEvidenceFixtureClosure, submissionFixtureReferenceTime, submissionFixtureTrustedKeys } from "./submission-fixtures.mjs";
+
+// Date-only mocks are scoped to each test; node:test restores them afterward.
+beforeEach((t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: submissionFixtureReferenceTime });
+});
 
 const digest = (value) => createHash("sha256").update(value).digest("hex");
 let testPngCrcTable;
@@ -367,7 +372,7 @@ test("knowledge adoption closure recomputes protected cases, aggregates, and exe
   );
 });
 
-test("submission gate requires all evidence, hashes, and explicit approval", async () => {
+test("submission gate requires all evidence, hashes, and explicit approval", async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-submission-"));
   await mkdir(path.join(root, "schemas"), { recursive: true });
   await mkdir(path.join(root, "proof"), { recursive: true });
@@ -401,6 +406,14 @@ test("submission gate requires all evidence, hashes, and explicit approval", asy
   await writeFile(path.join(root, "proof", "submission-manifest.json"), JSON.stringify(manifest));
   const ready = await evaluateSubmissionManifest(root, "proof/submission-manifest.json", { trustedAttestationKeys: submissionFixtureTrustedKeys });
   assert.equal(ready.submissionReady, true, ready.errors.join("\n"));
+
+  // The same unchanged evidence must fail once its pricing snapshot is stale.
+  t.mock.timers.setTime(submissionFixtureReferenceTime + 32 * 24 * 60 * 60 * 1000);
+  await assert.rejects(
+    () => resolveSubmissionEvidenceClosure(root, "freshAgentHeldout", verdicts.freshAgentHeldout),
+    /official pricing snapshot is stale/,
+  );
+  t.mock.timers.setTime(submissionFixtureReferenceTime);
   const noTrustStore = await evaluateSubmissionManifest(root, "proof/submission-manifest.json");
   assert.equal(noTrustStore.submissionReady, false);
   for (const id of [

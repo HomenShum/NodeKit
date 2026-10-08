@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -20,11 +20,21 @@ import { grantApproval, proposed } from "./helpers/evolution-approval-fixture.mj
 import { initializeKnowledgeGraph } from "../src/lib/knowledge-evolution.mjs";
 
 function git(root, args) {
-  return execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
+  return execFileSync("git", args, { cwd: root, encoding: "utf8", timeout: 15000, maxBuffer: 2 * 1024 * 1024 }).trim();
 }
 
-async function fixture() {
+async function fixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-evolution-"));
+  // The fixture is single-writer owned local state, not a hostile-filesystem sandbox.
+  t.after(async () => {
+    const relative = path.relative(path.resolve(os.tmpdir()), path.resolve(root));
+    assert.equal(path.dirname(relative), ".");
+    assert.ok(path.basename(relative).startsWith("nodekit-evolution-"));
+    const info = await lstat(root);
+    assert.ok(info.isDirectory() && !info.isSymbolicLink());
+    assert.equal(await realpath(root), path.join(await realpath(os.tmpdir()), relative));
+    await rm(root, { recursive: true, force: true });
+  });
   git(root, ["init"]);
   git(root, ["config", "user.email", "nodekit@example.com"]);
   git(root, ["config", "user.name", "NodeKit Test"]);
@@ -55,18 +65,19 @@ async function fixture() {
   return { commit, records, root };
 }
 
-test("Evolution Ledger verifies causal records, immutable evidence, and consumer adoption", async () => {
-  const { root } = await fixture();
+test("Evolution Ledger verifies causal records, immutable evidence, and consumer adoption", async (t) => {
+  const { root } = await fixture(t);
   const verdict = await verifyEvolutionLedger(root);
   assert.equal(verdict.passed, true, verdict.issues.join("\n"));
   assert.deepEqual(verdict.counts, { events: 1, assumptions: 1, invariants: 1, evidence: 1, adoptions: 1 });
   const query = await queryEvolutionLedger(root, { invariantId: "inv:test" });
+  assert.deepEqual(query.verification, { status: "NOT_RUN", currentDimensionsCertified: false });
   assert.equal(query.events.length, 1);
   assert.equal(query.adoptions[0].status, "verified");
 });
 
-test("Evolution Ledger detects evidence drift and refuses canonical overwrite", async () => {
-  const { records, root } = await fixture();
+test("Evolution Ledger detects evidence drift and refuses canonical overwrite", async (t) => {
+  const { records, root } = await fixture(t);
   await writeFile(path.join(root, "verifier.txt"), "drifted\n");
   const verdict = await verifyEvolutionLedger(root);
   assert.equal(verdict.passed, false);
@@ -78,21 +89,22 @@ test("Evolution Ledger detects evidence drift and refuses canonical overwrite", 
   await assert.rejects(() => recordEvolutionRecord(root, path.relative(root, input)), /immutable/);
 });
 
-test("verified evolution history generates projections and only proposes Knowledge Evolution changes", async () => {
-  const { root } = await fixture();
+test("verified evolution history generates projections and only proposes Knowledge Evolution changes", async (t) => {
+  const { root } = await fixture(t);
   const docs = await buildEvolutionDocs(root);
   assert.match(await readFile(docs.output, "utf8"), /proposal validation and approval/i);
   await initializeKnowledgeGraph(root, { graphId: "fixture-evolution" });
   const { patch } = await proposeEvolutionKnowledgePatch(root);
   assert.equal(patch.status, "pending");
   assert.equal(patch.operations.some((operation) => operation.node?.kind === "evidence"), true);
+  assert.equal(patch.operations.some((operation) => operation.node?.id === "evolution:asm:test"), false, "an assumption with no supporting evidence is not projected as a grounded node");
   const graph = JSON.parse(await readFile(path.join(root, ".nodeagent", "knowledge", "graph.json"), "utf8"));
   assert.equal(graph.version, 0);
   assert.equal(graph.nodes.length, 0);
 });
 
-test("materiality gate blocks unrecorded system changes and accepts a reviewed event in range", async () => {
-  const { commit: before, root } = await fixture();
+test("materiality gate blocks unrecorded system changes and accepts a reviewed event in range", async (t) => {
+  const { commit: before, root } = await fixture(t);
   await mkdir(path.join(root, "src"));
   await writeFile(path.join(root, "src", "runtime.mjs"), "export const version = 2;\n");
   git(root, ["add", "src/runtime.mjs"]);
@@ -126,8 +138,8 @@ test("materiality gate blocks unrecorded system changes and accepts a reviewed e
   assert.equal(passed.events[0].id, event.id);
 });
 
-test("reversible package change continues with exact live I/O, human-goal proof, and no forged approval", async () => {
-  const { commit: before, root } = await fixture();
+test("reversible package change continues with exact live I/O, human-goal proof, and no forged approval", async (t) => {
+  const { commit: before, root } = await fixture(t);
   await mkdir(path.join(root, "src"), { recursive: true });
   await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = (id) => ({ sessionId: id, resumed: true });\n");
   git(root, ["add", "src/session-resume.mjs"]);
@@ -212,8 +224,8 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   assert.equal(unrelatedRange.historicalDeferredReviews[0].id, created.receipt.id);
 });
 
-test("deferred review refuses missing UI proof and evidence that is not bound to rollback", async () => {
-  const { commit: before, root } = await fixture();
+test("deferred review refuses missing UI proof and evidence that is not bound to rollback", async (t) => {
+  const { commit: before, root } = await fixture(t);
   await mkdir(path.join(root, "src"), { recursive: true });
   await writeFile(path.join(root, "src", "ui-runtime.mjs"), "export const changed = true;\n");
   git(root, ["add", "src/ui-runtime.mjs"]);
@@ -264,8 +276,8 @@ test("deferred review refuses missing UI proof and evidence that is not bound to
   );
 });
 
-test("approval-architecture changes require a content-bound operator directive", async () => {
-  const { commit: before, root } = await fixture();
+test("approval-architecture changes require a content-bound operator directive", async (t) => {
+  const { commit: before, root } = await fixture(t);
   await mkdir(path.join(root, "src", "lib"), { recursive: true });
   await writeFile(path.join(root, "src", "lib", "evolution-trust.mjs"), "export const mode = 'deferred-proof';\n");
   git(root, ["add", "src/lib/evolution-trust.mjs"]);
@@ -325,8 +337,8 @@ test("approval-architecture changes require a content-bound operator directive",
   assert.equal(created.receipt.risk.authorityDirective.assurance, "operator-directed-in-session");
 });
 
-test("deferred review cannot bypass pre-action review for migration paths", async () => {
-  const { commit: before, root } = await fixture();
+test("deferred review cannot bypass pre-action review for migration paths", async (t) => {
+  const { commit: before, root } = await fixture(t);
   await mkdir(path.join(root, "src", "migrations"), { recursive: true });
   await writeFile(path.join(root, "src", "migrations", "drop-state.mjs"), "export const destructive = true;\n");
   git(root, ["add", "src/migrations/drop-state.mjs"]);
@@ -366,8 +378,8 @@ test("deferred review cannot bypass pre-action review for migration paths", asyn
   );
 });
 
-test("concurrent agent proposals with one id never become last-writer-wins", async () => {
-  const { root } = await fixture();
+test("concurrent agent proposals with one id never become last-writer-wins", async (t) => {
+  const { root } = await fixture(t);
   const input = {
     id: "evt:concurrent-maintainer-proposal",
     track: "harness",
@@ -432,17 +444,75 @@ test("an assumption that generalises must name the dimension its evidence measur
   }
 });
 
-test("every assumption shipped in this repository names its measured dimension", async () => {
+test("a maintainer's new claims still owe axes and evidence while declaration-only queries certify nothing", async (t) => {
+  const { root } = await fixture(t);
+  const base = {
+    schemaVersion: "nodekit.assumption/v1",
+    statement: "The measured fixture operation worked within its stated axis",
+    scope: { applications: ["fixture"] },
+    introducedByEventId: "evt:test",
+    supportingEvidenceIds: ["evd:test"],
+    contradictingEvidenceIds: [],
+  };
+  const submit = async (record) => {
+    const input = path.join(root, "inputs", `${record.id.replaceAll(":", "-")}.json`);
+    await writeFile(input, `${JSON.stringify(record, null, 2)}\n`);
+    return recordEvolutionRecord(root, path.relative(root, input));
+  };
+  for (const status of ["supported", "scope-limited"]) {
+    await assert.rejects(
+      () => submit({ ...base, id: `asm:missing-axis-${status}`, status }),
+      /dimensionsTested/,
+    );
+  }
+
+  const measured = { ...base, id: "asm:current-axis", status: "supported", dimensionsTested: ["fixture invariant operation"] };
+  const { output } = await submit(measured);
+  const originalBytes = await readFile(output);
+  const verified = await verifyEvolutionLedger(root);
+  assert.equal(verified.passed, true, verified.issues.join("\n"));
+  assert.equal(verified.historicalQualifications.length, 0, "new records use today's contract");
+  const query = await queryEvolutionLedger(root);
+  assert.deepEqual(query.verification, { status: "NOT_RUN", currentDimensionsCertified: false });
+  assert.deepEqual(query.assumptions.find((record) => record.id === measured.id), measured);
+  const text = execFileSync(process.execPath, [path.resolve("src/cli.mjs"), "evolution", "query", "--repo-root", root], {
+    cwd: path.resolve("."), encoding: "utf8", timeout: 15000, maxBuffer: 2 * 1024 * 1024,
+  });
+  assert.match(text, /verification NOT_RUN, current measured dimensions uncertified/);
+  assert.deepEqual(await readFile(output), originalBytes, "query and verification do not rewrite declarations");
+
+  for (const status of ["supported", "scope-limited"]) {
+    const unbacked = { ...base, id: `asm:unbacked-axis-${status}`, status, dimensionsTested: ["an axis named without a probe"], supportingEvidenceIds: [] };
+    await submit(unbacked);
+    const verdict = await verifyEvolutionLedger(root);
+    assert.equal(verdict.passed, false);
+    assert.ok(verdict.issues.some((issue) => issue.includes(unbacked.id) && issue.includes("cites no evidence")));
+    assert.equal(verdict.historicalQualifications.length, 0);
+  }
+});
+
+test("every current assumption names its measured dimension and exact historical authorship stays explicitly unscoped", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const dir = path.resolve("evolution/assumptions");
   const files = (await readdir(dir)).filter((f) => f.endsWith(".json"));
   assert.ok(files.length > 0, "a pass over zero assumptions measures nothing");
+  const verdict = await verifyEvolutionLedger(path.resolve("."));
+  assert.equal(verdict.passed, true, verdict.issues.join("\n"));
   let generalising = 0;
   for (const file of files) {
     const doc = JSON.parse(await readFile(path.join(dir, file), "utf8"));
     if (!["supported", "scope-limited"].includes(doc.status)) continue;
     generalising += 1;
-    assert.ok(doc.dimensionsTested?.length > 0, `${doc.id} generalises without naming what was measured`);
+    if (!(doc.dimensionsTested?.length > 0)) {
+      const historical = verdict.historicalQualifications.find((entry) => entry.file === `evolution/assumptions/${file}`);
+      assert.equal(historical?.currentDimensionsCertified, false, `${doc.id} has no verified authored contract`);
+      assert.ok(verdict.warnings.some((warning) => warning.includes(doc.id) && warning.includes("unknown")));
+    }
   }
   assert.ok(generalising > 0, "no generalising assumption was checked, so this asserts nothing");
+  const before = await readFile(path.join(dir, "asm-strong-model-infers-topology.json"));
+  const query = await queryEvolutionLedger(path.resolve("."));
+  assert.deepEqual(query.verification, { status: "NOT_RUN", currentDimensionsCertified: false });
+  assert.deepEqual(query.assumptions.find((record) => record.id === "asm:strong-model-infers-topology"), JSON.parse(before));
+  assert.deepEqual(await readFile(path.join(dir, "asm-strong-model-infers-topology.json")), before);
 });

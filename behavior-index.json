@@ -582,7 +582,7 @@
           {
             "scenario": "candidate-identity-bound",
             "file": "test/submission-gate.test.mjs",
-            "line": 142
+            "line": 147
           }
         ],
         "namedTestFiles": [
@@ -953,7 +953,7 @@
           {
             "scenario": "evidence-source-bound",
             "file": "test/submission-gate.test.mjs",
-            "line": 234
+            "line": 239
           }
         ],
         "namedTestFiles": [
@@ -1125,7 +1125,7 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
-      "line": 660
+      "line": 670
     },
     {
       "behaviorId": "journey.explain.produce-story",
@@ -1165,27 +1165,27 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 41
+      "line": 53
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 64
+      "line": 75
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 76
+      "line": 86
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 91
+      "line": 100
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 104
+      "line": 112
     },
     {
       "behaviorId": "inv:journey-contract-self-verifies",

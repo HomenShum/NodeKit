@@ -5,7 +5,7 @@
   "steps": [
     {
       "file": "src/cli-main.mjs",
-      "line": 2922,
+      "line": 2950,
       "pattern": "^main\\(\\)\\.catch\\(\\(error\\) => \\{",
       "title": "Every command failure ends here",
       "description": "One line on stderr, exit code 1, no stack trace — the person reading it is a user, not a debugger. Nothing above this calls `process.exit` directly, so buffered stdout still flushes.\n\nIf you are debugging and want the stack, run the module directly rather than removing this handler."

@@ -19,7 +19,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p ../ecosystem
-          for repo in NodeAgent NodeRoom NodeSlide NodeVideo NodeVoice NodeTrace NodeMem NodeProof agentic-ui-qa; do
+          # Derive the list from repositories.yaml so a newly registered repository cannot be
+          # skipped here: every non-untracked, non-platform entry needs a checkout or the
+          # conformance check reports it missing.
+          for repo in $(node -e 'const { parse } = require("yaml"); const { readFileSync } = require("fs"); const registry = parse(readFileSync("repositories.yaml", "utf8")); console.log(registry.repositories.filter((r) => r.commandProfile !== "untracked" && r.commandProfile !== "platform").map((r) => r.name).join(" "));'); do
             git clone --depth 1 "https://github.com/HomenShum/${repo}.git" "../ecosystem/${repo}"
           done
       - name: Verify ecosystem

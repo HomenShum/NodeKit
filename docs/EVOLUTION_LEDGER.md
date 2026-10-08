@@ -27,6 +27,10 @@ Canonical JSON lives under `evolution/`. Markdown timelines and adoption maps ar
 
 Agents may draft an interpretation. Canonical events require a named human reviewer. Records are immutable; later changes supersede rather than overwrite them.
 
+A maintainer reading an old record needs to preserve what was originally recorded without treating it as a measurement made today. An assumption authored before the measured-dimension contract cannot be repaired by inventing axes or editing its committed claim. Verification qualifies unchanged historical authorship only from full, continuous, unreplaced Git provenance and the exact schema that authored it. Such a qualification explicitly reports `currentDimensionsCertified: false`: the historical declaration is readable, while its current measured dimensions remain unknown. New and unqualified records still owe the current schema: admission rejects missing axes for supported or scope-limited assumptions, and verification rejects named axes without cited evidence. Declaring an axis alone does not certify its measurement.
+
+`evolution query` returns declared records with verification `NOT_RUN`; a recorded status is not a new measurement certificate. Generated documentation explains causal history, and graph synchronization creates a pending proposal rather than promoting a current guarantee. A later measured claim needs real evidence and the normal record/approval boundary. The current H1 credential policy proves credential control, not human presence; neither an old review string nor historical qualification supplies a missing attestation.
+
 Reversible changes may continue without an immediate approval interruption when they carry a proof-backed deferred-review receipt. This does not promote an agent proposal or claim that a human approved it. The receipt binds the exact commit range and all material files to:
 
 - exact before and after live request/response evidence;

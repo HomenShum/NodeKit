@@ -90,6 +90,9 @@ const lowerCostPricingSnapshot = Object.freeze({
   ],
   scope: "Fixture snapshot preserving the official-source pricing fields required to replay the lower-cost lane decision.",
 });
+// Historical contract tests simulate freshness without changing source timestamps.
+export const submissionFixtureReferenceTime =
+  Date.parse(lowerCostPricingSnapshot.retrievedAt) + 24 * 60 * 60 * 1000;
 const lowerCostPricingSnapshotBytes = Buffer.from(`${JSON.stringify(lowerCostPricingSnapshot, null, 2)}\n`);
 const lowerCostModelEvidence = Object.freeze({
   schemaVersion: "nodekit.lower-cost-model-evidence/v1",

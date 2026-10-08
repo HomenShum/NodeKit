@@ -4,7 +4,7 @@ import { generateKeyPairSync } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import test from "node:test";
+import test, { beforeEach } from "node:test";
 import {
   FINALIZABLE_EXTERNAL_GATES,
   FINALIZABLE_SUBMISSION_GATES,
@@ -17,7 +17,13 @@ import {
   exactSubmissionVerdicts,
   submissionEvidenceFixtureBytes,
   submissionEvidenceFixtureClosure,
+  submissionFixtureReferenceTime,
 } from "./submission-fixtures.mjs";
+
+// Date-only mocks are scoped to each test; node:test restores them afterward.
+beforeEach((t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: submissionFixtureReferenceTime });
+});
 
 const candidateCommit = "a".repeat(40);
 const sourceHash = "b".repeat(64);
