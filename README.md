@@ -11,6 +11,8 @@
 <p align="center"><a href="docs/START_HERE.md">Code&nbsp;walkthrough</a> · <a href="https://homenshum.github.io/">All&nbsp;projects</a></p>
 <!-- brand:end -->
 
+# NodeKit
+
 In one sentence: **NodeKit generates applications and then proves what they did.**
 
 ## 40 seconds to a running, proof-carrying app (measured from a cold clone)
