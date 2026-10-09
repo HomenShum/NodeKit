@@ -15,12 +15,21 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The clone list comes from repositories.yaml, the same registry
+      # `ecosystem check` iterates (every entry whose commandProfile is not
+      # "untracked"), so a repository added to the registry is checked out
+      # without editing this file. NodeKit is the current checkout, linked in.
       - name: Checkout active repositories
         shell: bash
         run: |
           mkdir -p ../ecosystem
-          for repo in NodeAgent NodeRoom NodeSlide NodeVideo NodeVoice NodeTrace NodeMem NodeProof agentic-ui-qa; do
-            git clone --depth 1 "https://github.com/HomenShum/${repo}.git" "../ecosystem/${repo}"
+          node -e 'for (const r of require("yaml").parse(require("fs").readFileSync("repositories.yaml", "utf8")).repositories) if (r.commandProfile !== "untracked") console.log(r.name, r.github)' |
+          while read -r name github; do
+            if [ "$name" = NodeKit ]; then
+              ln -s "$PWD" "../ecosystem/${name}"
+            else
+              git clone --depth 1 "https://github.com/${github}.git" "../ecosystem/${name}"
+            fi
           done
       - name: Verify ecosystem
         run: node src/cli.mjs ecosystem check --registry-root . --workspace ../ecosystem
