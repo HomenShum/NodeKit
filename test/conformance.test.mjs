@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+import { readYaml } from "../src/lib/files.mjs";
 import { checkRepository } from "../src/lib/repo-check.mjs";
 import { loadRegistry, validateRegistry } from "../src/lib/registry.mjs";
 
@@ -82,6 +85,67 @@ test("central registry and platform manifest are internally consistent", async (
   assert.deepEqual(validateRegistry(registry), []);
   const result = await checkRepository(platformRoot, registry);
   assert.equal(result.passed, true, result.errors.join("\n"));
+});
+
+test("a maintainer checks a nonstandard framework folder while missing downstream repositories stay failures", async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-ecosystem-"));
+  t.after(() => rm(root, { force: true, recursive: true }));
+  const framework = path.join(root, "framework checkout");
+  const workspace = path.join(root, "separate workspace");
+  await mkdir(workspace, { recursive: true });
+  const manifest = await readYaml(path.join(platformRoot, "nodekit.yaml"));
+  const files = ["ownership.yaml", "repositories.yaml", "architecture.yaml", "nodekit.yaml", "package.json",
+    ...manifest.contractDeclarations.map((entry) => entry.path)];
+  for (const file of files) {
+    await mkdir(path.dirname(path.join(framework, file)), { recursive: true });
+    await writeFile(path.join(framework, file), await readFile(path.join(platformRoot, file)));
+  }
+  const registry = await loadRegistry(framework);
+  assert.deepEqual(validateRegistry(registry), []);
+  const downstreams = registry.repositoryCatalog.repositories.filter((repo) =>
+    repo.commandProfile !== "untracked" && repo.name !== "NodeKit");
+  const run = promisify(execFile);
+  const inspect = async () => {
+    let report;
+    await assert.rejects(run(process.execPath, [path.join(platformRoot, "src", "cli.mjs"),
+      "ecosystem", "check", "--registry-root", framework, "--workspace", workspace, "--json"],
+    { cwd: root, timeout: 30_000, maxBuffer: 1024 * 1024 }), (error) => {
+      assert.equal(error.code, 1);
+      report = JSON.parse(error.stdout);
+      return true;
+    });
+    assert.equal(report.passed, false);
+    assert.equal(report.repositories.length, downstreams.length + 1);
+    const self = report.repositories.find((repo) => repo.repository === "HomenShum/NodeKit");
+    assert.ok(self, "the framework manifest must actually be read");
+    assert.equal(self.passed, true, self.errors.join("\n"));
+    return report;
+  };
+  const burst = await Promise.all(Array.from({ length: 3 }, () => inspect()));
+  for (const report of burst) {
+    for (const repo of downstreams) {
+      const missing = report.repositories.find((entry) => entry.repository === repo.name);
+      assert.ok(missing, `${repo.name} must remain in the report`);
+      assert.equal(missing.passed, false);
+      assert.deepEqual(missing.errors, [`repository checkout is missing at ${path.join(workspace, repo.name)}`]);
+    }
+  }
+  // A similarly named workspace directory cannot replace the actual framework root.
+  await mkdir(path.join(workspace, "NodeKit"));
+  await writeFile(path.join(workspace, "NodeKit", "nodekit.yaml"), "schemaVersion: invalid\n");
+  await writeFixture(path.join(workspace, "NodeProof"), { declaration: true });
+  for (let call = 0; call < 4; call += 1) {
+    const report = await inspect();
+    const proof = report.repositories.find((repo) => repo.repository === "HomenShum/NodeProof");
+    assert.equal(proof.passed, true, proof.errors.join("\n"));
+    assert.equal(report.repositories.filter((repo) => repo.errors.some((error) =>
+      error.includes("repository checkout is missing"))).length, downstreams.length - 1);
+  }
+  const proofManifest = path.join(workspace, "NodeProof", "nodekit.yaml");
+  await writeFile(proofManifest, (await readFile(proofManifest, "utf8")).replace("lifecycle: production", "lifecycle: imaginary"));
+  const malformed = (await inspect()).repositories.find((repo) => repo.repository === "HomenShum/NodeProof");
+  assert.equal(malformed.passed, false);
+  assert.match(malformed.errors.join("\n"), /invalid lifecycle imaginary/);
 });
 
 test("an undeclared canonical signature fails closed", async (t) => {

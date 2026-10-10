@@ -60,7 +60,7 @@ Five parts own everything. You should be able to name them after the tour:
 
 ## 4. Trace one real action
 
-Read `decideProposal` (src/lib/caseflow.mjs line 289). It is the one function in this repository
+Read `decideProposal` (src/lib/caseflow.mjs line 302). It is the one function in this repository
 that changes a saved artifact, and it is the whole governing rule in one function: **an accepted
 proposal is applied only if the version it was written against is still the current one.** If the
 artifact moved on in the meantime the proposal is marked `conflicted`, no version is written, and
@@ -84,28 +84,29 @@ npm test
 npm run evolution:verify
 ```
 
-> **This one currently reports `EVOLUTION BLOCKED` on a clean checkout, before you
-> change anything.** You did not break it. The ledger cites a commit that is not in
-> this repository's history, and one assumption record was edited in place instead
-> of superseded. Reproduction, the four exact reasons, and the fix are in
-> [docs/codebase/CONCERNS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md#3-npm-run-evolutionverify-exits-1-on-an-unmodified-clean-checkout).
-> Use `npm test` as your proof step until that is corrected.
+Run both commands and inspect their actual results. Ledger verification and
+pull-request material-change coverage are separate checks; passing tests does not
+replace either. A blocked check remains open until its reported cause is addressed
+with the required review. The failure transcript in
+[docs/codebase/CONCERNS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md#3-npm-run-evolutionverify-exits-1-on-an-unmodified-clean-checkout)
+is historical, not the status of your checkout.
 
 If you changed `src/`, `schemas/`, `templates/base/`, `harness/`, `nodekit.yaml`, `ownership.yaml`,
 or `.github/workflows/`, that is a **material** change and needs a reviewed Evolution Ledger entry
 before it can land. See [GLOSSARY.md](GLOSSARY.md#material-change) and
-[docs/EVOLUTION_LEDGER.md](docs/EVOLUTION_LEDGER.md).
+[docs/EVOLUTION_LEDGER.md](https://github.com/HomenShum/NodeKit/blob/main/docs/EVOLUTION_LEDGER.md).
 
 ## Where to go next
 
 | You want to | Read |
 |---|---|
-| **Change the code, not just use it** | [docs/START_HERE.md](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) — the same `create` command traced through the source in execution order, then [docs/codebase/](https://github.com/HomenShum/NodeKit/tree/main/docs/codebase) and [.tours/](https://github.com/HomenShum/NodeKit/tree/main/.tours) |
+| **Change the code, not just use it** | [docs/START_HERE.md](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) — trace `create`, then the generated app and separately invoked tools and tests; continue with [docs/codebase/](https://github.com/HomenShum/NodeKit/tree/main/docs/codebase/) and [.tours/](https://github.com/HomenShum/NodeKit/tree/main/.tours/) |
+| Find another project in the portfolio | [Repository directory](README.md#repository-directory) |
 | Generate an application | [README.md](README.md#from-a-brief-to-a-running-app) |
 | Turn an idea into the smallest useful product | [docs/IDEA_TO_REALITY_PRINCIPLES.md](docs/IDEA_TO_REALITY_PRINCIPLES.md) |
 | Understand a term | [GLOSSARY.md](GLOSSARY.md) |
-| Work on this repo as a coding agent | [AGENTS.md](AGENTS.md) |
-| Understand why a decision was made | [docs/DECISIONS.md](docs/DECISIONS.md), [docs/EVOLUTION_LEDGER.md](docs/EVOLUTION_LEDGER.md) |
+| Work on this repo as a coding agent | [AGENTS.md](https://github.com/HomenShum/NodeKit/blob/main/AGENTS.md) |
+| Understand why a decision was made | [docs/DECISIONS.md](https://github.com/HomenShum/NodeKit/blob/main/docs/DECISIONS.md), [docs/EVOLUTION_LEDGER.md](https://github.com/HomenShum/NodeKit/blob/main/docs/EVOLUTION_LEDGER.md) |
 | See the full command list | `node src/cli.mjs --help` or `repo-map.json` |
 
 `docs/` holds deeper reference documents. They are references, not onboarding — do not start there.

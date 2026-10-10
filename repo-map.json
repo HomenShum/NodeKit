@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 120,
+    "schemas": 121,
     "modules": 96,
-    "tests": 107
+    "tests": 108
   },
   "architecture": [
     {
@@ -161,6 +161,7 @@
     "nodeagent.pack.v1.schema.json",
     "nodekit.adversarial-verdict.v1.schema.json",
     "nodekit.agent-ease-trial.v2.schema.json",
+    "nodekit.assumption.v1.pre-dimensions.schema.json",
     "nodekit.assumption.v1.schema.json",
     "nodekit.attestation-signing-key-policy.v1.schema.json",
     "nodekit.audience-research.v1.schema.json",
@@ -431,6 +432,7 @@
     "launch-video.test.mjs",
     "local-candidate-gate.test.mjs",
     "managed-evidence-capture.test.mjs",
+    "managed-handoff.test.mjs",
     "model-intelligence.test.mjs",
     "motion-portability.test.mjs",
     "native-agent-identity.test.mjs",

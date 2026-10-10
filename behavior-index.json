@@ -417,7 +417,7 @@
           {
             "scenario": "idempotent-retry",
             "file": "test/caseflow.test.mjs",
-            "line": 13
+            "line": 162
           }
         ],
         "namedTestFiles": [
@@ -450,7 +450,7 @@
           {
             "scenario": "retry-contained",
             "file": "test/caseflow.test.mjs",
-            "line": 300
+            "line": 464
           }
         ],
         "namedTestFiles": [
@@ -816,7 +816,7 @@
           {
             "scenario": "adapter-conforms",
             "file": "test/postgres-adapter.test.mjs",
-            "line": 11
+            "line": 159
           }
         ],
         "namedTestFiles": [
@@ -1125,7 +1125,7 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "src/lib/evolution-ledger.mjs",
-      "line": 660
+      "line": 692
     },
     {
       "behaviorId": "journey.explain.produce-story",
@@ -1165,27 +1165,27 @@
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 41
+      "line": 48
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 64
+      "line": 71
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 76
+      "line": 83
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 91
+      "line": 98
     },
     {
       "behaviorId": "inv:ledger-records-are-immutable",
       "file": "test/evolution-immutability.test.mjs",
-      "line": 104
+      "line": 111
     },
     {
       "behaviorId": "inv:journey-contract-self-verifies",

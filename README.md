@@ -18,7 +18,7 @@ cd ../my-app && npm install && npm run demo
 That is a working agent application with a compiled definition, deterministic
 fixtures, and a no-key demo — 40 seconds end to end when this section was
 written, `"passed": true` from the demo's own output, and it is the same
-path the factory acceptance proves on every release. When it works, run
+creation path exercised by the factory acceptance gate. When it works, run
 `npm run proof` inside your app to see the receipt trail. **Coding-agent users skip all of this:**
 
 ```
@@ -38,21 +38,23 @@ itself. You do not need it to build your first app. Unfamiliar terms are in
 
 Read these instead, in this order. They exist so a new engineer can run, trace and
 change this repository without the person who built it sitting beside them — the
-[HUMAN-READY gate](https://github.com/HomenShum/NodeKit/blob/main/templates/promotion/HUMAN_READY.md) is the standard they answer to.
+[HUMAN-READY gate](templates/promotion/HUMAN_READY.md) is the standard they answer to.
 
 | Read | For |
 |---|---|
-| [`docs/START_HERE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) | One real command traced through the code **in the order it executes**, ten steps, entry to tests |
+| [`docs/START_HERE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/START_HERE.md) | Trace `create`, then the generated app, optional tools, and separately invoked tests |
 | [`.tours/`](https://github.com/HomenShum/NodeKit/tree/main/.tours) | The same three walkthroughs inside VS Code, pointing at live source ([CodeTour](https://marketplace.visualstudio.com/items?itemName=vsls-contrib.codetour)) |
-| [`docs/codebase/STRUCTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STRUCTURE.md) | Which of the 2,118 files are code (207) and which are records |
+| [`docs/codebase/STRUCTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STRUCTURE.md) | Find implementation, templates, contracts, and historical records |
 | [`docs/codebase/ARCHITECTURE.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/ARCHITECTURE.md) | The one invariant everything else is downstream of |
-| [`docs/codebase/CONCERNS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md) | What is known to be wrong, each with the command that reproduces it |
+| [`docs/codebase/CONCERNS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONCERNS.md) | Historical findings and reproduction commands; recheck them on your revision |
 | [`docs/SIMPLIFICATION_REPORT.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/SIMPLIFICATION_REPORT.md) | Before/after measurements for the last reduction pass, with every evidence command |
 
 Also: [`docs/codebase/STACK.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/STACK.md),
 [`CONVENTIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/CONVENTIONS.md),
 [`INTEGRATIONS.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/INTEGRATIONS.md),
 [`TESTING.md`](https://github.com/HomenShum/NodeKit/blob/main/docs/codebase/TESTING.md).
+
+Looking for another project? [Choose a repository by the developer task](#repository-directory).
 
 NodeKit is the figured-out product foundation and conformance layer for proof-carrying agent applications. It turns an empty directory or existing repository into a domain-blank application with one guided lifecycle, a compiled definition, deterministic fixtures, browser proof, and receipts.
 
@@ -126,9 +128,10 @@ The generated app includes `docs/FIGURED_OUT.md`, a product brief, audience plac
 There is no domain chooser, public preset catalog, or silent fallback. Narrow examples in this source repository are regression fixtures and historical demonstrations only: they are not shipped in the npm package and cannot be selected by the creation CLI. The coding agent starts from the same blank foundation every time, researches the user's actual workflow, and adds only the domain behavior that job requires.
 
 `pnpm proof` works before credentials exist in the pnpm quickstart: it emits a passing `local-ready`
-receipt after the deterministic demo and evaluation. If live Pi, browser, or deployment receipts
-are present, every attempted gate must pass; the receipt becomes `release-ready` only when all three
-are present and green. That generated-application status is not NodeKit Ease certification or Convex
+receipt after the deterministic demo and evaluation. Supplied browser evidence must pass.
+The generated proof script may label a passing result `browser-certified` when certified
+browser evidence is present, but it always reports `releaseReady: false` and lists remaining
+release gates. These generated-application levels are not NodeKit Ease certification or Convex
 submission authorization. Use the equivalent script command for the package manager selected at creation.
 
 Every created or adopted repository receives the same three coding-agent skills
@@ -342,6 +345,41 @@ owner reads, a principal-derived proposal RPC, explicit Realtime publication, an
 Storage policies. The worker module enables a server-only PGMQ queue and pg_cron without exposing
 either to browser roles. Checked-in SQL is not a claim that live Supabase Auth, Storage, Realtime,
 Queue, or Cron conformance has passed; see [`adapters/supabase/README.md`](adapters/supabase/README.md).
+
+## Repository directory
+
+Start with the job you need to finish. These are the repositories listed in
+[`repositories.yaml`](repositories.yaml); the descriptions summarize their maintained
+GitHub descriptions and entry pages observed on 2026-10-07. Open the repository's own README for setup
+and read its agent instructions before editing. This directory is a navigation aid,
+not a claim that every project is tested, published, licensed for reuse, or ready for production.
+
+| Developer task | Repository |
+|---|---|
+| Generate an agent application and use shared contracts | [NodeKit](#nodekit) |
+| Integrate an agent with room context, documents, spreadsheets, and notes | [NodeAgent](https://github.com/HomenShum/NodeAgent) |
+| Build shared editing flows for humans and agents | [NodeRoom](https://github.com/HomenShum/NodeRoom) |
+| Work on reviewable AI edits to presentation decks | [NodeSlide](https://github.com/HomenShum/NodeSlide) |
+| Inspect the default NodeSlide app or the separately enabled local Parity UI workflow | [parity-studio](https://github.com/HomenShum/parity-studio) |
+| Work on inspectable video reconstruction | [NodeVideo](https://github.com/HomenShum/NodeVideo) |
+| Coordinate agents in shared voice rooms | [NodeVoice](https://github.com/HomenShum/NodeVoice) |
+| Connect an app surface to its agent trace | [NodeTrace](https://github.com/HomenShum/NodeTrace) |
+| Add passive memory from agent activity streams | [NodeMem](https://github.com/HomenShum/NodeMem) |
+| Use a proof supervisor for coding-agent work | [NodeProof](https://github.com/HomenShum/NodeProof) |
+| Follow persona journeys and artifact-based UI QA | [agentic-ui-qa](https://github.com/HomenShum/agentic-ui-qa) |
+| Find task corpora, benchmark adapters, and rubrics | [NodeTasks](https://github.com/HomenShum/NodeTasks) |
+| Prepare readable developer and coding-agent handoffs | [BetterPRHandoff](https://github.com/HomenShum/BetterPRHandoff) |
+| Capture reproducible feature walkthrough videos and GIFs | [FeatureClipStudio](https://github.com/HomenShum/FeatureClipStudio) |
+| Read portable specifications for inspectable agent systems | [NodeAgentSpec](https://github.com/HomenShum/NodeAgentSpec) |
+| Model relationships between artifacts, traces, and proposals | [NodeGraph](https://github.com/HomenShum/NodeGraph) |
+| Explore trace, reward, memory, and repair research | [NodeRL](https://github.com/HomenShum/NodeRL) |
+| Work on sourced entity research and reusable artifacts | [NodeBenchAI](https://github.com/HomenShum/NodeBenchAI) |
+| Inspect a template for NodeBench MCP agent projects | [NodeBenchBoilerplate](https://github.com/HomenShum/NodeBenchBoilerplate) |
+
+For a local checkout, `rg --files` finds the entry documents and `rg "<symbol or topic>"`
+finds the code that owns a change. Start with source directories; open recorded evidence
+when investigating the specific run it describes. Registry lifecycle labels and README
+claims do not replace checks bound to the revision you intend to use.
 
 ## Contracts
 

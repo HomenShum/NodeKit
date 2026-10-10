@@ -62,3 +62,52 @@ nodekit evolution sync-graph
 ```
 
 Material changes include user workflow, public contracts, architectural ownership, security or authority, proof requirements, model routing, harness behavior, benchmark conclusions, and downstream guarantees. Routine formatting and dependency churn remain ordinary changelog entries.
+
+## Historical authorship and current measured scope
+
+A maintainer must be able to read what an earlier author actually claimed without
+turning it into a present-day guarantee. For example, an older scope-limited
+frontend claim did not name a measured dimension. Adding a later interpretation
+to that immutable record would rewrite its history (authored-contract revision).
+Historical validity preserves authorship; it does not certify today's measured scope.
+
+New records always use the current strict assumption schema. Supported and
+scope-limited claims must name nonempty dimensions and cite evidence; the frozen
+`nodekit.assumption.v1.pre-dimensions.schema.json` is never an admission contract.
+There is no caller flag, id exception or legacy stamp that relaxes a new write.
+
+An old unscoped claim is readable only when its exact original payload, full
+introducing commit, continuous path lifecycle, original schema hash and ancestry
+before the actual schema-tightening commit are verified. Shallow, missing, moved,
+deleted/readded, malformed or changed provenance remains unknown and fails the
+current dimension rule. Existing binding repair rules do not permit claim edits.
+
+Verification, queries, documentation and graph proposals each consume one loaded
+record snapshot and its computed verdict. A proven old claim is accompanied by
+`authored-historical-unscoped`, its source/contract identity and
+`currentDimensionsCertified: false`; this metadata does not alter the canonical
+record. Queries expose failed inspection issues, while documentation and graph
+projection refuse to generate successful output after failed inspection.
+
+Historical unscoped claims are omitted from new current graph nodes and causal
+edges. Existing derived interpretations and connected derived causal edges are
+retired only through grounded DEPRECATE proposals, normal validation and normal
+approval. Immutable source evidence remains available. No empty proposal is
+reported as successful.
+
+Later scope interpretations remain separate agent-proposed drafts. Their old
+source attribution is not a future repair commit. Materiality remains OPEN until
+a genuine permitted review route supplies its actual commit scope and proof.
+A session directive is not a credential signature; canonical promotion and
+replay protection remain unchanged.
+
+A maintainer changing a workflow must use the genuine pre-action review path.
+For example, this history-recovery repair includes
+`.github/workflows/quality.yml`, so its whole range cannot close through deferred
+review (workflow pre-action authority). The existing policy rejects any range
+containing `.github/workflows/*` before considering an operator directive.
+Even genuine in-range commits, command I/O, journey and rollback evidence plus
+a content-bound session directive cannot override that exclusion. Keep
+materiality OPEN, preserve the complete reviewed scope, and never split or
+rebind a range to hide changed workflow or other material paths. An ordinary
+source-review verdict is not canonical event approval or a credential signature.

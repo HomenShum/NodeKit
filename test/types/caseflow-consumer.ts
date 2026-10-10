@@ -96,6 +96,24 @@ void skillTrustedKeys;
 declare const pool: PostgreSqlPool;
 const postgres = createPostgresCaseflow({ pool, ownerId: "owner_123" });
 void postgres.snapshot();
+const externalException = await memory.raiseException({ runId: terminalRun.runId, nextAction: "Await external review", nextActionOwner: "external", preservedState: { version: 1 } });
+externalException.nextAction satisfies string | undefined;
+externalException.nextActionOwner satisfies string | undefined;
+externalException.preservedState.version satisfies number;
+void postgres.raiseException({ runId: terminalRun.runId, nextAction: undefined, nextActionOwner: undefined });
+void memory.raiseException({ runId: terminalRun.runId, nextAction: undefined, nextActionOwner: undefined });
+// @ts-expect-error Optional metadata accepts text or omission, never null.
+void memory.raiseException({ runId: terminalRun.runId, nextActionOwner: null });
 
 declare const artifact: NodeKitArtifact<{ value: number }>;
 artifact.versions.at(-1)?.content.value satisfies number | undefined;
+
+const expectedCompletion = { caseId: created.caseId, caseInputHash: "a".repeat(64), artifactBindings: [{ artifactId: "artifact", canonicalVersion: 1, contentHash: "b".repeat(64) }] };
+void memory.completeRun({ runId: terminalRun.runId, expected: expectedCompletion });
+void postgres.completeRun({ runId: terminalRun.runId, expected: expectedCompletion });
+void memory.completeRun({ runId: terminalRun.runId, expected: undefined });
+void postgres.completeRun({ runId: terminalRun.runId, expected: undefined });
+// @ts-expect-error Missing required reviewed case and artifact bindings.
+void memory.completeRun({ runId: terminalRun.runId, expected: { caseInputHash: "a".repeat(64) } });
+// @ts-expect-error A supplied null guard must not mean unguarded completion.
+void postgres.completeRun({ runId: terminalRun.runId, expected: null });

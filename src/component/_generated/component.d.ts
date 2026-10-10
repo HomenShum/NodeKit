@@ -31,6 +31,7 @@ type Approval = {
 };
 type Exception = {
   code: string; exceptionId: string; message: string; preservedState: any; raisedAt: string;
+  nextAction?: string; nextActionOwner?: string;
   resolution: string | null; resolvedAt?: string; runId: string; schemaVersion: "nodekit.exception/v1";
   status: "open" | "resolved";
 };
@@ -65,9 +66,9 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
     createArtifact: Ref<"mutation", { actor?: Actor; caseId: string; content: any; contentHash: string; idempotencyKey?: string; kind?: string; runId: string; scopeKey: string; title?: string }, Artifact, Name>;
     createProposal: Ref<"mutation", { actor?: Actor; artifactId: string; baseVersion: number; idempotencyKey?: string; patch: any; patchHash: string; rationale?: string; scopeKey: string }, Proposal, Name>;
     decideProposal: Ref<"mutation", { actor?: Actor; comment?: string; decision: "accepted" | "rejected"; proposalId: string; scopeKey: string }, { approval: Approval; artifact: Artifact; proposal: Proposal; reused: boolean }, Name>;
-    raiseException: Ref<"mutation", { actor?: Actor; code?: string; idempotencyKey?: string; message?: string; preservedState?: any; preservedStateHash: string; runId: string; scopeKey: string }, Exception, Name>;
+    raiseException: Ref<"mutation", { actor?: Actor; code?: string; idempotencyKey?: string; message?: string; nextAction?: string | undefined; nextActionOwner?: string | undefined; preservedState?: any; preservedStateHash: string; runId: string; scopeKey: string }, Exception, Name>;
     resolveException: Ref<"mutation", { actor?: Actor; exceptionId: string; nextAction?: string; nextActionOwner?: string; resolution?: string; scopeKey: string }, { exception: Exception; run: Run }, Name>;
-    completeRun: Ref<"mutation", { actor?: Actor; runId: string; scopeKey: string }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
+    completeRun: Ref<"mutation", { actor?: Actor; runId: string; scopeKey: string; expected?: { caseId: string; caseInputHash: string; artifactBindings: Array<{ artifactId: string; canonicalVersion: number; contentHash: string }> } | undefined }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
     cancelRun: Ref<"mutation", { actor?: Actor; reason?: string; runId: string; scopeKey: string }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
     failRunSafely: Ref<"mutation", { actor?: Actor; reason?: string; runId: string; scopeKey: string }, { receipt: Receipt; reused: boolean; run: Run }, Name>;
     getCase: Ref<"query", { caseId: string; scopeKey: string }, Case | null, Name>;

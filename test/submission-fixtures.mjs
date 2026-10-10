@@ -75,34 +75,16 @@ const protectedEvaluationChecks = Object.freeze(Object.fromEntries([
   "independentScreenshotCaptured", "isolationBound", "renderedTaskRelevant", "sourceTaskRelevant", "taskBytesBound",
   "taskInputBound", "taskSetBound", "typedArtifactVerified", "visualReviewPassed",
 ].map((name) => [name, true])));
-const lowerCostPricingSnapshot = Object.freeze({
-  schemaVersion: "nodekit.external-source-snapshot/v1",
-  retrievedAt: "2026-07-22T00:00:00.000Z",
-  retrievalMethod: "OpenAI Developer Docs official pricing snapshot",
-  source: "https://developers.openai.com/api/docs/pricing",
-  section: "Flagship models / Standard",
-  unit: "USD per 1M tokens",
-  columns: ["model", "input", "cachedInput", "cacheWrite", "output"],
-  rows: [
-    ["gpt-5.6-sol", 5, 0.5, 6.25, 30],
-    ["gpt-5.6-terra", 2.5, 0.25, 3.125, 15],
-    ["gpt-5.6-luna", 1, 0.1, 1.25, 6],
-  ],
-  scope: "Fixture snapshot preserving the official-source pricing fields required to replay the lower-cost lane decision.",
-});
-const lowerCostPricingSnapshotBytes = Buffer.from(`${JSON.stringify(lowerCostPricingSnapshot, null, 2)}\n`);
+// Reuse the preserved, current source and exact prices: fixtures must not age a
+// separate hard-coded copy or fabricate a fresh retrieval time.
+const currentLowerCostEvidence = JSON.parse(readFileSync(new URL("../evals/ease/lower-cost-model-evidence.json", import.meta.url)));
+const lowerCostPricingSnapshotBytes = readFileSync(new URL(`../evals/ease/${currentLowerCostEvidence.source.snapshotPath}`, import.meta.url));
+const lowerCostPricingSnapshot = Object.freeze(JSON.parse(lowerCostPricingSnapshotBytes));
 const lowerCostModelEvidence = Object.freeze({
-  schemaVersion: "nodekit.lower-cost-model-evidence/v1",
-  agentDriver: "codex",
-  model: "gpt-5.6-luna",
-  lowerCost: { inputUsdPerMillion: 1, outputUsdPerMillion: 6 },
-  comparators: [{ model: "gpt-5.6-sol", inputUsdPerMillion: 5, outputUsdPerMillion: 30 }],
-  observedAt: lowerCostPricingSnapshot.retrievedAt,
-  passed: true,
+  ...currentLowerCostEvidence,
   source: {
-    url: lowerCostPricingSnapshot.source,
+    ...currentLowerCostEvidence.source,
     snapshotPath: "lower-cost-source.snapshot.json",
-    snapshotSha256: createHash("sha256").update(lowerCostPricingSnapshotBytes).digest("hex"),
   },
 });
 const lowerCostModelEvidenceBytes = Buffer.from(`${JSON.stringify(lowerCostModelEvidence, null, 2)}\n`);
@@ -1434,7 +1416,106 @@ export function submissionEvidenceFixtureBytes(evidencePath, candidateCommit = "
       activeRunStartIsIdempotent: true, canonicalVersionAdvancedOnce: true, contentAddressedReceipt: true,
       exceptionStatePreserved: true, nextActionOwnerExplicit: true, oneAuthoritativeCase: true,
       repeatedCompletionIsIdempotent: true, repeatedDecisionIsIdempotent: true, staleProposalFailedClosed: true,
+      externalExceptionOwnershipPersisted: true,
+      exceptionMetadataRetriesStable: true,
+      ordinalExceptionOwnerSelection: true,
+      partialRecoveryKeepsRemainingOwner: true,
+      finalRecoveryUsesLegacyContinuation: true,
+      externalWaitPreservesCanonicalArtifact: true,
+      invalidExceptionMetadataFailsBeforeMutation: true,
+      guardedCompletionRejectsInvalidConditions: true,
+      guardedCompletionRejectsStaleStateWithoutMutation: true,
+      guardedCompletionReusesNormalizedRequest: true,
+      guardedCompletionPreservesRetryIdentity: true,
+      activeRunStagePlanMismatchFailsClosed: true,
+      blockedRunRejectsOrdinaryMutations: true,
+      caseInputUpdateIsIdempotent: true,
+      explicitRetryKeysAreIdempotent: true,
+      idempotencyKeyReuseWithDifferentInputFailsClosed: true,
+      idempotencyKeysAreTrimmed: true,
+      hostAuthorizationBoundary: true,
+      invalidPortableValuesFailClosed: true,
+      portablePayloadDepthReservesProviderEnvelope: true,
+      portableNormalizationPreservesJsonSemantics: true,
+      invalidStagesFailClosed: true,
+      multipleExceptionsRemainBlocked: true,
+      pendingProposalBlocksCompletion: true,
+      successfulCompletionRequiresCanonicalArtifact: true,
+      terminalReceiptBoundaryIsImmutable: true,
+      runCannotBindArtifactAcrossCases: true,
+      stageDefinitionsAreTrimmed: true,
+      terminalCancellationIsReceiptedAndIdempotent: true,
+      terminalFailureIsReceiptedAndPreservesArtifacts: true,
     };
+    // Synthetic consumer-contract records mirror the observed native shape;
+    // no PID, SQL observation, retry count or fixture hash below is live proof.
+    const guardAssertions = Object.fromEntries(["caseAndArtifactBothOrdersObserved", "proposalBothOrdersPreservePendingRule", "completedRunRejectsProposalAdmission", "restoredBytesRejectOldVersionWithoutMutation", "exactMembershipRejectedThenCompleted", "wrongOwnerRejectedWithoutMutation", "missingCanonicalVersionRejectedWithoutMutation", "postWriteRollbackRestoredExactState", "heldLockDeadlinePreservedState", "lostAckBurstSustainedReplacementRetriesStable"].map((name) => [name, true]));
+    const stateTables = ["cases", "runs", "artifacts", "proposals", "approvals", "exceptions", "receipts", "events", "artifact_versions"];
+    const fixtureState = (label, count = 1) => {
+      const counts = Object.fromEntries(stateTables.map((table) => [table, count]));
+      const hashes = Object.fromEntries(stateTables.map((table) => [table, digest(`${label}/${table}`)]));
+      return { counts, hashes, hash: portableContentHash({ counts, hashes }) };
+    };
+    const proofError = (code, message = `controlled ${code}`) => ({ name: "Error", code, message });
+    const userExceptionId = `exception_${"1".repeat(26)}`;
+    const externalExceptionId = `exception_${"2".repeat(26)}`;
+    const before = fixtureState("before-rollback");
+    const retryState = fixtureState("completed-retry");
+    const ownershipHash = digest("unchanged-ownership-state");
+    const exceptionOwnership = {
+      schemaVersion: "nodekit.exception-ownership-observations/v1",
+      assertions: Object.fromEntries(["mixedRecoveryPreservesRemainingAssignment", "postWriteStatementFailuresRestoreExactState", "canonicalExternalWaitIsBlocked", "lostAckBurstAndSustainedRetriesPreserveState", "freshBlockedMutationsAndCompletionRefuseWithoutChange", "changedOwnerReplayRefusesWithoutChange", "changedActionReplayRefusesWithoutChange"].map((name) => [name, true])),
+      mixedRecoveries: ["user-first", "external-first"].flatMap((raiseOrder) => ["user", "external"].map((resolvedOwner) => ({
+        raiseOrder, resolvedOwner, remainingOwner: resolvedOwner === "user" ? "external" : "user",
+        selectedExceptionId: userExceptionId,
+        remainingExceptionId: resolvedOwner === "user" ? externalExceptionId : userExceptionId, status: "blocked",
+      }))),
+      rollbacks: ["raiseException", "resolveException"].map((operation) => ({
+        operation, injection: "after-real-run-update-before-commit", writerPid: 51, observerPid: 52,
+        exceptionStatus: operation === "raiseException" ? "open" : "resolved", runStatus: "blocked", nextActionOwner: "external",
+        rollbackCommand: "ROLLBACK", beforeStateHash: ownershipHash, afterStateHash: ownershipHash,
+        originalError: proofError("22012", "division by zero"),
+      })),
+      refusals: ["changedOwnerReplay", "changedActionReplay", "enterStage", "createArtifact", "createProposal", "decideProposal", "completeRun"].map((operation) => ({
+        operation, beforeStateHash: ownershipHash, afterStateHash: ownershipHash, error: proofError("", `${operation} refused`),
+      })),
+      retries: { burstCalls: 100, sustainedCalls: 1000, maximumConcurrentCalls: 8, retainedPerRetryResults: 0,
+        simulatedAcknowledgmentLossAfter: "COMMIT", exceptionId: externalExceptionId, resultHash: digest("original-exception-result"),
+        beforeStateHash: ownershipHash, afterStateHash: ownershipHash },
+    };
+    const guardedCompletion = {
+      assertions: guardAssertions,
+      schedules: ["criteria-edit-first", "criteria-close-first", "artifact-edit-first", "artifact-close-first", "proposal-accept-first", "proposal-pending-close-first", "close-before-proposal-admission"].map((name) => {
+        const pendingFirst = name === "proposal-pending-close-first";
+        return { name, waiterPid: 51, blockerPid: 52, waitEventType: "Lock", blockerObserved: true,
+          first: pendingFirst ? "rejected" : "fulfilled", second: pendingFirst ? "fulfilled" : "rejected",
+          firstError: pendingFirst ? proofError("", "pending proposals") : null,
+          secondError: pendingFirst ? null : proofError("", "guarded close refused") };
+      }),
+      rollbackObservation: { uncommitted: { run_status: "completed", case_status: "completed", receipts: 1, terminal_events: 1,
+        writerPid: 51, observerPid: 52, injection: "after-real-receipt-insert-before-commit" }, rollbackCommand: "ROLLBACK",
+        before, after: structuredClone(before), originalError: proofError("PROOF_POST_WRITE", "controlled post-write rollback") },
+      heldLockObservation: { waiterPid: 51, blockerPid: 52, waitEventType: "Lock", blockerObserved: true, elapsedMs: 4002,
+        error: proofError("55P03", "canceling statement due to lock timeout"),
+        cleanup: ["held-lock-rollback", "held-lock-release", "held-lock-contender"].map((name) => ({ name, passed: true, detail: null })) },
+      exceptionOwnership,
+      retries: { burstCalls: 100, sustainedCalls: 1000, maximumConcurrentCalls: 8, retainedPerRetryResults: 0,
+        simulatedAcknowledgmentLossAfter: "COMMIT", before: retryState, after: structuredClone(retryState),
+        afterReplacement: fixtureState("replacement-run", 2), replacementRunActive: true },
+    };
+    const failedCleanup = [{ name: "harmless-cleanup", passed: false, error: proofError("PROOF_CLEANUP") }];
+    const lifecycleFailureScenarios = {
+      cleanupAfterPass: { value: { passed: true }, primaryError: null, cleanup: failedCleanup, passed: false, exitCode: 1 },
+      primaryAndCleanup: { value: null, primaryError: proofError("PROOF_PRIMARY"), cleanup: structuredClone(failedCleanup), passed: false, exitCode: 1 },
+    };
+    const cleanupCounts = Object.fromEntries([...stateTables, "knowledge_projections", "knowledge_sessions", "knowledge_retrieval_receipts"].map((table) => [table, 0]));
+    const cleanup = [
+      { name: "settle-scenario-clients", passed: true, detail: { required: true, remainingCheckedOut: 0 } },
+      { name: "exact-owned-fixtures", passed: true, detail: { required: true, committed: true, writerPid: 51, observerPid: 52,
+        exactCaseOwnerCount: 4, exactKnowledgeOwnerCount: 3, capturedArtifactIds: 34, counts: cleanupCounts } },
+      { name: "pool-and-clients", passed: true, detail: { required: true, unreleased: 0, poolEnded: true } },
+      { name: "exact-disposable-installation", passed: true, detail: { required: true, exactOwnedRootVerified: true, removed: true } },
+    ];
     return Buffer.from(`${JSON.stringify({
       schemaVersion: "nodekit.postgres-conformance/v2",
       adapter: "@homenshum/nodekit/adapters/postgres",
@@ -1459,10 +1540,10 @@ export function submissionEvidenceFixtureBytes(evidencePath, candidateCommit = "
         immutableTarballCopySha256: digest(packageFixture().tarball),
         sourceCheckoutImported: false,
       },
-      postgres: { serverVersion: "17.10", serverVersionNum: 170010 },
+      postgres: { serverVersion: "16.15 (Debian 16.15-1.pgdg13+2)", serverVersionNum: 160015 },
       capabilities,
       conformance: {
-        schemaVersion: "nodekit.adapter-conformance/v1", capabilities,
+        schemaVersion: "nodekit.adapter-conformance/v1", actorMode: "caller-supplied", capabilities,
         capabilityNegotiation: { schemaVersion: "nodekit.runtime-capability-negotiation/v1", provider: "postgres", missing: [], passed: true },
         assertions, passed: true,
       },
@@ -1471,7 +1552,16 @@ export function submissionEvidenceFixtureBytes(evidencePath, candidateCommit = "
         reloadPreservedState: true, sameBaseRaceFailedClosed: true, sharedConformancePassed: true,
         knowledgeFirstCreateRaceAtomic: true, knowledgeOwnerIsolation: true, knowledgePackageExportsResolved: true,
         knowledgeProjectionApplied: true, knowledgeProjectionReloaded: true, knowledgeRetrievalReceiptDurable: true,
+        ...guardAssertions, cleanupFailureAfterPassFails: true, primaryAndCleanupFailuresPreserved: true,
       },
+      guardedCompletion, exceptionOwnership, lifecycleFailureScenarios,
+      knowledgeFirstCreateRace: { outcomes: [
+        { index: 0, inputContentHash: digest("race-winner"), settlement: "fulfilled", applied: true, reused: false, conflict: false, actualVersion: 0 },
+        { index: 1, inputContentHash: digest("race-conflict"), settlement: "fulfilled", applied: false, reused: false, conflict: true, actualVersion: 0 },
+      ], storedVersion: 0, storedContentHash: digest("race-winner") },
+      namedProof: "MANAGED-HANDOFF-POSTGRES-INTERLEAVINGS-01",
+      limits: {"fileBytes": 67108864, "reportBytes": 1048576, "subprocessBytes": 1048576, "installMs": 180000, "proofMs": 360000, "processMs": 720000, "cleanupMs": 45000, "connectionMs": 3000, "statementMs": 10000, "lockMs": 4000, "idleTransactionMs": 12000, "queryMs": 12000, "synchronizationMs": 2500, "settlementMs": 15000, "clients": 8, "fixtureRows": 512, "artifactIds": 256},
+      finalizedAt: "2026-07-22T00:00:01.000Z", primaryError: null, failedAssertions: [], cleanup, poolErrorCount: 0, poolErrors: [],
       passed: true, errors: [], publicationPerformed: false, deployPerformed: false,
     }, null, 2)}\n`);
   }
@@ -1792,7 +1882,7 @@ export function exactSubmissionVerdicts(candidateCommit, sourceHash = defaultSou
         schemaVersion: "nodekit.postgres-conformance/v2",
         path: "proof/postgres-conformance.json",
         sha256: digest(submissionEvidenceFixtureBytes("proof/postgres-conformance.json", candidateCommit, sourceHash)),
-        serverVersionNum: 170010,
+        serverVersionNum: 160015,
         exactPackageInstalled: true,
         passed: true,
       },

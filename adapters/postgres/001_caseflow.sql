@@ -81,6 +81,8 @@ create table if not exists nodekit.exceptions (
   run_id text not null references nodekit.runs(run_id),
   code text not null,
   message text not null,
+  next_action text,
+  next_action_owner text,
   preserved_state jsonb not null,
   status text not null check (status in ('open', 'resolved')),
   resolution text,
@@ -116,6 +118,9 @@ create table if not exists nodekit.events (
 alter table nodekit.events add column if not exists idempotency_key text;
 alter table nodekit.events add column if not exists request_hash text;
 alter table nodekit.events add column if not exists result jsonb;
+-- Nullable metadata preserves legacy exception rows and cached result bytes.
+alter table nodekit.exceptions add column if not exists next_action text;
+alter table nodekit.exceptions add column if not exists next_action_owner text;
 
 -- The proposal owns the digest that will become the canonical artifact digest.
 -- PostgreSQL jsonb::text is not NodeKit's portable canonical serialization, so
@@ -147,6 +152,8 @@ create index if not exists nodekit_runs_owner_case on nodekit.runs(owner_id, cas
 create index if not exists nodekit_artifacts_owner_run on nodekit.artifacts(owner_id, run_id, created_at);
 create index if not exists nodekit_proposals_owner_artifact on nodekit.proposals(owner_id, artifact_id, created_at);
 create index if not exists nodekit_exceptions_owner_run on nodekit.exceptions(owner_id, run_id, raised_at);
+create index if not exists nodekit_exceptions_owner_run_open_id
+  on nodekit.exceptions(owner_id, run_id, exception_id collate "C") where status = 'open';
 create index if not exists nodekit_events_owner_aggregate on nodekit.events(owner_id, aggregate_id, sequence);
 create unique index if not exists nodekit_events_owner_idempotency
   on nodekit.events(owner_id, idempotency_key) where idempotency_key is not null;

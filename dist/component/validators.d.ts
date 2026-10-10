@@ -177,6 +177,8 @@ export declare const exceptionValidator: import("convex/values").VObject<{
     code: string;
     exceptionId: string;
     message: string;
+    nextAction?: string;
+    nextActionOwner?: string;
     preservedState: any;
     raisedAt: string;
     resolution: string | null;
@@ -188,6 +190,8 @@ export declare const exceptionValidator: import("convex/values").VObject<{
     code: import("convex/values").VString<string, "required">;
     exceptionId: import("convex/values").VString<string, "required">;
     message: import("convex/values").VString<string, "required">;
+    nextAction: import("convex/values").VString<string | undefined, "optional">;
+    nextActionOwner: import("convex/values").VString<string | undefined, "optional">;
     preservedState: import("convex/values").VAny<any, "required", string>;
     raisedAt: import("convex/values").VString<string, "required">;
     resolution: import("convex/values").VUnion<string | null, [import("convex/values").VNull<null, "required">, import("convex/values").VString<string, "required">], "required", never>;
@@ -195,7 +199,7 @@ export declare const exceptionValidator: import("convex/values").VObject<{
     runId: import("convex/values").VString<string, "required">;
     schemaVersion: import("convex/values").VLiteral<"nodekit.exception/v1", "required">;
     status: import("convex/values").VUnion<"open" | "resolved", [import("convex/values").VLiteral<"open", "required">, import("convex/values").VLiteral<"resolved", "required">], "required", never>;
-}, "required", "code" | "exceptionId" | "message" | "preservedState" | "raisedAt" | "resolution" | "resolvedAt" | "runId" | "schemaVersion" | "status" | `preservedState.${string}`>;
+}, "required", "code" | "exceptionId" | "message" | "nextAction" | "nextActionOwner" | "preservedState" | "raisedAt" | "resolution" | "resolvedAt" | "runId" | "schemaVersion" | "status" | `preservedState.${string}`>;
 export declare const receiptValidator: import("convex/values").VObject<{
     approvalBindings: {
         approvalId: string;
@@ -480,6 +484,8 @@ export declare const exceptionResolutionValidator: import("convex/values").VObje
         code: string;
         exceptionId: string;
         message: string;
+        nextAction?: string;
+        nextActionOwner?: string;
         preservedState: any;
         raisedAt: string;
         resolution: string | null;
@@ -510,6 +516,8 @@ export declare const exceptionResolutionValidator: import("convex/values").VObje
         code: string;
         exceptionId: string;
         message: string;
+        nextAction?: string;
+        nextActionOwner?: string;
         preservedState: any;
         raisedAt: string;
         resolution: string | null;
@@ -521,6 +529,8 @@ export declare const exceptionResolutionValidator: import("convex/values").VObje
         code: import("convex/values").VString<string, "required">;
         exceptionId: import("convex/values").VString<string, "required">;
         message: import("convex/values").VString<string, "required">;
+        nextAction: import("convex/values").VString<string | undefined, "optional">;
+        nextActionOwner: import("convex/values").VString<string | undefined, "optional">;
         preservedState: import("convex/values").VAny<any, "required", string>;
         raisedAt: import("convex/values").VString<string, "required">;
         resolution: import("convex/values").VUnion<string | null, [import("convex/values").VNull<null, "required">, import("convex/values").VString<string, "required">], "required", never>;
@@ -528,7 +538,7 @@ export declare const exceptionResolutionValidator: import("convex/values").VObje
         runId: import("convex/values").VString<string, "required">;
         schemaVersion: import("convex/values").VLiteral<"nodekit.exception/v1", "required">;
         status: import("convex/values").VUnion<"open" | "resolved", [import("convex/values").VLiteral<"open", "required">, import("convex/values").VLiteral<"resolved", "required">], "required", never>;
-    }, "required", "code" | "exceptionId" | "message" | "preservedState" | "raisedAt" | "resolution" | "resolvedAt" | "runId" | "schemaVersion" | "status" | `preservedState.${string}`>;
+    }, "required", "code" | "exceptionId" | "message" | "nextAction" | "nextActionOwner" | "preservedState" | "raisedAt" | "resolution" | "resolvedAt" | "runId" | "schemaVersion" | "status" | `preservedState.${string}`>;
     run: import("convex/values").VObject<{
         caseId: string;
         createdAt: string;
@@ -572,7 +582,7 @@ export declare const exceptionResolutionValidator: import("convex/values").VObje
         status: import("convex/values").VUnion<"active" | "blocked" | "cancelled" | "completed" | "failed_safely", [import("convex/values").VLiteral<"active", "required">, import("convex/values").VLiteral<"blocked", "required">, import("convex/values").VLiteral<"cancelled", "required">, import("convex/values").VLiteral<"completed", "required">, import("convex/values").VLiteral<"failed_safely", "required">], "required", never>;
         updatedAt: import("convex/values").VString<string, "required">;
     }, "required", "caseId" | "createdAt" | "currentStageId" | "nextAction" | "nextActionOwner" | "runId" | "schemaVersion" | "stages" | "status" | "updatedAt">;
-}, "required", "exception" | "exception.code" | "exception.exceptionId" | "exception.message" | "exception.preservedState" | "exception.raisedAt" | "exception.resolution" | "exception.resolvedAt" | "exception.runId" | "exception.schemaVersion" | "exception.status" | "run" | "run.caseId" | "run.createdAt" | "run.currentStageId" | "run.nextAction" | "run.nextActionOwner" | "run.runId" | "run.schemaVersion" | "run.stages" | "run.status" | "run.updatedAt" | `exception.preservedState.${string}`>;
+}, "required", "exception" | "exception.code" | "exception.exceptionId" | "exception.message" | "exception.nextAction" | "exception.nextActionOwner" | "exception.preservedState" | "exception.raisedAt" | "exception.resolution" | "exception.resolvedAt" | "exception.runId" | "exception.schemaVersion" | "exception.status" | "run" | "run.caseId" | "run.createdAt" | "run.currentStageId" | "run.nextAction" | "run.nextActionOwner" | "run.runId" | "run.schemaVersion" | "run.stages" | "run.status" | "run.updatedAt" | `exception.preservedState.${string}`>;
 export declare const completionValidator: import("convex/values").VObject<{
     receipt: {
         approvalBindings: {

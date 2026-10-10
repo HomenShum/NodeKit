@@ -168,6 +168,8 @@ declare const _default: {
             code: string;
             exceptionId: string;
             message: string;
+            nextAction?: string;
+            nextActionOwner?: string;
             preservedState: any;
             raisedAt: string;
             resolution?: string;
@@ -181,14 +183,17 @@ declare const _default: {
             runId: import("convex/values").VString<string, "required">;
             code: import("convex/values").VString<string, "required">;
             message: import("convex/values").VString<string, "required">;
+            nextAction: import("convex/values").VString<string | undefined, "optional">;
+            nextActionOwner: import("convex/values").VString<string | undefined, "optional">;
             preservedState: import("convex/values").VAny<any, "required", string>;
             status: import("convex/values").VUnion<"open" | "resolved", [import("convex/values").VLiteral<"open", "required">, import("convex/values").VLiteral<"resolved", "required">], "required", never>;
             resolution: import("convex/values").VString<string | undefined, "optional">;
             raisedAt: import("convex/values").VString<string, "required">;
             resolvedAt: import("convex/values").VString<string | undefined, "optional">;
-        }, "required", "code" | "exceptionId" | "message" | "preservedState" | "raisedAt" | "resolution" | "resolvedAt" | "runId" | "scopeKey" | "status" | `preservedState.${string}`>, {
+        }, "required", "code" | "exceptionId" | "message" | "nextAction" | "nextActionOwner" | "preservedState" | "raisedAt" | "resolution" | "resolvedAt" | "runId" | "scopeKey" | "status" | `preservedState.${string}`>, {
             by_scope_id: ["scopeKey", "exceptionId", "_creationTime"];
             by_scope_run: ["scopeKey", "runId", "_creationTime"];
+            by_scope_run_status_id: ["scopeKey", "runId", "status", "exceptionId", "_creationTime"];
             by_scope_status: ["scopeKey", "status", "_creationTime"];
         }, {}, {}>;
         receipts: import("convex/server").TableDefinition<import("convex/values").VObject<{

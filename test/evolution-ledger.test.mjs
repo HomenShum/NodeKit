@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import vm from "node:vm";
+import { validateSchema } from "../src/lib/schema-validation.mjs";
+import { readJson, pathExists } from "../src/lib/files.mjs";
 import {
   buildEvolutionDocs,
   checkEvolutionMateriality,
@@ -17,13 +21,15 @@ import {
   verifyEvolutionLedger,
 } from "../src/lib/evolution-ledger.mjs";
 import { grantApproval, proposed } from "./helpers/evolution-approval-fixture.mjs";
-import { initializeKnowledgeGraph } from "../src/lib/knowledge-evolution.mjs";
+import { applyGraphPatch, decideGraphPatch, initializeKnowledgeGraph, proposeGraphPatch,
+  queryKnowledgeGraph, readKnowledgeGraph, validateGraphPatch } from "../src/lib/knowledge-evolution.mjs";
+import { ingestEvidenceBytes, readEvidenceSnapshot } from "../src/lib/evidence-snapshots.mjs";
 
 function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
 }
 
-async function fixture() {
+async function fixture({ generatedAt = new Date().toISOString() } = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-evolution-"));
   git(root, ["init"]);
   git(root, ["config", "user.email", "nodekit@example.com"]);
@@ -36,7 +42,7 @@ async function fixture() {
   const sha256 = createHash("sha256").update(bytes).digest("hex");
   await initializeEvolutionLedger(root);
   const records = [
-    { schemaVersion: "nodekit.evolution-evidence/v1", id: "evd:test", kind: "test", artifactRef: "file:verifier.txt", sha256, sourceCommit: commit, generatedAt: new Date().toISOString(), command: "node --test", environment: { platform: process.platform }, verifiesInvariantIds: ["inv:test"], nodeProofReceiptId: "proof:test", result: "pass" },
+    { schemaVersion: "nodekit.evolution-evidence/v1", id: "evd:test", kind: "test", artifactRef: "file:verifier.txt", sha256, sourceCommit: commit, generatedAt, command: "node --test", environment: { platform: process.platform }, verifiesInvariantIds: ["inv:test"], nodeProofReceiptId: "proof:test", result: "pass" },
     { schemaVersion: "nodekit.assumption/v1", id: "asm:test", statement: "Direct mutation was safe", scope: { applications: ["fixture"] }, status: "disproven", introducedByEventId: "evt:test", invalidatedByEventId: "evt:test", supportingEvidenceIds: [], contradictingEvidenceIds: ["evd:test"] },
     { schemaVersion: "nodekit.invariant-claim/v1", id: "inv:test", statement: "Agent writes remain proposals until approval", scope: { applications: ["fixture"] }, enforcement: "runtime-gate", verifierRefs: ["verifier.txt"], introducedByEventId: "evt:test", status: "verified" },
     { schemaVersion: "nodekit.evolution-event/v1", id: "evt:test", projectId: "fixture", repository: "local/fixture", source: { commitSha: commit, occurredAt: new Date().toISOString() }, track: "architecture", category: "runtime", challenge: "Direct mutation corrupted canonical state", observedFailure: "A stale agent write replaced newer work", resolution: "Introduced proposal validation and approval", assumptionIds: ["asm:test"], invariantIds: ["inv:test"], evidenceIds: ["evd:test"], knownLimitations: [], interpretation: { status: "agent-proposed" } },
@@ -172,7 +178,7 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   await writeFile(path.join(evidenceRoot, "rollback-test.log"), "PASS baseline import fails; candidate import succeeds; reverting restores baseline behavior\n");
 
   const relativeEvidence = (name) => path.join("evidence", "deferred-review", name).replaceAll("\\", "/");
-  const created = await createDeferredEvolutionReview(root, {
+  const reviewInput = {
     draftRefs: [draftRef],
     from: before,
     to: after,
@@ -186,7 +192,8 @@ test("reversible package change continues with exact live I/O, human-goal proof,
     uiChanged: false,
     uiReason: "Package runtime only; the intended user goal is shown by the journey card and exact I/O.",
     rollbackVerificationRefs: [relativeEvidence("rollback-test.log")],
-  });
+  };
+  const created = await createDeferredEvolutionReview(root, reviewInput);
 
   assert.equal(created.receipt.events[0].eventId, event.id);
   assert.equal(created.receipt.review.status, "deferred-human-review");
@@ -195,6 +202,111 @@ test("reversible package change continues with exact live I/O, human-goal proof,
   assert.equal(passed.passed, true, passed.reason);
   assert.equal(passed.events.length, 0, "deferred review must not forge a canonical event");
   assert.equal(passed.deferredReviews.length, 1);
+
+  await writeFile(path.join(root, "README.md"), "Maintainer handoff notes; no runtime contract change.\n");
+  git(root, ["add", "README.md"]);
+  git(root, ["commit", "-m", "benign handoff descendant"]);
+  const benign = git(root, ["rev-parse", "HEAD"]);
+  const continued = await checkEvolutionMateriality(root, before, benign);
+  assert.equal(continued.passed, true, continued.reason);
+  assert.equal(continued.deferredReviews.length, 1, "an eligible ancestor receipt must survive a benign descendant");
+  const canonicalBefore = await readFile(path.join(root, "evolution", "events", "architecture", "evt-test.json"));
+  const draftBefore = await readFile(path.join(root, draftRef));
+  // A maintainer can import JSON without using the creator. Recompute an ordinary
+  // content digest for truthful coverage; that digest confers no review authority.
+  const ordered = (value) => Array.isArray(value) ? value.map(ordered)
+    : value && typeof value === "object"
+      ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, ordered(value[key])])) : value;
+  for (const protectedPath of [".github/workflows/imported.yml", "ops/deploy/release.mjs"]) {
+    git(root, ["checkout", "--detach", benign]);
+    await writeFile(created.output, `${JSON.stringify(created.receipt, null, 2)}\n`);
+    await mkdir(path.dirname(path.join(root, protectedPath)), { recursive: true });
+    await writeFile(path.join(root, protectedPath), "# Imported protected change\n");
+    git(root, ["add", protectedPath]);
+    git(root, ["commit", "-m", "import a protected descendant"]);
+    const protectedHead = git(root, ["rev-parse", "HEAD"]);
+    const imported = structuredClone(created.receipt);
+    const expectedMaterial = protectedPath.startsWith(".github/")
+      ? [protectedPath, "src/session-resume.mjs"] : ["src/session-resume.mjs"];
+    imported.coverage.materialFiles = expectedMaterial;
+    const { receiptDigest: ignoredDigest, ...subject } = imported;
+    imported.receiptDigest = createHash("sha256").update(JSON.stringify(ordered(subject))).digest("hex");
+    assert.deepEqual(await validateSchema("nodekit.evolution-deferred-review.v1.schema.json", imported, imported.id), []);
+    await writeFile(created.output, `${JSON.stringify(imported, null, 2)}\n`);
+    const importedBytes = await readFile(created.output);
+    const rejectImport = async () => {
+      const verdict = await checkEvolutionMateriality(root, before, protectedHead);
+      assert.equal(verdict.passed, false, "protected active-range paths cannot be deferred by an imported receipt");
+      assert.deepEqual(verdict.materialFiles, expectedMaterial);
+      assert.equal(verdict.deferredReviews.length, 0);
+      assert.equal(verdict.events.length, 0, "persisted rejection must not promote a canonical event");
+      assert.equal(verdict.rejectedDeferredReviews.length, 1);
+      assert.deepEqual(verdict.rejectedDeferredReviews[0].findings,
+        [`deferred review is forbidden for pre-action-review paths: ${protectedPath}`]);
+    };
+    await Promise.all(Array.from({ length: 8 }, () => rejectImport()));
+    for (let index = 0; index < 16; index++) await rejectImport();
+    assert.deepEqual(await readFile(created.output), importedBytes, "checking must not rewrite the imported receipt");
+    assert.deepEqual(await readFile(path.join(root, "evolution", "events", "architecture", "evt-test.json")), canonicalBefore);
+    assert.deepEqual(await readFile(path.join(root, draftRef)), draftBefore);
+    assert.equal(JSON.parse(draftBefore.toString("utf8")).interpretation.status, "agent-proposed");
+  }
+  // The protected source must exist at this new baseline. A path introduced and
+  // removed entirely inside the range would not be an aggregate rename-out.
+  git(root, ["checkout", "--detach", benign]);
+  const protectedSource = ".github/workflows/rename-out.yml";
+  const destination = "docs/imported-workflow.txt";
+  await mkdir(path.dirname(path.join(root, protectedSource)), { recursive: true });
+  await writeFile(path.join(root, protectedSource), "name: Existing workflow\non: workflow_dispatch\n");
+  await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = () => { throw new Error('ERR_PACKAGE_PATH_NOT_EXPORTED'); };\n");
+  git(root, ["add", protectedSource, "src/session-resume.mjs"]);
+  git(root, ["commit", "-m", "baseline contains a protected workflow"]);
+  const renameBefore = git(root, ["rev-parse", "HEAD"]);
+  await writeFile(path.join(root, "src", "session-resume.mjs"), "export const resume = (id) => ({ sessionId: id, resumed: true });\n");
+  git(root, ["add", "src/session-resume.mjs"]);
+  git(root, ["commit", "-m", "eligible reversible resume change"]);
+  const eligibleAfter = git(root, ["rev-parse", "HEAD"]);
+  const renameDraftRef = "evolution/drafts/evt-rename-out-import.json";
+  const renameDraft = { ...event, id: "evt:rename-out-import", source: { ...event.source, commitSha: eligibleAfter } };
+  await writeFile(path.join(root, renameDraftRef), `${JSON.stringify(renameDraft, null, 2)}\n`);
+  const renameReview = await createDeferredEvolutionReview(root, {
+    ...reviewInput, draftRefs: [renameDraftRef], from: renameBefore, to: eligibleAfter, rollbackTarget: renameBefore,
+  });
+  const eligible = await checkEvolutionMateriality(root, renameBefore, eligibleAfter);
+  assert.equal(eligible.passed, true, eligible.reason);
+  assert.deepEqual(eligible.materialFiles, ["src/session-resume.mjs"]);
+  const renameReceiptBytes = await readFile(renameReview.output);
+  const renameDraftBytes = await readFile(path.join(root, renameDraftRef));
+  git(root, ["config", "diff.renames", "true"]);
+  await mkdir(path.dirname(path.join(root, destination)), { recursive: true });
+  git(root, ["mv", protectedSource, destination]);
+  git(root, ["commit", "-m", "move the protected workflow into documentation"]);
+  const renameHead = git(root, ["rev-parse", "HEAD"]);
+  const postImagePaths = git(root, ["diff", "--name-only", `${renameBefore}..${renameHead}`]).split(/\r?\n/);
+  assert.equal(postImagePaths.includes(destination), true, "real rename detection reports the destination");
+  assert.equal(postImagePaths.includes(protectedSource), false, "post-image names omit the protected original");
+  const rejectRenameOut = async () => {
+    const verdict = await checkEvolutionMateriality(root, renameBefore, renameHead);
+    assert.equal(verdict.passed, false, "moving a protected baseline path cannot make its review deferrable");
+    assert.deepEqual(verdict.materialFiles, ["src/session-resume.mjs"], "the imported receipt retains truthful material coverage");
+    assert.equal(verdict.events.length, 0);
+    assert.equal(verdict.deferredReviews.length, 0);
+    assert.equal(verdict.rejectedDeferredReviews.length, 1);
+    assert.deepEqual(verdict.rejectedDeferredReviews[0].findings,
+      [`deferred review is forbidden for pre-action-review paths: ${protectedSource}`]);
+  };
+  await Promise.all(Array.from({ length: 8 }, () => rejectRenameOut()));
+  for (let index = 0; index < 16; index++) await rejectRenameOut();
+  assert.deepEqual(await readFile(renameReview.output), renameReceiptBytes, "rename-out admission must not rewrite the receipt");
+  assert.deepEqual(await readFile(path.join(root, renameDraftRef)), renameDraftBytes);
+  assert.equal(renameDraft.interpretation.status, "agent-proposed");
+  assert.deepEqual(await readFile(path.join(root, "evolution", "events", "architecture", "evt-test.json")), canonicalBefore);
+  await rm(renameReview.output);
+  git(root, ["checkout", "--detach", benign]);
+  await writeFile(created.output, `${JSON.stringify(created.receipt, null, 2)}\n`);
+  const restored = await checkEvolutionMateriality(root, before, benign);
+  assert.equal(restored.passed, true, restored.reason);
+  assert.equal(restored.deferredReviews.length, 1, "protected rejection must not poison the original eligible receipt");
 
   await writeFile(path.join(evidenceRoot, "after-live.json"), "{\"tampered\":true}\n");
   const tampered = await checkEvolutionMateriality(root, before, after);
@@ -432,17 +544,312 @@ test("an assumption that generalises must name the dimension its evidence measur
   }
 });
 
-test("every assumption shipped in this repository names its measured dimension", async () => {
-  const { readdir, readFile } = await import("node:fs/promises");
-  const dir = path.resolve("evolution/assumptions");
-  const files = (await readdir(dir)).filter((f) => f.endsWith(".json"));
-  assert.ok(files.length > 0, "a pass over zero assumptions measures nothing");
+test("repository assumptions preserve authored provenance without certifying unmeasured historical scope", async () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const verdict = await verifyEvolutionLedger(root);
+  assert.equal(verdict.passed, true, verdict.issues.join("\n"));
+  const query = await queryEvolutionLedger(root);
+  assert.equal(query.passed, true, query.issues.join("\n"));
+  assert.ok(query.assumptions.length > 0, "a pass over zero assumptions measures nothing");
+  const qualifications = new Map(query.historicalQualifications.map((entry) => [entry.id, entry]));
   let generalising = 0;
-  for (const file of files) {
-    const doc = JSON.parse(await readFile(path.join(dir, file), "utf8"));
-    if (!["supported", "scope-limited"].includes(doc.status)) continue;
+  for (const record of query.assumptions) {
+    if (!["supported", "scope-limited"].includes(record.status)) continue;
     generalising += 1;
-    assert.ok(doc.dimensionsTested?.length > 0, `${doc.id} generalises without naming what was measured`);
+    if (record.dimensionsTested?.length > 0) {
+      assert.equal(qualifications.has(record.id), false);
+      continue;
+    }
+    const origin = qualifications.get(record.id);
+    assert.ok(origin, `${record.id} lacks mandatory authored qualification`);
+    assert.equal(origin.classification, "authored-historical-unscoped");
+    assert.equal(origin.currentDimensionsCertified, false);
+    assert.equal(origin.originalSchemaSha256, "4d2998bf89b4eb2c1caf3cf5b2a95b600f68ed1565b0cb87a4aca2837526922f");
+    assert.match(origin.introducedIn, /^[a-f0-9]{40}$/);
+    assert.equal(origin.payloadSha256, origin.originalPayloadSha256);
+    const original = JSON.parse(git(root, ["show", `${origin.introducedIn}:${origin.file}`]));
+    assert.deepEqual(record, original, "all original claims, not only an id or epoch, must match");
   }
-  assert.ok(generalising > 0, "no generalising assumption was checked, so this asserts nothing");
+  assert.ok(generalising > 0, "no generalising assumption was checked");
+
+  // An actual new scoped control prevents historical-only success from replacing strict admission.
+  const f = await fixture();
+  const control = { ...f.records.find((record) => record.id === "asm:test"), id: "asm:current-scope-control",
+    status: "scope-limited", dimensionsTested: ["8 concurrent fixture queries", "16 sustained fixture queries"] };
+  const input = path.join(f.root, "inputs", "current-scope-control.json");
+  await writeFile(input, `${JSON.stringify(control, null, 2)}\n`);
+  await recordEvolutionRecord(f.root, path.relative(f.root, input));
+  const burst = await Promise.all(Array.from({ length: 8 }, () => queryEvolutionLedger(f.root)));
+  for (const result of burst) {
+    assert.equal(result.passed, true, result.issues.join("\n"));
+    assert.ok(result.assumptions.some((record) => record.id === control.id && record.dimensionsTested.length === 2));
+    assert.equal(result.historicalQualifications.length, 0);
+  }
+  for (let iteration = 0; iteration < 16; iteration += 1) {
+    const result = await queryEvolutionLedger(f.root);
+    assert.equal(result.passed, true, result.issues.join("\n"));
+    assert.equal(result.assumptions.filter((record) => record.id === control.id).length, 1);
+    assert.equal(result.historicalQualifications.length, 0);
+  }
+  await rm(f.root, { recursive: true, force: true });
+});
+
+test("a new author missing measured scope is rejected by admission and every current projection", async (t) => {
+  for (const status of ["supported", "scope-limited"]) {
+    for (const dimensions of [undefined, []]) {
+      const f = await fixture();
+      t.after(() => rm(f.root, { recursive: true, force: true }));
+      const record = { ...f.records.find((record) => record.id === "asm:test"), id: "asm:unknown-current", status };
+      if (dimensions !== undefined) record.dimensionsTested = dimensions;
+      const input = path.join(f.root, "inputs", "unknown-current.json");
+      await writeFile(input, `${JSON.stringify(record, null, 2)}\n`);
+      await assert.rejects(() => recordEvolutionRecord(f.root, path.relative(f.root, input)), /validation failed/);
+      await writeFile(path.join(f.root, "evolution", "assumptions", "asm-unknown-current.json"), `${JSON.stringify(record, null, 2)}\n`);
+      const query = await queryEvolutionLedger(f.root);
+      assert.equal(query.passed, false);
+      assert.equal(query.historicalQualifications.length, 0);
+      assert.ok(query.issues.some((issue) => /dimension/i.test(issue)));
+      await assert.rejects(() => buildEvolutionDocs(f.root), /must verify before documentation/);
+      assert.equal(await pathExists(path.join(f.root, "evolution", "projections", "EVOLUTION.md")), false);
+      await assert.rejects(() => proposeEvolutionKnowledgePatch(f.root), /must verify before graph/);
+      assert.equal(await pathExists(path.join(f.root, ".nodeagent", "knowledge", "graph.json")), false);
+    }
+  }
+});
+
+async function authoredConsumerFixture(t) {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodekit-authored-consumer-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  // Keep automatic maintenance from outliving the disposable clone's Git calls.
+  execFileSync("git", ["clone", "--quiet", "--no-hardlinks", "--config", "maintenance.auto=false", sourceRoot, root], { stdio: "ignore" });
+  const original = git(root, ["show", "5b9c4d73c286020fe7b7c52d208d7e0cbfeef626:evolution/assumptions/asm-strong-model-infers-topology.json"]);
+  await writeFile(path.join(root, "evolution", "assumptions", "asm-strong-model-infers-topology.json"), `${original}\n`);
+  return { root, original: JSON.parse(original) };
+}
+
+test("historical query and documentation keep unmeasured scope visible beside the unchanged claim", async (t) => {
+  const f = await authoredConsumerFixture(t);
+  const query = await queryEvolutionLedger(f.root);
+  assert.equal(query.passed, true, query.issues.join("\n"));
+  assert.deepEqual(query.assumptions.find((record) => record.id === f.original.id), f.original);
+  const qualification = query.historicalQualifications.find((entry) => entry.id === f.original.id);
+  assert.equal(qualification.currentDimensionsCertified, false);
+  const docs = await buildEvolutionDocs(f.root);
+  const markdown = await readFile(docs.output, "utf8");
+  assert.match(markdown, /current measured scope is unknown \(currentDimensionsCertified: false\)/);
+  assert.ok(markdown.includes(qualification.introducedIn));
+  assert.ok(markdown.includes(qualification.readSchema));
+  assert.ok(markdown.includes(qualification.originalSchemaSha256));
+  assert.equal(docs.verdict.historicalQualifications.find((entry) => entry.id === f.original.id).currentDimensionsCertified, false);
+});
+
+async function acceptFixturePatch(root, patch) {
+  const checked = await validateGraphPatch(root, patch.patchId);
+  assert.deepEqual(checked.validation.errors, []);
+  await assert.rejects(() => applyGraphPatch(root, patch.patchId), /only accepted/);
+  await assert.rejects(() => decideGraphPatch(root, patch.patchId, { decision: "accept" }), /principalId/);
+  await decideGraphPatch(root, patch.patchId, { decision: "accept", principalId: "human:fixture-reviewer", reason: "Review fixture grounding and retirement" });
+  return applyGraphPatch(root, patch.patchId);
+}
+
+test("a maintainer grounds timestamped ledger evidence before approval and retries without rewriting source", async (t) => {
+  for (const generatedAt of ["2026-07-22T00:36:59-07:00", "2026-07-22T07:36:59Z", "2026-07-29T05:24:16.8363055Z"]) {
+    await t.test(generatedAt, async (t) => {
+      const f = await fixture({ generatedAt });
+      t.after(() => rm(f.root, { recursive: true, force: true }));
+      await initializeKnowledgeGraph(f.root, { graphId: "fixture:timestamped-source" });
+      const record = f.records.find((entry) => entry.id === "evd:test");
+      const snapshot = await ingestEvidenceBytes(f.root, {
+        bytes: await readFile(path.join(f.root, "verifier.txt")),
+        sourceUri: `https://nodekit.local/evolution/${encodeURIComponent(record.id)}`,
+        mediaType: "application/octet-stream",
+        capturedAt: generatedAt,
+        expectedSha256: record.sha256,
+      });
+      const empty = await readKnowledgeGraph(f.root);
+      assert.equal(empty.version, 0);
+      assert.equal(empty.nodes.length, 0);
+      assert.equal(empty.hyperedges.length, 0);
+      const first = await proposeEvolutionKnowledgePatch(f.root);
+      assert.equal(first.patch.status, "pending");
+      assert.equal((await readKnowledgeGraph(f.root)).nodes.length, 0, "proposal must not mutate canonical graph");
+      const source = first.patch.operations.find((entry) => entry.node?.kind === "evidence").node;
+      assert.equal(source.id, snapshot.snapshotId, "pending projection must reuse the actual ingested snapshot");
+      assert.equal(source.properties.snapshotContentHash, snapshot.contentHash);
+      assert.deepEqual(first.patch.evidenceRefs, [snapshot.snapshotId]);
+      assert.deepEqual(await readEvidenceSnapshot(f.root, snapshot.snapshotId), snapshot, "recovery must leave immutable snapshot metadata unchanged");
+      const pending = await readKnowledgeGraph(f.root);
+      assert.deepEqual(
+        { graphId: pending.graphId, version: pending.version, nodes: pending.nodes, hyperedges: pending.hyperedges },
+        { graphId: empty.graphId, version: empty.version, nodes: empty.nodes, hyperedges: empty.hyperedges },
+        "snapshot reuse must leave canonical graph empty until approval",
+      );
+      assert.deepEqual(pending.proposals.filter((entry) => entry.status === "pending"), [first.patch]);
+      await acceptFixturePatch(f.root, first.patch);
+      const graph = await readKnowledgeGraph(f.root);
+      const evidence = graph.nodes.find((node) => node.kind === "evidence" && node.properties?.evolutionRecordId === "evd:test");
+      assert.ok(evidence, "the approved graph must contain its authenticated source evidence");
+      assert.equal(evidence.id, snapshot.snapshotId);
+      assert.equal(evidence.capturedAt, new Date(generatedAt).toISOString());
+      for (const entity of [...graph.nodes, ...graph.hyperedges]) {
+        if (entity.kind === "evidence") continue;
+        assert.ok(entity.evidenceRefs.length > 0, "every derived claim or causal edge needs real source evidence");
+        assert.ok(entity.evidenceRefs.every((id) => id === evidence.id), "references must name the actual authenticated snapshot");
+      }
+      const stored = await readJson(path.join(f.root, "evolution", "evidence", "evd-test.json"));
+      assert.equal(stored.generatedAt, generatedAt, "projection must preserve the original authored timestamp");
+      await assert.rejects(() => proposeEvolutionKnowledgePatch(f.root), /no new evidence-grounded records/);
+      assert.equal((await readKnowledgeGraph(f.root)).version, graph.version, "a retry must not rewrite the approved graph");
+    });
+  }
+});
+
+test("a populated graph retires the old current claim and causal edge only through grounded approval", async (t) => {
+  const f = await authoredConsumerFixture(t);
+  await initializeKnowledgeGraph(f.root, { graphId: "fixture:authored-retirement" });
+  const initial = await proposeEvolutionKnowledgePatch(f.root);
+  const legacyId = `evolution:${f.original.id}`;
+  assert.equal(initial.patch.operations.some((operation) => operation.node?.id === legacyId), false);
+  assert.equal(initial.patch.operations.some((operation) => operation.hyperedge?.participants.some((participant) => participant.nodeId === legacyId)), false);
+  assert.equal((await readKnowledgeGraph(f.root)).nodes.length, 0, "proposal must not mutate canonical graph");
+  await acceptFixturePatch(f.root, initial.patch);
+  const graph = await readKnowledgeGraph(f.root);
+  const evidence = graph.nodes.find((node) => node.kind === "evidence" && node.properties?.evolutionRecordId === "evd:nodevideo-topology-failure");
+  const event = graph.nodes.find((node) => node.id === "evolution:evt:nodevideo-topology-contract");
+  const invariant = graph.nodes.find((node) => node.id === "evolution:inv:major-frontend-direction-tournament");
+  assert.ok(evidence && event && invariant, "use authenticated existing evolution source and current entities");
+  const retiredEdgeId = "evolution:fixture:legacy-causal";
+  const unrelatedEdgeId = "evolution:fixture:unrelated-causal";
+  const seed = await proposeGraphPatch(f.root, {
+    graphId: graph.graphId, baseVersion: graph.version,
+    operations: [
+      { type: "INSERT", node: { id: legacyId, kind: "assumption", label: f.original.statement, layer: "derived", confidence: 0.8, evidenceRefs: [evidence.id], metadata: f.original } },
+      { type: "INSERT", hyperedge: { id: retiredEdgeId, predicate: "evolution-causal-chain", layer: "derived", participants: [{ nodeId: event.id, role: "event" }, { nodeId: legacyId, role: "challenged-assumption" }], confidence: 1, evidenceRefs: [evidence.id], createdAt: new Date().toISOString() } },
+      { type: "INSERT", hyperedge: { id: unrelatedEdgeId, predicate: "evolution-causal-chain", layer: "derived", participants: [{ nodeId: event.id, role: "event" }, { nodeId: invariant.id, role: "introduced-invariant" }], confidence: 1, evidenceRefs: [evidence.id], createdAt: new Date().toISOString() } },
+    ],
+    evidenceRefs: [evidence.id], contradictionRefs: [], confidence: 1,
+    proposedBy: { agentId: "fixture:old-projector", modelRoute: "deterministic", resolvedModel: "none", harnessVersion: "fixture" },
+  });
+  await acceptFixturePatch(f.root, seed);
+  const before = queryKnowledgeGraph(await readKnowledgeGraph(f.root), event.label);
+  assert.ok(before.supportingHyperedges.some((edge) => edge.id === retiredEdgeId), "reproduce the real surviving-edge consumer seam");
+  const retirement = await proposeEvolutionKnowledgePatch(f.root);
+  const targets = retirement.patch.operations.filter((operation) => operation.type === "DEPRECATE").map((operation) => operation.targetId);
+  assert.equal(targets.filter((id) => id === legacyId).length, 1);
+  assert.equal(targets.filter((id) => id === retiredEdgeId).length, 1);
+  assert.equal(targets.includes(unrelatedEdgeId), false);
+  assert.equal(targets.includes(evidence.id), false);
+  for (const operation of retirement.patch.operations.filter((operation) => operation.type === "DEPRECATE")) {
+    assert.ok(operation.evidenceRefs.includes(evidence.id));
+  }
+  assert.equal((await readKnowledgeGraph(f.root)).nodes.find((node) => node.id === legacyId).deprecatedAt, undefined);
+  await acceptFixturePatch(f.root, retirement.patch);
+  const after = await readKnowledgeGraph(f.root);
+  assert.ok(after.nodes.find((node) => node.id === legacyId).deprecatedAt);
+  assert.ok(after.hyperedges.find((edge) => edge.id === retiredEdgeId).deprecatedAt);
+  assert.equal(after.hyperedges.find((edge) => edge.id === unrelatedEdgeId).deprecatedAt, undefined);
+  assert.equal(after.nodes.find((node) => node.id === evidence.id).deprecatedAt, undefined);
+  const current = queryKnowledgeGraph(after, event.label);
+  assert.equal(current.results.some(({ entity }) => entity.id === legacyId), false);
+  assert.equal(current.supportingHyperedges.some((edge) => edge.id === retiredEdgeId), false);
+  assert.ok(current.supportingHyperedges.some((edge) => edge.id === unrelatedEdgeId));
+  await assert.rejects(() => proposeEvolutionKnowledgePatch(f.root), /no new evidence-grounded records.*historicalQualifications=/);
+});
+
+async function readerAtActualSeam(root, replaceAfterLoad) {
+  // Evaluate the actual existing owner bodies with reader instrumentation. There is no
+  // production test hook, second implementation, reduced schema or caller provenance override.
+  const source = await readFile(new URL("../src/lib/evolution-ledger.mjs", import.meta.url), "utf8");
+  const slice = (from, to) => {
+    const start = source.indexOf(from);
+    const end = source.indexOf(to, start);
+    assert.ok(start >= 0 && end > start, `${from} reader seam must exist`);
+    return source.slice(start, end);
+  };
+  const body = [
+    slice("function digest(", "const DEFERRED_REVIEW_SCHEMA"),
+    slice("function resolveInside(", "// Bound the buffer"),
+    slice("function commitExists(", "const MAX_LEDGER_RECORDS"),
+    slice("const MAX_LEDGER_RECORDS", "export async function initializeEvolutionLedger"),
+    slice("function hasCycle(", "async function inspectEvolutionLedger"),
+    slice("async function inspectEvolutionLedger", "export async function diffEvolutionLedger"),
+    source.slice(source.indexOf("export async function buildEvolutionDocs")),
+  ].join("\n").replace(/^export /gm, "");
+  const reads = new Map();
+  let inspected = 0;
+  const { EVOLUTION_EVENT_SCHEMA, EVOLUTION_RECORD_TYPES } = await import("../src/lib/evolution-ledger.mjs");
+  const { describeMutations } = await import("../src/lib/evolution-immutability.mjs");
+  const { readdir } = await import("node:fs/promises");
+  const { evidenceSnapshotToGraphNode, ingestEvidenceBytes, readEvidenceSnapshot } = await import("../src/lib/evidence-snapshots.mjs");
+  const readers = vm.runInNewContext(`${body}\n({ verifyEvolutionLedger, queryEvolutionLedger, buildEvolutionDocs, proposeEvolutionKnowledgePatch })`, {
+    createHash, execFileSync, mkdir, readFile, readdir, writeFile, path, pathExists,
+    readJson: async (file) => { reads.set(file, (reads.get(file) ?? 0) + 1); return readJson(file); },
+    EVOLUTION_EVENT_SCHEMA, EVOLUTION_RECORD_TYPES, validateSchema, describeMutations,
+    detectLedgerMutations: async (_root, loaded) => {
+      inspected += 1;
+      await replaceAfterLoad(inspected);
+      return { gitAvailable: true, observedHead: git(root, ["rev-parse", "HEAD"]), checked: loaded.length,
+        mutations: [], bindingRepairs: [], origins: [], failures: [] };
+    },
+    evidenceSnapshotToGraphNode, ingestEvidenceBytes, readEvidenceSnapshot, proposeGraphPatch, readKnowledgeGraph,
+    now: () => new Date().toISOString(),
+  });
+  return { readers, reads, inspections: () => inspected };
+}
+
+test("concurrent replacement after inspection cannot leak later bytes through verify, query, docs or graph", async (t) => {
+  for (const operation of ["verifyEvolutionLedger", "queryEvolutionLedger", "buildEvolutionDocs", "proposeEvolutionKnowledgePatch"]) {
+    const f = await fixture();
+    t.after(() => rm(f.root, { recursive: true, force: true }));
+    const assumptionFile = path.join(f.root, "evolution", "assumptions", "asm-test.json");
+    const scoped = { ...f.records.find((record) => record.id === "asm:test"), status: "scope-limited", supportingEvidenceIds: ["evd:test"], contradictingEvidenceIds: [], dimensionsTested: ["the originally loaded scoped payload"] };
+    await writeFile(assumptionFile, `${JSON.stringify(scoped, null, 2)}\n`);
+    if (operation === "proposeEvolutionKnowledgePatch") await initializeKnowledgeGraph(f.root, { graphId: "fixture:snapshot" });
+    const seam = await readerAtActualSeam(f.root, async (inspection) => {
+      if (inspection !== 1) return;
+      const { dimensionsTested, ...laterUnscoped } = scoped;
+      await writeFile(assumptionFile, `${JSON.stringify(laterUnscoped, null, 2)}\n`);
+    });
+    const result = await seam.readers[operation](f.root);
+    assert.equal(seam.inspections(), 1, operation);
+    assert.equal(seam.reads.get(assumptionFile), 1, "exact reader boundary must load this record once");
+    assert.equal(JSON.parse(await readFile(assumptionFile, "utf8")).dimensionsTested, undefined, "prove competing bytes actually changed");
+    if (operation === "verifyEvolutionLedger") assert.equal(result.passed, true);
+    if (operation === "queryEvolutionLedger") {
+      assert.equal(result.passed, true);
+      assert.deepEqual(result.assumptions.find((record) => record.id === scoped.id), scoped);
+    }
+    if (operation === "buildEvolutionDocs") assert.equal(result.verdict.passed, true);
+    if (operation === "proposeEvolutionKnowledgePatch") {
+      assert.equal(result.verdict.passed, true);
+      const node = result.patch.operations.find((entry) => entry.node?.id === "evolution:asm:test").node;
+      assert.deepEqual(node.metadata.dimensionsTested, scoped.dimensionsTested);
+    }
+    const next = await seam.readers.queryEvolutionLedger(f.root);
+    assert.equal(next.passed, false, "a later operation must inspect the new unscoped payload afresh");
+    assert.equal(next.historicalQualifications.length, 0);
+  }
+});
+
+test("reader burst and sustained calls do not share a mutable snapshot or accumulate qualification state", async (t) => {
+  const f = await fixture();
+  t.after(() => rm(f.root, { recursive: true, force: true }));
+  const seam = await readerAtActualSeam(f.root, async () => {});
+  const burst = await Promise.all(Array.from({ length: 32 }, () => seam.readers.queryEvolutionLedger(f.root)));
+  for (const result of burst) {
+    assert.equal(result.passed, true, Array.from(result.issues).join("\n"));
+    assert.equal(result.assumptions.length, 1);
+    assert.equal(result.historicalQualifications.length, 0);
+  }
+  burst[0].assumptions[0].statement = "consumer mutated its own result";
+  for (let iteration = 0; iteration < 100; iteration += 1) {
+    const result = await seam.readers.queryEvolutionLedger(f.root);
+    assert.equal(result.assumptions[0].statement, "Direct mutation was safe");
+    assert.equal(result.assumptions.length, 1);
+    assert.equal(result.historicalQualifications.length, 0);
+    assert.equal(result.passed, true);
+  }
+  assert.equal(seam.inspections(), 132);
+  assert.equal(seam.reads.get(path.join(f.root, "evolution", "assumptions", "asm-test.json")), 132);
 });

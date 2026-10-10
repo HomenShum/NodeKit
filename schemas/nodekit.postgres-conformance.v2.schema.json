@@ -51,19 +51,121 @@
     "postgres": {
       "type": "object", "additionalProperties": false, "required": ["serverVersion", "serverVersionNum"],
       "properties": {
-        "serverVersion": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+){0,3}(?:[-+._A-Za-z0-9 ]*)?$", "maxLength": 128 },
+        "serverVersion": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+){0,3}(?:[-+._A-Za-z0-9 ()]*)?$", "maxLength": 128 },
         "serverVersionNum": { "type": "integer", "minimum": 120000 }
       }
     },
     "capabilities": { "$ref": "#/$defs/capabilities" },
     "conformance": { "$ref": "#/$defs/conformance" },
     "assertions": { "$ref": "#/$defs/assertions" },
+    "exceptionOwnership": { "$ref": "#/$defs/exceptionOwnership" },
+    "guardedCompletion": {"$ref": "#/$defs/guardedCompletion"},
+    "knowledgeFirstCreateRace": {"$ref": "#/$defs/knowledgeFirstCreateRace"},
+    "lifecycleFailureScenarios": {"$ref": "#/$defs/lifecycleFailureScenarios"},
+    "namedProof": {"const": "MANAGED-HANDOFF-POSTGRES-INTERLEAVINGS-01"},
+    "limits": {"$ref": "#/$defs/nativeLimits"},
+    "finalizedAt": {"$ref": "#/$defs/timestamp"},
+    "primaryError": {"type": "null"},
+    "failedAssertions": {"type": "array", "maxItems": 0},
+    "cleanup": {"$ref": "#/$defs/successfulCleanup"},
+    "poolErrorCount": {"const": 0},
+    "poolErrors": {"type": "array", "maxItems": 0},
     "passed": { "const": true },
     "errors": { "type": "array", "maxItems": 0 },
     "publicationPerformed": { "const": false },
     "deployPerformed": { "const": false }
   },
   "$defs": {
+    "ownershipExceptionId": { "type": "string", "pattern": "^exception_[a-f0-9]{26}$" },
+    "ownershipError": {
+      "type": "object", "additionalProperties": false, "required": ["name", "code", "message"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 80 },
+        "code": { "type": "string", "maxLength": 80 },
+        "message": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "exceptionOwnership": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schemaVersion", "assertions", "mixedRecoveries", "rollbacks", "refusals", "retries"],
+      "properties": {
+        "schemaVersion": { "const": "nodekit.exception-ownership-observations/v1" },
+        "assertions": {
+          "type": "object", "additionalProperties": false,
+          "required": ["mixedRecoveryPreservesRemainingAssignment", "postWriteStatementFailuresRestoreExactState", "canonicalExternalWaitIsBlocked", "lostAckBurstAndSustainedRetriesPreserveState", "freshBlockedMutationsAndCompletionRefuseWithoutChange", "changedOwnerReplayRefusesWithoutChange", "changedActionReplayRefusesWithoutChange"],
+          "properties": {
+            "mixedRecoveryPreservesRemainingAssignment": { "const": true },
+            "postWriteStatementFailuresRestoreExactState": { "const": true },
+            "canonicalExternalWaitIsBlocked": { "const": true },
+            "lostAckBurstAndSustainedRetriesPreserveState": { "const": true },
+            "freshBlockedMutationsAndCompletionRefuseWithoutChange": { "const": true },
+            "changedOwnerReplayRefusesWithoutChange": { "const": true },
+            "changedActionReplayRefusesWithoutChange": { "const": true }
+          }
+        },
+        "mixedRecoveries": {
+          "type": "array", "minItems": 4, "maxItems": 4,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["raiseOrder", "resolvedOwner", "remainingOwner", "selectedExceptionId", "remainingExceptionId", "status"],
+            "properties": {
+              "raiseOrder": { "enum": ["user-first", "external-first"] },
+              "resolvedOwner": { "enum": ["user", "external"] },
+              "remainingOwner": { "enum": ["user", "external"] },
+              "selectedExceptionId": { "$ref": "#/$defs/ownershipExceptionId" },
+              "remainingExceptionId": { "$ref": "#/$defs/ownershipExceptionId" },
+              "status": { "const": "blocked" }
+            }
+          }
+        },
+        "rollbacks": {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["operation", "injection", "writerPid", "observerPid", "exceptionStatus", "runStatus", "nextActionOwner", "rollbackCommand", "beforeStateHash", "afterStateHash", "originalError"],
+            "properties": {
+              "operation": { "enum": ["raiseException", "resolveException"] },
+              "injection": { "const": "after-real-run-update-before-commit" },
+              "writerPid": { "type": "integer", "minimum": 1 },
+              "observerPid": { "type": "integer", "minimum": 1 },
+              "exceptionStatus": { "enum": ["open", "resolved"] },
+              "runStatus": { "const": "blocked" },
+              "nextActionOwner": { "const": "external" },
+              "rollbackCommand": { "const": "ROLLBACK" },
+              "beforeStateHash": { "$ref": "#/$defs/sha256" },
+              "afterStateHash": { "$ref": "#/$defs/sha256" },
+              "originalError": { "$ref": "#/$defs/ownershipError" }
+            }
+          }
+        },
+        "refusals": {
+          "type": "array", "minItems": 7, "maxItems": 7,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["operation", "beforeStateHash", "afterStateHash", "error"],
+            "properties": {
+              "operation": { "enum": ["changedOwnerReplay", "changedActionReplay", "enterStage", "createArtifact", "createProposal", "decideProposal", "completeRun"] },
+              "beforeStateHash": { "$ref": "#/$defs/sha256" },
+              "afterStateHash": { "$ref": "#/$defs/sha256" },
+              "error": { "$ref": "#/$defs/ownershipError" }
+            }
+          }
+        },
+        "retries": {
+          "type": "object", "additionalProperties": false,
+          "required": ["burstCalls", "sustainedCalls", "maximumConcurrentCalls", "retainedPerRetryResults", "simulatedAcknowledgmentLossAfter", "exceptionId", "resultHash", "beforeStateHash", "afterStateHash"],
+          "properties": {
+            "burstCalls": { "const": 100 }, "sustainedCalls": { "const": 1000 },
+            "maximumConcurrentCalls": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "retainedPerRetryResults": { "const": 0 }, "simulatedAcknowledgmentLossAfter": { "const": "COMMIT" },
+            "exceptionId": { "$ref": "#/$defs/ownershipExceptionId" },
+            "resultHash": { "$ref": "#/$defs/sha256" },
+            "beforeStateHash": { "$ref": "#/$defs/sha256" },
+            "afterStateHash": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    },
     "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
     "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "timestamp": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$" },
@@ -98,7 +200,37 @@
         "contentAddressedReceipt": { "const": true }, "exceptionStatePreserved": { "const": true },
         "nextActionOwnerExplicit": { "const": true }, "oneAuthoritativeCase": { "const": true },
         "repeatedCompletionIsIdempotent": { "const": true }, "repeatedDecisionIsIdempotent": { "const": true },
-        "staleProposalFailedClosed": { "const": true }
+        "staleProposalFailedClosed": { "const": true },
+        "externalExceptionOwnershipPersisted": { "const": true },
+        "exceptionMetadataRetriesStable": { "const": true },
+        "ordinalExceptionOwnerSelection": { "const": true },
+        "partialRecoveryKeepsRemainingOwner": { "const": true },
+        "finalRecoveryUsesLegacyContinuation": { "const": true },
+        "externalWaitPreservesCanonicalArtifact": { "const": true },
+        "invalidExceptionMetadataFailsBeforeMutation": { "const": true },
+        "guardedCompletionRejectsInvalidConditions": { "const": true },
+        "guardedCompletionRejectsStaleStateWithoutMutation": { "const": true },
+        "guardedCompletionReusesNormalizedRequest": { "const": true },
+        "guardedCompletionPreservesRetryIdentity": { "const": true },
+        "activeRunStagePlanMismatchFailsClosed": { "const": true },
+        "blockedRunRejectsOrdinaryMutations": { "const": true },
+        "caseInputUpdateIsIdempotent": { "const": true },
+        "explicitRetryKeysAreIdempotent": { "const": true },
+        "idempotencyKeyReuseWithDifferentInputFailsClosed": { "const": true },
+        "idempotencyKeysAreTrimmed": { "const": true },
+        "hostAuthorizationBoundary": { "const": true },
+        "invalidPortableValuesFailClosed": { "const": true },
+        "portablePayloadDepthReservesProviderEnvelope": { "const": true },
+        "portableNormalizationPreservesJsonSemantics": { "const": true },
+        "invalidStagesFailClosed": { "const": true },
+        "multipleExceptionsRemainBlocked": { "const": true },
+        "pendingProposalBlocksCompletion": { "const": true },
+        "successfulCompletionRequiresCanonicalArtifact": { "const": true },
+        "terminalReceiptBoundaryIsImmutable": { "const": true },
+        "runCannotBindArtifactAcrossCases": { "const": true },
+        "stageDefinitionsAreTrimmed": { "const": true },
+        "terminalCancellationIsReceiptedAndIdempotent": { "const": true },
+        "terminalFailureIsReceiptedAndPreservesArtifacts": { "const": true }
       }
     },
     "capabilityNegotiation": {
@@ -114,6 +246,7 @@
       "required": ["schemaVersion", "capabilities", "capabilityNegotiation", "assertions", "passed"],
       "properties": {
         "schemaVersion": { "const": "nodekit.adapter-conformance/v1" },
+        "actorMode": { "enum": ["caller-supplied", "host-bound"] },
         "capabilities": { "$ref": "#/$defs/capabilities" },
         "capabilityNegotiation": { "$ref": "#/$defs/capabilityNegotiation" },
         "assertions": { "$ref": "#/$defs/conformanceAssertions" },
@@ -133,8 +266,1285 @@
         "knowledgePackageExportsResolved": { "const": true },
         "knowledgeProjectionApplied": { "const": true },
         "knowledgeProjectionReloaded": { "const": true },
-        "knowledgeRetrievalReceiptDurable": { "const": true }
+        "knowledgeRetrievalReceiptDurable": { "const": true },
+        "caseAndArtifactBothOrdersObserved": { "const": true },
+        "proposalBothOrdersPreservePendingRule": { "const": true },
+        "completedRunRejectsProposalAdmission": { "const": true },
+        "restoredBytesRejectOldVersionWithoutMutation": { "const": true },
+        "exactMembershipRejectedThenCompleted": { "const": true },
+        "wrongOwnerRejectedWithoutMutation": { "const": true },
+        "missingCanonicalVersionRejectedWithoutMutation": { "const": true },
+        "postWriteRollbackRestoredExactState": { "const": true },
+        "heldLockDeadlinePreservedState": { "const": true },
+        "lostAckBurstSustainedReplacementRetriesStable": { "const": true },
+        "cleanupFailureAfterPassFails": { "const": true },
+        "primaryAndCleanupFailuresPreserved": { "const": true }
       }
+    },
+    "guardedState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "counts",
+        "hashes",
+        "hash"
+      ],
+      "properties": {
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cases",
+            "runs",
+            "artifacts",
+            "proposals",
+            "approvals",
+            "exceptions",
+            "receipts",
+            "events",
+            "artifact_versions"
+          ],
+          "properties": {
+            "cases": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "runs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "artifacts": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "proposals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "approvals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "exceptions": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "receipts": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "events": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "artifact_versions": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            }
+          }
+        },
+        "hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cases",
+            "runs",
+            "artifacts",
+            "proposals",
+            "approvals",
+            "exceptions",
+            "receipts",
+            "events",
+            "artifact_versions"
+          ],
+          "properties": {
+            "cases": {
+              "$ref": "#/$defs/sha256"
+            },
+            "runs": {
+              "$ref": "#/$defs/sha256"
+            },
+            "artifacts": {
+              "$ref": "#/$defs/sha256"
+            },
+            "proposals": {
+              "$ref": "#/$defs/sha256"
+            },
+            "approvals": {
+              "$ref": "#/$defs/sha256"
+            },
+            "exceptions": {
+              "$ref": "#/$defs/sha256"
+            },
+            "receipts": {
+              "$ref": "#/$defs/sha256"
+            },
+            "events": {
+              "$ref": "#/$defs/sha256"
+            },
+            "artifact_versions": {
+              "$ref": "#/$defs/sha256"
+            }
+          }
+        },
+        "hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "guardedAssertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseAndArtifactBothOrdersObserved",
+        "proposalBothOrdersPreservePendingRule",
+        "completedRunRejectsProposalAdmission",
+        "restoredBytesRejectOldVersionWithoutMutation",
+        "exactMembershipRejectedThenCompleted",
+        "wrongOwnerRejectedWithoutMutation",
+        "missingCanonicalVersionRejectedWithoutMutation",
+        "postWriteRollbackRestoredExactState",
+        "heldLockDeadlinePreservedState",
+        "lostAckBurstSustainedReplacementRetriesStable"
+      ],
+      "properties": {
+        "caseAndArtifactBothOrdersObserved": {
+          "const": true
+        },
+        "proposalBothOrdersPreservePendingRule": {
+          "const": true
+        },
+        "completedRunRejectsProposalAdmission": {
+          "const": true
+        },
+        "restoredBytesRejectOldVersionWithoutMutation": {
+          "const": true
+        },
+        "exactMembershipRejectedThenCompleted": {
+          "const": true
+        },
+        "wrongOwnerRejectedWithoutMutation": {
+          "const": true
+        },
+        "missingCanonicalVersionRejectedWithoutMutation": {
+          "const": true
+        },
+        "postWriteRollbackRestoredExactState": {
+          "const": true
+        },
+        "heldLockDeadlinePreservedState": {
+          "const": true
+        },
+        "lostAckBurstSustainedReplacementRetriesStable": {
+          "const": true
+        }
+      }
+    },
+    "guardedSchedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "waiterPid",
+        "blockerPid",
+        "waitEventType",
+        "blockerObserved",
+        "first",
+        "second",
+        "firstError",
+        "secondError"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "criteria-edit-first",
+            "criteria-close-first",
+            "artifact-edit-first",
+            "artifact-close-first",
+            "proposal-accept-first",
+            "proposal-pending-close-first",
+            "close-before-proposal-admission"
+          ]
+        },
+        "waiterPid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "blockerPid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "waitEventType": {
+          "const": "Lock"
+        },
+        "blockerObserved": {
+          "const": true
+        },
+        "first": {
+          "enum": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        "second": {
+          "enum": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        "firstError": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/ownershipError"
+            }
+          ]
+        },
+        "secondError": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/ownershipError"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "first": {
+                "const": "fulfilled"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "firstError": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "firstError": {
+                "$ref": "#/$defs/ownershipError"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "second": {
+                "const": "fulfilled"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "secondError": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "secondError": {
+                "$ref": "#/$defs/ownershipError"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "guardedRollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uncommitted",
+        "rollbackCommand",
+        "before",
+        "after",
+        "originalError"
+      ],
+      "properties": {
+        "uncommitted": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "run_status",
+            "case_status",
+            "receipts",
+            "terminal_events",
+            "writerPid",
+            "observerPid",
+            "injection"
+          ],
+          "properties": {
+            "run_status": {
+              "const": "completed"
+            },
+            "case_status": {
+              "const": "completed"
+            },
+            "receipts": {
+              "const": 1
+            },
+            "terminal_events": {
+              "const": 1
+            },
+            "writerPid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "observerPid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "injection": {
+              "const": "after-real-receipt-insert-before-commit"
+            }
+          }
+        },
+        "rollbackCommand": {
+          "const": "ROLLBACK"
+        },
+        "before": {
+          "$ref": "#/$defs/guardedState"
+        },
+        "after": {
+          "$ref": "#/$defs/guardedState"
+        },
+        "originalError": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ownershipError"
+            },
+            {
+              "properties": {
+                "code": {
+                  "const": "PROOF_POST_WRITE"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "heldLockObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "waiterPid",
+        "blockerPid",
+        "waitEventType",
+        "blockerObserved",
+        "elapsedMs",
+        "error",
+        "cleanup"
+      ],
+      "properties": {
+        "waiterPid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "blockerPid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "waitEventType": {
+          "const": "Lock"
+        },
+        "blockerObserved": {
+          "const": true
+        },
+        "elapsedMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 360000
+        },
+        "error": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ownershipError"
+            },
+            {
+              "properties": {
+                "code": {
+                  "const": "55P03"
+                }
+              }
+            }
+          ]
+        },
+        "cleanup": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "passed",
+              "detail"
+            ],
+            "properties": {
+              "name": {
+                "enum": [
+                  "held-lock-rollback",
+                  "held-lock-release",
+                  "held-lock-contender"
+                ]
+              },
+              "passed": {
+                "const": true
+              },
+              "detail": {
+                "type": "null"
+              }
+            }
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "allOf": [
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "held-lock-rollback"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "held-lock-release"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "held-lock-contender"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            }
+          ]
+        }
+      }
+    },
+    "guardedRetries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "burstCalls",
+        "sustainedCalls",
+        "maximumConcurrentCalls",
+        "retainedPerRetryResults",
+        "simulatedAcknowledgmentLossAfter",
+        "before",
+        "after",
+        "afterReplacement",
+        "replacementRunActive"
+      ],
+      "properties": {
+        "burstCalls": {
+          "const": 100
+        },
+        "sustainedCalls": {
+          "const": 1000
+        },
+        "maximumConcurrentCalls": {
+          "const": 8
+        },
+        "retainedPerRetryResults": {
+          "const": 0
+        },
+        "simulatedAcknowledgmentLossAfter": {
+          "const": "COMMIT"
+        },
+        "before": {
+          "$ref": "#/$defs/guardedState"
+        },
+        "after": {
+          "$ref": "#/$defs/guardedState"
+        },
+        "afterReplacement": {
+          "$ref": "#/$defs/guardedState"
+        },
+        "replacementRunActive": {
+          "const": true
+        }
+      }
+    },
+    "guardedCompletion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assertions",
+        "schedules",
+        "rollbackObservation",
+        "heldLockObservation",
+        "exceptionOwnership",
+        "retries"
+      ],
+      "properties": {
+        "assertions": {
+          "$ref": "#/$defs/guardedAssertions"
+        },
+        "schedules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/guardedSchedule"
+          },
+          "minItems": 7,
+          "maxItems": 7,
+          "allOf": [
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "criteria-edit-first"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "criteria-close-first"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "artifact-edit-first"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "artifact-close-first"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "proposal-accept-first"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "proposal-pending-close-first"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "name": {
+                    "const": "close-before-proposal-admission"
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            }
+          ]
+        },
+        "rollbackObservation": {
+          "$ref": "#/$defs/guardedRollback"
+        },
+        "heldLockObservation": {
+          "$ref": "#/$defs/heldLockObservation"
+        },
+        "exceptionOwnership": {
+          "$ref": "#/$defs/exceptionOwnership"
+        },
+        "retries": {
+          "$ref": "#/$defs/guardedRetries"
+        }
+      }
+    },
+    "knowledgeFirstCreateRace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcomes",
+        "storedVersion",
+        "storedContentHash"
+      ],
+      "properties": {
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "inputContentHash",
+              "settlement",
+              "applied",
+              "reused",
+              "conflict",
+              "actualVersion"
+            ],
+            "properties": {
+              "index": {
+                "enum": [
+                  0,
+                  1
+                ]
+              },
+              "inputContentHash": {
+                "$ref": "#/$defs/sha256"
+              },
+              "settlement": {
+                "const": "fulfilled"
+              },
+              "applied": {
+                "type": "boolean"
+              },
+              "reused": {
+                "const": false
+              },
+              "conflict": {
+                "type": "boolean"
+              },
+              "actualVersion": {
+                "const": 0
+              }
+            },
+            "oneOf": [
+              {
+                "properties": {
+                  "applied": {
+                    "const": true
+                  },
+                  "conflict": {
+                    "const": false
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "applied": {
+                    "const": false
+                  },
+                  "conflict": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "allOf": [
+            {
+              "contains": {
+                "properties": {
+                  "index": {
+                    "const": 0
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "index": {
+                    "const": 1
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "applied": {
+                    "const": true
+                  }
+                }
+              },
+              "minContains": 1,
+              "maxContains": 1
+            }
+          ]
+        },
+        "storedVersion": {
+          "const": 0
+        },
+        "storedContentHash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "failedCleanupLifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "primaryError",
+        "cleanup",
+        "passed",
+        "exitCode"
+      ],
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "passed"
+              ],
+              "properties": {
+                "passed": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        },
+        "primaryError": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ownershipError"
+                },
+                {
+                  "properties": {
+                    "code": {
+                      "const": "PROOF_PRIMARY"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "cleanup": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "passed",
+              "error"
+            ],
+            "properties": {
+              "name": {
+                "const": "harmless-cleanup"
+              },
+              "passed": {
+                "const": false
+              },
+              "error": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/ownershipError"
+                  },
+                  {
+                    "properties": {
+                      "code": {
+                        "const": "PROOF_CLEANUP"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "passed": {
+          "const": false
+        },
+        "exitCode": {
+          "const": 1
+        }
+      }
+    },
+    "lifecycleFailureScenarios": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cleanupAfterPass",
+        "primaryAndCleanup"
+      ],
+      "properties": {
+        "cleanupAfterPass": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/failedCleanupLifecycle"
+            },
+            {
+              "properties": {
+                "value": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "passed"
+                  ],
+                  "properties": {
+                    "passed": {
+                      "const": true
+                    }
+                  }
+                },
+                "primaryError": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        "primaryAndCleanup": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/failedCleanupLifecycle"
+            },
+            {
+              "properties": {
+                "value": {
+                  "type": "null"
+                },
+                "primaryError": {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/ownershipError"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "PROOF_PRIMARY"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "nativeLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileBytes",
+        "reportBytes",
+        "subprocessBytes",
+        "installMs",
+        "proofMs",
+        "processMs",
+        "cleanupMs",
+        "connectionMs",
+        "statementMs",
+        "lockMs",
+        "idleTransactionMs",
+        "queryMs",
+        "synchronizationMs",
+        "settlementMs",
+        "clients",
+        "fixtureRows",
+        "artifactIds"
+      ],
+      "properties": {
+        "fileBytes": {
+          "const": 67108864
+        },
+        "reportBytes": {
+          "const": 1048576
+        },
+        "subprocessBytes": {
+          "const": 1048576
+        },
+        "installMs": {
+          "const": 180000
+        },
+        "proofMs": {
+          "const": 360000
+        },
+        "processMs": {
+          "const": 720000
+        },
+        "cleanupMs": {
+          "const": 45000
+        },
+        "connectionMs": {
+          "const": 3000
+        },
+        "statementMs": {
+          "const": 10000
+        },
+        "lockMs": {
+          "const": 4000
+        },
+        "idleTransactionMs": {
+          "const": 12000
+        },
+        "queryMs": {
+          "const": 12000
+        },
+        "synchronizationMs": {
+          "const": 2500
+        },
+        "settlementMs": {
+          "const": 15000
+        },
+        "clients": {
+          "const": 8
+        },
+        "fixtureRows": {
+          "const": 512
+        },
+        "artifactIds": {
+          "const": 256
+        }
+      }
+    },
+    "successfulCleanup": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "passed",
+              "detail"
+            ],
+            "properties": {
+              "name": {
+                "const": "settle-scenario-clients"
+              },
+              "passed": {
+                "const": true
+              },
+              "detail": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "required",
+                  "remainingCheckedOut"
+                ],
+                "properties": {
+                  "required": {
+                    "const": true
+                  },
+                  "remainingCheckedOut": {
+                    "const": 0
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "passed",
+              "detail"
+            ],
+            "properties": {
+              "name": {
+                "const": "exact-owned-fixtures"
+              },
+              "passed": {
+                "const": true
+              },
+              "detail": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "required",
+                  "committed",
+                  "writerPid",
+                  "observerPid",
+                  "exactCaseOwnerCount",
+                  "exactKnowledgeOwnerCount",
+                  "capturedArtifactIds",
+                  "counts"
+                ],
+                "properties": {
+                  "required": {
+                    "const": true
+                  },
+                  "committed": {
+                    "const": true
+                  },
+                  "writerPid": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "observerPid": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "exactCaseOwnerCount": {
+                    "const": 4
+                  },
+                  "exactKnowledgeOwnerCount": {
+                    "const": 3
+                  },
+                  "capturedArtifactIds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 256
+                  },
+                  "counts": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "cases",
+                      "runs",
+                      "artifacts",
+                      "proposals",
+                      "approvals",
+                      "exceptions",
+                      "receipts",
+                      "events",
+                      "artifact_versions",
+                      "knowledge_projections",
+                      "knowledge_sessions",
+                      "knowledge_retrieval_receipts"
+                    ],
+                    "properties": {
+                      "cases": {
+                        "const": 0
+                      },
+                      "runs": {
+                        "const": 0
+                      },
+                      "artifacts": {
+                        "const": 0
+                      },
+                      "proposals": {
+                        "const": 0
+                      },
+                      "approvals": {
+                        "const": 0
+                      },
+                      "exceptions": {
+                        "const": 0
+                      },
+                      "receipts": {
+                        "const": 0
+                      },
+                      "events": {
+                        "const": 0
+                      },
+                      "artifact_versions": {
+                        "const": 0
+                      },
+                      "knowledge_projections": {
+                        "const": 0
+                      },
+                      "knowledge_sessions": {
+                        "const": 0
+                      },
+                      "knowledge_retrieval_receipts": {
+                        "const": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "passed",
+              "detail"
+            ],
+            "properties": {
+              "name": {
+                "const": "pool-and-clients"
+              },
+              "passed": {
+                "const": true
+              },
+              "detail": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "required",
+                  "unreleased",
+                  "poolEnded"
+                ],
+                "properties": {
+                  "required": {
+                    "const": true
+                  },
+                  "unreleased": {
+                    "const": 0
+                  },
+                  "poolEnded": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "passed",
+              "detail"
+            ],
+            "properties": {
+              "name": {
+                "const": "exact-disposable-installation"
+              },
+              "passed": {
+                "const": true
+              },
+              "detail": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "required",
+                  "exactOwnedRootVerified",
+                  "removed"
+                ],
+                "properties": {
+                  "required": {
+                    "const": true
+                  },
+                  "exactOwnedRootVerified": {
+                    "const": true
+                  },
+                  "removed": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "name": {
+                "const": "settle-scenario-clients"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "name": {
+                "const": "exact-owned-fixtures"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "name": {
+                "const": "pool-and-clients"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "name": {
+                "const": "exact-disposable-installation"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
     }
   }
 }

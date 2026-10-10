@@ -12,6 +12,7 @@ import {
   stageDefinitionsMatch,
 } from "../lib/portable-value.mjs";
 import { normalizeReceiptBindings } from "../lib/receipt-bindings.mjs";
+import { normalizeCompletionExpected, assertCompletionExpected } from "../lib/receipt-bindings.mjs";
 import { runtimeProfiles } from "../lib/runtime-capabilities.mjs";
 
 const defaultActor = Object.freeze({ type: "system", id: "nodekit" });
@@ -100,6 +101,8 @@ function exceptionRecord(row) {
     code: row.code,
     exceptionId: row.exception_id,
     message: row.message,
+    ...(row.next_action == null ? {} : { nextAction: row.next_action }),
+    ...(row.next_action_owner == null ? {} : { nextActionOwner: row.next_action_owner }),
     preservedState: json(row.preserved_state),
     raisedAt: iso(row.raised_at),
     resolution: row.resolution,
@@ -581,15 +584,30 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     });
   }
 
-  async function raiseException({ runId, code, message, preservedState = {}, actor, idempotencyKey }) {
+  async function selectOpenException(client, runId) {
+    const result = await client.query(
+      `select * from nodekit.exceptions where owner_id = $1 and run_id = $2 and status = 'open'
+        order by exception_id collate "C" limit 1`,
+      [owner, runId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async function raiseException({ runId, code, message, preservedState = {}, nextAction, nextActionOwner, actor, idempotencyKey }) {
     const eventActor = actorValue(actor);
     const normalizedCode = requireTrimmedText(code ?? "unknown", "code");
     const normalizedMessage = requireTrimmedText(message ?? "An exception occurred.", "message");
     const portableState = normalizePortableValue(preservedState, "preservedState", {
       maxNestingDepth: PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth,
     });
+    const metadata = optionalFields({}, {
+      nextAction: nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction"),
+      nextActionOwner: nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner"),
+    });
+    // Copy/validate the whole request before waiting for a pooled client, even
+    // without a key; missing fields must not change old journal fingerprints.
+    const request = normalizePortableValue({ actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId, ...metadata }, "raiseException request");
     return withTransaction(pool, async (client) => {
-      const request = { actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId };
       return withIdempotency(client, { idempotencyKey, ownerId: owner, request }, async (journal) => {
         const run = await client.query(
           "select * from nodekit.runs where owner_id = $1 and run_id = $2 for update",
@@ -601,13 +619,14 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
         const exceptionId = nodeId("exception");
         const row = (await client.query(
           `insert into nodekit.exceptions
-            (exception_id, owner_id, run_id, code, message, preserved_state, status, resolution, raised_at)
-            values ($1, $2, $3, $4, $5, $6::jsonb, 'open', null, $7) returning *`,
-          [exceptionId, owner, runId, normalizedCode, normalizedMessage, JSON.stringify(portableState), now],
+            (exception_id, owner_id, run_id, code, message, preserved_state, status, resolution, raised_at, next_action, next_action_owner)
+            values ($1, $2, $3, $4, $5, $6::jsonb, 'open', null, $7, $8, $9) returning *`,
+          [exceptionId, owner, runId, normalizedCode, normalizedMessage, JSON.stringify(portableState), now, metadata.nextAction ?? null, metadata.nextActionOwner ?? null],
         )).rows[0];
+        const selected = await selectOpenException(client, runId);
         await client.query(
-          "update nodekit.runs set status = 'blocked', next_action = 'Resolve exception', next_action_owner = 'user', updated_at = $1 where owner_id = $2 and run_id = $3",
-          [now, owner, runId],
+          "update nodekit.runs set status = 'blocked', next_action = $1, next_action_owner = $2, updated_at = $3 where owner_id = $4 and run_id = $5",
+          [selected.next_action ?? "Resolve exception", selected.next_action_owner ?? "user", now, owner, runId],
         );
         const record = exceptionRecord(row);
         await emit(client, {
@@ -636,6 +655,7 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     const normalizedResolution = requireTrimmedText(resolution ?? "resolved", "resolution");
     const normalizedNextAction = nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction");
     const normalizedNextActionOwner = nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner");
+    normalizePortableValue(optionalFields({ actor: eventActor, exceptionId, resolution: normalizedResolution }, { nextAction: normalizedNextAction, nextActionOwner: normalizedNextActionOwner }), "resolveException request");
     return withTransaction(pool, async (client) => {
       const existing = await client.query(
         "select * from nodekit.exceptions where owner_id = $1 and exception_id = $2 for update",
@@ -655,12 +675,9 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
           where owner_id = $3 and exception_id = $4 returning *`,
         [normalizedResolution, now, owner, exceptionId],
       )).rows[0];
-      const remaining = await client.query(
-        "select 1 from nodekit.exceptions where owner_id = $1 and run_id = $2 and status = 'open' limit 1",
-        [owner, resolved.run_id],
-      );
-      const runState = remaining.rowCount > 0
-        ? { status: "blocked", nextAction: "Resolve remaining exception", nextActionOwner: "user" }
+      const remaining = await selectOpenException(client, resolved.run_id);
+      const runState = remaining
+        ? { status: "blocked", nextAction: remaining.next_action ?? "Resolve remaining exception", nextActionOwner: remaining.next_action_owner ?? "user" }
         : { status: "active", nextAction: normalizedNextAction ?? "Continue run", nextActionOwner: normalizedNextActionOwner ?? "system" };
       const runRow = (await client.query(
         `update nodekit.runs set status = $1, next_action = $2, next_action_owner = $3, updated_at = $4
@@ -672,10 +689,11 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     });
   }
 
-  async function terminalizeRun({ runId, status, reason, actor }) {
+  async function terminalizeRun({ runId, status, reason, actor, expected: inputExpected }) {
+    const expected = normalizeCompletionExpected(inputExpected);
     const terminalActor = actorValue(actor);
     const eventType = `run.${status}`;
-    const terminalPayload = status === "completed" ? {} : { reason };
+    const terminalPayload = status === "completed" ? (expected ? { expectedStateHash: contentHash(expected) } : {}) : { reason };
     return withTransaction(pool, async (client) => {
       const runResult = await client.query(
         "select * from nodekit.runs where owner_id = $1 and run_id = $2 for update",
@@ -704,10 +722,30 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
       }
       if (TERMINAL_RUN_STATUSES.includes(current.status)) throw new Error(`run is terminal: ${current.status}`);
       if (status === "completed" && current.status !== "active") throw new Error(`run is not active: ${current.status}`);
+      // Keep the existing run -> case order. Artifact writers can hold an
+      // artifact while waiting on this run; never take artifact locks here.
+      const reviewedCase = expected ? (await client.query(
+        "select * from nodekit.cases where owner_id = $1 and case_id = $2 for update",
+        [owner, current.caseId],
+      )).rows[0] : undefined;
+      if (expected && !reviewedCase) throw new Error("expected case not found");
       const artifactRows = (await client.query(
-        "select * from nodekit.artifacts where owner_id = $1 and run_id = $2 order by artifact_id",
+        expected
+          ? `select a.*, v.content_hash from nodekit.artifacts a
+            left join nodekit.artifact_versions v on v.artifact_id = a.artifact_id and v.version = a.canonical_version
+            where a.owner_id = $1 and a.run_id = $2 order by a.artifact_id limit 8193`
+          : "select * from nodekit.artifacts where owner_id = $1 and run_id = $2 order by artifact_id",
         [owner, runId],
       )).rows;
+      if (expected && artifactRows.length > PORTABLE_VALUE_LIMITS.maxArrayItems) throw new Error("reviewed artifact set exceeds the portable limit");
+      const checkedBindings = expected ? artifactRows.map((row) => {
+        if (row.case_id !== current.caseId || row.run_id !== runId || row.owner_id !== owner) throw new Error("artifact does not belong to expected case/run/owner");
+        if (!row.content_hash) throw new Error(`artifact ${row.artifact_id} is missing its canonical version`);
+        return { artifactId: row.artifact_id, canonicalVersion: row.canonical_version, contentHash: row.content_hash };
+      }) : undefined;
+      if (expected) assertCompletionExpected(expected, {
+        ...caseRecord(reviewedCase), caseInputHash: contentHash({ title: reviewedCase.title, primaryJob: reviewedCase.primary_job }),
+      }, current, checkedBindings);
       if (status === "completed") {
         if (artifactRows.length === 0) throw new Error("run must have at least one canonical artifact");
         const open = await client.query(
@@ -737,7 +775,7 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
         [status === "completed" ? "completed" : "ready", now, owner, current.caseId],
       );
       await emit(client, { actor: terminalActor, aggregateId: runId, aggregateType: "run", eventType, now, ownerId: owner, payload: terminalPayload });
-      const rawArtifactBindings = (await client.query(
+      const rawArtifactBindings = checkedBindings ?? (await client.query(
         `select a.artifact_id, a.canonical_version, v.content_hash
           from nodekit.artifacts a join nodekit.artifact_versions v
             on v.artifact_id = a.artifact_id and v.version = a.canonical_version
@@ -827,8 +865,8 @@ export function createPostgresCaseflow({ pool, ownerId, clock = () => new Date()
     });
   }
 
-  async function completeRun({ runId, actor }) {
-    return terminalizeRun({ actor, runId, status: "completed" });
+  async function completeRun({ runId, actor, expected }) {
+    return terminalizeRun({ actor, runId, status: "completed", expected });
   }
 
   async function cancelRun({ runId, reason, actor }) {

@@ -115,6 +115,18 @@ No card is generated from NodeKit's deterministic factory proof because that pro
 live model comparison. Existing NodeSlide or NodeVideo evidence must be normalized into valid
 observations before it can support a card.
 
+A reviewer deciding whether to rely on an agent's answer needs to know what its confidence
+describes. A score of `0.9` alone does not establish a 90% chance of correctness. Current
+capability-card confidence is an ordinal level and reason, not a probability. If a host presents
+a correctness probability (probability calibration), require evidence from representative,
+independently resolved held-out cases for the stated task/model/harness, with sample counts,
+evidence window and limitations. Report calibration separately from evidence coverage and rubric
+grades; source verification, review, authority and release checks still apply. See
+[Guo et al.](https://proceedings.mlr.press/v70/guo17a.html).
+
+These are host acceptance requirements; no probability estimator or calibration check is
+implemented here.
+
 ## Implemented skill compiler mechanics
 
 `nodekit harness init` creates the five skill roots for the resolved stack:
@@ -164,6 +176,36 @@ Model A + Harness v2 +/- candidate skill             # skill effect
 
 Tasks, evidence, tools, budgets, judges, and scoring remain fixed. Candidate code cannot edit
 held-out tasks, decisive judges, thresholds, safety requirements, or official outcomes.
+
+A reviewer checking performance on unseen source/case families must not count another revision
+or near-duplicate of a development case as an unseen family. Freeze family membership before
+development/held-out splitting and keep related revisions and near-duplicates together.
+Label intentional within-family or cross-version evaluations separately. These are host acceptance
+requirements; no split builder or duplicate detector is implemented here.
+
+A separately labeled evaluator-only experiment must rescore identical frozen outputs and report
+agreement against independently reviewed reference judgments and calibration limits; it does not
+demonstrate improvement in the generating pipeline. Compare isolated components on identical
+intermediate inputs; evaluate the whole pipeline with each arm's actual upstream outputs. Keep
+these result scopes separate from each other and from protected promotion evidence.
+
+When changing both model and context builder, compare each model with both the baseline and
+candidate context builders under those fixed conditions. Report the interaction before attributing
+the gain to the model; a combined improvement alone does not isolate its cause.
+
+A product owner deciding whether to automate a task needs both useful completion and correctness.
+A gate that holds every case has no accepted errors but completes no work (selective prediction).
+For a gate that accepts or abstains, report accepted/eligible cases separately from incorrect/accepted
+decisions; zero accepted cases makes the latter undefined, not zero. Retain abstentions, execution
+failures, case-family counts and repeated-attempt counts. Choose gates on development cases and
+freeze them before held-out comparison. See [Geifman and El-Yaniv](https://proceedings.mlr.press/v97/geifman19a.html).
+
+A reviewer deciding whether to trust several judges needs to know whether they share a mistake.
+When using multiple reviewers, collect and retain their initial judgments against authorized
+primary evidence before exposing peer judgments; a shared lossy summary cannot be their only
+evidence. Audit unanimous agreement alongside disagreement, borderline and novel cases against
+independently reviewed references. Agreement alone does not establish correctness. These are host
+acceptance requirements; no decision gate, reviewer panel or audit runner is implemented here.
 
 ## Implemented routing mechanics
 

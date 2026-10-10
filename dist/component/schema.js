@@ -87,6 +87,8 @@ export default defineSchema({
         runId: v.string(),
         code: v.string(),
         message: v.string(),
+        nextAction: v.optional(v.string()),
+        nextActionOwner: v.optional(v.string()),
         preservedState: v.any(),
         status: v.union(v.literal("open"), v.literal("resolved")),
         resolution: v.optional(v.string()),
@@ -95,6 +97,7 @@ export default defineSchema({
     })
         .index("by_scope_id", ["scopeKey", "exceptionId"])
         .index("by_scope_run", ["scopeKey", "runId"])
+        .index("by_scope_run_status_id", ["scopeKey", "runId", "status", "exceptionId"])
         .index("by_scope_status", ["scopeKey", "status"]),
     receipts: defineTable({
         ...scoped,

@@ -6,7 +6,7 @@ import {
   requireTrimmedText,
   stageDefinitionsMatch,
 } from "./portable-value.mjs";
-import { normalizeReceiptBindings } from "./receipt-bindings.mjs";
+import { normalizeReceiptBindings, normalizeCompletionExpected, assertCompletionExpected } from "./receipt-bindings.mjs";
 import { runtimeProfiles } from "./runtime-capabilities.mjs";
 
 export const CASEFLOW_SCHEMA_VERSIONS = Object.freeze({
@@ -69,6 +69,20 @@ function optionalFields(required, optional) {
   ]);
 }
 
+function createEvent({ aggregateType, aggregateId, eventType, payload = {}, actor, eventId, occurredAt, sequence }) {
+  return {
+    actor: actorValue(actor),
+    aggregateId,
+    aggregateType,
+    eventId,
+    eventType,
+    occurredAt,
+    payload: clone(payload),
+    schemaVersion: CASEFLOW_SCHEMA_VERSIONS.event,
+    sequence,
+  };
+}
+
 export function createMemoryCaseflow({ clock = () => new Date().toISOString(), ownerId = "local:memory" } = {}) {
   const owner = requireTrimmedText(ownerId, "memory Caseflow ownerId");
   const state = {
@@ -116,17 +130,16 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
   }
 
   function emit(aggregateType, aggregateId, eventType, payload = {}, actor) {
-    const event = {
-      actor: actorValue(actor),
+    const event = createEvent({
+      actor,
       aggregateId,
       aggregateType,
       eventId: nodeId("event"),
       eventType,
       occurredAt: clock(),
-      payload: clone(payload),
-      schemaVersion: CASEFLOW_SCHEMA_VERSIONS.event,
+      payload,
       sequence: state.events.filter((entry) => entry.aggregateId === aggregateId).length + 1,
-    };
+    });
     state.events.push(event);
     return event;
   }
@@ -341,20 +354,38 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     return { approval: clone(approval), artifact: clone(artifact), proposal: clone(proposal), reused: false };
   }
 
-  function raiseException({ runId, code, message, preservedState, actor, idempotencyKey }) {
+  // Portable ASCII ids define one blocker order, independent of clocks and
+  // collection insertion order. The scan allocates no growing candidate list.
+  function selectOpenException(runId, excludedId, prospective = null) {
+    let selected = prospective;
+    for (const exception of state.exceptions.values()) {
+      if (exception.runId === runId && exception.status === "open" && exception.exceptionId !== excludedId
+        && (selected === null || exception.exceptionId < selected.exceptionId)) selected = exception;
+    }
+    return selected;
+  }
+
+  function raiseException({ runId, code, message, preservedState, nextAction, nextActionOwner, actor, idempotencyKey }) {
     const eventActor = actorValue(actor);
     const normalizedCode = requireTrimmedText(code ?? "unknown", "code");
     const normalizedMessage = requireTrimmedText(message ?? "An exception occurred.", "message");
     const portableState = normalizePortableValue(preservedState ?? {}, "preservedState", {
       maxNestingDepth: PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth,
     });
-    const request = { actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId };
+    const metadata = optionalFields({}, {
+      nextAction: nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction"),
+      nextActionOwner: nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner"),
+    });
+    // Validate the complete request even without a key. Omitted metadata stays
+    // absent, preserving the exact legacy canonical request fingerprint.
+    const request = clone({ actor: eventActor, code: normalizedCode, message: normalizedMessage, operation: "raiseException", preservedState: portableState, runId, ...metadata });
     return idempotent(idempotencyKey, request, () => {
       const run = requireNonTerminalRun(runId);
       const exception = {
         code: normalizedCode,
         exceptionId: nodeId("exception"),
         message: normalizedMessage,
+        ...metadata,
         preservedState: portableState,
         raisedAt: clock(),
         resolution: null,
@@ -362,44 +393,50 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
         schemaVersion: CASEFLOW_SCHEMA_VERSIONS.exception,
         status: "open",
       };
-      state.exceptions.set(exception.exceptionId, exception);
-      Object.assign(run, { status: "blocked", nextAction: "Resolve exception", nextActionOwner: "user", updatedAt: clock() });
-      emit("run", runId, "exception.raised", {
+      const selected = selectOpenException(runId, undefined, exception);
+      const updatedRun = clone({ ...run, status: "blocked", nextAction: selected.nextAction ?? "Resolve exception", nextActionOwner: selected.nextActionOwner ?? "user", updatedAt: clock() });
+      const result = clone(exception);
+      const event = clone(createEvent({ eventId: nodeId("event"), aggregateType: "run", aggregateId: runId, eventType: "exception.raised", payload: {
         code: exception.code,
         exceptionId: exception.exceptionId,
         messageHash: contentHash(exception.message),
         preservedStateHash: contentHash(exception.preservedState),
-      }, eventActor);
-      return clone(exception);
+      }, actor: eventActor, sequence: state.events.filter((entry) => entry.aggregateId === runId).length + 1, occurredAt: clock() }));
+      state.exceptions.set(exception.exceptionId, result);
+      Object.assign(run, updatedRun);
+      state.events.push(event);
+      return clone(result);
     });
   }
 
   function resolveException({ exceptionId, resolution, nextAction, nextActionOwner, actor }) {
     const eventActor = actorValue(actor);
+    const normalized = clone(optionalFields({ exceptionId, resolution: requireTrimmedText(resolution ?? "resolved", "resolution"), actor: eventActor }, {
+      nextAction: nextAction === undefined ? undefined : requireTrimmedText(nextAction, "nextAction"),
+      nextActionOwner: nextActionOwner === undefined ? undefined : requireTrimmedText(nextActionOwner, "nextActionOwner"),
+    }));
     const exception = requireRecord(state.exceptions, exceptionId, "exception");
     if (exception.status !== "open") throw new Error("exception is already resolved");
     const run = requireNonTerminalRun(exception.runId);
-    exception.status = "resolved";
-    exception.resolution = requireTrimmedText(resolution ?? "resolved", "resolution");
-    exception.resolvedAt = clock();
-    const hasAnotherOpenException = [...state.exceptions.values()].some((entry) => entry.runId === run.runId && entry.status === "open");
-    Object.assign(run, hasAnotherOpenException
-      ? { status: "blocked", nextAction: "Resolve remaining exception", nextActionOwner: "user", updatedAt: clock() }
-      : {
-          status: "active",
-          nextAction: nextAction === undefined ? "Continue run" : requireTrimmedText(nextAction, "nextAction"),
-          nextActionOwner: nextActionOwner === undefined ? "system" : requireTrimmedText(nextActionOwner, "nextActionOwner"),
-          updatedAt: clock(),
-        });
-    emit("run", run.runId, "exception.resolved", { exceptionId, resolution: exception.resolution }, eventActor);
-    return { exception: clone(exception), run: clone(run) };
+    const resolved = clone({ ...exception, status: "resolved", resolution: normalized.resolution, resolvedAt: clock() });
+    const remaining = selectOpenException(exception.runId, exceptionId);
+    const updatedRun = clone({ ...run, ...(remaining
+      ? { status: "blocked", nextAction: remaining.nextAction ?? "Resolve remaining exception", nextActionOwner: remaining.nextActionOwner ?? "user" }
+      : { status: "active", nextAction: normalized.nextAction ?? "Continue run", nextActionOwner: normalized.nextActionOwner ?? "system" }), updatedAt: clock() });
+    const result = clone({ exception: resolved, run: updatedRun });
+    const event = clone(createEvent({ eventId: nodeId("event"), aggregateType: "run", aggregateId: run.runId, eventType: "exception.resolved", payload: { exceptionId, resolution: resolved.resolution }, actor: eventActor, sequence: state.events.filter((entry) => entry.aggregateId === run.runId).length + 1, occurredAt: clock() }));
+    Object.assign(exception, resolved);
+    Object.assign(run, updatedRun);
+    state.events.push(event);
+    return result;
   }
 
-  function terminalizeRun({ runId, status, reason, actor }) {
+  function terminalizeRun({ runId, status, reason, actor, expected: inputExpected }) {
+    const expected = normalizeCompletionExpected(inputExpected);
     const run = requireRecord(state.runs, runId, "run");
     const terminalActor = actorValue(actor);
     const eventType = `run.${status}`;
-    const terminalPayload = status === "completed" ? {} : { reason };
+    const terminalPayload = status === "completed" ? (expected ? { expectedStateHash: contentHash(expected) } : {}) : { reason };
     if (run.status === status) {
       const receipt = [...state.receipts.values()].find((entry) => entry.runId === runId);
       if (!receipt) throw new Error(`${status} run is missing its receipt`);
@@ -414,7 +451,12 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
     if (TERMINAL_RUN_STATUSES.includes(run.status)) throw new Error(`run is terminal: ${run.status}`);
     if (status === "completed" && run.status !== "active") throw new Error(`run is not active: ${run.status}`);
 
-    const runArtifacts = [...state.artifacts.values()].filter((entry) => entry.runId === runId);
+    const runArtifacts = [];
+    for (const artifact of state.artifacts.values()) {
+      if (artifact.runId !== runId) continue;
+      runArtifacts.push(artifact);
+      if (expected && runArtifacts.length > PORTABLE_VALUE_LIMITS.maxArrayItems) throw new Error("reviewed artifact set exceeds the portable limit");
+    }
     const runArtifactIds = runArtifacts.map((entry) => entry.artifactId);
     if (status === "completed") {
       if (runArtifacts.length === 0) throw new Error("run must have at least one canonical artifact");
@@ -426,21 +468,37 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
       }
     }
 
+    const caseRecord = requireRecord(state.cases, run.caseId, "case");
+    const rawArtifactBindings = runArtifacts.map((entry) => {
+      if (expected && entry.caseId !== run.caseId) throw new Error("artifact does not belong to expected case");
+      const version = entry.versions.find((candidate) => candidate.version === entry.canonicalVersion);
+      if (!version) throw new Error(`artifact ${entry.artifactId} is missing its canonical version`);
+      return { artifactId: entry.artifactId, canonicalVersion: entry.canonicalVersion, contentHash: version.contentHash };
+    });
+    if (expected) assertCompletionExpected(expected, {
+      ...caseRecord, caseInputHash: contentHash({ title: caseRecord.title, primaryJob: caseRecord.primaryJob }),
+    }, run, rawArtifactBindings);
     const terminalAt = clock();
-    Object.assign(run, {
+    const terminalRun = {
+      ...run,
       status,
       nextAction: status === "completed" ? "Review receipt" : "Start a new run",
       nextActionOwner: "user",
       updatedAt: terminalAt,
       ...(status === "completed" ? { stages: run.stages.map((stage) => ({ ...stage, status: "completed" })) } : {}),
+    };
+    const terminalCase = { ...caseRecord, status: status === "completed" ? "completed" : "ready", updatedAt: terminalAt };
+    const terminalEvent = createEvent({
+      actor: terminalActor,
+      aggregateId: runId,
+      aggregateType: "run",
+      eventId: nodeId("event"),
+      eventType,
+      occurredAt: clock(),
+      payload: terminalPayload,
+      sequence: state.events.filter((entry) => entry.aggregateId === runId).length + 1,
     });
-    const caseRecord = requireRecord(state.cases, run.caseId, "case");
-    Object.assign(caseRecord, { status: status === "completed" ? "completed" : "ready", updatedAt: terminalAt });
-    emit("run", runId, eventType, terminalPayload, terminalActor);
-    const rawArtifactBindings = [...state.artifacts.values()].filter((entry) => entry.runId === runId).map((entry) => {
-      const version = entry.versions.find((candidate) => candidate.version === entry.canonicalVersion);
-      return { artifactId: entry.artifactId, canonicalVersion: entry.canonicalVersion, contentHash: version.contentHash };
-    });
+
     const rawArtifactIds = rawArtifactBindings.map((entry) => entry.artifactId);
     const rawProposalBindings = [...state.proposals.values()].filter((entry) => rawArtifactIds.includes(entry.artifactId)).map((entry) => ({
       artifactId: entry.artifactId,
@@ -456,7 +514,7 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
       decision: entry.decision,
       proposalId: entry.proposalId,
     }));
-    const rawEventBindings = state.events.filter((entry) => entry.aggregateId === runId || rawArtifactIds.includes(entry.aggregateId) || rawProposalIds.includes(entry.aggregateId)).map((entry) => ({
+    const rawEventBindings = state.events.filter((entry) => entry.aggregateId === runId || rawArtifactIds.includes(entry.aggregateId) || rawProposalIds.includes(entry.aggregateId)).concat(terminalEvent).map((entry) => ({
       actorHash: contentHash(entry.actor),
       aggregateId: entry.aggregateId,
       aggregateType: entry.aggregateType,
@@ -483,26 +541,41 @@ export function createMemoryCaseflow({ clock = () => new Date().toISOString(), o
       approvalBindings,
       artifactBindings,
       artifactIds,
-      caseHash: contentHash(caseRecord),
+      caseHash: contentHash(terminalCase),
       caseId: run.caseId,
       eventBindings,
       eventIds,
       generatedAt: terminalAt,
       proposalBindings,
       proposalIds,
-      runHash: contentHash(run),
+      runHash: contentHash(terminalRun),
       runId,
       schemaVersion: CASEFLOW_SCHEMA_VERSIONS.receipt,
       status,
     };
     const receipt = { ...receiptBody, receiptId: nodeId("receipt"), receiptHash: contentHash(receiptBody) };
+    const receiptEvent = createEvent({
+      actor: terminalActor,
+      aggregateId: runId,
+      aggregateType: "run",
+      eventId: nodeId("event"),
+      eventType: "receipt.created",
+      occurredAt: clock(),
+      payload: { receiptHash: receipt.receiptHash, receiptId: receipt.receiptId },
+      sequence: terminalEvent.sequence + 1,
+    });
+    const result = { receipt: clone(receipt), run: clone(terminalRun), reused: false };
+
+    // All portable-value validation must finish before the first owned-state write.
+    Object.assign(run, terminalRun);
+    Object.assign(caseRecord, terminalCase);
     state.receipts.set(receipt.receiptId, receipt);
-    emit("run", runId, "receipt.created", { receiptHash: receipt.receiptHash, receiptId: receipt.receiptId }, terminalActor);
-    return { receipt: clone(receipt), run: clone(run), reused: false };
+    state.events.push(terminalEvent, receiptEvent);
+    return result;
   }
 
-  function completeRun({ runId, actor }) {
-    return terminalizeRun({ actor, runId, status: "completed" });
+  function completeRun({ runId, actor, expected }) {
+    return terminalizeRun({ actor, runId, status: "completed", expected });
   }
 
   function cancelRun({ runId, reason, actor }) {

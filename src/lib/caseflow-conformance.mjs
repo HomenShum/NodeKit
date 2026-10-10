@@ -240,6 +240,94 @@ export async function runCaseflowConformance(createRuntime, {
     }
   }
 
+  // A caller reviews one revision, then closes against exactly that state.
+  const reviewedCase = await runtime.createCase({ title: "Reviewed task", primaryJob: "Close only reviewed state" });
+  const reviewedRun = await runtime.startRun({ caseId: reviewedCase.caseId, stages: [{ id: "review", label: "Review", owner: "user" }] });
+  const reviewedArtifact = await runtime.createArtifact({ caseId: reviewedCase.caseId, runId: reviewedRun.runId, content: { revision: 1 } });
+  const expected = {
+    caseId: reviewedCase.caseId,
+    caseInputHash: contentHash({ title: reviewedCase.title, primaryJob: reviewedCase.primaryJob }),
+    artifactBindings: [{ artifactId: reviewedArtifact.artifactId, canonicalVersion: 1, contentHash: contentHash({ revision: 1 }) }],
+  };
+  const beforeInvalid = contentHash(await runtime.snapshot());
+  const invalidExpected = [null, {}, [], false,
+    { ...expected, ignoredCondition: true },
+    { ...expected, artifactBindings: [{ ...expected.artifactBindings[0], ignoredCondition: true }] },
+    { ...expected, artifactBindings: [expected.artifactBindings[0], { ...expected.artifactBindings[0], artifactId: ` ${reviewedArtifact.artifactId} ` }] },
+  ];
+  const invalidExpectedRejected = [];
+  for (const invalid of invalidExpected) {
+    try { await runtime.completeRun({ runId: reviewedRun.runId, expected: invalid }); invalidExpectedRejected.push(false); }
+    catch { invalidExpectedRejected.push(contentHash(await runtime.snapshot()) === beforeInvalid); }
+  }
+  await runtime.updateCaseInput({ caseId: reviewedCase.caseId, primaryJob: "Changed while review was pending" });
+  const beforeStale = contentHash(await runtime.snapshot());
+  let staleReviewedStateRejected = false;
+  try { await runtime.completeRun({ runId: reviewedRun.runId, expected }); }
+  catch { staleReviewedStateRejected = contentHash(await runtime.snapshot()) === beforeStale; }
+  await runtime.updateCaseInput({ caseId: reviewedCase.caseId, primaryJob: reviewedCase.primaryJob });
+  const reviewedCompletion = await runtime.completeRun({ runId: reviewedRun.runId, expected });
+  const reviewedRetry = await runtime.completeRun({ runId: reviewedRun.runId, expected: { ...expected, caseId: ` ${expected.caseId} ` } });
+  const beforeRetryConflict = contentHash(await runtime.snapshot());
+  let guardedRetryIdentityPreserved = false;
+  try { await runtime.completeRun({ runId: reviewedRun.runId }); }
+  catch { guardedRetryIdentityPreserved = contentHash(await runtime.snapshot()) === beforeRetryConflict; }
+
+  // A reviewer may leave a task while another party owns a blocker. Verify
+  // canonical ownership, retries and partial recovery, not a banner-only label.
+  const ownershipResults = [];
+  for (const externalFirst of [false, true]) {
+    for (const resolveExternalFirst of [false, true]) {
+      const ownershipCase = await runtime.createCase({ title: "Shared recovery", primaryJob: "Keep external review assigned while another issue is repaired" });
+      const ownershipRun = await runtime.startRun({ caseId: ownershipCase.caseId, stages: [{ id: "work", label: "Work", owner: "agent" }] });
+      const ownershipArtifact = await runtime.createArtifact({ caseId: ownershipCase.caseId, runId: ownershipRun.runId, content: { reviewed: "preserved" } });
+      const externalInput = { runId: ownershipRun.runId, code: "external_review", nextAction: " Await external review ", nextActionOwner: " external ", preservedState: { artifactVersion: 1 }, idempotencyKey: `ownership-${externalFirst}-${resolveExternalFirst}` };
+      const legacyInput = { runId: ownershipRun.runId, code: "source_missing", idempotencyKey: `legacy-${externalFirst}-${resolveExternalFirst}` };
+      let external, legacy;
+      if (externalFirst) { external = await runtime.raiseException(externalInput); legacy = await runtime.raiseException(legacyInput); }
+      else { legacy = await runtime.raiseException(legacyInput); external = await runtime.raiseException(externalInput); }
+      const beforeRetries = contentHash(await runtime.snapshot());
+      const retries = await Promise.all(Array.from({ length: 8 }, () => runtime.raiseException({ ...externalInput, nextAction: "Await external review", nextActionOwner: "external" })));
+      let stable = retries.every((entry) => contentHash(entry) === contentHash(external));
+      for (let index = 0; index < 16; index += 1) stable = stable && contentHash(await runtime.raiseException(externalInput)) === contentHash(external);
+      const omitted = await runtime.raiseException({ ...legacyInput, nextAction: undefined, nextActionOwner: undefined });
+      let changedRejected = false;
+      try { await runtime.raiseException({ ...externalInput, nextActionOwner: "user" }); } catch { changedRejected = true; }
+      const afterRetries = await runtime.snapshot();
+      const retriesPreservedState = beforeRetries === contentHash(afterRetries);
+      const selected = external.exceptionId < legacy.exceptionId ? external : legacy;
+      const blocked = afterRetries.runs.find((entry) => entry.runId === ownershipRun.runId);
+      if (!blocked) throw new Error("ownership conformance run is missing from the portable snapshot");
+      const first = resolveExternalFirst ? external : legacy;
+      const remaining = resolveExternalFirst ? legacy : external;
+      const partial = await runtime.resolveException({ exceptionId: first.exceptionId, nextAction: "Do not override a remaining blocker", nextActionOwner: "agent" });
+      const final = await runtime.resolveException({ exceptionId: remaining.exceptionId });
+      const preserved = (await runtime.snapshot()).artifacts.find((entry) => entry.artifactId === ownershipArtifact.artifactId);
+      ownershipResults.push({
+        persisted: external.nextAction === "Await external review" && external.nextActionOwner === "external",
+        retries: stable && changedRejected && contentHash(omitted) === contentHash(legacy)
+          && !Object.hasOwn(omitted, "nextAction") && !Object.hasOwn(omitted, "nextActionOwner")
+          && retriesPreservedState,
+        selected: blocked.status === "blocked" && blocked.nextActionOwner === (selected.nextActionOwner ?? "user") && blocked.nextAction === (selected.nextAction ?? "Resolve exception"),
+        partial: partial.run.status === "blocked" && partial.run.nextActionOwner === (remaining.nextActionOwner ?? "user")
+          && (remaining.nextAction === undefined ? /^Resolve (remaining )?exception$/.test(partial.run.nextAction) : partial.run.nextAction === remaining.nextAction),
+        final: final.run.status === "active" && final.run.nextAction === "Continue run" && final.run.nextActionOwner === "system",
+        artifact: contentHash(preserved) === contentHash(ownershipArtifact),
+      });
+    }
+  }
+  const invalidOwnershipResults = [];
+  for (const input of [
+    { nextAction: null }, { nextActionOwner: null }, { nextAction: "" }, { nextActionOwner: "  " },
+    { nextAction: 3 }, { nextActionOwner: {} }, { nextAction: "bad\u0000action" }, { nextActionOwner: "\ud800" },
+    { nextAction: "x".repeat(PORTABLE_VALUE_LIMITS.maxEncodedBytes) },
+    { nextAction: "x".repeat(300_000), nextActionOwner: "y".repeat(300_000), preservedState: { body: "z".repeat(300_000) } },
+  ]) {
+    const before = contentHash(await runtime.snapshot());
+    try { await runtime.raiseException({ runId: isolationRun.runId, ...input }); invalidOwnershipResults.push(false); }
+    catch { invalidOwnershipResults.push(before === contentHash(await runtime.snapshot())); }
+  }
+
   let payloadAtDepthLimit = null;
   for (let depth = 0; depth < PORTABLE_VALUE_LIMITS.maxPayloadNestingDepth; depth += 1) {
     payloadAtDepthLimit = { value: payloadAtDepthLimit };
@@ -266,6 +354,17 @@ export async function runCaseflowConformance(createRuntime, {
   }
 
   const assertions = {
+    externalExceptionOwnershipPersisted: ownershipResults.every((entry) => entry.persisted),
+    exceptionMetadataRetriesStable: ownershipResults.every((entry) => entry.retries),
+    ordinalExceptionOwnerSelection: ownershipResults.every((entry) => entry.selected),
+    partialRecoveryKeepsRemainingOwner: ownershipResults.every((entry) => entry.partial),
+    finalRecoveryUsesLegacyContinuation: ownershipResults.every((entry) => entry.final),
+    externalWaitPreservesCanonicalArtifact: ownershipResults.every((entry) => entry.artifact),
+    invalidExceptionMetadataFailsBeforeMutation: invalidOwnershipResults.every(Boolean),
+    guardedCompletionRejectsInvalidConditions: invalidExpectedRejected.every(Boolean),
+    guardedCompletionRejectsStaleStateWithoutMutation: staleReviewedStateRejected,
+    guardedCompletionReusesNormalizedRequest: reviewedRetry.reused === true && reviewedRetry.receipt.receiptHash === reviewedCompletion.receipt.receiptHash,
+    guardedCompletionPreservesRetryIdentity: guardedRetryIdentityPreserved,
     activeRunStartIsIdempotent: reusedRun.runId === run.runId,
     activeRunStagePlanMismatchFailsClosed: mismatchedActiveRunPlanRejected,
     blockedRunRejectsOrdinaryMutations: blockedMutationResults.every(Boolean),

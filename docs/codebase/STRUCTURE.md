@@ -1,12 +1,13 @@
 # STRUCTURE
 
-**The single most useful fact about this repository: 2,118 tracked files, and only
-207 of them are code you can change.** Everything else is schemas, generated
-indexes, or recorded evidence. A new reader who does not know that spends their
-first hour in the wrong directories.
+**Start with implementation, templates, and contracts; open evidence for the run
+you are investigating.** The directory roles below help a new engineer avoid
+mistaking a historical record for the code that currently runs.
 
-Counts below are `git ls-files <dir> | wc -l`, taken at the commit this document
-ships in. Re-run it; if the number moved, this file is stale.
+The counts and line numbers below are a historical snapshot from the 2026-08-13
+onboarding pass, not current inventory. For current counts, run
+`git ls-files <dir> | wc -l` on your own revision; navigate source by symbol
+rather than relying on these recorded line numbers.
 
 ## Read these. They are the code.
 

@@ -3,21 +3,21 @@
   "agentDriver": "codex",
   "model": "gpt-5.6-luna",
   "lowerCost": {
-    "inputUsdPerMillion": 1,
-    "outputUsdPerMillion": 6
+    "inputUsdPerMillion": 0.2,
+    "outputUsdPerMillion": 1.2
   },
   "comparators": [
     {
       "model": "gpt-5.6-sol",
-      "inputUsdPerMillion": 5,
-      "outputUsdPerMillion": 30
+      "inputUsdPerMillion": 4,
+      "outputUsdPerMillion": 20
     }
   ],
-  "observedAt": "2026-07-22T13:49:31.4227751Z",
+  "observedAt": "2026-10-03T19:08:21.291Z",
   "passed": true,
   "source": {
     "url": "https://developers.openai.com/api/docs/pricing",
-    "snapshotPath": "openai-pricing-2026-07-22.json",
-    "snapshotSha256": "8e46b979c8ca6fe0ef992c367a4f591aaff57e9b3df9e144183d4e0b82f14937"
+    "snapshotPath": "openai-pricing-2026-10-03.json",
+    "snapshotSha256": "bfcafc85b8e370930ce135be5f56ccdd0916aa7366204ca0b72faeaa85acf735"
   }
 }

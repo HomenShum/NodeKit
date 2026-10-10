@@ -132,9 +132,9 @@ repositories:
     lifecycle: production
     support: active
     role: domain-application
-    # The live repository still uses the superseded apiVersion/kind/spec
-    # contract draft. Keep it visible but untracked until its manifest is
-    # explicitly migrated to the canonical flat nodekit.repo/v1 shape.
+    # Its live manifest uses flat nodekit.repo/v1. Keep this entry visible
+    # but untracked: no-key support is missing, its environment is legacy,
+    # and its proof receipt schema is undeclared.
     commandProfile: untracked
 
   - name: NodeBenchBoilerplate

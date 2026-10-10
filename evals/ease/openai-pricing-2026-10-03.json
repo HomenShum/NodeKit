@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "nodekit.external-source-snapshot/v1",
+  "retrievedAt": "2026-10-03T19:08:21.291Z",
+  "retrievalMethod": "OpenAI Developer Docs MCP fetch_openai_doc",
+  "source": "https://developers.openai.com/api/docs/pricing",
+  "sourceDocumentSha256": "b672bd03a1405d705a460d38eb56c80d939abbed26bd9c87bb141a4296113d10",
+  "section": "Flagship models / Standard / Short context",
+  "unit": "USD per 1M tokens",
+  "columns": [
+    "model",
+    "input",
+    "cachedInput",
+    "cacheWrite",
+    "output"
+  ],
+  "rows": [
+    [
+      "gpt-5.6-sol",
+      4,
+      0.4,
+      5,
+      20
+    ],
+    [
+      "gpt-5.6-terra",
+      2,
+      0.2,
+      2.5,
+      12
+    ],
+    [
+      "gpt-5.6-luna",
+      0.2,
+      0.02,
+      0.25,
+      1.2
+    ]
+  ],
+  "context": "Short context: at most 272K input tokens.",
+  "promotion": {
+    "model": "gpt-5.6-sol",
+    "availableAtLeastThrough": "2026-11-21"
+  },
+  "scope": "Standard short-context API token rates only, used to verify the lower-cost trial label. Long context, Batch, Flex, Fast, Ultrafast, regional/FedRAMP uplifts, tool costs and Codex subscription credits are outside this comparison. The live official page remains authoritative."
+}

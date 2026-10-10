@@ -85,6 +85,19 @@ semantic location; it does not invent a page, bounding box, or timestamp. For im
 positions, the byte anchor is verified while the semantic position remains attributed to its
 declared source.
 
+For a host using a visual location to support a claim, bind that location to the exact original
+capture, coordinate system, viewport or page, and video frame or time range where applicable.
+Preserve any crop, resize, rotation or masking transform. Verify the location mapping separately
+from whether the depicted content supports the claim; missing mapping remains unassessed.
+
+A reviewer asking an external service to inspect one page or a short clip may still disclose the
+full document or recording (analysis versus disclosure scope). Record requested and observed
+analysis scope separately from the exact material disclosed to each recipient and its access
+and retention status. Bind supplied derivatives to originals by identity, hash and transform.
+Offsets alone do not prove limited disclosure or evaluation; unsupported status stays unknown.
+
+These are host acceptance requirements, not checks implemented by the byte verifier.
+
 ```bash
 nodekit graph evidence-ingest \
   --file sources/report.pdf \
@@ -125,6 +138,17 @@ label, confidence, and properties, but cannot replace or rewrite the raw evidenc
 collection emits `nodekit.research-collection/v1`, records an `EXTERNAL_RESEARCH` action, and adds
 only a pending, source-grounded graph patch. The graph version and canonical entities must remain
 unchanged.
+
+A reviewer importing structured data needs the source value and its interpretation to remain
+distinguishable. For example, an identifier written as `0012` must not silently become the number
+`12`. Preserve the original representation, source locator, type and unit separately from the
+proposed interpretation (normalized value); ambiguous dates, identifiers, currencies and
+leading-zero values remain unresolved for review. A person's correction retains source lineage
+and whether it is an assertion or confirmed against evidence, without changing raw evidence or
+bypassing governed review.
+
+These are host acceptance requirements; no additional parser or normalization checks are
+implemented here.
 
 The bundled CLI deliberately supports only a deterministic local fixture provider, so tests and
 no-key demos never invoke a paid or mutable live service:

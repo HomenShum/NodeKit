@@ -89,6 +89,8 @@ export const exceptionValidator = v.object({
   code: v.string(),
   exceptionId: v.string(),
   message: v.string(),
+  nextAction: v.optional(v.string()),
+  nextActionOwner: v.optional(v.string()),
   preservedState: v.any(),
   raisedAt: v.string(),
   resolution: v.union(v.null(), v.string()),
