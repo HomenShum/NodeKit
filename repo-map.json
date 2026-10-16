@@ -4,9 +4,9 @@
   "regenerate": "npm run repo:map",
   "driftCheck": "Regenerate and diff. A stale map fails CI the same way evolution projections do.",
   "counts": {
-    "schemas": 121,
-    "modules": 96,
-    "tests": 108
+    "schemas": 122,
+    "modules": 101,
+    "tests": 111
   },
   "architecture": [
     {
@@ -276,7 +276,8 @@
     "nodekit.tournament.v1.schema.json",
     "nodekit.visual-review-inventory.v1.schema.json",
     "nodekit.workspace-reference-index.v1.schema.json",
-    "nodekit.workspace.v1.schema.json"
+    "nodekit.workspace.v1.schema.json",
+    "nodeplatform.models.v1.schema.json"
   ],
   "modules": [
     "agent-definition.mjs",
@@ -331,7 +332,12 @@
     "knowledge-runtime.mjs",
     "launch-video.mjs",
     "managed-evidence-capture.mjs",
+    "model-catalogs.mjs",
     "model-intelligence.mjs",
+    "model-lock.mjs",
+    "model-registry.mjs",
+    "models-cli.mjs",
+    "models-main.mjs",
     "motion-portability.mjs",
     "native-agent-identity.mjs",
     "native-agent-migration.mjs",
@@ -434,6 +440,9 @@
     "managed-evidence-capture.test.mjs",
     "managed-handoff.test.mjs",
     "model-intelligence.test.mjs",
+    "model-lock.test.mjs",
+    "model-registry.test.mjs",
+    "model-workflows.test.mjs",
     "motion-portability.test.mjs",
     "native-agent-identity.test.mjs",
     "native-agent-migration.test.mjs",
