@@ -1,0 +1,85 @@
+name: Model registry refresh
+
+# Weekly, proposal-only (SPEC-v9 §B.6, brief 2026-10-16). Reads four public, keyless catalogs, runs the
+# registry's own gates, and opens or updates ONE pull request on automation/model-registry when the decision
+# set differs from main. A human merges; nothing here merges, and no provider key or paid call is involved.
+#
+# Needs the repo setting "Allow GitHub Actions to create and approve pull requests" (Settings > Actions >
+# General). Without it the PR step fails loudly; the rest of the run is still valid evidence.
+
+on:
+  schedule:
+    - cron: "47 13 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Run every gate and print the proposal body, but push nothing and open no PR.
+        type: boolean
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: model-registry-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      BRANCH: automation/model-registry
+      GH_TOKEN: ${{ github.token }}
+      # A scheduled run is never a dry run; a manual run is one unless the input says otherwise.
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Start the evaluation clock
+        run: echo "AT=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> "$GITHUB_ENV"
+      - name: Snapshot the public catalogs (a fetch or structure failure fails the run)
+        run: node src/cli.mjs models snapshot
+      - name: Input validation (G1, B.2.1)
+        run: node src/cli.mjs models validate --stage inputs --max-age-days 14 --evaluated-at "$AT"
+      - name: Keep the input registry for the diff and the replay
+        run: cp models.yaml "$RUNNER_TEMP/models.input.yaml"
+      - name: Select (B.4)
+        id: select
+        run: node src/cli.mjs models select --write --evaluated-at "$AT" --ref "$GITHUB_SHA" --body-out "$RUNNER_TEMP/body.md" --github-output "$GITHUB_OUTPUT"
+      - name: Eligibility, merge rule and bot-diff allowlist (G1, B.2.2)
+        run: node src/cli.mjs models validate --stage full --evaluated-at "$AT" --base "$RUNNER_TEMP/models.input.yaml"
+      - name: Replay (B.2.3)
+        run: node src/cli.mjs models replay --input-registry "$RUNNER_TEMP/models.input.yaml"
+      - name: Closed-PR guard
+        id: guard
+        if: steps.select.outputs.changed == 'true'
+        env:
+          DECISION_SHA: ${{ steps.select.outputs.decisionSetSha256 }}
+        run: |
+          gh pr list --state closed --head "$BRANCH" --json number,body,mergedAt,closedAt --limit 5 > "$RUNNER_TEMP/closed.json"
+          node src/cli.mjs models pr-guard --closed-prs "$RUNNER_TEMP/closed.json" --hash "$DECISION_SHA" --github-output "$GITHUB_OUTPUT"
+      - name: Show the proposal
+        if: steps.select.outputs.changed == 'true'
+        run: cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Open or update the proposal PR
+        if: steps.select.outputs.changed == 'true' && steps.guard.outputs.suppress != 'true' && env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add models.yaml models
+          git commit -m "chore(models): refresh the model registry"
+          AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" fetch origin "$BRANCH:refs/remotes/origin/$BRANCH" || true
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push --force-with-lease origin "$BRANCH"
+          gh pr create --head "$BRANCH" --base "${GITHUB_REF_NAME}" --title "chore(models): refresh the model registry" --body-file "$RUNNER_TEMP/body.md" \
+            || gh pr edit "$BRANCH" --body-file "$RUNNER_TEMP/body.md"

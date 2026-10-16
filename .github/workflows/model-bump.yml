@@ -1,0 +1,134 @@
+name: Model bump
+
+# Reusable consumer workflow (SPEC-v9 §B.6). A consumer repo calls it by 40-hex SHA from its own
+# model-defaults.yml, with `permissions` granted per calling job: this file sets none of its own, because a
+# called workflow can only narrow what its caller grants. Modes:
+#   lint  - offline lock checks (G2 b, b2, c) on the consumer's own files; needs contents: read
+#   watch - open or update the one URGENT issue; needs contents: read, issues: write
+#   bump  - sync the lock from the registry, lint, run the consumer's gate, open/update ONE proposal PR on
+#           automation/model-defaults; needs contents: write, pull-requests: write
+# The NodeKit tooling comes from `platform_sha` (code, pinned). The registry is fetched from NodeKit at
+# `registry_ref` as DATA, resolved to a commit SHA first, and validated by that pinned tooling's schema; it is
+# never executed. No provider secret is passed and no paid call is made.
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        type: string
+        required: true
+      platform_sha:
+        description: 40-hex NodeKit commit that supplies the tooling.
+        type: string
+        required: true
+      registry_ref:
+        description: NodeKit branch or tag whose models.yaml is read as data.
+        type: string
+        default: main
+      dry_run:
+        description: Run every check and print the proposal; push nothing, open nothing.
+        type: boolean
+        default: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MODE: ${{ inputs.mode }}
+      PLATFORM_SHA: ${{ inputs.platform_sha }}
+      REGISTRY_REF: ${{ inputs.registry_ref }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      GH_TOKEN: ${{ github.token }}
+      BRANCH: automation/model-defaults
+      NODEKIT: .node-platform/src/cli.mjs
+    steps:
+      - name: Check the inputs
+        run: |
+          [[ "$PLATFORM_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "platform_sha must be a 40-hex commit SHA, got: $PLATFORM_SHA"; exit 1; }
+          [[ "$REGISTRY_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]] || { echo "registry_ref has characters outside [A-Za-z0-9._/-]"; exit 1; }
+          [[ "$MODE" =~ ^(lint|watch|bump)$ ]] || { echo "mode must be lint, watch or bump"; exit 1; }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: HomenShum/NodeKit
+          ref: ${{ inputs.platform_sha }}
+          path: .node-platform
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Install the pinned tooling
+        run: npm ci --prefix .node-platform --ignore-scripts
+
+      - name: Lint the lock (offline)
+        if: env.MODE == 'lint'
+        run: node "$NODEKIT" models lint --repo-root .
+
+      - name: Fetch the registry as data
+        if: env.MODE != 'lint'
+        run: |
+          mkdir -p .model-registry
+          REG_SHA="$(gh api "repos/HomenShum/NodeKit/commits/$REGISTRY_REF" --jq .sha)"
+          [[ "$REG_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "could not resolve $REGISTRY_REF to a commit"; exit 1; }
+          echo "REG_SHA=$REG_SHA" >> "$GITHUB_ENV"
+          curl --fail --silent --show-error --max-time 30 --max-filesize 5242880 \
+            -o .model-registry/models.yaml "https://raw.githubusercontent.com/HomenShum/NodeKit/$REG_SHA/models.yaml"
+          node "$NODEKIT" models validate --stage inputs --schema-only --registry .model-registry/models.yaml
+
+      - name: Watch
+        if: env.MODE == 'watch'
+        run: |
+          curl --fail --silent --max-time 30 --max-filesize 1048576 -o "$RUNNER_TEMP/runs.json" \
+            "https://api.github.com/repos/HomenShum/NodeKit/actions/workflows/model-registry-refresh.yml/runs?status=success&per_page=1" || rm -f "$RUNNER_TEMP/runs.json"
+          node "$NODEKIT" models watch --repo-root . --registry .model-registry/models.yaml --refresh-runs "$RUNNER_TEMP/runs.json" --json > "$RUNNER_TEMP/watch.json"
+          node -e 'const w=require(process.env.RUNNER_TEMP+"/watch.json");require("fs").writeFileSync(process.env.RUNNER_TEMP+"/watch.md",w.body);process.exit(w.urgent?0:3)' && URGENT=true || URGENT=false
+          cat "$RUNNER_TEMP/watch.md" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$URGENT" = true ] && [ "$DRY_RUN" != true ]; then
+            gh label create model-defaults --color B60205 --description "Model defaults automation" 2>/dev/null || true
+            N="$(gh issue list --label model-defaults --state open --json number,title --jq '[.[] | select(.title == "Model defaults: URGENT")][0].number // empty')"
+            if [ -n "$N" ]; then gh issue edit "$N" --body-file "$RUNNER_TEMP/watch.md"
+            else gh issue create --label model-defaults --title "Model defaults: URGENT" --body-file "$RUNNER_TEMP/watch.md"; fi
+          fi
+
+      - name: Sync the lock from the registry
+        id: sync
+        if: env.MODE == 'bump'
+        run: node "$NODEKIT" models sync --repo-root . --registry .model-registry/models.yaml --ref "$REG_SHA" --body-out "$RUNNER_TEMP/body.md" --github-output "$GITHUB_OUTPUT"
+      - name: Lint against the registry (G2)
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        run: node "$NODEKIT" models lint --repo-root . --registry .model-registry/models.yaml
+      - name: Run the consumer's own gate (G3)
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        run: |
+          INSTALL="$(node -e 'const c=require("./models.config.json");process.stdout.write((c.gate&&c.gate.install)||"")')"
+          CHECK="$(node -e 'const c=require("./models.config.json");process.stdout.write((c.gate&&c.gate.check)||"")')"
+          [ -n "$CHECK" ] || { echo "models.config.json gate.check is required for bump"; exit 1; }
+          [ -z "$INSTALL" ] || bash -ec "$INSTALL"
+          bash -ec "$CHECK"
+      - name: Closed-PR guard
+        id: guard
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        env:
+          DECISION_SHA: ${{ steps.sync.outputs.decisionSetSha256 }}
+        run: |
+          gh pr list --state closed --head "$BRANCH" --json number,body,mergedAt,closedAt --limit 5 > "$RUNNER_TEMP/closed.json"
+          node "$NODEKIT" models pr-guard --closed-prs "$RUNNER_TEMP/closed.json" --hash "$DECISION_SHA" --github-output "$GITHUB_OUTPUT"
+      - name: Show the proposal
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        run: cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Open or update the proposal PR
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true' && steps.guard.outputs.suppress != 'true' && env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add -- "$(node -e 'process.stdout.write(require("./models.config.json").lock)')"
+          git commit -m "chore(models): bump the model lock"
+          AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" fetch origin "$BRANCH:refs/remotes/origin/$BRANCH" || true
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push --force-with-lease origin "$BRANCH"
+          gh pr create --head "$BRANCH" --base "${GITHUB_REF_NAME}" --title "chore(models): bump the model lock" --body-file "$RUNNER_TEMP/body.md" \
+            || gh pr edit "$BRANCH" --body-file "$RUNNER_TEMP/body.md"

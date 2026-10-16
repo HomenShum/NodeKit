@@ -1,0 +1,45 @@
+name: Model registry check
+
+# G1 for any pull request that touches the registry (SPEC-v9 §B.2). On the bot branch it also enforces the
+# bot-writable allowlist, so a force-push that smuggled in a human-owned edit (constraints, reviewed, roles,
+# regex, transports) or removed an entry fails here.
+
+on:
+  pull_request:
+    paths:
+      - models.yaml
+      - models/**
+      - schemas/nodeplatform.models.v1.schema.json
+      - src/lib/model-*.mjs
+      - src/lib/models-cli.mjs
+      - .github/workflows/model-*.yml
+
+permissions: {}
+
+jobs:
+  g1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      BASE_REF: ${{ github.base_ref }}
+      HEAD_REF: ${{ github.head_ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Validate the registry (schema, references, hygiene, eligibility)
+        run: node src/cli.mjs models validate --stage full
+      - name: Bot branch only - allowlist of what the bot may change
+        if: env.HEAD_REF == 'automation/model-registry'
+        run: |
+          git show "origin/$BASE_REF:models.yaml" > "$RUNNER_TEMP/base.yaml"
+          git diff --name-only "origin/$BASE_REF...HEAD" > "$RUNNER_TEMP/changed.txt"
+          node src/cli.mjs models validate --stage full --base "$RUNNER_TEMP/base.yaml" --changed-files "$RUNNER_TEMP/changed.txt"
