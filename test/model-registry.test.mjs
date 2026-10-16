@@ -546,3 +546,13 @@ test("eligibility boundaries: 91 days out is information, 90 is a trigger, 31 is
   assert.deepEqual(eligibility({ state: "unverified" }, at), { unverified: true, eligible: null, trigger: false });
   for (const state of ["deprecated", "retired", "unlisted", "auto-routed", "legacy"]) assert.equal(eligibility({ state }, at).trigger, true, state);
 });
+
+test("the committed registry is not stale: its digest and its decision set reproduce from its own snapshots, clock and ref", async () => {
+  const { loadSnapshotDir } = await import("../src/lib/models-cli.mjs");
+  const registry = await readSeed();
+  const set = await loadSnapshotDir(path.join(ROOT, "models/snapshots/latest"));
+  assert.equal(decisionDigest(registry, set), registry.decisionDigest, "decisionDigest was computed by older tooling: run `nodekit models select --write` with the file's own --evaluated-at and --ref");
+  const { proposal } = select({ registry, snapshotSet: set, evaluatedAt: registry.evaluatedAt, ref: registry.registryRef });
+  assert.equal(decisionSetSha256(proposal), decisionSetSha256(registry));
+  for (const key of Object.keys(set.index.snapshots)) assert.equal(registry.snapshots[key].sha256, set.index.snapshots[key].sha256, `${key} snapshot hash`);
+});

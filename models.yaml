@@ -2,7 +2,7 @@ schemaVersion: nodeplatform.models/v1
 generatedAt: 2026-10-16T10:30:00.000Z
 evaluatedAt: 2026-10-16T10:30:00.000Z
 registryRef: bd8844df96c2ced3b4583f601ef87414891ece14
-decisionDigest: 20c7c566ad90c55baf18440627600a7ef46d055ae7c6b987007a9a92218b7404
+decisionDigest: 8282c563b0a854736c993f265e8944b0e3d6b08031edfcb06dd53fcf3c9379cc
 snapshots:
   openrouter:
     url: https://openrouter.ai/api/v1/models
