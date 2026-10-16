@@ -1,7 +1,7 @@
 // Consumer side of the model registry (SPEC-v9 §B.5, §B.6, §B.9): build models.lock.json from the registry
 // and a repo's models.config.json, lint it (G2), report horizons for `watch`, render the consumer PR body.
 // Pure functions; models-cli.mjs owns files and the network.
-import { canonical, daysUntil, decisionMarker, digestOf } from "./model-registry.mjs";
+import { canonical, daysUntil, decisionMarker, deprecationRow, deriveAvailability, digestOf } from "./model-registry.mjs";
 
 export const LOCK_SCHEMA = "nodeplatform.model-defaults/v1";
 export const URGENT_TITLE = "Model defaults: URGENT";
@@ -46,6 +46,10 @@ export function buildLock({ registry, config }) {
     const entry = registry.entries[line.current];
     if (!entry?.reviewed) throw new Error(`role ${role}: registry current ${line.current} is not reviewed`);
     if (!entry.ids[spec.transport]) throw new Error(`role ${role}: ${line.current} has no ${spec.transport} id`);
+    // Lifecycle and price are facts about ONE transport. A role that routes through `anthropic` must not change
+    // (and open a PR) because the same id was unlisted on OpenRouter or re-priced there: it keeps the availability
+    // of its own transport, and a price only when that transport priced it (brief D-3).
+    const own = entry.availability?.[spec.transport];
     roles[role] = {
       line: spec.line,
       lineTransports: [...line.transports],
@@ -54,13 +58,17 @@ export function buildLock({ registry, config }) {
       provider: entry.provider,
       ids: { ...entry.ids },
       constraints: entry.constraints,
-      availability: stripClock(entry.availability),
-      price: entry.price,
+      availability: own ? { [spec.transport]: stripClock(own) } : {},
+      price: entry.price?.source === spec.transport ? entry.price : null,
       ...(spec.minMaxTokens ? { minMaxTokens: spec.minMaxTokens } : {}),
     };
   }
-  const relevant = new Set([...Object.keys(known), ...Object.values(roles).map((r) => r.id)]);
-  const deprecations = Object.fromEntries(Object.entries(registry.deprecations).filter(([key]) => relevant.has(key.slice(0, key.lastIndexOf("/")))));
+  // The registry slice the lock depends on: each role's deprecation row on its own transport, nothing else.
+  const deprecations = {};
+  for (const r of Object.values(roles)) {
+    const key = `${r.id}/${r.transport}`;
+    if (registry.deprecations?.[key]) deprecations[key] = registry.deprecations[key];
+  }
   const decision = { roles, known, frozen: config.frozen ?? [], exclude };
   return { decision, registrySha256: digestOf({ ...decision, deprecations }), deprecations };
 }
@@ -150,15 +158,26 @@ export function lintLock({ lock, config, files = null, registry = null, now }) {
 // Announced horizons (<= 60 d) for every (id, transport) in the lock's roles and frozen list, floors as
 // advisories, and registry liveness (brief D-6): a robot that stopped looks the same as "no deprecations".
 // `refreshRun`: { ok: boolean, latestSuccessAt: ISO|null } from the public Actions API.
-export function watchReport({ lock, registry, now, refreshRun }) {
+// A role's id is always a registry entry, so its row comes from `registry.deprecations`. A frozen id (B.9) is the
+// consumer's own and need not be an entry, so its row is derived here from the snapshot set (`snapshotSet`, the
+// same parsers and rules as `select`); a frozen id on a transport with no snapshot, or with no snapshot set
+// loaded, is listed as NOT CHECKED rather than silently passed.
+export function watchReport({ lock, registry, now, refreshRun, snapshotSet = null }) {
   const pins = [
-    ...Object.values(lock.roles ?? {}).map((r) => ({ id: r.id, transport: r.transport, kind: `role ${r.line}` })),
-    ...(lock.frozen ?? []).map((f) => ({ id: f.id, transport: f.transport, kind: `frozen ${f.class ?? ""}`.trim() })),
+    ...Object.values(lock.roles ?? {}).map((r) => ({ id: r.id, transport: r.transport, kind: `role ${r.line}`, frozen: false })),
+    ...(lock.frozen ?? []).map((f) => ({ id: f.id, transport: f.transport, kind: `frozen ${f.class ?? ""}`.trim(), frozen: true })),
   ];
   const horizons = [];
   const floors = [];
+  const unchecked = [];
   for (const pin of pins) {
-    const row = registry?.deprecations?.[`${pin.id}/${pin.transport}`];
+    let row = registry?.deprecations?.[`${pin.id}/${pin.transport}`];
+    if (!row && pin.frozen) {
+      const derived = snapshotSet && deriveAvailability({ provider: pin.transport, ids: { [pin.transport]: pin.id } }, snapshotSet.parsed, now);
+      const own = derived?.availability[pin.transport];
+      if (!own || own.state === "unverified") { unchecked.push(pin); continue; }
+      row = deprecationRow(own, (derived.replacements[pin.transport] ?? [])[0] ?? null);
+    }
     if (!row) continue;
     if (row.kind === "floor") floors.push({ ...pin, date: row.date });
     else if (row.date) {
@@ -179,14 +198,15 @@ export function watchReport({ lock, registry, now, refreshRun }) {
     ...(liveness ? [`**registry refresh not running — lifecycle facts unverified.** ${liveness}. This is not a statement that nothing is retiring.`, ""] : []),
     ...(horizons.length ? ["### Announced horizons (60 days or less, on the transport in use)", "", ...horizons.map((h) => `- \`${h.id}\` (${h.transport}, ${h.kind}): ${h.kind2}${h.date ? ` ${h.date} in ${h.days} d` : ` state ${h.state}`}${h.replacement ? `, vendor-named replacement \`${h.replacement}\`` : ""}`), ""] : []),
     ...(floors.length ? ["### Advisories (floors, not announcements)", "", ...floors.map((f) => `- \`${f.id}\` (${f.transport}): earliest possible retirement ${f.date}`), ""] : []),
+    ...(unchecked.length ? ["### Not checked", "", ...unchecked.map((u) => `- \`${u.id}\` (${u.transport}, ${u.kind}): no catalog snapshot covers this transport, so its lifecycle is unknown. This is not a statement that it is safe.`), ""] : []),
     "_Opened by `nodekit models watch`. A floor never moves a default._",
   ].join("\n");
-  return { urgent, title: URGENT_TITLE, label: URGENT_LABEL, body, horizons, floors, liveness };
+  return { urgent, title: URGENT_TITLE, label: URGENT_LABEL, body, horizons, floors, unchecked, liveness };
 }
 
 // ---- consumer PR body ---------------------------------------------------------------------------------------
 
-export function renderLockBody({ oldLock, newLock, hash, config }) {
+export function renderLockBody({ oldLock, newLock, hash, config, snapshots = null }) {
   const lines = ["## Summary", "", `Registry ref \`${newLock.registryRef}\`, registry slice \`${newLock.registrySha256.slice(0, 16)}\`, input digest \`${newLock.decisionDigest.slice(0, 16)}\` (provenance only).`, "", "## Per-role changes", ""];
   let any = false;
   for (const [role, now] of Object.entries(newLock.roles)) {
@@ -199,11 +219,12 @@ export function renderLockBody({ oldLock, newLock, hash, config }) {
     if (before && canonical(before.price) !== canonical(now.price)) lines.push(`- price (valid on the \`${now.price?.source}\` transport only): \`${canonical(before.price)}\` -> \`${canonical(now.price)}\``);
     if (before && canonical(before.availability) !== canonical(now.availability)) lines.push(`- availability: \`${canonical(before.availability)}\` -> \`${canonical(now.availability)}\``);
     const av = now.availability?.[now.transport];
-    lines.push(`- lifecycle on ${now.transport}: ${av?.state ?? "unverified"}${av?.retiresOn ? `, retires ${av.retiresOn} (announced)` : ""}${av?.retiresNotBefore && !av?.retiresOn ? `, floor ${av.retiresNotBefore} (advisory)` : ""}`, "");
+    lines.push(`- lifecycle on ${now.transport}: ${av?.state ?? "unverified"}${av?.retiresOn ? `, retires ${av.retiresOn} (announced)` : ""}${av?.expiration ? `, expires ${av.expiration} (announced)` : ""}${av?.retiresNotBefore && !av?.retiresOn ? `, floor ${av.retiresNotBefore} (advisory)` : ""}`, "");
     const env = config.roles[role]?.env;
     if (env?.length) lines.push(`Environment checklist: ${env.map((e) => `\`${e}\``).join(", ")} may override this role; confirm each value still resolves.`, "");
   }
   if (!any) lines.push("- no role changed; `known`, `frozen` or `exclude` changed (see the diff).", "");
+  if (snapshots) lines.push("## Snapshots the registry was computed from", "", ...Object.entries(snapshots).map(([key, v]) => `- ${key}: sha256 \`${v.sha256}\`, ${v.rows} rows, fetched ${v.fetchedAt}`), "");
   lines.push("## Gates", "", "Lint (G2) and the repo's own check (G3) ran on the bot branch before this PR was created. No paid provider call was made.", "",
     "Closing this PR keeps it closed until the decision set changes. A human merges.", "", decisionMarker(hash));
   return lines.join("\n");

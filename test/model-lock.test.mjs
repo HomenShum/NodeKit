@@ -41,7 +41,10 @@ test("the lock pins the role's exact id, wire ids per transport, constraints and
   assert.equal(role.constraints.sampling, "forbidden");
   assert.equal(role.availability.anthropic.state, "active");
   assert.ok(!JSON.stringify(lock).includes("checkedAt"), "no clock inside the decision fields");
-  assert.equal(role.price.source, "openrouter", "the price says which transport priced it");
+  // was: assert.equal(role.price.source, "openrouter") - an anthropic role carried the OpenRouter price. Brief D-3: a
+  // price is valid only on the transport that priced it, so an anthropic role has none (and no dispatch is priced from it).
+  assert.equal(role.price, null, "an anthropic role carries no price: only OpenRouter priced it");
+  assert.deepEqual(Object.keys(role.availability), ["anthropic"], "availability of the role's own transport only");
   assert.deepEqual(Object.keys(lock.known).sort(), ["claude-haiku-5-5", "claude-opus-5-5", "claude-sonnet-5-5"], "unreviewed ids are not known");
   assert.equal(lock.registrySha256.length, 64);
   assert.equal(lock.decisionDigest, registry.decisionDigest);
@@ -55,7 +58,13 @@ test("sync is idempotent on the clock: a new date or an unrelated registry chang
   assert.equal(r.changed, false);
   assert.equal(r.lock, lock, "the committed lock object is kept byte for byte, provenance included");
   // the pinned model's price, constraints, lifecycle, or the set of known ids
-  assert.equal(same((n) => { n.entries["claude-haiku-5-5"].price.inPerM = 0.2; }).changed, true);
+  // was: a price change of the pinned model on OpenRouter -> changed === true. Only OpenRouter prices it, and the role
+  // routes through anthropic, so it is not a fact about this lock (brief D-3); the OpenRouter-role test below keeps it.
+  for (const unrelated of [
+    (n) => { n.entries["claude-haiku-5-5"].price.inPerM = 0.2; },
+    (n) => { n.entries["claude-haiku-5-5"].availability.openrouter = { state: "unlisted", source: "openrouter", checkedAt: day(30) }; n.deprecations["claude-haiku-5-5/openrouter"] = { kind: "state", date: null, state: "unlisted", source: "openrouter", replacement: null }; },
+    (n) => { n.entries["claude-haiku-5-5"].availability.openrouter.expiration = "2026-11-01"; n.deprecations["claude-haiku-5-5/openrouter"] = { kind: "expiration", date: "2026-11-01", source: "openrouter", replacement: null }; },
+  ]) assert.equal(same(unrelated).changed, false, "another transport's price or lifecycle never opens a PR for an anthropic role");
   assert.equal(same((n) => { n.entries["claude-haiku-5-5"].constraints.defaultEffort = "high"; }).changed, true);
   assert.equal(same((n) => { n.entries["claude-haiku-5-5"].availability.anthropic.retiresOn = "2027-01-01"; }).changed, true);
   assert.equal(same((n) => { n.entries["claude-sonnet-5-5"].reviewed = false; delete n.entries["claude-sonnet-5-5"].constraints; n.lines["anthropic.sonnet"].current = "claude-opus-5-5"; }).changed, true);
@@ -119,7 +128,7 @@ test("lint (c): the dying-incumbent rule on the transport in use, evaluated at t
   // (a)
   assert.deepEqual(lintLock({ lock, config: CONFIG, files: [], registry, now: T0 }).errors, []);
   const moved = clone(registry);
-  moved.entries["claude-haiku-5-5"].price.outPerM = 9;
+  moved.entries["claude-haiku-5-5"].constraints.defaultEffort = "high"; // was price.outPerM = 9 (not a fact about an anthropic role any more)
   assert.match(lintLock({ lock, config: CONFIG, files: [], registry: moved, now: T0 }).errors[0], /\(a\) models\.lock\.json is not in sync/);
   assert.match(lint(undefined, T0, { registry: null }).warnings.join("\n"), /\(a\) skipped: no --registry/);
   // frozen ids advise, they do not block (B.9)
@@ -159,17 +168,36 @@ test("watch: an announced horizon within 60 days is URGENT, a floor is not, and 
   }
 });
 
+// A repo that routes the same line through OpenRouter as well: there the price IS a fact about its transport.
+const OR_CONFIG = { ...CONFIG, roles: { reasoner: { ...CONFIG.roles.reasoner, transport: "openrouter" } } };
+const withOpenRouterLine = (registry) => { const next = clone(registry); next.lines["anthropic.haiku"].transports = ["anthropic", "openrouter"]; return next; };
+
+test("an OpenRouter-routed role carries OpenRouter's price and availability, and only those transports' changes move it", async () => {
+  const registry = withOpenRouterLine((await world()).registry);
+  const { lock } = syncLock({ registry, config: OR_CONFIG, existing: null, registryRef: REF });
+  const role = lock.roles.reasoner;
+  assert.equal(role.price.source, "openrouter");
+  assert.deepEqual(Object.keys(role.availability), ["openrouter"]);
+  const change = (mutate) => { const next = clone(registry); mutate(next); return syncLock({ registry: next, config: OR_CONFIG, existing: lock, registryRef: "d".repeat(40) }).changed; };
+  assert.equal(change((n) => { n.entries["claude-haiku-5-5"].price.inPerM = 0.2; }), true, "its own transport's price");
+  assert.equal(change((n) => { n.entries["claude-haiku-5-5"].availability.openrouter.expiration = "2026-11-01"; n.deprecations["claude-haiku-5-5/openrouter"] = { kind: "expiration", date: "2026-11-01", source: "openrouter", replacement: null }; }), true, "its own transport's lifecycle");
+  assert.equal(change((n) => { n.entries["claude-haiku-5-5"].availability.anthropic.retiresOn = "2027-03-01"; n.deprecations["claude-haiku-5-5/anthropic"] = { kind: "announced", date: "2027-03-01", source: "anthropicDocs", replacement: null }; }), false, "the other transport's lifecycle is not its business");
+});
+
 test("the consumer PR body shows the per-role diff, labels floor vs announced, ends with the closed-PR marker", async () => {
-  const { registry, lock } = await world();
+  const registry = withOpenRouterLine((await world()).registry);
+  const { lock } = syncLock({ registry, config: OR_CONFIG, existing: null, registryRef: REF });
   const next = clone(registry);
   next.entries["claude-haiku-5-5"].price.inPerM = 0.2;
-  next.entries["claude-haiku-5-5"].availability.anthropic.retiresOn = "2027-03-01";
-  const { lock: updated } = syncLock({ registry: next, config: CONFIG, existing: lock, registryRef: "d".repeat(40) });
+  next.entries["claude-haiku-5-5"].availability.openrouter.expiration = "2027-03-01";
+  const { lock: updated } = syncLock({ registry: next, config: OR_CONFIG, existing: lock, registryRef: "d".repeat(40) });
   const hash = lockDecisionSha256(updated);
-  const body = renderLockBody({ oldLock: lock, newLock: updated, hash, config: CONFIG });
-  assert.match(body, /### `reasoner` \(anthropic\.haiku, anthropic\)/);
+  const body = renderLockBody({ oldLock: lock, newLock: updated, hash, config: OR_CONFIG, snapshots: next.snapshots });
+  assert.match(body, /## Snapshots the registry was computed from/);
+  for (const [key, v] of Object.entries(next.snapshots)) assert.ok(body.includes(`- ${key}: sha256 \`${v.sha256}\``), `${key} sha256 in the body`);
+  assert.match(body, /### `reasoner` \(anthropic\.haiku, openrouter\)/);
   assert.match(body, /price \(valid on the `openrouter` transport only\)/);
-  assert.match(body, /retires 2027-03-01 \(announced\)/);
+  assert.match(body, /expires 2027-03-01 \(announced\)/);
   assert.match(body, /Environment checklist: `AGENT_MODEL`/);
   assert.equal(markerHashOf(body), hash);
   assert.ok(body.trimEnd().endsWith(decisionMarker(hash)));
@@ -202,7 +230,7 @@ test("the CLI in a consumer checkout: sync writes the lock once, --check agrees,
     assert.match(r.stdout, /MODELS LINT PASS/);
 
     const changed = YAML.parse(await readFile(registry, "utf8"));
-    changed.entries["claude-haiku-5-5"].price.inPerM = 0.3;
+    changed.entries["claude-haiku-5-5"].constraints.defaultEffort = "high"; // was price.inPerM = 0.3 (OpenRouter's price is not an anthropic role's fact)
     await writeFile(path.join(tmp, "registry.yaml"), stringifyYaml(changed));
     r = cli(["models", "sync", "--repo-root", tmp, "--registry", path.join(tmp, "registry.yaml"), "--check"]);
     assert.equal(r.status, 1, "the lock would change, so --check is red");
@@ -231,6 +259,95 @@ test("the CLI in a consumer checkout: sync writes the lock once, --check agrees,
     assert.equal(watch.label, "model-defaults");
     r = cli(["models", "watch", ...common, "--now", T0, "--json"]);
     assert.equal(JSON.parse(r.stdout).urgent, true, "no readable runs file means liveness is unverified, which is urgent");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+// ---- Part B v1 adversarial review (round 1) ------------------------------------------------------------------
+
+const FROZEN = { id: "tts-1", transport: "openai", class: "voice", reason: "voice fixture pinned by a customer", promotionPath: "a human PR" };
+
+test("watch (B.9): a frozen id the registry has no entry for still raises its announced shutdown, and one that cannot be checked is listed, never passed", async () => {
+  const { lock, registry } = await world();
+  assert.equal(registry.deprecations["tts-1/openai"], undefined, "tts-1 is the consumer's own: no registry entry, no registry row");
+  const set = makeSet();
+  const frozen = { ...clone(lock), frozen: [FROZEN] };
+  const fresh = { ok: true, latestSuccessAt: "2026-11-19T00:00:00Z" };
+  const now = "2026-11-20T10:30:00Z"; // OpenAI's page says tts-1 shuts down 2027-01-06: 47 days
+
+  const r = watchReport({ lock: frozen, registry, now, refreshRun: fresh, snapshotSet: set });
+  assert.equal(r.urgent, true);
+  assert.deepEqual(r.horizons.map((h) => [h.id, h.transport, h.days]), [["tts-1", "openai", 47]]);
+  assert.match(r.body, /`tts-1` \(openai, frozen voice\): announced 2027-01-06 in 47 d, vendor-named replacement `gpt-realtime-2\.1-mini`/);
+  assert.deepEqual(r.unchecked, []);
+
+  // 90 days out is not yet urgent
+  assert.equal(watchReport({ lock: frozen, registry, now: T0, refreshRun: fresh, snapshotSet: set }).urgent, false);
+
+  // no snapshot set loaded: the frozen id is NOT CHECKED, which is said out loud
+  const blind = watchReport({ lock: frozen, registry, now, refreshRun: fresh });
+  assert.equal(blind.urgent, false);
+  assert.deepEqual(blind.unchecked.map((u) => u.id), ["tts-1"]);
+  assert.match(blind.body, /### Not checked[\s\S]*`tts-1` \(openai, frozen voice\): no catalog snapshot covers this transport, so its lifecycle is unknown\. This is not a statement that it is safe\./);
+
+  // a transport no snapshot covers is not checked either, with the snapshots loaded
+  const bedrock = { ...clone(lock), frozen: [{ ...FROZEN, id: "anthropic.claude-3-haiku", transport: "bedrock" }] };
+  assert.deepEqual(watchReport({ lock: bedrock, registry, now, refreshRun: fresh, snapshotSet: set }).unchecked.map((u) => u.transport), ["bedrock"]);
+
+  // an id the page has no notice for is simply active
+  const quiet = { ...clone(lock), frozen: [{ ...FROZEN, id: "gpt-4o-mini-tts" }] };
+  const q = watchReport({ lock: quiet, registry, now, refreshRun: fresh, snapshotSet: set });
+  assert.deepEqual([q.urgent, q.horizons.length, q.unchecked.length], [false, 0, 0]);
+});
+
+test("watch --snapshots in a consumer checkout: the registry's snapshot files carry a frozen id's shutdown into the URGENT body", async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "models-frozen-"));
+  try {
+    const set = makeSet();
+    const snaps = path.join(tmp, "snapshots");
+    await mkdir(snaps, { recursive: true });
+    for (const [key, snap] of Object.entries(set.index.snapshots)) await writeFile(path.join(snaps, snap.file), set.texts[key]);
+    await writeFile(path.join(snaps, "index.json"), JSON.stringify(set.index));
+    await writeFile(path.join(tmp, "models.config.json"), JSON.stringify({ ...CONFIG, frozen: [FROZEN] }, null, 2));
+    await writeFile(path.join(tmp, "runs.json"), JSON.stringify({ workflow_runs: [{ updated_at: "2026-11-19T00:00:00Z" }] }));
+    const registry = path.join(ROOT, "models.yaml");
+    const common = ["--repo-root", tmp, "--registry", registry];
+    let r = cli(["models", "sync", ...common, "--ref", REF]);
+    assert.equal(r.status, 0, r.stderr);
+    const watch = (extra) => cli(["models", "watch", ...common, "--refresh-runs", path.join(tmp, "runs.json"), "--now", "2026-11-20T10:30:00Z", "--json", ...extra]);
+    r = watch(["--snapshots", snaps]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.equal(JSON.parse(r.stdout).urgent, true);
+    assert.match(JSON.parse(r.stdout).body, /`tts-1` \(openai, frozen voice\): announced 2027-01-06 in 47 d/);
+    r = watch([]);
+    assert.equal(JSON.parse(r.stdout).urgent, false);
+    assert.match(JSON.parse(r.stdout).body, /Not checked/);
+    // a snapshot directory that does not verify is refused, not skipped
+    await writeFile(path.join(snaps, "openai-deprecations.md"), "tampered");
+    r = watch(["--snapshots", snaps]);
+    assert.notEqual(r.status, 0, "a snapshot whose bytes do not match index.json fails closed");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("sync --snapshot-index: the consumer PR body quotes the snapshot hashes from the fetched index.json, and an index that disagrees with models.yaml is refused", async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "models-index-"));
+  try {
+    await writeFile(path.join(tmp, "models.config.json"), JSON.stringify(CONFIG, null, 2));
+    const index = JSON.parse(await readFile(path.join(ROOT, "models/snapshots/latest/index.json"), "utf8"));
+    const common = ["models", "sync", "--repo-root", tmp, "--registry", path.join(ROOT, "models.yaml"), "--ref", REF, "--body-out", path.join(tmp, "body.md")];
+    await writeFile(path.join(tmp, "index.json"), JSON.stringify(index));
+    let r = cli([...common, "--snapshot-index", path.join(tmp, "index.json")]);
+    assert.equal(r.status, 0, r.stderr);
+    const body = await readFile(path.join(tmp, "body.md"), "utf8");
+    for (const [key, v] of Object.entries(index.snapshots)) assert.ok(body.includes(`- ${key}: sha256 \`${v.sha256}\``), key);
+    index.snapshots.openaiDocs.sha256 = "0".repeat(64);
+    await writeFile(path.join(tmp, "index.json"), JSON.stringify(index));
+    r = cli([...common, "--snapshot-index", path.join(tmp, "index.json")]);
+    assert.equal(r.status, 1);
+    assert.match(r.stderr + r.stdout, /snapshot index disagrees with models\.yaml for openaiDocs/);
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }

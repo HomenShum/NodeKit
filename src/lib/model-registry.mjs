@@ -3,7 +3,7 @@
 // glue (models-cli.mjs) owns files and network. SPEC-v9 §B, brief 2026-10-16.
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
-import { SNAPSHOT_KEYS, SHRINK_RATIO, SnapshotError, parseSnapshot, sha256 } from "./model-catalogs.mjs";
+import { SNAPSHOT_KEYS, SnapshotError, parseSnapshot, sha256 } from "./model-catalogs.mjs";
 import { validateSchema } from "./schema-validation.mjs";
 
 const load = createRequire(import.meta.url);
@@ -141,6 +141,56 @@ export function deriveAvailability(entry, parsed, evaluatedAt) {
   return { availability, replacements, quotes };
 }
 
+// The machine-derived half of the registry, re-derived from the snapshots: each entry's availability, OpenRouter
+// price / context / supported parameters and release date, then the deprecation rows. `select` writes them and
+// `validateModels` re-derives them from the recorded snapshots to catch a hand edit (B.2.1 item 5). Mutates `next`.
+function refreshDerived(next, parsed, evaluatedAt) {
+  const evidenceMeta = {}; // `${id}/${transport}` -> {snapshot, quote}
+  const replacementsOf = {}; // `${id}/${transport}` -> [names]
+  for (const [id, entry] of Object.entries(next.entries)) {
+    const derived = deriveAvailability(entry, parsed, evaluatedAt);
+    entry.availability = derived.availability;
+    for (const [t, q] of Object.entries(derived.quotes)) evidenceMeta[`${id}/${t}`] = q;
+    for (const [t, r] of Object.entries(derived.replacements)) replacementsOf[`${id}/${t}`] = r;
+    const row = entry.ids.openrouter ? parsed.openrouter.byId.get(entry.ids.openrouter) : null;
+    if (row) {
+      // A row that no longer yields a price must not leave the old OpenRouter price standing as if it were
+      // current; a price a human recorded from a vendor page (any other source) is theirs and stays.
+      entry.price = priceFromOpenRouter(row) ?? (entry.price?.source === "openrouter" ? null : entry.price);
+      entry.context = contextFromOpenRouter(row);
+      entry.supportedParameters = [...(row.supported_parameters ?? [])].sort();
+      const found = releaseFromOpenRouter(row);
+      const rank = entry.releaseDateSource === null ? -1 : (RELEASE_RANK[entry.releaseDateSource] ?? -1);
+      if (found && (entry.releaseDate === null || RELEASE_RANK[found.source] > rank)) {
+        entry.releaseDate = found.date;
+        entry.releaseDateSource = found.source;
+      }
+      evidenceMeta[`${id}/openrouter-row`] = { snapshot: "openrouter", quote: `${row.id} prompt=${row.pricing.prompt} completion=${row.pricing.completion} context_length=${row.context_length} canonical_slug=${row.canonical_slug}` };
+    }
+  }
+  const deprecations = {};
+  for (const [id, entry] of Object.entries(next.entries)) {
+    for (const [transport, av] of Object.entries(entry.availability)) {
+      const key = `${id}/${transport}`;
+      const row = deprecationRow(av, (replacementsOf[key] ?? [])[0] ?? null);
+      if (row) deprecations[key] = row;
+    }
+  }
+  next.deprecations = sortedKeys(deprecations);
+  return { evidenceMeta, replacementsOf };
+}
+
+// The deprecation row for one (id, transport): an announced date, an expiration, a non-active state, or a floor.
+// `unverified` has none. Shared with `watch`, which derives the same row for a consumer's frozen ids.
+export function deprecationRow(av, replacement) {
+  if (!av || av.state === "unverified") return null;
+  if (av.retiresOn) return { kind: "announced", date: av.retiresOn, deprecatedAt: av.deprecatedAt ?? null, source: av.source, replacement };
+  if (av.expiration) return { kind: "expiration", date: av.expiration, source: av.source, replacement };
+  if (av.state !== "active" && av.state !== "listed") return { kind: "state", date: null, state: av.state, source: av.source, replacement };
+  if (av.retiresNotBefore) return { kind: "floor", date: av.retiresNotBefore, source: av.source, replacement };
+  return null;
+}
+
 // B.2.2 / B.4. A floor is never a factor. `trigger`: state outside {active, listed} or a date within 90 days.
 // `eligible`: state active/listed and no date within 30 days. `unverified` is neither.
 export function eligibility(av, evaluatedAt) {
@@ -171,8 +221,6 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
   const { parsed, index } = snapshotSet;
   const next = clone(registry);
   const report = { moves: [], held: [], added: [], advisories: [], soaking: [], available: [], information: [] };
-  const evidenceMeta = {}; // `${id}/${transport}` -> {snapshot, quote}
-  const replacementsOf = {}; // `${id}/${transport}` -> [names]
 
   // 1. discover newer ids (v1: Anthropic lines, from the vendor table; the regex is the keyless fallback, D-7)
   for (const [lineName, line] of Object.entries(next.lines)) {
@@ -189,41 +237,8 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
     }
   }
 
-  // 2. refresh every entry's machine fields from the snapshots
-  for (const [id, entry] of Object.entries(next.entries)) {
-    const derived = deriveAvailability(entry, parsed, evaluatedAt);
-    entry.availability = derived.availability;
-    for (const [t, q] of Object.entries(derived.quotes)) evidenceMeta[`${id}/${t}`] = q;
-    for (const [t, r] of Object.entries(derived.replacements)) replacementsOf[`${id}/${t}`] = r;
-    const row = entry.ids.openrouter ? parsed.openrouter.byId.get(entry.ids.openrouter) : null;
-    if (row) {
-      entry.price = priceFromOpenRouter(row) ?? entry.price;
-      entry.context = contextFromOpenRouter(row);
-      entry.supportedParameters = [...(row.supported_parameters ?? [])].sort();
-      const found = releaseFromOpenRouter(row);
-      const rank = entry.releaseDateSource === null ? -1 : (RELEASE_RANK[entry.releaseDateSource] ?? -1);
-      if (found && (entry.releaseDate === null || RELEASE_RANK[found.source] > rank)) {
-        entry.releaseDate = found.date;
-        entry.releaseDateSource = found.source;
-      }
-      evidenceMeta[`${id}/openrouter-row`] = { snapshot: "openrouter", quote: `${row.id} prompt=${row.pricing.prompt} completion=${row.pricing.completion} context_length=${row.context_length} canonical_slug=${row.canonical_slug}` };
-    }
-  }
-
-  // 3. deprecations (bot): every (id, transport) with an announced date, an expiration, a non-active state or a floor
-  const deprecations = {};
-  for (const [id, entry] of Object.entries(next.entries)) {
-    for (const [transport, av] of Object.entries(entry.availability)) {
-      if (av.state === "unverified") continue;
-      const key = `${id}/${transport}`;
-      const replacement = (replacementsOf[key] ?? [])[0] ?? null;
-      if (av.retiresOn) deprecations[key] = { kind: "announced", date: av.retiresOn, deprecatedAt: av.deprecatedAt ?? null, source: av.source, replacement };
-      else if (av.expiration) deprecations[key] = { kind: "expiration", date: av.expiration, source: av.source, replacement };
-      else if (av.state !== "active" && av.state !== "listed") deprecations[key] = { kind: "state", date: null, state: av.state, source: av.source, replacement };
-      else if (av.retiresNotBefore) deprecations[key] = { kind: "floor", date: av.retiresNotBefore, source: av.source, replacement };
-    }
-  }
-  next.deprecations = sortedKeys(deprecations);
+  // 2-3. refresh every entry's machine fields and the deprecation rows from the snapshots
+  const { evidenceMeta, replacementsOf } = refreshDerived(next, parsed, evaluatedAt);
 
   // 4. lines
   for (const [lineName, line] of Object.entries(next.lines)) {
@@ -243,16 +258,19 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
         report.moves.push({ line: lineName, from: line.current, to: candidate.id, reasons, source: evidenceMeta[`${line.current}/${triggered[0].transport}`] ?? null });
         line.previous = line.current;
         line.current = candidate.id;
-        line.status = "proposed-deprecation";
+        // No status of its own: the new current is judged below like any other, so `status` is already the one the
+        // next run computes and merging this proposal never leaves a status-only PR behind (SPEC B.3: unchanged
+        // inputs open nothing). The move itself is recorded in `previous` and in the PR body.
       } else {
         line.status = "held-no-replacement";
         const why = named.length ? named.map((name) => `${name}: ${replacementFor(next, lineName, line, name, evaluatedAt).why}`).join("; ") : "the vendor names no replacement";
         report.held.push({ kind: "held-no-replacement", line: lineName, id: line.current, source: evidenceMeta[`${line.current}/${triggered[0].transport}`] ?? null, detail: `${reasons.join("; ")}. ${why}. A human must add constraints/reviewed (or a transport id) for a replacement.` });
+        continue;
       }
-      continue;
     }
+    const incumbent = next.entries[line.current];
     for (const t of line.transports) {
-      const av = current.availability[t];
+      const av = incumbent.availability[t];
       if (av?.retiresNotBefore && !av.retiresOn) {
         const passed = daysUntil(av.retiresNotBefore, evaluatedAt) < 0;
         report.advisories.push({ line: lineName, id: line.current, transport: t, detail: `floor ${av.retiresNotBefore}${passed ? " passed, no notice published" : ""} (advisory only; a floor never moves a default)` });
@@ -296,7 +314,10 @@ function replacementFor(registry, lineName, line, name, evaluatedAt) {
   if (!entry.reviewed || !nonEmpty(entry.constraints)) return { ok: false, why: "not reviewed (no constraints)" };
   const missing = line.transports.filter((t) => !entry.ids[t]);
   if (missing.length) return { ok: false, why: `no ${missing.join(", ")} id` };
-  const bad = line.transports.filter((t) => eligibility(entry.availability[t], evaluatedAt).trigger);
+  // B.4: "eligible on each" is the B.2.2 test (state active/listed, no date inside 30 days). A replacement that
+  // itself retires in 31-90 days still qualifies and is moved again, with its own proposal, when its time comes;
+  // an unverified transport is neither eligible nor ineligible and does not block.
+  const bad = line.transports.filter((t) => eligibility(entry.availability[t], evaluatedAt).eligible === false);
   if (bad.length) return { ok: false, why: `not eligible on ${bad.join(", ")}` };
   return { ok: true, id };
 }
@@ -378,7 +399,7 @@ const hygiene = (id, line, entry, registry, parsed, error) => {
 
 // Input validation + eligibility. `stage`: "inputs" = B.2.1 only (before select); "full" = B.2.1 + B.2.2 merge
 // rule + registry/snapshot agreement. Returns { errors, findings }. Never throws on bad data.
-export function validateModels({ registry, snapshotSet = null, snapshotError = null, evaluatedAt, stage = "full", maxAgeDays = null, base = null }) {
+export function validateModels({ registry, snapshotSet = null, snapshotError = null, evaluatedAt, stage = "full", maxAgeDays = null }) {
   const errors = [];
   const findings = [];
   const error = (message) => errors.push(message);
@@ -408,8 +429,6 @@ export function validateModels({ registry, snapshotSet = null, snapshotError = n
   if (snapshotSet) {
     for (const key of SNAPSHOT_KEYS) {
       const row = snapshotSet.index.snapshots[key];
-      const previousRows = (base ?? registry).snapshots?.[key]?.rows;
-      if (Number.isInteger(previousRows) && row.rows < previousRows * SHRINK_RATIO) error(`snapshots.${key}: ${row.rows} rows is under ${SHRINK_RATIO} x the last committed ${previousRows}`);
       if (maxAgeDays !== null) {
         const age = (Date.parse(evaluatedAt) - Date.parse(row.fetchedAt)) / DAY;
         if (!(age <= maxAgeDays) || age < -1) error(`snapshots.${key}: fetched ${row.fetchedAt} is ${age.toFixed(1)} d from ${evaluatedAt} (allowed 0..${maxAgeDays})`);
@@ -431,8 +450,30 @@ export function validateModels({ registry, snapshotSet = null, snapshotError = n
         if (e.eligible === false && line.status !== "held-no-replacement") error(`lines.${lineName}: current ${line.current} is ineligible on ${t} (${e.why}) and status is ${line.status}, not held-no-replacement`);
       }
     }
+    // Baseline integrity (B.2.1 item 5): the bot-owned derived fields must be what the RECORDED snapshots give.
+    // Not "reproducible from today's catalogs" (a retired incumbent may change them), only consistent with the
+    // snapshots committed beside the file, so a hand-edited price, availability or deleted deprecation row fails.
+    try {
+      errors.push(...derivedFieldErrors(registry, snapshotSet.parsed, evaluatedAt));
+    } catch (cause) {
+      error(`cannot re-derive the bot-owned fields from the recorded snapshots: ${cause.message}`);
+    }
   }
   return { errors, findings };
+}
+
+const DERIVED_ENTRY_FIELDS = Object.freeze(["availability", "price", "context", "supportedParameters"]);
+export function derivedFieldErrors(registry, parsed, evaluatedAt) {
+  const again = clone(registry);
+  refreshDerived(again, parsed, evaluatedAt);
+  const errors = [];
+  for (const [id, entry] of Object.entries(registry.entries ?? {})) {
+    for (const field of DERIVED_ENTRY_FIELDS) {
+      if (canonical(stripClock(entry[field])) !== canonical(stripClock(again.entries[id][field]))) errors.push(`entries.${id}.${field} is bot-owned and does not match the recorded snapshots (run \`nodekit models select --write\`, do not edit it by hand)`);
+    }
+  }
+  if (canonical(stripClock(registry.deprecations ?? {})) !== canonical(again.deprecations)) errors.push("deprecations is bot-owned and does not match the rows the recorded snapshots give (run `nodekit models select --write`, do not edit it by hand)");
+  return errors;
 }
 
 // ---- G1: what a bot PR may change -------------------------------------------------------------------

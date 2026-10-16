@@ -48,7 +48,9 @@ nodekit models sync | lint | watch # consumer side
 - **Triggers.** A state outside active/listed, or an announced date within 90 days, makes the incumbent a
   trigger. It moves only to the vendor-named replacement, and only if that entry is `reviewed`, has an id for
   every transport the line is used on, and is eligible on each. Otherwise the line is `held-no-replacement` and
-  the PR body asks a human. A date within 30 days makes the incumbent ineligible.
+  the PR body asks a human. A date within 30 days makes the incumbent ineligible. The replacement is held to the same
+  eligibility test (state active/listed, no date within 30 days), not to the trigger test: one that itself retires in
+  31-90 days still qualifies and is moved again, with its own proposal, when its time comes.
 - **A floor is not a retirement.** Anthropic's "Not sooner than <date>" is recorded and watched. It never moves
   a default, also after it has passed with no notice.
 - **Soak.** A newer reviewed id is `soaking` for 14 days from its release date (no date: soaks until one is
@@ -59,6 +61,16 @@ nodekit models sync | lint | watch # consumer side
 - **Closed means closed.** Every bot PR body ends with a marker holding the sha256 of its decision set. If the
   newest closed-unmerged PR on the bot branch carries the same hash, the run logs `suppressed: closed by human`.
 - **Prices** are valid only on the transport that priced them (`price.source`), never copied across transports.
+  A consumer lock carries its role's own transport only: availability of that transport, and a price only when that
+  transport priced it, so an OpenRouter-only change never opens a PR for an Anthropic-routed role. A row that stops
+  giving a price clears the OpenRouter price instead of leaving the old one standing as verified.
+- **Baseline integrity (B.2.1 item 5).** The bot-owned derived fields (`availability`, `price`, `context`,
+  `supportedParameters`, `deprecations`) must equal what the recorded snapshots give, so a hand edit, or a deleted
+  deprecation row, fails `models validate` on any PR.
+- **A re-laid-out OpenAI page** that still parses into rows but names (almost) no model id fails the run: the
+  id-bearing row count has its own floor (`minIdRows`), because a page without ids reads as "nothing deprecated".
+- **No status-only PR.** A merged move leaves the line's status at the value the next run computes, so the week
+  after a merge opens nothing.
 
 ## Operating it
 
@@ -80,5 +92,18 @@ Sources and decisions: `D:/VSCode Projects/model-defaults/SPEC-v9.md` Part B and
   closes it.
 - The keyed Anthropic `GET /v1/models` cross-check, lint warnings (d)-(g) and ranking by performance (§B.8) are
   not built. Nothing here uses a provider key.
-- `watch` opens or updates one issue; it does not close it when the horizon passes.
+- `watch` opens or updates one issue; it does not close it when the horizon passes. A consumer's frozen ids (B.9) are
+  checked against the registry's snapshots (fetched only when the lock has frozen ids); an id on a transport no
+  snapshot covers is listed under "Not checked", never passed.
+- **B.1 loading is not wired.** `loadRegistry` / `validateRegistry` in `src/lib/registry.mjs`, the
+  `CONTRACT_SCHEMA_FILES` entry, a `models` property in `schemas/nodekit.schema.json` and the
+  `nodeplatform.model-defaults` concept in `ownership.yaml` (all SPEC-v9 B.1, not C.3) are deferred: those files are
+  also edited by open NodeKit PRs. So `npm run registry:check` says nothing about `models.yaml`; `nodekit models
+  validate` (the `model-registry-check` workflow) is what gates it. `CODEOWNERS` for the human-owned paths is C.3
+  and is Homen's call.
+- The 14-day snapshot-age bound is enforced by the refresh run, not by the PR check (it would only block human edits).
+- The consumer's bump token has `contents` and `pull-requests` write only. SPEC B.6 also listed `actions: write` and
+  `statuses: write` for a dispatch-and-mirror step that is not built (brief D-9: scopes unchanged until the first
+  pilot PR shows whether the "Approve workflows to run" banner appears). Consequence: the bot PR shows no CI until a
+  human approves its runs; that is the thing to record from the first real PR.
 - A consumer's own schedule dying cannot be detected from inside that consumer.

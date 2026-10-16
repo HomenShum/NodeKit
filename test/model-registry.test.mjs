@@ -9,7 +9,7 @@ import path from "node:path";
 import test from "node:test";
 import YAML from "yaml";
 import {
-  SnapshotError, fetchSnapshots, fetchText, parseAnthropicDocs, parseGoogleDocs, parseOpenAiDocs, parseOpenRouter, parseSnapshot, parseVendorDate,
+  SNAPSHOT_SOURCES, SnapshotError, fetchSnapshots, fetchText, parseAnthropicDocs, parseGoogleDocs, parseOpenAiDocs, parseOpenRouter, parseSnapshot, parseVendorDate,
 } from "../src/lib/model-catalogs.mjs";
 import {
   botDiffViolations, checkChangedFiles, closedPrGuard, decisionDigest, decisionMarker, decisionSetSha256, markerHashOf, priceFromOpenRouter,
@@ -42,12 +42,20 @@ test("stale id past retirement: the repair proposal moves the line to the vendor
   const before = validateModels({ registry: reg, snapshotSet: set, evaluatedAt: at, stage: "full" });
   assert.ok(before.errors.some((e) => /claude-sonnet-4-5-20250929 is ineligible on anthropic/.test(e) && /not held-no-replacement/.test(e)), before.errors.join("\n"));
 
-  // Selection repairs it (B.4): current moves, previous recorded, status proposed-deprecation.
+  // Selection repairs it (B.4): current moves, previous recorded. The move carries no status of its own: it was
+  // `proposed-deprecation`, which made the NEXT weekly run (status back to `current`, nothing else changed) open a
+  // status-only PR after every merged move (SPEC B.3: unchanged inputs open nothing). The status is now the one the
+  // line has once merged; the follow-up run below proves it is a fixed point.
   const { proposal, report } = select({ registry: reg, snapshotSet: set, evaluatedAt: at, ref: REF });
   const line = proposal.lines["anthropic.sonnet"];
   assert.equal(line.current, "claude-sonnet-5-5");
   assert.equal(line.previous, "claude-sonnet-4-5-20250929");
-  assert.equal(line.status, "proposed-deprecation");
+  assert.equal(line.status, "current");
+  for (const later of [at, day(54), day(61)]) {
+    const next = select({ registry: proposal, snapshotSet: set, evaluatedAt: later, ref: REF });
+    assert.equal(decisionSetSha256(next.proposal), decisionSetSha256(proposal), `after the move merges, the run at ${later.slice(0, 10)} opens no PR`);
+    assert.equal(next.report.moves.length, 0);
+  }
   assert.equal(report.moves.length, 1);
   assert.match(report.moves[0].reasons[0], /anthropic: state deprecated; retires 2026-11-30/);
 
@@ -555,4 +563,91 @@ test("the committed registry is not stale: its digest and its decision set repro
   const { proposal } = select({ registry, snapshotSet: set, evaluatedAt: registry.evaluatedAt, ref: registry.registryRef });
   assert.equal(decisionSetSha256(proposal), decisionSetSha256(registry));
   for (const key of Object.keys(set.index.snapshots)) assert.equal(registry.snapshots[key].sha256, set.index.snapshots[key].sha256, `${key} snapshot hash`);
+});
+
+// ---- Part B v1 adversarial review (round 1) ------------------------------------------------------------------
+
+test("a reformatted OpenAI page cannot read as 'nothing deprecated': rows with no model id are not enough, a few rows without ids are normal", async () => {
+  const live = openaiMd();
+  assert.doesNotThrow(() => parseSnapshot("openaiDocs", live));
+  // the live page has rows about APIs and headers that name no model id (4 of 107 on 2026-10-16)
+  const withApiRows = live + ["| 2027-02-01 | Videos API | Sora |", "| 2027-02-01 | OpenAI-Beta header | none |", "| 2027-02-01 | Assistants API | Responses API |", "| 2027-02-01 | Plugins | Apps |", ""].join("\n");
+  assert.doesNotThrow(() => parseSnapshot("openaiDocs", withApiRows));
+  // the page loses its backticks: the header, the dates and every row still parse, every id list is empty
+  const stripped = live.replace(/`/g, "");
+  assert.ok(parseOpenAiDocs(stripped).rows >= 3, "the old parser accepted this page");
+  assert.throws(() => parseSnapshot("openaiDocs", stripped), /rows name a model id, below the minimum 50/);
+  // and the whole fetch refuses it
+  const texts = { openrouter: openrouterJson(), anthropicDocs: anthropicMd(), openaiDocs: stripped, googleDocs: googleHtml() };
+  const fetchImpl = async (url) => {
+    const key = Object.entries(SNAPSHOT_SOURCES).find(([, s]) => String(url).startsWith(s.url.split("?")[0]))?.[0];
+    return new Response(texts[key], { status: 200 });
+  };
+  await assert.rejects(fetchSnapshots({ fetchImpl, now: new Date(T0) }), /openaiDocs: .*rows name a model id/);
+});
+
+test("baseline integrity (B.2.1 item 5): a hand edit of any bot-owned derived field fails validation, because the recorded snapshots do not give it", async () => {
+  const set = makeSet();
+  const reg = await seededRegistry(set, T0);
+  assert.deepEqual(validateModels({ registry: reg, snapshotSet: set, evaluatedAt: T0, stage: "full" }).errors, [], "the unedited registry is clean");
+  const edits = [
+    ["a price set to 999", (r) => { r.entries["claude-haiku-5-5"].price.outPerM = 999; }, /entries\.claude-haiku-5-5\.price is bot-owned/],
+    ["an availability state flipped to active", (r) => { r.entries["claude-sonnet-4-5-20250929"].availability.anthropic.state = "active"; }, /entries\.claude-sonnet-4-5-20250929\.availability is bot-owned/],
+    ["a context window changed", (r) => { r.entries["claude-haiku-5-5"].context = 1; }, /entries\.claude-haiku-5-5\.context is bot-owned/],
+    ["a deprecation row deleted, which would hide a horizon from every consumer's watch", (r) => { delete r.deprecations["claude-sonnet-4-5-20250929/anthropic"]; }, /deprecations is bot-owned/],
+    ["a deprecation row invented", (r) => { r.deprecations["claude-haiku-5-5/anthropic"] = { kind: "announced", date: "2026-12-01", deprecatedAt: null, source: "anthropicDocs", replacement: null }; }, /deprecations is bot-owned/],
+  ];
+  for (const [name, edit, matcher] of edits) {
+    const edited = clone(reg);
+    edit(edited);
+    const errors = validateModels({ registry: edited, snapshotSet: set, evaluatedAt: T0, stage: "full" }).errors;
+    assert.ok(errors.some((e) => matcher.test(e)), `${name}: ${errors.join("; ") || "no error"}`);
+  }
+  // a later date alone is not an edit: the clock never reaches these fields
+  assert.deepEqual(validateModels({ registry: reg, snapshotSet: set, evaluatedAt: day(30), stage: "full" }).errors.filter((e) => /bot-owned/.test(e)), []);
+});
+
+test("a catalog row that stops giving a price does not leave the old price standing as a freshly verified fact", async () => {
+  const rows = ["anthropic/claude-haiku-5.5", "anthropic/claude-haiku-4.5", "anthropic/claude-sonnet-5.5", "anthropic/claude-sonnet-4.5", "anthropic/claude-opus-5.5"].map((id) => orRow(id, id === "anthropic/claude-haiku-5.5" ? { pricing: {} } : {}));
+  const set = makeSet({ texts: { openrouter: openrouterJson({ rows }) } });
+  const reg = clone(await readSeed());
+  assert.ok(reg.entries["claude-haiku-5-5"].price?.inPerM > 0, "the seed carries a price");
+  const { proposal } = select({ registry: reg, snapshotSet: set, evaluatedAt: T0, ref: REF });
+  assert.equal(proposal.entries["claude-haiku-5-5"].price, null, "was: the previous price kept");
+  const errors = validateModels({ registry: proposal, snapshotSet: set, evaluatedAt: T0, stage: "full" }).errors;
+  assert.ok(errors.some((e) => /claude-haiku-5-5 has no price/.test(e)), errors.join("\n"));
+  // a price a human recorded from a vendor page is theirs and survives a row that gives none
+  const human = clone(reg);
+  human.entries["claude-haiku-5-5"].price = { ...human.entries["claude-haiku-5-5"].price, source: "anthropic-pricing-page" };
+  assert.equal(select({ registry: human, snapshotSet: set, evaluatedAt: T0, ref: REF }).proposal.entries["claude-haiku-5-5"].price.source, "anthropic-pricing-page");
+});
+
+test("replacement eligibility is B.4's test, not the trigger test: a replacement retiring in 31-90 days still qualifies, one inside 30 days or no longer active does not", async () => {
+  const at = day(47); // 2026-12-02
+  const on = (n) => new Date(Date.parse(`${at.slice(0, 10)}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+  const longDate = (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+  const outcome = async (replacementRow) => {
+    const rows = DEFAULT_ANTHROPIC_ROWS.map((r) => (r[0] === "claude-sonnet-5-5" ? replacementRow : r));
+    const set = makeSet({ texts: { anthropicDocs: anthropicMd({ rows }) } });
+    const reg = await staleSonnetRegistry(set, T0);
+    const { proposal, report } = select({ registry: reg, snapshotSet: set, evaluatedAt: at, ref: REF });
+    return { line: proposal.lines["anthropic.sonnet"], report };
+  };
+  for (const n of [31, 60, 90]) {
+    const { line, report } = await outcome(["claude-sonnet-5-5", "Active", "N/A", longDate(on(n))]);
+    assert.equal(line.current, "claude-sonnet-5-5", `a replacement retiring in ${n} d is still adopted (and is moved again, with its own proposal, when its time comes)`);
+    assert.equal(report.moves.length, 1);
+  }
+  for (const [name, row] of [
+    ["retiring in 30 days", ["claude-sonnet-5-5", "Active", "N/A", longDate(on(30))]],
+    ["retiring in 20 days", ["claude-sonnet-5-5", "Active", "N/A", longDate(on(20))]],
+    ["itself deprecated", ["claude-sonnet-5-5", "Deprecated", longDate(on(-3)), longDate(on(100))]],
+    ["retired", ["claude-sonnet-5-5", "Retired", longDate(on(-90)), longDate(on(-3))]],
+  ]) {
+    const { line, report } = await outcome(row);
+    assert.equal(line.current, "claude-sonnet-4-5-20250929", `${name}: the incumbent stays`);
+    assert.equal(line.status, "held-no-replacement", name);
+    assert.equal(report.moves.length, 0, name);
+    assert.match(report.held[0].detail, /claude-sonnet-5-5: not eligible on anthropic/, name);
+  }
 });

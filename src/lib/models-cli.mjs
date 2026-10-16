@@ -19,9 +19,9 @@ export const MODELS_USAGE = `  nodekit models snapshot [--out <dir>] [--registry
   nodekit models select --evaluated-at <ISO> [--ref <sha>] [--write] [--body-out <file>] [--registry <file>] [--snapshots <dir>] [--repo-root <path>] [--json]
   nodekit models replay --input-registry <file> [--registry <file>] [--snapshots <dir>] [--repo-root <path>]
   nodekit models pr-guard --closed-prs <json> --hash <sha256>
-  nodekit models sync --registry <models.yaml> [--config <file>] [--ref <sha>] [--check] [--body-out <file>] [--repo-root <path>]
+  nodekit models sync --registry <models.yaml> [--snapshot-index <index.json>] [--config <file>] [--ref <sha>] [--check] [--body-out <file>] [--repo-root <path>]
   nodekit models lint [--registry <models.yaml>] [--config <file>] [--now <ISO>] [--repo-root <path>] [--json]
-  nodekit models watch --registry <models.yaml> [--refresh-runs <json>] [--now <ISO>] [--config <file>] [--repo-root <path>] [--json]`;
+  nodekit models watch --registry <models.yaml> [--snapshots <dir>] [--refresh-runs <json>] [--now <ISO>] [--config <file>] [--repo-root <path>] [--json]`;
 
 const flag = (value) => value === true || value === "true";
 const one = (value, name) => {
@@ -144,7 +144,7 @@ async function validateCommand(options, p) {
   }
   const maxAge = options["max-age-days"] === undefined ? null : Number(one(options["max-age-days"], "max-age-days"));
   if (maxAge !== null && !(maxAge > 0)) throw new Error("--max-age-days must be a positive number");
-  const result = validateModels({ registry, snapshotSet, snapshotError, evaluatedAt, stage, maxAgeDays: errors.length ? null : maxAge, base });
+  const result = validateModels({ registry, snapshotSet, snapshotError, evaluatedAt, stage, maxAgeDays: errors.length ? null : maxAge });
   errors.push(...result.errors);
   if (base) errors.push(...botDiffViolations(base, registry));
   if (options["changed-files"]) {
@@ -221,7 +221,17 @@ async function syncCommand(options, p) {
   const { lock, changed } = syncLock({ registry, config, existing, registryRef });
   const hash = lockDecisionSha256(lock);
   if (changed && !flag(options.check)) await writeFile(path.resolve(p.root, config.lock), `${JSON.stringify(lock, null, 2)}\n`);
-  if (options["body-out"]) await writeFile(path.resolve(p.root, one(options["body-out"], "body-out")), renderLockBody({ oldLock: existing, newLock: lock, hash, config }));
+  // --snapshot-index: the registry's models/snapshots/latest/index.json, fetched as data (SPEC B.6). The PR body
+  // quotes the hashes from it, after checking they are the ones models.yaml records.
+  let snapshots = registry.snapshots;
+  if (options["snapshot-index"]) {
+    const index = await readJson(path.resolve(one(options["snapshot-index"], "snapshot-index")));
+    for (const [key, recorded] of Object.entries(registry.snapshots ?? {})) {
+      if (index?.snapshots?.[key]?.sha256 !== recorded.sha256) throw new Error(`snapshot index disagrees with models.yaml for ${key}: ${index?.snapshots?.[key]?.sha256 ?? "missing"} vs ${recorded.sha256}`);
+    }
+    snapshots = index.snapshots;
+  }
+  if (options["body-out"]) await writeFile(path.resolve(p.root, one(options["body-out"], "body-out")), renderLockBody({ oldLock: existing, newLock: lock, hash, config, snapshots }));
   emit(options, { changed, decisionSetSha256: hash }, changed ? `MODELS SYNC: lock ${flag(options.check) ? "would change" : "rewritten"} (${hash.slice(0, 12)})` : `MODELS SYNC: lock unchanged (${hash.slice(0, 12)})`);
   if (changed && flag(options.check)) process.exitCode = 1;
 }
@@ -266,7 +276,10 @@ async function watchCommand(options, p) {
       if (Array.isArray(runs?.workflow_runs)) refreshRun = { ok: true, latestSuccessAt: runs.workflow_runs[0]?.updated_at ?? runs.workflow_runs[0]?.created_at ?? null };
     } catch { /* unreadable: stays ok:false, which is itself an URGENT finding */ }
   }
-  const report = watchReport({ lock, registry, now: evaluatedAtOf(options, "now"), refreshRun });
+  // --snapshots: the registry's catalog snapshots (re-hashed and parsed like the registry's own run), needed only to
+  // check a frozen id the registry has no entry for.
+  const snapshotSet = options.snapshots ? await loadSnapshotDir(p.snapshots, {}) : null;
+  const report = watchReport({ lock, registry, now: evaluatedAtOf(options, "now"), refreshRun, snapshotSet });
   emit(options, { urgent: report.urgent, title: URGENT_TITLE, label: URGENT_LABEL, body: report.body }, report.urgent ? report.body : "MODELS WATCH: no announced horizon within 60 days; registry refresh is running");
 }
 

@@ -38,8 +38,11 @@ export function anthropicMd({ rows = DEFAULT_ANTHROPIC_ROWS, notices = DEFAULT_N
   ].join("\n");
 }
 
-export function openaiMd(rows = [["January 14, 2027", "GPT-4.1 mini (`gpt-4.1-mini-2025-04-14`)", "`gpt-6-luna`"], ["Jan 6, 2027", "`tts-1`", "`gpt-realtime-2.1-mini`"], ["2026‑09‑24", "`old-model`", "`new-model`"]]) {
-  return ["# Deprecations", "", "| Shutdown date | Model / system | Recommended replacement |", "| --- | --- | --- |", ...rows.map((r) => `| ${r.join(" | ")} |`), ""].join("\n");
+// `filler` rows keep the page above the id-bearing-row floor (SNAPSHOT_SOURCES.openaiDocs.minIdRows) the way the live
+// page does (103 id rows); they name ids no registry entry uses.
+export function openaiMd(rows = [["January 14, 2027", "GPT-4.1 mini (`gpt-4.1-mini-2025-04-14`)", "`gpt-6-luna`"], ["Jan 6, 2027", "`tts-1`", "`gpt-realtime-2.1-mini`"], ["2026‑09‑24", "`old-model`", "`new-model`"]], { filler = 60 } = {}) {
+  const padding = Array.from({ length: filler }, (_, i) => ["2027-12-31", `\`filler-model-${i}\``, "`filler-replacement`"]);
+  return ["# Deprecations", "", "| Shutdown date | Model / system | Recommended replacement |", "| --- | --- | --- |", ...[...rows, ...padding].map((r) => `| ${r.join(" | ")} |`), ""].join("\n");
 }
 
 export function googleHtml(rows = [["gemini-3.8-flash", "No shutdown date announced", ""], ["gemini-2.5-flash", "No shutdown date announced", ""], ["gemini-2.5-pro", "No shutdown date announced", ""], ["gemini-3.1-flash-lite", "May 7, 2027", "gemini-3.5-flash-lite"], ["gemini-3.5-flash", "N/A", "gemini-3.6-flash (not available to select; the endpoint is not shutting down and automatically routes API requests to <code>gemini-3.6-flash</code>)"]]) {

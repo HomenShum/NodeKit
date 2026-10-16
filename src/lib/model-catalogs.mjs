@@ -18,7 +18,10 @@ export class SnapshotError extends Error {
 export const SNAPSHOT_SOURCES = Object.freeze({
   openrouter: { url: "https://openrouter.ai/api/v1/models", file: "openrouter.json", maxBytes: 8 * 1024 * 1024, minRows: 50 },
   anthropicDocs: { url: "https://platform.claude.com/docs/en/about-claude/model-deprecations.md", file: "anthropic-deprecations.md", maxBytes: 1024 * 1024, minRows: 5 },
-  openaiDocs: { url: "https://developers.openai.com/api/docs/deprecations.md", file: "openai-deprecations.md", maxBytes: 2 * 1024 * 1024, minRows: 3 },
+  // minIdRows: rows that name at least one backticked model id (103 of 107 on 2026-10-16; the rest are API and
+  // header deprecations). A page that lost its backticks still parses into rows, every id list empty, and would
+  // read "nothing deprecated", so the id-bearing count has its own floor.
+  openaiDocs: { url: "https://developers.openai.com/api/docs/deprecations.md", file: "openai-deprecations.md", maxBytes: 2 * 1024 * 1024, minRows: 3, minIdRows: 50 },
   googleDocs: { url: "https://ai.google.dev/gemini-api/docs/deprecations?hl=en", file: "google-deprecations.html", maxBytes: 2 * 1024 * 1024, minRows: 5 },
 });
 export const SNAPSHOT_KEYS = Object.freeze(Object.keys(SNAPSHOT_SOURCES));
@@ -240,8 +243,10 @@ const PARSERS = Object.freeze({ openrouter: parseOpenRouter, anthropicDocs: pars
 // last committed rows (when known).
 export function parseSnapshot(key, text, { previousRows = null } = {}) {
   const parsed = PARSERS[key](text);
-  const { minRows } = SNAPSHOT_SOURCES[key];
+  const { minRows, minIdRows } = SNAPSHOT_SOURCES[key];
   if (parsed.rows < minRows) throw new SnapshotError(`${key}: ${parsed.rows} rows is below the minimum ${minRows}`, { key });
+  const idRows = minIdRows === undefined ? null : parsed.notices.filter((n) => n.ids.length).length; // not part of `parsed`: it is digested
+  if (idRows !== null && idRows < minIdRows) throw new SnapshotError(`${key}: ${idRows} rows name a model id, below the minimum ${minIdRows} (the page's layout changed?)`, { key });
   if (Number.isInteger(previousRows) && previousRows > 0 && parsed.rows < previousRows * SHRINK_RATIO) {
     throw new SnapshotError(`${key}: ${parsed.rows} rows is under ${SHRINK_RATIO} x the last committed ${previousRows}`, { key });
   }
