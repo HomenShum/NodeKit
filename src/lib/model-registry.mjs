@@ -31,6 +31,12 @@ export const digestOf = (value) => createHash("sha256").update(canonical(value))
 const clone = (value) => structuredClone(value);
 const dayOf = (iso) => String(iso).slice(0, 10);
 export const daysUntil = (date, evaluatedAt) => Math.floor((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${dayOf(evaluatedAt)}T00:00:00Z`)) / DAY);
+// The 90/30-day window a dated row is in at `evaluatedAt`. It is part of the row, so the decision set changes on
+// the run where a date crosses a window even when nothing else did (B.3), also on a line already held.
+const horizonOf = (date, evaluatedAt) => {
+  const days = daysUntil(date, evaluatedAt);
+  return days <= BLOCK_DAYS ? BLOCK_DAYS : days <= TRIGGER_DAYS ? TRIGGER_DAYS : null;
+};
 const addDays = (iso, n) => new Date(Date.parse(`${dayOf(iso)}T00:00:00Z`) + n * DAY).toISOString().slice(0, 10);
 const sortedKeys = (object) => Object.fromEntries(Object.keys(object).sort().map((k) => [k, object[k]]));
 const nonEmpty = (object) => object && typeof object === "object" && Object.keys(object).length > 0;
@@ -173,6 +179,7 @@ function refreshDerived(next, parsed, evaluatedAt) {
     for (const [transport, av] of Object.entries(entry.availability)) {
       const key = `${id}/${transport}`;
       const row = deprecationRow(av, (replacementsOf[key] ?? [])[0] ?? null);
+      if (row && (row.kind === "announced" || row.kind === "expiration")) row.horizon = horizonOf(row.date, evaluatedAt);
       if (row) deprecations[key] = row;
     }
   }
@@ -205,6 +212,15 @@ export function eligibility(av, evaluatedAt) {
 }
 
 // ---- lines ------------------------------------------------------------------------------------------
+
+// What a `current` must carry (B.2.1 item 1) and so what a replacement must carry before the robot may move to it.
+// Price and context come only from a catalog the bot reads for pricing (OpenRouter); a line that does not route
+// through such a transport has none to give and is not asked for them. One rule, used by `validate` and `select`.
+const PRICED_BY = Object.freeze(["openrouter"]);
+export function missingCurrentFields(entry, line) {
+  const fields = ["releaseDate", ...(line.transports.some((t) => PRICED_BY.includes(t)) ? ["context", "price"] : [])];
+  return fields.filter((field) => entry[field] === null || entry[field] === undefined);
+}
 
 const versionOf = (line, id) => {
   const m = new RegExp(line.regex).exec(id);
@@ -247,27 +263,37 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
       report.held.push({ kind: "needs-human", line: lineName, id: line.current, detail: "current is not a key in entries" });
       continue;
     }
-    const facts = line.transports.map((t) => ({ transport: t, ...eligibility(current.availability[t], evaluatedAt) }));
-    for (const f of facts.filter((x) => x.unverified)) report.information.push({ line: lineName, id: line.current, transport: f.transport, detail: "unverified: no snapshot for this transport" });
-    const triggered = facts.filter((f) => f.trigger);
-    if (triggered.length) {
+    // A move re-judges the NEW current: a replacement that itself retires in 31-90 days is eligible (B.4) but
+    // triggers, so with nothing eligible after it the line is held in this same run. The next run over the same
+    // catalogs is then a fixed point and no status-only PR follows the merge.
+    const visited = new Set();
+    let held = false;
+    for (;;) {
+      visited.add(line.current);
+      const incumbentNow = next.entries[line.current];
+      const facts = line.transports.map((t) => ({ transport: t, ...eligibility(incumbentNow.availability[t], evaluatedAt) }));
+      for (const f of facts.filter((x) => x.unverified)) report.information.push({ line: lineName, id: line.current, transport: f.transport, detail: "unverified: no snapshot for this transport" });
+      const triggered = facts.filter((f) => f.trigger);
+      if (!triggered.length) break;
       const reasons = triggered.map((f) => `${f.transport}: ${f.why}`);
       const named = triggered.flatMap((f) => replacementsOf[`${line.current}/${f.transport}`] ?? []);
-      const candidate = named.map((name) => replacementFor(next, lineName, line, name, evaluatedAt)).find((r) => r.ok);
-      if (candidate) {
-        report.moves.push({ line: lineName, from: line.current, to: candidate.id, reasons, source: evidenceMeta[`${line.current}/${triggered[0].transport}`] ?? null });
-        line.previous = line.current;
-        line.current = candidate.id;
-        // No status of its own: the new current is judged below like any other, so `status` is already the one the
-        // next run computes and merging this proposal never leaves a status-only PR behind (SPEC B.3: unchanged
-        // inputs open nothing). The move itself is recorded in `previous` and in the PR body.
-      } else {
+      const tried = named.map((name) => ({ name, ...replacementFor(next, lineName, line, name, evaluatedAt) }));
+      const candidate = tried.find((r) => r.ok && !visited.has(r.id));
+      const source = evidenceMeta[`${line.current}/${triggered[0].transport}`] ?? null;
+      if (!candidate) {
         line.status = "held-no-replacement";
-        const why = named.length ? named.map((name) => `${name}: ${replacementFor(next, lineName, line, name, evaluatedAt).why}`).join("; ") : "the vendor names no replacement";
-        report.held.push({ kind: "held-no-replacement", line: lineName, id: line.current, source: evidenceMeta[`${line.current}/${triggered[0].transport}`] ?? null, detail: `${reasons.join("; ")}. ${why}. A human must add constraints/reviewed (or a transport id) for a replacement.` });
-        continue;
+        const why = tried.length ? tried.map((r) => `${r.name}: ${r.ok ? "already passed through in this run" : r.why}`).join("; ") : "the vendor names no replacement";
+        report.held.push({ kind: "held-no-replacement", line: lineName, id: line.current, source, detail: `${reasons.join("; ")}. ${why}. A human must add constraints/reviewed (or a transport id, or the missing fields) for a replacement.` });
+        held = true;
+        break;
       }
+      report.moves.push({ line: lineName, from: line.current, to: candidate.id, reasons, source });
+      line.previous = line.current;
+      line.current = candidate.id;
+      // No status of its own: the new current is judged by the next pass of this loop and below like any other,
+      // so `status` is already the one the next run computes.
     }
+    if (held) continue;
     const incumbent = next.entries[line.current];
     for (const t of line.transports) {
       const av = incumbent.availability[t];
@@ -314,6 +340,10 @@ function replacementFor(registry, lineName, line, name, evaluatedAt) {
   if (!entry.reviewed || !nonEmpty(entry.constraints)) return { ok: false, why: "not reviewed (no constraints)" };
   const missing = line.transports.filter((t) => !entry.ids[t]);
   if (missing.length) return { ok: false, why: `no ${missing.join(", ")} id` };
+  // The robot must never propose a `current` that its own validation rejects (that fails the weekly run and no
+  // repair PR opens): hold the line and name what a human has to record.
+  const absent = missingCurrentFields(entry, line);
+  if (absent.length) return { ok: false, why: `no ${absent.join(", ")} recorded (a human adds ${absent.length > 1 ? "them" : "it"}; no catalog the bot reads gives ${absent.length > 1 ? "them" : "it"} for this id)` };
   // B.4: "eligible on each" is the B.2.2 test (state active/listed, no date inside 30 days). A replacement that
   // itself retires in 31-90 days still qualifies and is moved again, with its own proposal, when its time comes;
   // an unverified transport is neither eligible nor ineligible and does not block.
@@ -383,18 +413,21 @@ function evidenceRows(before, after, meta, index, report) {
 // ---- validate (B.2) ---------------------------------------------------------------------------------
 
 const DATED_CLAUDE = /^claude-.+-\d{8}$/;
-const hygiene = (id, line, entry, registry, parsed, error) => {
-  const ids = [id, ...Object.values(entry.ids)];
+const hygiene = (id, lineName, line, entry, registry, parsed, error) => {
+  // Only the wire ids of transports the line routes through: a bad row for a transport nobody on this line uses is
+  // information, never a reason to stop the whole weekly run.
+  const used = line.transports.map((t) => entry.ids[t]).filter(Boolean);
+  const ids = [id, ...used];
   for (const wire of ids) {
-    if (/:batch$/.test(wire)) error(`${line}: current ${id} uses a :batch id (${wire})`);
-    if (/:free$/.test(wire) && registry.roles?.free?.line !== line) error(`${line}: current ${id} uses a :free id (${wire}) outside role free`);
-    if (wire.startsWith("~") || wire.startsWith("openrouter/")) error(`${line}: current ${id} uses a router/alias id (${wire})`);
+    if (/:batch$/.test(wire)) error(`${lineName}: current ${id} uses a :batch id (${wire})`);
+    if (/:free$/.test(wire) && registry.roles?.free?.line !== lineName) error(`${lineName}: current ${id} uses a :free id (${wire}) outside role free`);
+    if (wire.startsWith("~") || wire.startsWith("openrouter/")) error(`${lineName}: current ${id} uses a router/alias id (${wire})`);
   }
-  if (DATED_CLAUDE.test(id) || (entry.ids.anthropic && DATED_CLAUDE.test(entry.ids.anthropic))) error(`${line}: current ${id} is a dated Claude id`);
-  if (/^claude-mythos-/.test(id)) error(`${line}: current ${id} is claude-mythos-*`);
-  if (/-preview$/.test(id) && Object.entries(registry.entries).some(([other, e]) => e.line === entry.line && other !== id && !/-preview$/.test(other))) error(`${line}: current ${id} is a -preview id while the line has a GA model`);
-  const row = entry.ids.openrouter ? parsed?.openrouter?.byId.get(entry.ids.openrouter) : null;
-  if (row && (row.pricing.prompt === "-1" || row.pricing.completion === "-1")) error(`${line}: current ${id} is a -1 priced OpenRouter row`);
+  if (DATED_CLAUDE.test(id) || used.some((wire) => DATED_CLAUDE.test(wire))) error(`${lineName}: current ${id} is a dated Claude id`);
+  if (/^claude-mythos-/.test(id)) error(`${lineName}: current ${id} is claude-mythos-*`);
+  if (/-preview$/.test(id) && Object.entries(registry.entries).some(([other, e]) => e.line === entry.line && other !== id && !/-preview$/.test(other))) error(`${lineName}: current ${id} is a -preview id while the line has a GA model`);
+  const row = line.transports.includes("openrouter") && entry.ids.openrouter ? parsed?.openrouter?.byId.get(entry.ids.openrouter) : null;
+  if (row && (row.pricing.prompt === "-1" || row.pricing.completion === "-1")) error(`${lineName}: current ${id} is a -1 priced OpenRouter row`);
 };
 
 // Input validation + eligibility. `stage`: "inputs" = B.2.1 only (before select); "full" = B.2.1 + B.2.2 merge
@@ -411,12 +444,12 @@ export function validateModels({ registry, snapshotSet = null, snapshotError = n
     if (!current) { error(`lines.${lineName}.current ${line.current} is not a key in entries`); continue; }
     if (current.reviewed !== true) error(`lines.${lineName}.current ${line.current} must have reviewed: true`);
     if (!nonEmpty(current.constraints)) error(`lines.${lineName}.current ${line.current} has no constraints`);
-    for (const field of ["releaseDate", "context", "price"]) if (current[field] === null || current[field] === undefined) error(`lines.${lineName}.current ${line.current} has no ${field}`);
+    for (const field of missingCurrentFields(current, line)) error(`lines.${lineName}.current ${line.current} has no ${field}`);
     for (const t of line.transports) if (!current.ids?.[t]) error(`lines.${lineName}.transports lists ${t} but ${line.current} has no ${t} id`);
     if (line.previous && !registry.entries[line.previous]) error(`lines.${lineName}.previous ${line.previous} is not a key in entries`);
     if (current.line !== lineName) error(`entries.${line.current}.line is ${current.line}, expected ${lineName}`);
     try { new RegExp(line.regex); } catch { error(`lines.${lineName}.regex does not compile`); }
-    hygiene(line.current, lineName, current, registry, snapshotSet?.parsed, error);
+    hygiene(line.current, lineName, line, current, registry, snapshotSet?.parsed, error);
   }
   for (const [id, entry] of Object.entries(registry.entries ?? {})) {
     if (!registry.lines?.[entry.line]) error(`entries.${id}.line ${entry.line} is not a line`);
@@ -454,7 +487,8 @@ export function validateModels({ registry, snapshotSet = null, snapshotError = n
     // Not "reproducible from today's catalogs" (a retired incumbent may change them), only consistent with the
     // snapshots committed beside the file, so a hand-edited price, availability or deleted deprecation row fails.
     try {
-      errors.push(...derivedFieldErrors(registry, snapshotSet.parsed, evaluatedAt));
+      // At the clock the file records, not today's: the 90/30-day window on a deprecation row moves with time.
+      errors.push(...derivedFieldErrors(registry, snapshotSet.parsed, registry.evaluatedAt ?? evaluatedAt));
     } catch (cause) {
       error(`cannot re-derive the bot-owned fields from the recorded snapshots: ${cause.message}`);
     }

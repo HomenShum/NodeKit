@@ -12,7 +12,7 @@ import { decisionMarker, markerHashOf, stringifyYaml } from "../src/lib/model-re
 import {
   LOCK_SCHEMA, WATCH_HORIZON_DAYS, buildLock, lintLock, lockDecisionSha256, renderLockBody, scanRawIds, syncLock, validateConfig, watchReport,
 } from "../src/lib/model-lock.mjs";
-import { ROOT, T0, makeSet, readSeed, seededRegistry } from "./model-registry.fixtures.mjs";
+import { DEFAULT_ANTHROPIC_ROWS, ROOT, T0, anthropicMd, makeSet, openaiMd, readSeed, seededRegistry } from "./model-registry.fixtures.mjs";
 
 const REF = "c".repeat(40);
 const clone = (v) => structuredClone(v);
@@ -218,7 +218,9 @@ test("the CLI in a consumer checkout: sync writes the lock once, --check agrees,
     assert.equal(JSON.parse(r.stdout).changed, true);
     const written = await readFile(path.join(tmp, "models.lock.json"), "utf8");
     assert.equal(JSON.parse(written).roles.reasoner.id, "claude-haiku-5-5");
-    assert.match(await readFile(path.join(tmp, "body.md"), "utf8"), /### `reasoner`/);
+    const body = await readFile(path.join(tmp, "body.md"), "utf8");
+    assert.match(body, /### `reasoner`/);
+    assert.match(body, /- released: 2026-10-07 \(anthropic-release-notes\)/, "the CLI gives the body the registry's release facts");
 
     r = cli(["models", "sync", ...common, "--ref", REF, "--check", "--json"]);
     assert.equal(r.status, 0, "second sync changes nothing");
@@ -351,4 +353,49 @@ test("sync --snapshot-index: the consumer PR body quotes the snapshot hashes fro
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }
+});
+
+// ---- Part B v1 adversarial review (round 2) ------------------------------------------------------------------
+
+test("watch (B.9): a frozen id is judged on the catalogs fetched now, not on the snapshots main last committed", async () => {
+  // The registry commits a snapshot only when ITS decision set changes, and a consumer's frozen id is never part of it.
+  // Week 0: the committed snapshots have no notice for tts-1. Week 1: OpenAI posts a shutdown 47 days out; the refresh
+  // run's decision set is unchanged, so main keeps the week-0 pages while the vendor page has moved on.
+  const rowsWithout = [["January 14, 2027", "GPT-4.1 mini (`gpt-4.1-mini-2025-04-14`)", "`gpt-6-luna`"], ["2026‑09‑24", "`old-model`", "`new-model`"]];
+  const rowsWith = [...rowsWithout, ["December 9, 2026", "`tts-1`", "`gpt-realtime-2.1-mini`"]];
+  const week0 = makeSet({ texts: { openaiDocs: openaiMd(rowsWithout) } });
+  const week1 = makeSet({ texts: { openaiDocs: openaiMd(rowsWith) } });
+  const registry = await seededRegistry(week0, T0); // main after the last merged proposal
+  const { lock } = syncLock({ registry, config: CONFIG, existing: null, registryRef: REF });
+  const frozen = { ...clone(lock), frozen: [FROZEN] };
+  const now = day(7);
+  const fresh = { ok: true, latestSuccessAt: now };
+  const onMain = watchReport({ lock: frozen, registry, now, refreshRun: fresh, snapshotSet: week0 });
+  assert.equal(onMain.urgent, false, "main's snapshots do not know yet: this is what the consumer used to read");
+  const live = watchReport({ lock: frozen, registry, now, refreshRun: fresh, snapshotSet: week1 });
+  assert.equal(live.urgent, true);
+  assert.deepEqual(live.horizons.map((h) => [h.id, h.days]), [["tts-1", 47]]);
+
+  // a frozen id that IS a registry entry: the registry row it committed is older than the page just fetched
+  const haiku = { id: "claude-haiku-4-5-20251001", transport: "anthropic", class: "judge", reason: "judge fixture", promotionPath: "a human PR" };
+  assert.equal(registry.deprecations["claude-haiku-4-5-20251001/anthropic"].kind, "floor");
+  const announced = makeSet({ texts: { anthropicDocs: anthropicMd({ rows: DEFAULT_ANTHROPIC_ROWS.map((r) => (r[0] === "claude-haiku-4-5-20251001" ? ["claude-haiku-4-5-20251001", "Deprecated", "October 20, 2026", "December 15, 2026"] : r)), notices: [["December 15, 2026", "claude-haiku-4-5-20251001", "claude-haiku-5-5"]] }) } });
+  const judge = { ...clone(lock), frozen: [haiku] };
+  assert.equal(watchReport({ lock: judge, registry, now, refreshRun: fresh }).urgent, false, "from the registry row alone: only a floor");
+  const viaLive = watchReport({ lock: judge, registry, now, refreshRun: fresh, snapshotSet: announced });
+  assert.equal(viaLive.urgent, true);
+  assert.deepEqual(viaLive.horizons.map((h) => [h.id, h.kind2, h.date, h.replacement]), [["claude-haiku-4-5-20251001", "announced", "2026-12-15", "claude-haiku-5-5"]]);
+});
+
+test("the consumer PR body carries the release and per-transport lifecycle facts the registry has, labelled, and says they are not in the lock (SPEC B.6)", async () => {
+  const { lock, registry } = await world();
+  const next = clone(registry);
+  next.entries["claude-haiku-5-5"].constraints.defaultEffort = "high";
+  const { lock: updated } = syncLock({ registry: next, config: CONFIG, existing: lock, registryRef: "d".repeat(40) });
+  const body = renderLockBody({ oldLock: lock, newLock: updated, hash: lockDecisionSha256(updated), config: CONFIG, snapshots: next.snapshots, registry: next });
+  assert.match(body, /- released: 2026-10-07 \(anthropic-release-notes\)/);
+  assert.match(body, /- lifecycle on anthropic: active, floor 2027-10-07 \(advisory\)/);
+  assert.match(body, /- other transports \(information; not in the lock\): openrouter: listed/);
+  // without the registry the body still renders (the facts are an addition, not a dependency)
+  assert.doesNotMatch(renderLockBody({ oldLock: lock, newLock: updated, hash: lockDecisionSha256(updated), config: CONFIG }), /released:/);
 });

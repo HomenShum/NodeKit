@@ -34,7 +34,8 @@ export function anthropicMd({ rows = DEFAULT_ANTHROPIC_ROWS, notices = DEFAULT_N
     "# Model deprecations", "", "## Model status", "",
     ...anthropicHeader, ...rows.map((r) => `| ${r.join(" | ")} |`), "",
     "## Deprecation history", "",
-    ...(notices.length ? [...noticeHeader, ...notices.map(([d, id, rep]) => `| ${d} | \`${id}\` | \`${rep}\` |`)] : []), "",
+    // The header is always there: a page with no history table at all is a re-laid-out page, which the parser refuses.
+    ...noticeHeader, ...notices.map(([d, id, rep]) => `| ${d} | \`${id}\` | \`${rep}\` |`), "",
   ].join("\n");
 }
 

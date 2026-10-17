@@ -13,7 +13,7 @@ import {
 } from "../src/lib/model-catalogs.mjs";
 import {
   botDiffViolations, checkChangedFiles, closedPrGuard, decisionDigest, decisionMarker, decisionSetSha256, markerHashOf, priceFromOpenRouter,
-  renderProposalBody, replay, select, selectionInput, stringifyYaml, validateModels,
+  renderProposalBody, replay, schemaErrors, select, selectionInput, stringifyYaml, validateModels,
 } from "../src/lib/model-registry.mjs";
 import { runModelsCommand } from "../src/lib/models-cli.mjs";
 import { ROOT, T0, anthropicMd, DEFAULT_ANTHROPIC_ROWS, googleHtml, makeSet, openaiMd, openrouterJson, orRow, readSeed, seededRegistry, sha } from "./model-registry.fixtures.mjs";
@@ -174,16 +174,42 @@ test("catalog field missing: every structure the parsers rely on fails the whole
   assert.doesNotThrow(() => parseSnapshot("openrouter", openrouterJson({ filler: 80 }), { previousRows: 150 }));
 });
 
-test("catalog field missing on a current entry: a price the catalog does not give is an error, not a guess", async () => {
+test("catalog field missing on a current entry: a line that routes through OpenRouter needs its price; a direct line is never stopped by a bad OpenRouter row", async () => {
   const set = makeSet({ texts: { openrouter: openrouterJson({ rows: [orRow("anthropic/claude-haiku-5.5", { pricing: { prompt: "-1", completion: "-1" } }), orRow("anthropic/claude-sonnet-5.5"), orRow("anthropic/claude-opus-5.5"), orRow("anthropic/claude-haiku-4.5"), orRow("anthropic/claude-sonnet-4.5")] }) } });
   assert.equal(priceFromOpenRouter(orRow("a/b", { pricing: { prompt: "-1", completion: "-1" } })), null);
-  const reg = clone(await readSeed());
-  reg.entries["claude-haiku-5-5"].price = null;
-  reg.entries["claude-haiku-5-5"].context = null;
-  const { proposal } = select({ registry: reg, snapshotSet: set, evaluatedAt: T0, ref: REF });
-  const result = validateModels({ registry: proposal, snapshotSet: set, evaluatedAt: T0, stage: "full" });
+  const seed = clone(await readSeed());
+  // a line that routes through OpenRouter: its current needs a price and context, and a -1 row is hygiene
+  const priced = clone(seed);
+  priced.lines["anthropic.haiku"].transports = ["anthropic", "openrouter"];
+  priced.entries["claude-haiku-5-5"].price = null;
+  priced.entries["claude-haiku-5-5"].context = null;
+  const result = validateModels({ registry: select({ registry: priced, snapshotSet: set, evaluatedAt: T0, ref: REF }).proposal, snapshotSet: set, evaluatedAt: T0, stage: "full" });
   assert.ok(result.errors.some((e) => /claude-haiku-5-5 has no price/.test(e)), result.errors.join("\n"));
   assert.ok(result.errors.some((e) => /is a -1 priced OpenRouter row/.test(e)));
+  // the pilot's line is anthropic-only: the same -1 row is about a transport nobody on this line uses. It aborted the
+  // whole weekly run (and so every other proposal in it) before the checks were scoped to the line's transports.
+  const direct = select({ registry: clone(seed), snapshotSet: set, evaluatedAt: T0, ref: REF }).proposal;
+  assert.equal(direct.entries["claude-haiku-5-5"].price, null, "the row gives no price, so the old one is cleared");
+  assert.deepEqual(validateModels({ registry: direct, snapshotSet: set, evaluatedAt: T0, stage: "inputs" }).errors, []);
+  assert.deepEqual(validateModels({ registry: direct, snapshotSet: set, evaluatedAt: T0, stage: "full" }).errors, []);
+  // ...and the same for an empty `pricing: {}` row, the other shape of "no price"
+  const emptyPricing = makeSet({ texts: { openrouter: openrouterJson({ rows: ["anthropic/claude-haiku-5.5", "anthropic/claude-haiku-4.5", "anthropic/claude-sonnet-5.5", "anthropic/claude-sonnet-4.5", "anthropic/claude-opus-5.5"].map((id) => orRow(id, id === "anthropic/claude-haiku-5.5" ? { pricing: {} } : {})) }) } });
+  assert.deepEqual(validateModels({ registry: select({ registry: clone(seed), snapshotSet: emptyPricing, evaluatedAt: T0, ref: REF }).proposal, snapshotSet: emptyPricing, evaluatedAt: T0, stage: "full" }).errors, []);
+});
+
+test("wire-id hygiene looks only at the transports the line routes through: a bad id for a transport nobody on the line uses does not stop the weekly run", async () => {
+  const set = makeSet();
+  const seed = clone(await readSeed());
+  assert.deepEqual(seed.lines["anthropic.haiku"].transports, ["anthropic"]);
+  for (const bad of ["anthropic/claude-haiku-5.5:batch", "anthropic/claude-haiku-5.5:free", "~anthropic/claude-haiku-latest", "openrouter/auto"]) {
+    const direct = clone(seed);
+    direct.entries["claude-haiku-5-5"].ids.openrouter = bad;
+    assert.deepEqual(validateModels({ registry: direct, snapshotSet: set, evaluatedAt: T0, stage: "inputs" }).errors, [], `${bad}: nobody on this line routes through OpenRouter`);
+    const viaOpenRouter = clone(direct);
+    viaOpenRouter.lines["anthropic.haiku"].transports = ["anthropic", "openrouter"];
+    const errors = validateModels({ registry: viaOpenRouter, snapshotSet: set, evaluatedAt: T0, stage: "inputs" }).errors;
+    assert.ok(errors.some((e) => /anthropic\.haiku: current claude-haiku-5-5 uses a (:batch id|:free id|router\/alias id)/.test(e)), `${bad}: once the line routes through it, it is an error: ${errors.join("; ")}`);
+  }
 });
 
 test("price rules: tiers from min_prompt_tokens, other override conditions fold in as the per-key maximum, per-token strings become per-million numbers", () => {
@@ -319,8 +345,10 @@ test("network failure fails closed with an honest error and leaves the previous 
       "a 200 that is a captcha page": { anthropicDocs: () => body("<html>Just a moment...</html>") },
       "an empty 200": { openrouter: () => body("") },
     };
+    const reasons = { "HTTP 503": /googleDocs: HTTP 503 from ai\.google\.dev/, "connection reset": /openaiDocs: fetch failed/, "a 200 that is a captcha page": /anthropicDocs: expected exactly one/, "an empty 200": /openrouter: not JSON/ };
     for (const [name, broken] of Object.entries(failures)) {
-      await assert.rejects(runModelsCommand("snapshot", { options: { "repo-root": dir, out: "snap", json: true } }, { fetchImpl: serve(broken) }), SnapshotError, name);
+      // the reason is part of the contract: without the status check a 503 only fails later as a parse error
+      await assert.rejects(runModelsCommand("snapshot", { options: { "repo-root": dir, out: "snap", json: true } }, { fetchImpl: serve(broken) }), (error) => error instanceof SnapshotError && reasons[name].test(error.message), name);
       const after = await Promise.all((await readdir(path.join(dir, "snap"))).sort().map(async (f) => [f, sha(await readFile(path.join(dir, "snap", f), "utf8"))]));
       assert.deepEqual(after, before, `${name}: the committed snapshots must be untouched`);
     }
@@ -382,7 +410,7 @@ test("scale: a 5,000-row catalog parses, selects and validates well inside a sec
   assert.equal(g.models[0].id, "gemini-9 alert(1)");
 });
 
-test("sustained: 52 weekly cycles over an unchanged catalog open zero PRs, hold the digest, and the file does not grow", async () => {
+test("sustained: 52 weekly cycles over an unchanged catalog open a PR only where a date crosses its 30-day window, hold the digest, and the file does not grow", async () => {
   const set = makeSet();
   let committed = await seededRegistry(set, T0);
   const size0 = stringifyYaml(committed).length;
@@ -394,7 +422,9 @@ test("sustained: 52 weekly cycles over an unchanged catalog open zero PRs, hold 
     if (decisionSetSha256(proposal) !== decisionSetSha256(committed)) { opened += 1; committed = proposal; }
     assert.equal(stringifyYaml(proposal).length, size0, `week ${week}: size drifted`);
   }
-  assert.equal(opened, 0);
+  // The only dated row that can cross anything in a year is Sonnet 4.5's announced 2026-11-30 retirement: in the 90-day
+  // window at the start, inside 30 days from 2026-10-31, i.e. week 3. Floors never open a PR.
+  assert.equal(opened, 1, "one window crossing in a year, nothing else");
   assert.equal(digests.size, 1);
 });
 
@@ -526,6 +556,24 @@ test("the pipeline end to end in a temp checkout: select --write, validate with 
     assert.match(prBody, /held-unreviewed\*\* ?|held-unreviewed/);
     assert.match(prBody, /`claude-haiku-5-6`/);
 
+    // An edit the field allowlist permits but selection would not make (a release date) passes `validate --base` and is
+    // refused by the replay the bot-branch check runs; a base registry other than the one selection started from is too.
+    const proposalText = await readFile(path.join(tmp, "models.yaml"), "utf8");
+    const redated = YAML.parse(proposalText);
+    redated.entries["claude-haiku-5-5"].releaseDate = "2020-01-01";
+    await writeFile(path.join(tmp, "models.yaml"), stringifyYaml(redated));
+    r = cli(["models", "validate", "--stage", "full", ...common, "--base", input]);
+    assert.equal(r.status, 0, "the allowlist alone lets it through: " + r.stdout);
+    r = cli(["models", "replay", "--repo-root", tmp, "--input-registry", input]);
+    assert.equal(r.status, 1);
+    assert.match(r.stdout, /MODELS REPLAY FAILED/);
+    await writeFile(path.join(tmp, "models.yaml"), proposalText);
+    await writeFile(path.join(tmp, "newer-base.yaml"), `${await readFile(input, "utf8")}# main moved on
+`);
+    r = cli(["models", "replay", "--repo-root", tmp, "--input-registry", path.join(tmp, "newer-base.yaml")]);
+    assert.equal(r.status, 1, "a bot PR cut from an older registry than the base branch's is stale and no longer replays");
+    assert.match(r.stderr, /does not hash to selection-input\.json/);
+
     // a human-owned edit smuggled into the bot's proposal fails G1
     const smuggled = YAML.parse(await readFile(path.join(tmp, "models.yaml"), "utf8"));
     smuggled.roles.fast.line = "anthropic.opus";
@@ -575,15 +623,18 @@ test("a reformatted OpenAI page cannot read as 'nothing deprecated': rows with n
   assert.doesNotThrow(() => parseSnapshot("openaiDocs", withApiRows));
   // the page loses its backticks: the header, the dates and every row still parse, every id list is empty
   const stripped = live.replace(/`/g, "");
-  assert.ok(parseOpenAiDocs(stripped).rows >= 3, "the old parser accepted this page");
-  assert.throws(() => parseSnapshot("openaiDocs", stripped), /rows name a model id, below the minimum 50/);
+  assert.throws(() => parseOpenAiDocs(stripped), /row names a model id without backticks/, "per row: an id-shaped name with no markup is a layout change");
+  // a page whose names are prose and have no markup is caught by the page-wide floor instead
+  const prose = openaiMd([["January 14, 2027", "GPT 4.1 mini", "GPT 6 luna"]], { filler: 0 }) + Array.from({ length: 60 }, (_, i) => `| 2027-12-31 | Filler model ${i} | Replacement |`).join("\n") + "\n";
+  assert.ok(parseOpenAiDocs(prose).rows >= 3, "the row parser alone accepts this page");
+  assert.throws(() => parseSnapshot("openaiDocs", prose), /rows name a model id, below the minimum 50/);
   // and the whole fetch refuses it
   const texts = { openrouter: openrouterJson(), anthropicDocs: anthropicMd(), openaiDocs: stripped, googleDocs: googleHtml() };
   const fetchImpl = async (url) => {
     const key = Object.entries(SNAPSHOT_SOURCES).find(([, s]) => String(url).startsWith(s.url.split("?")[0]))?.[0];
     return new Response(texts[key], { status: 200 });
   };
-  await assert.rejects(fetchSnapshots({ fetchImpl, now: new Date(T0) }), /openaiDocs: .*rows name a model id/);
+  await assert.rejects(fetchSnapshots({ fetchImpl, now: new Date(T0) }), /openaiDocs: .*without backticks/);
 });
 
 test("baseline integrity (B.2.1 item 5): a hand edit of any bot-owned derived field fails validation, because the recorded snapshots do not give it", async () => {
@@ -611,15 +662,21 @@ test("a catalog row that stops giving a price does not leave the old price stand
   const rows = ["anthropic/claude-haiku-5.5", "anthropic/claude-haiku-4.5", "anthropic/claude-sonnet-5.5", "anthropic/claude-sonnet-4.5", "anthropic/claude-opus-5.5"].map((id) => orRow(id, id === "anthropic/claude-haiku-5.5" ? { pricing: {} } : {}));
   const set = makeSet({ texts: { openrouter: openrouterJson({ rows }) } });
   const reg = clone(await readSeed());
+  reg.lines["anthropic.haiku"].transports = ["anthropic", "openrouter"]; // a line that prices through OpenRouter needs the price
   assert.ok(reg.entries["claude-haiku-5-5"].price?.inPerM > 0, "the seed carries a price");
   const { proposal } = select({ registry: reg, snapshotSet: set, evaluatedAt: T0, ref: REF });
   assert.equal(proposal.entries["claude-haiku-5-5"].price, null, "was: the previous price kept");
   const errors = validateModels({ registry: proposal, snapshotSet: set, evaluatedAt: T0, stage: "full" }).errors;
   assert.ok(errors.some((e) => /claude-haiku-5-5 has no price/.test(e)), errors.join("\n"));
-  // a price a human recorded from a vendor page is theirs and survives a row that gives none
+  // a price a human recorded from a vendor page is theirs and survives a row that gives none. It is recorded under the
+  // transport it is valid on (the schema used to allow only `openrouter`, so a human could not write one at all).
   const human = clone(reg);
-  human.entries["claude-haiku-5-5"].price = { ...human.entries["claude-haiku-5-5"].price, source: "anthropic-pricing-page" };
-  assert.equal(select({ registry: human, snapshotSet: set, evaluatedAt: T0, ref: REF }).proposal.entries["claude-haiku-5-5"].price.source, "anthropic-pricing-page");
+  human.entries["claude-haiku-5-5"].price = { ...human.entries["claude-haiku-5-5"].price, source: "anthropic" };
+  assert.deepEqual(await schemaErrors(human), [], "the schema accepts a price recorded for the vendor's own transport");
+  assert.equal(select({ registry: human, snapshotSet: set, evaluatedAt: T0, ref: REF }).proposal.entries["claude-haiku-5-5"].price.source, "anthropic");
+  const bogus = clone(reg);
+  bogus.entries["claude-haiku-5-5"].price = { ...bogus.entries["claude-haiku-5-5"].price, source: "anthropic-pricing-page" };
+  assert.notDeepEqual(await schemaErrors(bogus), [], "an arbitrary source is still refused");
 });
 
 test("replacement eligibility is B.4's test, not the trigger test: a replacement retiring in 31-90 days still qualifies, one inside 30 days or no longer active does not", async () => {
@@ -631,12 +688,24 @@ test("replacement eligibility is B.4's test, not the trigger test: a replacement
     const set = makeSet({ texts: { anthropicDocs: anthropicMd({ rows }) } });
     const reg = await staleSonnetRegistry(set, T0);
     const { proposal, report } = select({ registry: reg, snapshotSet: set, evaluatedAt: at, ref: REF });
-    return { line: proposal.lines["anthropic.sonnet"], report };
+    return { line: proposal.lines["anthropic.sonnet"], report, proposal, set };
   };
   for (const n of [31, 60, 90]) {
-    const { line, report } = await outcome(["claude-sonnet-5-5", "Active", "N/A", longDate(on(n))]);
+    const { line, report, proposal, set } = await outcome(["claude-sonnet-5-5", "Active", "N/A", longDate(on(n))]);
     assert.equal(line.current, "claude-sonnet-5-5", `a replacement retiring in ${n} d is still adopted (and is moved again, with its own proposal, when its time comes)`);
     assert.equal(report.moves.length, 1);
+    // the new current triggers too and the vendor names nothing after it: held in THIS run, so merging the move leaves
+    // nothing for the next run to change (it used to flip current -> held-no-replacement in a status-only follow-up PR)
+    assert.equal(line.status, "held-no-replacement", `${n} d: the new current is judged in the same run`);
+    assert.match(report.held[0].detail, new RegExp(`retires ${on(n)} \\(${n} d\\)`));
+    const again = select({ registry: proposal, snapshotSet: set, evaluatedAt: at, ref: REF });
+    assert.equal(decisionSetSha256(again.proposal), decisionSetSha256(proposal), `${n} d: a second run over the same catalogs changes nothing`);
+    assert.equal(again.report.moves.length, 0);
+  }
+  {
+    const { line, proposal, set } = await outcome(["claude-sonnet-5-5", "Active", "N/A", "Not sooner than September 28, 2027"]);
+    assert.equal(line.status, "current", "a replacement with only a floor leaves the line current");
+    assert.equal(decisionSetSha256(select({ registry: proposal, snapshotSet: set, evaluatedAt: at, ref: REF }).proposal), decisionSetSha256(proposal));
   }
   for (const [name, row] of [
     ["retiring in 30 days", ["claude-sonnet-5-5", "Active", "N/A", longDate(on(30))]],
@@ -650,4 +719,133 @@ test("replacement eligibility is B.4's test, not the trigger test: a replacement
     assert.equal(report.moves.length, 0, name);
     assert.match(report.held[0].detail, /claude-sonnet-5-5: not eligible on anthropic/, name);
   }
+});
+
+// ---- Part B v1 adversarial review (round 2) ------------------------------------------------------------------
+
+test("a vendor-named replacement the robot found but nobody has fully recorded: the line is held with a row naming what is missing, the weekly run still passes, and recording the fields moves the line", async () => {
+  // Week 0: the vendor table lists a new Sonnet and the robot adds it (Anthropic-only: no catalog gives it a release date).
+  // A human reviews it, as the PR body asks. Week N: the vendor deprecates the incumbent and names it.
+  const rows = [...DEFAULT_ANTHROPIC_ROWS, ["claude-sonnet-5-6", "Active", "N/A", "Not sooner than October 1, 2027"]];
+  const reg = await seededRegistry(makeSet({ texts: { anthropicDocs: anthropicMd({ rows, notices: [] }) } }), T0);
+  assert.equal(reg.entries["claude-sonnet-5-6"].releaseDate, null);
+  Object.assign(reg.entries["claude-sonnet-5-6"], { reviewed: true, constraints: { sampling: "forbidden", adaptiveThinking: true } });
+  const rowsN = rows.map((r) => (r[0] === "claude-sonnet-5-5" ? ["claude-sonnet-5-5", "Deprecated", "October 20, 2026", "December 1, 2026"] : r));
+  const setN = makeSet({ texts: { anthropicDocs: anthropicMd({ rows: rowsN, notices: [["December 1, 2026", "claude-sonnet-5-5", "claude-sonnet-5-6"]] }) } });
+  const at = day(10);
+  const held = select({ registry: reg, snapshotSet: setN, evaluatedAt: at, ref: REF });
+  assert.equal(held.proposal.lines["anthropic.sonnet"].current, "claude-sonnet-5-5", "never a move the registry's own validation would reject");
+  assert.equal(held.proposal.lines["anthropic.sonnet"].status, "held-no-replacement");
+  assert.match(held.report.held.find((h) => h.line === "anthropic.sonnet").detail, /claude-sonnet-5-6: no releaseDate recorded/);
+  assert.deepEqual(validateModels({ registry: held.proposal, snapshotSet: setN, evaluatedAt: at, stage: "full" }).errors, [], "was: 'has no releaseDate' failed the run every week and no repair PR ever opened");
+  // the human records the date from the vendor's release notes, as the row asked
+  const recorded = clone(held.proposal);
+  Object.assign(recorded.entries["claude-sonnet-5-6"], { releaseDate: "2026-10-01", releaseDateSource: "anthropic-release-notes" });
+  assert.deepEqual(await schemaErrors(recorded), []);
+  const moved = select({ registry: recorded, snapshotSet: setN, evaluatedAt: at, ref: REF });
+  assert.equal(moved.proposal.lines["anthropic.sonnet"].current, "claude-sonnet-5-6");
+  assert.deepEqual(validateModels({ registry: moved.proposal, snapshotSet: setN, evaluatedAt: at, stage: "full" }).errors, []);
+  // a line that routes through OpenRouter is also held for the fields only OpenRouter can give
+  const viaOpenRouter = clone(recorded);
+  viaOpenRouter.lines["anthropic.sonnet"].transports = ["anthropic", "openrouter"];
+  viaOpenRouter.entries["claude-sonnet-5-6"].ids.openrouter = "anthropic/claude-sonnet-5.6"; // a row the catalog does not have
+  const priced = select({ registry: viaOpenRouter, snapshotSet: setN, evaluatedAt: at, ref: REF });
+  assert.equal(priced.proposal.lines["anthropic.sonnet"].current, "claude-sonnet-5-5");
+  assert.match(priced.report.held.find((h) => h.line === "anthropic.sonnet").detail, /claude-sonnet-5-6: no context, price recorded/);
+});
+
+test("a 30-day crossing on a line that is already held still changes the decision set, so a PR opens; a day with no crossing does not (B.3)", async () => {
+  const set = makeSet({ texts: { anthropicDocs: anthropicMd({ notices: [] }) } }); // the vendor names no replacement
+  const reg = await staleSonnetRegistry(set, T0);
+  const key = "claude-sonnet-4-5-20250929/anthropic";
+  const w1 = select({ registry: reg, snapshotSet: set, evaluatedAt: day(14), ref: REF }); // 2026-10-30: 31 d to 2026-11-30
+  const w2 = select({ registry: w1.proposal, snapshotSet: set, evaluatedAt: day(15), ref: REF }); // 30 d: ineligible from here
+  const w3 = select({ registry: w2.proposal, snapshotSet: set, evaluatedAt: day(16), ref: REF });
+  for (const w of [w1, w2, w3]) assert.equal(w.proposal.lines["anthropic.sonnet"].status, "held-no-replacement", "the status does not move, which is why the old decision set did not either");
+  assert.equal(w1.proposal.deprecations[key].horizon, 90);
+  assert.equal(w2.proposal.deprecations[key].horizon, 30);
+  assert.notEqual(decisionSetSha256(w2.proposal), decisionSetSha256(w1.proposal), "the crossing is a decision-set change");
+  assert.equal(decisionSetSha256(w3.proposal), decisionSetSha256(w2.proposal), "the next day is not");
+  assert.equal(w1.proposal.decisionDigest, w2.proposal.decisionDigest, "...with no input change");
+  assert.ok(w2.report.evidence.some((e) => e.field === `deprecations.${key}.horizon` && e.old === 90 && e.new === 30), "and the PR body says what moved");
+  // the window is data about the row, so the schema knows it and a floor never carries one
+  assert.deepEqual(await schemaErrors(w2.proposal), []);
+  assert.ok(Object.values(w2.proposal.deprecations).filter((r) => r.kind === "floor").every((r) => !("horizon" in r)));
+});
+
+test("G1 on the bot branch replays selection: edits the field allowlist lets through but selection would not have made fail", async () => {
+  const set = makeSet();
+  const base = await seededRegistry(set, T0);
+  const baseText = stringifyYaml(base);
+  const at = day(7);
+  const { proposal } = select({ registry: YAML.parse(baseText), snapshotSet: set, evaluatedAt: at, ref: REF });
+  const sel = selectionInput({ evaluatedAt: at, snapshotSet: set, inputRegistryText: baseText, ref: REF });
+  const check = (edited) => ({ allowlist: botDiffViolations(base, edited), replay: replay({ inputRegistry: YAML.parse(baseText), snapshotSet: set, input: sel, proposalText: stringifyYaml(edited) }).ok });
+  assert.deepEqual(check(proposal), { allowlist: [], replay: true }, "what selection produced passes both");
+  const moved = clone(proposal);
+  Object.assign(moved.lines["anthropic.haiku"], { current: "claude-haiku-4-5-20251001", previous: "claude-haiku-5-5" });
+  assert.deepEqual(check(moved), { allowlist: [], replay: false }, "a move with no trigger: only the replay refuses it");
+  const redated = clone(proposal);
+  redated.entries["claude-haiku-5-5"].releaseDate = "2020-01-01";
+  assert.deepEqual(check(redated), { allowlist: [], replay: false }, "an edited release date: only the replay refuses it");
+});
+
+test("each docs parser must find its exact header and every id: a re-laid-out Anthropic history, an OpenAI row that lost its backticks, an unreadable date", () => {
+  // Anthropic: the history tables carry the replacement. Re-laid out (a column added), the old parser found no notice and
+  // the PR body said "the vendor names no replacement", a wrong sentence about a real notice.
+  const reLaid = anthropicMd().replace("| Retirement date | Deprecated model | Recommended replacement |\n| --- | --- | --- |", "| Retirement date | Deprecated model | Recommended replacement | Notes |\n| --- | --- | --- | --- |");
+  assert.notEqual(reLaid, anthropicMd());
+  assert.throws(() => parseAnthropicDocs(reLaid), /no "Retirement date \| Deprecated model \| Recommended replacement" table/);
+  assert.doesNotThrow(() => parseAnthropicDocs(anthropicMd({ notices: [] })), "an empty history is a table with no rows, which is normal");
+  // OpenAI: one row loses its backticks while 62 others keep theirs, so the page-wide floor (50) is satisfied and that
+  // model used to read as "active, no shutdown date"
+  const oneBad = openaiMd([["January 14, 2027", "GPT-4.1 mini (gpt-4.1-mini-2025-04-14)", "`gpt-6-luna`"]], { filler: 62 });
+  assert.throws(() => parseSnapshot("openaiDocs", oneBad), /row names a model id without backticks: January 14, 2027 \| GPT-4\.1 mini \(gpt-4\.1-mini-2025-04-14\)/);
+  const apiRows = openaiMd([["2027-02-01", "Videos API", "Sora"], ["2027-02-01", "OpenAI-Beta: assistants=v1", "OpenAI-Beta: assistants=v2"], ["2027-02-01", "Assistants API", "Responses API"]], { filler: 62 });
+  assert.doesNotThrow(() => parseSnapshot("openaiDocs", apiRows), "rows about APIs and headers name no model and are normal");
+  // dates: an unreadable one is a structure change, never "nothing deprecated"
+  assert.throws(() => parseAnthropicDocs(anthropicMd({ rows: [...DEFAULT_ANTHROPIC_ROWS, ["claude-x-1", "Deprecated", "sometime soon", "November 30, 2026"]] })), /cannot read claude-x-1 deprecated date/);
+  assert.throws(() => parseGoogleDocs(googleHtml([["gemini-9", "Q4 2026", ""]])), /cannot read gemini-9 shutdown date/);
+  assert.equal(parseGoogleDocs(googleHtml([["gemini-9", "No shutdown date announced", ""]])).models[0].shutdown, null);
+});
+
+// A registry entry for a non-Anthropic id, reviewed and recorded, as a human would write it.
+const recordedEntry = (provider, line, ids) => ({ provider, line, ids, releaseDate: "2026-06-01", releaseDateSource: "hf-created-at", availability: {}, price: null, context: null, supportedParameters: [], reviewed: true, constraints: { fixture: true } });
+
+test("triggers from every vendor page move a line to the vendor-named successor: a Google model the endpoint auto-routes, an OpenAI model with a shutdown notice", async () => {
+  const seed = clone(await readSeed());
+  // Google: gemini-3.5-flash keeps serving but only by routing to 3.6, so selecting it means getting a different model
+  const google = makeSet({ texts: { googleDocs: googleHtml([["gemini-3.5-flash", "N/A", "gemini-3.6-flash (not available to select; the endpoint is not shutting down and automatically routes API requests to <code>gemini-3.6-flash</code>)"], ["gemini-3.6-flash", "No shutdown date announced", ""], ["gemini-2.5-flash", "No shutdown date announced", ""], ["gemini-2.5-pro", "No shutdown date announced", ""], ["gemini-3.1-flash-lite", "May 7, 2027", "gemini-3.5-flash-lite"]]) } });
+  const g = clone(seed);
+  g.entries["gemini-3.5-flash"] = recordedEntry("google", "google.flash", { google: "gemini-3.5-flash" });
+  g.entries["gemini-3.6-flash"] = recordedEntry("google", "google.flash", { google: "gemini-3.6-flash" });
+  g.lines["google.flash"] = { regex: "^gemini-(\\d+)\\.(\\d+)-flash$", transports: ["google"], current: "gemini-3.5-flash", previous: null, status: "current" };
+  const gr = select({ registry: g, snapshotSet: google, evaluatedAt: T0, ref: REF });
+  assert.deepEqual([gr.proposal.entries["gemini-3.5-flash"].availability.google.state, gr.proposal.entries["gemini-3.5-flash"].availability.google.autoRoutedTo], ["auto-routed", "gemini-3.6-flash"]);
+  assert.equal(gr.proposal.lines["google.flash"].current, "gemini-3.6-flash", "an auto-routed model is a trigger, not 'active'");
+  assert.match(gr.report.moves[0].reasons[0], /google: state auto-routed/);
+  // OpenAI: a shutdown notice 67 days out
+  const openai = makeSet({ texts: { openaiDocs: openaiMd([["January 6, 2027", "`tts-1`", "`gpt-realtime-2.1-mini`"]]) } });
+  const o = clone(seed);
+  o.entries["tts-1"] = recordedEntry("openai", "openai.voice", { openai: "tts-1" });
+  o.entries["gpt-realtime-2.1-mini"] = recordedEntry("openai", "openai.voice", { openai: "gpt-realtime-2.1-mini" });
+  o.lines["openai.voice"] = { regex: "^(?:tts-\\d+|gpt-realtime-[\\d.]+-mini)$", transports: ["openai"], current: "tts-1", previous: null, status: "current" };
+  const or = select({ registry: o, snapshotSet: openai, evaluatedAt: day(15), ref: REF });
+  assert.deepEqual([or.proposal.entries["tts-1"].availability.openai.state, or.proposal.entries["tts-1"].availability.openai.retiresOn], ["deprecated", "2027-01-06"]);
+  assert.equal(or.proposal.lines["openai.voice"].current, "gpt-realtime-2.1-mini", "a page notice is a trigger, not 'active'");
+  assert.match(or.report.moves[0].reasons[0], /openai: state deprecated; retires 2027-01-06 \(67 d\)/);
+});
+
+test("a replacement must have a wire id for every transport the line routes through, not only the one the vendor page is about", async () => {
+  const set = makeSet();
+  const reg = await staleSonnetRegistry(set, T0);
+  reg.lines["anthropic.sonnet"].transports = ["anthropic", "openrouter"];
+  assert.equal(reg.entries["claude-sonnet-4-5-20250929"].ids.openrouter, "anthropic/claude-sonnet-4.5");
+  assert.equal(reg.entries["claude-sonnet-5-5"].ids.openrouter, "anthropic/claude-sonnet-5.5");
+  const ok = select({ registry: clone(reg), snapshotSet: set, evaluatedAt: day(47), ref: REF });
+  assert.equal(ok.proposal.lines["anthropic.sonnet"].current, "claude-sonnet-5-5", "with both ids the move is made");
+  delete reg.entries["claude-sonnet-5-5"].ids.openrouter;
+  const { proposal, report } = select({ registry: reg, snapshotSet: set, evaluatedAt: day(47), ref: REF });
+  assert.equal(proposal.lines["anthropic.sonnet"].current, "claude-sonnet-4-5-20250929");
+  assert.match(report.held[0].detail, /claude-sonnet-5-5: no openrouter id/);
 });

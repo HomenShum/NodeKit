@@ -150,7 +150,12 @@ export function parseAnthropicDocs(markdown) {
       quote: row.join(" | "),
     };
   });
-  const notices = tableRows(markdown, ANTHROPIC_NOTICE).rows.map((row) => {
+  // The deprecation-history tables carry the vendor-named replacement. If none is found, the page was re-laid out:
+  // reading that as "the vendor names no replacement" would be a wrong proposal, so it fails the run like any
+  // other structure change (brief D-2: each docs parser must find its exact header).
+  const history = tableRows(markdown, ANTHROPIC_NOTICE);
+  if (history.found < 1) throw new SnapshotError(`${key}: no "Retirement date | Deprecated model | Recommended replacement" table`, { key });
+  const notices = history.rows.map((row) => {
     if (row.length !== 3) throw new SnapshotError(`${key}: notice row has ${row.length} cells`, { key });
     return { retiresOn: mustDate(row[0], key, "notice retirement"), id: unTick(row[1]), replacement: unTick(row[2]) || null };
   });
@@ -161,6 +166,9 @@ export function parseAnthropicDocs(markdown) {
 // "Substitute model"). A table counts when its first column is "Shutdown date" and its second starts with
 // "Model"; the last column is the replacement. A row whose width differs from its header is a layout change.
 const OPENAI_HEADER = /^\|\s*Shutdown date\s*\|\s*Model[^|]*\|/i;
+// A lowercase hyphenated token (gpt-4o-mini, o3-pro, gpt-4.1-mini-2025-04-14). The 4 id-less rows on the live page
+// are "Videos API", "Assistants API" and "OpenAI-Beta: ...", none of which has one.
+const BARE_ID = /(?<![\w-])[a-z][a-z0-9]*(?:-[a-z0-9.]+)+(?![\w-])/;
 export function parseOpenAiDocs(markdown) {
   const key = "openaiDocs";
   const ticks = (cell) => [...cell.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
@@ -176,6 +184,9 @@ export function parseOpenAiDocs(markdown) {
       const row = cells(lines[j]);
       if (row.length !== width) throw new SnapshotError(`${key}: row has ${row.length} cells, header ${width}: ${row.join(" | ").slice(0, 80)}`, { key });
       const earliest = /^at earliest\s+(.+)$/i.exec(row[0]);
+      // A row that names no backticked id but whose name cell holds an id-shaped token lost its markup; it would
+      // read as "no notice" for that model. The page-wide floor (minIdRows) cannot see one such row.
+      if (!ticks(row[1]).length && BARE_ID.test(row[1])) throw new SnapshotError(`${key}: row names a model id without backticks: ${row.join(" | ").slice(0, 80)}`, { key });
       notices.push({ retiresOn: earliest ? null : mustDate(row[0], key, "shutdown"), retiresNotBefore: earliest ? mustDate(earliest[1], key, "earliest shutdown") : null, ids: ticks(row[1]), replacements: ticks(row[width - 1]), quote: row.join(" | ").slice(0, 300) });
     }
     i = j;

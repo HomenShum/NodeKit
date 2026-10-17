@@ -159,9 +159,11 @@ export function lintLock({ lock, config, files = null, registry = null, now }) {
 // advisories, and registry liveness (brief D-6): a robot that stopped looks the same as "no deprecations".
 // `refreshRun`: { ok: boolean, latestSuccessAt: ISO|null } from the public Actions API.
 // A role's id is always a registry entry, so its row comes from `registry.deprecations`. A frozen id (B.9) is the
-// consumer's own and need not be an entry, so its row is derived here from the snapshot set (`snapshotSet`, the
-// same parsers and rules as `select`); a frozen id on a transport with no snapshot, or with no snapshot set
-// loaded, is listed as NOT CHECKED rather than silently passed.
+// consumer's own and need not be an entry, and the registry commits a snapshot only when ITS decision set changes
+// (a frozen id is never part of it), so main's snapshots can be weeks behind the vendor page. Its row is therefore
+// derived here from `snapshotSet` (the same parsers and rules as `select`), which the caller fetches live; a frozen
+// id on a transport with no snapshot, or with no snapshot set loaded and no registry row, is listed as NOT CHECKED
+// rather than silently passed.
 export function watchReport({ lock, registry, now, refreshRun, snapshotSet = null }) {
   const pins = [
     ...Object.values(lock.roles ?? {}).map((r) => ({ id: r.id, transport: r.transport, kind: `role ${r.line}`, frozen: false })),
@@ -171,12 +173,15 @@ export function watchReport({ lock, registry, now, refreshRun, snapshotSet = nul
   const floors = [];
   const unchecked = [];
   for (const pin of pins) {
-    let row = registry?.deprecations?.[`${pin.id}/${pin.transport}`];
-    if (!row && pin.frozen) {
-      const derived = snapshotSet && deriveAvailability({ provider: pin.transport, ids: { [pin.transport]: pin.id } }, snapshotSet.parsed, now);
-      const own = derived?.availability[pin.transport];
+    let row;
+    if (pin.frozen && snapshotSet) {
+      const derived = deriveAvailability({ provider: pin.transport, ids: { [pin.transport]: pin.id } }, snapshotSet.parsed, now);
+      const own = derived.availability[pin.transport];
       if (!own || own.state === "unverified") { unchecked.push(pin); continue; }
       row = deprecationRow(own, (derived.replacements[pin.transport] ?? [])[0] ?? null);
+    } else {
+      row = registry?.deprecations?.[`${pin.id}/${pin.transport}`];
+      if (!row && pin.frozen) { unchecked.push(pin); continue; }
     }
     if (!row) continue;
     if (row.kind === "floor") floors.push({ ...pin, date: row.date });
@@ -206,7 +211,11 @@ export function watchReport({ lock, registry, now, refreshRun, snapshotSet = nul
 
 // ---- consumer PR body ---------------------------------------------------------------------------------------
 
-export function renderLockBody({ oldLock, newLock, hash, config, snapshots = null }) {
+// `registry` supplies the release and per-transport facts that the lock does not carry (SPEC B.6: "release/retirement
+// facts, floor vs announced, labelled, per transport"). They are information in the PR body, not part of the lock.
+const factsOf = (av) => `${av?.state ?? "unverified"}${av?.retiresOn ? `, retires ${av.retiresOn} (announced)` : ""}${av?.expiration ? `, expires ${av.expiration} (announced)` : ""}${av?.retiresNotBefore && !av?.retiresOn ? `, floor ${av.retiresNotBefore} (advisory)` : ""}`;
+
+export function renderLockBody({ oldLock, newLock, hash, config, snapshots = null, registry = null }) {
   const lines = ["## Summary", "", `Registry ref \`${newLock.registryRef}\`, registry slice \`${newLock.registrySha256.slice(0, 16)}\`, input digest \`${newLock.decisionDigest.slice(0, 16)}\` (provenance only).`, "", "## Per-role changes", ""];
   let any = false;
   for (const [role, now] of Object.entries(newLock.roles)) {
@@ -218,8 +227,14 @@ export function renderLockBody({ oldLock, newLock, hash, config, snapshots = nul
     if (before && canonical(before.constraints) !== canonical(now.constraints)) lines.push(`- constraints changed: \`${canonical(before.constraints)}\` -> \`${canonical(now.constraints)}\``);
     if (before && canonical(before.price) !== canonical(now.price)) lines.push(`- price (valid on the \`${now.price?.source}\` transport only): \`${canonical(before.price)}\` -> \`${canonical(now.price)}\``);
     if (before && canonical(before.availability) !== canonical(now.availability)) lines.push(`- availability: \`${canonical(before.availability)}\` -> \`${canonical(now.availability)}\``);
-    const av = now.availability?.[now.transport];
-    lines.push(`- lifecycle on ${now.transport}: ${av?.state ?? "unverified"}${av?.retiresOn ? `, retires ${av.retiresOn} (announced)` : ""}${av?.expiration ? `, expires ${av.expiration} (announced)` : ""}${av?.retiresNotBefore && !av?.retiresOn ? `, floor ${av.retiresNotBefore} (advisory)` : ""}`, "");
+    lines.push(`- lifecycle on ${now.transport}: ${factsOf(now.availability?.[now.transport])}`);
+    const entry = registry?.entries?.[now.id];
+    if (entry) {
+      lines.push(`- released: ${entry.releaseDate ?? "unknown"}${entry.releaseDateSource ? ` (${entry.releaseDateSource})` : ""}`);
+      const others = Object.entries(entry.availability ?? {}).filter(([t]) => t !== now.transport).map(([t, av]) => `${t}: ${factsOf(av)}`);
+      if (others.length) lines.push(`- other transports (information; not in the lock): ${others.join("; ")}`);
+    }
+    lines.push("");
     const env = config.roles[role]?.env;
     if (env?.length) lines.push(`Environment checklist: ${env.map((e) => `\`${e}\``).join(", ")} may override this role; confirm each value still resolves.`, "");
   }

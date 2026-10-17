@@ -354,6 +354,7 @@ deprecations:
     deprecatedAt: 2026-09-30
     source: anthropicDocs
     replacement: claude-sonnet-5-5
+    horizon: 90
   claude-sonnet-5-5/anthropic:
     kind: floor
     date: 2027-09-28

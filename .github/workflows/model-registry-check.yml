@@ -43,3 +43,10 @@ jobs:
           git show "origin/$BASE_REF:models.yaml" > "$RUNNER_TEMP/base.yaml"
           git diff --name-only "origin/$BASE_REF...HEAD" > "$RUNNER_TEMP/changed.txt"
           node src/cli.mjs models validate --stage full --base "$RUNNER_TEMP/base.yaml" --changed-files "$RUNNER_TEMP/changed.txt"
+      # The allowlist says which FIELDS may change; replay says the change is the one selection produces. It re-runs
+      # B.4 over the snapshots committed on this branch, from the registry on the base branch and the clock recorded
+      # in models/selection-input.json, and must reproduce models.yaml byte for byte. A move with no trigger, an
+      # edited release date or a proposal older than the base branch's registry therefore fails here.
+      - name: Bot branch only - replay selection (B.2.3)
+        if: env.HEAD_REF == 'automation/model-registry'
+        run: node src/cli.mjs models replay --input-registry "$RUNNER_TEMP/base.yaml"

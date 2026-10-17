@@ -4,6 +4,22 @@
 >
 > **Append rule**: New entries go at the top and released entries are never rewritten.
 
+## 2026-10-16 - Fix the pilot after adversarial review (round 2)
+
+The consumer's own install and test commands no longer share a job with the write token: `model-bump.yml` is a read-only
+`check` job (the gate is its last step) and a `write` job that runs none of the consumer's code, recomputes the lock and
+refuses to push unless it is the one the gate ran on. The weekly refresh no longer stops when the data it produced is
+incomplete: a replacement without a release date (or, on an OpenRouter line, a price and context) is held with a row
+naming the gap, and a bad OpenRouter row cannot stop an Anthropic-only line; a human can now record a price or context
+window under the transport's name. `watch` judges a consumer's frozen ids on the catalogs fetched now. The Anthropic
+history table and every OpenAI model row are checked, not just the page. A date crossing the 90 or 30-day line changes
+the decision set (`horizon` on dated deprecation rows). A replacement that itself retires is held in the same run. The
+G1 check on the bot branch replays selection. The refresh job puts `GH_TOKEN` on the steps that need it only, and
+the consumer PR body carries release and per-transport lifecycle facts.
+
+**Commit**: `this commit`. **Author**: Claude.
+**Touches**: `docs/MODEL_REGISTRY.md`
+
 ## 2026-10-16 - Fix the pilot after adversarial review (round 1)
 
 The consumer workflow no longer hands its write token to the consumer's own install and test commands: `GH_TOKEN`

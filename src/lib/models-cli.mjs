@@ -231,7 +231,7 @@ async function syncCommand(options, p) {
     }
     snapshots = index.snapshots;
   }
-  if (options["body-out"]) await writeFile(path.resolve(p.root, one(options["body-out"], "body-out")), renderLockBody({ oldLock: existing, newLock: lock, hash, config, snapshots }));
+  if (options["body-out"]) await writeFile(path.resolve(p.root, one(options["body-out"], "body-out")), renderLockBody({ oldLock: existing, newLock: lock, hash, config, snapshots, registry }));
   emit(options, { changed, decisionSetSha256: hash }, changed ? `MODELS SYNC: lock ${flag(options.check) ? "would change" : "rewritten"} (${hash.slice(0, 12)})` : `MODELS SYNC: lock unchanged (${hash.slice(0, 12)})`);
   if (changed && flag(options.check)) process.exitCode = 1;
 }
