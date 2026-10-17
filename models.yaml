@@ -2,7 +2,7 @@ schemaVersion: nodeplatform.models/v1
 generatedAt: 2026-10-16T10:30:00.000Z
 evaluatedAt: 2026-10-16T10:30:00.000Z
 registryRef: bd8844df96c2ced3b4583f601ef87414891ece14
-decisionDigest: 8282c563b0a854736c993f265e8944b0e3d6b08031edfcb06dd53fcf3c9379cc
+decisionDigest: e63597bec44640d17aee049958303ce01a709fdb5800d2951a8bd9711e2dcab7
 snapshots:
   openrouter:
     url: https://openrouter.ai/api/v1/models
@@ -18,7 +18,7 @@ snapshots:
     url: https://developers.openai.com/api/docs/deprecations.md
     sha256: 199d9bf98e262d0011f34c4c1b89e5803115040c49cf5179eb78296d721023b6
     fetchedAt: 2026-10-16T10:27:09.531Z
-    rows: 107
+    rows: 157
   googleDocs:
     url: https://ai.google.dev/gemini-api/docs/deprecations?hl=en
     sha256: 48c6f7626e131fb2c2aaa2bb78fa28ea21c71d8470615bd68f6f14d3ac17ceb4

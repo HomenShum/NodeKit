@@ -189,7 +189,7 @@ async function replayCommand(options, p) {
   const snapshotSet = await loadSnapshotDir(p.snapshots, Object.fromEntries(SNAPSHOT_KEYS.map((k) => [k, registry.snapshots?.[k]?.rows ?? null])));
   for (const key of SNAPSHOT_KEYS) if (snapshotSet.index.snapshots[key].sha256 !== input.snapshotSha256s[key]) throw new Error(`replay: ${key} snapshot differs from selection-input.json`);
   const result = replay({ inputRegistry: registry, snapshotSet, input, proposalText: await readBounded(p.registry) });
-  console.log(result.ok ? "MODELS REPLAY PASS: the proposal reproduces byte for byte" : `MODELS REPLAY FAILED: ${result.detail}`);
+  console.log(result.ok ? "MODELS REPLAY PASS: the proposal reproduces byte for byte, and a day later the digest and (absent a boundary) the decision set are unchanged" : `MODELS REPLAY FAILED: ${result.detail}`);
   if (!result.ok) process.exitCode = 1;
 }
 

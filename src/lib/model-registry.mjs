@@ -267,6 +267,8 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
     // triggers, so with nothing eligible after it the line is held in this same run. The next run over the same
     // catalogs is then a fixed point and no status-only PR follows the merge.
     const visited = new Set();
+    const start = { current: line.current, previous: line.previous, moves: report.moves.length };
+    let startSource = null;
     let held = false;
     for (;;) {
       visited.add(line.current);
@@ -277,9 +279,23 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
       if (!triggered.length) break;
       const reasons = triggered.map((f) => `${f.transport}: ${f.why}`);
       const named = triggered.flatMap((f) => replacementsOf[`${line.current}/${f.transport}`] ?? []);
-      const tried = named.map((name) => ({ name, ...replacementFor(next, lineName, line, name, evaluatedAt) }));
+      const tried = named.map((name) => ({ name, ...replacementFor(next, lineName, line, name, evaluatedAt, parsed) }));
       const candidate = tried.find((r) => r.ok && !visited.has(r.id));
       const source = evidenceMeta[`${line.current}/${triggered[0].transport}`] ?? null;
+      startSource ??= source;
+      if (!candidate && report.moves.length > start.moves && tried.some((r) => r.ok && visited.has(r.id))) {
+        // The vendor pages name each other as replacements. Stopping at wherever the loop ran out would be a different
+        // id every run (A -> B this week, B -> A next), a PR every week. Hold where the line started instead: the
+        // next run starts there too and reaches the same answer.
+        const loop = [...visited, ...tried.filter((r) => r.ok && visited.has(r.id)).map((r) => r.id)].join(" -> ");
+        report.moves.length = start.moves;
+        line.current = start.current;
+        line.previous = start.previous;
+        line.status = "held-no-replacement";
+        report.held.push({ kind: "held-no-replacement", line: lineName, id: start.current, source: startSource, detail: `the vendor-named replacements form a cycle (${loop}), so no end of it is better than where the line is. A human must choose the id.` });
+        held = true;
+        break;
+      }
       if (!candidate) {
         line.status = "held-no-replacement";
         const why = tried.length ? tried.map((r) => `${r.name}: ${r.ok ? "already passed through in this run" : r.why}`).join("; ") : "the vendor names no replacement";
@@ -332,7 +348,7 @@ export function select({ registry, snapshotSet, evaluatedAt, ref }) {
   return { proposal: next, report };
 }
 
-function replacementFor(registry, lineName, line, name, evaluatedAt) {
+function replacementFor(registry, lineName, line, name, evaluatedAt, parsed) {
   const id = registry.entries[name] ? name : Object.keys(registry.entries).find((k) => Object.values(registry.entries[k].ids).includes(name));
   if (!id) return { ok: false, why: "not an entry in the registry" };
   const entry = registry.entries[id];
@@ -340,6 +356,10 @@ function replacementFor(registry, lineName, line, name, evaluatedAt) {
   if (!entry.reviewed || !nonEmpty(entry.constraints)) return { ok: false, why: "not reviewed (no constraints)" };
   const missing = line.transports.filter((t) => !entry.ids[t]);
   if (missing.length) return { ok: false, why: `no ${missing.join(", ")} id` };
+  // Same for the id itself: a vendor can name a dated Claude id, a :free id or an alias, which `validate` refuses as a
+  // `current`. Hold the line and say why; a human decides whether that id is what the line should follow.
+  const problems = idProblems(id, lineName, line, entry, registry, parsed);
+  if (problems.length) return { ok: false, why: `${problems.join("; ")} (not allowed as a line's current)` };
   // The robot must never propose a `current` that its own validation rejects (that fails the weekly run and no
   // repair PR opens): hold the line and name what a human has to record.
   const absent = missingCurrentFields(entry, line);
@@ -413,22 +433,25 @@ function evidenceRows(before, after, meta, index, report) {
 // ---- validate (B.2) ---------------------------------------------------------------------------------
 
 const DATED_CLAUDE = /^claude-.+-\d{8}$/;
-const hygiene = (id, lineName, line, entry, registry, parsed, error) => {
+// What is wrong with an id as a line's `current`; [] when nothing is. One rule, used by `validate` (on the current)
+// and by `select` (on a replacement before it moves there): the robot must not propose what its own validation rejects.
+function idProblems(id, lineName, line, entry, registry, parsed) {
+  const problems = [];
   // Only the wire ids of transports the line routes through: a bad row for a transport nobody on this line uses is
   // information, never a reason to stop the whole weekly run.
   const used = line.transports.map((t) => entry.ids[t]).filter(Boolean);
-  const ids = [id, ...used];
-  for (const wire of ids) {
-    if (/:batch$/.test(wire)) error(`${lineName}: current ${id} uses a :batch id (${wire})`);
-    if (/:free$/.test(wire) && registry.roles?.free?.line !== lineName) error(`${lineName}: current ${id} uses a :free id (${wire}) outside role free`);
-    if (wire.startsWith("~") || wire.startsWith("openrouter/")) error(`${lineName}: current ${id} uses a router/alias id (${wire})`);
+  for (const wire of [id, ...used]) {
+    if (/:batch$/.test(wire)) problems.push(`uses a :batch id (${wire})`);
+    if (/:free$/.test(wire) && registry.roles?.free?.line !== lineName) problems.push(`uses a :free id (${wire}) outside role free`);
+    if (wire.startsWith("~") || wire.startsWith("openrouter/")) problems.push(`uses a router/alias id (${wire})`);
   }
-  if (DATED_CLAUDE.test(id) || used.some((wire) => DATED_CLAUDE.test(wire))) error(`${lineName}: current ${id} is a dated Claude id`);
-  if (/^claude-mythos-/.test(id)) error(`${lineName}: current ${id} is claude-mythos-*`);
-  if (/-preview$/.test(id) && Object.entries(registry.entries).some(([other, e]) => e.line === entry.line && other !== id && !/-preview$/.test(other))) error(`${lineName}: current ${id} is a -preview id while the line has a GA model`);
+  if (DATED_CLAUDE.test(id) || used.some((wire) => DATED_CLAUDE.test(wire))) problems.push("is a dated Claude id");
+  if (/^claude-mythos-/.test(id)) problems.push("is claude-mythos-*");
+  if (/-preview$/.test(id) && Object.entries(registry.entries).some(([other, e]) => e.line === entry.line && other !== id && !/-preview$/.test(other))) problems.push("is a -preview id while the line has a GA model");
   const row = line.transports.includes("openrouter") && entry.ids.openrouter ? parsed?.openrouter?.byId.get(entry.ids.openrouter) : null;
-  if (row && (row.pricing.prompt === "-1" || row.pricing.completion === "-1")) error(`${lineName}: current ${id} is a -1 priced OpenRouter row`);
-};
+  if (row && (row.pricing.prompt === "-1" || row.pricing.completion === "-1")) problems.push("is a -1 priced OpenRouter row");
+  return problems;
+}
 
 // Input validation + eligibility. `stage`: "inputs" = B.2.1 only (before select); "full" = B.2.1 + B.2.2 merge
 // rule + registry/snapshot agreement. Returns { errors, findings }. Never throws on bad data.
@@ -449,7 +472,7 @@ export function validateModels({ registry, snapshotSet = null, snapshotError = n
     if (line.previous && !registry.entries[line.previous]) error(`lines.${lineName}.previous ${line.previous} is not a key in entries`);
     if (current.line !== lineName) error(`entries.${line.current}.line is ${current.line}, expected ${lineName}`);
     try { new RegExp(line.regex); } catch { error(`lines.${lineName}.regex does not compile`); }
-    hygiene(line.current, lineName, line, current, registry, snapshotSet?.parsed, error);
+    for (const problem of idProblems(line.current, lineName, line, current, registry, snapshotSet?.parsed)) error(`${lineName}: current ${line.current} ${problem}`);
   }
   for (const [id, entry] of Object.entries(registry.entries ?? {})) {
     if (!registry.lines?.[entry.line]) error(`entries.${id}.line ${entry.line} is not a line`);
@@ -605,11 +628,32 @@ export function selectionInput({ evaluatedAt, snapshotSet, inputRegistryText, re
   return { evaluatedAt, registryRef: ref, snapshotSha256s: Object.fromEntries(SNAPSHOT_KEYS.map((k) => [k, snapshotSet.index.snapshots[k].sha256])), inputRegistrySha256: sha256(inputRegistryText), toolingSha: ref };
 }
 
-// Re-runs selection from the same inputs and clock and compares to the proposal text byte for byte.
+// True when a time-dependent rule has a boundary between the two clocks: a dated row crossing the 90/30-day line, or
+// a release date leaving its 14-day soak. Those, and only those, may change the decision set with the date (B.3).
+function crossedBoundary(proposal, t1, t2) {
+  const entries = Object.values(proposal.entries);
+  const dates = entries.flatMap((e) => Object.values(e.availability ?? {}).flatMap((av) => [av.retiresOn, av.expiration])).filter(Boolean);
+  if (dates.some((date) => horizonOf(date, t1) !== horizonOf(date, t2))) return true;
+  return entries.some((e) => e.releaseDate && (e.releaseDate > addDays(t1, -SOAK_DAYS)) !== (e.releaseDate > addDays(t2, -SOAK_DAYS)));
+}
+
+// B.3: selection at two clocks over the same snapshots gives the same decisionDigest, and the same decision set unless a
+// boundary lies between the clocks. Returns the first problem, or null.
+export function clockProblem(first, second, t1, t2) {
+  if (first.decisionDigest !== second.decisionDigest) return `decisionDigest differs between ${dayOf(t1)} and ${dayOf(t2)} over the same snapshots: the clock leaked into the digest`;
+  if (decisionSetSha256(first) !== decisionSetSha256(second) && !crossedBoundary(first, t1, t2)) return `the decision set differs between ${dayOf(t1)} and ${dayOf(t2)} although no horizon or soak boundary lies between them`;
+  return null;
+}
+
+// Re-runs selection from the same inputs and clock and compares to the proposal text byte for byte (B.2.3), then runs
+// it a day later and checks the clock changed nothing it should not have (B.3).
 // Compares proposal to proposal, never to the committed registry, so a retirement still replays.
-export function replay({ inputRegistry, snapshotSet, input, proposalText }) {
-  const again = stringifyYaml(select({ registry: inputRegistry, snapshotSet, evaluatedAt: input.evaluatedAt, ref: input.registryRef }).proposal);
-  return again === proposalText ? { ok: true } : { ok: false, detail: "selection is not deterministic: re-running it over the same snapshots and clock produced different bytes" };
+export function replay({ inputRegistry, snapshotSet, input, proposalText, selectFn = select }) {
+  const first = selectFn({ registry: inputRegistry, snapshotSet, evaluatedAt: input.evaluatedAt, ref: input.registryRef }).proposal;
+  if (stringifyYaml(first) !== proposalText) return { ok: false, detail: "selection is not deterministic: re-running it over the same snapshots and clock produced different bytes" };
+  const later = new Date(Date.parse(input.evaluatedAt) + DAY).toISOString();
+  const problem = clockProblem(first, selectFn({ registry: inputRegistry, snapshotSet, evaluatedAt: later, ref: input.registryRef }).proposal, input.evaluatedAt, later);
+  return problem ? { ok: false, detail: problem } : { ok: true };
 }
 
 export async function schemaErrors(registry) {

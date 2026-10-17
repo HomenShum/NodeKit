@@ -21,7 +21,9 @@ name: Model bump
 #   write - inherits the caller's write scopes and runs no consumer code at all. It starts from a fresh checkout,
 #           recomputes the lock itself with `models sync` from the same registry commit, refuses to go on unless
 #           that lock hashes to what `check` computed, then commits and pushes it. Watch mode runs here too: it
-#           executes only the pinned tooling.
+#           executes only the pinned tooling. In both jobs `setup-node` runs before the consumer's files exist and
+#           without a package-manager cache, so nothing of the consumer's is executed or carried between jobs
+#           before the gate.
 # What the gate CAN still do is whatever any read-only CI step of the consumer's can do; this file does not widen it.
 
 on:
@@ -65,6 +67,14 @@ jobs:
           [[ "$PLATFORM_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "platform_sha must be a 40-hex commit SHA, got: $PLATFORM_SHA"; exit 1; }
           [[ "$REGISTRY_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]] || { echo "registry_ref has characters outside [A-Za-z0-9._/-]"; exit 1; }
           [[ "$MODE" =~ ^(lint|bump)$ ]] || { echo "mode must be lint, watch or bump"; exit 1; }
+      # BEFORE the consumer's checkout, with its package-manager cache off: setup-node runs `yarn --version` in the
+      # workspace (a committed .yarnrc `yarn-path` would execute, with the action's default token in its environment),
+      # and with `packageManager: npm` in the consumer's package.json it saves ~/.npm after the gate and restores it in
+      # the job that writes. In an empty workspace with no cache neither can happen.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -74,9 +84,6 @@ jobs:
           ref: ${{ inputs.platform_sha }}
           path: .node-platform
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
       - name: Install the pinned tooling
         run: npm ci --prefix .node-platform --ignore-scripts
 
@@ -158,6 +165,14 @@ jobs:
           [[ "$PLATFORM_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "platform_sha must be a 40-hex commit SHA, got: $PLATFORM_SHA"; exit 1; }
           [[ "$REGISTRY_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]] || { echo "registry_ref has characters outside [A-Za-z0-9._/-]"; exit 1; }
           [[ "$MODE" =~ ^(watch|bump)$ ]] || { echo "mode must be lint, watch or bump"; exit 1; }
+      # BEFORE the consumer's checkout, with its package-manager cache off: setup-node runs `yarn --version` in the
+      # workspace (a committed .yarnrc `yarn-path` would execute, with the action's default token in its environment),
+      # and with `packageManager: npm` in the consumer's package.json it saves ~/.npm after the gate and restores it in
+      # the job that writes. In an empty workspace with no cache neither can happen.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -167,9 +182,6 @@ jobs:
           ref: ${{ inputs.platform_sha }}
           path: .node-platform
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
       - name: Install the pinned tooling
         run: npm ci --prefix .node-platform --ignore-scripts
 

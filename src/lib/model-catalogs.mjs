@@ -18,7 +18,7 @@ export class SnapshotError extends Error {
 export const SNAPSHOT_SOURCES = Object.freeze({
   openrouter: { url: "https://openrouter.ai/api/v1/models", file: "openrouter.json", maxBytes: 8 * 1024 * 1024, minRows: 50 },
   anthropicDocs: { url: "https://platform.claude.com/docs/en/about-claude/model-deprecations.md", file: "anthropic-deprecations.md", maxBytes: 1024 * 1024, minRows: 5 },
-  // minIdRows: rows that name at least one backticked model id (103 of 107 on 2026-10-16; the rest are API and
+  // minIdRows: rows that name at least one backticked model id (153 of 157 on 2026-10-16; the rest are API and
   // header deprecations). A page that lost its backticks still parses into rows, every id list empty, and would
   // read "nothing deprecated", so the id-bearing count has its own floor.
   openaiDocs: { url: "https://developers.openai.com/api/docs/deprecations.md", file: "openai-deprecations.md", maxBytes: 2 * 1024 * 1024, minRows: 3, minIdRows: 50 },
@@ -109,6 +109,11 @@ const mustDate = (text, key, what) => {
 const cells = (line) => line.trim().replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((cell) => cell.replaceAll("\\|", "|").trim());
 const unTick = (cell) => cell.replaceAll("`", "").trim();
 
+// Pipe-table header rows whose first cell is a date column, parsed or not. Every parser that reads such tables must
+// have parsed this many: a table it skipped (a renamed column) would otherwise read as "no notice" for its models.
+const DATE_TABLE_HEADER = /^\|\s*(?:Shutdown|Retirement) date\b/i;
+const dateTables = (markdown) => markdown.split(/\r?\n/).filter((line) => line.trimStart().startsWith("|") && DATE_TABLE_HEADER.test(line.trimStart())).length;
+
 // All pipe tables whose header row matches `header`; returns the body rows of each, split into cells.
 function tableRows(markdown, header) {
   const lines = markdown.split(/\r?\n/);
@@ -155,6 +160,8 @@ export function parseAnthropicDocs(markdown) {
   // other structure change (brief D-2: each docs parser must find its exact header).
   const history = tableRows(markdown, ANTHROPIC_NOTICE);
   if (history.found < 1) throw new SnapshotError(`${key}: no "Retirement date | Deprecated model | Recommended replacement" table`, { key });
+  const dated = dateTables(markdown);
+  if (history.found !== dated) throw new SnapshotError(`${key}: ${dated} "Retirement date" tables but ${history.found} have the columns "Deprecated model | Recommended replacement"; the others would read as "no notice"`, { key });
   const notices = history.rows.map((row) => {
     if (row.length !== 3) throw new SnapshotError(`${key}: notice row has ${row.length} cells`, { key });
     return { retiresOn: mustDate(row[0], key, "notice retirement"), id: unTick(row[1]), replacement: unTick(row[2]) || null };
@@ -162,10 +169,11 @@ export function parseAnthropicDocs(markdown) {
   return { rows: models.length, models, notices };
 }
 
-// OpenAI's page holds many shutdown tables with differing column names ("Model / system", "Model snapshot",
-// "Substitute model"). A table counts when its first column is "Shutdown date" and its second starts with
-// "Model"; the last column is the replacement. A row whose width differs from its header is a layout change.
-const OPENAI_HEADER = /^\|\s*Shutdown date\s*\|\s*Model[^|]*\|/i;
+// OpenAI's page holds many shutdown tables with differing column names ("Model / system", "Deprecated model",
+// "Legacy model", "System", "Model snapshot", "Substitute model", extra price columns). A table counts when its first
+// column is "Shutdown date"; the name column is the second and the replacement is the last, which must say so. A row
+// whose width differs from its header is a layout change.
+const OPENAI_REPLACEMENT_COLUMN = /replacement|substitute/i;
 // A lowercase hyphenated token (gpt-4o-mini, o3-pro, gpt-4.1-mini-2025-04-14). The 4 id-less rows on the live page
 // are "Videos API", "Assistants API" and "OpenAI-Beta: ...", none of which has one.
 const BARE_ID = /(?<![\w-])[a-z][a-z0-9]*(?:-[a-z0-9.]+)+(?![\w-])/;
@@ -176,9 +184,11 @@ export function parseOpenAiDocs(markdown) {
   let found = 0;
   const lines = markdown.split(/\r?\n/);
   for (let i = 0; i < lines.length; i += 1) {
-    if (!lines[i].trimStart().startsWith("|") || !OPENAI_HEADER.test(lines[i])) continue;
+    if (!lines[i].trimStart().startsWith("|") || !DATE_TABLE_HEADER.test(lines[i])) continue;
     found += 1;
-    const width = cells(lines[i]).length;
+    const head = cells(lines[i]);
+    const width = head.length;
+    if (!/^Shutdown date$/i.test(head[0]) || width < 3 || !OPENAI_REPLACEMENT_COLUMN.test(head[width - 1])) throw new SnapshotError(`${key}: a shutdown table has unexpected columns (the first must be Shutdown date, the last a replacement): ${head.join(" | ").slice(0, 80)}`, { key });
     let j = i + 2;
     for (; j < lines.length && lines[j].trimStart().startsWith("|"); j += 1) {
       const row = cells(lines[j]);

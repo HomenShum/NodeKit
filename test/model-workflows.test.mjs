@@ -386,3 +386,121 @@ test("bump fetches the registry's snapshot index as data and gives it to sync, s
   assert.match(fetchStep.run, /\$REG_SHA\/models\/snapshots\/latest\/index\.json/);
   for (const sync of steps(wf).filter((s) => /models sync/.test(s.run ?? ""))) assert.match(sync.run, /--snapshot-index \.model-registry\/index\.json/);
 });
+
+// ---- Part B v1 adversarial review (round 3) ------------------------------------------------------------------
+
+test("setup-node runs before the consumer's files exist and without a package-manager cache, in both jobs of the reusable workflow", async () => {
+  // setup-node runs `yarn --version` in the workspace (a committed .yarnrc `yarn-path` would execute, with the action's
+  // default token in its environment) and, when package.json says `packageManager: npm`, saves ~/.npm after the gate
+  // and restores it in the job that writes. Neither can happen in an empty workspace with the cache off.
+  const { wf } = await load("model-bump.yml");
+  for (const [jobId, job] of Object.entries(wf.jobs)) {
+    const at = job.steps.findIndex((s) => s.uses?.startsWith("actions/setup-node@"));
+    const firstCheckout = job.steps.findIndex((s) => s.uses?.startsWith("actions/checkout@"));
+    assert.ok(at >= 0 && firstCheckout >= 0, jobId);
+    assert.ok(at < firstCheckout, `${jobId}: setup-node must run before the consumer's checkout`);
+    assert.equal(job.steps[at].with["package-manager-cache"], false, `${jobId}: automatic package-manager caching is off`);
+    assert.equal(job.steps[at].with.cache, undefined, `${jobId}: no explicit cache either`);
+  }
+});
+
+test("the scheduled refresh is never a dry run, and a manual one is unless it says otherwise", async () => {
+  // A forced DRY_RUN: 'true' keeps every run green (the liveness check in each consumer reads "alive") while no PR ever opens.
+  const { wf } = await load("model-registry-refresh.yml");
+  const raw = wf.jobs.refresh.env.DRY_RUN;
+  assert.match(raw, /^\$\{\{[^}]+\}\}$/, "DRY_RUN is computed from the event, not fixed");
+  const expr = /^\$\{\{\s*([^}]+?)\s*\}\}$/.exec(raw)[1];
+  assert.match(expr, /^[\w.'= &|]+$/, "only the tokens this evaluator knows");
+  const evaluate = (eventName, inputs) => String(new Function("github", "inputs", `return (${expr});`)({ event_name: eventName }, inputs));
+  assert.equal(evaluate("schedule", {}), "false", "the weekly run opens its PR");
+  assert.equal(evaluate("workflow_dispatch", { dry_run: true }), "true", "a manual run defaults to a dry run");
+  assert.equal(evaluate("workflow_dispatch", { dry_run: false }), "false", "...and can be told not to be");
+  for (const step of wf.jobs.refresh.steps.filter((s) => /force-with-lease/.test(s.run ?? "") || /git commit/.test(s.run ?? ""))) assert.match(step.if, /env\.DRY_RUN != 'true'/, step.name);
+});
+
+test("a push never overwrites work it has not seen: both workflows use --force-with-lease and no bare --force", async () => {
+  for (const name of ["model-registry-refresh.yml", "model-bump.yml"]) {
+    const { wf } = await load(name);
+    const pushes = steps(wf).filter((s) => /\bpush\b/.test(s.run ?? "") && /origin/.test(s.run ?? ""));
+    assert.equal(pushes.length, 1, name);
+    assert.match(pushes[0].run, /push --force-with-lease origin "\$BRANCH"/, name);
+    assert.doesNotMatch(pushes[0].run, /--force(?!-with-lease)|\s-f\s/, name);
+  }
+});
+
+test("each job refuses a mode it does not run, and a platform_sha or registry_ref that is not what the contract says", { skip: skipBash }, async () => {
+  const { wf } = await load("model-bump.yml");
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "bump-inputs-"));
+  const sha = "a".repeat(40);
+  const run = (job, env) => spawnSync("bash", ["-ec", wf.jobs[job].steps.find((s) => s.name === "Check the inputs").run], { cwd: tmp, encoding: "utf8", env: { ...process.env, PLATFORM_SHA: sha, REGISTRY_REF: "main", MODE: "bump", ...env } }).status;
+  try {
+    for (const [job, ok, bad] of [["check", ["lint", "bump"], ["watch", "", "Bump", "lint;id"]], ["write", ["watch", "bump"], ["lint", "", "Watch", "bump;id"]]]) {
+      for (const mode of ok) assert.equal(run(job, { MODE: mode }), 0, `${job} runs ${mode}`);
+      for (const mode of bad) assert.equal(run(job, { MODE: mode }), 1, `${job} refuses ${JSON.stringify(mode)}`);
+      assert.equal(run(job, { PLATFORM_SHA: "a".repeat(39) }), 1, `${job}: a 39-hex platform_sha`);
+      assert.equal(run(job, { PLATFORM_SHA: "main" }), 1, `${job}: a branch name as platform_sha`);
+      assert.equal(run(job, { REGISTRY_REF: "feature/x y" }), 1, `${job}: a registry_ref with a space`);
+      assert.equal(run(job, { REGISTRY_REF: "refs/tags/v1.2" }), 0, `${job}: a tag path`);
+    }
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("the Watch step opens the URGENT issue exactly when the report is urgent, updates the one that exists, and opens nothing on a dry run", { skip: skipBash }, async () => {
+  const { wf } = await load("model-bump.yml");
+  const sync = wf.jobs.check.steps.find((s) => s.id === "sync");
+  const watch = wf.jobs.write.steps.find((s) => s.name === "Watch");
+  const stale = JSON.stringify({ workflow_runs: [{ updated_at: "2020-01-01T00:00:00Z" }] });
+  const dirs = [];
+  // A consumer workspace with its lock, a `gh` that records every call, and a refresh-run history to serve.
+  const scenario = async ({ runs, quietRegistry = false, issue = "", dry = "false" }) => {
+    const tmp = await consumerWorkspace();
+    dirs.push(tmp);
+    assert.equal(runStep(tmp, sync).status, 0);
+    if (quietRegistry) {
+      // no announced date anywhere, so only the liveness read can make the report urgent (the clock-independent case)
+      const registry = YAML.parse(await readFile(path.join(tmp, ".model-registry/models.yaml"), "utf8"));
+      registry.deprecations = {};
+      await writeFile(path.join(tmp, ".model-registry/models.yaml"), YAML.stringify(registry));
+    }
+    await mkdir(path.join(tmp, "bin"), { recursive: true });
+    await writeFile(path.join(tmp, "bin", "gh"), `#!/bin/sh
+echo "$@" >> "$GH_LOG"
+[ "$1" = api ] && cat "$RUNS_JSON"
+[ "$1 $2" = "issue list" ] && printf '%s' "$ISSUE_N"
+exit 0
+`);
+    spawnSync("bash", ["-c", "chmod +x bin/gh"], { cwd: tmp });
+    await writeFile(path.join(tmp, "runs.json"), runs === "fresh" ? JSON.stringify({ workflow_runs: [{ updated_at: new Date().toISOString() }] }) : stale);
+    const r = runStep(tmp, watch, {
+      MODE: "watch", DRY_RUN: dry, GH_TOKEN: "t", ISSUE_N: issue, GH_LOG: fwd(path.join(tmp, "gh.log")), RUNS_JSON: fwd(path.join(tmp, "runs.json")),
+      GITHUB_STEP_SUMMARY: fwd(path.join(tmp, "summary.md")), PATH: `${posix(path.join(tmp, "bin"))}:${process.env.PATH}`,
+    });
+    const log = await readFile(path.join(tmp, "gh.log"), "utf8").catch(() => "");
+    const summary = await readFile(path.join(tmp, "summary.md"), "utf8").catch(() => "");
+    return { status: r.status, out: r.stdout + r.stderr, log, summary };
+  };
+  try {
+    const urgent = await scenario({ runs: "stale" });
+    assert.equal(urgent.status, 0, urgent.out);
+    assert.match(urgent.log, /issue create --label model-defaults --title Model defaults: URGENT --body-file/, "an urgent report opens the issue");
+    assert.doesNotMatch(urgent.log, /issue edit/);
+    assert.match(urgent.summary, /registry refresh not running/);
+
+    const existing = await scenario({ runs: "stale", issue: "7" });
+    assert.match(existing.log, /issue edit 7 --body-file/, "the one open issue is updated, not duplicated");
+    assert.doesNotMatch(existing.log, /issue create/);
+
+    const dry = await scenario({ runs: "stale", dry: "true" });
+    assert.equal(dry.status, 0, dry.out);
+    assert.doesNotMatch(dry.log, /issue (create|edit)|label create/, "a dry run reads and reports but writes nothing");
+    assert.match(dry.summary, /registry refresh not running/, "...and still says what it found");
+
+    const quiet = await scenario({ runs: "fresh", quietRegistry: true });
+    assert.equal(quiet.status, 0, quiet.out);
+    assert.doesNotMatch(quiet.log, /issue /, "nothing urgent, no issue");
+  } finally {
+    for (const dir of dirs) await rm(dir, { recursive: true, force: true });
+  }
+});

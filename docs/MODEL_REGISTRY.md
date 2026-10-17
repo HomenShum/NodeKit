@@ -130,6 +130,10 @@ Sources and decisions: `D:/VSCode Projects/model-defaults/SPEC-v9.md` Part B and
   closes it.
 - The keyed Anthropic `GET /v1/models` cross-check, lint warnings (d)-(g) and ranking by performance (§B.8) are
   not built. Nothing here uses a provider key.
+- A consumer's **role** pins are judged on `main`'s committed `deprecations` (only frozen ids are read live). So a notice
+  that appeared this week reaches a consumer's URGENT issue once the registry's refresh PR is merged, not before;
+  the open refresh PR is the earlier signal. Reading roles live would make every consumer's daily `watch` depend on
+  four vendor pages, so v1 does not.
 - `watch` opens or updates one issue; it does not close it when the horizon passes. A consumer's frozen ids (B.9) are
   judged on the four public catalogs fetched during the `watch` run (only when the lock has frozen ids), with the
   same strict parsers, not on the snapshots on `main`: the registry commits a snapshot only when its own decision

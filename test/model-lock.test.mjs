@@ -10,7 +10,7 @@ import test from "node:test";
 import YAML from "yaml";
 import { decisionMarker, markerHashOf, stringifyYaml } from "../src/lib/model-registry.mjs";
 import {
-  LOCK_SCHEMA, WATCH_HORIZON_DAYS, buildLock, lintLock, lockDecisionSha256, renderLockBody, scanRawIds, syncLock, validateConfig, watchReport,
+  LOCK_SCHEMA, REFRESH_MAX_AGE_DAYS, WATCH_HORIZON_DAYS, buildLock, lintLock, lockDecisionSha256, renderLockBody, scanRawIds, syncLock, validateConfig, watchReport,
 } from "../src/lib/model-lock.mjs";
 import { DEFAULT_ANTHROPIC_ROWS, ROOT, T0, anthropicMd, makeSet, openaiMd, readSeed, seededRegistry } from "./model-registry.fixtures.mjs";
 
@@ -166,6 +166,17 @@ test("watch: an announced horizon within 60 days is URGENT, a floor is not, and 
     assert.doesNotMatch(r.body, /no (announced )?deprecations/i);
     assert.match(r.body, /not a statement that nothing is retiring/);
   }
+});
+
+test("watch liveness boundary: a refresh exactly 14 days old is alive, one second older is not, and nothing newer than the clock is trusted", async () => {
+  const { lock, registry } = await world();
+  assert.equal(REFRESH_MAX_AGE_DAYS, 14);
+  const at = (secondsAgo) => ({ ok: true, latestSuccessAt: new Date(Date.parse(T0) - secondsAgo * 1000).toISOString() });
+  const day14 = 14 * 86_400;
+  assert.equal(watchReport({ lock, registry, now: T0, refreshRun: at(day14) }).liveness, null, "14 d exactly");
+  assert.match(watchReport({ lock, registry, now: T0, refreshRun: at(day14 + 1) }).liveness, /last successful registry refresh was/, "14 d and 1 s");
+  assert.equal(watchReport({ lock, registry, now: T0, refreshRun: at(day14 - 1) }).liveness, null);
+  assert.match(watchReport({ lock, registry, now: T0, refreshRun: { ok: true, latestSuccessAt: "not a date" } }).liveness, /last successful registry refresh was/, "an unreadable timestamp is not a live robot");
 });
 
 // A repo that routes the same line through OpenRouter as well: there the price IS a fact about its transport.

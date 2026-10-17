@@ -23,7 +23,7 @@
       "sha256": "199d9bf98e262d0011f34c4c1b89e5803115040c49cf5179eb78296d721023b6",
       "bytes": 40824,
       "fetchedAt": "2026-10-16T10:27:09.531Z",
-      "rows": 107
+      "rows": 157
     },
     "googleDocs": {
       "url": "https://ai.google.dev/gemini-api/docs/deprecations?hl=en",
