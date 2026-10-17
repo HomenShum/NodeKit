@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HomenShum/NodeKit/schemas/nodeplatform.models.v1.schema.json",
+  "title": "NodeKit model registry (models.yaml)",
+  "description": "One reviewed list of exact model ids, with per-transport availability. Humans own constraints, reviewed, sdkSupport, lines.*.regex, lines.*.transports and roles; the weekly bot owns every other field (see src/lib/model-registry.mjs BOT_WRITABLE).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "evaluatedAt", "registryRef", "decisionDigest", "snapshots", "entries", "lines", "roles", "deprecations"],
+  "properties": {
+    "schemaVersion": { "const": "nodeplatform.models/v1" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "evaluatedAt": { "type": "string", "format": "date-time" },
+    "registryRef": { "type": "string", "minLength": 1 },
+    "decisionDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "snapshots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["openrouter", "anthropicDocs", "openaiDocs", "googleDocs"],
+      "properties": {
+        "openrouter": { "$ref": "#/$defs/snapshot" },
+        "anthropicDocs": { "$ref": "#/$defs/snapshot" },
+        "openaiDocs": { "$ref": "#/$defs/snapshot" },
+        "googleDocs": { "$ref": "#/$defs/snapshot" }
+      }
+    },
+    "entries": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/entry" }
+    },
+    "lines": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/line" }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "line": { "type": "string" },
+          "policy": { "enum": ["opt-in", "frozen", "per-app-benchmark"] }
+        },
+        "minProperties": 1
+      }
+    },
+    "deprecations": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/deprecation" }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "format": "date" },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "sha256", "fetchedAt", "rows"],
+      "properties": {
+        "url": { "type": "string", "pattern": "^https://" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "fetchedAt": { "type": "string", "format": "date-time" },
+        "rows": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "required": ["state"],
+      "properties": {
+        "state": { "enum": ["active", "listed", "legacy", "deprecated", "retired", "unlisted", "auto-routed", "unverified"] },
+        "deprecatedAt": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "retiresOn": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "retiresNotBefore": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "expiration": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "autoRoutedTo": { "type": ["string", "null"] },
+        "source": { "enum": ["anthropicDocs", "openrouter", "openaiDocs", "googleDocs"] },
+        "checkedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "tier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["abovePromptTokens", "inPerM", "outPerM"],
+      "properties": {
+        "abovePromptTokens": { "type": "integer", "minimum": 0 },
+        "inPerM": { "type": "number", "minimum": 0 },
+        "outPerM": { "type": "number", "minimum": 0 },
+        "cacheReadPerM": { "type": "number", "minimum": 0 }
+      }
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inPerM", "outPerM", "tiers", "source"],
+      "properties": {
+        "inPerM": { "type": "number", "minimum": 0 },
+        "outPerM": { "type": "number", "minimum": 0 },
+        "cacheReadPerM": { "type": "number", "minimum": 0 },
+        "tiers": { "type": "array", "items": { "$ref": "#/$defs/tier" } },
+        "source": { "enum": ["openrouter", "anthropic", "openai", "google"], "description": "The transport whose catalog or vendor page gave the price. Valid only on that transport; never copied across transports. `openrouter` is derived by the bot; the others are recorded by a human, and survive only on an entry with no OpenRouter row to derive a price from." }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "line", "ids", "releaseDate", "releaseDateSource", "availability", "price", "context", "supportedParameters", "reviewed"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "line": { "type": "string", "minLength": 1 },
+        "ids": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string", "minLength": 1 } },
+        "releaseDate": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "releaseDateSource": { "enum": ["anthropic-release-notes", "hf-created-at", "openrouter-canonical-slug", "openrouter-created", null] },
+        "availability": { "type": "object", "additionalProperties": { "$ref": "#/$defs/availability" } },
+        "price": { "oneOf": [{ "$ref": "#/$defs/price" }, { "type": "null" }] },
+        "context": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["maxInput", "maxOutput", "source"],
+              "properties": {
+                "maxInput": { "type": "integer", "minimum": 0 },
+                "maxOutput": { "type": ["integer", "null"], "minimum": 0 },
+                "source": { "enum": ["openrouter", "anthropic", "openai", "google"] }
+              }
+            }
+          ]
+        },
+        "supportedParameters": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "object" },
+        "reviewed": { "type": "boolean" },
+        "sdkSupport": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regex", "transports", "current", "previous", "status"],
+      "properties": {
+        "regex": { "type": "string", "minLength": 1 },
+        "transports": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+        "current": { "type": "string", "minLength": 1 },
+        "previous": { "type": ["string", "null"] },
+        "status": { "enum": ["current", "soaking", "held-unreviewed", "held-no-replacement"] }
+      }
+    },
+    "deprecation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "date", "source", "replacement"],
+      "properties": {
+        "kind": { "enum": ["floor", "announced", "expiration", "state"] },
+        "date": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "deprecatedAt": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+        "state": { "type": "string" },
+        "horizon": { "enum": [30, 90, null], "description": "The window the date was in when evaluated: 30 (inside 30 days or past), 90 (inside 90) or null. Part of the row so that crossing a window changes the decision set." },
+        "source": { "enum": ["anthropicDocs", "openrouter", "openaiDocs", "googleDocs"] },
+        "replacement": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

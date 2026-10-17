@@ -1,0 +1,275 @@
+name: Model bump
+
+# Reusable consumer workflow (SPEC-v9 §B.6). A consumer repo calls it by 40-hex SHA from its own
+# model-defaults.yml, with `permissions` granted per calling job. Modes:
+#   lint  - offline lock checks (G2 a, b, b2, c) on the consumer's own files, the lock compared with the registry
+#           at the commit the lock itself pins; needs contents: read
+#   watch - open or update the one URGENT issue; needs contents: read, issues: write
+#   bump  - sync the lock from the registry, lint, run the consumer's gate, open/update ONE proposal PR on
+#           automation/model-defaults; needs contents: write, pull-requests: write
+# The NodeKit tooling comes from `platform_sha` (code, pinned). The registry is fetched from NodeKit as DATA at a
+# commit SHA and validated by that pinned tooling's schema; it is never executed. No provider secret is passed and
+# no paid call is made.
+#
+# Two jobs, because the consumer's own install and test commands (the gate) are code this repo does not control and
+# anything that runs in a job can reach everything that job holds: its token, its runner files, its environment
+# files and the git config of its user.
+#   check - `permissions: contents: read`. Syncs and lints the proposal, then runs the gate as its LAST step. Its
+#           outputs (changed, the registry commit, the sha256 of the proposed lock) are written by steps that run
+#           BEFORE the gate: the runner records a step's outputs when that step ends, so a later step cannot
+#           rewrite them, and nothing the gate does to $GITHUB_ENV / $GITHUB_PATH reaches another job.
+#   write - inherits the caller's write scopes and runs no consumer code at all. It starts from a fresh checkout,
+#           recomputes the lock itself with `models sync` from the same registry commit, refuses to go on unless
+#           that lock hashes to what `check` computed, then commits and pushes it. Watch mode runs here too: it
+#           executes only the pinned tooling. In both jobs `setup-node` runs before the consumer's files exist and
+#           without a package-manager cache, so nothing of the consumer's is executed or carried between jobs
+#           before the gate.
+# What the gate CAN still do is whatever any read-only CI step of the consumer's can do; this file does not widen it.
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        type: string
+        required: true
+      platform_sha:
+        description: 40-hex NodeKit commit that supplies the tooling.
+        type: string
+        required: true
+      registry_ref:
+        description: NodeKit branch or tag whose models.yaml is read as data (watch, bump). Lint reads the commit the lock pins.
+        type: string
+        default: main
+      dry_run:
+        description: Run every check and print the proposal; push nothing, open nothing.
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    if: inputs.mode != 'watch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.sync.outputs.changed }}
+      reg_sha: ${{ steps.reg.outputs.reg_sha }}
+      lock_sha256: ${{ steps.lockhash.outputs.lock_sha256 }}
+    env:
+      MODE: ${{ inputs.mode }}
+      PLATFORM_SHA: ${{ inputs.platform_sha }}
+      REGISTRY_REF: ${{ inputs.registry_ref }}
+      NODEKIT: .node-platform/src/cli.mjs
+    steps:
+      - name: Check the inputs
+        run: |
+          [[ "$PLATFORM_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "platform_sha must be a 40-hex commit SHA, got: $PLATFORM_SHA"; exit 1; }
+          [[ "$REGISTRY_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]] || { echo "registry_ref has characters outside [A-Za-z0-9._/-]"; exit 1; }
+          [[ "$MODE" =~ ^(lint|bump)$ ]] || { echo "mode must be lint, watch or bump"; exit 1; }
+      # BEFORE the consumer's checkout, with its package-manager cache off: setup-node runs `yarn --version` in the
+      # workspace (a committed .yarnrc `yarn-path` would execute, with the action's default token in its environment),
+      # and with `packageManager: npm` in the consumer's package.json it saves ~/.npm after the gate and restores it in
+      # the job that writes. In an empty workspace with no cache neither can happen.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: HomenShum/NodeKit
+          ref: ${{ inputs.platform_sha }}
+          path: .node-platform
+          persist-credentials: false
+      - name: Install the pinned tooling
+        run: npm ci --prefix .node-platform --ignore-scripts
+
+      - name: Resolve the registry commit (lint reads the commit the lock pins)
+        id: reg-lint
+        if: env.MODE == 'lint'
+        run: |
+          REG_SHA="$(node -e 'const fs=require("fs");const c=JSON.parse(fs.readFileSync("models.config.json","utf8"));process.stdout.write(String(JSON.parse(fs.readFileSync(c.lock,"utf8")).registryRef||""))')"
+          [[ "$REG_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "the lock's registryRef is not a 40-hex commit, so lint (a) cannot compare it with the registry: $REG_SHA"; exit 1; }
+          echo "REG_SHA=$REG_SHA" >> "$GITHUB_ENV"
+      - name: Resolve the registry commit (bump)
+        id: reg
+        if: env.MODE == 'bump'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          REG_SHA="$(gh api "repos/HomenShum/NodeKit/commits/$REGISTRY_REF" --jq .sha)"
+          [[ "$REG_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "could not resolve $REGISTRY_REF to a commit"; exit 1; }
+          echo "REG_SHA=$REG_SHA" >> "$GITHUB_ENV"
+          echo "reg_sha=$REG_SHA" >> "$GITHUB_OUTPUT"
+      - name: Fetch the registry as data
+        run: |
+          mkdir -p .model-registry
+          curl --fail --silent --show-error --max-time 30 --max-filesize 5242880 \
+            -o .model-registry/models.yaml "https://raw.githubusercontent.com/HomenShum/NodeKit/$REG_SHA/models.yaml"
+          curl --fail --silent --show-error --max-time 30 --max-filesize 1048576 \
+            -o .model-registry/index.json "https://raw.githubusercontent.com/HomenShum/NodeKit/$REG_SHA/models/snapshots/latest/index.json"
+          node "$NODEKIT" models validate --stage inputs --schema-only --registry .model-registry/models.yaml
+
+      - name: Lint the lock against the registry it pins (G2)
+        if: env.MODE == 'lint'
+        run: node "$NODEKIT" models lint --repo-root . --registry .model-registry/models.yaml
+
+      - name: Sync the lock from the registry
+        id: sync
+        if: env.MODE == 'bump'
+        run: node "$NODEKIT" models sync --repo-root . --registry .model-registry/models.yaml --snapshot-index .model-registry/index.json --ref "$REG_SHA" --body-out "$RUNNER_TEMP/body.md" --github-output "$GITHUB_OUTPUT"
+      # SPEC B.6: sync -> lint -> (only if the lock changed) the gate. Lint is not conditional on a change: a pinned
+      # role that is dying must not pass a weekly run just because the registry gave nothing newer.
+      - name: Lint against the registry (G2)
+        if: env.MODE == 'bump'
+        run: node "$NODEKIT" models lint --repo-root . --registry .model-registry/models.yaml
+      - name: Hash the proposed lock before any consumer code runs
+        id: lockhash
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        run: |
+          LOCKPATH="$(node -e 'const fs=require("fs");process.stdout.write(String(JSON.parse(fs.readFileSync("models.config.json","utf8")).lock))')"
+          if [[ ! "$LOCKPATH" =~ ^[A-Za-z0-9._/-]+$ || "$LOCKPATH" == /* || "$LOCKPATH" == *..* || "$LOCKPATH" == .git/* ]]; then echo "models.config.json lock path is not a plain relative path: $LOCKPATH"; exit 1; fi
+          echo "lock_sha256=$(sha256sum -- "$LOCKPATH" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Show the proposal
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        run: cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+      # LAST: consumer code. Nothing after it may be trusted, so nothing is after it.
+      - name: Run the consumer's own gate (G3), read-only and without the token
+        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        run: |
+          INSTALL="$(node -e 'const fs=require("fs");const c=JSON.parse(fs.readFileSync("models.config.json","utf8"));process.stdout.write((c.gate&&c.gate.install)||"")')"
+          CHECK="$(node -e 'const fs=require("fs");const c=JSON.parse(fs.readFileSync("models.config.json","utf8"));process.stdout.write((c.gate&&c.gate.check)||"")')"
+          [ -n "$CHECK" ] || { echo "models.config.json gate.check is required for bump"; exit 1; }
+          [ -z "$INSTALL" ] || bash -ec "$INSTALL"
+          bash -ec "$CHECK"
+
+  write:
+    needs: check
+    # `!cancelled()` so that watch mode (where `check` is skipped) still runs; bump runs only after a green gate.
+    if: ${{ !cancelled() && (inputs.mode == 'watch' || (inputs.mode == 'bump' && needs.check.result == 'success' && needs.check.outputs.changed == 'true')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MODE: ${{ inputs.mode }}
+      PLATFORM_SHA: ${{ inputs.platform_sha }}
+      REGISTRY_REF: ${{ inputs.registry_ref }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      CHECKED_REG_SHA: ${{ needs.check.outputs.reg_sha }}
+      CHECKED_LOCK_SHA256: ${{ needs.check.outputs.lock_sha256 }}
+      BRANCH: automation/model-defaults
+      NODEKIT: .node-platform/src/cli.mjs
+    steps:
+      - name: Check the inputs
+        run: |
+          [[ "$PLATFORM_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "platform_sha must be a 40-hex commit SHA, got: $PLATFORM_SHA"; exit 1; }
+          [[ "$REGISTRY_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]] || { echo "registry_ref has characters outside [A-Za-z0-9._/-]"; exit 1; }
+          [[ "$MODE" =~ ^(watch|bump)$ ]] || { echo "mode must be lint, watch or bump"; exit 1; }
+      # BEFORE the consumer's checkout, with its package-manager cache off: setup-node runs `yarn --version` in the
+      # workspace (a committed .yarnrc `yarn-path` would execute, with the action's default token in its environment),
+      # and with `packageManager: npm` in the consumer's package.json it saves ~/.npm after the gate and restores it in
+      # the job that writes. In an empty workspace with no cache neither can happen.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: HomenShum/NodeKit
+          ref: ${{ inputs.platform_sha }}
+          path: .node-platform
+          persist-credentials: false
+      - name: Install the pinned tooling
+        run: npm ci --prefix .node-platform --ignore-scripts
+
+      - name: Resolve the registry commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # bump uses exactly the commit the gate was run against; watch resolves the ref now.
+          if [ "$MODE" = bump ]; then REG_SHA="$CHECKED_REG_SHA"; else REG_SHA="$(gh api "repos/HomenShum/NodeKit/commits/$REGISTRY_REF" --jq .sha)"; fi
+          [[ "$REG_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "could not resolve a registry commit from $REGISTRY_REF: $REG_SHA"; exit 1; }
+          echo "REG_SHA=$REG_SHA" >> "$GITHUB_ENV"
+      - name: Fetch the registry as data
+        run: |
+          mkdir -p .model-registry
+          curl --fail --silent --show-error --max-time 30 --max-filesize 5242880 \
+            -o .model-registry/models.yaml "https://raw.githubusercontent.com/HomenShum/NodeKit/$REG_SHA/models.yaml"
+          curl --fail --silent --show-error --max-time 30 --max-filesize 1048576 \
+            -o .model-registry/index.json "https://raw.githubusercontent.com/HomenShum/NodeKit/$REG_SHA/models/snapshots/latest/index.json"
+          node "$NODEKIT" models validate --stage inputs --schema-only --registry .model-registry/models.yaml
+
+      - name: Fetch the public catalogs live (only when the lock has frozen ids to check)
+        if: env.MODE == 'watch'
+        run: |
+          # The registry commits a snapshot only when its own decision set changes, and a consumer's frozen id is
+          # never part of that set, so a shutdown notice for one can sit unseen on the vendor page for weeks.
+          # Fetch the same four pages with the same strict parsers, now; a fetch or structure failure fails the run.
+          N="$(node -e 'const fs=require("fs");const c=JSON.parse(fs.readFileSync("models.config.json","utf8"));process.stdout.write(String((JSON.parse(fs.readFileSync(c.lock,"utf8")).frozen||[]).length))')"
+          if [ "$N" -gt 0 ]; then node "$NODEKIT" models snapshot --out .model-registry/live --registry .model-registry/models.yaml; fi
+      - name: Watch
+        if: env.MODE == 'watch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The token makes the liveness read authenticated: an unauthenticated call from a shared runner IP can be
+          # rate-limited, which would open a false "status could not be read" URGENT issue.
+          gh api "repos/HomenShum/NodeKit/actions/workflows/model-registry-refresh.yml/runs?status=success&per_page=1" > "$RUNNER_TEMP/runs.json" || rm -f "$RUNNER_TEMP/runs.json"
+          SNAP=(); [ -d .model-registry/live ] && SNAP=(--snapshots .model-registry/live)
+          node "$NODEKIT" models watch --repo-root . --registry .model-registry/models.yaml "${SNAP[@]}" --refresh-runs "$RUNNER_TEMP/runs.json" --json > "$RUNNER_TEMP/watch.json"
+          node -e 'const w=require(process.env.RUNNER_TEMP+"/watch.json");require("fs").writeFileSync(process.env.RUNNER_TEMP+"/watch.md",w.body);process.exit(w.urgent?0:3)' && URGENT=true || URGENT=false
+          cat "$RUNNER_TEMP/watch.md" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$URGENT" = true ] && [ "$DRY_RUN" != true ]; then
+            gh label create model-defaults --color B60205 --description "Model defaults automation" 2>/dev/null || true
+            N="$(gh issue list --label model-defaults --state open --json number,title --jq '[.[] | select(.title == "Model defaults: URGENT")][0].number // empty')"
+            if [ -n "$N" ]; then gh issue edit "$N" --body-file "$RUNNER_TEMP/watch.md"
+            else gh issue create --label model-defaults --title "Model defaults: URGENT" --body-file "$RUNNER_TEMP/watch.md"; fi
+          fi
+
+      - name: Recompute the lock and check it is the one the gate was run on
+        id: sync
+        if: env.MODE == 'bump'
+        run: |
+          LOCKPATH="$(node -e 'const fs=require("fs");process.stdout.write(String(JSON.parse(fs.readFileSync("models.config.json","utf8")).lock))')"
+          if [[ ! "$LOCKPATH" =~ ^[A-Za-z0-9._/-]+$ || "$LOCKPATH" == /* || "$LOCKPATH" == *..* || "$LOCKPATH" == .git/* ]]; then echo "models.config.json lock path is not a plain relative path: $LOCKPATH"; exit 1; fi
+          node "$NODEKIT" models sync --repo-root . --registry .model-registry/models.yaml --snapshot-index .model-registry/index.json --ref "$REG_SHA" --body-out "$RUNNER_TEMP/body.md" --github-output "$GITHUB_OUTPUT"
+          GOT="$(sha256sum -- "$LOCKPATH" | cut -d' ' -f1)"
+          [ "$GOT" = "$CHECKED_LOCK_SHA256" ] || { echo "the lock recomputed here ($GOT) is not the one the gate ran on ($CHECKED_LOCK_SHA256); nothing is pushed"; exit 1; }
+          echo "lockpath=$LOCKPATH" >> "$GITHUB_OUTPUT"
+      - name: Closed-PR guard
+        id: guard
+        if: env.MODE == 'bump'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DECISION_SHA: ${{ steps.sync.outputs.decisionSetSha256 }}
+        run: |
+          gh pr list --state closed --head "$BRANCH" --json number,body,mergedAt,closedAt --limit 5 > "$RUNNER_TEMP/closed.json"
+          node "$NODEKIT" models pr-guard --closed-prs "$RUNNER_TEMP/closed.json" --hash "$DECISION_SHA" --github-output "$GITHUB_OUTPUT"
+      - name: Commit the proposal
+        if: env.MODE == 'bump' && steps.guard.outputs.suppress != 'true' && env.DRY_RUN != 'true'
+        env:
+          LOCKPATH: ${{ steps.sync.outputs.lockpath }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q -B "$BRANCH"
+          git add -- "$LOCKPATH"
+          git commit -q -m "chore(models): bump the model lock"
+      - name: Open or update the proposal PR
+        if: env.MODE == 'bump' && steps.guard.outputs.suppress != 'true' && env.DRY_RUN != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SERVER="${GITHUB_SERVER_URL:-https://github.com}"
+          AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          net() { git -c "http.$SERVER/.extraheader=AUTHORIZATION: basic $AUTH" "$@"; }
+          net fetch -q origin "$BRANCH:refs/remotes/origin/$BRANCH" || true
+          net push --force-with-lease origin "$BRANCH"
+          gh pr create --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base "${GITHUB_REF_NAME}" --title "chore(models): bump the model lock" --body-file "$RUNNER_TEMP/body.md" \
+            || gh pr edit "$BRANCH" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/body.md"

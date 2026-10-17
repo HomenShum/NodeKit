@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "nodeplatform.models-snapshots/v1",
+  "snapshots": {
+    "openrouter": {
+      "url": "https://openrouter.ai/api/v1/models",
+      "file": "openrouter.json",
+      "sha256": "ba98e9a7d61e8cf9f1c32b8f7163ad4504d1a0f8080addb26ebfe69cab9e6d4f",
+      "bytes": 777904,
+      "fetchedAt": "2026-10-16T10:27:09.531Z",
+      "rows": 465
+    },
+    "anthropicDocs": {
+      "url": "https://platform.claude.com/docs/en/about-claude/model-deprecations.md",
+      "file": "anthropic-deprecations.md",
+      "sha256": "ad1c50227e13e9d3e194da3cc109db9b18012453059ed792eaae178d2aca206a",
+      "bytes": 14238,
+      "fetchedAt": "2026-10-16T10:27:09.531Z",
+      "rows": 23
+    },
+    "openaiDocs": {
+      "url": "https://developers.openai.com/api/docs/deprecations.md",
+      "file": "openai-deprecations.md",
+      "sha256": "199d9bf98e262d0011f34c4c1b89e5803115040c49cf5179eb78296d721023b6",
+      "bytes": 40824,
+      "fetchedAt": "2026-10-16T10:27:09.531Z",
+      "rows": 157
+    },
+    "googleDocs": {
+      "url": "https://ai.google.dev/gemini-api/docs/deprecations?hl=en",
+      "file": "google-deprecations.html",
+      "sha256": "48c6f7626e131fb2c2aaa2bb78fa28ea21c71d8470615bd68f6f14d3ac17ceb4",
+      "bytes": 121031,
+      "fetchedAt": "2026-10-16T10:27:09.531Z",
+      "rows": 81
+    }
+  }
+}

@@ -1,0 +1,362 @@
+schemaVersion: nodeplatform.models/v1
+generatedAt: 2026-10-16T10:30:00.000Z
+evaluatedAt: 2026-10-16T10:30:00.000Z
+registryRef: bd8844df96c2ced3b4583f601ef87414891ece14
+decisionDigest: e63597bec44640d17aee049958303ce01a709fdb5800d2951a8bd9711e2dcab7
+snapshots:
+  openrouter:
+    url: https://openrouter.ai/api/v1/models
+    sha256: ba98e9a7d61e8cf9f1c32b8f7163ad4504d1a0f8080addb26ebfe69cab9e6d4f
+    fetchedAt: 2026-10-16T10:27:09.531Z
+    rows: 465
+  anthropicDocs:
+    url: https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+    sha256: ad1c50227e13e9d3e194da3cc109db9b18012453059ed792eaae178d2aca206a
+    fetchedAt: 2026-10-16T10:27:09.531Z
+    rows: 23
+  openaiDocs:
+    url: https://developers.openai.com/api/docs/deprecations.md
+    sha256: 199d9bf98e262d0011f34c4c1b89e5803115040c49cf5179eb78296d721023b6
+    fetchedAt: 2026-10-16T10:27:09.531Z
+    rows: 157
+  googleDocs:
+    url: https://ai.google.dev/gemini-api/docs/deprecations?hl=en
+    sha256: 48c6f7626e131fb2c2aaa2bb78fa28ea21c71d8470615bd68f6f14d3ac17ceb4
+    fetchedAt: 2026-10-16T10:27:09.531Z
+    rows: 81
+entries:
+  claude-haiku-4-5-20251001:
+    provider: anthropic
+    line: anthropic.haiku
+    ids:
+      anthropic: claude-haiku-4-5-20251001
+      openrouter: anthropic/claude-haiku-4.5
+    releaseDate: 2025-10-01
+    releaseDateSource: openrouter-canonical-slug
+    availability:
+      anthropic:
+        state: active
+        deprecatedAt: null
+        retiresOn: null
+        retiresNotBefore: 2026-10-15
+        autoRoutedTo: null
+        source: anthropicDocs
+        checkedAt: 2026-10-16T10:30:00.000Z
+      openrouter:
+        state: listed
+        expiration: null
+        source: openrouter
+        checkedAt: 2026-10-16T10:30:00.000Z
+    price:
+      inPerM: 1
+      outPerM: 5
+      cacheReadPerM: 0.1
+      tiers: []
+      source: openrouter
+    context:
+      maxInput: 200000
+      maxOutput: 64000
+      source: openrouter
+    supportedParameters:
+      - include_reasoning
+      - max_completion_tokens
+      - max_tokens
+      - reasoning
+      - response_format
+      - stop
+      - structured_outputs
+      - temperature
+      - tool_choice
+      - tools
+      - top_k
+      - top_p
+    reviewed: false
+  claude-haiku-5-5:
+    provider: anthropic
+    line: anthropic.haiku
+    ids:
+      anthropic: claude-haiku-5-5
+      openrouter: anthropic/claude-haiku-5.5
+      bedrock: anthropic.claude-haiku-5-5
+    releaseDate: 2026-10-07
+    releaseDateSource: anthropic-release-notes
+    availability:
+      anthropic:
+        state: active
+        deprecatedAt: null
+        retiresOn: null
+        retiresNotBefore: 2027-10-07
+        autoRoutedTo: null
+        source: anthropicDocs
+        checkedAt: 2026-10-16T10:30:00.000Z
+      openrouter:
+        state: listed
+        expiration: null
+        source: openrouter
+        checkedAt: 2026-10-16T10:30:00.000Z
+      bedrock:
+        state: unverified
+    price:
+      inPerM: 0.1
+      outPerM: 0.5
+      cacheReadPerM: 0.01
+      tiers:
+        - abovePromptTokens: 100000
+          inPerM: 0.5
+          outPerM: 2.5
+          cacheReadPerM: 0.05
+      source: openrouter
+    context:
+      maxInput: 1000000
+      maxOutput: 128000
+      source: openrouter
+    supportedParameters:
+      - include_reasoning
+      - max_completion_tokens
+      - max_tokens
+      - reasoning
+      - reasoning_effort
+      - response_format
+      - stop
+      - structured_outputs
+      - tool_choice
+      - tools
+      - verbosity
+    constraints:
+      sampling: forbidden
+      prefill: forbidden
+      forcedToolChoice: allowed-skips-thinking
+      thinkingDisabled: allowed-at-high-or-below
+      budgetTokens: forbidden
+      adaptiveThinking: true
+      defaultEffort: medium
+      efforts:
+        - low
+        - medium
+        - high
+        - xhigh
+        - max
+      maxTokensField: max_tokens
+      refusalStopReason: true
+    reviewed: true
+  claude-opus-5-5:
+    provider: anthropic
+    line: anthropic.opus
+    ids:
+      anthropic: claude-opus-5-5
+      openrouter: anthropic/claude-opus-5.5
+      bedrock: anthropic.claude-opus-5-5
+    releaseDate: 2026-09-21
+    releaseDateSource: openrouter-canonical-slug
+    availability:
+      anthropic:
+        state: active
+        deprecatedAt: null
+        retiresOn: null
+        retiresNotBefore: 2027-09-22
+        autoRoutedTo: null
+        source: anthropicDocs
+        checkedAt: 2026-10-16T10:30:00.000Z
+      openrouter:
+        state: listed
+        expiration: null
+        source: openrouter
+        checkedAt: 2026-10-16T10:30:00.000Z
+      bedrock:
+        state: unverified
+    price:
+      inPerM: 4
+      outPerM: 20
+      cacheReadPerM: 0.2
+      tiers: []
+      source: openrouter
+    context:
+      maxInput: 1000000
+      maxOutput: 128000
+      source: openrouter
+    supportedParameters:
+      - include_reasoning
+      - max_completion_tokens
+      - max_tokens
+      - reasoning
+      - reasoning_effort
+      - response_format
+      - stop
+      - structured_outputs
+      - tool_choice
+      - tools
+      - verbosity
+    constraints:
+      sampling: forbidden
+      prefill: forbidden
+      forcedToolChoice: forbidden
+      thinkingDisabled: forbidden
+      budgetTokens: forbidden
+      adaptiveThinking: true
+      defaultEffort: medium
+      maxTokensField: max_tokens
+    reviewed: true
+  claude-sonnet-4-5-20250929:
+    provider: anthropic
+    line: anthropic.sonnet
+    ids:
+      anthropic: claude-sonnet-4-5-20250929
+      openrouter: anthropic/claude-sonnet-4.5
+    releaseDate: 2025-09-29
+    releaseDateSource: openrouter-canonical-slug
+    availability:
+      anthropic:
+        state: deprecated
+        deprecatedAt: 2026-09-30
+        retiresOn: 2026-11-30
+        retiresNotBefore: null
+        autoRoutedTo: null
+        source: anthropicDocs
+        checkedAt: 2026-10-16T10:30:00.000Z
+      openrouter:
+        state: listed
+        expiration: null
+        source: openrouter
+        checkedAt: 2026-10-16T10:30:00.000Z
+    price:
+      inPerM: 3
+      outPerM: 15
+      cacheReadPerM: 0.3
+      tiers:
+        - abovePromptTokens: 200000
+          inPerM: 6
+          outPerM: 22.5
+          cacheReadPerM: 0.6
+      source: openrouter
+    context:
+      maxInput: 1000000
+      maxOutput: 64000
+      source: openrouter
+    supportedParameters:
+      - include_reasoning
+      - max_completion_tokens
+      - max_tokens
+      - reasoning
+      - response_format
+      - stop
+      - structured_outputs
+      - temperature
+      - tool_choice
+      - tools
+      - top_k
+      - top_p
+    reviewed: false
+  claude-sonnet-5-5:
+    provider: anthropic
+    line: anthropic.sonnet
+    ids:
+      anthropic: claude-sonnet-5-5
+      openrouter: anthropic/claude-sonnet-5.5
+      bedrock: anthropic.claude-sonnet-5-5
+    releaseDate: 2026-09-28
+    releaseDateSource: openrouter-canonical-slug
+    availability:
+      anthropic:
+        state: active
+        deprecatedAt: null
+        retiresOn: null
+        retiresNotBefore: 2027-09-28
+        autoRoutedTo: null
+        source: anthropicDocs
+        checkedAt: 2026-10-16T10:30:00.000Z
+      openrouter:
+        state: listed
+        expiration: null
+        source: openrouter
+        checkedAt: 2026-10-16T10:30:00.000Z
+      bedrock:
+        state: unverified
+    price:
+      inPerM: 2
+      outPerM: 10
+      cacheReadPerM: 0.1
+      tiers: []
+      source: openrouter
+    context:
+      maxInput: 1000000
+      maxOutput: 128000
+      source: openrouter
+    supportedParameters:
+      - include_reasoning
+      - max_completion_tokens
+      - max_tokens
+      - reasoning
+      - reasoning_effort
+      - response_format
+      - stop
+      - structured_outputs
+      - tool_choice
+      - tools
+      - verbosity
+    constraints:
+      sampling: forbidden
+      prefill: forbidden
+      forcedToolChoice: forbidden
+      thinkingDisabled: forbidden
+      budgetTokens: forbidden
+      adaptiveThinking: true
+      defaultEffort: high
+      maxTokensField: max_tokens
+    reviewed: true
+lines:
+  anthropic.haiku:
+    regex: ^claude-haiku-(\d+)(-\d+)?$
+    transports:
+      - anthropic
+    current: claude-haiku-5-5
+    previous: claude-haiku-4-5-20251001
+    status: current
+  anthropic.sonnet:
+    regex: ^claude-sonnet-(\d+)(-\d+)?$
+    transports:
+      - anthropic
+    current: claude-sonnet-5-5
+    previous: claude-sonnet-4-5-20250929
+    status: current
+  anthropic.opus:
+    regex: ^claude-opus-(\d+)(-\d+)?$
+    transports:
+      - anthropic
+    current: claude-opus-5-5
+    previous: null
+    status: current
+roles:
+  fast:
+    line: anthropic.haiku
+  balanced:
+    line: anthropic.sonnet
+  flagship:
+    line: anthropic.opus
+deprecations:
+  claude-haiku-4-5-20251001/anthropic:
+    kind: floor
+    date: 2026-10-15
+    source: anthropicDocs
+    replacement: null
+  claude-haiku-5-5/anthropic:
+    kind: floor
+    date: 2027-10-07
+    source: anthropicDocs
+    replacement: null
+  claude-opus-5-5/anthropic:
+    kind: floor
+    date: 2027-09-22
+    source: anthropicDocs
+    replacement: null
+  claude-sonnet-4-5-20250929/anthropic:
+    kind: announced
+    date: 2026-11-30
+    deprecatedAt: 2026-09-30
+    source: anthropicDocs
+    replacement: claude-sonnet-5-5
+    horizon: 90
+  claude-sonnet-5-5/anthropic:
+    kind: floor
+    date: 2027-09-28
+    source: anthropicDocs
+    replacement: null
