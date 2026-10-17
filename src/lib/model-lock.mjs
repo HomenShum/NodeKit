@@ -238,7 +238,20 @@ export function renderLockBody({ oldLock, newLock, hash, config, snapshots = nul
     const env = config.roles[role]?.env;
     if (env?.length) lines.push(`Environment checklist: ${env.map((e) => `\`${e}\``).join(", ")} may override this role; confirm each value still resolves.`, "");
   }
-  if (!any) lines.push("- no role changed; `known`, `frozen` or `exclude` changed (see the diff).", "");
+  if (!any) {
+    // Nothing a role copies changed. Say what did, from the lock itself: `known`/`frozen`/`exclude`, or only the registry
+    // slice digest (a pinned role's deprecation row moved, for example its date crossing the 90 or 30-day line).
+    const moved = ["known", "frozen", "exclude"].filter((k) => canonical(oldLock?.[k]) !== canonical(newLock[k]));
+    const sliceMoved = oldLock?.registrySha256 !== newLock.registrySha256;
+    if (moved.length) lines.push(`- no role changed; ${moved.map((k) => `\`${k}\``).join(", ")} changed (see the diff).`);
+    if (sliceMoved) {
+      const rows = Object.values(newLock.roles).map((r) => ({ key: `${r.id}/${r.transport}`, row: registry?.deprecations?.[`${r.id}/${r.transport}`] })).filter((r) => r.row);
+      lines.push(`- no role changed${moved.length ? " either" : ""}; only the registry slice digest moved (\`${String(oldLock?.registrySha256).slice(0, 16)}\` -> \`${newLock.registrySha256.slice(0, 16)}\`, registry \`${oldLock?.registryRef ?? "(none)"}\` -> \`${newLock.registryRef}\`), which means a deprecation row of a pinned role changed, for example its retirement date crossed the 90 or 30-day line. Nothing to edit; merging records that the lock was checked against it.`);
+      for (const { key, row } of rows) lines.push(`- deprecation row now: \`${key}\` ${canonical(row)}`);
+    }
+    if (!moved.length && !sliceMoved) lines.push("- the lock's decision fields are identical.");
+    lines.push("");
+  }
   if (snapshots) lines.push("## Snapshots the registry was computed from", "", ...Object.entries(snapshots).map(([key, v]) => `- ${key}: sha256 \`${v.sha256}\`, ${v.rows} rows, fetched ${v.fetchedAt}`), "");
   lines.push("## Gates", "", "Lint (G2) and the repo's own check (G3) ran on the bot branch before this PR was created. No paid provider call was made.", "",
     "Closing this PR keeps it closed until the decision set changes. A human merges.", "", decisionMarker(hash));

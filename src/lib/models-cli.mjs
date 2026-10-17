@@ -108,7 +108,12 @@ async function snapshotCommand(options, p, fetchImpl) {
     const registry = await readYaml(p.registry);
     previousRows = Object.fromEntries(SNAPSHOT_KEYS.map((k) => [k, registry.snapshots?.[k]?.rows ?? null]));
   } catch { /* first run: no committed rows to compare against */ }
-  const { texts, index } = await fetchSnapshots({ fetchImpl, now: new Date(), previousRows });
+  // The last committed pages in `out`: the baseline a partly changed page is judged against (none on a first run).
+  const previousTexts = {};
+  for (const key of SNAPSHOT_KEYS) {
+    try { previousTexts[key] = await readBounded(path.join(out, SNAPSHOT_SOURCES[key].file)); } catch (error) { if (error.code !== "ENOENT") throw error; }
+  }
+  const { texts, index } = await fetchSnapshots({ fetchImpl, now: new Date(), previousRows, previousTexts });
   // Write beside, then rename: a failure leaves the previous snapshot set untouched. index.json goes last so a
   // crash between renames is caught by the re-hash in `validate`.
   const staging = `${out}.staging-${process.pid}-${randomUUID().slice(0, 8)}`;

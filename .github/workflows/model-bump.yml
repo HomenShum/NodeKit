@@ -121,8 +121,10 @@ jobs:
         id: sync
         if: env.MODE == 'bump'
         run: node "$NODEKIT" models sync --repo-root . --registry .model-registry/models.yaml --snapshot-index .model-registry/index.json --ref "$REG_SHA" --body-out "$RUNNER_TEMP/body.md" --github-output "$GITHUB_OUTPUT"
+      # SPEC B.6: sync -> lint -> (only if the lock changed) the gate. Lint is not conditional on a change: a pinned
+      # role that is dying must not pass a weekly run just because the registry gave nothing newer.
       - name: Lint against the registry (G2)
-        if: env.MODE == 'bump' && steps.sync.outputs.changed == 'true'
+        if: env.MODE == 'bump'
         run: node "$NODEKIT" models lint --repo-root . --registry .model-registry/models.yaml
       - name: Hash the proposed lock before any consumer code runs
         id: lockhash

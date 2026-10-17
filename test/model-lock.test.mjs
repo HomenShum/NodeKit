@@ -410,3 +410,65 @@ test("the consumer PR body carries the release and per-transport lifecycle facts
   // without the registry the body still renders (the facts are an addition, not a dependency)
   assert.doesNotMatch(renderLockBody({ oldLock: lock, newLock: updated, hash: lockDecisionSha256(updated), config: CONFIG }), /released:/);
 });
+
+// ---- Part B v1 adversarial review (round 4) ------------------------------------------------------------------
+
+test("watch horizon boundary: a notice exactly 60 days out is URGENT, 61 days out is not", async () => {
+  const { lock, registry } = await world();
+  const pinned = clone(lock);
+  pinned.roles.reasoner = { ...pinned.roles.reasoner, id: "claude-sonnet-4-5-20250929" }; // retires 2026-11-30
+  const fresh = { ok: true, latestSuccessAt: "2026-10-01T00:00:00Z" };
+  const on = watchReport({ lock: pinned, registry, now: "2026-10-01T10:30:00Z", refreshRun: fresh });
+  assert.equal(on.horizons[0].days, 60);
+  assert.equal(on.urgent, true, "60 d is inside the horizon");
+  const before = watchReport({ lock: pinned, registry, now: "2026-09-30T10:30:00Z", refreshRun: { ok: true, latestSuccessAt: "2026-09-30T00:00:00Z" } });
+  assert.equal(before.urgent, false, "61 d is not");
+});
+
+test("a pinned role's date crossing the 90 or 30-day line changes only the registry slice digest: the lock still changes, and the PR says why instead of 'known, frozen or exclude changed'", async () => {
+  const { registry, lock } = await world();
+  const withHorizon = (horizon) => {
+    const next = clone(registry);
+    next.deprecations["claude-haiku-5-5/anthropic"] = { kind: "announced", date: "2027-01-01", deprecatedAt: null, source: "anthropicDocs", replacement: null, horizon };
+    return next;
+  };
+  const a = syncLock({ registry: withHorizon(90), config: CONFIG, existing: lock, registryRef: REF });
+  const b = syncLock({ registry: withHorizon(30), config: CONFIG, existing: a.lock, registryRef: REF });
+  assert.equal(b.changed, true, "dropping registrySha256 from the decision fields would let this crossing go unrecorded");
+  for (const field of ["roles", "known", "frozen", "exclude"]) assert.deepEqual(b.lock[field], a.lock[field], `${field} is identical`);
+  assert.notEqual(b.lock.registrySha256, a.lock.registrySha256);
+  assert.notEqual(lockDecisionSha256(b.lock), lockDecisionSha256(a.lock));
+  const body = renderLockBody({ oldLock: a.lock, newLock: b.lock, hash: lockDecisionSha256(b.lock), config: CONFIG, registry: withHorizon(30) });
+  assert.doesNotMatch(body, /`known`, `frozen` or `exclude` changed/, "the old sentence was false here");
+  assert.match(body, /only the registry slice digest moved/);
+  assert.match(body, /deprecation row now: `claude-haiku-5-5\/anthropic` .*"horizon":30/);
+  // ...and when `known` really is what changed, the body still says so
+  const grown = clone(registry);
+  grown.entries["claude-opus-5-5"].constraints = { sampling: "allowed", fixture: true };
+  const c = syncLock({ registry: grown, config: CONFIG, existing: lock, registryRef: REF });
+  assert.equal(c.changed, true);
+  assert.match(renderLockBody({ oldLock: lock, newLock: c.lock, hash: lockDecisionSha256(c.lock), config: CONFIG, registry: grown }), /no role changed; `known` changed \(see the diff\)/);
+});
+
+test("watch in a consumer checkout: a refresh-run history with no successful run is URGENT, not healthy", async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "models-liveness-"));
+  try {
+    await writeFile(path.join(tmp, "models.config.json"), JSON.stringify(CONFIG, null, 2));
+    const common = ["--repo-root", tmp, "--registry", path.join(ROOT, "models.yaml")];
+    assert.equal(cli(["models", "sync", ...common, "--ref", REF]).status, 0);
+    const watch = async (runs) => {
+      await writeFile(path.join(tmp, "runs.json"), runs);
+      const r = cli(["models", "watch", ...common, "--refresh-runs", path.join(tmp, "runs.json"), "--now", "2026-10-17T10:30:00Z", "--json"]);
+      assert.equal(r.status, 0, r.stderr);
+      return JSON.parse(r.stdout);
+    };
+    const empty = await watch(JSON.stringify({ workflow_runs: [] }));
+    assert.equal(empty.urgent, true);
+    assert.match(empty.body, /no successful registry refresh run exists/);
+    assert.equal((await watch(JSON.stringify({ message: "Not Found" }))).urgent, true, "a 404-shaped body is unreadable, not healthy");
+    assert.equal((await watch("not json")).urgent, true);
+    assert.equal((await watch(JSON.stringify({ workflow_runs: [{ updated_at: "2026-10-16T13:47:00Z" }] }))).urgent, false, "a run from yesterday is alive");
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});

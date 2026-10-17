@@ -504,3 +504,35 @@ exit 0
     for (const dir of dirs) await rm(dir, { recursive: true, force: true });
   }
 });
+
+// ---- Part B v1 adversarial review (round 4) ------------------------------------------------------------------
+
+test("the refresh cannot open a PR for a proposal that did not change or was not checked: every gate precedes the push, and the PR steps need a changed decision set", async () => {
+  const { wf } = await load("model-registry-refresh.yml");
+  const all = wf.jobs.refresh.steps;
+  const at = (re) => all.findIndex((s) => re.test(s.run ?? ""));
+  const commit = all.find((s) => /git commit/.test(s.run ?? ""));
+  const push = all.find((s) => /force-with-lease/.test(s.run ?? ""));
+  for (const step of [commit, push]) assert.match(step.if, /steps\.select\.outputs\.changed == 'true'/, `${step.name}: an unchanged decision set opens no PR`);
+  // the bot-diff allowlist (--base) runs on the file `select` just wrote, against the registry kept before it, and before any commit
+  const keep = at(/cp models\.yaml "\$RUNNER_TEMP\/models\.input\.yaml"/);
+  const select = at(/models select --write/);
+  const base = at(/models validate --stage full .*--base "\$RUNNER_TEMP\/models\.input\.yaml"/);
+  const replay = at(/models replay --input-registry "\$RUNNER_TEMP\/models\.input\.yaml"/);
+  const commitAt = all.indexOf(commit);
+  assert.ok(keep >= 0 && keep < select, "the input registry is copied before select overwrites it");
+  assert.ok(select < base && base < commitAt, "the allowlist step runs after select and before the commit");
+  assert.ok(select < replay && replay < commitAt, "so does the replay");
+  for (const step of [all[base], all[replay]]) assert.equal(step.if, undefined, `${step.name}: a gate with a condition can be skipped`);
+});
+
+test("the bump workflow lints on every bump run, not only when the lock changed (SPEC B.6: sync, lint, then the gate if changed)", async () => {
+  const { wf } = await load("model-bump.yml");
+  const all = wf.jobs.check.steps;
+  const lint = all.find((s) => /models lint/.test(s.run ?? "") && s.name?.startsWith("Lint against the registry"));
+  assert.equal(lint.if, "env.MODE == 'bump'", "no `changed` condition");
+  const names = all.map((s) => s.name);
+  const gate = all.find((s) => /Run the consumer's own gate/.test(s.name ?? ""));
+  assert.match(gate.if, /steps\.sync\.outputs\.changed == 'true'/, "the gate still runs only for a changed lock");
+  assert.ok(names.indexOf("Sync the lock from the registry") < names.indexOf(lint.name) && names.indexOf(lint.name) < names.indexOf(gate.name));
+});

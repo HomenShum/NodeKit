@@ -260,9 +260,24 @@ export function parseOpenRouter(text) {
 
 const PARSERS = Object.freeze({ openrouter: parseOpenRouter, anthropicDocs: parseAnthropicDocs, openaiDocs: parseOpenAiDocs, googleDocs: parseGoogleDocs });
 
-// Parses one snapshot and applies the row tripwires: rows >= source minimum, and rows >= SHRINK_RATIO x the
-// last committed rows (when known).
-export function parseSnapshot(key, text, { previousRows = null } = {}) {
+// The ids a page carries a lifecycle notice for: the only thing whose silent loss turns "retiring" into "active".
+// OpenRouter has none (an id it drops reads `unlisted`, which is loud).
+export function noticeIds(key, parsed) {
+  if (key === "anthropicDocs") return new Set(parsed.notices.map((n) => n.id));
+  if (key === "openaiDocs") return new Set(parsed.notices.flatMap((n) => n.ids));
+  if (key === "googleDocs") return new Set(parsed.models.filter((m) => m.shutdown || m.autoRoutedTo).map((m) => m.id));
+  return null;
+}
+// The ids of the last committed snapshot text, or null when there is none to compare with (first run, unparseable).
+export function previousNoticeIds(key, text) {
+  try { return noticeIds(key, PARSERS[key](text)); } catch { return null; }
+}
+
+// Parses one snapshot and applies the row tripwires: rows >= source minimum, rows >= SHRINK_RATIO x the last
+// committed rows (when known), and no id that had a notice in the last committed snapshot has lost it. The last
+// one is the only check that sees a table the parsers do not recognise (a renamed first column, a deleted table, a
+// table turned into a list): every header test is blind to a table it does not match, so the baseline is the check.
+export function parseSnapshot(key, text, { previousRows = null, previousIds = null } = {}) {
   const parsed = PARSERS[key](text);
   const { minRows, minIdRows } = SNAPSHOT_SOURCES[key];
   if (parsed.rows < minRows) throw new SnapshotError(`${key}: ${parsed.rows} rows is below the minimum ${minRows}`, { key });
@@ -271,18 +286,22 @@ export function parseSnapshot(key, text, { previousRows = null } = {}) {
   if (Number.isInteger(previousRows) && previousRows > 0 && parsed.rows < previousRows * SHRINK_RATIO) {
     throw new SnapshotError(`${key}: ${parsed.rows} rows is under ${SHRINK_RATIO} x the last committed ${previousRows}`, { key });
   }
+  const now = previousIds ? noticeIds(key, parsed) : null;
+  const lost = now ? [...previousIds].filter((id) => !now.has(id)) : [];
+  if (lost.length) throw new SnapshotError(`${key}: ${lost.length} id(s) had a vendor notice in the last committed snapshot and have none now (${lost.slice(0, 5).join(", ")}${lost.length > 5 ? ", ..." : ""}); a table was probably re-laid out or removed. If the vendor really dropped them, run \`snapshot --out\` into an empty directory and review the diff`, { key });
   return parsed;
 }
 
 // Fetches and parses all four. Any failure aborts the whole set (one weekly registry should fail loud);
 // nothing is returned half-built.
-export async function fetchSnapshots({ fetchImpl, now = new Date(), previousRows = {}, timeoutMs } = {}) {
+export async function fetchSnapshots({ fetchImpl, now = new Date(), previousRows = {}, previousTexts = {}, timeoutMs } = {}) {
   const fetchedAt = now.toISOString();
   const texts = {};
   const snapshots = {};
   for (const key of SNAPSHOT_KEYS) {
     texts[key] = await fetchText(key, { fetchImpl, timeoutMs });
-    const { rows } = parseSnapshot(key, texts[key], { previousRows: previousRows[key] ?? null });
+    const previousIds = previousTexts[key] === undefined ? null : previousNoticeIds(key, previousTexts[key]);
+    const { rows } = parseSnapshot(key, texts[key], { previousRows: previousRows[key] ?? null, previousIds });
     snapshots[key] = { url: SNAPSHOT_SOURCES[key].url, file: SNAPSHOT_SOURCES[key].file, sha256: sha256(texts[key]), bytes: Buffer.byteLength(texts[key]), fetchedAt, rows };
   }
   return { texts, index: { schemaVersion: "nodeplatform.models-snapshots/v1", snapshots } };

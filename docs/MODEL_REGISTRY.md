@@ -84,6 +84,10 @@ nodekit models sync | lint | watch # consumer side
   replacement". OpenAI: an id-bearing row count floor (`minIdRows`) for a page that lost all its ids, and per row, a
   name cell with no backticked id that holds an id-shaped token fails (one row that lost its markup would otherwise
   read as "no notice" while 62 others keep the page-wide floor satisfied).
+  Whatever the page does, an id that had a vendor notice in the last committed snapshot and has none now fails the
+  run too (a renamed date column, a deleted table, a table turned into a list all land here): that baseline check is the
+  only one that sees a table no header test matches. Known limit: it needs a previous snapshot, so the first run, and an
+  id that never had a notice, are not covered.
 - **No status-only PR.** A merged move leaves the line's status at the value the next run computes, so the week
   after a merge opens nothing.
 - **The bot branch is replayed, not only fenced.** The G1 check on `automation/model-registry` runs the field

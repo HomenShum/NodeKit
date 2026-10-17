@@ -981,3 +981,107 @@ test("replay also checks the clock (B.3): the digest never moves with the date, 
   drifted.lines["anthropic.opus"].status = "soaking";
   assert.match(clockProblem(same, drifted, day(0), day(1)), /no horizon or soak boundary lies between them/);
 });
+
+// ---- Part B v1 adversarial review (round 4) ------------------------------------------------------------------
+
+test("a vendor page that changes in part cannot make a retiring model read as active: an id that had a notice and has none fails the snapshot", async () => {
+  // The maintainer's robot meets a page where ONE table changed (a renamed first column, the table deleted, or a list
+  // in its place). Every header test is blind to a table it does not match, so the row floors still pass (157 -> 153)
+  // and tts-1 would read "active, no notice". The previous committed snapshot is the only thing that can see it.
+  const live = Object.fromEntries(await Promise.all(Object.entries(SNAPSHOT_SOURCES).map(async ([key, s]) => [key, await readFile(path.join(ROOT, "models/snapshots/latest", s.file), "utf8")])));
+  const hostOf = { openrouter: "openrouter.ai", anthropicDocs: "claude.com", openaiDocs: "openai.com", googleDocs: "google.dev" };
+  const serve = (texts) => async (url) => body(texts[Object.keys(hostOf).find((k) => String(url).includes(hostOf[k]))]);
+  const tableAround = (text, needle) => { // [a, b] of the date table (header starts with a date column) whose body mentions `needle`
+    const lines = text.split(String.fromCharCode(10));
+    for (let at = 0; at < lines.length; at += 1) {
+      if (!lines[at].includes(needle)) continue;
+      let a = at; while (a > 0 && lines[a - 1].trimStart().startsWith("|")) a -= 1;
+      if (!/^\|\s*(?:Shutdown|Retirement) date/.test(lines[a])) continue;
+      let b = at; while (b < lines.length - 1 && lines[b + 1].trimStart().startsWith("|")) b += 1;
+      return { lines, a, b };
+    }
+    throw new Error(`no date table mentions ${needle}`);
+  };
+  const edit = (text, needle, how) => { const { lines, a, b } = tableAround(text, needle); how(lines, a, b); return lines.join("\n"); };
+  const mutations = {
+    "OpenAI: the first column renamed": ["openaiDocs", edit(live.openaiDocs, "`tts-1`", (l, a) => { l[a] = l[a].replace("Shutdown date", "Date         "); }), /openaiDocs: \d+ id\(s\) had a vendor notice.*tts-1/],
+    "OpenAI: the table deleted": ["openaiDocs", edit(live.openaiDocs, "`tts-1`", (l, a, b) => l.splice(a, b - a + 1)), /openaiDocs: \d+ id\(s\) had a vendor notice.*tts-1/],
+    "OpenAI: the table turned into a list": ["openaiDocs", edit(live.openaiDocs, "`tts-1`", (l, a, b) => l.splice(a, b - a + 1, "- tts-1 is shut down on Jan 6, 2027")), /openaiDocs: \d+ id\(s\) had a vendor notice.*tts-1/],
+    "Anthropic: a history table's date column renamed": ["anthropicDocs", edit(live.anthropicDocs, "claude-sonnet-4-5", (l, a) => { l[a] = l[a].replace("Retirement date", "Date           "); }), /anthropicDocs: \d+ id\(s\) had a vendor notice.*claude-sonnet-4-5/],
+    "Anthropic: a history table deleted": ["anthropicDocs", edit(live.anthropicDocs, "claude-sonnet-4-5", (l, a, b) => l.splice(a, b - a + 1)), /anthropicDocs: \d+ id\(s\) had a vendor notice.*claude-sonnet-4-5/],
+  };
+  const dir = await mkdtemp(path.join(os.tmpdir(), "models-partial-"));
+  try {
+    await cp(path.join(ROOT, "models/snapshots/latest"), path.join(dir, "snap"), { recursive: true });
+    const hashes = async () => Promise.all((await readdir(path.join(dir, "snap"))).sort().map(async (f) => [f, sha(await readFile(path.join(dir, "snap", f), "utf8"))]));
+    // the unchanged live pages pass against their own baseline, so the check is not a standing failure
+    await runModelsCommand("snapshot", { options: { "repo-root": dir, out: "snap", json: true } }, { fetchImpl: serve(live) });
+    for (const [name, [key, mutated, reason]] of Object.entries(mutations)) {
+      assert.notEqual(mutated, live[key], `${name}: the mutation changed the page`);
+      assert.doesNotThrow(() => parseSnapshot(key, mutated, { previousRows: null }), `${name}: the row floors alone accept it (that is the bug)`);
+      const saved = await hashes();
+      await assert.rejects(runModelsCommand("snapshot", { options: { "repo-root": dir, out: "snap", json: true } }, { fetchImpl: serve({ ...live, [key]: mutated }) }), (error) => error instanceof SnapshotError && reason.test(error.message), name);
+      assert.deepEqual(await hashes(), saved, `${name}: the committed snapshots must be untouched`);
+    }
+    // first run, or a human who reviewed the diff and snapshots into an empty directory: no baseline, no check
+    await runModelsCommand("snapshot", { options: { "repo-root": dir, out: "fresh", json: true } }, { fetchImpl: serve({ ...live, openaiDocs: mutations["OpenAI: the table deleted"][1] }) });
+    assert.equal((await readdir(path.join(dir, "fresh"))).length, 5, "the reviewed snapshot was written");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("a current that disappears from Anthropic's status table is unlisted: a trigger, never 'active', and with no named replacement the line is held", async () => {
+  // The incumbent's row is simply gone (not retired, not deprecated: gone). Reading that as 'active' would keep a
+  // default the vendor no longer lists.
+  const gone = DEFAULT_ANTHROPIC_ROWS.filter((r) => r[0] !== "claude-sonnet-4-5-20250929");
+  const set = makeSet({ texts: { anthropicDocs: anthropicMd({ rows: gone, notices: [] }) } });
+  const reg = await staleSonnetRegistry(makeSet(), T0);
+  const { proposal, report } = select({ registry: reg, snapshotSet: set, evaluatedAt: T0, ref: REF });
+  const av = proposal.entries["claude-sonnet-4-5-20250929"].availability.anthropic;
+  assert.equal(av.state, "unlisted");
+  assert.equal(proposal.deprecations["claude-sonnet-4-5-20250929/anthropic"].kind, "state");
+  assert.equal(proposal.lines["anthropic.sonnet"].status, "held-no-replacement");
+  assert.equal(proposal.lines["anthropic.sonnet"].current, "claude-sonnet-4-5-20250929", "nothing named, nothing guessed");
+  assert.match(report.held[0].detail, /anthropic: state unlisted\. the vendor names no replacement/);
+});
+
+test("a -preview id cannot be a line's current while the line has a GA model, and can when it is all the line has", async () => {
+  const set = makeSet();
+  const reg = await seededRegistry(set, T0);
+  reg.entries["claude-sonnet-5-6-preview"] = { ...clone(reg.entries["claude-sonnet-5-5"]), ids: { anthropic: "claude-sonnet-5-6-preview" } };
+  reg.lines["anthropic.sonnet"].current = "claude-sonnet-5-6-preview";
+  const errors = (r) => validateModels({ registry: r, snapshotSet: set, evaluatedAt: T0, stage: "inputs" }).errors;
+  assert.ok(errors(reg).some((e) => /anthropic\.sonnet: current claude-sonnet-5-6-preview is a -preview id while the line has a GA model/.test(e)), errors(reg).join("\n"));
+  for (const id of Object.keys(reg.entries).filter((k) => reg.entries[k].line === "anthropic.sonnet" && !/-preview$/.test(k))) delete reg.entries[id];
+  reg.lines["anthropic.sonnet"].previous = null;
+  assert.deepEqual(errors(reg).filter((e) => /-preview/.test(e)), [], "a line with nothing but previews may use one");
+});
+
+test("a current must be reviewed", async () => {
+  const set = makeSet();
+  const reg = await seededRegistry(set, T0);
+  reg.entries["claude-haiku-5-5"].reviewed = false;
+  assert.ok(validateModels({ registry: reg, snapshotSet: set, evaluatedAt: T0, stage: "inputs" }).errors.some((e) => /lines\.anthropic\.haiku\.current claude-haiku-5-5 must have reviewed: true/.test(e)));
+});
+
+test("G1: a new id the bot adds carries no human-owned field, whichever one it is", async () => {
+  const reg = await seededRegistry(makeSet(), T0);
+  const fresh = { provider: "anthropic", line: "anthropic.haiku", ids: { anthropic: "claude-new-9" }, releaseDate: null, releaseDateSource: null, availability: {}, price: null, context: null, supportedParameters: [], reviewed: false };
+  const violations = (extra) => { const next = clone(reg); next.entries["claude-new-9"] = { ...fresh, ...extra }; return botDiffViolations(reg, next); };
+  assert.deepEqual(violations({}), []);
+  for (const [name, extra] of Object.entries({ constraints: { constraints: { sampling: "allowed" } }, sdkSupport: { sdkSupport: { ai: "6" } }, "reviewed: true": { reviewed: true } })) {
+    assert.match(violations(extra).join("\n"), /new entries\.claude-new-9 must be reviewed: false with no constraints\/sdkSupport/, name);
+  }
+});
+
+test("an OpenAI 'at earliest' date is a floor, not an announced retirement: it is recorded and watched but never counted down", () => {
+  const md = openaiMd([["at earliest Jan 6, 2027", "`tts-1`", "`gpt-realtime-2.1-mini`"], ["Jan 6, 2027", "`tts-1-hd`", "`gpt-realtime-2.1-mini`"]]);
+  const parsed = parseSnapshot("openaiDocs", md);
+  assert.deepEqual([parsed.notices[0].retiresOn, parsed.notices[0].retiresNotBefore], [null, "2027-01-06"]);
+  assert.deepEqual([parsed.notices[1].retiresOn, parsed.notices[1].retiresNotBefore], ["2027-01-06", null]);
+  const set = makeSet({ texts: { openaiDocs: md } });
+  const av = (id) => deriveAvailability({ provider: "openai", ids: { openai: id } }, set.parsed, T0).availability.openai;
+  assert.deepEqual([av("tts-1").retiresOn, av("tts-1").retiresNotBefore], [null, "2027-01-06"]);
+  assert.equal(av("tts-1-hd").retiresOn, "2027-01-06");
+});
