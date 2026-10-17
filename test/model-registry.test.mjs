@@ -424,6 +424,9 @@ test("sustained: 52 weekly cycles over an unchanged catalog open a PR only where
   }
   // The only dated row that can cross anything in a year is Sonnet 4.5's announced 2026-11-30 retirement: in the 90-day
   // window at the start, inside 30 days from 2026-10-31, i.e. week 3. Floors never open a PR.
+  // Was `assert.equal(opened, 0)`. Loosened to 1 on purpose (SPEC B.3: a date crossing the 90 or 30-day line opens a PR with no
+  // input change; on a held line neither status nor date moved, so the old decision set could not see it). The trace to the
+  // spec is the `horizon` field; any second PR in a year is still a failure.
   assert.equal(opened, 1, "one window crossing in a year, nothing else");
   assert.equal(digests.size, 1);
 });
